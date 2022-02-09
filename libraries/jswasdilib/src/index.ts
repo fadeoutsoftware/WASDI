@@ -3,7 +3,7 @@
 
 'use strict';
 
-class Wasdi {
+export class Wasdi {
     _m_sUser: string;
     _m_sPassword: string;
 
@@ -94,7 +94,7 @@ class Wasdi {
     /**
      * Test method to check wasdi instance, with a tiny bit of developer's traditions
      */
-    helloWasdiWorld(checkInstance : boolean) :void{
+    helloWasdiWorld(checkInstance: boolean): string {
 
         var xhr = new XMLHttpRequest();
         let response = undefined;
@@ -168,7 +168,7 @@ class Wasdi {
      * @param configFile
      * @param parametersFile
      */
-    loadConfig(configFile :string, parametersFile:string) {
+    loadConfig(configFile: string, parametersFile: string) {
         let sUrl = configFile;
         if (configFile == undefined) { // default value
             sUrl = './config.json';
@@ -228,7 +228,7 @@ class Wasdi {
      * @param filename
      * @returns {Promise<void>}
      */
-    async asyncLoadConfig(filename:string) {
+    async asyncLoadConfig(filename: string) {
 
         let initPromiseChain = fetch(filename)
             .then(response => {
@@ -273,7 +273,7 @@ class Wasdi {
     }
 
     // GET calls
-    getWorkspaceById(workspaceID:string) {
+    getWorkspaceById(workspaceID: string) {
         var xhr = new XMLHttpRequest();
 
         xhr.addEventListener("readystatechange", function () {
@@ -298,7 +298,7 @@ class Wasdi {
      * @param params String containing the parameters, must include the correct syntax like '?=[...]'
      * @returns {number|string|{}|any}
      */
-    #getObject(url:string, params:string) {
+    private getObject(url: string, params: string) {
         var xhr = new XMLHttpRequest();
 
         xhr.addEventListener("readystatechange", function () {
@@ -320,7 +320,7 @@ class Wasdi {
      * @param params String containing the parameters, must include the correct syntax like '?=[...]'
      * @returns {number|string|{}|any}
      */
-    #postObject(url:string, params:string, data:string) {
+    private postObject(url: string, params: string, data: string) {
 
         var xhr = new XMLHttpRequest();
 
@@ -339,16 +339,16 @@ class Wasdi {
     }
 
     workspaceList() {
-        var workspaceList = this.#getObject(this._m_sBaseUrl + "/ws/byuser", "");
+        var workspaceList = this.getObject(this._m_sBaseUrl + "/ws/byuser", "");
         console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
-        workspaceList.forEach(a => console.log(a.workspaceName + " - Id" + a.workspaceId));
+        workspaceList.forEach((a: { workspaceName: string; workspaceId: string; }) => console.log(a.workspaceName + " - Id" + a.workspaceId));
         return workspaceList;
     }
 
     productListByActiveWs() {
-        let productList = this.#getObject(this._m_sBaseUrl + "/product/byws", "?workspace=" + this.ActiveWorkspace)
+        let productList = this.getObject(this._m_sBaseUrl + "/product/byws", "?workspace=" + this.ActiveWorkspace)
         console.log("[INFO] jswasdilib.productListByActiveWs: Products in the active workspace ");
-        productList.forEach(a => console.log(a.name));
+        productList.forEach((a: { name: string; }) => console.log(a.name));
         return productList;
     }
 
@@ -357,8 +357,8 @@ class Wasdi {
      * @param workspaceID The id of the selected workspace
      * @returns {{workspaceId}|number|string|{}|*}
      */
-    openWorkspaceById(workspaceID:string) {
-        let ws = this.#getObject(this._m_sBaseUrl + "/ws/getws", "?workspace=" + workspaceID);// retrieves workspace viewmodel
+    openWorkspaceById(workspaceID: string) {
+        let ws = this.getObject(this._m_sBaseUrl + "/ws/getws", "?workspace=" + workspaceID);// retrieves workspace viewmodel
         if (ws.workspaceId) {
             this._m_sActiveWorkspace = ws.workspaceId;
             this._m_sWorkspaceName = ws.name;
@@ -377,11 +377,14 @@ class Wasdi {
      * @param workspaceID The id of the selected workspace
      * @returns {{workspaceId}|number|string|{}|*}
      */
-    openWorkspace(workspaceName:string) {
+    openWorkspace(workspaceName: string) {
         let wsList = this.workspaceList();
         if (wsList) {
-            let ws;
-            wsList.forEach(a => {
+            let ws = {
+                workspaceId: "",
+                workspaceName: ""
+            };
+            wsList.forEach((a: { workspaceName: string;workspaceId: string; }) => {
                 if (a.workspaceName == workspaceName) {
                     ws = a;
                 }
@@ -403,9 +406,9 @@ class Wasdi {
      * Launch a process in the current workspace
      * @param appname the application name
      */
-    launchProcessor(appname:string) {
+    launchProcessor(appname: string) {
         if (this._m_sActiveWorkspace) {
-            let response = this.#postObject(this._m_sWorkspaceBaseUrl + "/processors/run", "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace,"");
+            let response = this.postObject(this._m_sWorkspaceBaseUrl + "/processors/run", "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace, "");
             if (response.processingIdentifier) {
                 this._m_aoRunningProcessId.push(response.processingIdentifier);
             }
@@ -419,10 +422,10 @@ class Wasdi {
      * Retrieves a list of applications available on the WASDI marketplace
      */
     getDeployed() {
-        let object = this.#getObject("https://test.wasdi.net/wasdiwebserver/rest", "/processors/getdeployed");
+        let object = this.getObject("https://test.wasdi.net/wasdiwebserver/rest", "/processors/getdeployed");
         let ret: string [];
         if (object[0].processorName) {
-            object.forEach(a => {
+            object.forEach((a: { processorName: string; }) => {
                 ret.push(a.processorName);
             })
         }
@@ -434,8 +437,8 @@ class Wasdi {
      * @param sProcessId the processId to add the payload
      * @param data JSON string containing the payload
      */
-    setProcessPayload(sProcessId :string, data:string) {
-        return this.#getObject(this._m_sWorkspaceBaseUrl + "/process/setpayload", "?procws=" + sProcessId +
+    setProcessPayload(sProcessId: string, data: string) {
+        return this.getObject(this._m_sWorkspaceBaseUrl + "/process/setpayload", "?procws=" + sProcessId +
             "&payload=" + encodeURIComponent(data));
     }
 
@@ -444,8 +447,8 @@ class Wasdi {
      * Create a new workspace for the active user
      * @param wsName The workspace name
      */
-    createWorkspace(wsName:string) {
-        let ws = this.#getObject(this._m_sBaseUrl + "/ws/create", "?name=" + wsName);
+    createWorkspace(wsName: string) {
+        let ws = this.getObject(this._m_sBaseUrl + "/ws/create", "?name=" + wsName);
         if (ws.stringValue) {
             console.log("[INFO] jswasdilib.CreateWorkspace: New workspace " + wsName + " created");
             console.log("[INFO] jswasdilib.CreateWorkspace: Workspace Id " + ws.stringValue);
@@ -460,8 +463,8 @@ class Wasdi {
      * Retrieves the process status of a process, identified by its processId
      * @param processId
      */
-    getProcessStatus(processId:string) {
-        let procWs = this.#getObject(this._m_sWorkspaceBaseUrl + "/process/byid", "?procws=" + processId);
+    getProcessStatus(processId: string) {
+        let procWs = this.getObject(this._m_sWorkspaceBaseUrl + "/process/byid", "?procws=" + processId);
         if (procWs.status) {
             console.log("[INFO] jswasdilib.getProcessStatus: Process status " + procWs.status
                 + " Percentage " + procWs.progressPerc + " %");
@@ -476,17 +479,17 @@ class Wasdi {
     }
 
     getProductsActiveWorkspace() {
-        return this.#getObject(this._m_sWorkspaceBaseUrl + "/product/byws", "?workspace=" + this._m_sActiveWorkspace);
+        return this.getObject(this._m_sWorkspaceBaseUrl + "/product/byws", "?workspace=" + this._m_sActiveWorkspace);
     }
 
-    publishBand(fileName:string, bandName:string) {
+    publishBand(fileName: string, bandName: string) {
         // search filename in the current workspace
-        let file = this.getProductsActiveWorkspace().find(a => a.fileName == fileName);
+        let file = this.getProductsActiveWorkspace().find((a: { fileName: string; }) => a.fileName == fileName);
         if (file && file.bandsGroups) {
-            let band = file.bandsGroups.bands.find(b => b.name == bandName);
+            let band = file.bandsGroups.bands.find((b: { name: string; }) => b.name == bandName);
             if (band) {
                 console.log("[INFO] jswasdilib.publishBand: Band found, begin publish");
-                let published = this.#getObject(
+                let published = this.getObject(
                     this._m_sWorkspaceBaseUrl + "/filebuffer/publishband",
                     "?fileUrl=" + fileName +
                     "&workspace=" + this._m_sActiveWorkspace +
@@ -581,8 +584,6 @@ class Wasdi {
 
 }
 
-const wasdiInstance = new Wasdi();
-module.exports = wasdiInstance;
 
 
 

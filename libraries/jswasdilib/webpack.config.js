@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: './src/index.ts',
     module: {
         rules: [
             {
@@ -13,15 +13,14 @@ module.exports = {
         ]
     },
     target: 'web',
-    mode : 'development',
+    mode: 'production',
     output: {
         filename: 'wasdi.js',
         clean: true,
         path: path.resolve(__dirname, 'dist'),
         library: {
             name: 'wasdi',
-            type: 'umd',
-
+            type: 'umd'
         },
 
         libraryTarget: 'var'
@@ -29,12 +28,12 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
-   /*resolve :{
-       fallback: {
-           "child_process" : require.resolve("child_process"),
-           "fs" : false,
-           "http": require.resolve("stream-http"),
-           "https": require.resolve("https-browserify")
-       }
-   }*/
+    /*resolve :{
+        fallback: {
+            "child_process" : require.resolve("child_process"),
+            "fs" : false,
+            "http": require.resolve("stream-http"),
+            "https": require.resolve("https-browserify")
+        }
+    }*/
 };
