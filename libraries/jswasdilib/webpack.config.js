@@ -3,6 +3,15 @@ const webpack = require('webpack');
 
 module.exports = {
     entry: './src/index.js',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/
+            }
+        ]
+    },
     target: 'web',
     mode : 'development',
     output: {
@@ -14,7 +23,11 @@ module.exports = {
             type: 'umd',
 
         },
+
         libraryTarget: 'var'
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
     },
    /*resolve :{
        fallback: {
