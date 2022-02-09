@@ -3,7 +3,7 @@
 
 'use strict';
 
-export class Wasdi {
+export default class Wasdi {
     _m_sUser: string;
     _m_sPassword: string;
 

@@ -23,7 +23,7 @@ module.exports = {
             type: 'umd'
         },
 
-        libraryTarget: 'var'
+        libraryTarget: 'umd'
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
