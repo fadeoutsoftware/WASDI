@@ -52,7 +52,9 @@ namespace WasdiLib.Repositories
 
             _wasdiHttpClient.DefaultRequestHeaders.Clear();
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + HELLO_WASDI_PATH);
+            string url = sBaseUrl + HELLO_WASDI_PATH;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
@@ -79,7 +81,9 @@ namespace WasdiLib.Repositories
 
             var requestPayload = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _wasdiHttpClient.PostAsync(sBaseUrl + LOGIN_PATH, requestPayload);
+            string url = sBaseUrl + LOGIN_PATH;
+
+            var response = await _wasdiHttpClient.PostAsync(url, requestPayload);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<LoginResponse>();
@@ -93,7 +97,9 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + CHECK_SESSION_PATH);
+            string url = sBaseUrl + CHECK_SESSION_PATH;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<LoginResponse>();
@@ -116,8 +122,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
 
             string sUrl = sWorkspaceBaseUrl;
@@ -168,15 +173,11 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
+            string url = sWorkspaceBaseUrl + CATALOG_UPLOAD_INGEST_PATH + query;
 
-            string sUrl = sWorkspaceBaseUrl;
-            sUrl += CATALOG_UPLOAD_INGEST_PATH;
-            sUrl += query;
-
-            var response = await _wasdiHttpClient.GetAsync(sUrl);
+            var response = await _wasdiHttpClient.GetAsync(url);
 
             var content = response.Content;
             if (content != null)
@@ -206,15 +207,11 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
+            string url = sWorkspaceBaseUrl + CATALOG_COPY_TO_SFPT_PATH + query;
 
-            string sUrl = sWorkspaceBaseUrl;
-            sUrl += CATALOG_COPY_TO_SFPT_PATH;
-            sUrl += query;
-
-            var response = await _wasdiHttpClient.GetAsync(sUrl);
+            var response = await _wasdiHttpClient.GetAsync(url);
 
             var content = response.Content;
             if (content != null)
@@ -238,15 +235,11 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
+            string url = sWorkspaceBaseUrl + CATALOG_DOWNLOAD_PATH + query;
 
-            string sUrl = sWorkspaceBaseUrl;
-            sUrl += CATALOG_DOWNLOAD_PATH;
-            sUrl += query;
-
-            var response = await _wasdiHttpClient.GetAsync(sUrl);
+            var response = await _wasdiHttpClient.GetAsync(url);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -266,7 +259,7 @@ namespace WasdiLib.Repositories
 
 
 
-                        string sOutputFilePath = "";
+                        string sOutputFilePath;
                         if (!String.IsNullOrEmpty(sAttachmentName))
                             sOutputFilePath = sSavePath + sAttachmentName;
                         else
@@ -277,9 +270,7 @@ namespace WasdiLib.Repositories
 
                         //create the directory
                         if (!Directory.Exists(parentDirectoryName))
-                        {
                             Directory.CreateDirectory(parentDirectoryName);
-                        }
 
                         try
                         {
@@ -341,9 +332,7 @@ namespace WasdiLib.Repositories
         private void Unzip(string sAttachmentName, string sPath)
         {
             if (!sPath.EndsWith("/") && !sPath.EndsWith("\\") && !sPath.EndsWith(Path.DirectorySeparatorChar))
-            {
                 sPath += Path.DirectorySeparatorChar;
-            }
 
             string sZipFilePath = sPath + sAttachmentName;
 
@@ -419,8 +408,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sBaseUrl + FILEBUFFER_DOWNLOAD_PATH + query;
 
@@ -446,8 +434,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESSORS_LOGS_ADD_PATH + query;
 
@@ -479,8 +466,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sBaseUrl + PROCESING_SUBSET_PATH + query;
 
@@ -515,8 +501,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sBaseUrl + PROCESING_MULTISUBSET_PATH + query;
 
@@ -542,14 +527,9 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-
-
-            string sUrl = sBaseUrl;
-            sUrl += PROCESSORS_RUN_PATH;
-            sUrl += query;
+            string sUrl = sBaseUrl + PROCESSORS_RUN_PATH + query;
 
             var response = await _wasdiHttpClient.GetAsync(sUrl);
 

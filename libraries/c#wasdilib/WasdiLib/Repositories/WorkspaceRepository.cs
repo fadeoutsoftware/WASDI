@@ -32,7 +32,9 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _wasdiHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-session-token", sSessionId);
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACES_BY_USER_PATH);
+            string url = sBaseUrl + WORKSPACES_BY_USER_PATH;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Workspace>>();
@@ -51,10 +53,11 @@ namespace WasdiLib.Repositories
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
-            if (!string.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACE_BY_WS_ID_PATH + query);
+            string url = sBaseUrl + WORKSPACE_BY_WS_ID_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<WorkspaceEditorViewModel>();
@@ -81,7 +84,9 @@ namespace WasdiLib.Repositories
             if (!string.IsNullOrEmpty(query))
                 query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + WORKSPACE_CREATE_PATH + query);
+            string url = sBaseUrl + WORKSPACE_CREATE_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
@@ -102,12 +107,11 @@ namespace WasdiLib.Repositories
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
+            query = "?" + query;
 
-            if (!string.IsNullOrEmpty(query))
-                query = "?" + query;
+            string url = sBaseUrl + WORKSPACE_DELETE_PATH + query;
 
-
-            var response = await _wasdiHttpClient.DeleteAsync(sBaseUrl + WORKSPACE_DELETE_PATH + query);
+            var response = await _wasdiHttpClient.DeleteAsync(url);
 
             var data = string.Empty;
 

@@ -6,7 +6,7 @@ namespace WasdiLib.Services
     {
         List<Workflow> GetWorkflows(string sBaseUrl, string sSessionId);
 
-        PrimitiveResult CreateWorkflow(string sBaseUrl, string sSessionId, string sWorkspace, string? sParentId, Workflow oWorkflow);
+        PrimitiveResult RunWorkflow(string sBaseUrl, string sSessionId, string sWorkspaceId, string? sParentId, Workflow oWorkflow);
 
     }
 }

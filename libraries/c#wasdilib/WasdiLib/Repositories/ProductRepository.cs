@@ -40,10 +40,11 @@ namespace WasdiLib.Repositories
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
-            if (!string.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + PRODUCTS_BY_WS_ID_PATH + query);
+            string url = sBaseUrl + PRODUCTS_BY_WS_ID_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<Product>>();
@@ -63,10 +64,11 @@ namespace WasdiLib.Repositories
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
-            if (!string.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sBaseUrl + PRODUCT_BY_NAME_PATH + query);
+            string url = sBaseUrl + PRODUCT_BY_NAME_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<Product>();
@@ -88,12 +90,11 @@ namespace WasdiLib.Repositories
 
             var content = new FormUrlEncodedContent(parameters);
             string query = content.ReadAsStringAsync().Result;
+            query = "?" + query;
 
-            if (!string.IsNullOrEmpty(query))
-                query = "?" + query;
+            string url = sWorkspaceBaseUrl + PRODUCT_DELETE_PATH + query;
 
-
-            var response = await _wasdiHttpClient.DeleteAsync(sWorkspaceBaseUrl + PRODUCT_DELETE_PATH + query);
+            var response = await _wasdiHttpClient.DeleteAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<PrimitiveResult>();
@@ -121,13 +122,9 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            string sUrl = sWorkspaceBaseUrl;
-            sUrl += PRODUCT_UPLOAD_FILE_PATH;
-
-            sUrl += query;
+            string sUrl = sWorkspaceBaseUrl + PRODUCT_UPLOAD_FILE_PATH + query;
 
             string sFullPath = sSavePath + sFileName;
             ByteArrayContent fileContent = new ByteArrayContent(await File.ReadAllBytesAsync(sFullPath));

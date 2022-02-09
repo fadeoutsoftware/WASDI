@@ -13,10 +13,10 @@ namespace WasdiLib.Repositories
 
         private const string PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH = "process/byws";
         private const string PROCESS_WORKSPACES_BY_PROCESS_ID_PATH = "process/byid";
-        private const string PROCESSES_STATUS_BY_IDS_PATH = "/process/statusbyid";
-        private const string PROCESSES_UPDATE_PATH = "/process/updatebyid";
-        private const string PROCESSES_UPDATE_PAYLOAD_PATH = "/process/setpayload";
-        private const string PROCESS_PAYLOAD_PATH = "/process/payload";
+        private const string PROCESSES_STATUS_BY_IDS_PATH = "process/statusbyid";
+        private const string PROCESSES_UPDATE_PATH = "process/updatebyid";
+        private const string PROCESSES_UPDATE_PAYLOAD_PATH = "process/setpayload";
+        private const string PROCESS_PAYLOAD_PATH = "process/payload";
         private const string PROCESS_SETSUBPID_PATH = "process/setsubpid";
 
         private readonly ILogger<ProcessWorkspaceRepository> _logger;
@@ -43,10 +43,11 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
+            string url = sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<ProcessWorkspace>>();
@@ -79,10 +80,11 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
-            var response = await _wasdiHttpClient.GetAsync(sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query);
+            string url = sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_WORKSPACE_ID_PATH + query;
+
+            var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
             return await response.ConvertResponse<List<ProcessWorkspace>>();
@@ -101,10 +103,10 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESS_WORKSPACES_BY_PROCESS_ID_PATH + query;
+
             var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
@@ -125,10 +127,10 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESS_SETSUBPID_PATH + query;
+
             var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
@@ -171,8 +173,7 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESS_PAYLOAD_PATH + query;
 
@@ -208,10 +209,10 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESSES_UPDATE_PATH + query;
+
             var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
@@ -232,10 +233,10 @@ namespace WasdiLib.Repositories
 
             var formUrlEncodedContent = new FormUrlEncodedContent(parameters);
             string query = formUrlEncodedContent.ReadAsStringAsync().Result;
-            if (!String.IsNullOrEmpty(query))
-                query = "?" + query;
+            query = "?" + query;
 
             string url = sWorkspaceBaseUrl + PROCESSES_UPDATE_PAYLOAD_PATH + query;
+
             var response = await _wasdiHttpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
