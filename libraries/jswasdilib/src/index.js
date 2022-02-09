@@ -414,6 +414,20 @@ class Wasdi {
     }
 
     /**
+     * Retrieves a list of applications available on the WASDI marketplace
+     */
+    getDeployed() {
+        let object = this.#getObject("https://test.wasdi.net/wasdiwebserver/rest", "/processors/getdeployed");
+        let ret = [];
+        if (object[0].processorName) {
+            object.forEach(a => {
+                ret.push(a.processorName);
+            })
+        }
+        return ret;
+    }
+
+    /**
      * Set the payload of a process, identified by its processId
      * @param sProcessId the processId to add the payload
      * @param data JSON string containing the payload
