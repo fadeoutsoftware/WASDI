@@ -2069,7 +2069,7 @@ public class ProcessorsResource  {
 			Stack<File> aoFileStack = new Stack<File>();
 			String sBasePath = oInitialFile.getParent();
 
-			Utils.debugLog("ProcessorsResource.zipProcessor: sDir = " + sBasePath);
+			Utils.debugLog("ProcessorsResource.zipProcessor: sBasePath = " + sBasePath);
 
 			// Get the processor folder
 			File oFile = new File(sBasePath);
@@ -2080,7 +2080,6 @@ public class ProcessorsResource  {
 			}
 
 			int iBaseLen = sBasePath.length();
-
 			
 			String sProcTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;			
 			if (!sProcTemplatePath.endsWith(File.separator)) sProcTemplatePath += File.separator;
@@ -2117,6 +2116,8 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorsResource.zipProcessor: sAbsolute Path " + sAbsolutePath);
 
 				if(oFile.isDirectory()) {
+					Utils.debugLog("ProcessorsResource.zipProcessor: is a folder");
+					
 					if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
 						sAbsolutePath = sAbsolutePath + "/";
 					}
@@ -2133,14 +2134,17 @@ public class ProcessorsResource  {
 					}
 				}
 
-				String sRelativePath = sAbsolutePath.substring(iBaseLen);
+				if (sAbsolutePath.length()>=iBaseLen) {
+					String sRelativePath = sAbsolutePath.substring(iBaseLen);
 
-				if (!Utils.isNullOrEmpty(sRelativePath)) {
-					Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
-					aoFileEntries.put(sRelativePath,oFile);				
-				}
-				else {
-					Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
+					if (!Utils.isNullOrEmpty(sRelativePath)) {
+						Utils.debugLog("ProcessorsResource.zipProcessor: adding file " + sRelativePath +" for compression");
+						aoFileEntries.put(sRelativePath,oFile);				
+					}
+					else {
+						Utils.debugLog("ProcessorsResource.zipProcessor: jumping empty file");
+					}
+					
 				}
 			}
 
@@ -2165,7 +2169,7 @@ public class ProcessorsResource  {
 			}
 			//oResponseBuilder.header("Content-Length", lLength);
 			Utils.debugLog("ProcessorsResource.zipProcessor: done");
-			return oResponseBuilder.	build();
+			return oResponseBuilder.build();
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessorsResource.zipProcessor: " + oE);
 		}

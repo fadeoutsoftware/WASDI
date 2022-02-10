@@ -52,6 +52,10 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(CONDA)) {
 			
 		}
+		else if (sProcessorType.equals(CSHARP)) {
+			aoFiles.add("deploywasdidocker.sh");
+			aoFiles.add("runwasdidocker.sh");
+		}
 
 		return aoFiles;
 	}
