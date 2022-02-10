@@ -5,7 +5,7 @@ namespace WasdiLib.Repositories
     internal interface IWasdiRepository
     {
 
-        Task<PrimitiveResult> HelloWasdi(string sBaseUrl);
+        Task<PrimitiveResult> Hello(string sBaseUrl);
 
         Task<LoginResponse> Login(string sBaseUrl, string sUser, string sPassword);
 

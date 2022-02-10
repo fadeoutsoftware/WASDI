@@ -18,17 +18,23 @@ namespace WasdiLib.Client
             WasdiLib wasdi = new WasdiLib();
             wasdi.Init();
 
-            /*
-            HelloWasdi(wasdi);
+            wasdi.PrintStatus();
+
+            GetProcessorPath(wasdi);
+
+
             WasdiLog(wasdi);
+            Hello(wasdi);
+            GetWorkspacesNames(wasdi);
             GetWorkspaces(wasdi);
+            GetWorkspaceIdByName(wasdi);
             CreateWorkspace_DeleteWorkspace(wasdi);
             GetProcessWorkspacesByWorkspaceId(wasdi);
-            GetWorkspaceIdByName(wasdi);
             GetProductsByWorkspaceId(wasdi);
             GetWorkflows(wasdi);
-            */
 
+
+            /*
             String sStartDate = wasdi.GetParam("DATEFROM");
             String sEndDate= wasdi.GetParam("DATETO");
             String sBbox = wasdi.GetParam("BBOX");
@@ -72,13 +78,20 @@ namespace WasdiLib.Client
 
             wasdi.WasdiLog("FINISHED");
             UpdateStatus(wasdi);
+            */
 
         }
 
-        private static void HelloWasdi(WasdiLib wasdi)
+        private static void Hello(WasdiLib wasdi)
         {
-            wasdi.WasdiLog("HelloWasdi:");
-            wasdi.WasdiLog(wasdi.HelloWasdi());
+            wasdi.WasdiLog("Hello:");
+            wasdi.WasdiLog(wasdi.Hello());
+        }
+
+        private static void GetProcessorPath(WasdiLib wasdi)
+        {
+            wasdi.WasdiLog("GetProcessorPath:");
+            wasdi.WasdiLog(wasdi.GetProcessorPath());
         }
 
         private static void WasdiLog(WasdiLib wasdi)
@@ -104,7 +117,19 @@ namespace WasdiLib.Client
 
             foreach (Workspace workspace in workspaces)
             {
-                wasdi.WasdiLog(JsonConvert.SerializeObject(workspace));
+                Console.WriteLine(JsonConvert.SerializeObject(workspace));
+            }
+        }
+
+        private static void GetWorkspacesNames(WasdiLib wasdi)
+        {
+            wasdi.WasdiLog("GetWorkspacesNames:");
+
+            List<string> workspacesNames = wasdi.GetWorkspacesNames();
+
+            foreach (string workspaceName in workspacesNames)
+            {
+                Console.WriteLine(workspaceName);
             }
         }
 
@@ -152,6 +177,7 @@ namespace WasdiLib.Client
             string workspaceUrl = wasdi.GetWorkspaceUrlByWsId(workspaceId);
 
             wasdi.WasdiLog("workspaceUrl: " + workspaceUrl);
+            Console.WriteLine("workspaceId: " + workspaceId);
 
         }
 
@@ -166,7 +192,7 @@ namespace WasdiLib.Client
 
             foreach (string product in productList)
             {
-                wasdi.WasdiLog(product);
+                Console.WriteLine(product);
             }
         }
 

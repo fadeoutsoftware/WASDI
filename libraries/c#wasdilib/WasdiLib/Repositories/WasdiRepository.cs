@@ -46,9 +46,9 @@ namespace WasdiLib.Repositories
             _wasdiHttpClient = httpClientFactory.CreateClient("WasdiApi");
         }
 
-        public async Task<PrimitiveResult> HelloWasdi(string sBaseUrl)
+        public async Task<PrimitiveResult> Hello(string sBaseUrl)
         {
-            _logger.LogDebug("HelloWasdi()");
+            _logger.LogDebug("Hello()");
 
             _wasdiHttpClient.DefaultRequestHeaders.Clear();
 

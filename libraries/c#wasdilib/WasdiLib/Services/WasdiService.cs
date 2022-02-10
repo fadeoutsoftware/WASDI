@@ -16,11 +16,11 @@ namespace WasdiLib.Services
             _repository = repository;
         }
 
-        public PrimitiveResult HelloWasdi(string sBaseUrl)
+        public PrimitiveResult Hello(string sBaseUrl)
         {
             _logger.LogDebug("HelloWasdi()");
 
-            return _repository.HelloWasdi(sBaseUrl).GetAwaiter().GetResult();
+            return _repository.Hello(sBaseUrl).GetAwaiter().GetResult();
         }
 
         public LoginResponse Authenticate(string sBaseUrl, string sUser, string sPassword)

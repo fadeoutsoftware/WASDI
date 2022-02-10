@@ -32,10 +32,10 @@ namespace WasdiLib.Test
         }
 
         [Test]
-        public void Test_0_HelloWasdi_WithoutCredentials_ShouldSayHelloWasdi()
+        public void Test_0_Hello_WithoutCredentials_ShouldSayHelloWasdi()
         {
             string expected = "Hello Wasdi!!";
-            string actual = wasdi.HelloWasdi();
+            string actual = wasdi.Hello();
 
             Assert.AreEqual(expected, actual);
             Assert.That(actual, Is.EqualTo(expected));
@@ -44,7 +44,7 @@ namespace WasdiLib.Test
         [Test]
         public void Test_81_GetWorkspaceIdByName_And_GettWorkspaceNameById()
         {
-            string workspaceNameExpected = "TestWorkspace";
+            string workspaceNameExpected = "ERA5_WORKSPACE_TEST";
             string workspaceId = wasdi.GetWorkspaceIdByName(workspaceNameExpected);
 
             Assert.IsNotNull(workspaceId);

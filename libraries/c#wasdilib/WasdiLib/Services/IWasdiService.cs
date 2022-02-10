@@ -4,7 +4,7 @@ namespace WasdiLib.Services
 {
     internal interface IWasdiService
     {
-        PrimitiveResult HelloWasdi(string sBaseUrl);
+        PrimitiveResult Hello(string sBaseUrl);
 
         LoginResponse Authenticate(string sBaseUrl, string sUser, string sPassword);
 

@@ -6,7 +6,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WasdiLib", "WasdiLib.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WasdiLib.Client", "..\WasdiLib.Client\WasdiLib.Client.csproj", "{A25F3B9B-0CAD-412D-870C-F055545B8FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasdiLib.Test", "..\WasdiLib.Test\WasdiLib.Test.csproj", "{B238B7D6-AF01-4704-A237-C0D423C5B8FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WasdiLib.Test", "..\WasdiLib.Test\WasdiLib.Test.csproj", "{B238B7D6-AF01-4704-A237-C0D423C5B8FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2E95AFB3-A2E2-452B-82DB-FDFAE7B76186}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
