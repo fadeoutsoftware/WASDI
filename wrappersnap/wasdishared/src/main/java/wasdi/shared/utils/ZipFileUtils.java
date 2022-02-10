@@ -85,29 +85,35 @@ public class ZipFileUtils {
 	 * @throws Exception 
 	 */
 	public String unzip(String sZipFileAbsolutePath, String sDestinationPath) throws Exception {
-
-		m_iEntries = 0;
-		m_lTotal = 0;
-
-		String sTempRelativeDirectory = nameRandomTempLocalDirectory();
-		String sTempAbsolutePath = buildTempFullPath(sDestinationPath, sTempRelativeDirectory);
-
-		Path oPath = Paths.get(sTempAbsolutePath).toAbsolutePath().normalize();
-		if (oPath.toFile().mkdirs()) {
-			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
-		} else {
-			throw new IOException("Can't create temporary dir " + sTempAbsolutePath);
-		}
-
-		File oInputFile = new File(sZipFileAbsolutePath);
-		try(ZipFile oZipFile = new ZipFile(oInputFile)){
-			Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
-			while(aoZipArchiveEntries.hasMoreElements()) {
-				extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
-
+		String sTempRelativeDirectory = null;
+		String sTempAbsolutePath = null;
+		try {
+			m_iEntries = 0;
+			m_lTotal = 0;
+	
+			sTempRelativeDirectory = nameRandomTempLocalDirectory();
+			sTempAbsolutePath = buildTempFullPath(sDestinationPath, sTempRelativeDirectory);
+	
+			Path oPath = Paths.get(sTempAbsolutePath).toAbsolutePath().normalize();
+			if (oPath.toFile().mkdirs()) {
+				s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
+			} else {
+				throw new IOException("Can't create temporary dir " + sTempAbsolutePath);
 			}
-
-			// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
+	
+			File oInputFile = new File(sZipFileAbsolutePath);
+			try(ZipFile oZipFile = new ZipFile(oInputFile)){
+				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
+				while(aoZipArchiveEntries.hasMoreElements()) {
+					extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
+	
+				}
+			}
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + ".unzip: " + oE);
+			throw oE;
+		} finally {
+			// make sure temporary directory gets deleted
 			s_oLogger.info(m_sLoggerPrefix + "Copy and clean tmp dir.");
 			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
 				s_oLogger.error(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
@@ -165,9 +171,14 @@ public class ZipFileUtils {
 	 * @return
 	 */
 	private String nameRandomTempLocalDirectory() {
-		int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
-		String sTempDirectory = "tmp-" + iRandom + File.separator;
-		return sTempDirectory;
+		try {
+			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
+			String sTempDirectory = "tmp-" + iRandom + File.separator;
+			return sTempDirectory;
+		}catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + "nameRandomTempLocalDirectory: " + oE);
+			return null;
+		}
 	}
 
 	/**
@@ -218,13 +229,18 @@ public class ZipFileUtils {
 	}
 
 	private String buildTempFullPath(String sPath, String sTemp) {
-		String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
-
-		if(!sTempPath.endsWith(File.separator)) {
-			sTempPath += File.separator;
+		try {
+			String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
+	
+			if(!sTempPath.endsWith(File.separator)) {
+				sTempPath += File.separator;
+			}
+			sTempPath += sTemp;
+			return sTempPath;
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + "buildTempFullPath: " + oE);
+			return null;
 		}
-		sTempPath += sTemp;
-		return sTempPath;
 	}
 
 	/**
@@ -311,47 +327,52 @@ public class ZipFileUtils {
 	 * @return True if the operation is done without errors nor exceptions. False instead
 	 */
 	private boolean cleanTempDir(String sTempPath, String sTemp) {
-
-		// point the temp dir
-		File oDir = new File(sTempPath); 
-
-		try (Stream<Path> aoPathStream = Files.walk(oDir.toPath())){
-
-			// this make the dir before other files
-			aoPathStream.sorted(Comparator.naturalOrder()).map(Path::toFile).forEach(oFile -> {
-				try {
-					// removes the tmp-part from the destination files
-					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
-					// checks the existence of the dir
-					if (oFile.isDirectory()) {
-						oDest.mkdir();
-						return;
-					}
-
-					if  (!oDest.getParentFile().exists()) {
-						oDest.mkdirs();
-					}
-
-					Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
-					try {
-						Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
-					}
-					catch (Exception e) {
-					}
-
-				} catch (Exception oE) {
-					oE.printStackTrace();
-				}
-			});
-		} catch (IOException oE) {
-			oE.printStackTrace();
-			return false;
-		}
-
 		try {
-			deleteDirectory(oDir.toPath());
-		} catch (IOException oE) {
-			oE.printStackTrace();
+			// point the temp dir
+			File oDir = new File(sTempPath); 
+	
+			try (Stream<Path> aoPathStream = Files.walk(oDir.toPath())){
+	
+				// this make the dir before other files
+				aoPathStream.sorted(Comparator.naturalOrder()).map(Path::toFile).forEach(oFile -> {
+					try {
+						// removes the tmp-part from the destination files
+						File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
+						// checks the existence of the dir
+						if (oFile.isDirectory()) {
+							oDest.mkdir();
+							return;
+						}
+	
+						if  (!oDest.getParentFile().exists()) {
+							oDest.mkdirs();
+						}
+	
+						Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+						try {
+							Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
+						}
+						catch (Exception oE) {
+							s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: set posix file permissions failed because: " + oE);
+						}
+	
+					} catch (Exception oE) {
+						s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: map for each file failed because: " + oE);
+					}
+				});
+			} catch (IOException oE) {
+				s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: files walk failed because: " + oE);
+				return false;
+			}
+	
+			try {
+				deleteDirectory(oDir.toPath());
+			} catch (IOException oE) {
+				s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
+				return false;
+			}
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix +".cleanTempDir (outmost): " + oE);
 			return false;
 		}
 
@@ -459,8 +480,8 @@ public class ZipFileUtils {
 				}
 				//				oFis.close();				
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			System.out.println("ZipFileUtils.zipFile: " + oE);
 		}
 	}
 
