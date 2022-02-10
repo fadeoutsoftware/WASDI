@@ -63,6 +63,7 @@ public class Redeployprocessor extends Operation {
             }
 
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);

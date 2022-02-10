@@ -220,7 +220,7 @@ var WappsController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                console.alert("Closed modal");
+                //console.alert("Closed modal");
             });
         });
 

@@ -18,9 +18,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -358,6 +360,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
                 LauncherMain.s_oLogger.info("DockerProcessorEngine.run: processor not available on node download it");
+                
+                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "APP NOT ON NODE<BR>INSTALLATION STARTED", m_oParameter.getExchange());
 
                 String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
 
@@ -365,6 +369,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                 if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
                     deploy(oParameter, false);
+                    
+                    m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
+                    
                 } else {
                     LauncherMain.s_oLogger.error("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
@@ -401,12 +408,19 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create connection
             URL oProcessorUrl = new URL(sUrl);
+            
+			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
+			int iReadTimeOut = WasdiConfig.Current.readTimeout;
+			            
 
             LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: call open connection");
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
             oConnection.setRequestMethod("POST");
             oConnection.setRequestProperty("Content-Type", "application/json");
+            oConnection.setConnectTimeout(iConnectionTimeOut);
+            oConnection.setReadTimeout(iReadTimeOut);
+            
 
             OutputStream oOutputStream = null;
             try {
