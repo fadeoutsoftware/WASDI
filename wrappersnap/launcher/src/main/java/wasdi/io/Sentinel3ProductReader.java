@@ -114,12 +114,36 @@ public class Sentinel3ProductReader extends SnapProductReader {
 				m_oProduct = readSnapProduct();
 			}
 			
+			//hack 0 for altimeter
 			if(null==m_oProduct) {
-				//maybe it's one of those unsupported Sentinel-3 readings, such as the altimeter
-				//let's see if we can read the nc directly
-				m_oProductFile = new File(sBase + "measurement.nc");
-				m_oProduct = readSnapProduct();
+				//simplest case
+				try {
+					m_oProductFile = new File(sBase + "measurement.nc");
+					m_oProduct = readSnapProduct();
+					m_oProduct.setName(m_oProductFile.getParentFile().getName());
+				} catch (Exception oE) {
+					LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: tried to read measurement.nc but failed: " + oE);
+				}
 			}
+			//hack 1 for altimeter
+			if(null==m_oProduct)
+				//in case we have a different type of measuremente, let's try one of these
+				if(!m_oProductFile.canRead()) {
+					m_oProductFile = new File(sBase + "standard_measurement.nc");
+					m_oProduct = readSnapProduct();
+					m_oProduct.setName(m_oProductFile.getParentFile().getName());
+				}
+				if(!m_oProductFile.canRead()) {
+					m_oProductFile = new File(sBase + "enhanced_measurement.nc");
+				}
+				if(!m_oProductFile.canRead()) {
+					m_oProductFile = new File(sBase + "reduced_measurement.nc");
+				}
+				
+				
+			}
+			
+			
 			
 			if(null!=m_oProduct) {
 				m_bSnapReadAlreadyDone = true;
