@@ -1794,7 +1794,7 @@ namespace WasdiLib
             // Create Query String:
 
             // Platform name for sure
-            string sQuery = "( platformname:";
+            string sQuery = "(platformname:";
             if (sPlatform.Equals("S1")) sQuery += "Sentinel-1";
             else if (sPlatform.Equals("S2")) sQuery += "Sentinel-2";
             else if (sPlatform.Equals("S3")) sQuery += "Sentinel-3";
@@ -1828,14 +1828,14 @@ namespace WasdiLib
 
             // Date Block
             sQuery += "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
-            sQuery += "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+            sQuery += " AND endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
 
             // Close the second block
             sQuery += ") ";
 
             if (dULLat != null && dULLon != null && dLRLat != null && dLRLon != null)
             {
-                string sFootPrint = "( footprint:\"intersects(POLYGON(( " + dULLon + " " + dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " + dLRLat + ")))\") AND ";
+                string sFootPrint = "( footprint:\"intersects(POLYGON((" + dULLon + " " + dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " + dLRLat + ")))\") AND ";
                 sQuery = sFootPrint + sQuery;
             }
 
