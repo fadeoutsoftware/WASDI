@@ -457,12 +457,12 @@ class Wasdi {
    * Launch a process in the current workspace
    * @param appname the application name
    */
-  launchProcessor(appname: string) {
+  launchProcessor(appname: string, jsonParameters: string) {
     if (this._m_sActiveWorkspace) {
       let response = this.postObject(
         this._m_sWorkspaceBaseUrl + "/processors/run",
         "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace,
-        ""
+        jsonParameters
       );
       if (response.processingIdentifier) {
         this._m_aoRunningProcessId.push(response.processingIdentifier);
