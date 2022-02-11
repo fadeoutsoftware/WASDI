@@ -3,7 +3,7 @@
 
 'use strict';
 
-export default class Wasdi {
+class Wasdi {
     _m_sUser: string;
     _m_sPassword: string;
 
@@ -583,6 +583,10 @@ export default class Wasdi {
     }
 
 }
+
+
+let  wasdi = new Wasdi();
+export default wasdi;
 
 
 
