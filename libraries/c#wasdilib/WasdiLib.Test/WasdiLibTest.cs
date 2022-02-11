@@ -35,7 +35,7 @@ namespace WasdiLib.Test
         public void Test_0_Hello_WithoutCredentials_ShouldSayHelloWasdi()
         {
             string expected = "Hello Wasdi!!";
-            string actual = wasdi.Hello();
+            string? actual = wasdi.Hello();
 
             Assert.AreEqual(expected, actual);
             Assert.That(actual, Is.EqualTo(expected));
@@ -63,8 +63,8 @@ namespace WasdiLib.Test
             Assert.IsNotNull(workspaceId);
 
             // "https://test.wasdi.net/wasdiwebserver/rest/ws/getws?workspace=" + workspaceId;
-            string workspaceUrlExpected = null;
-            string workspaceUrlActual = wasdi.GetWorkspaceUrlByWsId(workspaceId);
+            string? workspaceUrlExpected = null;
+            string? workspaceUrlActual = wasdi.GetWorkspaceUrlByWsId(workspaceId);
 
             //Assert.AreEqual(workspaceUrlExpected, workspaceUrlActual);
             Assert.IsNull(workspaceUrlActual);
@@ -75,7 +75,7 @@ namespace WasdiLib.Test
         {
             string userIdExpected = _configuration!["USER"]!;
 
-            List<Workspace> workspaces = wasdi.GetWorkspaces();
+            List<Workspace>? workspaces = wasdi.GetWorkspaces();
 
             Assert.IsNotNull(workspaces);
 
@@ -98,7 +98,7 @@ namespace WasdiLib.Test
             string openedWorkspaceId = wasdi.OpenWorkspace(workspaceName);
             Assert.AreEqual(foundWorkspaceId, openedWorkspaceId);
 
-            string activeWorkspaceId = wasdi.GetActiveWorkspace();
+            string? activeWorkspaceId = wasdi.GetActiveWorkspace();
             Assert.AreEqual(foundWorkspaceId, activeWorkspaceId);
 
             string sFileName = "RIVER-FLDglobal-composite1_20220111_000000_part071.tif";
@@ -127,7 +127,7 @@ namespace WasdiLib.Test
             string openedWorkspaceId = wasdi.OpenWorkspace(workspaceName);
             Assert.AreEqual(foundWorkspaceId, openedWorkspaceId);
 
-            string activeWorkspaceId = wasdi.GetActiveWorkspace();
+            string? activeWorkspaceId = wasdi.GetActiveWorkspace();
             Assert.AreEqual(foundWorkspaceId, activeWorkspaceId);
 
             string sFileName = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525.zip";
@@ -172,7 +172,7 @@ namespace WasdiLib.Test
 
             if (!string.IsNullOrEmpty(workspaceId))
             {
-                string outcome = wasdi.DeleteWorkspace(workspaceId);
+                string? outcome = wasdi.DeleteWorkspace(workspaceId);
 
                 Assert.IsEmpty(outcome);
                 workspaceName = wasdi.GetWorkspaceNameById(workspaceId);

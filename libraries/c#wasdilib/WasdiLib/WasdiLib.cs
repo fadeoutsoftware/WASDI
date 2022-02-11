@@ -1174,9 +1174,9 @@ namespace WasdiLib
 				sProvider = GetDefaultProvider();
 
 			//start downloads
-			List<string> asDownloadIds = AsynchImportProductList(asProductsLinks, asProductsNames);
+			List<string>? asDownloadIds = AsynchImportProductList(asProductsLinks, asProductsNames);
 
-			List<string> asWorkflowIds = AsynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow, sPreProcSuffix, asDownloadIds);
+			List<string>? asWorkflowIds = AsynchPreprocessProductsOnceDownloadedWithNames(asProductsNames, sWorkflow, sPreProcSuffix, asDownloadIds);
 
 			WaitProcesses(asWorkflowIds);
 			WasdiLog("ImportAndPreprocess: complete :-)");
@@ -1219,7 +1219,7 @@ namespace WasdiLib
 			//start downloads
 			List<string>? asDownloadIds = AsynchImportProductListWithMaps(aoProductsToImport);
 
-			List<string> asWorkflowIds = AsynchPreprocessProductsOnceDownloaded(aoProductsToImport, sWorkflow, sPreProcSuffix, asDownloadIds);
+			List<string>? asWorkflowIds = AsynchPreprocessProductsOnceDownloaded(aoProductsToImport, sWorkflow, sPreProcSuffix, asDownloadIds);
 
 			WaitProcesses(asWorkflowIds);
 			WasdiLog("ImportAndPreprocess: complete :-)");
@@ -1272,8 +1272,16 @@ namespace WasdiLib
 		/// <param name="sPreProcSuffix">the pre-process suffix</param>
 		/// <param name="asDownloadIds">the list of downloads Ids</param>
 		/// <returns>the list of workflow ids</returns>
-		private List<string>? AsynchPreprocessProductsOnceDownloadedWithNames(List<string> asProductsNames, string sWorkflow, string sPreProcSuffix, List<string> asDownloadIds)
+		private List<string>? AsynchPreprocessProductsOnceDownloadedWithNames(List<string> asProductsNames, string sWorkflow, string sPreProcSuffix, List<string>? asDownloadIds)
 		{
+
+			if (asDownloadIds == null)
+			{
+				WasdiLog("The list of downloaded product ids is null, aborting");
+
+				return null;
+			}
+
 			try
 			{
 				//prepare for preprocessing
@@ -2362,12 +2370,12 @@ namespace WasdiLib
 			{
 				return Convert.ToInt32(value);
 			}
-			catch (System.ArgumentNullException)
+			catch (ArgumentNullException)
 			{
 				_logger.LogError("ToInt64: the string value is null, set null");
 				return null;
 			}
-			catch (System.FormatException)
+			catch (FormatException)
 			{
 				_logger.LogError("ToInt64: the string value is not a valid integer, set null");
 				return null;

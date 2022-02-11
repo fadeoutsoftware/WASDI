@@ -11,8 +11,8 @@ namespace WasdiLib.Configuration
 {
     internal class Startup
     {
-        public static IServiceProvider? ServiceProvider;
-        public static IConfigurationRoot? ConfigurationRoot;
+        public static IServiceProvider ServiceProvider;
+        public static IConfigurationRoot ConfigurationRoot;
 
         public static void RegisterServices()
         {
@@ -42,7 +42,7 @@ namespace WasdiLib.Configuration
 
 
             // add HttpClients extension
-            aoServicies.ConfigureHttpClients(ConfigurationRoot);
+            aoServicies.ConfigureHttpClients();
 
             ServiceProvider = aoServicies.BuildServiceProvider();
         }
