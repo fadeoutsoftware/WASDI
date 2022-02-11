@@ -18,7 +18,7 @@
         "karma-firefox-launcher": "^0.1.7",
         "karma-jasmine": "^0.3.8",
         "karma-junit-reporter": "^0.4.1",
-        "node-sass": "^5.0.0",
+        "node-sass": "^7.0.0",
         "protractor": "^3.2.2",
         "sass-loader": "^11.0.1",
         "style-loader": "^2.0.0",
