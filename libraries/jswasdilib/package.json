@@ -1,0 +1,75 @@
+{
+  "name": "wasdi",
+  "version": "0.0.7",
+  "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
+  "main": "build/index.js",
+  "types": "build/types/index.d.ts",
+  "scripts": {
+    "start": "webpack serve --config webpack.config.demo.js",
+    "build": "webpack && tsc",
+    "build:demo": "webpack --config webpack.config.demo.js",
+    "test": "jest --silent",
+    "coverage": "npm run test -- --coverage",
+    "prepare": "npm run build",
+    "trypublish": "npm publish || true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fadeoutsoftware/WASDI/"
+  },
+  "author": "WASDI (LU) Sarl",
+  "license": "GPL-3.0",
+  "keywords": [
+    "WASDI",
+    "EO",
+    "Earth observation"
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.17.0",
+    "@babel/core": "^7.17.2",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/plugin-transform-typescript": "^7.16.8",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.16.11",
+    "@types/jest": "^27.4.0",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.3",
+    "babel-preset-minify": "^0.5.0",
+    "css-loader": "^6.6.0",
+    "eslint": "^7.32.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "jest": "^27.5.1",
+    "mini-css-extract-plugin": "^2.5.3",
+    "optimize-css-assets-webpack-plugin": "^6.0.1",
+    "prettier": "^2.5.1",
+    "prettier-webpack-plugin": "^1.2.0",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.3.1",
+    "typescript": "^4.5.5",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "4.7.4"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/scripts/testMock.js",
+      "\\.(css|less)$": "<rootDir>/scripts/testMock.js"
+    },
+    "moduleFileExtensions": [
+      "web.js",
+      "js",
+      "web.ts",
+      "ts",
+      "web.tsx",
+      "tsx",
+      "json",
+      "web.jsx",
+      "jsx",
+      "node"
+    ]
+  }
+}
