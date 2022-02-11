@@ -1,7 +1,0 @@
-src
-test
-webpack.config.js
-*.json
-index.html
-localBrowserTest.js
-localNodeTest.js
