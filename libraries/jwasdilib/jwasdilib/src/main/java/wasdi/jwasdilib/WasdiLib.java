@@ -2027,7 +2027,7 @@ public class WasdiLib {
 			if (sInputIgnoreValue != null) {
 				try {
 					Integer oInputIgnoreValue = Integer.parseInt(sInputIgnoreValue);
-					oMosaicSetting.setNoDataValue(oInputIgnoreValue);
+					oMosaicSetting.setInputIgnoreValue(oInputIgnoreValue);
 				}
 				catch (Exception e) {
 					log("InternalMosaic: InputIgnoreValue is not a valid integer, set null");
@@ -2270,8 +2270,8 @@ public class WasdiLib {
 		sQuery += ") ";
 
 		// Date Block
-		sQuery += "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
-		sQuery += "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+		sQuery += "AND (beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+		sQuery += "AND endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
 
 		// Close the second block
 		sQuery += ") ";

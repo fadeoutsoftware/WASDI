@@ -22,6 +22,7 @@ import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
 import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
+import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
 import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
@@ -48,6 +49,7 @@ public class QueryExecutorFactory {
 		aoMap.put("CDS", QueryExecutorCDS::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		aoMap.put("PLANET", QueryExecutorPLANET::new);
+		aoMap.put("TERRASCOPE", QueryExecutorTerrascope::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

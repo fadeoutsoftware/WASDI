@@ -31,4 +31,9 @@ public class MongoConfig {
 	 * Db Password
 	 */
 	public String password;
+	
+	/**
+	 * Replica Name
+	 */
+	public String replicaName;
 }

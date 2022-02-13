@@ -64,7 +64,12 @@ public class WasdiConfig {
 	/**
 	 * Mongo db Configuration
 	 */
-	public MongoConfig mongo;
+	public MongoConfig mongoMain;
+	
+	/**
+	 * Mongo db Configuration
+	 */
+	public MongoConfig mongoLocal;	
 	
 	/**
 	 * Keycloack auth server Configuration
