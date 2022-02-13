@@ -78,6 +78,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    python/waspy.rst
    octave/octave.rst
    java/WasdiLib.rst
+   typescript/wasdi.rst
 
 
 

@@ -1,6 +1,8 @@
 //var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
-class Wasdi {
+/**
+ * This is class wasdi
+ */
+export class Wasdi {
   _m_sUser: string;
   _m_sPassword: string;
 
@@ -659,5 +661,4 @@ class Wasdi {
   }
 }
 
-let wasdi = new Wasdi();
-export default wasdi;
+
