@@ -15,7 +15,7 @@ namespace WasdiLib.Test
 
         private IConfiguration _configuration;
 
-        private WasdiLib wasdi;
+        private Wasdi wasdi;
 
         [SetUp]
         public void Setup()
@@ -27,7 +27,7 @@ namespace WasdiLib.Test
                 .AddJsonFile(path, optional: false, reloadOnChange: true)
                 .Build();
 
-            wasdi = new WasdiLib();
+            wasdi = new Wasdi();
             wasdi.Init();
         }
 

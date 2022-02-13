@@ -11,10 +11,13 @@ using WasdiLib.Services;
 
 namespace WasdiLib
 {
-	public class WasdiLib
+	/// <summary>
+	/// WasdiLib's main class. It is the facade for all the operations exposed by the WASDI Platform.
+	/// </summary>
+	public class Wasdi
 	{
 
-		private readonly ILogger<WasdiLib> _logger;
+		private ILogger<Wasdi> _logger;
 		private IConfiguration _configuration;
 
 
@@ -42,16 +45,20 @@ namespace WasdiLib
 		private string m_sParametersFilePath = "";
 		private string m_sDefaultProvider = "AUTO";
 
-
-		public WasdiLib()
+		/// <summary>
+		/// The parameterless constructor. If there is a config file initilizes the class members.
+		/// </summary>
+		public Wasdi()
 		{
 
 
 			Startup.RegisterServices();
-			Startup.SetupErrorLogger();
 
-			_logger = Startup.ServiceProvider.GetService<ILogger<WasdiLib>>();
-			_logger.LogDebug("WasdiLib()");
+			Startup.RegisterLogger(false);
+			_logger = Startup.ServiceProvider.GetService<ILogger<Wasdi>>();
+			_logger.LogDebug("Wasdi()");
+
+			Startup.SetupErrorLogger();
 
 			_processWorkspaceService = Startup.ServiceProvider.GetService<IProcessWorkspaceService>();
 			_productService = Startup.ServiceProvider.GetService<IProductService>();
@@ -306,12 +313,19 @@ namespace WasdiLib
 			return false;
 		}
 
-
+		/// <summary>
+		/// Explicit accessor for the defaultProvider property.
+		/// </summary>
+		/// <returns>the defaultProvider</returns>
 		public string GetDefaultProvider()
 		{
 			return m_sDefaultProvider;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the defaultProvider property.
+		/// </summary>
+		/// <param name="sProvider">the provider to be used by default</param>
 		public void SetDefaultProvider(string? sProvider)
 		{
 			_logger.LogDebug($"SetDefaultProvider({sProvider})");
@@ -325,11 +339,19 @@ namespace WasdiLib
 			this.m_sDefaultProvider = sProvider;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the user property.
+		/// </summary>
+		/// <returns>the user</returns>
 		public string GetUser()
 		{
 			return m_sUser;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the user property.
+		/// </summary>
+		/// <param name="sUser">the user</param>
 		public void SetUser(string? sUser)
 		{
 			_logger.LogDebug($"SetUser({sUser})");
@@ -343,11 +365,19 @@ namespace WasdiLib
 			this.m_sUser = sUser;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the password property.
+		/// </summary>
+		/// <returns>the password</returns>
 		public string? GetPassword()
 		{
 			return m_sPassword;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the password property.
+		/// </summary>
+		/// <param name="sPassword">the password</param>
 		public void SetPassword(string? sPassword)
 		{
 			_logger.LogDebug("SetPassword( ********** )");
@@ -355,12 +385,17 @@ namespace WasdiLib
 			this.m_sPassword = sPassword;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the activeWorkspace property.
+		/// </summary>
+		/// <returns>the activeWorgspace</returns>
 		public string? GetActiveWorkspace()
 		{
 			return m_sActiveWorkspace;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the activeWorkspace property.
 		/// If the new active workspace is not null, sets also the workspace owner.
 		/// </summary>
 		/// <param name="sNewActiveWorkspaceId">the new Id of the activeWorkspace</param>
@@ -376,12 +411,17 @@ namespace WasdiLib
 			}
 		}
 
+		/// <summary>
+		/// Explicit accessor for the sessionId property.
+		/// </summary>
+		/// <returns>the sessionId</returns>
 		public string GetSessionId()
 		{
 			return m_sSessionId;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the sessionId property.
 		/// Sets the sessionId only if the input is not null.
 		/// </summary>
 		/// <param name="sSessionId"></param>
@@ -398,12 +438,17 @@ namespace WasdiLib
 			this.m_sSessionId = sSessionId;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the baseUrl property.
+		/// </summary>
+		/// <returns>the baseUrl</returns>
 		public string GetBaseUrl()
 		{
 			return m_sBaseUrl;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the baseUrl property.
 		/// Sets the baseUrl only if the input is not null and if it represents a valid URI.
 		/// </summary>
 		/// <param name="sBaseUrl">the new baseUrl</param>
@@ -435,11 +480,19 @@ namespace WasdiLib
 			}
 		}
 
+		/// <summary>
+		/// Explicit accessor for the isOnServer property.
+		/// </summary>
+		/// <returns>True if the application is deployed on server, False if it is running on local development machine</returns>
 		public bool GetIsOnServer()
 		{
 			return m_bIsOnServer;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the isOnServer property.
+		/// </summary>
+		/// <param name="bIsOnServer">Indicates whether the application is deployed on server or running on local development machine</param>
 		public void SetIsOnServer(bool bIsOnServer)
 		{
 			_logger.LogDebug($"SetIsOnServer({bIsOnServer})");
@@ -447,11 +500,19 @@ namespace WasdiLib
 			this.m_bIsOnServer = bIsOnServer;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the downloadActive property.
+		/// </summary>
+		/// <returns>the value of the downloadActive flag</returns>
 		public Boolean GetDownloadActive()
 		{
 			return m_bDownloadActive;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the downloadActive property.
+		/// </summary>
+		/// <param name="bDownloadActive">the desired value of the downloadActive flag</param>
 		public void SetDownloadActive(bool bDownloadActive)
 		{
 			_logger.LogDebug($"SetDownloadActive({bDownloadActive})");
@@ -459,11 +520,19 @@ namespace WasdiLib
 			this.m_bDownloadActive = bDownloadActive;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the uploadActive property.
+		/// </summary>
+		/// <returns>the value of the uploadActive flag</returns>
 		public bool GetUploadActive()
 		{
 			return m_bUploadActive;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the uploadActive property.
+		/// </summary>
+		/// <param name="bUploadActive">the desired value of the uploadActive flag</param>
 		public void SetUploadActive(bool bUploadActive)
 		{
 			_logger.LogDebug($"SetUploadActive({bUploadActive})");
@@ -471,12 +540,17 @@ namespace WasdiLib
 			this.m_bUploadActive = bUploadActive;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the basePath property.
+		/// </summary>
+		/// <returns>the basePath</returns>
 		public string GetBasePath()
 		{
 			return m_sBasePath;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the basePath property.
 		/// Sets the basePath only if the input is not null and if it represents a valid path and the user has the permissions to read and write.
 		/// </summary>
 		/// <param name="sBasePath">the new basePath</param>
@@ -552,15 +626,20 @@ namespace WasdiLib
 			return writeAllow && !writeDeny;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the myProcId property.
+		/// </summary>
+		/// <returns>the myProcId</returns>
 		public string GetMyProcId()
 		{
 			return m_sMyProcId;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the myProcId property.
 		/// Set the myProcessId only if the input is not null or empty.
 		/// </summary>
-		/// <param name="sMyProcId"></param>
+		/// <param name="sMyProcId">the value of myProcId</param>
 		public void SetMyProcId(string? sMyProcId)
 		{
 			_logger.LogDebug($"SetMyProcId({sMyProcId})");
@@ -574,16 +653,29 @@ namespace WasdiLib
 			this.m_sMyProcId = sMyProcId;
 		}
 
+		/// <summary>
+		/// Explicit accessor for the verbose property.
+		/// </summary>
+		/// <returns>the value of the verbose flag</returns>
 		public bool GetVerbose()
 		{
 			return m_bVerbose;
 		}
 
+		/// <summary>
+		/// Explicit mutator for the verbose property.
+		/// If the verbose flag is set to True, the level of logging is INFORMATION.
+		/// If the verbose flag is set to False, the level of logging is ERROR.
+		/// </summary>
+		/// <param name="bVerbose">the desired value of the verbose flag</param>
 		public void SetVerbose(bool bVerbose)
 		{
 			_logger.LogDebug($"SetVerbose({bVerbose})");
 
 			this.m_bVerbose = bVerbose;
+
+			Startup.RegisterLogger(bVerbose);
+			_logger = Startup.ServiceProvider.GetService<ILogger<Wasdi>>();
 		}
 
 		/// <summary>
@@ -720,13 +812,17 @@ namespace WasdiLib
 			return false;
 		}
 
-
+		/// <summary>
+		/// Explicit accessor for the workspaceBaseUrl property.
+		/// </summary>
+		/// <returns>the workspace's baseUrl</returns>
 		public string GetWorkspaceBaseUrl()
 		{
 			return m_sWorkspaceBaseUrl;
 		}
 
 		/// <summary>
+		/// Explicit mutator for the workspaceBaseUrl property.
 		/// Sets the workspace's baseUrl only if the input is not null and if it represents a valid URI.
 		/// </summary>
 		/// <param name="sWorkspaceBaseUrl">the new baseUrl of the workspace</param>

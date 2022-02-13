@@ -15,11 +15,16 @@ namespace WasdiLib.Client
 
         static void Main(string[] args)
         {
-            WasdiLib wasdi = new WasdiLib();
+            Wasdi wasdi = new Wasdi();
             wasdi.Init();
 
             wasdi.PrintStatus();
 
+            wasdi.SetVerbose(true);
+
+            wasdi.PrintStatus();
+
+            /*
             GetProcessorPath(wasdi);
 
 
@@ -32,6 +37,7 @@ namespace WasdiLib.Client
             GetProcessWorkspacesByWorkspaceId(wasdi);
             GetProductsByWorkspaceId(wasdi);
             GetWorkflows(wasdi);
+            */
 
 
             /*
@@ -76,30 +82,36 @@ namespace WasdiLib.Client
             }
 
 
+            // call another app: HelloWasdiWorld
+            Dictionary dictionary  = new Dictionary("name");
+            // wasdi.ExecuteProcessor("HelloWasdiWorld", dictionary);
+
+
+
             wasdi.WasdiLog("FINISHED");
             UpdateStatus(wasdi);
             */
 
         }
 
-        private static void Hello(WasdiLib wasdi)
+        private static void Hello(Wasdi wasdi)
         {
             wasdi.WasdiLog("Hello:");
             wasdi.WasdiLog(wasdi.Hello());
         }
 
-        private static void GetProcessorPath(WasdiLib wasdi)
+        private static void GetProcessorPath(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetProcessorPath:");
             wasdi.WasdiLog(wasdi.GetProcessorPath());
         }
 
-        private static void WasdiLog(WasdiLib wasdi)
+        private static void WasdiLog(Wasdi wasdi)
         {
             wasdi.WasdiLog("WasdiLog: Prova");
         }
 
-        private static void UpdateStatus(WasdiLib wasdi)
+        private static void UpdateStatus(Wasdi wasdi)
         {
             wasdi.WasdiLog("UpdateStatus:");
 
@@ -109,7 +121,7 @@ namespace WasdiLib.Client
             wasdi.UpdateStatus(sStatus, iPerc);
         }
 
-        private static void GetWorkspaces(WasdiLib wasdi)
+        private static void GetWorkspaces(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetWorkspaces:");
 
@@ -121,7 +133,7 @@ namespace WasdiLib.Client
             }
         }
 
-        private static void GetWorkspacesNames(WasdiLib wasdi)
+        private static void GetWorkspacesNames(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetWorkspacesNames:");
 
@@ -133,7 +145,7 @@ namespace WasdiLib.Client
             }
         }
 
-        private static void CreateWorkspace_DeleteWorkspace(WasdiLib wasdi)
+        private static void CreateWorkspace_DeleteWorkspace(Wasdi wasdi)
         {
             wasdi.WasdiLog("CreateWorkspace_DeleteWorkspace:");
 
@@ -151,7 +163,7 @@ namespace WasdiLib.Client
             wasdi.WasdiLog("Deleted Workspace: " + outcome);
         }
 
-        private static void GetProcessWorkspacesByWorkspaceId(WasdiLib wasdi)
+        private static void GetProcessWorkspacesByWorkspaceId(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetProcessWorkspacesByWorkspaceId:");
 
@@ -167,7 +179,7 @@ namespace WasdiLib.Client
             }
         }
 
-        private static void GetWorkspaceIdByName(WasdiLib wasdi)
+        private static void GetWorkspaceIdByName(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetWorkspaceIdByName:");
 
@@ -181,7 +193,7 @@ namespace WasdiLib.Client
 
         }
 
-        private static void GetProductsByWorkspaceId(WasdiLib wasdi)
+        private static void GetProductsByWorkspaceId(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetProductsByWorkspaceId:");
 
@@ -196,7 +208,7 @@ namespace WasdiLib.Client
             }
         }
 
-        private static void GetWorkflows(WasdiLib wasdi)
+        private static void GetWorkflows(Wasdi wasdi)
         {
             wasdi.WasdiLog("GetWorkflows:");
 
