@@ -5,9 +5,10 @@ angular.module('wasdi.wapTextBox', [])
             restrict: 'E',
             scope: {},
             bindToController: {
-                inputText: '='
+                inputText: '=',
+                tooltip:'='
             },
-            template: `<input type="text" class="form-control"  ng-model="$ctrl.inputText">`,
+            template: `<input type="text" class="form-control"  ng-model="$ctrl.inputText" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right">`,
             controller: function() {
 
             },

@@ -110,7 +110,7 @@ var WorkspaceDetailsController = (function () {
 
     /**
      * Get the Cloud provider SLA Link if available
-     * @returns 
+     * @returns
      */
     WorkspaceDetailsController.prototype.getSLALink = function () {
 
@@ -139,3 +139,4 @@ var WorkspaceDetailsController = (function () {
     ];
     return WorkspaceDetailsController;
 })();
+window.WorkspaceDetailsController = WorkspaceDetailsController;

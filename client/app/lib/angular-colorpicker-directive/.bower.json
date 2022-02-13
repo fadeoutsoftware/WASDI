@@ -1,0 +1,26 @@
+{
+  "name": "angular-colorpicker-directive",
+  "authors": [
+    "Alberto Pujante <alberplz@gmail.com>"
+  ],
+  "description": "AnguarJS color picker directive with no dependencies required",
+  "main": [
+    "js/color-picker.js",
+    "css/color-picker.css"
+  ],
+  "ignore": [
+    "node_modules"
+  ],
+  "licence": "MIT",
+  "homepage": "https://github.com/Alberplz/angular-colorpicker-directive",
+  "version": "1.2.2",
+  "_release": "1.2.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.2.2",
+    "commit": "f19243a91cb611a537af2f54a4de67c58b930c01"
+  },
+  "_source": "https://github.com/Alberplz/angular-colorpicker-directive.git",
+  "_target": "~1.2.0",
+  "_originalSource": "angular-colorpicker-directive"
+}

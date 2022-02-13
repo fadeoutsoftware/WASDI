@@ -127,3 +127,4 @@ var FTPController = (function() {
     ];
     return FTPController;
 })();
+window.FTPController=FTPController;

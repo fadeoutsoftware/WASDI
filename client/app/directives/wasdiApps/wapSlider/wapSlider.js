@@ -13,6 +13,11 @@ angular.module('wasdi.wapSlider', [])
                 min:"=",
                 max:"="
             },
+            bindToController:{
+                tooltip:'='
+            },
+            controller: function() {},
+            controllerAs: '$ctrl',
             link: function(scope, elem, attrs)
             {
                 scope.sliderOptions = {
@@ -52,6 +57,7 @@ angular.module('wasdi.wapSlider', [])
                     }
                 });
 */
-            }
+            },
+         
         };
     }]);

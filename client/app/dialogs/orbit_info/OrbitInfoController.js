@@ -23,3 +23,4 @@ var OrbitInfoController = (function() {
     ];
     return OrbitInfoController;
 })();
+window.OrbitInfoController = OrbitInfoController;

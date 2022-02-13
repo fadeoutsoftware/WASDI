@@ -94,3 +94,4 @@ var ProductInfoController = (function() {
     ];
     return ProductInfoController;
 })();
+window.ProductInfoController = ProductInfoController;

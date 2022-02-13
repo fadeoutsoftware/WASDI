@@ -16,7 +16,8 @@ angular.module('wasdi.wapProductList', [])
                 loadingData: '=',
                 isAvailableSelection: '=',
                 isSingleSelection : '=',
-                singleSelectionLayer: '='
+                singleSelectionLayer: '=',
+                tooltip: '='
             },
 
             templateUrl:"directives/wasdiApps/wapProductList/wapProductList.html",

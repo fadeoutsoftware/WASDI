@@ -421,5 +421,10 @@
     "DIALOG_PAYLOAD_COPY": "Copy payload",
 
     "DIALOG_WORKSPACE_DETAILS_APPLY" : "Apply",
-    "DIALOG_WORKSPACE_DETAILS_CLOSE": "Close"
+    "DIALOG_WORKSPACE_DETAILS_CLOSE": "Close",
+
+    "WAP_SELECT_AREA_BASE" : "The selected area exceeds the limits imposed for the application:",
+    "WAP_SELECT_AREA_OVER_AREA" : "<br> - The area is too big",
+    "WAP_SELECT_AREA_OVER_SIDE" : "<br> - The larger side selected is too big",
+    "WAP_SELECT_AREA_OVER_RATIO" : "<br> - One side is too large, compared to the other"
 }

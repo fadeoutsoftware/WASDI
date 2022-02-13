@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="wasdi" class="no-js"> <!--<![endif]-->
+<link rel="icon" href="https://www.wasdi.net/favicon.ico" type="image/x-icon">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Wasdi</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!---------------- Get all JS resources from CDN  ---------------->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script> -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://maps.google.com/maps/api/js?v=3&amp;sensor=false" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.js" async></script>
+    <script src="https://code.createjs.com/createjs-2014.12.12.min.js" async></script>
+    <script src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+    <script src="https://unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" async></script>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js" async></script>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
+
+
+
+
+    <!---------------- KeyCloak Auth Client ---------------->
+
+    <script src="https://www.wasdi.net/auth/js/keycloak.js"></script>
+    <!-- <script src=<%= KCURL %>> </script> -->
+    <script>
+        var oKeycloak = new Keycloak();
+        var bKeyCloakInitialized = false;
+        oKeycloak.init({
+                checkLoginIframe: false,
+                enableLogging: true
+            }
+        ).then(function () {
+            bKeyCloakInitialized = true;
+        }).catch(function () {
+            bKeyCloakInitialized = true;
+        });
+
+    </script>
+
+    <!-- CSS -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/start/jquery-ui.css">
+    <!-- LEAFLET -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <!--Geocoder-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</head>
+
+
+<body>
+<div ui-view></div>
+
+
+
+
+<!-- Wasdi config -->
+<script src="environments/secrets.js"></script>
+<script src="environments/environment.js"></script>
+
+<!-- Wasdi models/classes -->
+<script src="models/RabbitConnectionState.js"></script>
+<script src="models/TabType.js"></script>
+<script src="models/MessageHelper.js"></script>
+
+<!-- Stomp js -->
+
+<script src="lib/bower-sockjs-client/sockjs.js"></script><!--min.-->
+<script src="lib/stomp-websocket/lib/stomp.js"></script>
+
+<!-- utils js -->
+<script src="lib/utils/FadeoutJSUtils.js"></script>
+<script src="lib/utils/FadeOutVexDialogUtils.js"></script>
+<script src="lib/utils/WasdiJSUtils.js"></script>
+
+<!--Leaflet provider-->
+<script src="lib/leafletProvider/leaflet-providers.js"></script>
+
+<!-- cesium -->
+<script src="lib/Cesium/Cesium.js"></script>
+
+<script src="lib/factories/ViewElementFactory.js"></script>
+
+
+<!--VEX DIALOG-->
+
+<script src="lib/vex-dialog/vex-dialog.js"></script>
+
+
+<script src="lib/jstree/dist/jstree.min.js"></script>
+<script src="lib/vex-js/dist/js/vex.combined.js"></script>
+
+<script>vex.defaultOptions.className = 'vex-theme-default'</script>
+
+
+
+
+<!-- include JSONedit files -->
+<script src="lib/json-edit/js/directives.js"></script>
+<link href="lib/json-edit/css/styles.css" rel="stylesheet" type="text/css"/>
+
+<!-- include the dependencies in this order (if you don't already have them) -->
+
+<script src="lib/json-edit/bower_components/angular-ui-sortable/sortable.min.js"></script>
+
+<!-- WPS -->
+<script src="lib/wps-js/js/openlayers/OpenLayers-closure.js"></script>
+<script src="lib/wps-js/js/wps-js/wps-js.0.1.1.js"></script>
+<link type="text/css" rel="stylesheet" href="lib/wps-js/css/wps-js.css">
+
+</body>
+</html>

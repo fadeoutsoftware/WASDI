@@ -1,0 +1,80 @@
+{
+  "_args": [
+    [
+      "vex-js@3.0.0",
+      "/home/marco/Documents/Fadeout/LocalProjects/ClientMigration/WASDI-Client-Migration-Dummy"
+    ]
+  ],
+  "_from": "vex-js@3.0.0",
+  "_id": "vex-js@3.0.0",
+  "_inBundle": false,
+  "_integrity": "sha1-nWXVXjU97JUNiPeg/lbzrgYyzSE=",
+  "_location": "/vex-js",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "vex-js@3.0.0",
+    "name": "vex-js",
+    "escapedName": "vex-js",
+    "rawSpec": "3.0.0",
+    "saveSpec": null,
+    "fetchSpec": "3.0.0"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/vex-js/-/vex-js-3.0.0.tgz",
+  "_spec": "3.0.0",
+  "_where": "/home/marco/Documents/Fadeout/LocalProjects/ClientMigration/WASDI-Client-Migration-Dummy",
+  "bugs": {
+    "url": "https://github.com/HubSpot/vex/issues"
+  },
+  "contributors": [
+    {
+      "name": "Adam Schwartz",
+      "email": "aschwartz@hubspot.com"
+    },
+    {
+      "name": "Brendan Batliner",
+      "email": "brendan@omnipointment.com"
+    },
+    {
+      "name": "Mark Stosberg",
+      "email": "mark@rideamigos.com"
+    }
+  ],
+  "dependencies": {
+    "classlist-polyfill": "1.0.3",
+    "domify": "1.4.0",
+    "es6-object-assign": "1.0.2",
+    "vex-dialog": "1.0.6"
+  },
+  "description": "Beautiful, functional dialogs in vanilla JavaScript",
+  "devDependencies": {
+    "grunt": "1.0.1",
+    "grunt-browserify": "5.0.0",
+    "grunt-contrib-compass": "1.1.1",
+    "grunt-contrib-uglify": "1.0.1",
+    "grunt-sass": "1.2.0",
+    "standard": "7.1.2"
+  },
+  "homepage": "https://github.com/HubSpot/vex#readme",
+  "license": "MIT",
+  "main": "dist/js/vex.js",
+  "name": "vex-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HubSpot/vex.git"
+  },
+  "scripts": {
+    "build": "grunt",
+    "test": "standard"
+  },
+  "standard": {
+    "ignore": [
+      "/dist"
+    ]
+  },
+  "version": "3.0.0"
+}

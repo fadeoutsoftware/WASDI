@@ -42,7 +42,7 @@ var WappsController = (function() {
     WappsController.prototype.getProcessorsList = function() {
         var oController = this;
         // swap to true after loading icon is properly rendered
-        oController.m_bIsLoadingProcessorList = true; 
+        oController.m_bIsLoadingProcessorList = true;
 
         this.m_oProcessorService.getProcessorsList().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
@@ -220,6 +220,7 @@ var WappsController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
+                console.alert("Closed modal");
             });
         });
 
@@ -340,3 +341,4 @@ var WappsController = (function() {
     ];
     return WappsController;
 })();
+window.WappsController =  WappsController;

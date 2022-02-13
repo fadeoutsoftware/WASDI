@@ -1,0 +1,16 @@
+{
+  "name": "sockjs-client",
+  "version": "0.3.4",
+  "main": "./sockjs.js",
+  "license": "MIT",
+  "homepage": "https://github.com/joujiahe/bower-sockjs-client",
+  "_release": "0.3.4",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.3.4",
+    "commit": "34c20db5ae0304c763a7b96be4f3af752b1b5022"
+  },
+  "_source": "https://github.com/joujiahe/bower-sockjs-client.git",
+  "_target": "~0.3.4",
+  "_originalSource": "bower-sockjs-client"
+}

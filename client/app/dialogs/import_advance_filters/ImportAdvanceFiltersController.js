@@ -811,3 +811,4 @@ var ImportAdvanceFiltersController = (function() {
     ];
     return ImportAdvanceFiltersController;
 })();
+window.ImportAdvanceFiltersController = ImportAdvanceFiltersController;
