@@ -1,5 +1,7 @@
 package wasdi.shared.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +13,11 @@ import org.bson.conversions.Bson;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -36,9 +42,9 @@ public class MongoRepository {
      */
     public static String SERVER_ADDRESS = "127.0.0.1";
     /**
-     * Server Port
+     * Replica Set Name, if Any
      */
-    public static int SERVER_PORT = 27017;
+    public static String REPLICA_NAME = "WASDI_PROD_RS";
     /**
      * Db User
      */
@@ -79,11 +85,11 @@ public class MongoRepository {
     private static boolean s_bDbSwitchLogged = false;
     
     public static void readConfig() {
-        MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongo.address;
-        MongoRepository.SERVER_PORT = WasdiConfig.Current.mongo.port;
-        MongoRepository.DB_NAME = WasdiConfig.Current.mongo.dbName;
-        MongoRepository.DB_USER = WasdiConfig.Current.mongo.user;
-        MongoRepository.DB_PWD = WasdiConfig.Current.mongo.password;    	
+        MongoRepository.SERVER_ADDRESS = WasdiConfig.Current.mongoMain.address;
+        MongoRepository.DB_NAME = WasdiConfig.Current.mongoMain.dbName;
+        MongoRepository.DB_USER = WasdiConfig.Current.mongoMain.user;
+        MongoRepository.DB_PWD = WasdiConfig.Current.mongoMain.password;
+        MongoRepository.REPLICA_NAME = WasdiConfig.Current.mongoMain.replicaName;
     }
     
 	/**
@@ -95,7 +101,7 @@ public class MongoRepository {
      * @param iServerPort Port
      * @param sDbName db name
      */
-    public static void addMongoConnection(String sDbCode, String sUser, String sPassword, String sAddress, int iServerPort, String sDbName) {
+    public static void addMongoConnection(String sDbCode, String sUser, String sPassword, String sAddress, String sReplicaName, String sDbName) {
     	try 
     	{
     		// Check if this does not exists yet
@@ -105,8 +111,22 @@ public class MongoRepository {
     			
     			// Create the connection config
     			oMongoConnection = new MongoConnection();
+    			
+    			String []asAddressParts = sAddress.split(",");
+    			boolean bReplica = false;
+    			
+    			if (asAddressParts != null) {
+    				if (asAddressParts.length>1) {
+    					bReplica = true;
+    				}
+    			}
             	
-            	String sConnectionString = "mongodb://" + sUser+":"+sPassword+"@"+sAddress+":"+iServerPort+"/?authSource=" + sDbName;
+            	String sConnectionString = "mongodb://" + sUser+":"+sPassword+"@"+sAddress+"/?authSource=" + sDbName;
+            	
+            	if (bReplica) {
+            		sConnectionString = sConnectionString + "&replicaSet="+sReplicaName;
+            	}
+            	
             	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
             	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(sDbName);
             	
@@ -137,13 +157,10 @@ public class MongoRepository {
     		if (oMongoConnection == null) {
     			// If is the default wasdi and does not exist
     			if (sDbCode.equals("wasdi")) {
+    				
     				// Create default connection
-        			oMongoConnection = new MongoConnection();
-                	String sConnectionString = "mongodb://" + DB_USER+":"+DB_PWD+"@"+SERVER_ADDRESS+":"+SERVER_PORT+"/?authSource=" + DB_NAME;
-                	oMongoConnection.m_oMongoClient = MongoClients.create(sConnectionString);
-                	oMongoConnection.m_oMongoDatabase = oMongoConnection.m_oMongoClient.getDatabase(DB_NAME);
-                	// Add it to the dictionary
-                	s_aoDbConnections.put("wasdi", oMongoConnection);
+    				addMongoConnection("wasdi", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.REPLICA_NAME, MongoRepository.DB_NAME);
+    				return getMongoDatabase("wasdi");
     			}
     			else {
     				

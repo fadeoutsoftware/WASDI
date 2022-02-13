@@ -482,3 +482,4 @@ var WorkFlowManagerController = (function () {
     ];
     return WorkFlowManagerController;
 })();
+window.WorkFlowManagerController = WorkFlowManagerController;

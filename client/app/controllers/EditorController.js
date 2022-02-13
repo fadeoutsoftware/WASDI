@@ -2157,3 +2157,4 @@ var EditorController = (function () {
 
     return EditorController;
 })();
+window.EditorController = EditorController;

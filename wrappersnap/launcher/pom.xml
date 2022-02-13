@@ -89,6 +89,10 @@
 						<manifest>
 							<mainClass>wasdi.LauncherMain</mainClass>
 						</manifest>
+						<manifestEntries>
+							<OpenIDE-Module-Implementation-Version>8.0.4</OpenIDE-Module-Implementation-Version>
+							<OpenIDE-Module-Specification-Version>8.0.4</OpenIDE-Module-Specification-Version>
+						</manifestEntries>						
 					</archive>
 				</configuration>
 			</plugin>
@@ -164,6 +168,11 @@
 			<artifactId>snap-bigtiff</artifactId>
 			<version>${snap.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-geotiff</artifactId>
+            <version>${snap.version}</version>
+        </dependency>		
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-rcp</artifactId>

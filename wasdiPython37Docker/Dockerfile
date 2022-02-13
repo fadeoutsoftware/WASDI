@@ -82,11 +82,6 @@ RUN pip3 install flask \
     rasterio \
     wheel
 
-
-# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
-RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
-
-
 # [IN OUR VENV] Install needed Python GDAL library
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
@@ -96,6 +91,8 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
 # Copy our files
 COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
 
+# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
+RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
 
 # From now, all commands executed are executed as root
 USER root

@@ -6,10 +6,11 @@ angular.module('wasdi.wapCheckBox', [])
             scope: {},
             bindToController: {
                 boolValue: '=',
-                labelText: '='
+                labelText: '=',
+                tooltip:'='
             },
             template: `
-            <label class="switch">
+            <label class="switch" >
             <input type="checkbox"  ng-model="$ctrl.boolValue" value="$ctrl.labelText">
             <span class="slider-checkbox round"></span>
             </label>

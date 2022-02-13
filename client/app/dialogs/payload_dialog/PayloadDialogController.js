@@ -66,3 +66,4 @@ var PayloadDialogController = (function () {
     ]
     return PayloadDialogController;
 })();
+window.PayloadDialogController = PayloadDialogController;

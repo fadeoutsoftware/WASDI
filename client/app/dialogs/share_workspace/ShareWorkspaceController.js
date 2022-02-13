@@ -132,3 +132,4 @@ var ShareWorkspaceController = (function() {
     ];
     return ShareWorkspaceController;
 })();
+window.ShareWorkspaceController = ShareWorkspaceController;

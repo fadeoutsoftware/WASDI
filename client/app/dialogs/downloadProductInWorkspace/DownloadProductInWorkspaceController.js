@@ -67,3 +67,4 @@ var DownloadProductInWorkspaceController = (function() {
     ];
     return DownloadProductInWorkspaceController;
 })();
+window.DownloadProductInWorkspaceController = DownloadProductInWorkspaceController;

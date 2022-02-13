@@ -29,6 +29,7 @@ public class Libraryupdate extends Operation {
 	        
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setParameter(oParameter);
+	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
 	        return oEngine.libraryUpdate(oParameter);

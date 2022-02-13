@@ -25,3 +25,4 @@ var AttributesMetadataController = (function() {
     ];
     return AttributesMetadataController;
 })();
+window.AttributesMetadataController = AttributesMetadataController;

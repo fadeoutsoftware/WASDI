@@ -1130,6 +1130,7 @@ public class dbUtils {
             System.out.println("\t2 - Move Workpsace to new node");
             System.out.println("\t3 - Delete Wokspace");
             System.out.println("\t4 - Reconstruct Wokspace");
+            System.out.println("\t5 - Clean Workspaces not existing in node");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1513,6 +1514,194 @@ public class dbUtils {
 
                 }
             }
+            
+            else if (sInputString.equals("5")) {
+            	
+                System.out.println("Please write DELETE for a real delete");
+                String sCommand = s_oScanner.nextLine();
+                
+                boolean bDelete = false;
+                
+                if (sCommand.equals("DELETE")) {
+                	
+                	System.out.println("This is a REAL Delete, are you sure [1/0]?");
+
+                    String sConfirm = s_oScanner.nextLine();
+                	
+                    if (sConfirm.equals("1")) {
+                    	bDelete = true;
+                    }
+                    else {
+                    	System.out.println("Ok just a list");
+                    }
+                }
+                else {
+                	System.out.println("Ok just a list");
+                }
+
+                System.out.println("Searching Workspace no longer existing on node");
+
+                // repositories
+                ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+                PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
+                WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+                DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+                
+                
+                List<Workspace> aoWorkspaces = oWorkspaceRepository.getWorkspacesList();
+                
+                for (Workspace oWorkspace : aoWorkspaces) {
+                	
+                	String sWorkspaceNode="wasdi";
+                	
+                	if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+                		sWorkspaceNode= oWorkspace.getNodeCode();
+                	}
+                	
+                	if (!sWorkspaceNode.equals(WasdiConfig.Current.nodeCode)) continue;
+                	
+					String sWorkspaceId = oWorkspace.getWorkspaceId();
+					
+	                Workspace oWS = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+
+	                String sWorkspaceOwner = oWS.getUserId();
+
+	                // get workspace path
+	                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+	                
+	                File oWorkspacePath = new File(sWorkspacePath);
+	                
+	                if (oWorkspacePath.exists() == false) {
+	                	System.out.println("Deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
+	                	
+	                	if (bDelete) {
+			                // Delete Workspace Db Entry
+			                if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
+
+			                    // Get all Products in workspace
+			                    List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
+
+			                    try {
+			                        System.out.println("Deleting workspace layers");
+
+			                        // GeoServer Manager Object
+			                        GeoServerManager oGeoServerManager = new GeoServerManager();
+
+			                        // For each product in the workspace, if is unique, delete published bands and metadata file ref
+			                        for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+
+			                            // Get the downloaded file
+			                            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(oProductWorkspace.getProductName());
+
+			                            // Is the product used also in other workspaces?
+			                            List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(oDownloadedFile.getFileName());
+
+			                            if (aoDownloadedFileList.size() > 1) {
+			                                // Yes, it is in other Ws, jump
+			                                Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+			                                continue;
+			                            }
+
+			                            // We need the View Model product name: start from file name
+			                            String sProductName = oDownloadedFile.getFileName();
+
+			                            // If view model is available (should be), get the name from the view model
+			                            if (oDownloadedFile.getProductViewModel() != null) {
+			                                sProductName = oDownloadedFile.getProductViewModel().getName();
+			                            }
+
+			                            // Get the list of published bands by product name
+			                            List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(sProductName);
+
+			                            // For each published band
+			                            for (PublishedBand oPublishedBand : aoPublishedBands) {
+
+			                                try {
+			                                    // Remove Geoserver layer (and file)
+			                                    if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+			                                        System.out.println("error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+			                                    }
+
+			                                    try {
+			                                        // delete published band on database
+			                                        oPublishRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+			                                    } catch (Exception oEx) {
+			                                        System.out.println("error deleting published band on data base " + oEx.toString());
+			                                    }
+			                                } catch (Exception oEx) {
+			                                    System.out.println("error deleting layer id " + oEx.toString());
+			                                }
+			                            }
+
+			                            // If view model is available (should be), get the metadata file reference
+			                            if (oDownloadedFile.getProductViewModel() != null) {
+
+			                                String sMetadataFileRef = oDownloadedFile.getProductViewModel().getMetadataFileReference();
+
+			                                if (!Utils.isNullOrEmpty(sMetadataFileRef)) {
+			                                    System.out.println("deleting metadata file " + sMetadataFileRef);
+			                                    FileUtils.deleteQuietly(new File(sMetadataFileRef));
+			                                }
+			                            }
+
+			                        }
+			                    } catch (Exception oE) {
+			                        System.out.println("error while trying to delete layers: " + oE);
+			                    }
+
+			                    try {
+
+			                        System.out.println("Delete workspace folder " + sWorkspacePath);
+
+			                        // delete directory
+			                        try {
+			                            File oDir = new File(sWorkspacePath);
+			                            if (!oDir.exists()) {
+			                                System.out.println("trying to delete non existing directory " + sWorkspacePath);
+			                            }
+			                            // try anyway for two reasons:
+			                            // 1. non existing directories are handled anyway
+			                            // 2. try avoiding race conditions
+			                            FileUtils.deleteDirectory(oDir);
+			                        } catch (Exception oE) {
+			                            System.out.println("error while trying to delete directory " + sWorkspacePath + ": " + oE);
+			                        }
+
+			                        // delete download file on database
+			                        for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
+
+			                            try {
+
+			                                System.out.println("Deleting file " + oProductWorkspace.getProductName());
+			                                oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
+
+			                            } catch (Exception oEx) {
+			                                System.out.println("Error deleting download on data base: " + oEx);
+			                            }
+			                        }
+
+			                    } catch (Exception oEx) {
+			                        System.out.println("Error deleting workspace directory: " + oEx);
+			                    }
+
+			                    // Delete Product Workspace entry
+			                    oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
+
+			                    // Delete also the sharings, it is deleted by the owner..
+			                    System.out.println("Delete Workspace sharings");
+			                    WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			                    oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+
+			                    System.out.println("Workspace Deleted");
+			                } else {
+			                    System.out.println("Impossible to delete workspace from the db");
+			                }	
+	                	}
+	                	
+	                }
+				}
+
+            }             
         } catch (Exception oEx) {
             System.out.println("Workspace Sharing Exception: " + oEx);
             oEx.printStackTrace();
@@ -1919,8 +2108,8 @@ public class dbUtils {
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
                 System.out.println("Adding local mongo config");
-                // Configure also the local connection: by default is the "wasdi" port + 1
-                MongoRepository.addMongoConnection("local", MongoRepository.DB_USER, MongoRepository.DB_PWD, MongoRepository.SERVER_ADDRESS, MongoRepository.SERVER_PORT + 1, MongoRepository.DB_NAME);
+                // Configure also the local connection
+                MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
 
             boolean bExit = false;

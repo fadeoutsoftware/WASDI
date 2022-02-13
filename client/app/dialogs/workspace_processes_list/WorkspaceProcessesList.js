@@ -37,6 +37,7 @@ var WorkspaceProcessesList = (function () {
         let oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         if (_.isNil(oActiveWorkspace) == false) {
             this.m_sActiveWorkspaceId = oActiveWorkspace.workspaceId;
+            this.m_sActiveWorkspaceName = oActiveWorkspace.name;
 
             $scope.close = function (result) {
                 // stops the update of the inverval
@@ -267,7 +268,8 @@ var WorkspaceProcessesList = (function () {
 
                     var oLink=document.createElement('a');
                     oLink.href = file;
-                    oLink.download = "processes";
+                    let sTimestamp = (new Date()).toISOString().replace(/[^0-9]/g, "_").slice(0, 19);
+                    oLink.download = "processes_" + oController.m_sActiveWorkspaceName + "_" + sTimestamp;
                     oLink.click();
                 }
             }
@@ -396,3 +398,4 @@ var WorkspaceProcessesList = (function () {
     ];
     return WorkspaceProcessesList;
 })();
+window.WorkspaceProcessesList = WorkspaceProcessesList;

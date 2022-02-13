@@ -23,3 +23,4 @@ var SnakeController = (function() {
     ];
     return SnakeController;
 })();
+window.SnakeController = SnakeController;

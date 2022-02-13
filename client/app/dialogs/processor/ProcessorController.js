@@ -84,7 +84,7 @@ var ProcessorController = (function() {
          * Types of available processors
          * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
          */
-        this.m_aoProcessorTypes = [{'name':'Python 3.7 Pip','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'},{'name':'Python 3.x Conda','id':'conda'}];
+        this.m_aoProcessorTypes = [{'name':'Python 3.7 Pip','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'},{'name':'OCTAVE 6.x','id':'octave'},{'name':'Python 3.x Conda','id':'conda'},{'name':'C# .NET Core','id':'csharp'}];
         /**
          * Selected Processor Type
          * @type {string}
@@ -345,12 +345,9 @@ var ProcessorController = (function() {
         if (this.m_bEditMode == false) {
             return true;
         }
-
-        if (this.m_sTypeIdOnly === "ubuntu_idl372" || this.m_sTypeIdOnly === "ubuntu_python37_snap"
-        || this.m_sTypeIdOnly === "conda" || this.m_sTypeIdOnly === "octave")  {
+        else {
             return true;
         }
-        return false;
     };
 
      /**
@@ -760,31 +757,36 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"name": "Tab Name",\n\t\t"controls": [\n\t\t]\n\t},';
          }
          else if (sElementType === "textbox") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "numeric") {
-            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "numeric",\n\t\t"label": "description",\n\t\t"default": "0",\n\t\t"required": false\n\t},';
+            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "numeric",\n\t\t"label": "description",\n\t\t"default": "0",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
         }
          else if (sElementType === "dropdown") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "bbox") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "bbox",\n\t\t"label": "Bounding Box",'+
+             '\n\t\t"required": false,\n\t\t"tooltip":"",'+
+             '\n\t\t"maxArea": 0,'+
+             '\n\t\t"maxSide": 0,'+
+             '\n\t\t"maxRatioSide": 0'+
+             '\n\t},';
          }
          else if (sElementType === "slider") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100,\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "slider",\n\t\t"label": "description",\n\t\t"default": 0,\n\t\t"min": 0,\n\t\t"max": 100,\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "date") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "date",\n\t\t"label": "Date",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "date",\n\t\t"label": "Date",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "boolean") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false,\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "boolean",\n\t\t"label": "description",\n\t\t"default": false,\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "productscombo") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product",\n\t\t"required": false,\n\t\t"showExtension": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "productscombo",\n\t\t"label": "Product",\n\t\t"required": false,\n\t\t"tooltip":"",\n\t\t"showExtension": false\n\t},';
          }
          else if (sElementType === "searcheoimage") {
-             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description",\n\t\t"required": false\n\t},';
+             sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "searcheoimage",\n\t\t"label": "Description",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "hidden") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "hidden",\n\t\t"default": ""\n\t},';
@@ -812,3 +814,4 @@ var ProcessorController = (function() {
     ];
     return ProcessorController;
 })();
+ window.ProcessorController = ProcessorController;

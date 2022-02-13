@@ -303,3 +303,4 @@ var ProcessorParametersTemplateController = (function() {
     ];
     return ProcessorParametersTemplateController;
 })();
+window.ProcessorParametersTemplateController = ProcessorParametersTemplateController;

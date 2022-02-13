@@ -27,6 +27,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
+import org.json.JSONObject;
 
 /**
  * Utility class for HTTP operations.
@@ -42,11 +43,13 @@ public final class HttpUtils {
 
 	/**
 	 * Standard http get utility function
+	 * 
 	 * @param sUrl url to call
 	 * @param asHeaders headers dictionary
 	 * @return server response
 	 */
 	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
+		String sMessage = "";
 
 		try {
 			URL oURL = new URL(sUrl);
@@ -65,12 +68,51 @@ public final class HttpUtils {
 
 			oConnection.connect();
 
-			return readHttpResponse(oConnection);
-		}
-		catch (Exception oEx) {
+			sMessage = readHttpResponse(oConnection);
+
+			oConnection.disconnect();
+		} catch (Exception oEx) {
 			oEx.printStackTrace();
-			return "";
 		}
+
+		return sMessage;
+	}
+
+	/**
+	 * Get the size of a file to be downloaded via HTTP.
+	 * 
+	 * @param sUrl url to call
+	 * @param asHeaders headers dictionary
+	 * @return the size of the file
+	 */
+	public static long getDownloadFileSizeViaHttp(String sUrl, Map<String, String> asHeaders) {
+		long lLenght = 0L;
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setConnectTimeout(2000);
+			oConnection.setReadTimeout(2000);
+
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("GET");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			oConnection.connect();
+
+			lLenght = getHttpResponseContentLength(oConnection);
+
+			oConnection.disconnect();
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return lLenght;
 	}
 
 	public static String downloadFile(String sUrl, Map<String, String> asHeaders, String sOutputFilePath) {
@@ -135,7 +177,7 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
-		
+
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
@@ -200,7 +242,7 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
-		
+
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
@@ -335,7 +377,6 @@ public final class HttpUtils {
 		}
 	}
 
-	
 	/**
 	 * Standard http post file utility function
 	 * @param sUrl destination url
@@ -351,7 +392,6 @@ public final class HttpUtils {
 			return false;
 		}
 
-		
 		String sZippedFile = null;
 
 		// Check if we need to zip this file
@@ -474,7 +514,7 @@ public final class HttpUtils {
 				Utils.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -523,7 +563,7 @@ public final class HttpUtils {
 			if (sPayload!= null) oStreamWriter.write(sPayload);
 			oStreamWriter.flush();
 			oStreamWriter.close();
-			oPostOutputStream.close(); 
+			oPostOutputStream.close();
 
 			oConnection.connect();
 
@@ -531,8 +571,7 @@ public final class HttpUtils {
 			oConnection.disconnect();
 
 			return sMessage;
-		}
-		catch (Exception oEx) {
+		} catch (Exception oEx) {
 			oEx.printStackTrace();
 			return "";
 		}
@@ -544,7 +583,7 @@ public final class HttpUtils {
 	 * @throws IOException
 	 * @throws CopyStreamException
 	 */
-	public static String readHttpResponse(HttpURLConnection oConnection) {
+	private static String readHttpResponse(HttpURLConnection oConnection) {
 		try {
 			// response
 
@@ -583,13 +622,55 @@ public final class HttpUtils {
 	}
 
 	/**
+	 * Get the length of the content returned by the call.
+	 * 
+	 * @param oConnection the connection
+	 * @return the length of the content
+	 */
+	private static long getHttpResponseContentLength(HttpURLConnection oConnection) {
+		long lLenght = 0L;
+
+		try {
+			int responseCode = oConnection.getResponseCode();
+
+			// always check HTTP response code first
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				lLenght = oConnection.getHeaderFieldLong("Content-Length", 0L);
+
+				Utils.debugLog("HttpUtils.getHttpResponseContentLength: File size = " + lLenght);
+			} else {
+				Utils.debugLog("HttpUtils.getHttpResponseContentLength: No file to download. Server replied HTTP code: " + responseCode);
+			}
+		} catch (IOException oE) {
+			Utils.debugLog("HttpUtils.getHttpResponseContentLength: exception: " + oE );
+		}
+
+		return lLenght;
+	}
+
+	/**
 	 * Get the standard headers for a WASDI call
-	 * @return
+	 * 
+	 * @param sSessionId the sessionId
+	 * @return the map containing the headers
 	 */
 	public static Map<String, String> getStandardHeaders(String sSessionId) {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("x-session-token", sSessionId);
 		asHeaders.put("Content-Type", "application/json");
+
+		return asHeaders;
+	}
+
+	/**
+	 * Get the OpenId Connect header for a external-services call
+	 * 
+	 * @param sOpenidConnectToken the OpenId Connect token
+	 * @return the map containing the headers
+	 */
+	public static Map<String, String> getOpenIdConnectHeaders(String sOpenidConnectToken) {
+		Map<String, String> asHeaders = new HashMap<>();
+		asHeaders.put("Authorization", "Bearer " + sOpenidConnectToken);
 
 		return asHeaders;
 	}
@@ -615,6 +696,66 @@ public final class HttpUtils {
 
 		Utils.debugLog("HttpUtils." + sMethodName + " performance: " + dMillis + " ms, "
 				+ iResponseSize + " B (" + dSpeed + " B/s)");
+	}
+
+	public static String obtainOpenidConnectToken(String sUrl, String sDownloadUser, String sDownloadPassword, String sClientId) {
+		try {
+			URL oURL = new URL(sUrl);
+
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			oConnection.setDoOutput(true);
+			oConnection.getOutputStream().write(("client_id=" + sClientId + "&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
+
+			int iStatus = oConnection.getResponseCode();
+			Utils.debugLog("HttpUtils.obtainOpenidConnectToken: Response status: " + iStatus);
+
+			if (iStatus == 200) {
+				InputStream oInputStream = oConnection.getInputStream();
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+
+				if (null != oInputStream) {
+					Util.copyStream(oInputStream, oBytearrayOutputStream);
+					String sResult = oBytearrayOutputStream.toString();
+
+					JSONObject oJson = new JSONObject(sResult);
+					String sToken = oJson.optString("access_token", null);
+
+					return sToken;
+				}
+			} else {
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+				InputStream oErrorStream = oConnection.getErrorStream();
+				Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+				String sMessage = oBytearrayOutputStream.toString();
+				Utils.debugLog("HttpUtils.obtainOpenidConnectToken:" + sMessage);
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("HttpUtils.obtainOpenidConnectToken: " + oE);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Internal version of get 
+	 * @param sUrl
+	 * @return
+	 */
+	public static String httpGetResults(String sUrl) {
+		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
+
+		Map<String, String> asHeaders = new HashMap<>();
+
+		long lStart = System.nanoTime();
+		String sResult = standardHttpGETQuery(sUrl, asHeaders);
+		long lEnd = System.nanoTime();
+
+		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
+
+		return sResult;
 	}
 
 }

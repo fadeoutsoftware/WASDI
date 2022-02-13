@@ -33,6 +33,6 @@ make html
 ##Webhooks and ReadTheDocs
 The project has a direct connection, through a webhook, from the master branch of WASDI 
 and the ReadTheDocs service.
-After an event on master, like a commit or a merge, the documentation compile is triggerend 
+After an event on master, like a commit or a merge, the documentation compile is triggered 
 and the resulting webpages are published on https://wasdi.readthedocs.io/
 

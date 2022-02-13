@@ -32,3 +32,4 @@ Thumbs.db
 **/secrets.js
 **/environment.js
 .sass-cache/
+/dist/

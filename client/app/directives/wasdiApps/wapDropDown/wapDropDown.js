@@ -15,6 +15,13 @@ angular.module('wasdi.wapDropDown', [])
                 enableSearchFilter:"=",
                 dropdownName:"="
             },
+            bindToController:{
+                tooltip:'='
+            },
+            controller: function() {
+
+            },
+            controllerAs: '$ctrl',
             link: function(scope, elem, attrs)
             {
                 if(  typeof scope.enableSearchOption !== "boolean")

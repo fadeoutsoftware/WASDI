@@ -5,7 +5,7 @@
 
  'use strict';
  angular.module('wasdi.WorkflowService', ['wasdi.WorkflowService']).
- service('WorkflowService', ['$http', 'ConstantsService', function ($http, oConstantsService) {
+ service('WorkflowService', ['ConstantsService','$rootScope','$http', function (oConstantsService,$rootScope,$http) {
      this.APIURL = oConstantsService.getAPIURL();
      this.m_oHttp = $http;
      this.m_oController = this;

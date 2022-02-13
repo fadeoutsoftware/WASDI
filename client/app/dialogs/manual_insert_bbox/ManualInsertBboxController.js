@@ -35,3 +35,4 @@ var ManualInsertBboxController = (function() {
     ];
     return ManualInsertBboxController;
 })();
+window.ManualInsertBboxController=ManualInsertBboxController;

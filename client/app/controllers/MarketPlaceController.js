@@ -373,3 +373,4 @@ var MarketPlaceController = (function() {
 
     return MarketPlaceController;
 }) ();
+window.MarketPlaceController = MarketPlaceController;

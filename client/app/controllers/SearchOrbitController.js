@@ -1173,3 +1173,4 @@ var SearchOrbitController = (function() {
 
     return SearchOrbitController;
 }) ();
+window.SearchOrbitController = SearchOrbitController;

@@ -17,6 +17,7 @@ public class ProcessorTypes {
 	public static String IDL = "ubuntu_idl372";
 	public static String OCTAVE = "octave";
 	public static String CONDA = "conda";
+	public static String CSHARP = "csharp";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
@@ -28,6 +29,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(UBUNTU_PYTHON37_SNAP)) return "python37";
 		else if (sProcessorType.equals(OCTAVE)) return "octave";
 		else if (sProcessorType.equals(CONDA)) return "conda";
+		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		return "";
 	}
 	
@@ -49,6 +51,10 @@ public class ProcessorTypes {
 		}
 		else if (sProcessorType.equals(CONDA)) {
 			
+		}
+		else if (sProcessorType.equals(CSHARP)) {
+			aoFiles.add("deploywasdidocker.sh");
+			aoFiles.add("runwasdidocker.sh");
 		}
 
 		return aoFiles;

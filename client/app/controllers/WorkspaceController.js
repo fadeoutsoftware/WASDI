@@ -649,3 +649,4 @@ var WorkspaceController = (function () {
     ];
     return WorkspaceController;
 })();
+window.WorkspaceController = WorkspaceController;
