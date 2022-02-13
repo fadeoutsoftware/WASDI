@@ -35,8 +35,8 @@ extensions = ['javasphinx',
 'sphinx_js']
 
 js_language = 'typescript'
-js_source_path = '../libraries/jswasdilib/src/lib'
-jsdoc_config_path = '../libraries/jswasdilib/src/lib/tsconfig.json'
+js_source_path = '../libraries/jswasdilib/doc/'
+jsdoc_config_path = '../libraries/jswasdilib/doc/tsconfig.json'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
