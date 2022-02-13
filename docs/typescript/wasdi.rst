@@ -1,4 +1,4 @@
-This is TypeSCRIPT
+Javascript WasdiLib
 =============================
 
 .. js:autoclass:: Wasdi
