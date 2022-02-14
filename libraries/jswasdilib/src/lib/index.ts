@@ -1,5 +1,10 @@
-//var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
+/**
+ * Wasdi class expose methods and utilities to interact with WASDI services, using
+ * Javascript/Typescript as specification and programming language. The package available
+ * through npm repository, can be imported.
+ * Object definitions are also provided.
+ * Check README and LICENSE for further details
+ */
 class Wasdi {
   _m_sUser: string;
   _m_sPassword: string;
@@ -58,7 +63,7 @@ class Wasdi {
   }
 
   /**
-   * Print status utility
+   * Print status utility, prints the information about the current session with WASDI
    */
   printStatus() {
     console.log("");
@@ -107,15 +112,17 @@ class Wasdi {
   }
 
   /**
-   * Test method to check wasdi instance, with a tiny bit of developer's traditions
+   * Test method to check wasdi instance, with a tiny bit of developer's traditions.
+   * Used across this library to check the connection state.
+   * @param  noOutput if true, the method doesn't output the response on the console
    */
-  helloWasdiWorld(checkInstance: boolean): string {
+  helloWasdiWorld(noOutput: boolean): string {
     var xhr = new XMLHttpRequest();
     let response = undefined;
     xhr.addEventListener("readystatechange", function () {
       if (this.readyState === 4) {
         response = this.responseText;
-        if (!checkInstance) console.log(response);
+        if (!noOutput) console.log(response);
       }
     });
 
@@ -126,8 +133,9 @@ class Wasdi {
   }
 
   /**
-   * Util methods to check initialization of the correct base url to contact wasdi services
-   * @returns {boolean}
+   * Util methods to check initialization of the current base URL.
+   * Can be used to verify the WASDI service on the selected node.
+   * @returns {boolean} true, if the connection is ok, false instead
    */
   checkBaseUrl() {
     let response = this.helloWasdiWorld(true);
@@ -139,7 +147,7 @@ class Wasdi {
   }
 
   /**
-   * Api call for the login to Wasdi services
+   * Api call for the login to WASDI services. Valid credential must be available.
    * @param sUserName The username, corresponding to the e-mail used during registration
    * @param sPassword The selected password
    */
@@ -176,8 +184,8 @@ class Wasdi {
    * Loads configuration and parameters. If no filename is specified, it
    * loads the file config.json and parameters.json from the same level directory of the calling
    * URL
-   * @param configFile
-   * @param parametersFile
+   * @param configFile a JSON containing all the required information to login to WASDI, please check repository for example
+   * @param parametersFile a JSON containing the parameters that can be used in case of a launch of an appliciation
    */
   loadConfig(configFile: string, parametersFile: string) {
     let sUrl = configFile;
@@ -232,8 +240,9 @@ class Wasdi {
   }
 
   /**
-   * Loads Parameters.json, if filename is not specified
-   * @param filename
+   * Loads a json containing the parameters which are then imported in a dedicated field.
+   * If filename is not specified the methods search for "parameters.json", as default
+   * @param filename the file name of the JSON containing the parameters
    */
   loadParameters(filename: string) {
     let sUrl = filename;
@@ -301,7 +310,10 @@ class Wasdi {
     return result;
   }
 
-  // GET calls
+  /**
+   * Retrieve the information of a single Workspace, by using its ID
+   * @param workspaceID a String containing the workspace ID
+   */
   getWorkspaceById(workspaceID: string) {
     var xhr = new XMLHttpRequest();
 
@@ -369,6 +381,9 @@ class Wasdi {
     return JSON.parse(xhr.response);
   }
 
+  /**
+   * Retrieves the list of Workspace of the current logged user.
+   */
   workspaceList() {
     var workspaceList = this.getObject(this._m_sBaseUrl + "/ws/byuser", "");
     console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
@@ -378,6 +393,9 @@ class Wasdi {
     return workspaceList;
   }
 
+  /**
+   * Retrieve a list of workspace of the current logged user.
+   */
   productListByActiveWs() {
     let productList = this.getObject(
       this._m_sBaseUrl + "/product/byws",
@@ -391,7 +409,8 @@ class Wasdi {
   }
 
   /**
-   * Opens a workspace and set it as active workspace
+   * Opens a workspace and set it as active workspace. The active workspace is the one used
+   * for the following operations, like launch a processor or execute a workflow.
    * @param workspaceID The id of the selected workspace
    * @returns {{workspaceId}|number|string|{}|*}
    */
@@ -416,7 +435,7 @@ class Wasdi {
   }
 
   /**
-   * Open a workspace and set it as active workspace
+   * Open a workspace and set it as active workspace, by using its Id
    * @param workspaceID The id of the selected workspace
    * @returns {{workspaceId}|number|string|{}|*}
    */
@@ -454,8 +473,11 @@ class Wasdi {
   }
 
   /**
-   * Launch a process in the current workspace
-   * @param appname the application name
+   * Launch a process in the current workspace.
+   * Check getDeployed method to obtain a list of the available processors
+   * @param appname a String containing the name of the selected application
+   * @param jsonParameters a JSON containing the parameters for the application, please check the app on WASDI
+   * for a specific reference
    */
   launchProcessor(appname: string, jsonParameters: string) {
     if (this._m_sActiveWorkspace) {
@@ -476,7 +498,8 @@ class Wasdi {
   }
 
   /**
-   * Retrieves a list of applications available on the WASDI marketplace
+   * Retrieves a list of applications available on the WASDI marketplace.
+   * The response is an array of strings that can be used to launch the particular application
    */
   getDeployed() {
     return this.getObject(this._m_sBaseUrl, "/processors/getdeployed");
@@ -495,8 +518,9 @@ class Wasdi {
   }
 
   /**
-   * Create a new workspace for the active user
-   * @param wsName The workspace name
+   * Create a new workspace for the active user.
+   * @param wsName The workspace name, if the name is already used WADI will append a further numeric identifier
+   * (like the OS for new folders)
    */
   createWorkspace(wsName: string) {
     let ws = this.getObject(this._m_sBaseUrl + "/ws/create", "?name=" + wsName);
@@ -516,8 +540,10 @@ class Wasdi {
   }
 
   /**
-   * Retrieves the process status of a process, identified by its processId
-   * @param processId
+   * Retrieves the process status of a process, identified by its processId.
+   * The response contains, among other data, the status and the progress percentage
+   * @param processId the string containing the processId selected
+   * @return the process Object
    */
   getProcessStatus(processId: string) {
     let procWs = this.getObject(
@@ -532,6 +558,7 @@ class Wasdi {
           procWs.progressPerc +
           " %"
       );
+      return procWs;
     }
   }
 
@@ -542,6 +569,9 @@ class Wasdi {
     this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
   }
 
+  /**
+   * Retrieves a list of products from the current active workspace
+   */
   getProductsActiveWorkspace() {
     return this.getObject(
       this._m_sWorkspaceBaseUrl + "/product/byws",
@@ -549,6 +579,12 @@ class Wasdi {
     );
   }
 
+  /**
+   * Publish a band of the particular product selected. To obtain a list of available bands, a function
+   * that retrieves the product details can be used.
+   * @param fileName The product name in the current workspace
+   * @param bandName The band that needs to be published
+   */
   publishBand(fileName: string, bandName: string) {
     // search filename in the current workspace
     let file = this.getProductsActiveWorkspace().find(
