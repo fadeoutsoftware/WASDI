@@ -64,6 +64,7 @@ If you already know WASDI features and you are a Python developer check out the 
    SearchImport.rst
    LibWorkspaces.rst
    SynchAsynch.rst
+   JavascriptTutorial.rst
 
 
 Reference center
