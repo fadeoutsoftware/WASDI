@@ -138,24 +138,14 @@ public class ProcessorsResource  {
 				return oResult;
 			}
 			
-			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessorsResource.uploadProcessor: session is null or empty, aborting");
-				oResult.setIntValue(401);
-				return oResult;
-			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: invalid session, aborting");
 				oResult.setIntValue(401);
 				return oResult;
 			}
+			
 			String sUserId = oUser.getUserId();
-			if (Utils.isNullOrEmpty(sUserId)) {
-				Utils.debugLog("ProcessorsResource.uploadProcessor: userid of user (from session) is null or empty, aborting");
-				oResult.setIntValue(401);
-				return oResult;
-			}
 			
 			// Put the processor as Public by default
 			if (iPublic == null) {
