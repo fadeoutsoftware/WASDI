@@ -21,7 +21,7 @@ namespace WasdiLib.Repositories
 
         Task<PrimitiveResult> ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting);
 
-        Task<List<QueryResultViewModel>> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
+        Task<List<QueryResult>> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
 
         Task<PrimitiveResult> FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox);
 

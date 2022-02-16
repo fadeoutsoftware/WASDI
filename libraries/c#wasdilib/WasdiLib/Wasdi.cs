@@ -249,7 +249,7 @@ namespace WasdiLib
 		/// Call this after base parameters settings to init the system.
 		/// Needed at least: Base Path, User, Password or SessionId.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>True if the system is initialized, False if there is any error</returns>
 		public bool InternalInit()
 		{
 			_logger.LogDebug("InternalInit");
@@ -388,7 +388,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Explicit accessor for the activeWorkspace property.
 		/// </summary>
-		/// <returns>the activeWorgspace</returns>
+		/// <returns>the activeWorkspace</returns>
 		public string? GetActiveWorkspace()
 		{
 			return m_sActiveWorkspace;
@@ -424,7 +424,7 @@ namespace WasdiLib
 		/// Explicit mutator for the sessionId property.
 		/// Sets the sessionId only if the input is not null.
 		/// </summary>
-		/// <param name="sSessionId"></param>
+		/// <param name="sSessionId">the sessionId</param>
 		public void SetSessionId(string? sSessionId)
 		{
 			_logger.LogDebug($"SetSessionId({sSessionId})");
@@ -595,7 +595,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sPath">the path to be verified</param>
 		/// <returns>True if the user has permissions, False otherwise</returns>
-		public static bool HasWritePermissionOnDir(string sPath)
+		private static bool HasWritePermissionOnDir(string sPath)
 		{
 			var writeAllow = false;
 			var writeDeny = false;
@@ -701,7 +701,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Get the parameters in Json format.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>the parameters as a Json string</returns>
 		public string GetParamsAsJsonString()
 		{
 			if (GetParams() == null)
@@ -736,6 +736,10 @@ namespace WasdiLib
 			return m_aoParams.GetValueOrDefault(sKey, "");
 		}
 
+		/// <summary>
+		/// Explicit accessor for the parametersFilePath property.
+		/// </summary>
+		/// <returns>the parameters file path</returns>
 		public string GetParametersFilePath()
 		{
 			return m_sParametersFilePath;
@@ -744,7 +748,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Sets the parametersFilePath only if the input is not null and if it represents a valid path.
 		/// </summary>
-		/// <param name="sParametersFilePath"></param>
+		/// <param name="sParametersFilePath">the parameters file path</param>
 		public void SetParametersFilePath(string? sParametersFilePath)
 		{
 			_logger.LogDebug($"SetParametersFilePath({sParametersFilePath})");
@@ -870,7 +874,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Get the list of workspaces of the logged user.
 		/// </summary>
-		/// <returns>a list of workspaces or null in case of any error</returns>
+		/// <returns>the list of workspaces or null in case of any error</returns>
 		public List<Workspace>? GetWorkspaces()
 		{
 			_logger.LogDebug("GetWorkspaces()");
@@ -892,7 +896,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Get the list of workspaces' names of the logged user.
 		/// </summary>
-		/// <returns>a list of workspaces' names or an empty list in case of any error</returns>
+		/// <returns>the list of workspaces' names or an empty list in case of any error</returns>
 		public List<string> GetWorkspacesNames()
 		{
 			_logger.LogDebug("GetWorkspacesNames()");
@@ -1199,7 +1203,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="oProduct">the product</param>
 		/// <returns>the name of the product or null in case of any error</returns>
-		string? GetProductName(Dictionary<string, object> oProduct)
+		public string? GetProductName(Dictionary<string, object> oProduct)
 		{
 			string? sResult = null;
 
@@ -1236,7 +1240,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Import and pre-process with links.
 		/// </summary>
-		/// <param name="asProductsLink">the list of product links</param>
+		/// <param name="asProductsLinks">the list of product links</param>
 		/// <param name="asProductsNames">the list of product names</param>
 		/// <param name="sWorkflow">the workflow</param>
 		/// <param name="sPreProcSuffix">the pre-process suffix</param>
@@ -1755,9 +1759,9 @@ namespace WasdiLib
 		/// <param name="asOutputFileNames">the list of output file names</param>
 		/// <param name="sWorkflowName">the workflow's name</param>
 		/// <returns>the Id of the workflow process or empty string in case of any issue</returns>
-		public string AsynchExecuteWorkflow(List<string> asInputFileName, List<string> asOutputFileName, string sWorkflowName)
+		public string AsynchExecuteWorkflow(List<string> asInputFileNames, List<string> asOutputFileNames, string sWorkflowName)
 		{
-			return InternalExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName, true);
+			return InternalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, true);
 		}
 
 		/// <summary>
@@ -1767,16 +1771,16 @@ namespace WasdiLib
 		/// <param name="asOutputFileNames">the list of output file names</param>
 		/// <param name="sWorkflowName">the workflow's name</param>
 		/// <returns>output status of the Workflow Process</returns>
-		public string ExecuteWorkflow(List<string> asInputFileName, List<string> asOutputFileName, string sWorkflowName)
+		public string ExecuteWorkflow(List<string> asInputFileNames, List<string> asOutputFileNames, string sWorkflowName)
 		{
-			return InternalExecuteWorkflow(asInputFileName, asOutputFileName, sWorkflowName, false);
+			return InternalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, false);
 		}
 
 		/// <summary>
 		/// Get WASDI Process Status.
 		/// </summary>
 		/// <param name="sProcessId">the process's Id</param>
-		/// <returns>rocess Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY</returns>
+		/// <returns>process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY</returns>
 		public string GetProcessStatus(string? sProcessId)
 		{
 			_logger.LogDebug($"GetProcessStatus({sProcessId})");
@@ -1851,7 +1855,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Update the status of the current process.
 		/// </summary>
-		/// <param name="sStatus">the Status to set</param>
+		/// <param name="sStatus">the status to set</param>
 		/// <returns>updated status as a String or empty string in case of any issue</returns>
 		public string? UpdateStatus(string? sStatus)
 		{
@@ -1871,8 +1875,8 @@ namespace WasdiLib
 
 		/// Update the status of the current process.
 		/// </summary>
-		/// <param name="sStatus">the Status to set</param>
-		/// <param name="iPerc">Progress in %</param>
+		/// <param name="sStatus">the status to set</param>
+		/// <param name="iPerc">the progress in %</param>
 		/// <returns>updated status as a String or empty string in case of any issue</returns>
 		public string UpdateStatus(string? sStatus, int iPerc)
 		{
@@ -1891,11 +1895,11 @@ namespace WasdiLib
 		}
 
 
-		/// Update the status of the current process.
+		/// Update the status of a process.
 		/// </summary>
-		/// <param name="sProcessId">the process id</param>
-		/// <param name="sStatus">the Status to set</param>
-		/// <param name="iPerc">Progress in %</param>
+		/// <param name="sProcessId">the process Id</param>
+		/// <param name="sStatus">the status to set</param>
+		/// <param name="iPerc">the progress in %</param>
 		/// <returns>updated status as a String or empty string in case of any issue</returns>
 		public string UpdateProcessStatus(string? sProcessId, string? sStatus, int iPerc)
 		{
@@ -1930,7 +1934,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Update the status of a process
 		/// </summary>
-		/// <param name="iPerc">Progress in %</param>
+		/// <param name="iPerc">the progress in %</param>
 		/// <returns>updated status as a String or empty string in case of any issue</returns>
 		public string UpdateProgressPerc(int iPerc)
 		{
@@ -1969,7 +1973,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Wait for a process to finish.
 		/// </summary>
-		/// <param name="sProcessId">the process id</param>
+		/// <param name="sProcessId">the process Id</param>
 		/// <returns>the process status</returns>
 		public string WaitProcess(string? sProcessId)
 		{
@@ -2022,7 +2026,7 @@ namespace WasdiLib
 		/// Wait for a collection of processes to finish.
 		/// </summary>
 		/// <param name="asIds">the list of processes Ids</param>
-		/// <returns></returns>
+		/// <returns>the list of process statuses</returns>
 		public List<string>? WaitProcesses(List<string>? asIds)
 		{
 			_logger.LogDebug($"WaitProcesses({asIds})");
@@ -2300,7 +2304,7 @@ namespace WasdiLib
 		}
 
 		/// <summary>
-		/// Adds a generated file to current open workspace in a synchronous way.
+		/// Adds a generated file to current open workspace in synchronous way.
 		/// </summary>
 		/// <param name="sFileName">the name of the file to be added to the open workspace</param>
 		/// <param name="sStyle">name of a valid WMS style</param>
@@ -2322,7 +2326,7 @@ namespace WasdiLib
 		}
 
 		/// <summary>
-		/// Adds a generated file to current open workspace in a synchronous way.
+		/// Adds a generated file to current open workspace in synchronous way.
 		/// </summary>
 		/// <param name="sFileName">the name of the file to be added to the open workspace</param>
 		/// <returns>the process Id or empty string in case of any issues</returns>
@@ -2565,14 +2569,14 @@ namespace WasdiLib
 		/// <param name="sDateTo">the End date in format "YYYY-MM-DD"</param>
 		/// <param name="dULLat">Upper Left Lat Coordinate. Can be null.</param>
 		/// <param name="dULLon">Upper Left Lon Coordinate. Can be null.</param>
-		/// <param name="dLRLat">Lower Right Lat Coordinate. Can be null..</param>
+		/// <param name="dLRLat">Lower Right Lat Coordinate. Can be null.</param>
 		/// <param name="dLRLon">Lower Right Lon Coordinate. Can be null.</param>
 		/// <param name="sProductType">the Product Type. If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.</param>
 		/// <param name="iOrbitNumber">the Sentinel Orbit Number. Can be null.</param>
 		/// <param name="sSensorOperationalMode">the Sensor Operational Mode. ONLY for S1. Accepts -> "SM", "IW", "EW", "WV". Can be null. Ignored for Platform "S2"</param>
 		/// <param name="sCloudCoverage">the Cloud Coverage. Sample syntax: [0 TO 9.4]</param>
 		/// <returns>the list of the available products</returns>
-		public List<QueryResultViewModel> SearchEOImages(string? sPlatform, string? sDateFrom, string? sDateTo, Double? dULLat, Double? dULLon, Double? dLRLat, Double? dLRLon,
+		public List<QueryResult> SearchEOImages(string? sPlatform, string? sDateFrom, string? sDateTo, Double? dULLat, Double? dULLon, Double? dLRLat, Double? dLRLon,
 			string? sProductType, int? iOrbitNumber, string? sSensorOperationalMode, string? sCloudCoverage)
 		{
 			_logger.LogDebug($"SearchEOImages()( {sPlatform}, [ {sDateFrom}, {sDateTo} ], " +
@@ -2582,7 +2586,7 @@ namespace WasdiLib
 				$"sensor mode: {sSensorOperationalMode}, " +
 				$"cloud coverage: {sCloudCoverage}");
 
-			List<QueryResultViewModel> aoReturnList = new List<QueryResultViewModel>();
+			List<QueryResult> aoReturnList = new List<QueryResult>();
 
 			if (sPlatform == null)
 			{
@@ -2703,7 +2707,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="oProduct">the Product as returned by searchEOImage</param>
 		/// <returns>the name of the product</returns>
-		public string GetFoundProductName(QueryResultViewModel? oProduct)
+		public string GetFoundProductName(QueryResult? oProduct)
 		{
 			if (oProduct == null)
 				return "";
@@ -2732,7 +2736,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="oProduct">the Product as returned by searchEOImage</param>
 		/// <returns>the link of the product</returns>
-		public string GetFoundProductLink(QueryResultViewModel? oProduct)
+		public string GetFoundProductLink(QueryResult? oProduct)
 		{
 			if (oProduct == null)
 				return "";
@@ -2761,7 +2765,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="oProduct">the Product as returned by searchEOImage</param>
 		/// <returns>the footprint of the product</returns>
-		public string GetFoundProductFootprint(QueryResultViewModel? oProduct)
+		public string GetFoundProductFootprint(QueryResult? oProduct)
 		{
 			if (oProduct == null)
 				return "";
@@ -2860,7 +2864,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="oProduct">the product to be imported</param>
 		/// <returns>the status of the Import process</returns>
-		public string ImportProduct(QueryResultViewModel oProduct)
+		public string ImportProduct(QueryResult oProduct)
 		{
 			_logger.LogDebug("ImportProduct()");
 
@@ -3017,7 +3021,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Imports a list of product asynchronously.
 		/// </summary>
-		/// <param name="aoProductsToImport">the list of products to import</param>
+		/// <param name="asProductsToImport">the list of products to import</param>
 		/// <param name="asNames">the list of names</param>
 		/// <returns>a list of String containing the WASDI process ids of all the imports</returns>
 		public List<string>? AsynchImportProductList(List<string>? asProductsToImport, List<string>? asNames)
@@ -3072,7 +3076,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Imports a list of products.
 		/// </summary>
-		/// <param name="aoProductsToImport">the list of products to import</param>
+		/// <param name="asProductsToImport">the list of products to import</param>
 		/// <param name="asNames">the list of names</param>
 		/// <returns>a list of String containing the WASDI process ids of all the imports</returns>
 		public List<string> ImportProductList(List<string> asProductsToImport, List<string> asNames)
@@ -3293,7 +3297,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sProcessorName">the name of the processor</param>
 		/// <param name="aoParams">the dictionary of params</param>
-		/// <returns>the WASDI processor ID</returns>
+		/// <returns>the WASDI processor Id</returns>
 		public string ExecuteProcessor(string sProcessorName, Dictionary<string, object> aoParams)
 		{
 			return WaitProcess(AsynchExecuteProcessor(sProcessorName, aoParams));
@@ -3304,7 +3308,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sProcessorName">the name of the processor</param>
 		/// <param name="aoParams">the dictionary of params</param>
-		/// <returns>the WASDI processor ID</returns>
+		/// <returns>the WASDI processor Id</returns>
 		public string AsynchExecuteProcessor(string sProcessorName, Dictionary<string, object>? aoParams)
 		{
 			_logger.LogDebug($"AsynchExecuteProcessor( {sProcessorName}, Map<string, object> aoParams )");
@@ -3336,7 +3340,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sProcessorName">the name of the processor</param>
 		/// <param name="sEncodedParams">a JSON formatted string of parameters for the processor</param>
-		/// <returns>the WASDI processor ID</returns>
+		/// <returns>the WASDI processor Id</returns>
 		public string ExecuteProcessor(string sProcessorName, string sEncodedParams)
 		{
 			return WaitProcess(AsynchExecuteProcessor(sProcessorName, sEncodedParams));
@@ -3347,7 +3351,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sProcessorName">the name of the processor</param>
 		/// <param name="sEncodedParams">a JSON formatted string of parameters for the processor</param>
-		/// <returns>the WASDI processor ID</returns>
+		/// <returns>the WASDI processor Id</returns>
 		public string AsynchExecuteProcessor(string? sProcessorName, string? sEncodedParams)
 		{
 
@@ -3484,16 +3488,16 @@ namespace WasdiLib
 		/// <param name="sWorkspaceName">the name of the workspace</param>
 		/// <param name="nodeCode">the node on which to create the workspace</param>
 		/// <returns>the Id of the newly created workspace or empty string in case of any issues</returns>
-		public string? CreateWorkspace(string? workspaceName, string? nodeCode = null)
+		public string? CreateWorkspace(string? sWorkspaceName, string? nodeCode = null)
 		{
-			_logger.LogDebug($"CreateWorkspace({workspaceName}, {nodeCode})");
+			_logger.LogDebug($"CreateWorkspace({sWorkspaceName}, {nodeCode})");
 
-			if (workspaceName == null)
+			if (sWorkspaceName == null)
 			{
-				workspaceName = "";
+				sWorkspaceName = "";
 			}
 
-			if (workspaceName == "")
+			if (sWorkspaceName == "")
 			{
 				_logger.LogInformation("CreateWorkspace: WARNING workspace name null or empty, it will be defaulted");
 			}
@@ -3502,7 +3506,7 @@ namespace WasdiLib
 
 			try
 			{
-				PrimitiveResult? primitiveResult = _workspaceService.CreateWorkspace(m_sBaseUrl, m_sSessionId, workspaceName, nodeCode);
+				PrimitiveResult? primitiveResult = _workspaceService.CreateWorkspace(m_sBaseUrl, m_sSessionId, sWorkspaceName, nodeCode);
 
 				if (primitiveResult != null)
 					sReturn = primitiveResult.StringValue;
@@ -3630,7 +3634,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Gets the processor payload as a dictionary.
 		/// </summary>
-		/// <param name="sProcessObjId">the ID of the processor</param>
+		/// <param name="sProcessObjId">the Id of the processor</param>
 		/// <returns>the processor payload as a dictionary</returns>
 		public Dictionary<string, object>? GetProcessorPayload(string? sProcessObjId)
 		{
@@ -3653,7 +3657,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Retrieve the payload of a processor formatted as a JSON string.
 		/// </summary>
-		/// <param name="sProcessObjId">the ID of the processor</param>
+		/// <param name="sProcessObjId">the Id of the processor</param>
 		/// <returns>the payload as a JSON string, or null if error occurred</returns>
 		public string? GetProcessorPayloadAsJSON(string? sProcessObjId)
 		{
@@ -3767,7 +3771,7 @@ namespace WasdiLib
 		/// Copy a file from a workspace to the WASDI user's SFTP Folder in a synchronous way.
 		/// </summary>
 		/// <param name="sFileName">the filename to move to the SFTP folder</param>
-		/// <returns>the Process ID is synchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
+		/// <returns>the Process Id is synchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
 		public string CopyFileToSftp(string sFileName)
 		{
 			_logger.LogDebug($"CopyFileToSftp( {sFileName} )");
@@ -3780,7 +3784,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sFileName">the filename to move to the SFTP folder</param>
 		/// <param name="sRelativePath">the relative path in the SFTP root</param>
-		/// <returns>the Process ID is synchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
+		/// <returns>the Process Id is synchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
 		public string CopyFileToSftp(string sFileName, string? sRelativePath)
 		{
 			_logger.LogDebug($"CopyFileToSftp( {sFileName}, {sRelativePath} )");
@@ -3792,7 +3796,7 @@ namespace WasdiLib
 		/// Copy a file from a workspace to the WASDI user's SFTP Folder in a asynchronous way.
 		/// </summary>
 		/// <param name="sFileName">the filename to move to the SFTP folder</param>
-		/// <returns>the Process ID</returns>
+		/// <returns>the Process Id is asynchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
 		public string? AsynchCopyFileToSftp(string sFileName)
 		{
 			return AsynchCopyFileToSftp(sFileName, null);
@@ -3803,7 +3807,7 @@ namespace WasdiLib
 		/// </summary>
 		/// <param name="sFileName">the filename to move to the SFTP folder</param>
 		/// <param name="sRelativePath">the relative path in the SFTP root</param>
-		/// <returns>the Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
+		/// <returns>the Process Id is asynchronous execution, end status otherwise. An empty string is returned in case of failure</returns>
 		public string? AsynchCopyFileToSftp(string? sFileName, string? sRelativePath)
 		{
 			_logger.LogDebug($"AsynchCopyFileToSftp({sFileName}, {sRelativePath})");
@@ -3854,7 +3858,7 @@ namespace WasdiLib
 		/// <summary>
 		/// Sets the sub pid.
 		/// </summary>
-		/// <param name="sProcessId">the process ID</param>
+		/// <param name="sProcessId">the process Id</param>
 		/// <param name="iSubPid">the subPid of the process</param>
 		/// <returns>the updated status of the processs</returns>
 		public string SetSubPid(string? sProcessId, int iSubPid)

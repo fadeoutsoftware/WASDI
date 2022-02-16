@@ -24,13 +24,15 @@ namespace WasdiLib.Client
 
             wasdi.PrintStatus();
 
-            /*
             GetProcessorPath(wasdi);
 
 
             WasdiLog(wasdi);
             Hello(wasdi);
             GetWorkspacesNames(wasdi);
+
+
+            /*
             GetWorkspaces(wasdi);
             GetWorkspaceIdByName(wasdi);
             CreateWorkspace_DeleteWorkspace(wasdi);
@@ -64,7 +66,7 @@ namespace WasdiLib.Client
 
             wasdi.WasdiLog("Start searching images");
 
-            List<QueryResultViewModel> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate,dLatN,dLonW,dLatS,dLonE,"GRD",null,null,null);
+            List<QueryResult> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate,dLatN,dLonW,dLatS,dLonE,"GRD",null,null,null);
 
             wasdi.WasdiLog("Found " + aoResults.Count + " Images");
 
