@@ -12,7 +12,7 @@
         /// </summary>
         /// <param name="wasdi">the wasdi object injected by the platform</param>
         /// <returns>the status of the execution (i.e. CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY)</returns>
-        string Run(Wasdi wasdi);
+        void Run(Wasdi wasdi);
 
     }
 }

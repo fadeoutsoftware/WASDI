@@ -3422,13 +3422,13 @@ namespace WasdiLib
 				// Check minimun input values
 				if (sLogRow == null)
 				{
-					_logger.LogError("Log line null, aborting");
+					Log("Log line null, aborting");
 					return;
 				}
 
 				if (sLogRow == "")
 				{
-					_logger.LogError("Log line empty, aborting");
+					Log("Log line empty, aborting");
 					return;
 				}
 
@@ -3443,7 +3443,19 @@ namespace WasdiLib
 				}
 			}
 			else
-				_logger.LogInformation(sLogRow);
+				Log(sLogRow);
+		}
+
+		/// <summary>
+		/// Log to the console if the verbosity flag is set to True.
+		/// </summary>
+		/// <param name="sLog">the line to be logged</param>
+		internal void Log(string sLog)
+		{
+			if (!m_bVerbose)
+				return;
+
+			Console.WriteLine(sLog);
 		}
 
 		/// <summary>

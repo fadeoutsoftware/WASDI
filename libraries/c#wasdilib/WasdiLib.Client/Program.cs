@@ -1,52 +1,72 @@
-﻿namespace WasdiLib.Client
+﻿using WasdiLib.Models;
+
+namespace WasdiLib.Client
 {
-    internal class Program 
+    internal class Program : IWasdiRunnable
     {
         static void Main(string[] args)
         {
             Wasdi wasdi = new();
             wasdi.Init();
 
-            IWasdiRunnable wasdiRunnable = new MyFirstWasdiApp();
+            Program program = new Program();
+            program.Run(wasdi);
+        }
 
-            try
+        public void Run(Wasdi wasdi)
+        {
+            RunExecuteWorkflow(wasdi);
+
+            RunExecuteProcessor(wasdi);
+        }
+
+        private void RunExecuteWorkflow(Wasdi wasdi)
+        {
+            string sStartDate = wasdi.GetParam("DATEFROM");
+            string sEndDate = wasdi.GetParam("DATETO");
+            string sBbox = wasdi.GetParam("BBOX");
+            string sWorkflow = wasdi.GetParam("WORKFLOW");
+
+            double dLatN = 44.0;
+            double dLonW = 35.0;
+            double dLatS = 45.0;
+            double dLonE = 36.0;
+
+            if (sBbox != null)
             {
-                string customStatus = wasdiRunnable.Run(wasdi);
-
-                UpdateStatusCustom(wasdi, customStatus);
+                String[] asLatLons = sBbox.Split(',');
+                dLatN = Double.Parse(asLatLons[0]);
+                dLonW = Double.Parse(asLatLons[1]);
+                dLatS = Double.Parse(asLatLons[2]);
+                dLonE = Double.Parse(asLatLons[3]);
             }
-            catch (Exception ex)
+
+            wasdi.WasdiLog("Start searching images");
+            List<QueryResult> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate, dLatN, dLonW, dLatS, dLonE, "GRD", null, null, null);
+            wasdi.WasdiLog("Found " + aoResults.Count + " Images");
+
+            if (aoResults.Count > 0)
             {
-                wasdi.WasdiLog(ex.Message);
+                wasdi.ImportProduct(aoResults[0]);
 
-                UpdateStatusError(wasdi);
+                List<string> asInputs = new List<string>();
+                asInputs.Add(aoResults[0].Title + ".zip");
+
+                List<string> asOutputs = new List<string>();
+                asOutputs.Add("preprocessed.tif");
+
+                wasdi.ExecuteWorkflow(asInputs, asOutputs, sWorkflow);
             }
-
             wasdi.WasdiLog("FINISHED");
         }
 
-        private static void UpdateStatusSuccess(Wasdi wasdi)
+        private void RunExecuteProcessor(Wasdi wasdi)
         {
-            wasdi.WasdiLog("UpdateStatus:");
-            string sStatus = "DONE";
-            int iPerc = 100;
-            wasdi.UpdateStatus(sStatus, iPerc);
-        }
 
-        private static void UpdateStatusError(Wasdi wasdi)
-        {
-            wasdi.WasdiLog("UpdateStatus:");
-            string sStatus = "ERROR";
-            int iPerc = 0;
-            wasdi.UpdateStatus(sStatus, iPerc);
-        }
-
-        private static void UpdateStatusCustom(Wasdi wasdi, string customStatus)
-        {
-            wasdi.WasdiLog("UpdateStatus:");
-
-            int iPerc = 100;
-            wasdi.UpdateStatus(customStatus, iPerc);
+            // call another app: HelloWasdiWorld
+            Dictionary<string, object> dictionary = new Dictionary<string, object>()
+                        { { "name", "Wasdi User" } };
+            wasdi.ExecuteProcessor("HelloWasdiWorld", dictionary);
         }
 
     }
