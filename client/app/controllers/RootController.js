@@ -358,7 +358,7 @@ var RootController = (function() {
             _this.m_oConstantsService.setActiveWorkspace(null);
 
             _this.m_oConstantsService.logOut();
-            var oLogOutOptions = { redirectUri :"../#/home"}
+            var oLogOutOptions = { redirectUri : this.m_oConstantsService.BASEURL}
             oKeycloak.logout(oLogOutOptions);
             //_this.m_oState.go("home");
         }catch(e)
