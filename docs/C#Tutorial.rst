@@ -205,9 +205,9 @@ Call the **/hello** endpoint
 
 The application can run locally as a stand-alone application (with a Main method). However, in order for the application to run on the Wasdi platform, the class must meet two conditions:
 
-- implement the **IWasdiRunnable** interface and override its **Run** method;
+implement the **IWasdiRunnable** interface and override its **Run** method;
 
-- have a no-arg constructor (if the class does not have an explicit constructor, the compiler will add a default no-arg constructor at compile time);
+have a no-arg constructor (if the class does not have an explicit constructor, the compiler will add a default no-arg constructor at compile time);
 
 .. note::
 	It is strongly recommended for the application to have the structure shown below.
