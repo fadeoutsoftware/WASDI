@@ -126,11 +126,11 @@ Find the WasdiLib on NuGet. Open a page in a browser and navigate to https://www
 .. image:: _static/c#_tutorial_images/21_find_wasdilib_on_nuget.PNG
    :alt: find WasdiLib on NuGet
 
-Copy the installation commad (by pressing the orange button):
+Copy the installation commad for the latest version (by pressing the orange button):
 
 .. code-block::
 
-	Install-Package WasdiLib -Version 0.0.2.8
+	Install-Package WasdiLib -Version 0.0.3.3
 
 Open the NuGet Package Manager console.
 
@@ -203,31 +203,54 @@ Verify the setup
 Call the **/hello** endpoint
 ////////////////////////////
 
-To connect to the Wasdi server trough the WasdiLib, an object of type Wasdi must be created and initialized.
-More, to see on the console the result, the verbosity of the logging mechanism should be increased.
-The call can now be made.
+The application can run locally as a stand-alone application (with a Main method). However, in order for the application to run on the Wasdi platform, the class must meet two conditions:
+
+- implement the **IWasdiRunnable** interface and override its **Run** method;
+
+- have a no-arg constructor (if the class does not have an explicit constructor, the compiler will add a default no-arg constructor at compile time);
+
+.. note::
+	It is strongly recommended for the application to have the structure shown below.
+
+To connect to the Wasdi server through the WasdiLib, an object of type Wasdi must be created and initialized in the **Main** method and passed as an argument to the **Run** method.
+The verbosity of the logging mechanism could be increased, in order to see on the console the result.
+
+The actual call to the Wasdi object should be done either form inside the **Run** method or from any other method called by **Run**.
 
 .. code-block::
 
+	using WasdiLib;
+
 	namespace TutorialSeeSharpApp
 	{
-		internal class Program
+		internal class Program : IWasdiRunnable
 		{
 			static void Main(string[] args)
 			{
-				WasdiLib.Wasdi wasdi = new();
+				Wasdi wasdi = new();
 				wasdi.Init();
 				wasdi.SetVerbose(true);
 
+				Program program = new Program();
+				program.Run(wasdi);
+			}
+
+			public void Run(Wasdi wasdi)
+			{
 				wasdi.WasdiLog(wasdi.Hello());
 			}
 		}
 	}
 
-The outcome of running the program is a console window showing the Wasdi greeting.
+The outcome of running the program locally is a console window showing the Wasdi greeting.
 
 .. image:: _static/c#_tutorial_images/27_hello_wasdi.PNG
    :alt: hello wasdi
+
+Running the same program on the Wasdi platform produces the following outcome.
+
+.. image:: _static/c#_tutorial_images/29_hello_wasdi_platform.PNG
+   :alt: hello wasdi on Wasdi
 
 Get the user's workspaces' names
 ////////////////////////////////
@@ -241,13 +264,20 @@ An user can access a workspace either if the workspace was created by the uses o
 
 	namespace TutorialSeeSharpApp
 	{
-		internal class Program
+		internal class Program : IWasdiRunnable
 		{
 			static void Main(string[] args)
 			{
 				Wasdi wasdi = new();
 				wasdi.Init();
+				wasdi.SetVerbose(true);
 
+				Program program = new Program();
+				program.Run(wasdi);
+			}
+
+			public void Run(Wasdi wasdi)
+			{
 				GetWorkspacesNames(wasdi);
 			}
 
@@ -259,19 +289,22 @@ An user can access a workspace either if the workspace was created by the uses o
 
 				foreach (string workspaceName in workspacesNames)
 				{
-					Console.WriteLine(workspaceName);
+					wasdi.WasdiLog(workspaceName);
 				}
 			}
-
 		}
 	}
 
-Runnig the program should show in the console the list of workspaces' names.
+Runnig the program locally should show in the console the list of workspaces' names.
 At least **TutorialWorkspace** should be present.
 
 .. image:: _static/c#_tutorial_images/28_get_workspaces_names.PNG
    :alt: get workspaces names
 
+Running the same program on the Wasdi platform produces the following outcome.
+
+.. image:: _static/c#_tutorial_images/30_get_workspaces_names.PNG
+   :alt: get workspaces names on Wasdi
 
 Running the new C# application on Wasdi server
 ++++++++++++++++++++++++++++++++++++++++++++++
@@ -290,20 +323,25 @@ In order to see the application producing some effects, two operations are trigg
 
 	namespace TutorialSeeSharpApp
 	{
-		internal class Program
+		internal class Program : IWasdiRunnable
 		{
 			static void Main(string[] args)
 			{
 				Wasdi wasdi = new();
 				wasdi.Init();
+				wasdi.SetVerbose(true);
 
+				Program program = new Program();
+				program.Run(wasdi);
+
+				UpdateStatus(wasdi);
+			}
+
+			public void Run(Wasdi wasdi)
+			{
 				RunExecuteWorkflow(wasdi);
 
 				RunExecuteProcessor(wasdi);
-
-				wasdi.WasdiLog("FINISHED");
-
-				UpdateStatus(wasdi);
 			}
 
 			private static void RunExecuteWorkflow(Wasdi wasdi)
@@ -328,7 +366,7 @@ In order to see the application producing some effects, two operations are trigg
 				}
 
 				wasdi.WasdiLog("Start searching images");
-				List<QueryResultViewModel> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate, dLatN, dLonW, dLatS, dLonE, "GRD", null, null, null);
+				List<QueryResult> aoResults = wasdi.SearchEOImages("S1", sStartDate, sEndDate, dLatN, dLonW, dLatS, dLonE, "GRD", null, null, null);
 				wasdi.WasdiLog("Found " + aoResults.Count + " Images");
 
 				if (aoResults.Count > 0)
@@ -351,7 +389,8 @@ In order to see the application producing some effects, two operations are trigg
 
 				// call another app: HelloWasdiWorld
 				Dictionary<string, object> dictionary = new Dictionary<string, object>()
-				{ { "name", "Bob" } };
+							{ { "name", wasdi.GetUser() } };
+
 				wasdi.ExecuteProcessor("HelloWasdiWorld", dictionary);
 			}
 
@@ -362,7 +401,6 @@ In order to see the application producing some effects, two operations are trigg
 				int iPerc = 100;
 				wasdi.UpdateStatus(sStatus, iPerc);
 			}
-
 		}
 	}
 
