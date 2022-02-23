@@ -1527,3 +1527,4 @@ PrintStatus
 .. java:method:: public void PrintStatus()
 
    Print the status information ot the Wasdi application.
+
