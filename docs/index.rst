@@ -65,6 +65,7 @@ If you already know WASDI features and you are a Python developer check out the 
    LibWorkspaces.rst
    SynchAsynch.rst
    JavascriptTutorial.rst
+   C#Tutorial.rst
 
 
 Reference center
@@ -81,6 +82,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    python/waspy.rst
    octave/octave.rst
    java/WasdiLib.rst
+   c#/WasdiLib.rst
 
 
 
