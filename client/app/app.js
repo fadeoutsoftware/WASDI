@@ -34,6 +34,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ProcessorMediaService',
     'wasdi.NodeService',
     'wasdi.WorkflowService',
+    'wasdi.StyleService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -209,6 +210,7 @@ wasdiApp.controller("SnakeController",SnakeController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
 wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
+wasdiApp.controller("StyleManagerController",StyleManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
 wasdiApp.controller("ProcessorParametersTemplateController", ProcessorParametersTemplateController);

@@ -8,8 +8,11 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -164,6 +167,36 @@ public class WasdiFileUtils {
 		return fileExists(file);
 	}
 
+	/**
+	 * Create the directory structure in case it does not already exit.
+	 * @param sPathname the full path of the directory
+	 */
+	public static void createDirectoryIfDoesNotExist(String sPathname) {
+		File oPath = new File(sPathname);
+
+		if (!oPath.exists()) {
+			oPath.mkdirs();
+		}
+	}
+
+	/**
+	 * Write input-stream to file
+	 * @param fileInputStream the input-stream to be written
+	 * @param oFile the file to be written
+	 * @throws FileNotFoundException in case of any issues with the file
+	 * @throws IOException if an I/O error occurs
+	 */
+	public static void writeFile(InputStream fileInputStream, File oFile) throws FileNotFoundException, IOException {
+		int iRead = 0;
+		byte[] ayBytes = new byte[1024];
+
+		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
+			}
+			oOutStream.flush();
+		}
+	}
 
 	/**
 	 * Move a file to a destination directory.

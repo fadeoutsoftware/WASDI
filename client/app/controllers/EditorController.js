@@ -189,6 +189,14 @@ var EditorController = (function () {
                 onClick: this.openProcessorDialog,
                 icon: "fa fa-lg fa-plus-square"
             },
+            // --- Style ---
+            {
+                name: "",
+                icon: "fa fa-paint-brush",
+                caption_i18n: "EDITOR_OPERATION_TITLE_STYLE",
+                subMenu: [],
+                onClick: this.openStyleManagerDialog
+            },
             {
                 name: "",//Share
                 caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
@@ -1257,6 +1265,39 @@ var EditorController = (function () {
             modal.close.then(function (oResult) {
 
                 oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+
+    /**
+     *
+     * @returns {boolean}
+     */
+     EditorController.prototype.openStyleManagerDialog = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/style_manager/StyleManagerView.html",
+            controller: "StyleManagerController",
+            inputs: {
+                extras: {
+                    products: oController.m_aoStyleList,
+                    //styleId: oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                //oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 

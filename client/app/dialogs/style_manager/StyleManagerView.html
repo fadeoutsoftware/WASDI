@@ -1,0 +1,48 @@
+<div id="wappsDialog" class="modal fade wapps-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                    <h4 class="modal-title ">
+                        <i class="fa fa-paint-brush" aria-hidden="true"></i>&nbsp;{{"DIALOG_TITLE_STYLES"|translate}}
+                    </h4>
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body d-flex flex-column" style="height:70vh">
+                <div class="row-v4" ng-show="m_oController.m_bIsLoadingStyleList === true"> <!---->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <!--ng-show=" (m_oController.m_aoStyleList.length === 0) && (m_oController.m_bIsLoadingStyleList === true)"-->
+                        <div class="loadIcon">
+                            <invader style ="margin-top: calc(100% / 5);margin-bottom: calc(100% / 5);"></invader>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row-v4" ng-show="m_oController.m_bIsLoadingStyleList === false">
+                    <div class="col-v4" style="height:70vh">
+                        <ng-include src="'dialogs/style_manager/style-list-item.html'"></ng-include>
+                    </div>
+                    <div class="col-v4" style="height:70vh">
+                        <ng-include src="'dialogs/style_manager/xml-editor.html'"></ng-include>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

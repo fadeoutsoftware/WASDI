@@ -408,7 +408,8 @@ var WasdiApplicationUIController = (function () {
     /**
      * Generate the JSON that has to be sent to the Procesor
      */
-    WasdiApplicationUIController.prototype.generateParamsAndRun = function () {
+    WasdiApplicationUIController.prototype.generateParamsAndRun = function (sUserProvidedWorkspaceName) {
+        console.log("generateParamsAndRun | sUserProvidedWorkspaceName: ", sUserProvidedWorkspaceName)
 
         let bCheck = this.checkParams();
 
@@ -429,12 +430,19 @@ var WasdiApplicationUIController = (function () {
         // Reference to the application name
         let sApplicationName = this.m_oConstantsService.getSelectedApplication();
 
-        let oToday = new Date();
-        let sToday = oToday.toISOString()
-
-        let sWorkspaceName = sApplicationName + "_" + sToday;
-
         if (this.m_oSelectedWorkspace == null) {
+
+            let sWorkspaceName;
+
+            if (sUserProvidedWorkspaceName) {
+                sWorkspaceName = sUserProvidedWorkspaceName;
+            } else {
+                let oToday = new Date();
+                let sToday = oToday.toISOString()
+        
+                sWorkspaceName = sApplicationName + "_" + sToday;
+            }
+
             // Create a new Workspace
             this.m_oWorkspaceService.createWorkspace(sWorkspaceName).then(function (data, status) {
 

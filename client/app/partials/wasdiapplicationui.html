@@ -42,13 +42,18 @@
                                 <label class="form-check-label" for="newWorkspace">
                                     New Workspace
                                 </label>
+                                
+                                <div class="col col-sm-8" ng-show="workspaceChose == 'new'">
+                                    <input type="text" name="workspaceName" placeholder="WORKSPACE NAME" ng-model="workspaceName"
+                                        class="my-input-text ng-pristine ng-valid ng-empty ng-touched" />
+                                </div>
                             </div>
-                            <div class="form-check d-flex align-items-center mt-2">
+                            <div class="form-check d-flex align-items-center mr-2">
                                 <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose"
                                     name="exampleRadios" id="openWorkspace" value="open"
                                     ng-click="m_oController.openWorkspaceClicked()">
                                 <!--MOSTRA SOLO SE NON SELEZIONATO-->
-                                <label class="form-check-label" for="openWorkspace" ng-show="workspaceChose == 'new'">
+                                <label class="form-check-label" for="openWorkspace">
                                     <span>Open Workspace</span>
                                 </label>
 
@@ -79,7 +84,7 @@
                             </div>
                         </div>
                         <div class="blue-big-btn run-btn d-flex align-items-center justify-content-center flex-row"
-                            ng-click="m_oController.generateParamsAndRun()">
+                            ng-click="m_oController.generateParamsAndRun(workspaceName)">
                             <span>RUN</span>
                             <div class="slide-out">
                                 <div class="rocket-animation ml-2">
