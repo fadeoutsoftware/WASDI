@@ -183,7 +183,8 @@ class Wasdi {
   /**
    * Loads configuration and parameters. If no filename is specified, it
    * loads the file config.json and parameters.json from the same level directory of the calling
-   * URL
+   * URL.
+   * The config file can be hosted on an external URL.
    * @param configFile a JSON containing all the required information to login to WASDI, please check repository for example
    * @param parametersFile a JSON containing the parameters that can be used in case of a launch of an appliciation
    */
@@ -384,7 +385,7 @@ class Wasdi {
   /**
    * Retrieves the list of Workspace of the current logged user.
    */
-  workspaceList() {
+  getWorkspaces() {
     var workspaceList = this.getObject(this._m_sBaseUrl + "/ws/byuser", "");
     console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
     workspaceList.forEach((a: { workspaceName: string; workspaceId: string }) =>
@@ -394,18 +395,78 @@ class Wasdi {
   }
 
   /**
+   * Returns the workspace Id from the name. It search through the workspaces
+   * of the current user.
+   * @param sName Workspace name to be searched for
+   * @returns A string containing the workspace Id, if the name was found. An empty string otherwise
+   */
+  getWorkspaceIdByName(sName){
+
+
+  }
+
+  /**
    * Retrieve a list of workspace of the current logged user.
    */
-  productListByActiveWs() {
+  getProductsByActiveWorkspace() {
     let productList = this.getObject(
-      this._m_sBaseUrl + "/product/byws",
-      "?workspace=" + this.ActiveWorkspace
+        this._m_sBaseUrl + "/product/byws",
+        "?workspace=" + this.ActiveWorkspace
     );
     console.log(
-      "[INFO] jswasdilib.productListByActiveWs: Products in the active workspace "
+        "[INFO] jswasdilib.productListByActiveWorkspace: Products in the active workspace "
     );
     productList.forEach((a: { name: string }) => console.log(a.name));
     return productList;
+  }
+
+  /**
+   * Retrieve a list of workspace of the current logged user.
+   */
+  getProductsByWorkspaceId(workspace : string) {
+    let productList = this.getObject(
+        this._m_sBaseUrl + "/product/byws",
+        "?workspace=" + workspace
+    );
+    console.log(
+        "[INFO] jswasdilib.productListByWorkspace: Products in the active workspace "
+    );
+    productList.forEach((a: { name: string }) => console.log(a.name));
+    return productList;
+  }
+
+
+  /**
+   * Delete a Product from the current active workspace
+   * @param sProduct the product name with extension
+   */
+  deleteProduct(sProduct : string) {
+    let response = this.getObject(
+        this._m_sBaseUrl + "/product/delete?name=" + sProduct +"&deletefile=true&workspace=" +this._m_sActiveWorkspace + "&deletelayer=true" ,
+        ""
+    );
+    if (response?.ok) {
+      console.log(
+          "[INFO] jswasdilib.deleteProduct: Product " + sProduct + " deleted"
+      );
+    }
+    else {
+      console.log(
+          "[ERROR] jswasdilib.deleteProduct: Can't delete product "+ sProduct + " in workspace " + this._m_sActiveWorkspace
+      );
+
+    }
+    return response?.ok;
+  }
+
+  /**
+   * Execute a Workflow on WASDI on the specified input files. Generates the specified output files
+   * @param asInputFileNames An array of string containing the input file (with extension)
+   * @param asOutputFileNames An array of string containing the input file (with extension)
+   * @param sWorkflowName The name of the workflow to be executed
+   */
+  executeWorkflow(asInputFileNames : string[], asOutputFileNames : string[], sWorkflowName: string){
+
   }
 
   /**
@@ -440,7 +501,7 @@ class Wasdi {
    * @returns {{workspaceId}|number|string|{}|*}
    */
   openWorkspace(workspaceName: string) {
-    let wsList = this.workspaceList();
+    let wsList = this.getWorkspaces();
     if (wsList) {
       let ws = {
         workspaceId: "",
@@ -479,7 +540,7 @@ class Wasdi {
    * @param jsonParameters a JSON containing the parameters for the application, please check the app on WASDI
    * for a specific reference
    */
-  launchProcessor(appname: string, jsonParameters: string) {
+  executeProcessor(appname: string, jsonParameters: string) {
     if (this._m_sActiveWorkspace) {
       let response = this.postObject(
         this._m_sWorkspaceBaseUrl + "/processors/run",
@@ -616,6 +677,10 @@ class Wasdi {
           " not found in the current workspace"
       );
     }
+  }
+
+  getActiveWorkspaceId() {
+    return this._m_sActiveWorkspace;
   }
 
   get User() {
