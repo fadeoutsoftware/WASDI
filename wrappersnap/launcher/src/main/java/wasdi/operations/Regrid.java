@@ -13,6 +13,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.settings.RegridSetting;
+import wasdi.shared.utils.gis.GdalUtils;
 
 public class Regrid extends Operation {
 
@@ -89,7 +90,7 @@ public class Regrid extends Operation {
             // Format='(D)'), flood_in, flood_temp,'-co','COMPRESS=LZW'], /NOSHELL
             String sGdalWarpCommand = "gdalwarp";
 
-            sGdalWarpCommand = LauncherMain.adjustGdalFolder(sGdalWarpCommand);
+            sGdalWarpCommand = GdalUtils.adjustGdalFolder(sGdalWarpCommand);
 
             ArrayList<String> asArgs = new ArrayList<String>();
             asArgs.add(sGdalWarpCommand);

@@ -12,6 +12,7 @@ import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.settings.MultiSubsetSetting;
 import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.gis.GdalUtils;
 
 public class Multisubset extends Operation {
 
@@ -93,7 +94,7 @@ public class Multisubset extends Operation {
                 // Translate
                 String sGdalTranslateCommand = "gdal_translate";
 
-                sGdalTranslateCommand = LauncherMain.adjustGdalFolder(sGdalTranslateCommand);
+                sGdalTranslateCommand = GdalUtils.adjustGdalFolder(sGdalTranslateCommand);
 
                 ArrayList<String> asArgs = new ArrayList<String>();
                 asArgs.add(sGdalTranslateCommand);

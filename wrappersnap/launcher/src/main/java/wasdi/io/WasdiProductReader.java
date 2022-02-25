@@ -98,11 +98,16 @@ public abstract class WasdiProductReader {
     public abstract MetadataViewModel getProductMetadataViewModel();
     
     /**
-     * 
+     * Applies any needed adjustment to the file immediatly after the download
      * @return
      */
     public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
 	
+    /**
+     * Get the file in a format suitable for publish band
+     * @return
+     */
+    public abstract File getFileForPublishBand(String sBand, String sLayerId);
 	
     /**
      * Read a SNAP Product: this is supported directly in the main class

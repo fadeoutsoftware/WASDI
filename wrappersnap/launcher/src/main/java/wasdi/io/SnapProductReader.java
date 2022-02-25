@@ -1,7 +1,12 @@
 package wasdi.io;
 
 import java.awt.Dimension;
+import java.awt.image.ColorModel;
+import java.awt.image.RenderedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.esa.snap.core.datamodel.Band;
@@ -11,10 +16,19 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.geotiff.GeoTIFF;
+import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 
 import wasdi.LauncherMain;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.*;
 
 public class SnapProductReader extends WasdiProductReader {
@@ -193,4 +207,115 @@ public class SnapProductReader extends WasdiProductReader {
 		return sFileName;
 	}
 	
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		
+		String sBaseDir = m_oProductFile.getParentFile().getPath();
+		if (!sBaseDir.endsWith("/")) sBaseDir += "/";
+		
+		String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(m_oProductFile.getName());
+		
+		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
+			
+			LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: handle geotiff file");
+			
+			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
+			if (oGdalInfoResult != null) {
+				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
+					LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: this is a Mollweide file, try to convert");
+					
+					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
+					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
+					
+		            File oPrjFile = new File(sOutputFile);
+
+		            try (BufferedWriter oPrjWriter = new BufferedWriter(new FileWriter(oPrjFile))) {
+		                // Fill the script file
+		                if (oPrjWriter != null) {
+		                    LauncherMain.s_oLogger.debug("SnapProductReader.deploy: getFileForPublishBand " + sOutputFile + " file");
+		                    oPrjWriter.write(GdalUtils.getMollweideProjectionDescription());
+		                    oPrjWriter.flush();
+		                    oPrjWriter.close();
+		                }
+		            } catch (IOException oEx) {
+		            	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: Exception converting Generating prj file " + oEx.toString() );
+					}
+				}
+			}
+			
+			return m_oProductFile;
+		}
+		else if (sPlatform!=null) {
+	        // Check if it is a S2
+	        if (sPlatform.equals(Platforms.SENTINEL2)) {
+
+	        	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Managing S2 Product Band " + sBand);
+
+	            Band oBand = m_oProduct.getBand(sBand);
+	            Product oGeotiffProduct = new Product(sBand, "GEOTIFF");
+	            oGeotiffProduct.addBand(oBand);
+	            String sOutputFilePath = sBaseDir + sLayerId + ".tif";
+				try {
+					sOutputFilePath = new WasdiProductWriter(null, null).WriteGeoTiff(oGeotiffProduct, sBaseDir, sLayerId+".tif");
+				} catch (Exception oEx) {
+					LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: Exception converting S2 to geotiff " + oEx.toString() );
+				}
+	            File oOutputFile = new File(sOutputFilePath);
+	            LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Geotiff File Created" + sOutputFilePath);
+	            
+	            return oOutputFile;
+
+	        } else {
+	        	
+	        	String sOutputFilePath = "";
+	        	File oOutputFile = new File(sOutputFilePath);
+
+	        	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Managing NON S2 Product Band " + sBand);
+
+	            // Get the Band
+	            Band oBand = m_oProduct.getBand(sBand);
+	            // Get Image
+	            // MultiLevelImage oBandImage = oBand.getSourceImage();
+	            RenderedImage oBandImage = oBand.getSourceImage();
+
+	            // Check if the Colour Model is present
+	            ColorModel oColorModel = oBandImage.getColorModel();
+
+	            // Tested for Copernicus Marine - netcdf files
+	            if (oColorModel == null) {
+
+	                // Colour Model not present: try a different way to get the Image
+	                BandImageManager oImgManager = new BandImageManager(m_oProduct);
+
+	                // Create full dimension and View port
+	                Dimension oOutputImageSize = new Dimension(oBand.getRasterWidth(), oBand.getRasterHeight());
+
+	                // Render the image
+	                oBandImage = oImgManager.buildImageWithMasks(oBand, oOutputImageSize, null, false, true);
+	            }
+
+	            // Get TIFF Metadata
+	            GeoTIFFMetadata oMetadata = ProductUtils.createGeoTIFFMetadata(m_oProduct);
+
+	            
+	            try {
+					if (GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata)) {
+						LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  GeoTiff File Created: " + sOutputFilePath);
+					}
+					else {
+						LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Impossible to create: " + sOutputFilePath);
+					}
+					
+				} catch (IOException oEx) {
+					LauncherMain.s_oLogger.debug("Exception converting S1 to geotiff " + oEx.toString() );
+				}
+	            
+	            return oOutputFile;
+	        }			
+		}
+		
+		LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: we did not find any useful way, return null");
+		return null;
+	}
+
 }
