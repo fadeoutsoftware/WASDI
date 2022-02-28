@@ -118,6 +118,9 @@ Run the program to verify that everything is fine.
    :alt: run the application and see a console window
 
 
+Work with WASDI
+------------------------------------------------------
+
 Add the WasdiLib dependency to your application
 +++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -132,7 +135,7 @@ Copy the installation commad for the latest version (by pressing the orange butt
 
 	Install-Package WasdiLib -Version 0.0.3.3
 
-Open the NuGet Package Manager console.
+Open the NuGet Package Manager console (Tools > NuGet Package Manager) and paste in the command just copied.
 
 .. image:: _static/c#_tutorial_images/22_open_nuget_package_manager_console.PNG
    :alt: open NuGet Package Manager console
@@ -142,7 +145,7 @@ Install the WasdiLib as a dependency of your console application.
 .. image:: _static/c#_tutorial_images/23_install_wasdilib_console.PNG
    :alt: install WasdiLib
 
-Alternatively, the WasdiLib can be installed through NuGet Package Manager.
+Alternatively, the WasdiLib can be installed through NuGet Package Manager (Tools > Manage NuGet Packages for Solution).
 
 .. image:: _static/c#_tutorial_images/24_install_wasdilib_manager.PNG
    :alt: install WasdiLib
@@ -152,6 +155,32 @@ Create configuration files
 
 Create appsettings.json
 ///////////////////////////
+
+To add a file to the application, right click on the **TutorialSeeSharpApp**.
+
+.. image:: _static/c#_tutorial_images/51_create_new_file.PNG
+   :scale: 40 %
+   :align: center
+   :alt: create new file
+
+
+Select **Add** and then **New Item**.
+
+
+.. image:: _static/c#_tutorial_images/52_create_new_file.PNG
+   :scale: 70 %
+   :align: center
+   :alt: create new file
+
+
+Select the type of file and input the name.
+
+
+.. image:: _static/c#_tutorial_images/53_create_new_file.PNG
+   :scale: 60 %
+   :align: center
+   :alt: create new file
+
 
 The **appsettings.json** file contains the information required to connect to the Wasdi server.
 In absence of such information, the library cannot connect to the server, in development mode.
@@ -257,7 +286,7 @@ Get the user's workspaces' names
 ////////////////////////////////
 
 The following program retrieves the names of the workspaces that the user has access to.
-An user can access a workspace either if the workspace was created by the uses or if the workspace was shared by another user.
+An user can access a workspace either if the workspace was created by the user or if the workspace was shared by another user.
 
 .. code-block::
 
@@ -435,6 +464,12 @@ On the page that opens, fill in the details of the application, as shown in the 
 .. image:: _static/c#_tutorial_images/33_create_new_app_page.PNG
    :alt: the New App page
 
+Until the application is ready to be exposed to the public, the **Make Application Public** checkbox could be unchecked. To find this checkbox, scroll down to the bottom of the page.
+
+.. image:: _static/c#_tutorial_images/61_select_private_app.PNG
+   :scale: 40 %
+   :align: center
+   :alt: create a zip archive with the content of the \bin\Debug\net6.0 directory
 
 A message will be shown to inform the user that the application (processor) will be deployed shortly.
 
