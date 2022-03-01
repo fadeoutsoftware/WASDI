@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 
 
@@ -190,8 +192,6 @@ public class Publisher {
         //publish image pyramid
         try {
         	
-        	//s_oLogger.info("Publisher.PublishGeoTiffImage: STORE: " + sStoreName + " File: " + oFile.getAbsolutePath() + " EPGS " + sEPSG + " STYLE " + sStyle);
-        	
             //Pubblico il layer
             if (!oManager.publishStandardGeoTiff(sStoreName, oFile, sEPSG, sStyle, s_oLogger)) {
             	s_oLogger.error("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
@@ -225,5 +225,49 @@ public class Publisher {
         if (lFileLenght> lMaxSize) return this.publishImagePyramidOnGeoServer(sFileName, sStore, sStyle, oManager);
         else  return this.publishGeoTiffImage(sFileName, sStore, sEPSG, sStyle, oManager);
     }
+    
+    /**
+     * Publish a Shape file in geoserver
+     * @param sFileName Full Name and Path of the .shp 
+     * @param asShapeFiles List of the different Full name and Path of the shape (all same names, different extension)
+     * @param sStore name of the store and layer to create 
+     * @param sEPSG Projection
+     * @param sStyle Style 
+     * @param oManager Geoserver Manager
+     * @return Name of the created store/layer if ok, null otherwise
+     * @throws Exception
+     */
+    public String publishShapeFile(String sFileName, ArrayList<String> asShapeFiles, String sStore, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
 
+        // Domain Check
+        if (Utils.isNullOrEmpty(sFileName)) return  "";
+        if (Utils.isNullOrEmpty(sStore)) return  "";
+        if (asShapeFiles == null) return "";
+        
+        String sZipFile = sFileName.replace(".shp", ".zip");
+        sZipFile = sZipFile.replace(".SHP", ".zip");
+
+        File oZippedShapeFile = new File(sZipFile);
+        
+        ZipFileUtils.zipFiles(asShapeFiles, oZippedShapeFile.getPath());
+        
+        //publish image pyramid
+        try {
+        	
+            //Pubblico il layer
+            if (!oManager.publishShapeFile(sStore, oZippedShapeFile, sEPSG, sStyle, s_oLogger)) {
+            	s_oLogger.error("Publisher.publishShapeFile: unable to publish shapefile " + sStore);
+            	return null;
+            }
+            s_oLogger.info("Publisher.publishShapeFile: shapefile published " + sStore);
+
+        } catch (Exception oEx) {
+        	s_oLogger.error("Publisher.publishShapeFile Exception: unable to publish shapefile " + sStore, oEx);
+        	return null;
+        }
+
+        return sStore;
+    }
+
+    
 }

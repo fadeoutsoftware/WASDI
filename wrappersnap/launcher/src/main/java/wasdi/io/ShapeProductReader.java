@@ -63,24 +63,7 @@ public class ShapeProductReader extends WasdiProductReader{
             	oNodeGroupViewModel.setBands(oBands);
             	
             	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
-            	
-            	
-            	// Bounding Box
-            	oRetViewModel.setBbox("");
-            	
             }
-            /*
-            // Sample code to read the features
-            SimpleFeatureIterator features = oShapefileDataStore.getFeatureSource().getFeatures().features();
-
-            while (features.hasNext()) {
-            	SimpleFeature shp = features.next();
-            	String name = (String)shp.getAttribute("");
-            	MultiPolygon geom = (MultiPolygon) shp.getDefaultGeometry();
-            }
-            
-            features.close();
-            */
             
             // Clean
             oShapefileDataStore.dispose();    	
@@ -148,7 +131,7 @@ public class ShapeProductReader extends WasdiProductReader{
 	
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
-		return null;
+		return m_oProductFile;
 	}
 
 

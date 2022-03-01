@@ -31,6 +31,7 @@ import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
@@ -57,20 +58,18 @@ public class Publishband extends Operation {
         	
         	PublishBandParameter oParameter = (PublishBandParameter) oParam;
 
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
             // Read File Name
-            String sFile = oParameter.getFileName();
+            String sInputFile = oParameter.getFileName();
             
             // Check integrity
-            if (Utils.isNullOrEmpty(sFile)) {
+            if (Utils.isNullOrEmpty(sInputFile)) {
                 // File not good!!
                 m_oLocalLogger.debug("Publishband.executeOperation: file is null or empty");
                 String sError = "Input File path is null";
 
-                m_oProcessWorkspaceLogger.log("Input file is null...");
+                m_oProcessWorkspaceLogger.log(sError);
 
                 // Send KO to Rabbit
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -79,38 +78,48 @@ public class Publishband extends Operation {
             }            
 
             // Generate full path name
-            sFile = LauncherMain.getWorkspacePath(oParameter) + sFile;
+            sInputFile = LauncherMain.getWorkspacePath(oParameter) + sInputFile;
+            
+            String sBackup = sInputFile;
+            
+            if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	sInputFile = "/data/wasdi/" + oParam.getWorkspaceOwnerId() + "/" + oParam.getWorkspace() + "/" + oParameter.getFileName();
+            }
 
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFile);
+            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sInputFile);
 
             if (oDownloadedFile == null) {
-                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sFile + "]");
+                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sInputFile + "]");
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Cannot find product to publish", oParameter.getExchange());
                 return false;
+            }
+            
+            if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	sInputFile = sBackup;
             }
 
             // Get the product name
             String sProductName = oDownloadedFile.getProductViewModel().getName();
 
             m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
-            m_oLocalLogger.debug("Publishband.executeOperation:  File = " + sFile);
+            m_oLocalLogger.debug("Publishband.executeOperation: " + sProductName + " - " + oParameter.getBandName());
 
             // Create file object
-            File oFile = new File(sFile);
-            String sInputFileNameOnly = oFile.getName();
+            File oInputFile = new File(sInputFile);
+            String sInputFileNameOnly = oInputFile.getName();
 
             // set file size
-            setFileSizeToProcess(oFile, oProcessWorkspace);
+            setFileSizeToProcess(oInputFile, oProcessWorkspace);
 
-            // Generate Layer Id
+            // Generate Layer Id: filename_band
             sLayerId = sInputFileNameOnly;
-            sLayerId = Utils.getFileNameWithoutLastExtension(sFile);
+            sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
             sLayerId += "_" + oParameter.getBandName();
 
             // Is already published?
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-            PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sFile, oParameter.getBandName());
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sInputFile, oParameter.getBandName());
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 10);
 
@@ -135,21 +144,18 @@ public class Publishband extends Operation {
             String sStyle = "raster";
             
             // Try to get the default one by file name
-            sStyle = getStyleByFileName(sFile);
+            sStyle = getStyleByFileName(sInputFile);
             
             // Finally, if specified, we set the style specified by the product
             if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
                 sStyle = oParameter.getStyle();
             }
-
-            m_oProcessWorkspaceLogger.log("Using style " + sStyle);
-
-            m_oLocalLogger.debug("Publishband.executeOperation:  Generating Band Image...");
-
-            m_oProcessWorkspaceLogger.log("Generate Band Image");
+            
+            m_oLocalLogger.debug("Publishband.executeOperation:  Generating Band Image with style " + sStyle);
+            m_oProcessWorkspaceLogger.log("Generate Band Image with style " + sStyle);
 
             // Create the Product Reader
-			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFile);
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oInputFile);
 			
 			// Ask to obtain the file to send to geoserver
 			File oFileToCopy = oReadProduct.getFileForPublishBand(oParameter.getBandName(), sLayerId);
@@ -184,6 +190,9 @@ public class Publishband extends Operation {
             if (!oTargetDir.exists())
                 oTargetDir.mkdirs();
 
+            // List of the files copied
+            ArrayList<String> asCopiedFiles = new ArrayList<String>();
+            
             // Output file Path
             String sOutputFilePath = sTargetDir + oFileToCopy.getName();
 
@@ -193,8 +202,9 @@ public class Publishband extends Operation {
             m_oLocalLogger.debug("Publishband.executeOperation: copy geoserver ready file to " + sOutputFilePath + " [LayerId] = " + sLayerId);
             
             FileUtils.copyFile(oFileToCopy, oOutputFile);
+            asCopiedFiles.add(oOutputFile.getPath());
             
-            m_oLocalLogger.debug("Publishband.executeOperation: search for other files to copy");
+            m_oLocalLogger.debug("Publishband.executeOperation: search for other files to copy (same name, different extension)");
             
 			ArrayList<String> asFilesToCopy = new ArrayList<String>();
 			File oWorkspaceFolder = new File(oFileToCopy.getParent());
@@ -228,9 +238,10 @@ public class Publishband extends Operation {
     				
     				sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
     				
-    				m_oLocalLogger.debug("Publishband.executeOperation: copy " + sFileToCopy + " to " + sOtherOutputFile);
+    				m_oLocalLogger.debug("Publishband.executeOperation: copy also " + sFileToCopy + " to " + sOtherOutputFile);
     				
     				FileUtils.copyFile(new File(sFileToCopy), new File(sOtherOutputFile));
+    				asCopiedFiles.add(sOtherOutputFile);
     			}            	
             }
             
@@ -243,14 +254,19 @@ public class Publishband extends Operation {
             GeoServerManager oGeoServerManager = new GeoServerManager();
             
             // Check or Get the style from WASDI
-            sStyle = checkOrGetStyle(oGeoServerManager,sStyle, oParam);
+            sStyle = checkOrGetStyle(oGeoServerManager, sStyle, oParam);
             
             //Ok publish
             Publisher oPublisher = new Publisher();
             
-
-            m_oLocalLogger.debug("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
-            sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);
+            if (sOutputFilePath.toLowerCase().endsWith(".shp")) {
+                m_oLocalLogger.debug("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                sLayerId = oPublisher.publishShapeFile(sOutputFilePath, asCopiedFiles, sLayerId, sEPSG, sStyle, oGeoServerManager);
+            }
+            else {
+                m_oLocalLogger.debug("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);            	
+            }
 
             m_oLocalLogger.debug("Publishband.executeOperation: Obtained sLayerId = " + sLayerId);
 
@@ -307,8 +323,7 @@ public class Publishband extends Operation {
                 oVM.setGeoserverBoundingBox(sGeoserverBBox);
                 oVM.setGeoserverUrl(oPublishedBand.getGeoserverUrl());
 
-                // P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the
-                // process
+                // P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the process
                 Thread.sleep(1000);
 
                 m_oSendToRabbit.SendRabbitMessage(bResultPublishBand, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
@@ -394,6 +409,10 @@ public class Publishband extends Operation {
         
         if (sFile.toUpperCase().contains("S5P") && sFile.toUpperCase().contains("_SO2_")) {
             sStyle = "s5p_so2";
+        }
+        
+        if (WasdiFileUtils.isShapeFile(sFile)) {
+        	sStyle = "polygon";
         }
         
         return sStyle;

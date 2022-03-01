@@ -65,7 +65,7 @@ public class Sen2cor extends Operation {
                     // 5 - ZipIt -> L2A.zip
                     m_oLocalLogger.debug("Sen2core.executeOperation: Conversion done, begin compression of L2 archive");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 75);
-                    oZipExtractor.zip(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
+                    oZipExtractor.zipFolder(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
 
 
                     m_oLocalLogger.debug("Sen2core.executeOperation: Done");

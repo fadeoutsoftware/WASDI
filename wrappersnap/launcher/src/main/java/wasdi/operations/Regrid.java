@@ -13,6 +13,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.settings.RegridSetting;
+import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 
 public class Regrid extends Operation {
@@ -23,12 +24,12 @@ public class Regrid extends Operation {
 		m_oLocalLogger.debug("Regrid.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			m_oLocalLogger.error("Regrid.executeOperation: Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			m_oLocalLogger.error("Regrid.executeOperation: Process Workspace is null");
 			return false;
 		}        
         
@@ -44,45 +45,30 @@ public class Regrid extends Operation {
 
             File oReferenceFile = new File( LauncherMain.getWorkspacePath(oParameter) + sReferenceProduct);
 
-			WasdiProductReader oRead = WasdiProductReaderFactory.getProductReader(oReferenceFile);
+			WasdiProductReader oReferenceFileReader = WasdiProductReaderFactory.getProductReader(oReferenceFile);
+			
+			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(oReferenceFile);
+			
+			if (oGdalInfoResult == null) {
+				m_oLocalLogger.error("Regrid.executeOperation: impossible to get images gdal info");
+				m_oProcessWorkspaceLogger.log("Impossible to get reference image info, sorry");
+				return false;				
+			}            
 
-            if (oRead.getSnapProduct() == null) {
-                m_oLocalLogger.error("Regrid.executeOperation: product is not a SNAP product ");
-                return false;
-            }
+            double dXOrigin = oGdalInfoResult.topLeftX;
+            double dYOrigin = oGdalInfoResult.topLeftY;
+            double dXEnd = oGdalInfoResult.topLeftX + oGdalInfoResult.westEastPixelResolution* ( (double) oGdalInfoResult.size.get(0));
+            double dYEnd = oGdalInfoResult.topLeftY + oGdalInfoResult.northSouthPixelResolution* ( (double) oGdalInfoResult.size.get(1));
 
-            // minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
-            String sBBox = oRead.getProductBoundingBox();
+            // Get th
+            double dXScale = oGdalInfoResult.westEastPixelResolution;
+            double dYScale = Math.abs(oGdalInfoResult.northSouthPixelResolution);
 
-            String[] asBBox = sBBox.split(",");
-            double[] adBBox = new double[10];
-
-            // It it is null, we will have handled excpetion
-            if (asBBox.length >= 10) {
-                for (int iStrings = 0; iStrings < 10; iStrings++) {
-                    try {
-                        adBBox[iStrings] = Double.parseDouble(asBBox[iStrings]);
-                    } catch (Exception e) {
-                        m_oLocalLogger.error("Regrid.executeOperation: error convering bbox " + e.toString());
-                        adBBox[iStrings] = 0.0;
-                    }
-                }
-            }
-
-            double dXOrigin = adBBox[1];
-            double dYOrigin = adBBox[0];
-            double dXEnd = adBBox[3];
-            double dYEnd = adBBox[4];
-
-            Dimension oDim = oRead.getSnapProduct().getSceneRasterSize();
-
-            // STILL HAVE TO FIND THE SCALE: THIS IS NOT PRECISE
-            double dXScale = (dXEnd - dXOrigin) / oDim.getWidth();
-            double dYScale = (dYEnd - dYOrigin) / oDim.getHeight();
-
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
-            }
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            
+            m_oProcessWorkspaceLogger.log("Regrid " + oParameter.getSourceProductName() + " to " + sReferenceProduct);
+            
+            m_oProcessWorkspaceLogger.log("XOrigin = " + dXOrigin + "; dYOrigin = " + dYOrigin + "; dXEnd " + dXEnd + "; dYEnd = " + dYEnd + "; XStep " + dXScale + "; YStep " + dYScale);
 
             // SPAWN, ['gdalwarp', '-r', 'near', '-tr', STRING(xscale, Format='(D)'),
             // STRING(yscale, Format='(D)'), '-te', STRING(xOrigin, Format='(D)'),
@@ -129,14 +115,18 @@ public class Regrid extends Operation {
             oProcess = oProcessBuidler.start();
 
             oProcess.waitFor();
+            
+            String sBBox = oReferenceFileReader.getProductBoundingBox();
 
             addProductToDbAndWorkspaceAndSendToRabbit(null, LauncherMain.getWorkspacePath(oParameter) + sDestinationProduct,
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.REGRID.name(), sBBox, false,
                     true);
             
+            m_oProcessWorkspaceLogger.log("Regrid Done");
+            
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 100);
 
-            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(), "Regrid Done", oParameter.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.REGRID.name(), oParameter.getWorkspace(), "Regrid Done", oParameter.getExchange());
             
             return true;
         } catch (Exception oEx) {
@@ -144,7 +134,7 @@ public class Regrid extends Operation {
             
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
             
-            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.MULTISUBSET.name(), oParam.getWorkspace(), sError, oParam.getExchange());
+            m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.REGRID.name(), oParam.getWorkspace(), sError, oParam.getExchange());
 
         }
         
