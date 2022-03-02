@@ -303,7 +303,7 @@ var WappsController = (function() {
                     sHelpMessage = "There isn't any help message."
                 }
 
-                var oConverter = new showdown.Converter();
+                var oConverter = new showdown.Converter({tables: true});
 
                 // utilsVexDialogAlertTop(sHelpMessage);
                 utilsVexDialogBigAlertTop(oConverter.makeHtml(sHelpMessage));

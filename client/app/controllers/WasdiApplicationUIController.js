@@ -236,7 +236,7 @@ var WasdiApplicationUIController = (function () {
                     sHelpMessage = "There isn't any help message."
                 }
 
-                var oConverter = new showdown.Converter();
+                var oConverter = new showdown.Converter({tables: true});
 
                 oController.m_sHelpHtml = oController.m_oSceService.trustAsHtml(oConverter.makeHtml(sHelpMessage));
             } else {
