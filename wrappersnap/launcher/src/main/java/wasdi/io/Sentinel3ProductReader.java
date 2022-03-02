@@ -4,7 +4,10 @@
 package wasdi.io;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
@@ -52,16 +55,16 @@ public class Sentinel3ProductReader extends SnapProductReader {
 
 			//remove .SEN3 from the file name -> required for CREODIAS
 			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");
-			
+
 			oZipExtractor.unzip(sDownloadPath + File.separator + sNewFileName, sDownloadPath);
 			deleteDownloadedZipFile(sDownloadedFileFullPath);
-			
+
 			//remove .zip and add .SEN3 if required
 			sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
 			if(!sNewFileName.endsWith(".SEN3")) {
 				sNewFileName = sNewFileName + ".SEN3";
 			}
-			
+
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
 			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
@@ -93,7 +96,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		}
 	}
 
-	
+
 	/**
 	 * Get the SNAP product or null if this is not a product readable by Snap
 	 * 
@@ -101,61 +104,56 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	 */
 	@Override
 	public Product getSnapProduct() {
+		
+		//prepare path
+		String sBase = null;
 		try {
-			String sBase = m_oProductFile.getAbsolutePath();
+			sBase = m_oProductFile.getAbsolutePath();
 			if(sBase.endsWith(".zip")) {
 				sBase = sBase.replaceAll(".zip", ".SEN3");
 			}
 			sBase += File.separator;
-			//save File pointing to directory
-			m_oProductFile = new File(sBase + "xfdumanifest.xml");
-			//business as usual
+		} catch (Exception oE) {
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: setting paths failed due to: " + oE);
+		}
+		
+		//prepare list of plausible file names
+		List<String> asNames = new LinkedList<>();
+		asNames.add("xfdumanifest.xml");
+		asNames.add("measurement.nc");
+		asNames.add("standard_measurement.nc");
+		asNames.add("enhanced_measurement.nc");
+		asNames.add("reduced_measurement.nc");
+		
+		//try reading files until a good one is found
+		for (String sFileName : asNames) {
+			if(null!=m_oProduct) {
+				readProductBandFromFile(sBase, sFileName);
+			} else {
+				m_bSnapReadAlreadyDone = true;
+				break;
+			}
+		}
+
+		//reset the File pointer
+		m_oProductFile = m_oProductFile.getParentFile();
+
+		return m_oProduct;
+	}
+
+	/**
+	 * @param sBase
+	 * @param sFileName
+	 */
+	private void readProductBandFromFile(String sBase, String sFileName) {
+		try {
+			m_oProductFile = new File(sBase + sFileName);
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
 			}
-			
-			//hack 0 for altimeter
-			if(null==m_oProduct) {
-				//simplest case
-				try {
-					m_oProductFile = new File(sBase + "measurement.nc");
-					m_oProduct = readSnapProduct();
-					m_oProduct.setName(m_oProductFile.getParentFile().getName());
-				} catch (Exception oE) {
-					LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: tried to read measurement.nc but failed: " + oE);
-				}
-			}
-			//hack 1 for altimeter
-			if(null==m_oProduct)
-				//in case we have a different type of measuremente, let's try one of these
-				if(!m_oProductFile.canRead()) {
-					m_oProductFile = new File(sBase + "standard_measurement.nc");
-					m_oProduct = readSnapProduct();
-					m_oProduct.setName(m_oProductFile.getParentFile().getName());
-				}
-				if(!m_oProductFile.canRead()) {
-					m_oProductFile = new File(sBase + "enhanced_measurement.nc");
-				}
-				if(!m_oProductFile.canRead()) {
-					m_oProductFile = new File(sBase + "reduced_measurement.nc");
-				}
-				
-				
-			}
-			
-			
-			
-			if(null!=m_oProduct) {
-				m_bSnapReadAlreadyDone = true;
-			}
-			//reset the File pointer
-			m_oProductFile = m_oProductFile.getParentFile();
-			
-			return m_oProduct;
 		}
 		catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: " + oE);
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: tried to read " + sFileName + " but failed: " + oE);
 		}
-		return null;
 	}
 }
