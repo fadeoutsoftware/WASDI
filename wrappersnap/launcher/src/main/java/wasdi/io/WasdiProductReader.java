@@ -4,8 +4,12 @@ import java.io.File;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -108,6 +112,26 @@ public abstract class WasdiProductReader {
      * @return
      */
     public abstract File getFileForPublishBand(String sBand, String sLayerId);
+    
+    /**
+     * Get the EPSG of the file
+     * @return
+     */
+    public String getEPSG() {
+		try {
+			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
+			if (oGdalInfoResult != null) {
+				LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): WKT " + oGdalInfoResult.coordinateSystemWKT);
+				CoordinateReferenceSystem oCRS = CRS.parseWKT(oGdalInfoResult.coordinateSystemWKT);
+				String sEPSG = CRS.lookupIdentifier(oCRS, true);
+				return sEPSG;
+			}
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): exception " + oEx.toString());
+		}
+		return null;    	
+    }
 	
     /**
      * Read a SNAP Product: this is supported directly in the main class

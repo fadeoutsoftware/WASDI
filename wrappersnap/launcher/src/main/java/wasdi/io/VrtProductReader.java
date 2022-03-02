@@ -77,5 +77,4 @@ public class VrtProductReader extends WasdiProductReader {
 	public File getFileForPublishBand(String sBand, String sLayerId) {
 		return null;
 	}
-
 }

@@ -209,7 +209,6 @@ public class Publisher {
     }
 
     public String publishGeoTiff(String sFileName, String sStore, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
-
         // Domain Check
 
         if (Utils.isNullOrEmpty(sFileName)) return  "";

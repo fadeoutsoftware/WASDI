@@ -77,15 +77,18 @@ public class Publishband extends Operation {
                 return false;
             }            
 
-            // Generate full path name
+            // Generate full path name of the input file
             sInputFile = LauncherMain.getWorkspacePath(oParameter) + sInputFile;
             
+            // Debug Utils: to debug publish band in local, we can force the path of the file to be published
             String sBackup = sInputFile;
             
             if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	// Force it as it was on the standard server path
             	sInputFile = "/data/wasdi/" + oParam.getWorkspaceOwnerId() + "/" + oParam.getWorkspace() + "/" + oParameter.getFileName();
             }
-
+            
+            // Try to get the file
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sInputFile);
 
@@ -96,6 +99,7 @@ public class Publishband extends Operation {
             }
             
             if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	// it was only for backup, restore the real local path
             	sInputFile = sBackup;
             }
 
@@ -105,17 +109,18 @@ public class Publishband extends Operation {
             m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
             m_oLocalLogger.debug("Publishband.executeOperation: " + sProductName + " - " + oParameter.getBandName());
 
-            // Create file object
+            // Create input file object
             File oInputFile = new File(sInputFile);
-            String sInputFileNameOnly = oInputFile.getName();
 
             // set file size
             setFileSizeToProcess(oInputFile, oProcessWorkspace);
 
             // Generate Layer Id: filename_band
-            sLayerId = sInputFileNameOnly;
             sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
-            sLayerId += "_" + oParameter.getBandName();
+            
+            if (WasdiFileUtils.isShapeFile(sInputFile) == false) {
+            	sLayerId += "_" + oParameter.getBandName();
+            }
 
             // Is already published?
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
@@ -141,11 +146,8 @@ public class Publishband extends Operation {
             }
 
             // Default Style: can be changed in the following lines depending by the product
-            String sStyle = "raster";
-            
-            // Try to get the default one by file name
-            sStyle = getStyleByFileName(sInputFile);
-            
+            String sStyle = getStyleByFileName(sInputFile);
+                        
             // Finally, if specified, we set the style specified by the product
             if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
                 sStyle = oParameter.getStyle();
@@ -166,22 +168,11 @@ public class Publishband extends Operation {
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Looks we cannot show\nthis file on map", oParameter.getExchange());
                 return false;
 			}
-			
-			// Assume more standard sEPSG
-			String sEPSG = "EPSG:4326";
-			
-			// Try to get the SNAP Product
-			Product oProduct = oReadProduct.getSnapProduct();
-
-            if (oProduct != null) {
-            	sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);            	
-			}
-            
+			            
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
             // write the data directly to GeoServer Data Dir
-            String sGeoServerDataDir = WasdiConfig.Current.paths.geoserverDataDir;
-            String sTargetDir = sGeoServerDataDir;
+            String sTargetDir = WasdiConfig.Current.paths.geoserverDataDir;
 
             if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
             sTargetDir += sLayerId + "/";
@@ -258,6 +249,10 @@ public class Publishband extends Operation {
             
             //Ok publish
             Publisher oPublisher = new Publisher();
+            
+            WasdiProductReader oFileToPublishReader = WasdiProductReaderFactory.getProductReader(oOutputFile);
+            
+            String sEPSG = oFileToPublishReader.getEPSG();
             
             if (sOutputFilePath.toLowerCase().endsWith(".shp")) {
                 m_oLocalLogger.debug("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
@@ -347,7 +342,7 @@ public class Publishband extends Operation {
             
         } catch (Exception oEx) {
 
-            m_oProcessWorkspaceLogger.log("Exception");
+            m_oProcessWorkspaceLogger.log("Exception " + oEx.toString());
 
             m_oLocalLogger.error("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 

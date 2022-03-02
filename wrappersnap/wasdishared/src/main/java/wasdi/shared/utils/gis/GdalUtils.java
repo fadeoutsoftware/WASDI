@@ -85,6 +85,8 @@ public class GdalUtils {
 			
 			asArgs.add("-json");
 			asArgs.add(oFile.getPath());
+			asArgs.add("-wkt_format");
+			asArgs.add("WKT1");
 			
 			// Execute the process
 			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));

@@ -19,6 +19,8 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
 import wasdi.shared.config.WasdiConfig;
@@ -103,6 +105,11 @@ public class SnapProductReader extends WasdiProductReader {
 			LauncherMain.s_oLogger.info("SnapProductReader.getProductBoundingBox: product is null return empty ");
 			return "";
 		}
+		
+		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
+        	addPrjToMollweidTiffFiles();
+        }
+		
 		String sBB = "";
 		try {
 			
@@ -198,7 +205,7 @@ public class SnapProductReader extends WasdiProductReader {
 	            LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 	            sFileName = sFolderName + "/" + "xfdumanifest.xml";
 	            LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
-	        }	
+	        }
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("SnapProductReader.adjustFileAfterDownload: error ", oEx);
@@ -210,6 +217,8 @@ public class SnapProductReader extends WasdiProductReader {
 	@Override
 	public File getFileForPublishBand(String sBand, String sLayerId) {
 		
+		m_oProduct = getSnapProduct();
+		
 		String sBaseDir = m_oProductFile.getParentFile().getPath();
 		if (!sBaseDir.endsWith("/")) sBaseDir += "/";
 		
@@ -217,31 +226,9 @@ public class SnapProductReader extends WasdiProductReader {
 		
 		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
 			
-			LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: handle geotiff file");
+			LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: this is a geotiff file");
 			
-			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
-			if (oGdalInfoResult != null) {
-				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
-					LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: this is a Mollweide file, try to convert");
-					
-					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
-					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
-					
-		            File oPrjFile = new File(sOutputFile);
-
-		            try (BufferedWriter oPrjWriter = new BufferedWriter(new FileWriter(oPrjFile))) {
-		                // Fill the script file
-		                if (oPrjWriter != null) {
-		                    LauncherMain.s_oLogger.debug("SnapProductReader.deploy: getFileForPublishBand " + sOutputFile + " file");
-		                    oPrjWriter.write(GdalUtils.getMollweideProjectionDescription());
-		                    oPrjWriter.flush();
-		                    oPrjWriter.close();
-		                }
-		            } catch (IOException oEx) {
-		            	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: Exception converting Generating prj file " + oEx.toString() );
-					}
-				}
-			}
+			addPrjToMollweidTiffFiles();
 			
 			return m_oProductFile;
 		}
@@ -316,6 +303,57 @@ public class SnapProductReader extends WasdiProductReader {
 		
 		LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: we did not find any useful way, return null");
 		return null;
+	}
+	
+	@Override
+    public String getEPSG() {
+		try {
+            String sEPSG = CRS.lookupIdentifier(getSnapProduct().getSceneCRS(), true);
+			return sEPSG;
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): exception " + oEx.toString());
+		}
+		return null;    	
+    }
+	
+	/**
+	 * Mollweid projected files are not read by geotools if the do not have the .prj file.
+	 * This methods checks and if it is missing it creates it
+	 */
+	protected void addPrjToMollweidTiffFiles() {
+		
+		try {
+			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
+			if (oGdalInfoResult != null) {
+				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
+					LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: this is a Mollweide file, try to convert");
+					
+					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
+					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
+					
+		            File oPrjFile = new File(sOutputFile);
+		            
+		            if (oPrjFile.exists()==false) {
+			            try (BufferedWriter oPrjWriter = new BufferedWriter(new FileWriter(oPrjFile))) {
+			                // Fill the script file
+			                if (oPrjWriter != null) {
+			                    LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: " + sOutputFile + " file");
+			                    oPrjWriter.write(GdalUtils.getMollweideProjectionDescription());
+			                    oPrjWriter.flush();
+			                    oPrjWriter.close();
+			                }
+			            } catch (IOException oEx) {
+			            	LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: Exception converting Generating prj file " + oEx.toString() );
+						}
+		            }
+				}
+			}			
+		}
+		catch (Exception oEx) {
+			
+		}
+	
 	}
 
 }

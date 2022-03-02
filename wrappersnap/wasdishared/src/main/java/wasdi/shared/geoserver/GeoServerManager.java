@@ -37,6 +37,8 @@ import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 
 /**
  * GeoServerManager: utility class to add layers to geoserver
@@ -321,6 +323,8 @@ public class GeoServerManager {
     	// This has been overloaded by our own method to create the resource.
     	// We use anyhow publishShp for convenience creating the datastore (first step)
     	boolean bRes = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
+    	
+    	/*
     	// Now we create our own featureType
     	String sFileNotZipped = oShpFile.getPath().replace(".zip", ".shp");
     	
@@ -333,7 +337,7 @@ public class GeoServerManager {
     		// And we configure the layer 
     		bRes = m_oGsPublisher.configureLayer(m_sWorkspace, sStoreName, configureDefaultStyle(sStyle));
     	}
-    	        
+    	*/      
 		return bRes;
 	}
     
@@ -398,7 +402,6 @@ public class GeoServerManager {
             SimpleFeatureCollection oFeatColl = oShapefileDataStore.getFeatureSource().getFeatures();
 			CoordinateReferenceSystem oCrs = oFeatColl.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
 			
-			//Object oTest = oFeatColl.getSchema();
 		    if (oCrs == null) {
 		        oCrs = DefaultGeographicCRS.WGS84;
 		    }
@@ -432,8 +435,8 @@ public class GeoServerManager {
             
             sXML += "<nativeBoundingBox>" + sBbox + "</nativeBoundingBox>";
             sXML += "<latLonBoundingBox>" + sBbox + "</latLonBoundingBox>";
-            //sXML += "<nativeCRS>" +  StringEscapeUtils.escapeXml(oCrs.toWKT()) + "</nativeCRS>";
-            sXML += "<nativeCRS>" +  "GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], AUTHORITY[\"EPSG\",\"6326\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]" + "</nativeCRS>";
+            sXML += "<nativeCRS>" +  StringEscapeUtils.escapeXml(oCrs.toWKT()) + "</nativeCRS>";
+            //sXML += "<nativeCRS>" +  "GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], AUTHORITY[\"EPSG\",\"6326\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]" + "</nativeCRS>";
             
             sXML += "<simpleConversionEnabled>false</simpleConversionEnabled>";
             sXML += "<attributes>";
