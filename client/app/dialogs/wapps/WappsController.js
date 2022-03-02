@@ -220,7 +220,7 @@ var WappsController = (function() {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                console.alert("Closed modal");
+                //console.alert("Closed modal");
             });
         });
 
@@ -303,7 +303,7 @@ var WappsController = (function() {
                     sHelpMessage = "There isn't any help message."
                 }
 
-                var oConverter = new showdown.Converter();
+                var oConverter = new showdown.Converter({tables: true});
 
                 // utilsVexDialogAlertTop(sHelpMessage);
                 utilsVexDialogBigAlertTop(oConverter.makeHtml(sHelpMessage));

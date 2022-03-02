@@ -20,10 +20,10 @@ angular.module('wasdi.wapSelectArea', [])
 
 
             },
-            // Tooltips alternatives : 
+            // Tooltips alternatives :
             // uib-tooltip="I'm a tooltip!" alternative using bootstrap-UI
             // title="My Tooltip!" data-toggle="tooltip" data-placement="top" tooltip
-            // the first on relies on a library, UI-boostrap, the second one relies on a directive 
+            // the first on relies on a library, UI-boostrap, the second one relies on a directive
             template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right"></div>`,
 
             controller: function ($translate) {
@@ -75,7 +75,54 @@ angular.module('wasdi.wapSelectArea', [])
                     width: this.widthMap + 'px'
                 };
 
+                /**
+                 * Support method to check area, accordingly to specificated limits
+                 * Generates a custom message, taking in account the constraints violated
+                 * @param oController a pointer to this controller
+                 * @param layer the layer to be analyzed for validity
+                 * @param SErrorMessage the error message to be composed
+                 * @param bIsValid a boolean which represents validity, used for further evaluation
+                 * @return {{bIsValid: boolean, SErrorMessage}}
+                 */
+                function checkArea(oController, layer, SErrorMessage, bIsValid) {
+                    oController.boundingBox.northEast = layer._bounds._northEast;
+                    oController.boundingBox.southWest = layer._bounds._southWest;
 
+                    //remove old shape
+                    if (oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length !== 0) {
+                        oController.m_oDrawnItems.clearLayers();
+                    }
+
+                    var latlngs = layer.getLatLngs();
+
+                    // height and width respectively
+                    let oSide = [oController.getDistance(latlngs[0][0],
+                        latlngs[0][1]), oController.getDistance(latlngs[0][1], latlngs[0][2])];
+
+                    let fMaxSide = Math.max(...oSide);
+
+                    let fRatio = Math.max(...oSide) / Math.min(...oSide);
+
+                    // first element is the array itself to be passed
+                    let fArea = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 1000000;
+
+
+                    if (fArea > oController.maxarea && oController.maxarea != 0) {
+                        SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_AREA);
+                        bIsValid = false;
+                    }
+
+                    if (fMaxSide > oController.maxside && oController.maxside != 0) {
+                        SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_SIDE);
+                        bIsValid = false;
+                    }
+
+                    if (fRatio > oController.maxratioside && oController.maxratioside != 0) {
+                        SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_RATIO);
+                        bIsValid = false;
+                    }
+                    return {SErrorMessage, bIsValid};
+                }
 
                 this.addBoundingBoxDrawerOnMap = function (oMap) {
 
@@ -112,51 +159,17 @@ angular.module('wasdi.wapSelectArea', [])
                     let oController = this;
                     oMap.on(L.Draw.Event.CREATED, function (event) {
                         var layer = event.layer;
-                        oController.boundingBox.northEast = layer._bounds._northEast;
-                        oController.boundingBox.southWest = layer._bounds._southWest;
-
-                        //remove old shape
-                        if (oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length !== 0) {
-                            oController.m_oDrawnItems.clearLayers();
-                        }
-
-                        var latlngs = layer.getLatLngs();
-
-                        // height and width respectively
-                        let oSide = [oController.getDistance(latlngs[0][0],
-                            latlngs[0][1]), oController.getDistance(latlngs[0][1], latlngs[0][2])];
-
-                        let fMaxSide = Math.max(...oSide);
-
-                        let fRatio = Math.max(...oSide) / Math.min(...oSide);
-
-                        // first element is the array itself to be passed
-                        let fArea = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 1000000;
-
                         let bIsValid = true;
-
                         let SErrorMessage = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
-
-                        if (fArea > oController.maxarea && oController.maxarea != 0) {
-                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_AREA);
-                            bIsValid = false;
-                        }
-
-                        if (fMaxSide > oController.maxside && oController.maxside != 0) {
-                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_SIDE);
-                            bIsValid = false;
-                        }
-
-                        if (fRatio > oController.maxratioside && oController.maxratioside != 0) {
-                            SErrorMessage = SErrorMessage.concat($translate.getTranslationTable().WAP_SELECT_AREA_OVER_RATIO);
-                            bIsValid = false;
-                        }
+                        const __ret = checkArea(oController, layer, SErrorMessage, bIsValid);
+                        SErrorMessage = __ret.SErrorMessage;
+                        bIsValid = __ret.bIsValid;
 
 
                         if (!bIsValid) {
-                            //show error message 
+                            //show error message
                             utilsVexDialogAlertTop(SErrorMessage.toLocaleUpperCase());
-                            // turn the bounding box red 
+                            // turn the bounding box red
                             layer.options.color = "#ff0000";
                             // erase the bounding box
                             oController.boundingBox.northEast = "";
@@ -212,17 +225,25 @@ angular.module('wasdi.wapSelectArea', [])
                                         // checks size here.
                                         var oLayer = L.rectangle(aoBounds, { color: "#3388ff", weight: 1 });
 
+                                        var layer = oLayer;
+                                        let bIsValid = true;
+                                        let SErrorMessage = $translate.getTranslationTable().WAP_SELECT_AREA_BASE;
+                                        const __ret = checkArea(oController, layer, SErrorMessage, bIsValid);
+                                        SErrorMessage = __ret.SErrorMessage;
+                                        bIsValid = __ret.bIsValid;
 
-                                        oController.boundingBox.northEast = oLayer._bounds._northEast;
-                                        oController.boundingBox.southWest = oLayer._bounds._southWest;
 
-                                        //remove old shape
-                                        if (oController.m_oDrawnItems && oController.m_oDrawnItems.getLayers().length !== 0) {
-                                            oController.m_oDrawnItems.clearLayers();
+                                        if (!bIsValid) {
+                                            //show error message
+                                            utilsVexDialogAlertTop(SErrorMessage.toLocaleUpperCase());
+                                            // turn the bounding box red
+                                            layer.options.color = "#ff0000";
+                                            // erase the bounding box
+                                            oController.boundingBox.northEast = "";
+                                            oController.boundingBox.southWest = "";
                                         }
-
                                         //save new shape in map
-
+                                        oController.m_oDrawnItems.addLayer(layer);
                                     });
                                 });
                             }

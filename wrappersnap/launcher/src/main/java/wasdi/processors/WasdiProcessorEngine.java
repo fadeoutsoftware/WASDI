@@ -12,6 +12,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
@@ -23,7 +24,8 @@ public abstract class WasdiProcessorEngine {
 	protected String m_sTomcatUser;
 	ProcessorParameter m_oParameter;
 	protected ProcessWorkspace m_oProcessWorkspace= null;
-	
+	protected Send m_oSendToRabbit = new Send(null);
+
 	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
 		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 	}
@@ -47,6 +49,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.CONDA)) {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+		else if (sType.equals(ProcessorTypes.CSHARP)) {
+			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}		
 		else {
 			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
@@ -268,5 +273,22 @@ public abstract class WasdiProcessorEngine {
 	public void setParameter(ProcessorParameter oParameter) {
 		this.m_oParameter = oParameter;
 	}
+	
+	/**
+	 * Get the send to rabbit object
+	 * @return
+	 */
+	public Send getSendToRabbit() {
+		return m_oSendToRabbit;
+	}
+
+	/**
+	 * Set the sent to rabbit object
+	 * @param m_oSendToRabbit
+	 */
+	public void setSendToRabbit(Send m_oSendToRabbit) {
+		this.m_oSendToRabbit = m_oSendToRabbit;
+	}
+	
 	
 }

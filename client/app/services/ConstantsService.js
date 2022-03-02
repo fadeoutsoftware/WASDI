@@ -31,12 +31,6 @@ service('ConstantsService', [function () {
     this.WMSURL = environment.wmsUrl;
 
     /**
-     * WPS Proxy Url
-     * @type {string}
-     */
-    this.WPSPROXY = environment.wpsProxy;
-
-    /**
      * API URL
      * @type {string}
      */
@@ -109,15 +103,6 @@ service('ConstantsService', [function () {
      */
     this.getRabbitPassword = function () {
         return this.m_sRabbitPassword;
-    }
-
-    /**
-     * Get WPS Proxy address
-     * @returns {string}
-     */
-    this.getWPSPROXY = function()
-    {
-       return  this.WPSPROXY;
     }
 
     /**
@@ -359,15 +344,7 @@ service('ConstantsService', [function () {
 
         return this.WEBSTOMPURL;
     }
-
-    /**
-     * get Wasdi Geoserver WPS Address
-     * @returns {string}
-     */
-    this.getWasdiGeoserverWPS = function()
-    {
-        return this.WASDIGEOSERVERWPS;
-    }
+    
     /*------------- COOKIES --------------*/
 
     //set by w3school.com

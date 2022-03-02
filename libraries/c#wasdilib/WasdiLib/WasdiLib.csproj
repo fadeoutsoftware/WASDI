@@ -1,0 +1,102 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<PackageId>WasdiLib</PackageId>
+	<Authors>WASDI (LU) S.a.r.l.</Authors>
+	<PackageVersion>0.0.2.6</PackageVersion>
+	<Description>WASDI (LU) S.a.r.l.
+
+**Disclaimer ** 
+The library is provided "as-is" without warranty
+
+Neither WASDI (LU) S.a.r.l. or any of its partners or agents shall be liable for any direct, indirect, incidental, special, exemplary, or consequential
+damages (including, but not limited to, breach of expressed or implied contract; procurement of substitute goods or services; loss of use, data or profits; 
+business interruption; or damage to any equipment, software and/or data files) however caused and on any legal theory of liability, whether for contract, 
+tort, strict liability, or a combination thereof (including negligence or otherwise) arising in any way out of the direct or indirect use of software, 
+even if advised of the possibility of such risk and potential damage.
+
+WASDI (LU) S.a.r.l. uses all reasonable care to ensure that software products and other files that are made available are safe to use when installed,
+and that all products are free from any known software virus. For your own protection, you should scan all files for viruses prior to installation.
+
+
+# WASDI
+
+This is c#wasdilib, the WASDI's C# lib.
+
+WASDI is a fully scalable and distributed Cloud based EO analytical platform. The system is cross-cloud and cross DIAS. 
+WASDI is an operating platform that offers services to develop and deploy DIAS based EO on-line applications, designed 
+to extract value-added information, made and distributed by EO-Experts without any specific IT/Cloud skills.  
+WASDI offers as well to End-Users the opportunity to run EO applications both from a dedicated user-friendly interface 
+and from an API based software interface, fulfilling the real-world business needs. 
+EO-Developers can work using the WASDI Libraries in their usual programming languages and add to the platform these new blocks 
+in the simplest possible way.
+
+Note:
+the philosophy of safe programming is adopted as widely as possible, the lib will try to workaround issues such as
+faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
+the return statues
+
+Version 0.0.2.6</Description>
+	<PackageTags>WASDI C#</PackageTags>
+	<PackageProjectUrl>https://www.wasdi.net/</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/fadeoutsoftware/WASDI/tree/master/libraries/libraries/c%23wasdilib</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<PackageIcon>wasdi_logo.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<AssemblyVersion>0.0.2.6</AssemblyVersion>
+	<FileVersion>0.0.2.6</FileVersion>
+	<PackageReleaseNotes>Version 0.0.2.6</PackageReleaseNotes>
+	<Copyright>WASDI (LU) S.a.r.l.</Copyright>
+	<ApplicationIcon>wasdi_logo.ico</ApplicationIcon>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Version>0.0.2.6</Version>
+	<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Content Include="wasdi_logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Include="wasdi_logo.png">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	</None>
+	<None Include="..\README.md">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	</None>
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	<PackageReference Include="NLog" Version="4.7.11" />
+	<PackageReference Include="NLog.Extensions.Logging" Version="1.7.4" />
+	<PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
+	<PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Update="appsettings.json">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Update="WasdiLib.nlog.config">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+  </ItemGroup>
+
+</Project>
