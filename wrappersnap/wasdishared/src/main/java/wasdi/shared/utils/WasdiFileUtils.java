@@ -117,8 +117,7 @@ public class WasdiFileUtils {
 	 * @return
 	 */
 	public static String fixPathSeparator(String sPathString) {
-	return sPathString.replace("/",File.separator).replace("\\",File.separator);
-		
+		return sPathString.replace("/",File.separator).replace("\\",File.separator);
 	}
 
 	/**
@@ -603,10 +602,7 @@ public class WasdiFileUtils {
 		
 		return "";
 	}
-	
-	
-
-	
+		
 	public static void testImageDecoders() {
 		
 		testImageDecode("S1A_IW_GRDH_1SDV_20211227T052748_20211227T052813_041190_04E503_D2FB");

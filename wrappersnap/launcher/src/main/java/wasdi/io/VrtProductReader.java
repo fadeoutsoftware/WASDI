@@ -73,4 +73,8 @@ public class VrtProductReader extends WasdiProductReader {
 		return sDownloadedFileFullPath;
 	}
 
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		return null;
+	}
 }

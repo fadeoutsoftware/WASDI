@@ -13,6 +13,7 @@ import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.gis.GdalUtils;
 
 public class Mosaic {
 	
@@ -110,7 +111,7 @@ public class Mosaic {
 				bVrt = true;
 			}
 			
-			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
+			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
 			
 			ArrayList<String> asArgs = new ArrayList<String>();
 			asArgs.add(sGdalCommand);

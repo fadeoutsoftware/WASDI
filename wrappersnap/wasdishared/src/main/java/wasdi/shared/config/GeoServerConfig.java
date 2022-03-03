@@ -32,4 +32,13 @@ public class GeoServerConfig {
 	 * Gdal retile command for pyramidation
 	 */
 	public String gdalRetileCommand = "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES";
+	
+	/**
+	 * Flag to activate the special debug mode for PublishBand.
+	 * If it is on, in the publish band operation, the input DonwloadedFile is forced to be gathered from the 
+	 * database using /data/wasdi/ instead of the real local folder. After got the file from the db the 
+	 * path is again set to the local one.
+	 * This allows to debug a publish band from a parameter taken from the server
+	 */
+	public boolean localDebugPublisBand = false;
 }

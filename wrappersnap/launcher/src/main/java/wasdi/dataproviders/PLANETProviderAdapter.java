@@ -1,15 +1,12 @@
 package wasdi.dataproviders;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;

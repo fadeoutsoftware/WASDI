@@ -6,7 +6,6 @@
  */
 package wasdi.shared.queryexecutors.eodc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
