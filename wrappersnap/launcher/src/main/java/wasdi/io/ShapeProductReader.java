@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.*;
 
 public class ShapeProductReader extends WasdiProductReader{
@@ -63,24 +67,7 @@ public class ShapeProductReader extends WasdiProductReader{
             	oNodeGroupViewModel.setBands(oBands);
             	
             	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
-            	
-            	
-            	// Bounding Box
-            	oRetViewModel.setBbox("");
-            	
             }
-            /*
-            // Sample code to read the features
-            SimpleFeatureIterator features = oShapefileDataStore.getFeatureSource().getFeatures().features();
-
-            while (features.hasNext()) {
-            	SimpleFeature shp = features.next();
-            	String name = (String)shp.getAttribute("");
-            	MultiPolygon geom = (MultiPolygon) shp.getDefaultGeometry();
-            }
-            
-            features.close();
-            */
             
             // Clean
             oShapefileDataStore.dispose();    	
@@ -146,5 +133,45 @@ public class ShapeProductReader extends WasdiProductReader{
 		return sDownloadedFileFullPath;
 	}
 	
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		return m_oProductFile;
+	}
+	
+	@Override
+    public String getEPSG() {
+		try {
+			String sPrjFile = m_oProductFile.getPath();
+			sPrjFile = sPrjFile.replace(".shp", ".prj");
+			sPrjFile = sPrjFile.replace(".SHP", ".prj");
+			
+			File oPrjFile = new File(sPrjFile);
+			
+			String sWKT = "";
+			
+			if (oPrjFile.exists()) {
+				sWKT = WasdiFileUtils.fileToText(sPrjFile);
+				CoordinateReferenceSystem oCRS = CRS.parseWKT(sWKT);
+				String sEPSG = CRS.lookupIdentifier(oCRS, true);
+				return sEPSG;				
+			}
+			else {
+	    		
+	    		// Try to read the shape
+	            ShapefileDataStore oShapefileDataStore = new ShapefileDataStore(m_oProductFile.toURI().toURL());
+	            
+				// Check the coordinate system
+	            SimpleFeatureCollection oFeatColl = oShapefileDataStore.getFeatureSource().getFeatures();
+				CoordinateReferenceSystem oCRS = oFeatColl.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
+				String sEPSG = CRS.lookupIdentifier(oCRS, true);
+				oShapefileDataStore.dispose();
+				return sEPSG;
+			}
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("ShapeProductReader.getEPSG(): exception " + oEx.toString());
+		}
+		return null;    	
+    }
 
 }

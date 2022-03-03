@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.LauncherMain;
-import wasdi.shared.utils.Utils;
 
 public class CondaProcessorEngine extends DockerProcessorEngine {
 	

@@ -236,7 +236,7 @@ var WasdiApplicationUIController = (function () {
                     sHelpMessage = "There isn't any help message."
                 }
 
-                var oConverter = new showdown.Converter();
+                var oConverter = new showdown.Converter({tables: true});
 
                 oController.m_sHelpHtml = oController.m_oSceService.trustAsHtml(oConverter.makeHtml(sHelpMessage));
             } else {
@@ -409,7 +409,6 @@ var WasdiApplicationUIController = (function () {
      * Generate the JSON that has to be sent to the Procesor
      */
     WasdiApplicationUIController.prototype.generateParamsAndRun = function (sUserProvidedWorkspaceName) {
-        console.log("generateParamsAndRun | sUserProvidedWorkspaceName: ", sUserProvidedWorkspaceName)
 
         let bCheck = this.checkParams();
 
@@ -439,7 +438,7 @@ var WasdiApplicationUIController = (function () {
             } else {
                 let oToday = new Date();
                 let sToday = oToday.toISOString()
-        
+
                 sWorkspaceName = sApplicationName + "_" + sToday;
             }
 

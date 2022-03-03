@@ -235,7 +235,7 @@ public class Utils {
 	 * @param lBytes
 	 * @return
 	 */
-	public static String GetFormatFileDimension(long lBytes) {
+	public static String getFormatFileDimension(long lBytes) {
 		int iUnit = 1024;
 		if (lBytes < iUnit)
 			return lBytes + " B";

@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.shared.utils.gis;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.PatternSyntaxException;
+
+import wasdi.shared.utils.Utils;
 
 /**
  * Utility class for BoundingBox related operations.

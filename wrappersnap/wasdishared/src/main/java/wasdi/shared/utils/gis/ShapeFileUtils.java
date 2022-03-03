@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.shared.utils.gis;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -7,6 +7,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.log4j.Logger;
+
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class ShapeFileUtils {
 	String m_sLoggerPrefix = "ShapeFileUtils."; 
