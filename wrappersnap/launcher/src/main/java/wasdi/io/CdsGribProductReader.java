@@ -309,4 +309,9 @@ public class CdsGribProductReader extends WasdiProductReader {
 		return sFileName;
 	}
 
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		return null;
+	}
+
 }

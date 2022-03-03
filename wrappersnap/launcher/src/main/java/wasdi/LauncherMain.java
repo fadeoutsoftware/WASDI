@@ -680,28 +680,6 @@ public class LauncherMain  {
 
         return "ERROR";
     }
-
-    public static String adjustGdalFolder(String sGdalCommand) {
-        try {
-            String sGdalPath = WasdiConfig.Current.paths.gdalPath;
-
-            if (!Utils.isNullOrEmpty(sGdalPath)) {
-                File oGdalFolder = new File(sGdalPath);
-                if (oGdalFolder.exists()) {
-                    if (oGdalFolder.isDirectory()) {
-                        if (!sGdalPath.endsWith("" + File.separatorChar)) sGdalPath = sGdalPath + File.separatorChar;
-                        sGdalCommand = sGdalPath + sGdalCommand;
-                    }
-                }
-            }
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-
-        return sGdalCommand;
-
-    }
 	
 	public static String toTitleCase(String sInput) {
 	    StringBuilder sTitleCase = new StringBuilder(sInput.length());

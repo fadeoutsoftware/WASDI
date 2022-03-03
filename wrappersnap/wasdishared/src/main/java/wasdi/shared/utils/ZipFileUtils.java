@@ -16,6 +16,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -359,35 +360,70 @@ public class ZipFileUtils {
 
 	/**
 	 * Util method to zip a complete Path, traversing all the subdirectories, using java stream support
-	 * @param sourceDirPath The path to the directory that should be added
-	 * @param zipFilePath the destination Zip File path
+	 * @param sSourceDirPath The path to the directory that should be added
+	 * @param sZipFilePath the destination Zip File path
 	 * @throws IOException
 	 */
-	public void zip(String sourceDirPath, String zipFilePath) throws IOException {
-		Path p = Files.createFile(Paths.get(zipFilePath));
-		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
-			Path pp = Paths.get(sourceDirPath);
-			Files.walk(pp)
+	public void zipFolder(String sSourceDirPath, String sZipFilePath) throws IOException {
+		
+		Path oZipFilePath = Files.createFile(Paths.get(sZipFilePath));
+		
+		try (ZipOutputStream oZipOutputStream = new ZipOutputStream(Files.newOutputStream(oZipFilePath))) {
+			Path oPath = Paths.get(sSourceDirPath);
+			Files.walk(oPath)
 			.filter(path -> !Files.isDirectory(path))
 			.forEach(path -> {
-				ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+				ZipEntry zipEntry = new ZipEntry(oPath.relativize(path).toString());
 				try {
-					zs.putNextEntry(zipEntry);
-					Files.copy(path, zs);
-					zs.closeEntry();
+					oZipOutputStream.putNextEntry(zipEntry);
+					Files.copy(path, oZipOutputStream);
+					oZipOutputStream.closeEntry();
 				} catch (IOException e) {
 					s_oLogger.error(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
 				}
 			});
 		}
 	}
+	
+	/**
+	 * Zip a list of files. They are supposed to be all on the same folder
+	 * @param asSourceFiles
+	 * @param sZipFilePath
+	 * @throws IOException
+	 */
+	public static void zipFiles(ArrayList<String> asSourceFiles, String sZipFilePath) throws IOException {
+		
+		File oCheckExists = new File(sZipFilePath);
+		
+		if (oCheckExists.exists()) {
+			oCheckExists.delete();
+		}
+		
+		Path oZipFilePath = Files.createFile(Paths.get(sZipFilePath));
+		
+		try (ZipOutputStream oZipOutputStream = new ZipOutputStream(Files.newOutputStream(oZipFilePath))) {
+			
+			for (String sFileToZip: asSourceFiles) {
+				
+				File oFileToZip = new File(sFileToZip);
+				
+				Path oPath = Paths.get(oFileToZip.getPath());
+				
+				ZipEntry zipEntry = new ZipEntry(oFileToZip.getName());
+				try {
+					oZipOutputStream.putNextEntry(zipEntry);
+					Files.copy(oPath, oZipOutputStream);
+					oZipOutputStream.closeEntry();
+				} catch (IOException e) {
+					s_oLogger.error("ZipFileUtils.zipFiles: Error during creation of zip archive " );
+				}				
+			}
+		}
+	}
 
 	//courtesy of https://www.baeldung.com/java-compress-and-uncompress
 	public static void zipFile(File oFileToZip, String sFileName, ZipOutputStream oZipOut) {
 		try {
-			//			if (oFileToZip.isHidden()) {
-			//				return;
-			//			}
 			if(oFileToZip.getName().equals(".") || oFileToZip.getName().equals("..")) {
 				return;
 			}
@@ -492,7 +528,7 @@ public class ZipFileUtils {
 			for (File file : files) {
 				if (file.isDirectory()) {
 					if ((simpleName).equalsIgnoreCase(file.getName())) {
-						oZipExtractor.zip(file.getAbsolutePath(), dirPath + simpleName + "_temp" + ".zip");
+						oZipExtractor.zipFolder(file.getAbsolutePath(), dirPath + simpleName + "_temp" + ".zip");
 						files = null;
 						break;
 					} else {

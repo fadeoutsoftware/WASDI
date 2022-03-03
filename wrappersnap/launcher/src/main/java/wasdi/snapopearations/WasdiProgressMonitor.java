@@ -41,12 +41,15 @@ public class WasdiProgressMonitor implements ProgressMonitor {
 	            	
 	                //get process pid
 					m_oProcess.setProgressPerc(m_iComputedIntervals);
-	                //update the process
-	                if (!m_oProcessRepository.updateProcess(m_oProcess)) {
-	                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: Error during process update");
-	                } else {
-	                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS " + m_iComputedIntervals + "% ProcId: " + m_oProcess.getProcessObjId());
-	                }
+					
+					if (m_oProcessRepository!=null) {
+		                //update the process
+		                if (!m_oProcessRepository.updateProcess(m_oProcess)) {
+		                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: Error during process update");
+		                } else {
+		                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS " + m_iComputedIntervals + "% ProcId: " + m_oProcess.getProcessObjId());
+		                }						
+					}
 	                
 	                try {
 						if (LauncherMain.s_oSendToRabbit != null) LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(m_oProcess);
