@@ -616,6 +616,8 @@ var EditorController = (function () {
         oBand.bbox = oPublishedBand.boundingBox;
         oBand.geoserverBoundingBox = oPublishedBand.geoserverBoundingBox;
         oBand.geoserverUrl = oPublishedBand.geoserverUrl;
+        oBand.showLegend=false;
+        oBand.legendUrl = this.getBandLegendUrl(oBand)
 
         // Set the tree node as selected and published
         this.setTreeNodeAsSelected(sNodeID);
@@ -2152,6 +2154,26 @@ var EditorController = (function () {
             //this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox, 'BB', this.m_aoVisibleBands[iIndexLayer].layerId);
 
         }
+    }
+
+    EditorController.prototype.showLayerLegend = function (iLayerIndex) {
+        this.m_aoVisibleBands[iLayerIndex].showLegend = !this.m_aoVisibleBands[iLayerIndex].showLegend;
+    }
+
+    EditorController.prototype.getBandLegendUrl = function (oLayer) {
+
+        if (oLayer == null) return "";
+
+        var sGeoserverUrl = oLayer.geoserverUrl
+
+        if (utilsIsStrNullOrEmpty(sGeoserverUrl)) sGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
+
+        sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+
+        sGeoserverUrl = sGeoserverUrl + "request=GetLegendGraphic&format=image/png&WIDTH=12&HEIGHT=12&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True&LAYER=";
+        sGeoserverUrl = sGeoserverUrl + "wasdi:" + oLayer.layerId;
+
+        return sGeoserverUrl;
     }
 
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
