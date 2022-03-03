@@ -34,7 +34,7 @@ require('./app/dialogs/import_advance_filters/ImportAdvanceFiltersController.js'
 require('./app/dialogs/workflow_manager/WorkFlowManagerController.js');
 require('./app/dialogs/workflow_edit/WorkFlowController.js');
 require('./app/dialogs/style_manager/StyleManagerController.js');
-//require('./app/dialogs/style_edit/StyleController.js');
+require('./app/dialogs/style_edit/StyleController.js');
 require('./app/dialogs/get_list_of_workspace_selected/GetListOfWorkspacesSelectedController.js');
 require('./app/dialogs/processor/ProcessorController.js');
 require('./app/dialogs/workspace_details/WorkspaceDetailsController.js');

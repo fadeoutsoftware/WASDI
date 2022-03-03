@@ -176,22 +176,23 @@ public class StyleResource {
 			}
 
 			// original sld file
-			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + sStyleId + ".sld");
+			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
 			// new sld file
-			File oStyleSldFileTemp = new File(sDownloadRootPath + "styles/" + sStyleId + ".sld.temp");
+			File oStyleSldFileTemp = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp");
 			//if the new one is ok delete the old and rename the ".temp" file
 			// save uploaded file in ".temp" format
 
 			try {
-				writeFile(fileInputStream, oStyleSldFile);
+				writeFile(fileInputStream, oStyleSldFileTemp);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-			// checks that the graph field is valid by checking the nodes
-			try (FileReader oFileReader = new FileReader(oStyleSldFileTemp)) {				
+//			// checks that the Style Xml field is valid
+//			try (FileReader oFileReader = new FileReader(oStyleSldFileTemp)) {
+			try {
 				// Overwrite the old file
 				Files.write(oStyleSldFile.toPath(), Files.readAllBytes(oStyleSldFileTemp.toPath()));
 				// Delete the temp file
@@ -277,11 +278,11 @@ public class StyleResource {
 	@Path("/updatexml")
 	public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
-			@FormDataParam("graphXml") String sGraphXml) {
-		Utils.debugLog("StyleResource.updateXML: StyleId " + sStyleId + " invoke StyleResource.updateGraph");
+			@FormDataParam("styleXml") String sStyleXml) {
+		Utils.debugLog("StyleResource.updateXML: StyleId " + sStyleId + " invoke StyleResource.updateXml");
 
 		// convert string to file and invoke updateGraphFile
-		return updateFile(new ByteArrayInputStream(sGraphXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId);
+		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId);
 	}
 
 	@POST
@@ -289,7 +290,7 @@ public class StyleResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response updateParams(
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("styleid") String sStyleId,
+			@QueryParam("styleId") String sStyleId,
 			@QueryParam("name") String sName,
 			@QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
@@ -440,7 +441,7 @@ public class StyleResource {
 			// Get Download Path on the current WASDI instance
 			String sBasePath = Wasdi.getDownloadPath();
 			sBasePath += "styles/";
-			String sStyleFilePath = sBasePath + oStyle.getStyleId() + ".sld";
+			String sStyleFilePath = sBasePath + oStyle.getName() + ".sld";
 
 			if (!Utils.isNullOrEmpty(sStyleFilePath)) {
 				File oStyleFile = new File(sStyleFilePath);

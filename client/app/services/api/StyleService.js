@@ -17,19 +17,19 @@
      };
 
      // Upload a style by file
-     this.uploadByFile = function (sWorkspaceInput, sName, sDescription, oBody, bIsPublic) {
-         return this.m_oHttp.post(this.APIURL + '/styles/uploadfile?workspace=' + sWorkspaceInput + "&name=" + sName +
+     this.uploadByFile = function (sName, sDescription, oBody, bIsPublic) {
+         return this.m_oHttp.post(this.APIURL + '/styles/uploadfile?' + "name=" + sName +
              "&description=" + sDescription + "&public=" + bIsPublic, oBody, this.m_oOptions);
      };
 
      // Update style xml file
      this.updateStyleFile = function (sStyleId, oBody) {
-         return this.m_oHttp.post(this.APIURL + '/styles/updatefile?styleid=' + sStyleId, oBody, this.m_oOptions);
+         return this.m_oHttp.post(this.APIURL + '/styles/updatefile?styleId=' + sStyleId, oBody, this.m_oOptions);
      }
 
      // Update style parameters
      this.updateStyleParameters = function (sStyleId, sName, sDescription, bIsPublic) {
-         return this.m_oHttp.post(this.APIURL + '/styles/updateparams?styleid=' + sStyleId +
+         return this.m_oHttp.post(this.APIURL + '/styles/updateparams?styleId=' + sStyleId +
              '&name=' + sName +
              '&description=' + sDescription +
              '&public=' + bIsPublic);

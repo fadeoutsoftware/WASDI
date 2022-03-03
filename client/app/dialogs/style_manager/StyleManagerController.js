@@ -27,6 +27,13 @@
         };
 
         this.isUploadingStyle = false;
+        
+        if (utilsIsObjectNullOrUndefined(this.m_oExtras.defaultTab) === true) {
+            this.m_sSelectedStyleTab = 'StyleTab1';
+        } else {
+            this.m_sSelectedStyleTab = this.m_oExtras.defaultTab;
+        }
+
         this.m_bIsLoadingStyles = false;
         this.m_bIsLoadingStyleList = false;
         this.m_bIsJsonEditModeActive = false;
@@ -47,7 +54,7 @@
         this.getStylesByUser();
 
         // model variable that contains the Xml of the style
-        this.m_asWorkflowXml;
+        this.m_asStyleXml;
 
         // support variable enabled when the xml is edited on edit xml tab 
         this.m_bXmlEdited = false;
@@ -113,71 +120,84 @@
         return true;
     };
 
-    StyleManagerController.prototype.selectStyle_ = function(style) {
-        this._selectedStyle = style;
-        this.m_sJson = {};
+    /**
+     * uploadUserStyleOnServer
+     */
 
-        if (!utilsIsStrNullOrEmpty(style.paramsSample)) {
-            this.m_sMyJsonString = decodeURIComponent(style.paramsSample);
+     StyleManagerController.prototype.uploadUserStyleOnServer = function () {
 
-            try {
-                var oParsed = JSON.parse(this.m_sMyJsonString);
-                sPrettyPrint = JSON.stringify(oParsed, null, 2);
-                this.m_sMyJsonString = sPrettyPrint;
-            }
-            catch (oError) {
-
-            }
+        if (utilsIsStrNullOrEmpty(this.m_oStyleFileData.styleName) === true) {
+            this.m_oStyleFileData.styleName = "style";
         }
-        else {
-            this.m_sMyJsonString = "";
+        var oBody = new FormData();
+        oBody.append('file', this.m_oFile[0]);
+
+        this.uploadStyle(this.m_sWorkspaceId, this.m_oStyleFileData.styleName, this.m_oStyleFileData.styleDescription,
+            this.m_oStyleFileData.isPublic, oBody);
+    };
+
+    /**
+     * uploadStyle
+     * @param sWorkspaceId
+     * @param sName
+     * @param sDescription
+     * @param oBody
+     * @returns {boolean}
+     */
+     StyleManagerController.prototype.uploadStyle = function (sWorkspaceId, sName, sDescription, bIsPublic, oBody) {
+        if (utilsIsObjectNullOrUndefined(sWorkspaceId) === true) {
+            return false;
         }
-    }
+        if (utilsIsObjectNullOrUndefined(sName) === true || utilsIsStrNullOrEmpty(sName) === true) {
+            return false;
+        }
+        if (utilsIsObjectNullOrUndefined(sDescription) === true)//|| utilsIsStrNullOrEmpty(sDescription) === true
+        {
+            return false;
+        }
+        if (utilsIsObjectNullOrUndefined(oBody) === true) {
+            return false;
+        }
+        this.isUploadingStyle = true;
+        var oController = this;
+        this.m_oStyleService.uploadByFile(this.m_sWorkspaceId, sName, sDescription, oBody, bIsPublic).then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                //Reload list o workFlows
+                oController.getStylesByUser();
+                oController.cleanAllUploadStyleFields();
+                var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD");
+                utilsVexCloseDialogAfter(4000, oDialog);
+            } else {
+                //TODO ERROR
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
+            }
 
-    StyleManagerController.prototype.selectStyle = function(style) {
-        console.log("selectStyle | style: ", style);
+            oController.isUploadingStyle = false;
+        },function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
+            oController.cleanAllUploadStyleFields();
+            oController.isUploadingStyle = false;
+        });
 
-        //this._selectedStyle = style;
-        //this.m_sJson = {};
+        return true;
+    };
+
+    StyleManagerController.prototype.selectStyle = function(style) {        
+        this.m_oSelectedStyle = style;
 
         this.m_asStyleXml = "";
 
         if (style) {
-            console.log("selectStyle | 1");
-            console.log("selectStyle calling selectStyle | style.styleId: ", style.styleId);
-            console.log("selectStyle calling selectStyle | utilsIsStrNullOrEmpty(style.styleId): ", utilsIsStrNullOrEmpty(style.styleId));
             if (!utilsIsStrNullOrEmpty(style.styleId)) {
-                console.log("selectStyle | 2");
-                console.log("selectStyle calling selectStyle | style.styleId: ", style.styleId);
                 this.getStyleXml(style.styleId);
             }
         }
-
-        /*
-        if (!utilsIsStrNullOrEmpty(style.paramsSample)) {
-            //this.m_sMyJsonString = decodeURIComponent(style.paramsSample);
-
-            try {
-                var oParsed = JSON.parse(this.m_sMyJsonString);
-                sPrettyPrint = JSON.stringify(oParsed, null, 2);
-                this.m_sMyJsonString = sPrettyPrint;
-            }
-            catch (oError) {
-
-            }
-        }
-        else {
-            this.m_sMyJsonString = "";
-        }
-        */
     }
 
     StyleManagerController.prototype.getStyleXml = function (sStyleId) {
-        console.log("getStyleXml | sStyleId: ", sStyleId);
         var oController = this;
         this.m_oStyleService.getStyleXml(sStyleId).then(function (data) {
             oController.m_asStyleXml = data.data;
-            console.log("getStyleXml |  oController.m_asStyleXml: ",  oController.m_asStyleXml);
         });
     }
     
@@ -218,7 +238,6 @@
     };
 
     StyleManagerController.prototype.isPossibleDoUpload = function () {
-        // this.m_oStyleFileData.styleName,this.m_oStyleFileData.styleDescription    this.m_oFile[0]
         var bReturnValue = false;
         if ((utilsIsStrNullOrEmpty(this.m_oStyleFileData.styleName) === false) && (utilsIsStrNullOrEmpty(this.m_oStyleFileData.styleDescription) === false)
             && (utilsIsObjectNullOrUndefined(this.m_oFile[0]) === false)) {
@@ -241,7 +260,10 @@
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult, iDelay) {
-                //oController.getStylesByUser();
+                oController.m_sSelectedStyleTab="StyleTab1";
+
+                //Load styles
+                oController.getStylesByUser();
             });
         });
     }

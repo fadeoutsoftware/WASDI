@@ -229,6 +229,7 @@ wasdiApp.controller("DownloadProductInWorkspaceController", window.DownloadProdu
 wasdiApp.controller("ImportAdvanceFiltersController", window.ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController", window.WorkFlowManagerController);
 wasdiApp.controller("StyleManagerController", window.StyleManagerController);
+wasdiApp.controller("StyleController", window.StyleController);
 wasdiApp.controller("GetListOfWorkspacesController", window.GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", window.ProcessorController);
 wasdiApp.controller("WorkflowController", window.WorkflowController);

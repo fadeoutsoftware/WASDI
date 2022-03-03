@@ -246,7 +246,7 @@ public class WorkflowsResource {
             // save uploaded file in ".temp" format
             
             try {
-                writeFile(fileInputStream, oWorkflowXmlFile);
+                writeFile(fileInputStream, oWorkflowXmlFileTemp);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
