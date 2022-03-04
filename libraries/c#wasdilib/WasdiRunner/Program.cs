@@ -15,6 +15,7 @@ namespace WasdiRunner
 
             try
             {
+                wasdi.WasdiLog("WasdiRunner v1.01");
                 IWasdiRunnable? wasdiRunnable = LoadRunnable(wasdi);
 
                 if (wasdiRunnable == null)
@@ -75,15 +76,21 @@ namespace WasdiRunner
                 if (fileName == null)
                     continue;
 
+                if (fileName == "WasdiLib.dll")
+                {
+                    wasdi.WasdiLog("Jumping WASDI.lib assembly");
+                    continue;
+                }
+
                 Assembly assembly = Assembly.LoadFrom(fileName);
 
-                foreach (Type t in assembly.GetTypes())
+                foreach (Type type in assembly.GetTypes())
                 {
-                    if (typeof(IWasdiRunnable).IsAssignableFrom(t))
+                    if (typeof(IWasdiRunnable).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
                     {
-                        wasdi.WasdiLog("Found class " + t.ToString() + " implementing IWasdiRunnable");
+                        wasdi.WasdiLog("Found class " + type.ToString() + " implementing IWasdiRunnable");
 
-                        return Activator.CreateInstance(t) as IWasdiRunnable;
+                        return Activator.CreateInstance(type) as IWasdiRunnable;
                     }
                 }
             }
