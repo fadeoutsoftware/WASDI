@@ -13,7 +13,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.gis.*;
 
 
 /**

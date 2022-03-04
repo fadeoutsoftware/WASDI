@@ -254,7 +254,7 @@ public class SnapProductReader extends WasdiProductReader {
 
 	        } else {
 	        	
-	        	String sOutputFilePath = "";
+	        	String sOutputFilePath = sBaseDir + sLayerId + ".tif";
 	        	File oOutputFile = new File(sOutputFilePath);
 
 	        	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Managing NON S2 Product Band " + sBand);
@@ -309,6 +309,10 @@ public class SnapProductReader extends WasdiProductReader {
     public String getEPSG() {
 		try {
             String sEPSG = CRS.lookupIdentifier(getSnapProduct().getSceneCRS(), true);
+            
+            if (Utils.isNullOrEmpty(sEPSG)) {
+            	sEPSG = super.getEPSG();
+            }
 			return sEPSG;
 		}
 		catch (Exception oEx) {

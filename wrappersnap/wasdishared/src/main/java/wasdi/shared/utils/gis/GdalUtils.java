@@ -109,6 +109,10 @@ public class GdalUtils {
 				// Create the return object
 				GdalInfoResult oGdalInfoResult = new GdalInfoResult();
 				
+				if (!sOutput.startsWith("{")) {
+					sOutput = sOutput.substring(sOutput.indexOf("{"));
+				}
+				
 				Map<String, Object> aoInfoJson = JsonUtils.jsonToMapOfObjects(sOutput);
 				
 				if (aoInfoJson == null) {

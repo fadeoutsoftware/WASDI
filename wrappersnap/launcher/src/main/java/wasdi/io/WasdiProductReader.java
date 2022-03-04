@@ -1,6 +1,7 @@
 package wasdi.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;

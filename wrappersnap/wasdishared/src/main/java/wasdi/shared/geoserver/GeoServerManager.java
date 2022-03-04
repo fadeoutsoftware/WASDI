@@ -7,17 +7,12 @@ import java.net.MalformedURLException;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
@@ -35,10 +30,7 @@ import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.gis.GdalInfoResult;
-import wasdi.shared.utils.gis.GdalUtils;
 
 /**
  * GeoServerManager: utility class to add layers to geoserver
@@ -324,22 +316,28 @@ public class GeoServerManager {
     	// We use anyhow publishShp for convenience creating the datastore (first step)
     	boolean bRes = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
     	
-    	/*
-    	// Now we create our own featureType
-    	String sFileNotZipped = oShpFile.getPath().replace(".zip", ".shp");
-    	
-    	if (new File(sFileNotZipped).exists() == false) {
-    		sFileNotZipped = oShpFile.getPath().replace(".zip", ".SHP");
-    	}
-    	bRes = createResource(sFileNotZipped, sStoreName ,sEpsg);
-    	
-    	if (bRes) {
-    		// And we configure the layer 
-    		bRes = m_oGsPublisher.configureLayer(m_sWorkspace, sStoreName, configureDefaultStyle(sStyle));
-    	}
-    	*/      
 		return bRes;
 	}
+    
+    /**
+     * Configure a new style for a layer 
+     * @param sLayerId
+     * @param sStyle
+     * @return
+     */
+    public boolean configureLayerStyle(String sLayerId, String sStyle) {
+    	
+    	try {
+        	boolean bRes = m_oGsPublisher.configureLayer(m_sWorkspace, sLayerId, configureDefaultStyle(sStyle));
+        	
+        	return bRes;		
+    	}
+    	catch (Exception oEx) {
+			Utils.debugLog("GeoServerManager.configureLayerStyle: exception " + oEx.toString());
+		}
+    	
+    	return false;
+    }
     
     /**
      * Re-Creation of the createResource: taken from the geosolutions lib, it 
