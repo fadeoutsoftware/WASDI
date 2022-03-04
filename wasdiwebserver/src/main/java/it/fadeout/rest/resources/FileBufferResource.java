@@ -391,6 +391,7 @@ public class FileBufferResource {
 	
 	@GET
 	@Path("/styles")	
+	@Deprecated
 	public Response getStyles(@HeaderParam("x-session-token") String sSessionId)
 	{			
 

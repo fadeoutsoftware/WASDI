@@ -4,14 +4,14 @@
 
 var UploadController = (function() {
 
-    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService,oFileBufferService) {
+    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService, oStyleService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
         this.m_oCatalogService = oCatalogService;
         this.m_oConstantsService = oConstantsService;
         this.m_oProductService = oProductService;
-        this.m_oFileBufferService = oFileBufferService;
+        this.m_oStyleService = oStyleService;
         this.m_aoListOfFiles = [];
         this.m_bIsAccountCreated = null;
         this.m_sEmailNewPassword="";
@@ -31,14 +31,14 @@ var UploadController = (function() {
 
         var oController = this;
 
-        this.m_oFileBufferService.getStyles().then(function(data){
+        this.m_oStyleService.getStylesByUser().then(function(data) {
                 if(data.status !== 200)
                 {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
                     utilsVexCloseDialogAfter(5000,oDialog);
                 }
                 else {
-                    oController.m_asStyles = data.data;
+                    oController.m_asStyles = data.data.map(item => item.name);
                     oController.m_aoStylesMap = oController.m_asStyles.map(name => ({name}))
                 }
             },function(data){
@@ -267,7 +267,7 @@ var UploadController = (function() {
         'ConstantsService',
         'CatalogService',
         'ProductService',
-        'FileBufferService'
+        'StyleService'
     ];
     return UploadController;
 })();
