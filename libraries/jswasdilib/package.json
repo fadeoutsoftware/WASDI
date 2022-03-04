@@ -1,6 +1,6 @@
 {
   "name": "wasdi",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
   "main": "build/index.js",
   "types": "build/types/index.d.ts",

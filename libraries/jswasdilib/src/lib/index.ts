@@ -396,13 +396,17 @@ class Wasdi {
 
   /**
    * Returns the workspace Id from the name. It search through the workspaces
-   * of the current user.
-   * @param sName Workspace name to be searched for
+   * of the current logged user.
+   * @param wsName Workspace name to be searched for
    * @returns A string containing the workspace Id, if the name was found. An empty string otherwise
    */
-  getWorkspaceIdByName(sName){
-
-
+  getWorkspaceIdByName(wsName: string) {
+    this.getWorkspaces().forEach(
+      (a: { workspaceName: string; workspaceId: string }) => {
+        if (a.workspaceName == wsName) return a.workspaceId;
+      }
+    );
+    return "";
   }
 
   /**
@@ -410,51 +414,62 @@ class Wasdi {
    */
   getProductsByActiveWorkspace() {
     let productList = this.getObject(
-        this._m_sBaseUrl + "/product/byws",
-        "?workspace=" + this.ActiveWorkspace
+      this._m_sBaseUrl + "/product/byws",
+      "?workspace=" + this.ActiveWorkspace
     );
     console.log(
-        "[INFO] jswasdilib.productListByActiveWorkspace: Products in the active workspace "
+      "[INFO] jswasdilib.productListByActiveWorkspace: Products in the active workspace "
     );
     productList.forEach((a: { name: string }) => console.log(a.name));
     return productList;
+  }
+
+  getProductsByWorkspace(workspaceName: string) {
+    return this.getProductsByWorkspaceId(
+      this.getWorkspaceIdByName(workspaceName)
+    );
   }
 
   /**
    * Retrieve a list of workspace of the current logged user.
    */
-  getProductsByWorkspaceId(workspace : string) {
+  getProductsByWorkspaceId(workspaceId: string) {
     let productList = this.getObject(
-        this._m_sBaseUrl + "/product/byws",
-        "?workspace=" + workspace
+      this._m_sBaseUrl + "/product/byws",
+      "?workspace=" + workspaceId
     );
     console.log(
-        "[INFO] jswasdilib.productListByWorkspace: Products in the active workspace "
+      "[INFO] jswasdilib.productListByWorkspace: Products in the active workspace "
     );
     productList.forEach((a: { name: string }) => console.log(a.name));
     return productList;
   }
 
-
   /**
    * Delete a Product from the current active workspace
    * @param sProduct the product name with extension
    */
-  deleteProduct(sProduct : string) {
+  deleteProduct(sProduct: string) {
     let response = this.getObject(
-        this._m_sBaseUrl + "/product/delete?name=" + sProduct +"&deletefile=true&workspace=" +this._m_sActiveWorkspace + "&deletelayer=true" ,
-        ""
+      this._m_sBaseUrl +
+        "/product/delete?name=" +
+        sProduct +
+        "&deletefile=true&workspace=" +
+        this._m_sActiveWorkspace +
+        "&deletelayer=true",
+      ""
     );
     if (response?.ok) {
       console.log(
-          "[INFO] jswasdilib.deleteProduct: Product " + sProduct + " deleted"
+        "[INFO] jswasdilib.deleteProduct: Product " + sProduct + " deleted"
       );
-    }
-    else {
+    } else {
       console.log(
-          "[ERROR] jswasdilib.deleteProduct: Can't delete product "+ sProduct + " in workspace " + this._m_sActiveWorkspace
+        "[ERROR] jswasdilib.deleteProduct: Can't delete product " +
+          sProduct +
+          " in workspace " +
+          this._m_sActiveWorkspace
       );
-
     }
     return response?.ok;
   }
@@ -465,9 +480,11 @@ class Wasdi {
    * @param asOutputFileNames An array of string containing the input file (with extension)
    * @param sWorkflowName The name of the workflow to be executed
    */
-  executeWorkflow(asInputFileNames : string[], asOutputFileNames : string[], sWorkflowName: string){
-
-  }
+  executeWorkflow(
+    asInputFileNames: string[],
+    asOutputFileNames: string[],
+    sWorkflowName: string
+  ) {}
 
   /**
    * Opens a workspace and set it as active workspace. The active workspace is the one used
