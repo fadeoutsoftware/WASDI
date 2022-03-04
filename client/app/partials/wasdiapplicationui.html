@@ -43,16 +43,13 @@
                                     New Workspace
                                 </label>
                                 
-                                <div class="col col-sm-8" ng-show="workspaceChose == 'new'">
-                                    <input type="text" name="workspaceName" placeholder="WORKSPACE NAME" ng-model="workspaceName"
-                                        class="my-input-text ng-pristine ng-valid ng-empty ng-touched" />
-                                </div>
+                                <input type="text" name="workspaceName" placeholder="[AUTO NAME]" ng-model="workspaceName"
+                                    class="wsNameTextBox ng-pristine ng-valid ng-empty ng-touched"  ng-show="workspaceChose == 'new'"/>
                             </div>
                             <div class="form-check d-flex align-items-center mr-2">
                                 <input class="form-check-input mr-2" type="radio" ng-model="workspaceChose"
                                     name="exampleRadios" id="openWorkspace" value="open"
                                     ng-click="m_oController.openWorkspaceClicked()">
-                                <!--MOSTRA SOLO SE NON SELEZIONATO-->
                                 <label class="form-check-label" for="openWorkspace">
                                     <span>Open Workspace</span>
                                 </label>
