@@ -572,7 +572,35 @@ public class ProductResource {
             if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle))) {
                 // Update the 2 fields that can be updated
                 oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
-                oDownloaded.setDefaultStyle(oProductViewModel.getStyle());             
+                oDownloaded.setDefaultStyle(oProductViewModel.getStyle());
+                
+                try {
+                    if (!sOriginalStyle.equals(sNewStyle)) {
+                    	PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+                    	List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oProductViewModel.getName());
+                    	
+                    	for (PublishedBand oPublishedBand : aoPublishedBands) {
+                    		String sGeoServerUrl = oPublishedBand.getGeoserverUrl();
+                    		
+                    		if (Utils.isNullOrEmpty(sGeoServerUrl)) {
+                    			sGeoServerUrl = WasdiConfig.Current.geoserver.address;
+                    		}
+                    		else {
+                    			if (sGeoServerUrl.endsWith("/ows")) {
+                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-4);
+                    			}
+                    		}
+                    		
+                    		GeoServerManager oGeoServerManager = new GeoServerManager(sGeoServerUrl, WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
+                    		oGeoServerManager.configureLayerStyle(oPublishedBand.getLayerId(), sNewStyle);
+                    	}
+                    	
+                    	
+                    }                	
+                }
+                catch (Exception oStyleEx) {
+                	Utils.debugLog("ProductResource.UpdateProductViewModel: Exception changing geoserver style " + oStyleEx.toString());
+				}
 
                 // Save
                 if (oDownloadedFilesRepository.updateDownloadedFile(oDownloaded) == false) {
