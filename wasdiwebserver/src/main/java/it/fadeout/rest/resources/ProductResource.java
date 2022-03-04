@@ -576,10 +576,13 @@ public class ProductResource {
                 
                 try {
                     if (!sOriginalStyle.equals(sNewStyle)) {
+                    	
                     	PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-                    	List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oProductViewModel.getName());
+                    	List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oDownloaded.getFilePath());
                     	
                     	for (PublishedBand oPublishedBand : aoPublishedBands) {
+                    		Utils.debugLog("ProductResource.UpdateProductViewModel: change style for " + oPublishedBand.getLayerId());
+                    		
                     		String sGeoServerUrl = oPublishedBand.getGeoserverUrl();
                     		
                     		if (Utils.isNullOrEmpty(sGeoServerUrl)) {
@@ -591,11 +594,39 @@ public class ProductResource {
                     			}
                     		}
                     		
+                    		Utils.debugLog("ProductResource.UpdateProductViewModel: sGeoServerUrl " + sGeoServerUrl);
                     		GeoServerManager oGeoServerManager = new GeoServerManager(sGeoServerUrl, WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
-                    		oGeoServerManager.configureLayerStyle(oPublishedBand.getLayerId(), sNewStyle);
+                    		
+                    		
+                    		
+                    		if (!oGeoServerManager.styleExists(sNewStyle)) {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: style does not exists: add it");
+                    			
+                                String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
+                                if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
+                                sStylePath += "styles" + File.separator;
+
+                                // Set the style file
+                                sStylePath += sNewStyle + ".sld";
+
+                                File oStyleFile = new File(sStylePath);
+
+                                // Do we have the file?
+                                if (oStyleFile.exists()) {
+                                	oGeoServerManager.publishStyle(sStylePath);
+                                }
+                                else {
+                                	Utils.debugLog("ProductResource.UpdateProductViewModel: style file not found, this will be a problem");
+                                }
+                    		}
+                    		
+                    		if (oGeoServerManager.configureLayerStyle(oPublishedBand.getLayerId(), sNewStyle)) {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: style changed");
+                    		}
+                    		else {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: error changing style");
+                    		}
                     	}
-                    	
-                    	
                     }                	
                 }
                 catch (Exception oStyleEx) {
