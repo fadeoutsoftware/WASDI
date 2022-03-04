@@ -130,6 +130,11 @@ namespace WasdiLib
 
 			if (!File.Exists(sConfigFilePath))
 			{
+				sConfigFilePath = Path.GetFullPath("../../../appsettings.json");
+			}
+
+			if (!File.Exists(sConfigFilePath))
+			{
 				_logger.LogError($"Init: \"{sConfigFilePath}\" is not a valid path for a config file, aborting");
 				return false;
 			}
@@ -225,6 +230,11 @@ namespace WasdiLib
 			{
 				_logger.LogWarning("Init: the parameters-file path is not set, trying to use the parameters.json file");
 				m_sParametersFilePath = Path.GetFullPath("parameters.json");
+			}
+
+			if (String.IsNullOrEmpty(m_sParametersFilePath))
+			{
+				m_sParametersFilePath = Path.GetFullPath("../../../parameters.json");
 			}
 
 			if (File.Exists(m_sParametersFilePath))
