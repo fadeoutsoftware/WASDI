@@ -647,15 +647,6 @@ class Wasdi {
     this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
   }
 
-  /**
-   * Retrieves a list of products from the current active workspace
-   */
-  getProductsActiveWorkspace() {
-    return this.getObject(
-      this._m_sWorkspaceBaseUrl + "/product/byws",
-      "?workspace=" + this._m_sActiveWorkspace
-    );
-  }
 
   /**
    * Publish a band of the particular product selected. To obtain a list of available bands, a function
@@ -665,7 +656,7 @@ class Wasdi {
    */
   publishBand(fileName: string, bandName: string) {
     // search filename in the current workspace
-    let file = this.getProductsActiveWorkspace().find(
+    let file = this.getProductsByActiveWorkspace().find(
       (a: { fileName: string }) => a.fileName == fileName
     );
     if (file && file.bandsGroups) {
