@@ -254,6 +254,11 @@ public class Publishband extends Operation {
             
             String sEPSG = oFileToPublishReader.getEPSG();
             
+            if (Utils.isNullOrEmpty(sEPSG)) {
+            	m_oLocalLogger.error("Publishband.executeOperation: EPSG is still null. Try to recover with default EPSG:4326");
+            	sEPSG = "EPSG:4326";
+            }
+            
             if (sOutputFilePath.toLowerCase().endsWith(".shp")) {
                 m_oLocalLogger.debug("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
                 sLayerId = oPublisher.publishShapeFile(sOutputFilePath, asCopiedFiles, sLayerId, sEPSG, sStyle, oGeoServerManager);

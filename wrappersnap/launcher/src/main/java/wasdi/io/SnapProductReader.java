@@ -311,12 +311,13 @@ public class SnapProductReader extends WasdiProductReader {
             String sEPSG = CRS.lookupIdentifier(getSnapProduct().getSceneCRS(), true);
             
             if (Utils.isNullOrEmpty(sEPSG)) {
+            	LauncherMain.s_oLogger.error("SnapProductReader.getEPSG(): sEPSG is null, try with gdal");
             	sEPSG = super.getEPSG();
             }
 			return sEPSG;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): exception " + oEx.toString());
+			LauncherMain.s_oLogger.error("SnapProductReader.getEPSG(): exception " + oEx.toString());
 		}
 		return null;    	
     }
