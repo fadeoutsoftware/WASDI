@@ -647,7 +647,6 @@ class Wasdi {
     this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
   }
 
-
   /**
    * Publish a band of the particular product selected. To obtain a list of available bands, a function
    * that retrieves the product details can be used.
@@ -666,7 +665,7 @@ class Wasdi {
       if (band) {
         console.log("[INFO] jswasdilib.publishBand: Band found, begin publish");
         let published = this.getObject(
-          this._m_sWorkspaceBaseUrl + "/filebuffer/publishband",
+          this._m_sBaseUrl + "/filebuffer/publishband",
           "?fileUrl=" +
             fileName +
             "&workspace=" +
