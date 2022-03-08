@@ -66,6 +66,7 @@ If you already know WASDI features and you are a Python developer check out the 
    SynchAsynch.rst
    JavascriptTutorial.rst
    C#Tutorial.rst
+   UITutorial.rst
 
 
 Reference center
