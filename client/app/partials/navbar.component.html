@@ -93,7 +93,7 @@
 
                         <!-- HOME BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ui-sref="root.workspaces" >
+                            <a ng-click="m_oController.openWorkspaces();" href=""   >
                                 <i class="fa fa-save fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>

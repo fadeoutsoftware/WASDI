@@ -2,11 +2,12 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
+    function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
         oModalService, oTranslate, oCatalogService,
         $window) {
         // Reference to the needed Services
+        this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oLocation = $location;
@@ -24,7 +25,10 @@ var EditorController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
 
-
+        if (this.m_oConstantsService.getActiveWorkspace()) {
+            this.m_oRootScope.title = this.m_oConstantsService.getActiveWorkspace().name;
+        }
+        
         this.m_oTranslate = oTranslate;
         this.m_oCatalogService = oCatalogService;
         // Flag to know if in the big map is 2d (true) or 3d (false)
@@ -2197,6 +2201,7 @@ var EditorController = (function () {
     };
 
     EditorController.$inject = [
+        '$rootScope',
         '$scope',
         '$location',
         '$interval',

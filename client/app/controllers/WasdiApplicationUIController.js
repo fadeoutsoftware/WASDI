@@ -458,6 +458,8 @@ var WasdiApplicationUIController = (function () {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
                 });
 
+                oController.m_oRootScope.title = sWorkspaceName;
+
             }
                 , function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
