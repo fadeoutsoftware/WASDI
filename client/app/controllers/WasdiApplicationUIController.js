@@ -466,7 +466,7 @@ var WasdiApplicationUIController = (function () {
                 });
         } else {
             if (this.m_oSelectedWorkspace) {
-                this.m_oRootScope.title = this.m_oSelectedWorkspace.name;
+                this.m_oRootScope.title = this.m_oSelectedWorkspace.workspaceName;
             }
 
             this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
