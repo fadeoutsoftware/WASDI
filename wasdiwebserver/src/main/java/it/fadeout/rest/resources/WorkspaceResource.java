@@ -606,7 +606,9 @@ public class WorkspaceResource {
 
 							// Get the list of published bands by product name
 							PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
-							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(sProductName);
+							
+							
+							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId) + sProductName);
 
 							// For each published band
 							for (PublishedBand oPublishedBand : aoPublishedBands) {
