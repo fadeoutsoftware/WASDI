@@ -11,14 +11,15 @@ namespace WasdiLib.Configuration
 {
     internal class Startup
     {
-        public static IServiceProvider? ServiceProvider;
-        public static IConfigurationRoot? ConfigurationRoot;
+        public static IServiceProvider ServiceProvider;
+        public static IConfigurationRoot ConfigurationRoot;
+        private static IServiceCollection aoServicies;
 
-        public static void RegisterServices()
+        internal static void RegisterServices()
         {
 
             // configure services
-            var aoServicies = new ServiceCollection()
+            aoServicies = new ServiceCollection()
                 .AddScoped<IProcessWorkspaceService, ProcessWorkspaceService>()
                 .AddScoped<IProductService, ProductService>()
                 .AddScoped<IWasdiService, WasdiService>()
@@ -31,18 +32,27 @@ namespace WasdiLib.Configuration
                 .AddScoped<IWorkflowRepository, WorkflowRepository>()
                 .AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 
+            // add HttpClients extension
+            aoServicies.ConfigureHttpClients();
+
+            ServiceProvider = aoServicies.BuildServiceProvider();
+        }
+
+        
+        internal static void RegisterLogger(bool logLevelVerbose)
+        {
             // configure logger
             aoServicies
                 .AddLogging(oConfigure =>
                 {
-                    if (File.Exists("WasdiLib.nlog.config")) oConfigure.AddNLog("WasdiLib.nlog.config");
+                    if (File.Exists("WasdiLib.nlog.config"))
+                        oConfigure.AddNLog("WasdiLib.nlog.config");
+
                     oConfigure.AddConsole();
                 })
-                .Configure<LoggerFilterOptions>(oOptions => oOptions.MinLevel = LogLevel.Error);
-
-
-            // add HttpClients extension
-            aoServicies.ConfigureHttpClients(ConfigurationRoot);
+                .Configure<LoggerFilterOptions>(oOptions => 
+                    oOptions.MinLevel = (logLevelVerbose ? LogLevel.Information : LogLevel.Error)
+                );
 
             ServiceProvider = aoServicies.BuildServiceProvider();
         }
@@ -65,7 +75,7 @@ namespace WasdiLib.Configuration
 
         static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs exception)
         {
-            var _logger = ServiceProvider?.GetService<ILogger<WasdiLib>>();
+            var _logger = ServiceProvider?.GetService<ILogger<Wasdi>>();
             _logger?.LogError(exception.ExceptionObject as Exception, "An error has occured" + Environment.NewLine);
             _logger?.LogWarning("Exiting because an error occured! Please check logs for error details.");
             Environment.Exit(1);

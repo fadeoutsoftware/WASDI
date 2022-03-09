@@ -372,7 +372,7 @@ namespace WasdiLib.Repositories
             return await response.ConvertResponse<PrimitiveResult>();
         }
 
-        public async Task<List<QueryResultViewModel>> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
+        public async Task<List<QueryResult>> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
         {
             _logger.LogDebug("SearchQueryList()");
 
@@ -385,7 +385,7 @@ namespace WasdiLib.Repositories
             var response = await _wasdiHttpClient.PostAsync(sUrl, requestPayload);
             response.EnsureSuccessStatusCode();
 
-            return await response.ConvertResponse<List<QueryResultViewModel>>();
+            return await response.ConvertResponse<List<QueryResult>>();
         }
 
         public async Task<PrimitiveResult> FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox)

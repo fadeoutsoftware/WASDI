@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WasdiLib.Models
 {
-    public class QueryResultViewModel
+    public class QueryResult
     {
 
         public string Preview { get; set; }
@@ -17,6 +17,6 @@ namespace WasdiLib.Models
         public string Footprint { get; set; }
         public string Provider { get; set; }
 
-        public Dictionary<string, string> properties { get; set; }
+        public Dictionary<string, string> Properties { get; set; }
     }
 }

@@ -68,7 +68,7 @@ namespace WasdiLib.Services
             return _repository.ProcessingMosaic(sUrl, sSessionId, oMosaicSetting).GetAwaiter().GetResult();
         }
 
-        public List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
+        public List<QueryResult> SearchQueryList(string sUrl, string sSessionId, string sQueryBody)
         {
             _logger.LogDebug("SearchQueryList()");
 
