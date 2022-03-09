@@ -465,6 +465,10 @@ var WasdiApplicationUIController = (function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
                 });
         } else {
+            if (this.m_oSelectedWorkspace) {
+                this.m_oRootScope.title = this.m_oSelectedWorkspace.name;
+            }
+
             this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
         }
     }
