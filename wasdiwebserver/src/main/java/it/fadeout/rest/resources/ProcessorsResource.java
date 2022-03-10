@@ -764,9 +764,7 @@ public class ProcessorsResource  {
 	public RunningProcessorViewModel runPost(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("parent") String sParentProcessWorkspaceId, String sEncodedJson) throws Exception {
-		Utils.debugLog("ProcessorsResource.run( Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
-		
-		Utils.debugLog("ProcessorsResource.internalRun: run@POST");
+		Utils.debugLog("ProcessorsResource.runPost( Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " )");
 		return internalRun(sSessionId, sName, sEncodedJson, sWorkspaceId, sParentProcessWorkspaceId);
 	}
 	

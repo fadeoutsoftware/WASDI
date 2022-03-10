@@ -589,9 +589,12 @@ public class ProductResource {
                     			sGeoServerUrl = WasdiConfig.Current.geoserver.address;
                     		}
                     		else {
-                    			if (sGeoServerUrl.endsWith("/ows")) {
-                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-4);
+                    			if (sGeoServerUrl.endsWith("/ows?")) {
+                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-5);
                     			}
+                    			else if (sGeoServerUrl.endsWith("/ows")) {
+                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-4);
+                    			}                    			
                     		}
                     		
                     		Utils.debugLog("ProductResource.UpdateProductViewModel: sGeoServerUrl " + sGeoServerUrl);
