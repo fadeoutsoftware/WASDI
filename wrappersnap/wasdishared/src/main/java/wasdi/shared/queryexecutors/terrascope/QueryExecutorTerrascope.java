@@ -137,17 +137,23 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	 * @return the query with the adjusted dates
 	 */
 	private static String adjustUserProvidedDatesTo2020(String sQuery) {
-		if (sQuery.contains("platformname:WorldCover") || sQuery.contains("platformname:DEM")) {
-			String sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("[", sQuery.indexOf("beginPosition")) + 1, sQuery.indexOf("TO", sQuery.indexOf("beginPosition"))).trim();
-			String sReplacedWithDate = "2020-01-01T00:00:00.000Z";
-
-			sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
-
-			sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("TO", sQuery.indexOf("beginPosition")) + 3, sQuery.indexOf("]", sQuery.indexOf("beginPosition"))).trim();
-			sReplacedWithDate = Utils.formatToYyyyDashMMDashdd(new Date()) + "T23:59:59.999Z";
-
-			sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
+		if (!sQuery.contains("platformname:WorldCover") && !sQuery.contains("platformname:DEM")) {
+			return sQuery;
 		}
+
+		if (!sQuery.contains("beginPositionr") || !sQuery.contains("endPosition")) {
+			return sQuery;
+		}
+
+		String sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("[", sQuery.indexOf("beginPosition")) + 1, sQuery.indexOf("TO", sQuery.indexOf("beginPosition"))).trim();
+		String sReplacedWithDate = "2020-01-01T00:00:00.000Z";
+
+		sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
+
+		sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("TO", sQuery.indexOf("beginPosition")) + 3, sQuery.indexOf("]", sQuery.indexOf("beginPosition"))).trim();
+		sReplacedWithDate = Utils.formatToYyyyDashMMDashdd(new Date()) + "T23:59:59.999Z";
+
+		sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
 
 		return sQuery;
 	}
