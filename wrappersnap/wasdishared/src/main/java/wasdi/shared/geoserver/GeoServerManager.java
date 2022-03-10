@@ -260,6 +260,23 @@ public class GeoServerManager {
     }
     
     /**
+     * Removes a style to geoserver
+     * @param sStyleFile Path of the sld file
+     * @return
+     */
+    public boolean removeStyle(String sStyleFile) {
+    	File oFile = new File(sStyleFile);
+    	
+    	if (oFile.exists()) {
+    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
+    		return m_oGsPublisher.removeStyle(sStyleName);
+    	}
+    	else {
+    		return false;
+    	}
+    }
+    
+    /**
      * Check if a style exists
      * @param sStyle
      * @return
