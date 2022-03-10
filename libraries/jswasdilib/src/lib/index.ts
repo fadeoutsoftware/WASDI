@@ -31,10 +31,6 @@ class Wasdi {
   _m_sWorkspaceName = "";
   _m_sWorkspaceId = "";
 
-  _m_aoRunningProcessId: string[];
-
-  _m_asRunningProcessorIds: string[];
-
   constructor() {
     this._m_sUser = undefined;
     this._m_sPassword = undefined;
@@ -565,7 +561,7 @@ class Wasdi {
         jsonParameters
       );
       if (response.processingIdentifier) {
-        this._m_aoRunningProcessId.push(response.processingIdentifier);
+        //this._m_aoRunningProcessId.push(response.processingIdentifier);
       }
       return response;
     } else {
@@ -642,11 +638,11 @@ class Wasdi {
 
   /**
    * Prints details about the status if the processes launched during the last session
-   */
+
   printProcesses() {
     this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
   }
-
+   */
   /**
    * Publish a band of the particular product selected. To obtain a list of available bands, a function
    * that retrieves the product details can be used.
