@@ -141,7 +141,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			return sQuery;
 		}
 
-		if (!sQuery.contains("beginPositionr") || !sQuery.contains("endPosition")) {
+		if (!sQuery.contains("beginPosition") || !sQuery.contains("endPosition")) {
 			return sQuery;
 		}
 
