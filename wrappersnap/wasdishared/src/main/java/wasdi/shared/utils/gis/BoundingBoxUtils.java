@@ -1,5 +1,6 @@
 package wasdi.shared.utils.gis;
 
+import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,50 @@ public class BoundingBoxUtils {
 	private BoundingBoxUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
-
+	
+	
+	/**
+	 * Get a WKT Polygon Representation of a lat lon rectangle
+	 * @param dSouth South coordinate
+	 * @param dWest West  coordinate
+	 * @param dNorth North  coordinate
+	 * @param dEast East  coordinate
+	 * @return WKT representation 
+	 */
+	public static String getWKTPolygon(double dSouth, double dWest, double dNorth, double dEast ) {
+		
+		
+		String sFootPrint = "POLYGON(( " + dWest + " " +dSouth + "," + dWest + " " + dNorth + "," + dEast + " " + dNorth + "," + dEast + " " + dSouth + "," + dWest + " " +dSouth + "))";
+		
+		return sFootPrint;
+		
+	}
+	
+	/**
+	 * Check interesection between two rectangle bboxes
+	 * @param dSouth1 Rect1 south coordinate
+	 * @param dWest1 Rect1 west coordinate
+	 * @param dNorth1 Rect1 north coordinate
+	 * @param dEast1 Rect1 east coordinate
+	 * @param dSouth2 Rect2 south coordinate
+	 * @param dWest2 Rect2 west coordinate
+	 * @param dNorth2 Rect2 north coordinate
+	 * @param dEast2 Rect2 east coordinate
+	 * @return
+	 */
+	public static boolean bboxIntersects(double dSouth1, double dWest1, double dNorth1, double dEast1, double dSouth2, double dWest2, double dNorth2, double dEast2) {
+		
+		Rectangle2D oBbox1 = new Rectangle2D.Double(dWest1, dSouth1, dEast1-dWest1, dNorth1-dSouth1);
+		Rectangle2D oBbox2 = new Rectangle2D.Double(dWest2, dSouth2, dEast2-dWest2, dNorth2-dSouth2);
+		
+		return oBbox1.intersects(oBbox2);
+	}
+	
+	/**
+	 * Parse a bbox string in the format north, west, south, east in a list of doubles
+	 * @param sBoundingBox
+	 * @return
+	 */
 	public static List<Double> parseBoundingBox(String sBoundingBox) {
 		if (sBoundingBox != null && !sBoundingBox.contains("null")) {
 			try {

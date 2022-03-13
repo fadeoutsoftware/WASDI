@@ -30,6 +30,7 @@ import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -100,28 +101,50 @@ public class GeoServerManager {
     }
     
     /**
-     * Get the bbox as detected by Geoserver
+     * Get the bbox as detected by Geoserver as a String
      * @param sLayerId Layer id to query
      * @return bbox string in format "{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}"
      */
     public String getLayerBBox(String sLayerId) {
     	
     	try {
-        	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
-        	RESTResource oRes = m_oGsReader.getResource(oLayer);
-        	RESTBoundingBox oBbox = oRes.getLatLonBoundingBox();
+        	RESTBoundingBox oBbox = getLayerRESTBBox(sLayerId);
         	
-        	String sRet = String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", 
-        			oBbox.getMinY(), oBbox.getMinX(), oBbox.getCRS().replace("\"", "\\\\\\\""), oBbox.getMaxY(), oBbox.getMaxX());
+        	if (oBbox != null) {
+            	String sRet = String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", 
+            			oBbox.getMinY(), oBbox.getMinX(), oBbox.getCRS().replace("\"", "\\\\\\\""), oBbox.getMaxY(), oBbox.getMaxX());
+            	
+            	return sRet;        		
+        	}
+        	else {
+        		return "";
+        	}
         	
-        	return sRet;    		
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
     		Utils.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return "";
 		}
-    	
+    }
+    
+    /**
+     * Get the bbox as detected by Geoserver as a RESTBoundingBox object
+     * @param sLayerId Layer id to query
+     * @return bbox string in format "{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}"
+     */    
+    public RESTBoundingBox getLayerRESTBBox(String sLayerId) {
+    	try {
+        	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
+        	RESTResource oRes = m_oGsReader.getResource(oLayer);
+        	RESTBoundingBox oBbox = oRes.getLatLonBoundingBox();
+          	return oBbox;    		
+    	}
+    	catch (Exception oEx) {
+    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		Utils.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
+    		return null;
+		}    	
     }
 
     /**
@@ -154,6 +177,21 @@ public class GeoServerManager {
 
     	return false;
     }
+    
+    
+    /**
+     * Checks if a layer exists
+     * @param sLayerId layer id to check
+     * @return true if exists, false if it does not exists
+     */
+    public boolean layerExists(String sLayerId) {
+
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
+    	
+    	if (oLayer == null) return false;
+    	return true;
+    }
+    
     
     /**
      * Publish a raster that had Pyramidization

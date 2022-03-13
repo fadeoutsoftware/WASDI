@@ -478,7 +478,23 @@
                     "indexvalue":"10m_2020_V1"
                 }
             ]
-        }
+        },
+        {
+            "name": "THEMATICS",
+            "indexname": "platformname",
+            "indexvalue": "StaticFiles",
+            "selected": true,
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015",
+                    "regex": ".*",
+                    "indexvalue":"ESA_CCI_LAND_COVER_2015"
+
+                }
+            ]
+        }        
     ],
     "orbitsearch":{
         "sensortypes":["SAR","Optical"],
