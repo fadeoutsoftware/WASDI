@@ -48,6 +48,8 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 			String sCrs = asQueryParts[2];
 			String sBbox = asQueryParts[3];
 			String sOutputFileName = asQueryParts[4];
+			
+			String []asBboxParts = sBbox.split(",");
 	    	
 	    	String sUrl = asQueryParts[0];
 	    	
@@ -58,7 +60,9 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	    	sUrl += "wcs?service=WCS&version=2.0.0&request=GetCoverage&coverageId=wasdi:";
 	    	sUrl += sLayerId;
 	    	sUrl += "&crs="+"urn:ogc:def:crs:"+sCrs;
-	    	sUrl += "&bbox=" + sBbox;
+	    	//sUrl += "&bbox=" + sBbox;
+	    	sUrl += "&subset=Lat(" + asBboxParts[1] + "," + asBboxParts[3] +")";
+	    	sUrl += "&subset=Long(" + asBboxParts[0] + "," + asBboxParts[2] +")";
 	    	sUrl += "&FORMAT=image/tiff;application=geotiff&GEOTIFF:COMPRESSION=LZW";
 	    	
 	    	m_oLogger.debug("STATICSProviderAdapter.executeDownloadFile: Generated URL: " + sUrl);
