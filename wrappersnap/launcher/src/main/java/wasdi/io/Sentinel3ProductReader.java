@@ -104,6 +104,9 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	 */
 	@Override
 	public Product getSnapProduct() {
+		if(m_bSnapReadAlreadyDone) {
+			return m_oProduct;
+		}
 		
 		//prepare path
 		String sBase = null;
@@ -127,10 +130,9 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		
 		//try reading files until a good one is found
 		for (String sFileName : asNames) {
-			if(null!=m_oProduct) {
+			if(null==m_oProduct) {
 				readProductBandFromFile(sBase, sFileName);
 			} else {
-				m_bSnapReadAlreadyDone = true;
 				break;
 			}
 		}
@@ -148,8 +150,17 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	private void readProductBandFromFile(String sBase, String sFileName) {
 		try {
 			m_oProductFile = new File(sBase + sFileName);
+			if(!m_oProductFile.exists()) {
+				LauncherMain.s_oLogger.warn("Sentinel3ProductReader.getSnapProduct: file " + sBase + sFileName + " does not exist");
+				return;
+			}
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
+			}
+			if(null!=m_oProduct) {
+				m_bSnapReadAlreadyDone = true;
+			} else {
+				m_bSnapReadAlreadyDone = false;
 			}
 		}
 		catch (Exception oE) {
