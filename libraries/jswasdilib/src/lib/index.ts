@@ -637,6 +637,35 @@ class Wasdi {
   }
 
   /**
+   * Util method
+   * @param ms to be waited
+   * @private
+   */
+  private delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Returns an object containing 2 string with WMS parameters:
+   * - server e.g. "https://[URL]/geoserver/ows?" if using Geoserver
+   * - layerId
+   * @param sProductName the Product name
+   * @param sBand The band required
+   */
+  getLayerWMS(sProductName: string, sBand: string) {
+    let sourceMapPayload = this.publishBand(sProductName, sBand);
+    while (!sourceMapPayload?.layerID) {
+      sourceMapPayload = this.publishBand(sProductName, sBand);
+      this.delay(2000);
+    }
+    let ret = {
+      "server": sourceMapPayload?.geoserverUrl,
+      "layerId ": sourceMapPayload?.layerId,
+    };
+    return ret;
+  }
+
+  /**
    * Prints details about the status if the processes launched during the last session
 
   printProcesses() {
