@@ -1,43 +1,29 @@
-/**
- * Wasdi class expose methods and utilities to interact with WASDI services, using
- * Javascript/Typescript as specification and programming language. The package available
- * through npm repository, can be imported.
- * Object definitions are also provided.
- * Check README and LICENSE for further details
- */
-export class Wasdi {
-  _m_sUser: string;
-  _m_sPassword: string;
+class Wasdi {
+  _m_sUser;
+  _m_sPassword;
 
-  _m_sActiveWorkspace: string;
-  _m_sWorkspaceOwner: string;
-  _m_sWorkspaceBaseUrl: string;
+  _m_sActiveWorkspace;
+  _m_sWorkspaceOwner;
+  _m_sWorkspaceBaseUrl;
 
-  _m_sParametersFilePath: string;
-  _m_sSessionId: string;
-  _m_bValidSession: boolean;
-  _m_sBasePath: string;
+  _m_sParametersFilePath;
+  _m_sSessionId;
+  _m_bValidSession;
+  _m_sBasePath;
 
-  _m_bDownloadActive: boolean;
-  _m_bUploadActive: boolean;
-  _m_bVerbose: boolean;
+  _m_bDownloadActive;
+  _m_bUploadActive;
+  _m_bVerbose;
   _m_aoParamsDictionary = {};
 
-  _m_sMyProcId: string;
+  _m_sMyProcId;
   _m_sBaseUrl = "https://www.wasdi.net/wasdiwebserver/rest";
-  _m_bIsOnServer: boolean;
+  _m_bIsOnServer;
   _m_iRequestsTimeout = 2 * 60;
   // handled through field instead of local variables
   _m_sWorkspaceName = "";
   _m_sWorkspaceId = "";
 
-  _m_aoRunningProcessId: string[];
-
-  _m_asRunningProcessorIds: string[];
-
-  /**
-   * test comment of constructor
-   */
   constructor() {
     this._m_sUser = undefined;
     this._m_sPassword = undefined;
@@ -74,33 +60,33 @@ export class Wasdi {
     console.log("[INFO] jswasdilib.printStatus: password: ***********");
     console.log("[INFO] jswasdilib.printStatus: session id: " + this.SessionId);
     console.log(
-        "[INFO] jswasdilib.printStatus: active workspace: " + this.ActiveWorkspace
+      "[INFO] jswasdilib.printStatus: active workspace: " + this.ActiveWorkspace
     );
     console.log(
-        "[INFO] jswasdilib.printStatus: workspace owner: " + this.WorkspaceOwner
+      "[INFO] jswasdilib.printStatus: workspace owner: " + this.WorkspaceOwner
     );
     console.log(
-        "[INFO] jswasdilib.printStatus: parameters file path: " +
+      "[INFO] jswasdilib.printStatus: parameters file path: " +
         this.ParametersFilePath
     );
     console.log("[INFO] jswasdilib.printStatus: base path: " + this.BasePath);
     console.log(
-        "[INFO] jswasdilib.printStatus: download active: " + this.DownloadActive
+      "[INFO] jswasdilib.printStatus: download active: " + this.DownloadActive
     );
     console.log(
-        "[INFO] jswasdilib.printStatus: upload active: " + this.UploadActive
+      "[INFO] jswasdilib.printStatus: upload active: " + this.UploadActive
     );
     console.log("[INFO] jswasdilib.printStatus: verbose: " + this.Verbose);
     console.log(
-        "[INFO] jswasdilib.printStatus: param dict: " + this.ParamsDictionary
+      "[INFO] jswasdilib.printStatus: param dict: " + this.ParamsDictionary
     );
     console.log("[INFO] jswasdilib.printStatus: proc id: " + this.MyProcId);
     console.log("[INFO] jswasdilib.printStatus: base url: " + this.BaseUrl);
     console.log(
-        "[INFO] jswasdilib.printStatus: is on server: " + this.IsOnServer
+      "[INFO] jswasdilib.printStatus: is on server: " + this.IsOnServer
     );
     console.log(
-        "[INFO] jswasdilib.printStatus: workspace base url: " +
+      "[INFO] jswasdilib.printStatus: workspace base url: " +
         this.WorkspaceBaseUrl
     );
     this._m_bValidSession = this._m_sSessionId != undefined;
@@ -108,7 +94,7 @@ export class Wasdi {
       console.log("[INFO] jswasdilib.printStatus: session is valid :-)");
     } else {
       console.log(
-          "[ERROR] jswasdilib.printStatus: session is not valid :-(" +
+        "[ERROR] jswasdilib.printStatus: session is not valid :-(" +
           "  ******************************************************************************"
       );
     }
@@ -119,7 +105,7 @@ export class Wasdi {
    * Used across this library to check the connection state.
    * @param  noOutput if true, the method doesn't output the response on the console
    */
-  helloWasdiWorld(noOutput: boolean): string {
+  helloWasdiWorld(noOutput) {
     var xhr = new XMLHttpRequest();
     let response = undefined;
     xhr.addEventListener("readystatechange", function () {
@@ -186,11 +172,12 @@ export class Wasdi {
   /**
    * Loads configuration and parameters. If no filename is specified, it
    * loads the file config.json and parameters.json from the same level directory of the calling
-   * URL
+   * URL.
+   * The config file can be hosted on an external URL.
    * @param configFile a JSON containing all the required information to login to WASDI, please check repository for example
    * @param parametersFile a JSON containing the parameters that can be used in case of a launch of an appliciation
    */
-  loadConfig(configFile: string, parametersFile: string) {
+  loadConfig(configFile, parametersFile) {
     let sUrl = configFile;
     if (configFile == undefined) {
       // default value
@@ -204,36 +191,36 @@ export class Wasdi {
       let jsondata = JSON.parse(request.responseText);
       this._m_sUser = jsondata.USER ? jsondata.USER : this._m_sUser;
       this._m_sPassword = jsondata.PASSWORD
-          ? jsondata.PASSWORD
-          : this._m_sPassword;
+        ? jsondata.PASSWORD
+        : this._m_sPassword;
       this._m_sWorkspaceName = jsondata.WORKSPACE
-          ? jsondata.WORKSPACE
-          : this._m_sWorkspaceName;
+        ? jsondata.WORKSPACE
+        : this._m_sWorkspaceName;
       this._m_sWorkspaceId = jsondata.WORKSPACEID
-          ? jsondata.WORKSPACEID
-          : this._m_sWorkspaceId;
+        ? jsondata.WORKSPACEID
+        : this._m_sWorkspaceId;
       this._m_sBasePath = jsondata.BASEPATH
-          ? jsondata.BASEPATH
-          : this._m_sBasePath;
+        ? jsondata.BASEPATH
+        : this._m_sBasePath;
       this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH
-          ? jsondata.PARAMETERSFILEPATH
-          : this._m_sParametersFilePath;
+        ? jsondata.PARAMETERSFILEPATH
+        : this._m_sParametersFilePath;
       this._m_bDownloadActive = jsondata.DOWNLOADACTIVE
-          ? jsondata.DOWNLOADACTIVE
-          : this._m_bDownloadActive;
+        ? jsondata.DOWNLOADACTIVE
+        : this._m_bDownloadActive;
       this._m_bUploadActive = jsondata.UPLOADACTIVE
-          ? jsondata.UPLOADACTIVE
-          : this._m_bUploadActive;
+        ? jsondata.UPLOADACTIVE
+        : this._m_bUploadActive;
       this._m_bVerbose = jsondata.VERBOSE ? jsondata.VERBOSE : this._m_bVerbose;
       this._m_sBaseUrl = jsondata.BASEURL ? jsondata.BASEURL : this._m_sBaseUrl;
       this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT
-          ? jsondata.REQUESTTIMEOUT
-          : this._m_iRequestsTimeout;
+        ? jsondata.REQUESTTIMEOUT
+        : this._m_iRequestsTimeout;
     }
 
     if (!this.checkBaseUrl()) {
       console.log(
-          "[jswasdilib] Error in base Url - Can't contact wasdi instance, please check configuration "
+        "[jswasdilib] Error in base Url - Can't contact wasdi instance, please check configuration "
       );
     }
 
@@ -247,7 +234,7 @@ export class Wasdi {
    * If filename is not specified the methods search for "parameters.json", as default
    * @param filename the file name of the JSON containing the parameters
    */
-  loadParameters(filename: string) {
+  loadParameters(filename) {
     let sUrl = filename;
     if (filename == undefined) {
       // default value
@@ -268,47 +255,47 @@ export class Wasdi {
    * @param filename
    * @returns {Promise<void>}
    */
-  async asyncLoadConfig(filename: string) {
+  async asyncLoadConfig(filename) {
     let initPromiseChain = fetch(filename)
-        .then((response) => {
-          return response.json();
-        })
-        .then((jsondata) => {
-          // async, so must init here
+      .then((response) => {
+        return response.json();
+      })
+      .then((jsondata) => {
+        // async, so must init here
 
-          this._m_sUser = jsondata.USER;
-          this._m_sPassword = jsondata.PASSWORD;
-          this._m_sWorkspaceName = jsondata.WORKSPACE;
-          this._m_sWorkspaceId = jsondata.WORKSPACEID;
-          this._m_sBasePath = jsondata.BASEPATH;
-          this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH;
-          this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
-          this._m_bUploadActive = jsondata.UPLOADACTIVE;
-          this._m_bVerbose = jsondata.VERBOSE;
+        this._m_sUser = jsondata.USER;
+        this._m_sPassword = jsondata.PASSWORD;
+        this._m_sWorkspaceName = jsondata.WORKSPACE;
+        this._m_sWorkspaceId = jsondata.WORKSPACEID;
+        this._m_sBasePath = jsondata.BASEPATH;
+        this._m_sParametersFilePath = jsondata.PARAMETERSFILEPATH;
+        this._m_bDownloadActive = jsondata.DOWNLOADACTIVE;
+        this._m_bUploadActive = jsondata.UPLOADACTIVE;
+        this._m_bVerbose = jsondata.VERBOSE;
 
-          this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
-          // suppose that, at least, user and password are set
-          let bIsValid =
-              this._m_sUser != undefined && this._m_sPassword != undefined;
-          if (!bIsValid) {
-            console.log(
-                "[ERROR] jswasdilib._loadConfig: something went wrong" +
-                "  ******************************************************************************"
-            );
-          }
-          return bIsValid;
-        })
-        .then((isValid) => {
-          if (isValid && this._m_sParametersFilePath != undefined) {
-            fetch(this._m_sParametersFilePath)
-                .then((response) => {
-                  return response.json();
-                })
-                .then((jsondata) => {
-                  this._m_aoParamsDictionary = jsondata;
-                });
-          }
-        });
+        this._m_iRequestsTimeout = jsondata.REQUESTTIMEOUT;
+        // suppose that, at least, user and password are set
+        let bIsValid =
+          this._m_sUser != undefined && this._m_sPassword != undefined;
+        if (!bIsValid) {
+          console.log(
+            "[ERROR] jswasdilib._loadConfig: something went wrong" +
+              "  ******************************************************************************"
+          );
+        }
+        return bIsValid;
+      })
+      .then((isValid) => {
+        if (isValid && this._m_sParametersFilePath != undefined) {
+          fetch(this._m_sParametersFilePath)
+            .then((response) => {
+              return response.json();
+            })
+            .then((jsondata) => {
+              this._m_aoParamsDictionary = jsondata;
+            });
+        }
+      });
     let result = await initPromiseChain;
     return result;
   }
@@ -317,7 +304,7 @@ export class Wasdi {
    * Retrieve the information of a single Workspace, by using its ID
    * @param workspaceID a String containing the workspace ID
    */
-  getWorkspaceById(workspaceID: string) {
+  getWorkspaceById(workspaceID) {
     var xhr = new XMLHttpRequest();
 
     xhr.addEventListener("readystatechange", function () {
@@ -327,9 +314,9 @@ export class Wasdi {
     });
 
     xhr.open(
-        "GET",
-        this._m_sBaseUrl + "/ws/getws?workspace=" + workspaceID,
-        false
+      "GET",
+      this._m_sBaseUrl + "/ws/getws?workspace=" + workspaceID,
+      false
     );
     xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
     xhr.setRequestHeader("x-session-token", this._m_sSessionId);
@@ -345,7 +332,7 @@ export class Wasdi {
    * @param params String containing the parameters, must include the correct syntax like '?=[...]'
    * @returns {number|string|{}|any}
    */
-  private getObject(url: string, params: string) {
+  getObject(url, params) {
     var xhr = new XMLHttpRequest();
 
     xhr.addEventListener("readystatechange", function () {
@@ -367,7 +354,7 @@ export class Wasdi {
    * @param params String containing the parameters, must include the correct syntax like '?=[...]'
    * @returns {number|string|{}|any}
    */
-  private postObject(url: string, params: string, data: string) {
+  postObject(url, params, data) {
     var xhr = new XMLHttpRequest();
 
     xhr.addEventListener("readystatechange", function () {
@@ -387,29 +374,100 @@ export class Wasdi {
   /**
    * Retrieves the list of Workspace of the current logged user.
    */
-  workspaceList() {
+  getWorkspaces() {
     var workspaceList = this.getObject(this._m_sBaseUrl + "/ws/byuser", "");
     console.log("[INFO] jswasdilib.workspaceList: Available workspaces : ");
-    workspaceList.forEach((a: { workspaceName: string; workspaceId: string }) =>
-        console.log(a.workspaceName + " - Id" + a.workspaceId)
+    workspaceList.forEach((a) =>
+      console.log(a.workspaceName + " - Id" + a.workspaceId)
     );
     return workspaceList;
   }
 
   /**
+   * Returns the workspace Id from the name. It search through the workspaces
+   * of the current logged user.
+   * @param wsName Workspace name to be searched for
+   * @returns A string containing the workspace Id, if the name was found. An empty string otherwise
+   */
+  getWorkspaceIdByName(wsName) {
+    this.getWorkspaces().forEach((a) => {
+      if (a.workspaceName == wsName) return a.workspaceId;
+    });
+    return "";
+  }
+
+  /**
    * Retrieve a list of workspace of the current logged user.
    */
-  productListByActiveWs() {
+  getProductsByActiveWorkspace() {
     let productList = this.getObject(
-        this._m_sBaseUrl + "/product/byws",
-        "?workspace=" + this.ActiveWorkspace
+      this._m_sBaseUrl + "/product/byws",
+      "?workspace=" + this.ActiveWorkspace
     );
     console.log(
-        "[INFO] jswasdilib.productListByActiveWs: Products in the active workspace "
+      "[INFO] jswasdilib.productListByActiveWorkspace: Products in the active workspace "
     );
-    productList.forEach((a: { name: string }) => console.log(a.name));
+    productList.forEach((a) => console.log(a.name));
     return productList;
   }
+
+  getProductsByWorkspace(workspaceName) {
+    return this.getProductsByWorkspaceId(
+      this.getWorkspaceIdByName(workspaceName)
+    );
+  }
+
+  /**
+   * Retrieve a list of workspace of the current logged user.
+   */
+  getProductsByWorkspaceId(workspaceId) {
+    let productList = this.getObject(
+      this._m_sBaseUrl + "/product/byws",
+      "?workspace=" + workspaceId
+    );
+    console.log(
+      "[INFO] jswasdilib.productListByWorkspace: Products in the active workspace "
+    );
+    productList.forEach((a) => console.log(a.name));
+    return productList;
+  }
+
+  /**
+   * Delete a Product from the current active workspace
+   * @param sProduct the product name with extension
+   */
+  deleteProduct(sProduct) {
+    let response = this.getObject(
+      this._m_sBaseUrl +
+        "/product/delete?name=" +
+        sProduct +
+        "&deletefile=true&workspace=" +
+        this._m_sActiveWorkspace +
+        "&deletelayer=true",
+      ""
+    );
+    if (response?.ok) {
+      console.log(
+        "[INFO] jswasdilib.deleteProduct: Product " + sProduct + " deleted"
+      );
+    } else {
+      console.log(
+        "[ERROR] jswasdilib.deleteProduct: Can't delete product " +
+          sProduct +
+          " in workspace " +
+          this._m_sActiveWorkspace
+      );
+    }
+    return response?.ok;
+  }
+
+  /**
+   * Execute a Workflow on WASDI on the specified input files. Generates the specified output files
+   * @param asInputFileNames An array of string containing the input file (with extension)
+   * @param asOutputFileNames An array of string containing the input file (with extension)
+   * @param sWorkflowName The name of the workflow to be executed
+   */
+  executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName) {}
 
   /**
    * Opens a workspace and set it as active workspace. The active workspace is the one used
@@ -417,17 +475,17 @@ export class Wasdi {
    * @param workspaceID The id of the selected workspace
    * @returns {{workspaceId}|number|string|{}|*}
    */
-  openWorkspaceById(workspaceID: string) {
+  openWorkspaceById(workspaceID) {
     let ws = this.getObject(
-        this._m_sBaseUrl + "/ws/getws",
-        "?workspace=" + workspaceID
+      this._m_sBaseUrl + "/ws/getws",
+      "?workspace=" + workspaceID
     ); // retrieves workspace viewmodel
     if (ws.workspaceId) {
       this._m_sActiveWorkspace = ws.workspaceId;
       this._m_sWorkspaceName = ws.name;
       this._m_sWorkspaceBaseUrl = ws.apiUrl;
       console.log(
-          "[INFO] jswasdilib.openWorkspace: Opened Workspace " +
+        "[INFO] jswasdilib.openWorkspace: Opened Workspace " +
           this._m_sWorkspaceName
       );
       return ws;
@@ -442,34 +500,34 @@ export class Wasdi {
    * @param workspaceID The id of the selected workspace
    * @returns {{workspaceId}|number|string|{}|*}
    */
-  openWorkspace(workspaceName: string) {
-    let wsList = this.workspaceList();
+  openWorkspace(workspaceName) {
+    let wsList = this.getWorkspaces();
     if (wsList) {
       let ws = {
         workspaceId: "",
         workspaceName: "",
       };
-      wsList.forEach((a: { workspaceName: string; workspaceId: string }) => {
+      wsList.forEach((a) => {
         if (a.workspaceName == workspaceName) {
           ws = a;
         }
       });
       if (ws.workspaceId) {
         console.log(
-            "[INFO] jswasdilib.openWorkspaceByName: Opened Workspace " +
+          "[INFO] jswasdilib.openWorkspaceByName: Opened Workspace " +
             ws.workspaceName
         );
         return this.openWorkspaceById(ws.workspaceId);
       } else {
         console.log(
-            '[INFO] jswasdilib.openWorkspaceByName: Could not find workspace "' +
+          '[INFO] jswasdilib.openWorkspaceByName: Could not find workspace "' +
             workspaceName +
             '"'
         );
       }
     } else {
       console.log(
-          "[ERROR] jswasdilib.openWorkspaceByName: please check parameters"
+        "[ERROR] jswasdilib.openWorkspaceByName: please check parameters"
       );
       return;
     }
@@ -482,20 +540,20 @@ export class Wasdi {
    * @param jsonParameters a JSON containing the parameters for the application, please check the app on WASDI
    * for a specific reference
    */
-  launchProcessor(appname: string, jsonParameters: string) {
+  executeProcessor(appname, jsonParameters) {
     if (this._m_sActiveWorkspace) {
       let response = this.postObject(
-          this._m_sWorkspaceBaseUrl + "/processors/run",
-          "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace,
-          jsonParameters
+        this._m_sWorkspaceBaseUrl + "/processors/run",
+        "?name=" + appname + "&workspace=" + this._m_sActiveWorkspace,
+        jsonParameters
       );
       if (response.processingIdentifier) {
-        this._m_aoRunningProcessId.push(response.processingIdentifier);
+        //this._m_aoRunningProcessId.push(response.processingIdentifier);
       }
       return response;
     } else {
       console.log(
-          "[INFO] jswasdilib.LaunchProcessor: no workspace opened, please use wasdi.openWorkspace se the active workspace or wasdi.createWorkspace for a new one"
+        "[INFO] jswasdilib.LaunchProcessor: no workspace opened, please use wasdi.openWorkspace se the active workspace or wasdi.createWorkspace for a new one"
       );
     }
   }
@@ -513,10 +571,10 @@ export class Wasdi {
    * @param sProcessId the processId to add the payload
    * @param data JSON string containing the payload
    */
-  setProcessPayload(sProcessId: string, data: string) {
+  setProcessPayload(sProcessId, data) {
     return this.getObject(
-        this._m_sWorkspaceBaseUrl + "/process/setpayload",
-        "?procws=" + sProcessId + "&payload=" + encodeURIComponent(data)
+      this._m_sWorkspaceBaseUrl + "/process/setpayload",
+      "?procws=" + sProcessId + "&payload=" + encodeURIComponent(data)
     );
   }
 
@@ -525,16 +583,16 @@ export class Wasdi {
    * @param wsName The workspace name, if the name is already used WADI will append a further numeric identifier
    * (like the OS for new folders)
    */
-  createWorkspace(wsName: string) {
+  createWorkspace(wsName) {
     let ws = this.getObject(this._m_sBaseUrl + "/ws/create", "?name=" + wsName);
     if (ws.stringValue) {
       console.log(
-          "[INFO] jswasdilib.CreateWorkspace: New workspace " +
+        "[INFO] jswasdilib.CreateWorkspace: New workspace " +
           wsName +
           " created"
       );
       console.log(
-          "[INFO] jswasdilib.CreateWorkspace: Workspace Id " + ws.stringValue
+        "[INFO] jswasdilib.CreateWorkspace: Workspace Id " + ws.stringValue
       );
       this._m_sActiveWorkspace = ws.stringValue;
       console.log("[INFO] jswasdilib.CreateWorkspace: Active workspace set");
@@ -548,14 +606,14 @@ export class Wasdi {
    * @param processId the string containing the processId selected
    * @return the process Object
    */
-  getProcessStatus(processId: string) {
+  getProcessStatus(processId) {
     let procWs = this.getObject(
-        this._m_sWorkspaceBaseUrl + "/process/byid",
-        "?procws=" + processId
+      this._m_sWorkspaceBaseUrl + "/process/byid",
+      "?procws=" + processId
     );
     if (procWs.status) {
       console.log(
-          "[INFO] jswasdilib.getProcessStatus: Process status " +
+        "[INFO] jswasdilib.getProcessStatus: Process status " +
           procWs.status +
           " Percentage " +
           procWs.progressPerc +
@@ -566,42 +624,59 @@ export class Wasdi {
   }
 
   /**
-   * Prints details about the status if the processes launched during the last session
+   * Util method
+   * @param ms to be waited
+   * @private
    */
-  printProcesses() {
-    this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
-   * Retrieves a list of products from the current active workspace
+   * Returns an object containing 2 string with WMS parameters:
+   * - server e.g. "https://[URL]/geoserver/ows?" if using Geoserver
+   * - layerId
+   * @param sProductName the Product name
+   * @param sBand The band required
    */
-  getProductsActiveWorkspace() {
-    return this.getObject(
-        this._m_sWorkspaceBaseUrl + "/product/byws",
-        "?workspace=" + this._m_sActiveWorkspace
-    );
+  getLayerWMS(sProductName, sBand) {
+    let sourceMapPayload = this.publishBand(sProductName, sBand);
+    while (!sourceMapPayload?.layerID) {
+      sourceMapPayload = this.publishBand(sProductName, sBand);
+      this.delay(2000);
+    }
+    let ret = {
+      server: sourceMapPayload?.geoserverUrl,
+      "layerId ": sourceMapPayload?.layerId,
+    };
+    return ret;
   }
 
+  /**
+     * Prints details about the status if the processes launched during the last session
+
+     printProcesses() {
+    this._m_aoRunningProcessId.forEach((a) => this.getProcessStatus(a));
+  }
+     */
   /**
    * Publish a band of the particular product selected. To obtain a list of available bands, a function
    * that retrieves the product details can be used.
    * @param fileName The product name in the current workspace
    * @param bandName The band that needs to be published
    */
-  publishBand(fileName: string, bandName: string) {
+  publishBand(fileName, bandName) {
     // search filename in the current workspace
-    let file = this.getProductsActiveWorkspace().find(
-        (a: { fileName: string }) => a.fileName == fileName
+    let file = this.getProductsByActiveWorkspace().find(
+      (a) => a.fileName == fileName
     );
     if (file && file.bandsGroups) {
-      let band = file.bandsGroups.bands.find(
-          (b: { name: string }) => b.name == bandName
-      );
+      let band = file.bandsGroups.bands.find((b) => b.name == bandName);
       if (band) {
         console.log("[INFO] jswasdilib.publishBand: Band found, begin publish");
         let published = this.getObject(
-            this._m_sWorkspaceBaseUrl + "/filebuffer/publishband",
-            "?fileUrl=" +
+          this._m_sBaseUrl + "/filebuffer/publishband",
+          "?fileUrl=" +
             fileName +
             "&workspace=" +
             this._m_sActiveWorkspace +
@@ -614,11 +689,15 @@ export class Wasdi {
       }
     } else {
       console.log(
-          "[INFO] jswasdilib.publishBand: File " +
+        "[INFO] jswasdilib.publishBand: File " +
           fileName +
           " not found in the current workspace"
       );
     }
+  }
+
+  getActiveWorkspaceId() {
+    return this._m_sActiveWorkspace;
   }
 
   get User() {
@@ -697,3 +776,5 @@ export class Wasdi {
     return this._m_sWorkspaceName;
   }
 }
+
+var wasdi = new Wasdi();

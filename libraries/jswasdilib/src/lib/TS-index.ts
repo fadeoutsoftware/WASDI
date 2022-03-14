@@ -659,7 +659,7 @@ class Wasdi {
       this.delay(2000);
     }
     let ret = {
-      "server": sourceMapPayload?.geoserverUrl,
+      server: sourceMapPayload?.geoserverUrl,
       "layerId ": sourceMapPayload?.layerId,
     };
     return ret;
