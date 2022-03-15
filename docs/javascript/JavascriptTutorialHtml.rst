@@ -191,7 +191,8 @@ Open the index.html page on you browser and you will have a simple form like thi
 
 .. image:: img/2.png
 
-Try to click and check on WASDI the newly created workspace:
+When you click the system will create a new workspace on WASDI.
+You can check it in the wasdi web application:
 
 .. image:: img/3.png
 
@@ -221,7 +222,7 @@ Each processor has a defined set of parameters encoded in a specific JSON and, w
 template is served.
 
 In this step of the tutorial we will list the available processors, show them on a selection list
- and load the parameters of the selected one.
+and load the parameters of the selected one.
 
 First, add the following line to the index.hml file, containing
 
@@ -276,3 +277,86 @@ Then, open the main.js file and add the definition to actual load the data for t
     });
     }
 
+Opening again the index.html and clicking on the first button the list will be populated:
+
+.. image:: img/4.png
+
+And, after selecting a processor, clicking on the second button the parameters are then showed:
+
+.. image:: img/5.png
+
+
+Execute a processor
+------------------------
+
+In this step we will use the data gathered on the prevoius task of the tutorial to launch an actual application on WASDI.
+The first approach will be by using a simple test application, which implements a pretty common feature for programming newbie.
+After that we will introduce the request to obtain the status of the launched processors.
+This data will be showed by adding a string to the html DOM.
+
+First open index.html and add the following components inside the *<body>* tags:
+
+.. code-block:: html
+    <p>
+        <input type="button" onclick="executeProcessor()" value="Execute processor">
+    </p>
+
+
+    <p>
+        <input type="button" onclick="getStatus()" value="Get status of processor launched">
+    <div id="processorStatus"> </div>
+    </p>
+
+
+First, in order to have a support variable keeping the launched process from this webpage, add this line at the top of the *main.js* file
+
+.. code-block:: javascript 
+    var launchedProcessorID=[];
+
+Then add the following methods to *main.js*:
+
+
+.. code-block:: javascript 
+    executeProcessor = function() {
+    let list = document.getElementById("ProcessorSelect");
+    let selectedProcessor = list.options[list.selectedIndex].text;
+    let parameters = document.getElementById("parameters").value;
+    let response = wasdi.executeProcessor(selectedProcessor,encodeURI(parameters));
+    console.log(response.processingIdentifier);
+    launchedProcessorID.push(response.processingIdentifier);
+
+    }
+
+    // Util function to render a formatteed string from the process status reponse 
+    getProcessorString = function(status) {
+    let response = "";
+    response = response.concat("Processor name " + status.productName + " | " + "status " + status.status + " | % " + status.progressPerc +  " | Payload " + status.payload  );
+    return response;
+    }
+
+    getStatus = function() {  
+    document.getElementById("processorStatus").innerHTML = "";
+    launchedProcessorID.forEach(element => {
+        let status = wasdi.getProcessStatus(element);
+        document.getElementById("processorStatus").innerHTML = document.getElementById("processorStatus").innerHTML.concat(
+            getProcessorString(status) + "<br>"
+        );
+    }); 
+    }
+
+The first function *executeProcessor* invoke the wasdi library method to run a processor (remember, on the workspace "JavascriptWebTutorial" ).
+
+The second function *getProcessorString* it's an util method to shown the process status of the processes started from the current page.
+
+The last function use the wasdi library to gather the data of the launched processors and push the formatted result on a dedicated div.
+
+We can then test the page by launching the application **hellowasdiworld**: after clicking on both buttons, *excecute processor* and 
+*Get status of processor launched* a string with the status will showed :
+
+
+.. image:: img/6.png
+
+If you open WASDI on wasdi.net, login and open the workspace, you will see that the processor were executed:
+
+.. image:: img/7.png
+    :scale: 50
