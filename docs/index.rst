@@ -62,6 +62,7 @@ If you already know WASDI features and you are a Python developer check out the 
    PythonLandsatTutorial.rst
    LibWorkspaces.rst
    PythonTutorial.rst
+   javascript/JavascriptTutorialHtml.rst
    JavascriptTutorial.rst
 
 
