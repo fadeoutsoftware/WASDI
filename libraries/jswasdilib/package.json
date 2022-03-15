@@ -1,9 +1,9 @@
 {
   "name": "wasdi",
-  "version": "0.0.10",
+  "version": "0.0.18",
   "description": "Javascript library for WASDI - Web Advanced Space Developer Interface",
-  "main": "build/index.js",
-  "types": "build/types/index.d.ts",
+  "main": "build/wasdi-module.js",
+  "types": "build/types/wasdi-module.d.ts",
   "scripts": {
     "start": "webpack serve --config webpack.config.demo.js",
     "build": "webpack && tsc",
@@ -37,6 +37,7 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.3",
     "babel-preset-minify": "^0.5.0",
+    "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",
     "eslint": "^7.32.0",
     "file-loader": "^6.2.0",

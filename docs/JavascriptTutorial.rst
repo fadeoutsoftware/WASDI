@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 .. _PythonTutorial:
 
-Javascript Tutorial
+Javascript Angular Tutorial
 ===========================
 
 In this tutorial we will introduce WASDI javascript library.
