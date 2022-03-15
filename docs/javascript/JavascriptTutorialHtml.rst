@@ -54,7 +54,7 @@ Include the library
 ---------------------
 The library is served through npm so it is also automatically available through
 its related CDN at cnd.jsdelivr.net.
-The current version for Wasdi Javascript library is 0.0.16.
+The current version for Wasdi Javascript library is 0.0.18.
 
 Please check package page on npmjs.org for the latest updates.
 
@@ -70,7 +70,7 @@ Please edit index.html and add the import of the library a the end of the head s
         <meta charset="UTF-8">
         <title>Js Wasdi Tutorial</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/wasdi@0.0.16/build/wasdi-javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wasdi@0.0.18/build/wasdi-javascript.js"></script>
 
     </head>
     <body></body>
@@ -90,7 +90,7 @@ Include the file index.html :
         <meta charset="UTF-8">
         <title>Js Wasdi Tutorial</title>
     <!-- This script loads the library -->
-    <script src="https://cdn.jsdelivr.net/npm/wasdi@0.0.16/build/wasdi-javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wasdi@0.0.18/build/wasdi-javascript.js"></script>
     <!-- This script contains your custom code -->
     <script src="main.js"></script>
 
@@ -153,7 +153,7 @@ Add the following lines:
 After the successful login call, the wasdi global object will keep its state, 
 allowing to make further request to the system.
 
-Create and list user's Workspaces
+Create Workspaces
 -----------------------
 
 A **Workspaces** is a basic concept of WASDI: one of the main objective of the platform is to connect 
@@ -167,14 +167,112 @@ Each users can create his own workspace, but he can also share them with other u
 In the following steps we will add some controls to HTML and some code to our main.js
 file to create a Workspace on WASDI.
 
-First edit the index.html file by adding there lines, inside the body tags :
+First edit the index.html file by adding the following lines, inside the body tags :
 
 .. code-block:: html
-    // load the configuration from config.json file
+
+        <p>
+        Insert workspace name <input type="text" id="wsname">
+        <input type="button" onclick="createWorkspace()" value="Create Workspace">
+        </p>
+
+Then open our javascript file *main.js* and define the function createWorkspace() :
+
+.. code-block:: javascript
+
+    // Function to create a workspace
+    createWorkspace = function() {
+    let wsName = document.getElementById("wsname").value;
+    wasdi.createWorkspace(wsName);
+    }
+
+The function defined will be invoked when the user clicks on the "Create workspace" button.
+Open the index.html page on you browser and you will have a simple form like this: 
+
+.. image:: img/2.png
+
+Try to click and check on WASDI the newly created workspace:
+
+.. image:: img/3.png
+
+There it is !
+
+For the following part of the tutorial we will use this workspace as default one.
+This way, for the following features, it will not be necessary to create each time a 
+new workspace.
+
+To open it every time we reload the page add this statement after the login call, a the beginning of the file 
+*main.js*: 
+
+.. code-block:: javascript
+
     wasdi.loadConfig();
-    // login to Wasdi
     wasdi.login();
+    // From now on this tutorial uses JavascriptWebTutorial workspace as default
+    wasdi.openWorkspace("JavascriptWebTutorial");
+
+List the available Processors
+---------------------------------
+
+Another key concept of the WASDI web application is the **Processor**: it represents
+a tool to gather and elaborate satellite imagery. Processors can be either public or private in WASDI, depending on your subscription.
+Any user can upload his own code in several languages to create a new Processor.
+Each processor has a defined set of parameters encoded in a specific JSON and, when we load a processor, a default
+template is served.
+
+In this step of the tutorial we will list the available processors, show them on a selection list
+ and load the parameters of the selected one.
+
+First, add the following line to the index.hml file, containing
+
+- the button to load the deployed processor.
+- a selection list that will be populated with the available ones.
+- a button to load the parameters of the selected ones.
+- a textarea to show the JSON of the parameters.
+
+.. code-block:: html
+
+    <p>
+        <input type="button" onclick="getDeployed()" value="Get processor list">
+        <div id="processorList"></div>
+    </p>
 
 
+    <p>
+        <select id="ProcessorSelect" size="8"></select>
+        <input type="button" onclick="loadProcessorParameters()" value="Load processor parameters">
+    </p>
+    
+    <p>
+        Edit parameters <br>
+        <textarea rows="10" cols="100" id="parameters">  </textarea>
+    </p>
 
+Then, open the main.js file and add the definition to actual load the data for the controller defined:
+
+.. code-block:: javascript
+
+    getDeployed = function() {
+    var deployed = wasdi.getDeployed();
+    let selectionList = document.getElementById("ProcessorSelect");
+
+    deployed.forEach(element => {        
+        let option = document.createElement("option");
+        option.text=element.processorName;
+        selectionList.add(option);
+    });
+
+    }
+
+    loadProcessorParameters = function(){
+    let list = document.getElementById("ProcessorSelect");
+    let selectedProcessor = list.options[list.selectedIndex].text;
+
+    wasdi.getDeployed().forEach(element => {        
+        if (element.processorName == selectedProcessor){
+            
+            document.getElementById("parameters").value =decodeURI(element.paramsSample);
+        }    
+    });
+    }
 
