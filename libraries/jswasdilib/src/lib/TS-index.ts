@@ -608,6 +608,7 @@ class Wasdi {
         "[INFO] jswasdilib.CreateWorkspace: Workspace Id " + ws.stringValue
       );
       this._m_sActiveWorkspace = ws.stringValue;
+      this.openWorkspaceById(ws.stringValue);
       console.log("[INFO] jswasdilib.CreateWorkspace: Active workspace set");
     }
     return;
