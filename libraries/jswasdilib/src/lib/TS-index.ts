@@ -5,7 +5,7 @@
  * Object definitions are also provided.
  * Check README and LICENSE for further details
  */
-class Wasdi {
+export class Wasdi {
   _m_sUser: string;
   _m_sPassword: string;
 
@@ -31,6 +31,10 @@ class Wasdi {
   _m_sWorkspaceName = "";
   _m_sWorkspaceId = "";
 
+  /**
+   * Constructor method: init an instance of the library object. 
+   * As convention the name "wasdi" is used, both for Javascript and Typescript.
+   */
   constructor() {
     this._m_sUser = undefined;
     this._m_sPassword = undefined;

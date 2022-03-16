@@ -139,20 +139,21 @@ The basic configuration, that can be used in almost all cases, is:
 	}
 
 Basic Parameters are:
-*User is your valid WASDI UserId, ie the mail you used to register.
-*Password is your valid WASDI password.
-*Workspace, is the workspace where you want to run the code you are writing. 
-*Parameters File Path is the path where you have the parameters file for the code you are running.
+
+* User is your valid WASDI UserId, ie the mail you used to register.
+* Password is your valid WASDI password.
+* Workspace, is the workspace where you want to run the code you are writing. 
+* Parameters File Path is the path where you have the parameters file for the code you are running.
 
 Advanced configuration can be controlled adding these codes to the config file:
 
-*BASEPATH=c:/local/path/ - This is the local base path used by wasdi to read and save the data you are using in your application. 
-*DOWNLOADACTIVE=1 - If 1, WASDI will automatically download the data you need in your code when requested
-*UPLOADACTIVE=1 - If 1, WASDI will automatically upload your data to the cloud when requested.
-*BASEURL=https://www.wasdi.net/wasdiwebserver/rest - base url of the WASDI APIs
-*WORKSPACEID=364c24ff-4891-4d0a-83bd-2772d292f918 - Id of the workspace, can be used as an alternative to the WORKSPACE name option
-*VERBOSE=1 1 to make local console verbose log of the lib, 0 to deactivate
-*REQUESTSTIMEOUT=5 - seconds of timeout for the lib http calls
+* BASEPATH=c:/local/path/ - This is the local base path used by wasdi to read and save the data you are using in your application. 
+* DOWNLOADACTIVE=1 - If 1, WASDI will automatically download the data you need in your code when requested
+* UPLOADACTIVE=1 - If 1, WASDI will automatically upload your data to the cloud when requested.
+* BASEURL=https://www.wasdi.net/wasdiwebserver/rest - base url of the WASDI APIs
+* WORKSPACEID=364c24ff-4891-4d0a-83bd-2772d292f918 - Id of the workspace, can be used as an alternative to the WORKSPACE name option
+* VERBOSE=1 1 to make local console verbose log of the lib, 0 to deactivate
+* REQUESTSTIMEOUT=5 - seconds of timeout for the lib http calls
 
 
 Local File System
@@ -163,8 +164,8 @@ This means that you will have your files on your computer, and this can be usefu
 
 By default, for all the languages, WASDI use as base folder the home folder of your computer user and adds a .wasdi folder. Can be:
 
-*Linux: /home/[your user]/.wasdi
-*Windows: C:\Users\[your user]\.wasdi
+* Linux: /home/[your user]/.wasdi
+* Windows: C:\Users\[your user]\.wasdi
 
 In the .wasdi folder WASDI will create a subfolder for each user and for each workspace. Is very important to remember: this will be done only if and when is needed!! if there is no need to access the file locally, all we be delegated to the cloud and no folder will be created. If a file is accessed locally, the folder will be created and the file downlaoded.
 
@@ -179,30 +180,31 @@ The folder structure will be something similar:
 
 .. image:: _static/libs_concepts_images/folders.jpg
 
-*Linux: /home/[your user]/.wasdi/[WASDI_User]/[WorkspaceId]/
-*Windows: C:\Users\[your user]\.wasdi\[WASDI_User]\[WorkspaceId]\
+* Linux: /home/[your user]/.wasdi/[WASDI_User]/[WorkspaceId]/
+* Windows: C:\Users\[your user]\.wasdi\[WASDI_User]\[WorkspaceId]\
 
 These are your folders, you can do what you want of that folders. Again: only and when needed, WASDI will search there for the needed files and, if not avaiable, will donwload it.
 
 
 
 Basic Functionalities
---------------
+--------------------------
 The basic functionalities are:
-*Access users' workspaces and files
-*Search EO Images
-*Import EO Images in the workspace
-*Execute SNAP Workflows
-*Execute other WASDI Applications
-*Execute basic GIS Operations (mosaic, multisubset)
-*Run Sen2Core
+
+* Access users' workspaces and files
+* Search EO Images
+* Import EO Images in the workspace
+* Execute SNAP Workflows
+* Execute other WASDI Applications
+* Execute basic GIS Operations (mosaic, multisubset)
+* Run Sen2Core
 
 
 
 Advanced Functionalities
---------------
+-----------------------------
 The advanced functionalities are:
-*Send log directly to the web user interface
-*Update the progress of the processing
-*Save a payload associated to each run of the app
-*Search and retrive the execution of other processors and the relative payloads
+* Send log directly to the web user interface
+* Update the progress of the processing
+* Save a payload associated to each run of the app
+* Search and retrive the execution of other processors and the relative payloads
