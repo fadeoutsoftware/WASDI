@@ -39,6 +39,7 @@
     "ROOT_VIEW_NAV_BAR_LINK_WORKSPACES":"Workspaces",
     "ROOT_VIEW_NAV_BAR_LINK_SEARCH":"Plan",
     "ROOT_VIEW_NAV_BAR_LINK_CATALOG":"Catalog",
+    "ROOT_VIEW_NAV_BAR_LINK_FEEDBACK":"Feedback",
     "ROOT_VIEW_LINK_HELP":"Documentation",
     "ROOT_VIEW_LINK_LOG_OUT":"Log-out",
     "ROOT_VIEW_LABEL_USER":"User:",
@@ -199,6 +200,7 @@
     "DIALOG_RUN_BUTTON":"Run",
     "DIALOG_CLOSE_BUTTON":"Close",
     "DIALOG_SAVE_BUTTON":"Save",
+    "DIALOG_SEND_BUTTON":"Send",
 
 
     "DIALOG_APPLY_ORBIT_TITLE":"Apply Orbit",

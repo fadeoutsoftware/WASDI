@@ -489,6 +489,28 @@ var RootController = (function() {
         oController.m_oState.go("root.import", { });
     };
 
+    RootController.prototype.openSendFeedbackDialog = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/send_feedback/SendFeedbackDialog.html",
+            controller: "SendFeedbackController",
+            inputs: {
+                extras: {
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+            });
+        });
+    };
+
     RootController.prototype.activePageCss = function(oPage)
     {
         return (oPage == this.m_oState.current.name );

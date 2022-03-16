@@ -1,0 +1,52 @@
+<div class="modal fade workflow-manager-modal ">
+    <div class="modal-dialog modal-wasdi">
+        <div class="modal-content ">
+
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title ">
+                    <i class="fa fa-comment" aria-hidden="true"></i>&nbsp;Send feedback to WASDI as: {{m_oController.m_oUser.name}} - {{m_oController.m_oUser.userId}}
+                </h4>
+            </div>
+
+
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <label>Would you like to try our live support?</label>
+                            <a href="https://discordapp.com/channels/937730046335017002/937732461897609307" target="_blank">Houston, we have a problem! Discord channel</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+                            <div class="form-v4-group">
+                                <label for="title">Title</label>
+                                <input type="text" id="title" class="form-v4-control-plaintext wasdi-input" required="required"
+                                    ng-model="m_oController.m_oFeedback.title">
+                            </div>  
+                            <div class="form-v4-group">
+                                <label for="message">Message:</label>
+                                <textarea class="form-control wasdi-input not-resizable" rows="5" id="message" maxlength="150"
+                                    ng-model="m_oController.m_oFeedback.message"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">                
+                <button type="button" ng-click="m_oController.m_oClose(null, 500)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="m_oController.sendFeedback()" class="my-button" data-dismiss="modal"
+                        ng-disabled="!m_oController.m_oFeedback || !m_oController.m_oFeedback.title || !m_oController.m_oFeedback.message">
+                    {{"DIALOG_SEND_BUTTON"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
