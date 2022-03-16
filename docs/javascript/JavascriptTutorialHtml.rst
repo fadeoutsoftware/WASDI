@@ -7,6 +7,15 @@
 Javascript Web Tutorial
 ===========================
 
+.. note::
+	To make the most of this tutorial, prior experience with the WASDI platform is required.
+
+	For new users, it is highly recommended to follow the `Wasdi Web Platform access and basic usage <https://wasdi.readthedocs.io/en/latest/WasdiTutorial.html>`_ tutorial before continuing.
+
+    Also, to complete the tutorial, a validated account on WASDI is required.
+
+
+
 In this tutorial we will show you how you can start using to use the Javascript library
 for WASDI. In this tutorial we will create a web page that show data gathered through
 the library just by using one <script> tags.
@@ -133,6 +142,7 @@ Add the following content, changing **[YOUR_USERNAME]** and **[YOUR_PASSWORD]** 
       "BASEURL" : "https://www.wasdi.net/wasdiwebserver/rest",
       "REQUESTTIMEOUT":120
     }
+
 
 Notte that this file name is a **conventional one**. Please check library documentation for more details about the 
 **loadconfig()** function.
