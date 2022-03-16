@@ -100,19 +100,22 @@ public class WasdiResource {
 				Message oMessage = new Message();
 
 				oMessage.setTilte(sTitle);
-
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender == null) {
-					sSender = "wasdi@wasdi.net";
-				}
-
-				oMessage.setSender(sSender);
+				
+				oMessage.setSender(sUserId);
 
 				oMessage.setMessage(sMessage);
 
 				Integer iPositiveSucceded = 0;
+				
+				String sWasdiAdminMail = WasdiConfig.Current.notifications.wasdiAdminMail;
 
-				iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+				if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
+					sWasdiAdminMail = "info@fadeout.biz";
+				}
+				
+				sWasdiAdminMail += ";" + sUserId;
+
+				iPositiveSucceded = oAPI.sendMailDirect(sWasdiAdminMail, oMessage);
 
 				Utils.debugLog("WasdiResource.sendEmail: notification sent with result " + iPositiveSucceded);
 			}
