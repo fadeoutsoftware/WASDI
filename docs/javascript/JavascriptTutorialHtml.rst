@@ -131,21 +131,17 @@ Add the following content, changing **[YOUR_USERNAME]** and **[YOUR_PASSWORD]** 
 
     {
       "USER": "[YOUR_USERNAME]",
-      "PASSWORD": "[YOUR_PASSWORD]",
-      "WORKSPACE": "",
-      "PARAMETERSFILEPATH": "./parameters.json",
-      "WORKSPACEID": "test",
-      "BASEPATH":"test",
-      "DOWNLOADACTIVE":"test",
-      "UPLOADACTIVE": "test",
-      "VERBOSE":"test",
-      "BASEURL" : "https://www.wasdi.net/wasdiwebserver/rest",
-      "REQUESTTIMEOUT":120
+      "PASSWORD": "[YOUR_PASSWORD]"
     }
 
 
-Notte that this file name is a **conventional one**. Please check library documentation for more details about the 
+Note that this file name, config.json, is a **the default value**, if no filename is passed to the method. Please check library documentation for more details about the 
 **loadconfig()** function.
+
+WASDI libraries share the structure of the configuration files. 
+The two fields used in the JSON above represents a sub-set of the available configuration fields.
+
+Check `configuration chapter in Library Concepts <https://wasdi.readthedocs.io/en/latest/LibsConcepts.html#configuration>`_ section for more details.
 
 Please open main.js and start editing the file.
 Wasdi librariy is exposed as a global singleton, a common practise for Javascript library. 
@@ -154,6 +150,7 @@ The variable to be used to access library methods is "**wasdi**"
 Add the following lines:
 
 .. code-block:: javascript
+
     // load the configuration from config.json file  
     wasdi.loadConfig();
     // login to Wasdi
@@ -177,7 +174,35 @@ Each users can create his own workspace, but he can also share them with other u
 In the following steps we will add some controls to HTML and some code to our main.js
 file to create a Workspace on WASDI.
 
-First edit the index.html file by adding the following lines, inside the body tags :
+In this step of the tutorial we will use this library call :
+
+.. code-block:: javascript
+    
+    wasdi.createWorkspace(wsName);
+
+The function call can be used to create a workspace in WASDI. 
+
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#createworkspace>`_
+
+Wasdi use a conventional object, the **PrimitiveResult**, as response for, among other, creation calls.
+This object has the following structure :
+
+.. code-block:: json
+
+    {
+        "IntValue" : 42,
+        "StringValue" : "some_string",
+        "DoubleValue" : 3.14159265359,
+        "BoolValue" : true
+    }
+
+
+In this case the response will contain a primitive result with only the StringValue setted. 
+The value of the response represents the **workspaceID** an univoque identifier of the workspace.
+
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#createworkspace>`_
+
+Going back to the webpage, please edit the index.html file by adding the following lines, inside the body tags :
 
 .. code-block:: html
 
@@ -190,9 +215,10 @@ Then open our javascript file *main.js* and define the function createWorkspace(
 
 .. code-block:: javascript
 
-    // Function to create a workspace
+    // Local function to create a workspace
     createWorkspace = function() {
     let wsName = document.getElementById("wsname").value;
+    // this is the actual call to WASDI services 
     wasdi.createWorkspace(wsName);
     }
 
@@ -222,6 +248,8 @@ To open it every time we reload the page add this statement after the login call
     // From now on this tutorial uses JavascriptWebTutorial workspace as default
     wasdi.openWorkspace("JavascriptWebTutorial");
 
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#openworkspace>`_
+
 List the available Processors
 ---------------------------------
 
@@ -231,10 +259,49 @@ Any user can upload his own code in several languages to create a new Processor.
 Each processor has a defined set of parameters encoded in a specific JSON and, when we load a processor, a default
 template is served.
 
+Wasdi has a dedicated section to allow users to parametrize and launch processor. In fact, the UI available in the system just
+alows to edit the JSON of the parameters before the execution.
+
 In this step of the tutorial we will list the available processors, show them on a selection list
 and load the parameters of the selected one.
 
-First, add the following line to the index.hml file, containing
+In the following we're gonna use this library call : 
+
+.. code-block:: javascript
+
+    wasdi.getDeployed();
+
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#getdeployed>`_
+
+The library ask for a list of available processors (or apps). The response is an array with each element structured as follow :
+
+.. code-block:: JSON 
+
+    	{
+		"imgLink": null,
+		"isPublic": 0,
+		"minuteTimeout": 180,
+		"paramsSample": "%7B%0A%20%20%22name%22:%20%22WASDI%22%0A%7D",
+		"processorDescription": "Hello WASDI world for testing purposes",
+		"processorId": "22c37982-34f1-4b92-9983-93afb921a8f6",
+		"processorName": "hellowasdiworld",
+		"processorVersion": "1",
+		"publisher": "c.nattero@fadeout.it",
+		"sharedWithMe": true,
+		"type": "ubuntu_python37_snap"
+	}
+
+The fields above represents a reference to application for WASDI. 
+
+One note about **paramsSample**: the value, as you probably noted, is URL-encoded. In this context, in which 
+we are using Javascript, to view and modify the parameters we can use the 2 functions :
+
+- decodeURI() -> To convert sample in a plain string
+- encodeURI() -> To re-convert it as URL compatible string
+
+These functions are available natively on any modern Browser/Javascript engine and will be used in the following steps.
+
+Add the following line to the index.hml file, containing
 
 - the button to load the deployed processor.
 - a selection list that will be populated with the available ones.
@@ -264,6 +331,7 @@ Then, open the main.js file and add the definition to actual load the data for t
 .. code-block:: javascript
 
     getDeployed = function() {
+    //Obtain a list of availble processors from WASDI
     var deployed = wasdi.getDeployed();
     let selectionList = document.getElementById("ProcessorSelect");
 
@@ -281,7 +349,7 @@ Then, open the main.js file and add the definition to actual load the data for t
 
     wasdi.getDeployed().forEach(element => {        
         if (element.processorName == selectedProcessor){
-            
+            // Here is required the devode URI call 
             document.getElementById("parameters").value =decodeURI(element.paramsSample);
         }    
     });
@@ -304,9 +372,78 @@ The first approach will be by using a simple test application, which implements 
 After that we will introduce the request to obtain the status of the launched processors.
 This data will be showed by adding a string to the html DOM.
 
-First open index.html and add the following components inside the *<body>* tags:
+In this step of the tutorial this library call will be used : 
+
+.. code-block:: javascript
+
+    wasdi.executeProcessor(processorName, parametersJSON);
+
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#executeprocessor>`_
+
+The methods has two parameters:
+
+- **processorName** the name of the processor that we want to be launched
+- **parametersJSON** a JSON string containing the parameters for the processor. As stating point use the template available through getDeployed() library call.
+
+The response to this method has the following structure:
+
+.. code-block:: json 
+
+    {
+	"jsonEncodedResult": "",
+	"name": "hellowasdiworld",
+	"processingIdentifier": "8f09edca-2f7b-4745-aada-bff50cdc6383",
+	"processorId": "22c37982-34f1-4b92-9983-93afb921a8f6",
+	"status": "CREATED"
+    }
+    
+
+
+The most important parameter is the **processingIdentifier**: using this will allows us to follow the status of the processing task.
+In this example, for the sake of clarity, the update will be triggered by the pressing of a button. In any case the call can be integrated 
+in more sophisticated front-end frameworks.
+
+To retrieve the status of the process launched we will use the following library method: 
+
+.. code-block:: javascript
+
+    wasdi.getProcessStatus(processId);
+
+For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#getprocessstatus>`_
+
+The response of this method has the following parameters:
+
+.. code-block:: json 
+
+    {
+	"fileSize": "",
+        "lastChangeDate": "2022-03-16 17:56:44 Z",
+	"operationDate": "2022-03-16 17:56:42 Z",
+	"operationEndDate": "2022-03-16 17:56:48 Z",
+	"operationStartDate": "2022-03-16 17:56:44 Z",
+        "operationSubType": "",
+	"pid": 3860834,
+        "payload": "{\"name\": \"WASDI\", \"done\": true, \"the answer is\": 42}",
+	"processObjId": "8f09edca-2f7b-4745-aada-bff50cdc6383",
+	"productName": "hellowasdiworld",
+	"progressPerc": 100,
+	"status": "DONE",
+	"userId": "m.menapace@fadeout.it"
+    }
+
+Across the several fields of the response, the ones used in this tutorial are :
+
+- **productName** which identifies the processor name, "hellowasdiworld" in this example.
+- **status** represents the possible state of the processor among: {WAITING | RUNNING | DONE | ERROR}.
+- **progressPerc** is a number indicating the percentage of the progress fot the current processing work.
+- **payload** is a JSON which contains information about the outcome of the elaboration.
+
+You can check their usage in the **getProcessorString** function definition in the following javascript snippets.
+
+Open index.html and add the following components inside the *<body>* tags:
 
 .. code-block:: html
+
     <p>
         <input type="button" onclick="executeProcessor()" value="Execute processor">
     </p>
@@ -321,12 +458,14 @@ First open index.html and add the following components inside the *<body>* tags:
 First, in order to have a support variable keeping the launched process from this webpage, add this line at the top of the *main.js* file
 
 .. code-block:: javascript 
+
     var launchedProcessorID=[];
 
 Then add the following methods to *main.js*:
 
 
 .. code-block:: javascript 
+
     executeProcessor = function() {
     let list = document.getElementById("ProcessorSelect");
     let selectedProcessor = list.options[list.selectedIndex].text;
@@ -366,7 +505,7 @@ We can then test the page by launching the application **hellowasdiworld**: afte
 
 .. image:: img/6.png
 
-If you open WASDI on wasdi.net, login and open the workspace, you will see that the processor were executed:
+If you open WASDI on wasdi.net, login with your user credentials and open the workspace, you will see that the processor were executed:
 
 .. image:: img/7.png
     :scale: 50

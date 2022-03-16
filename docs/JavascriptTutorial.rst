@@ -15,7 +15,7 @@ Javascript Angular Tutorial
     Also, to complete the tutorial, a validated account on WASDI is required.
 
 In this tutorial we will introduce WASDI javascript library.
-To showcase the usage of the library and how it connect to WASDI services,
+To showcase the usage of the library and how it connects to WASDI services,
 an easy application will be created using Angular, a popular framework from Google.
 
 Setup
