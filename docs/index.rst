@@ -87,6 +87,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    octave/octave.rst
    java/WasdiLib.rst
    c#/WasdiLib.rst
+   typescript/wasdi.rst
 
 
 
