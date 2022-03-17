@@ -24,7 +24,7 @@ To keep the requirements of this tutorial as small and easy as possible all exam
 browser-based DOM manipulation: no Javascript frameworks will be used and the produced code will (should)
 be compatible with any browser. (If it's not it's indeed time for an update :-) )
 
-If you are an Angular developer, please refer to the `Angular dedicated tutorial <https://wasdi.readthedocs.io/en/latest/JavascriptTutorial.html>`.
+If you are an Angular developer, please refer to the `Angular dedicated tutorial <https://wasdi.readthedocs.io/en/latest/JavascriptTutorial.html>`_.
 
 Setup & tools
 ---------------------------
