@@ -1,7 +1,7 @@
 require('./app/controllers/RootController.js');
 require('./app/controllers/HomeController.js');
 
-// // Test with import instead of require 
+// // Test with import instead of require
 // import WorkspaceController from './app/controllers/WorkspaceController.js';
 // global.WorkspaceController = WorkspaceController;
 require('./app/controllers/WorkspaceController.js');
@@ -32,7 +32,7 @@ require('./app/dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceCont
 //require('./app/dialogs/mask_manager/MaskManagerController.js');
 require('./app/dialogs/import_advance_filters/ImportAdvanceFiltersController.js');
 require('./app/dialogs/workflow_manager/WorkFlowManagerController.js');
-require('./app/dialogs/workflow_edit/WorkFlowController.js');
+require('./app/dialogs/workflow_edit/WorkflowController.js');
 require('./app/dialogs/get_list_of_workspace_selected/GetListOfWorkspacesSelectedController.js');
 require('./app/dialogs/processor/ProcessorController.js');
 require('./app/dialogs/workspace_details/WorkspaceDetailsController.js');
