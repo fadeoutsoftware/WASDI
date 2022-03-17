@@ -152,7 +152,7 @@ public class StyleResource {
 			// Get Download Path
 			String sDownloadRootPath = Wasdi.getDownloadPath();
 
-			Utils.debugLog("StylesResource.updateFile: download path " + sDownloadRootPath);
+			Utils.debugLog("StyleResource.updateFile: download path " + sDownloadRootPath);
 
 			String sDirectoryPathname = sDownloadRootPath + "styles/";
 
@@ -163,7 +163,7 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				Utils.debugLog("StylesResource.updateFile: error in styleId " + sStyleId + " not found on DB");
+				Utils.debugLog("StyleResource.updateFile: error in styleId " + sStyleId + " not found on DB");
 				return Response.notModified("StyleId not found, please check parameters").build();
 			}
 
@@ -171,7 +171,7 @@ public class StyleResource {
 			StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
 
 			if (!oUser.getUserId().equals(oStyle.getUserId()) && !oStyleSharingRepository.isSharedWithUser(oUser.getUserId(), oStyle.getStyleId())) {
-				Utils.debugLog("StylesResource.updateFile: User " + oUser.getUserId() + " doesn't have rights on style " + oStyle.getName());
+				Utils.debugLog("StyleResource.updateFile: User " + oUser.getUserId() + " doesn't have rights on style " + oStyle.getName());
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -198,7 +198,7 @@ public class StyleResource {
 				// Delete the temp file
 				Files.delete(oStyleSldFileTemp.toPath());
 				
-				Utils.debugLog("StylesResource.updateFile: style files updated! styleID" + oStyle.getStyleId());
+				Utils.debugLog("StyleResource.updateFile: style files updated! styleID" + oStyle.getStyleId());
 
 				// Updates the location on the current server
 				oStyle.setFilePath(oStyleSldFile.getPath());
@@ -207,12 +207,12 @@ public class StyleResource {
 				if (oStyleSldFileTemp.exists())
 					oStyleSldFileTemp.delete();
 
-				Utils.debugLog("StylesResource.updateFile: " + oEx);
+				Utils.debugLog("StyleResource.updateFile: " + oEx);
 				return Response.status(Status.NOT_MODIFIED).build();
 			}
 
 		} catch (Exception oEx2) {
-			Utils.debugLog("StylesResource.updateFile: " + oEx2);
+			Utils.debugLog("StyleResource.updateFile: " + oEx2);
 		}
 
 		return Response.ok().build();
@@ -248,7 +248,7 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				Utils.debugLog("StylesResource.getXML: error in styleId " + sStyleId + " not found on DB");
+				Utils.debugLog("StyleResource.getXML: error in styleId " + sStyleId + " not found on DB");
 				return Response.notModified("StyleId not found").build();
 			}
 
@@ -294,10 +294,10 @@ public class StyleResource {
 			@QueryParam("name") String sName,
 			@QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
-		Utils.debugLog("StylesResource.updateParams( InputStream, Style: " + sName + ", StyleId: " + sStyleId);
+		Utils.debugLog("StyleResource.updateParams( InputStream, Style: " + sName + ", StyleId: " + sStyleId);
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Utils.debugLog("StylesResource.updateParams( InputStream, Session: " + sSessionId + ", Ws: " + sStyleId + " ): invalid session");
+			Utils.debugLog("StyleResource.updateParams( InputStream, Session: " + sSessionId + ", Ws: " + sStyleId + " ): invalid session");
 			return Response.status(401).build();
 		}
 
@@ -386,10 +386,10 @@ public class StyleResource {
 			}
 			
 		} catch (Exception oE) {
-			Utils.debugLog("StylesResource.getStylesByUser( " + sSessionId + " ): " + oE);
+			Utils.debugLog("StyleResource.getStylesByUser( " + sSessionId + " ): " + oE);
 		}
 
-		Utils.debugLog("StylesResource.getStylesByUser: return " + aoRetStyles.size() + " styles");
+		Utils.debugLog("StyleResource.getStylesByUser: return " + aoRetStyles.size() + " styles");
 
 		return aoRetStyles;
 	}
@@ -407,7 +407,7 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("StylesResource.delete( Session: " + sSessionId + ", Style: " + sStyleId + " ): invalid session");
+				Utils.debugLog("StyleResource.delete( Session: " + sSessionId + ", Style: " + sStyleId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -430,7 +430,7 @@ public class StyleResource {
 
 				if (oStyleSharingRepository.isSharedWithUser(sUserId, sStyleId)) {
 					oStyleSharingRepository.deleteByUserIdStyleId(sUserId, sStyleId);
-					Utils.debugLog("StylesResource.delete: Deleted sharing between user " + sUserId + " and style " + oStyle.getName() + " Style files kept in place");
+					Utils.debugLog("StyleResource.delete: Deleted sharing between user " + sUserId + " and style " + oStyle.getName() + " Style files kept in place");
 					return Response.ok().build();
 				}
 
@@ -447,11 +447,11 @@ public class StyleResource {
 				File oStyleFile = new File(sStyleFilePath);
 				if (oStyleFile.exists()) {
 					if (!oStyleFile.delete()) {
-						Utils.debugLog("StylesResource.delete: Error deleting the style file " + oStyle.getFilePath());
+						Utils.debugLog("StyleResource.delete: Error deleting the style file " + oStyle.getFilePath());
 					}
 				}
 			} else {
-				Utils.debugLog("StylesResource.delete: style file path is null or empty.");
+				Utils.debugLog("StyleResource.delete: style file path is null or empty.");
 			}
 
 			// Delete sharings
@@ -461,7 +461,7 @@ public class StyleResource {
 			// Delete the style
 			oStyleRepository.deleteStyle(sStyleId);
 		} catch (Exception oE) {
-			Utils.debugLog("StylesResource.delete( Session: " + sSessionId + ", Style: " + sStyleId + " ): " + oE);
+			Utils.debugLog("StyleResource.delete( Session: " + sSessionId + ", Style: " + sStyleId + " ): " + oE);
 			return Response.serverError().build();
 		}
 
@@ -473,7 +473,7 @@ public class StyleResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult shareStyle(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId) {
-		Utils.debugLog("StylesResource.shareStyle(  Style : " + sStyleId + ", User: " + sUserId + " )");
+		Utils.debugLog("StyleResource.shareStyle(  Style : " + sStyleId + ", User: " + sUserId + " )");
 
 		//init repositories
 		StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
@@ -485,7 +485,7 @@ public class StyleResource {
 		oResult.setBoolValue(false);
 
 		if (oRequesterUser == null) {
-			Utils.debugLog("StylesResource.shareStyle( Session: " + sSessionId + ", Style: " + sStyleId + ", User: " + sUserId + " ): invalid session");
+			Utils.debugLog("StyleResource.shareStyle( Session: " + sSessionId + ", Style: " + sStyleId + ", User: " + sUserId + " ): invalid session");
 			oResult.setStringValue("Invalid session.");
 			return oResult;
 		}
@@ -496,7 +496,7 @@ public class StyleResource {
 		}
 
 		try {
-			// Check if the processor exists and is of the user calling this API
+			// Check if the style exists and is of the user calling this API
 			oStyleRepository = new StyleRepository();
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
@@ -506,7 +506,7 @@ public class StyleResource {
 			}
 
 			if (oRequesterUser.getUserId().equals(sUserId)) {
-				Utils.debugLog("StylesResource.ShareStyle: auto sharing not so smart");
+				Utils.debugLog("StyleResource.ShareStyle: auto sharing not so smart");
 				oResult.setStringValue("Impossible to autoshare.");
 				return oResult;
 			}
@@ -550,13 +550,13 @@ public class StyleResource {
 			oStyleSharing.setShareDate((double) oTimestamp.getTime());
 			oStyleSharingRepository.insertStyleSharing(oStyleSharing);
 
-			Utils.debugLog("StylesResource.shareStyle: Style" + sStyleId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
+			Utils.debugLog("StyleResource.shareStyle: Style" + sStyleId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
 			try {
 				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 				if (Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-					Utils.debugLog("StylesResource.shareStyle: sMercuriusAPIAddress is null");
+					Utils.debugLog("StyleResource.shareStyle: sMercuriusAPIAddress is null");
 				} else {
 					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);
 					Message oMessage = new Message();
@@ -580,13 +580,13 @@ public class StyleResource {
 
 					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
 
-					Utils.debugLog("StylesResource.shareStyle: notification sent with result " + iPositiveSucceded);
+					Utils.debugLog("StyleResource.shareStyle: notification sent with result " + iPositiveSucceded);
 				}
 			} catch (Exception oEx) {
-				Utils.debugLog("StylesResource.shareStyle: notification exception " + oEx.toString());
+				Utils.debugLog("StyleResource.shareStyle: notification exception " + oEx.toString());
 			}
 		} catch (Exception oEx) {
-			Utils.debugLog("StylesResource.shareStyle: " + oEx);
+			Utils.debugLog("StyleResource.shareStyle: " + oEx);
 
 			oResult.setStringValue("Error in save process");
 			oResult.setBoolValue(false);
@@ -605,7 +605,7 @@ public class StyleResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult deleteUserSharingStyle(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId) {
-		Utils.debugLog("StylesResource.deleteUserSharedStyle( ProcId: " + sStyleId + ", User:" + sUserId + " )");
+		Utils.debugLog("StyleResource.deleteUserSharedStyle( ProcId: " + sStyleId + ", User:" + sUserId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -615,7 +615,7 @@ public class StyleResource {
 			User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oOwnerUser == null) {
-				Utils.debugLog("StylesResource.deleteUserSharedStyle( Session: " + sSessionId + ", ProcId: " + sStyleId + ", User:" + sUserId + " ): invalid session");
+				Utils.debugLog("StyleResource.deleteUserSharedStyle( Session: " + sSessionId + ", ProcId: " + sStyleId + ", User:" + sUserId + " ): invalid session");
 				oResult.setStringValue("Invalid session");
 				return oResult;
 			}
@@ -651,15 +651,15 @@ public class StyleResource {
 					return oResult;
 				}
 			} catch (Exception oEx) {
-				Utils.debugLog("StylesResource.deleteUserSharedStyle: " + oEx);
-				oResult.setStringValue("Error deleting processor sharing");
+				Utils.debugLog("StyleResource.deleteUserSharedStyle: " + oEx);
+				oResult.setStringValue("Error deleting style sharing");
 				return oResult;
 			}
 
 			oResult.setStringValue("Done");
 			oResult.setBoolValue(true);
 		} catch (Exception oE) {
-			Utils.debugLog("StylesResource.deleteUserSharedStyle( Session: " + sSessionId + ", ProcId: " + sStyleId + ", User:" + sUserId + " ): " + oE);
+			Utils.debugLog("StyleResource.deleteUserSharedStyle( Session: " + sSessionId + ", ProcId: " + sStyleId + ", User:" + sUserId + " ): " + oE);
 		}
 
 		return oResult;
@@ -671,13 +671,13 @@ public class StyleResource {
 	public List<StyleSharingViewModel> getEnableUsersSharedStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
 		List<StyleSharingViewModel> oResult = new ArrayList<>();
 
-		Utils.debugLog("StylesResource.getEnableUsersSharedStyle(  Style : " + sStyleId + " )");
+		Utils.debugLog("StyleResource.getEnableUsersSharedStyle(  Style : " + sStyleId + " )");
 
 		// Validate Session
 		User oAskingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oAskingUser == null) {
-			Utils.debugLog("StylesResource.getEnableUsersSharedStyle( Session: " + sSessionId + ", Style: " + sStyleId + "): invalid session");
+			Utils.debugLog("StyleResource.getEnableUsersSharedStyle( Session: " + sSessionId + ", Style: " + sStyleId + "): invalid session");
 
 			return oResult;
 		}
@@ -693,7 +693,7 @@ public class StyleResource {
 
 			if (oValidateStyle == null) {
 				// return
-				Utils.debugLog("StylesResource.getEnableUsersSharedStyle: Style not found");
+				Utils.debugLog("StyleResource.getEnableUsersSharedStyle: Style not found");
 				// if something went wrong returns an empty set
 				return oResult;
 			}
@@ -706,7 +706,7 @@ public class StyleResource {
 
 			return oResult;
 		} catch (Exception oEx) {
-			Utils.debugLog("StylesResource.getEnableUsersSharedStyle: " + oEx);
+			Utils.debugLog("StyleResource.getEnableUsersSharedStyle: " + oEx);
 			return oResult;
 		}
 	}
@@ -727,7 +727,7 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("StylesResource.download( Session: " + sSessionId + ", StyleId: " + sStyleId + " ): invalid session");
+				Utils.debugLog("StyleResource.download( Session: " + sSessionId + ", StyleId: " + sStyleId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -737,7 +737,7 @@ public class StyleResource {
 			ResponseBuilder oResponseBuilder = null;
 
 			if (oStyle == null) {
-				Utils.debugLog("StylesResource.download( Session: " + sSessionId + ", StyleId: " + sStyleId + " ): Style Id not found on DB");
+				Utils.debugLog("StyleResource.download( Session: " + sSessionId + ", StyleId: " + sStyleId + " ): Style Id not found on DB");
 				oResponseBuilder = Response.noContent();
 				return oResponseBuilder.build();
 			}
@@ -749,10 +749,10 @@ public class StyleResource {
 			File oFile = new File(sStyleSldPath);
 
 			if (!oFile.exists()) {
-				Utils.debugLog("StylesResource.download: file does not exists " + oFile.getPath());
+				Utils.debugLog("StyleResource.download: file does not exists " + oFile.getPath());
 				oResponseBuilder = Response.serverError();
 			} else {
-				Utils.debugLog("StylesResource.download: returning file " + oFile.getPath());
+				Utils.debugLog("StyleResource.download: returning file " + oFile.getPath());
 
 				FileStreamingOutput oStream;
 				oStream = new FileStreamingOutput(oFile);
@@ -765,7 +765,7 @@ public class StyleResource {
 			return oResponseBuilder.build();
 				
 		} catch (Exception oEx) {
-			Utils.debugLog("StylesResource.download: " + oEx);
+			Utils.debugLog("StyleResource.download: " + oEx);
 		}
 
 		return Response.status(404).build();
