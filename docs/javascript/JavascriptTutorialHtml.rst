@@ -86,7 +86,7 @@ Please edit index.html and add the import of the library a the end of the head s
 Now,to start using the functionalities exposed by the library, create a new file next to index.html
 and name it **main.js**.
 
-Include the file index.html :
+Include the file in index.html as a new <script> tag :
 
 .. code-block:: html
 
@@ -108,21 +108,21 @@ Include the file index.html :
 Login
 ---------------------------
 
-WASDI is a web application that allows users to download, process and obtains result from satellite imagery.
+WASDI is a web application that allow users to download, process and obtain results from satellite imagery.
 
 To continue with this tutorial you will need a valid account on the platform: 
-please, proceed to register to WASDI services and keep note of your credential.
+please, proceed to register to WASDI services and keep note of your credentials.
 
 The first step to start interacting with `WASDI <https://www.wasdi.net>`_ services is to login by using the library facilities.
 
 To achieve this you must add 2 files next the index.html file :
+
 - config.json
 - parameters.json
 
-The second will be introduced later on the tutorial, when we will start using processors.
-Create file config.json next to index.html file.
+The second file will be introduced later on in the tutorial, when we will start using processors.
 
-Add the following content, changing **[YOUR_USERNAME]** and **[YOUR_PASSWORD]** with your WASDI credentials
+Add the following content to config.json, changing **[YOUR_USERNAME]** and **[YOUR_PASSWORD]** with your WASDI credentials
 
 .. code-block:: json
 
@@ -132,16 +132,16 @@ Add the following content, changing **[YOUR_USERNAME]** and **[YOUR_PASSWORD]** 
     }
 
 
-Note that this file name, config.json, is a **the default value**, if no filename is passed to the method. Please check library documentation for more details about the 
+Note that this file name, config.json, is **the default value**, if no filename is passed to the method. Please check library documentation for more details about the
 **loadconfig()** function.
 
 WASDI libraries share the structure of the configuration files. 
-The two fields used in the JSON above represents a sub-set of the available configuration fields.
+The two fields used in the JSON above represent a sub-set of the available configuration fields.
 
 Check `configuration chapter in Library Concepts <https://wasdi.readthedocs.io/en/latest/LibsConcepts.html#configuration>`_ section for more details.
 
 Please open main.js and start editing the file.
-Wasdi librariy is exposed as a global singleton, a common practise for Javascript library. 
+Wasdi library is exposed as a global singleton, a common practice for Javascript libraries.
 
 The variable to be used to access library methods is "**wasdi**"
 Add the following lines:
@@ -155,7 +155,7 @@ Add the following lines:
 
 
 After the successful login call, the wasdi global object will keep its state, 
-allowing to make further request to the system.
+allowing to make further requests to the system.
 
 Create Workspaces
 -----------------------
