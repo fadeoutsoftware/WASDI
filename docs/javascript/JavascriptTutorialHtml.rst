@@ -160,13 +160,15 @@ allowing to make further requests to the system.
 Create Workspaces
 -----------------------
 
-A **Workspaces** is a basic concept of WASDI: one of the main objective of the platform is to connect 
+A **Workspace** is a basic concept of WASDI: think of it as a folder.
+
+One of the main objective of the platform is to connect
 to various satellite imagery portals and download files from such services. 
 The workspace is composed by a collection of images downloaded, called **products**. 
 
-The download doesn't require local storage because it "happens" in dedicated cluod instances.
-Also, a workspace, holds the informations about the elaborations on such data, done by the **processors**.
-Each users can create his own workspace, but he can also share them with other users.
+Data retrieval doesn't require local storage because it "happens" in the cloud.
+Also, a workspace holds the information about the elaborations on such data, done by the **processors**.
+Users can create their own workspaces, and they can also share them with other users.
 
 In the following steps we will add some controls to HTML and some code to our main.js
 file to create a Workspace on WASDI.
@@ -181,7 +183,7 @@ The function call can be used to create a workspace in WASDI.
 
 For more information, the library method documentation can be found `here <https://wasdi.readthedocs.io/en/latest/typescript/wasdi.html#createworkspace>`_
 
-Wasdi use a conventional object, the **PrimitiveResult**, as response for, among other, creation calls.
+Wasdi uses a conventional object, the **PrimitiveResult**, as response for, among other, creation calls.
 This object has the following structure :
 
 .. code-block:: json
@@ -224,18 +226,18 @@ Open the index.html page on you browser and you will have a simple form like thi
 
 .. image:: img/2.png
 
-When you click the system will create a new workspace on WASDI.
-You can check it in the wasdi web application:
+When you click, the system will create a new workspace on WASDI.
+You can check it in the wasdi web application in the workspaces page:
 
 .. image:: img/3.png
 
 There it is !
 
-For the following part of the tutorial we will use this workspace as default one.
+For the following part of the tutorial, we will use this workspace as the default one.
 This way, for the following features, it will not be necessary to create each time a 
 new workspace.
 
-To open it every time we reload the page add this statement after the login call, a the beginning of the file 
+To open it every time we reload the page, add this statement after the login call, at the beginning of the file
 *main.js*: 
 
 .. code-block:: javascript
