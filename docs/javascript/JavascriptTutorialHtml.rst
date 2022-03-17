@@ -18,16 +18,13 @@ Javascript Web Tutorial
 
 In this tutorial we will show you how you can start using to use the Javascript library
 for WASDI. In this tutorial we will create a web page that show data gathered through
-the library just by using one <script> tags.
-
-This guide will not require to know any information about WASDI because
-a brief explanation of the core concepts involved will be reported at each step.
+the library just by using one **<script>** tag.
 
 To keep the requirements of this tutorial as small and easy as possible all examples will be using 
-browser based DOM manipulation: no Javascript frameworks will be used and the produced code will (should) 
+browser-based DOM manipulation: no Javascript frameworks will be used and the produced code will (should)
 be compatible with any browser. (If it's not it's indeed time for an update :-) )
 
-If you are an Angular developer, please refer to the Angular dedicated tutorial.
+If you are an Angular developer, please refer to the `Angular dedicated tutorial <https://wasdi.readthedocs.io/en/latest/JavascriptTutorial.html>`.
 
 Setup & tools
 ---------------------------
