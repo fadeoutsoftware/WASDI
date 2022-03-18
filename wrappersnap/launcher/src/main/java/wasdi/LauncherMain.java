@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.security.Security;
 import java.util.Date;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 
@@ -392,7 +393,23 @@ public class LauncherMain  {
                     System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
             } else {
-                s_oLogger.debug("SNAP Log file not active");
+                s_oLogger.debug("SNAP Log file not active: clean log handlers");
+                
+                try {
+
+                    EngineConfig oSnapConfig = Engine.getInstance().getConfig();
+                    java.util.logging.Logger oSnapLogger = oSnapConfig.logger();
+                    
+                    Handler[] aoHandlers = oSnapLogger.getHandlers();
+                    
+                    for (Handler oHandler : aoHandlers) {
+                    	oSnapLogger.removeHandler(oHandler);
+						
+					}
+
+                } catch (Exception oEx) {
+                    System.out.println("LauncherMain.configureSNAP: exception cleaning SNAP log Handlers " + oEx.toString());
+                }                
             }
             
             try {
