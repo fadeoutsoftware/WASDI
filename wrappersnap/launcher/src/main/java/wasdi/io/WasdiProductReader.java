@@ -9,6 +9,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -158,6 +159,13 @@ public abstract class WasdiProductReader {
         if (m_oProductFile.getName().toUpperCase().startsWith("S5P")) {
         	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
         	return null;        	
+        }
+        
+        if (m_oProductFile.getName().toUpperCase().endsWith(".ZIP")) {
+        	if (!ZipFileUtils.isValidZipFile(m_oProductFile)) {
+            	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: not valid zip file, return null");
+            	return null;        	        		
+        	}
         }
         
         try {
