@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.log4j.Logger;
 
 /**
@@ -543,5 +544,28 @@ public class ZipFileUtils {
 		deleteFile(zipFilePath);
 		WasdiFileUtils.renameFile(dirPath + simpleName + "_temp" + ".zip", simpleName + ".zip");
 	}
+	
+	/**
+	 * Cheks if it is a Valid Zip File
+	 * @param oFile
+	 * @return
+	 */
+	 public static boolean isValidZipFile(final File oFile) {
+		    ZipFile oZipfile = null;
+		    try {
+		        oZipfile = new ZipFile(oFile);
+		        return true;
+		    } catch (IOException e) {
+		        return false;
+		    } finally {
+		        try {
+		            if (oZipfile != null) {
+		                oZipfile.close();
+		                oZipfile = null;
+		            }
+		        } catch (IOException e) {
+		        }
+		    }
+		}	
 
 }
