@@ -151,6 +151,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 } else {
                     m_oLocalLogger.error("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
+                
+                Product oProduct = null;
 
                 oProviderAdapter.subscribe(this);
                 
@@ -171,9 +173,37 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         if (iLastError > 0)
                             sError += ": query obtained HTTP Error Code " + iLastError;
 
-                        m_oProcessWorkspaceLogger.log(sError);
-                        
-                        oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+                        m_oProcessWorkspaceLogger.log(sError);                        
+                    }
+                    else {
+                        // Control Check for the file Name
+                        sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
+
+                        // Get The product view Model
+        				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
+        				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
+        				File oProductFile = new File(sFileName);
+        				
+        				sFileNameWithoutPath = oProductFile.getName(); 
+        				
+        				oProduct = oProductReader.getSnapProduct();
+        				
+        				try {
+        					oVM = oProductReader.getProductViewModel();
+        				}
+        				catch (Exception oVMEx) {
+        					m_oLocalLogger.warn("Download.executeOperation: exception reading Product View Model " + oVMEx.toString());
+						}
+        				
+        				if (oVM == null) {
+            				// Reset the cycle to search a better solution
+            				sFileName = "";        					
+        				}
+                    }
+                    
+                    
+                    if (Utils.isNullOrEmpty(sFileName)) {
+                        oProviderAdapter.unsubscribe(this);
                         
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
@@ -182,8 +212,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         	return false;
                         }
                         
-                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
-                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
+                        oProviderAdapter.subscribe(this);
+                        
+                        m_oProcessWorkspaceLogger.log("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
+                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
                     }
                 }
 
@@ -192,18 +224,6 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                 m_oProcessWorkspaceLogger.log("Got File, try to read");
 
-                // Control Check for the file Name
-                sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
-
-                // Get The product view Model
-				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
-				sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
-				File oProductFile = new File(sFileName);
-				
-				sFileNameWithoutPath = oProductFile.getName(); 
-				
-				Product oProduct = oProductReader.getSnapProduct();
-				oVM = oProductReader.getProductViewModel();
 				
                 // Save it in the register
                 oAlreadyDownloaded = new DownloadedFile();
