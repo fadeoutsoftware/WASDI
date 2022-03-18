@@ -23,6 +23,8 @@ require('./app/dialogs/snake_dialog/SnakeController.js');
 require('./app/dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceController.js');
 require('./app/dialogs/import_advance_filters/ImportAdvanceFiltersController.js');
 require('./app/dialogs/workflow_manager/WorkFlowManagerController.js');
+require('./app/dialogs/style_manager/StyleManagerController.js');
+require('./app/dialogs/style_edit/StyleController.js');
 require('./app/dialogs/workflow_edit/WorkflowController.js');
 require('./app/dialogs/style_manager/StyleManagerController.js');
 require('./app/dialogs/style_edit/StyleController.js');
