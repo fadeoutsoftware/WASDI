@@ -1,14 +1,10 @@
 package wasdi.operations;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.esa.snap.core.datamodel.Product;
-import org.geotools.referencing.CRS;
 
 import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
@@ -32,7 +28,6 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 public class Publishband extends Operation {
@@ -116,11 +111,13 @@ public class Publishband extends Operation {
             setFileSizeToProcess(oInputFile, oProcessWorkspace);
 
             // Generate Layer Id: filename_band
-            sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
+//            sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
+//            
+//            if (WasdiFileUtils.isShapeFile(sInputFile) == false) {
+//            	sLayerId += "_" + oParameter.getBandName();
+//            }
             
-            if (WasdiFileUtils.isShapeFile(sInputFile) == false) {
-            	sLayerId += "_" + oParameter.getBandName();
-            }
+            sLayerId = Utils.getRandomName();
 
             // Is already published?
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
@@ -416,88 +413,6 @@ public class Publishband extends Operation {
         }
         
         return sStyle;
-	}
-    
-	protected boolean convertSentinel5PtoGeotiff(String sInputFile, String sOutputFile, String sBand) {
-		try {
-			
-			if (Utils.isNullOrEmpty(sInputFile)) return false;
-			if (Utils.isNullOrEmpty(sOutputFile)) return false;
-			if (Utils.isNullOrEmpty(sBand)) return false;
-			
-			String sInputPath = "";
-			File oFile = new File(sInputFile);
-			sInputPath = oFile.getParentFile().getPath();
-			if (!sInputPath.endsWith("/")) sInputPath += "/";
-			
-			String sGdalCommand = "gdal_translate";
-			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
-			
-			ArrayList<String> asArgs = new ArrayList<String>();
-			asArgs.add(sGdalCommand);
-			
-			asArgs.add("-co");
-			asArgs.add("WRITE_BOTTOMUP=NO");
-			
-			asArgs.add("-of");
-			asArgs.add("VRT");
-			
-			String sGdalInput = "NETCDF:\""+sInputFile+"\":/PRODUCT/"+sBand;
-			
-			asArgs.add(sGdalInput);
-			asArgs.add(sInputPath + sBand + ".vrt");
-
-			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				m_oLocalLogger.debug("Publishband.convertS5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();			
-			
-			asArgs = new ArrayList<String>();
-			sGdalCommand = "gdalwarp";
-			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
-			
-			asArgs.add(sGdalCommand);
-			asArgs.add("-geoloc");
-			asArgs.add("-t_srs");
-			asArgs.add("EPSG:4326");
-			asArgs.add("-overwrite");
-			asArgs.add(sInputPath + sBand+ ".vrt");
-			asArgs.add(sInputPath + sOutputFile);
-			
-			oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-		
-//			sCommand = "";
-//			for (String sArg : asArgs) {
-//				sCommand += sArg + " ";
-//			}
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			while ((sLine = oReader.readLine()) != null)
-				m_oLocalLogger.debug("Publishband.convertSentine5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();
-			
-			if (new File(sInputPath + sOutputFile).exists()) return true;
-			else return false;
-		}
-		catch (Exception oEx) {
-			
-			m_oLocalLogger.debug("Publishband.convertSentinel5PtoGeotiff: Exception = " + oEx.toString());
-			
-			return false;
-		}
 	}
 	
 	/**
