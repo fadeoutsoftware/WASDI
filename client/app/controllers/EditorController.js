@@ -546,7 +546,7 @@ var EditorController = (function () {
                 oController.receivedNewProductMessage(oMessage);
                 break;
             case "DELETE":
-                oController.getProductListByWorkspace();
+                //oController.getProductListByWorkspace();
                 break;
         }
 
@@ -1214,38 +1214,6 @@ var EditorController = (function () {
     };
 
     /**
-     * openWPSDialog
-     * @returns {boolean}
-     */
-    EditorController.prototype.openMosaicDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/mosaic/MosaicView.html",
-            controller: "MosaicController",
-            inputs: {
-                extras: {
-                    // products:oController.m_aoProducts
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-
-        return true;
-    };
-
-    /**
      *
      * @returns {boolean}
      */
@@ -1742,7 +1710,7 @@ var EditorController = (function () {
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                //"_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     //$node.original.fileName;
                                     if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
@@ -1809,7 +1777,7 @@ var EditorController = (function () {
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                //"_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     //$node.original.fileName;
                                     if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
@@ -1858,8 +1826,6 @@ var EditorController = (function () {
                                                 }));
                                             }
                                         });
-
-
                                     }
 
                                 }
@@ -1943,10 +1909,10 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
+
                 // REMOVE CHECKBOXES
                 oNode.a_attr = new Object();
                 oNode.a_attr.class = "no_checkbox";
-
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];

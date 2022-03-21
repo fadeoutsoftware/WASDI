@@ -250,6 +250,8 @@ wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
 
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
+
 //wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
 
