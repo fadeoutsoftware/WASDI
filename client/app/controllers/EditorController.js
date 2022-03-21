@@ -1710,7 +1710,7 @@ var EditorController = (function () {
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
-                                //"_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     //$node.original.fileName;
                                     if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
@@ -1777,7 +1777,7 @@ var EditorController = (function () {
                             "Download": {
                                 "label": "Download",
                                 "icon": "fa fa-download",
-                                //"_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
                                     //$node.original.fileName;
                                     if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
