@@ -628,6 +628,9 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
             // For each product
             for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
+
+                if (utilsIsObjectNullOrUndefined(aoProducts[iIndexProduct]) === true) continue;
+                if (utilsIsObjectNullOrUndefined(aoProducts[iIndexProduct].bbox) === true) continue;
                 // Split bbox string
                 aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
 
