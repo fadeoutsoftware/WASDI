@@ -528,12 +528,12 @@ public class StyleResource {
 				// computational-node-side work
 				computationalNodesDeleteStyle(sSessionId, oStyle.getStyleId(), oStyle.getName());
 			}
-			
-			// filesystem-side work
-			filesystemDeleteStyleIfExists(oStyle.getName());
-			
+						
 			// geoserver-side work
 			geoServerRemoveStyleIfExists(oStyle.getName());
+
+			// filesystem-side work
+			filesystemDeleteStyleIfExists(oStyle.getName());
 
 			// Trigger the style delete operation on this specific node
 			Utils.debugLog("StyleResource.deleteStyle: Style Deleted");
@@ -569,10 +569,10 @@ public class StyleResource {
 
 			// Trigger the style delete operation on this specific node
 			Utils.debugLog("StyleResource.nodeDeleteStyle: this is a computing node, just execute Delete here");
-			
-			filesystemDeleteStyleIfExists(sStyleName);
 
 			geoServerRemoveStyleIfExists(sStyleName);
+			
+			filesystemDeleteStyleIfExists(sStyleName);
 
 			return Response.ok().build();
 		} catch (Exception oEx) {
@@ -650,9 +650,12 @@ public class StyleResource {
 				}
 			}			
 			
-			Utils.debugLog("StyleResource.geoServerRemoveStyleIfExists: remove the style");
-			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName;
-			oGeoServerManager.removeStyle(sStyleFilePath);
+			
+			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName + ".sld";
+			
+			Utils.debugLog("StyleResource.geoServerRemoveStyleIfExists: remove the style " + sStyleFilePath);
+			
+			oGeoServerManager.removeStyle(sName);
 		}
 	}
 

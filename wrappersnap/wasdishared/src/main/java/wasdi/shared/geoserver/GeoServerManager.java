@@ -337,16 +337,8 @@ public class GeoServerManager {
      * @param sStyleFile Path of the sld file
      * @return
      */
-    public boolean removeStyle(String sStyleFile) {
-    	File oFile = new File(sStyleFile);
-    	
-    	if (oFile.exists()) {
-    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
-    		return m_oGsPublisher.removeStyle(sStyleName);
-    	}
-    	else {
-    		return false;
-    	}
+    public boolean removeStyle(String sStyleName) {
+    	return m_oGsPublisher.removeStyle(sStyleName);
     }
     
     /**
