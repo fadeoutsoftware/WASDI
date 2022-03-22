@@ -2138,7 +2138,12 @@ var EditorController = (function () {
 
         if (utilsIsStrNullOrEmpty(sGeoserverUrl)) sGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
 
-        sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+        if (sGeoserverUrl.endsWith("?")) {
+            sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+        }
+        else {
+            sGeoserverUrl = sGeoserverUrl.replace("ows", "wms?");
+        }
 
         sGeoserverUrl = sGeoserverUrl + "request=GetLegendGraphic&format=image/png&WIDTH=12&HEIGHT=12&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True&LAYER=";
         sGeoserverUrl = sGeoserverUrl + "wasdi:" + oLayer.layerId;

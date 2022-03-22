@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -199,7 +200,6 @@ public class StyleResource {
 				return Response.status(400).build();
 			}
 
-
 			// DB-side work
 			StyleRepository oStyleRepository = new StyleRepository();
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
@@ -231,8 +231,12 @@ public class StyleResource {
 			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
 			
 			if (!oStyleSldFile.exists()) {
-				Utils.debugLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
-				return Response.status(404).build();
+				GeoServerManager oManager = new GeoServerManager();
+				
+				if (oManager.styleExists(oStyle.getName()) == false) {
+					Utils.debugLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
+					return Response.status(404).build();					
+				}
 			}
 			
 			if (bZipped==null) {
@@ -265,6 +269,8 @@ public class StyleResource {
 				Utils.debugLog("StyleResource.updateFile: unzip the style");
 				ZipFileUtils oExtractor = new ZipFileUtils();
 				oExtractor.unzip(sTempFileName, sDownloadRootPath+"styles/");
+				// Delete the zip file
+				FileUtils.deleteQuietly(oStyleSldFileTemp);
 			}
 			else {
 				// checks that the Style Xml field is valid
@@ -472,9 +478,7 @@ public class StyleResource {
 		if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
 			Utils.debugLog("StyleResource.DeleteStyle: this is a computational node, cannot call this API here");
 
-			// if the flow of execution is interrupted at this time
-			// this functionality will not work on local environments
-//			return Response.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		try {
@@ -614,15 +618,12 @@ public class StyleResource {
 		GeoServerManager oGeoServerManager = new GeoServerManager();
 
 		if (oGeoServerManager.styleExists(sName)) {
-			Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, call remove style");
-			if (!oGeoServerManager.removeStyle(sStyleFilePath)) {
-				Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: remove style returned false!!");
+			Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
+			
+			
+			if (!oGeoServerManager.updateStyle(sStyleFilePath)) {
+				Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
 			}
-		}
-
-		if (sStyleFilePath != null) {
-			Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: call publish style");
-			oGeoServerManager.publishStyle(sStyleFilePath);
 		}
 	}
 
@@ -632,6 +633,24 @@ public class StyleResource {
 		GeoServerManager oGeoServerManager = new GeoServerManager();
 
 		if (oGeoServerManager.styleExists(sName)) {
+			
+			Utils.debugLog("StyleResource.geoServerRemoveStyleIfExists: style exists. Search for layers with the style assigned");
+			
+			List<String> asLayers = oGeoServerManager.getLayers();
+			
+			for (String sLayer : asLayers) {
+				if (sLayer.startsWith("wasdi:")) {
+					sLayer = sLayer.replace("wasdi:", "");
+					String sStyle = oGeoServerManager.getLayerStyle(sLayer);
+					
+					if (sStyle.equals(sName)) {
+						Utils.debugLog("StyleResource.geoServerRemoveStyleIfExists: removing style from " + sLayer);
+						oGeoServerManager.configureLayerStyle(sLayer, "raster");
+					}
+				}
+			}			
+			
+			Utils.debugLog("StyleResource.geoServerRemoveStyleIfExists: remove the style");
 			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName;
 			oGeoServerManager.removeStyle(sStyleFilePath);
 		}

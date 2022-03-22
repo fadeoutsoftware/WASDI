@@ -57,6 +57,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
@@ -304,8 +305,9 @@ public class Wasdi extends ResourceConfig {
 		Utils.debugLog("--------        Welcome to space        -------");
 		Utils.debugLog("-----------------------------------------------\n\n");
 		
+		
+		
 		try {
-			
 			// Can be useful for debug
 			Utils.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
 			for (String string : enviorntmentVars.keySet()) { Utils.debugLog(string + ": " + enviorntmentVars.get(string)); }
