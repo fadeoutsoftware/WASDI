@@ -47,7 +47,7 @@ public class StyleUpdateFileWorker extends Thread {
 					sUrl += "/";
 				}
 
-				sUrl += "styles/updatefile?styleId=" + m_sStyleId;
+				sUrl += "styles/updatefile?styleId=" + m_sStyleId+"&zipped=true";
 
 				Map<String, String> asHeaders = new HashMap<>();
 				asHeaders.put("x-session-token", m_sSessionId);

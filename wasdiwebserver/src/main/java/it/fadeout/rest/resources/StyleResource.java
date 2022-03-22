@@ -51,6 +51,7 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.styles.StyleSharingViewModel;
 import wasdi.shared.viewmodels.styles.StyleViewModel;
@@ -170,7 +171,8 @@ public class StyleResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("styleId") String sStyleId) {
+			@QueryParam("styleId") String sStyleId,
+			@QueryParam("zipped") Boolean bZipped) {
 		Utils.debugLog("StyleResource.updateFile( InputStream, StyleId: " + sStyleId);
 
 		try {
@@ -221,12 +223,10 @@ public class StyleResource {
 			// Get Download Path
 			String sDownloadRootPath = Wasdi.getDownloadPath();
 
-			Utils.debugLog("StyleResource.updateFile: download path " + sDownloadRootPath);
-
 			String sDirectoryPathname = sDownloadRootPath + "styles/";
 
 			createDirectoryIfDoesNotExist(sDirectoryPathname);
-
+			
 			// original sld file
 			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
 			
@@ -234,9 +234,20 @@ public class StyleResource {
 				Utils.debugLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
 				return Response.status(404).build();
 			}
+			
+			if (bZipped==null) {
+				bZipped = false;
+			}
+			
+			String sTempFileName = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp";
+			
+			if (bZipped) {
+				Utils.debugLog("StyleResource.updateFile: file is zipped");
+				sTempFileName = sTempFileName.replace(".temp", ".zip");
+			}
 
 			// new sld file
-			File oStyleSldFileTemp = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp");
+			File oStyleSldFileTemp = new File(sTempFileName);
 
 			//rename the ".temp" file
 			// save uploaded file in ".temp" format
@@ -248,24 +259,31 @@ public class StyleResource {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-			// checks that the Style Xml field is valid
-			try {
-				// Overwrite the old file
-				Files.write(oStyleSldFile.toPath(), Files.readAllBytes(oStyleSldFileTemp.toPath()));
-
-				// Delete the temp file
-				Files.delete(oStyleSldFileTemp.toPath());
+			
+			if (bZipped) {
 				
-				Utils.debugLog("StyleResource.updateFile: style files updated! styleID" + oStyle.getStyleId());
-			} catch (Exception oEx) {
-				if (oStyleSldFileTemp.exists())
-					oStyleSldFileTemp.delete();
-
-				Utils.debugLog("StyleResource.updateFile: " + oEx);
-				return Response.status(Status.NOT_MODIFIED).build();
+				Utils.debugLog("StyleResource.updateFile: unzip the style");
+				ZipFileUtils oExtractor = new ZipFileUtils();
+				oExtractor.unzip(sTempFileName, sDownloadRootPath+"styles/");
 			}
+			else {
+				// checks that the Style Xml field is valid
+				try {
+					// Overwrite the old file
+					Files.write(oStyleSldFile.toPath(), Files.readAllBytes(oStyleSldFileTemp.toPath()));
 
+					// Delete the temp file
+					Files.delete(oStyleSldFileTemp.toPath());
+					
+					Utils.debugLog("StyleResource.updateFile: style files updated! styleID - " + oStyle.getStyleId());
+				} catch (Exception oEx) {
+					if (oStyleSldFileTemp.exists())
+						oStyleSldFileTemp.delete();
+
+					Utils.debugLog("StyleResource.updateFile: " + oEx);
+					return Response.status(Status.NOT_MODIFIED).build();
+				}
+			}
 
 			//computational-node-side work
 			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
@@ -341,7 +359,7 @@ public class StyleResource {
 		Utils.debugLog("StyleResource.updateXML: StyleId " + sStyleId + " invoke StyleResource.updateXml");
 
 		// convert string to file and invoke updateGraphFile
-		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId);
+		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId, false);
 	}
 
 	@POST
@@ -506,12 +524,10 @@ public class StyleResource {
 				// computational-node-side work
 				computationalNodesDeleteStyle(sSessionId, oStyle.getStyleId(), oStyle.getName());
 			}
-
-
+			
 			// filesystem-side work
 			filesystemDeleteStyleIfExists(oStyle.getName());
-
-
+			
 			// geoserver-side work
 			geoServerRemoveStyleIfExists(oStyle.getName());
 
@@ -616,28 +632,8 @@ public class StyleResource {
 		GeoServerManager oGeoServerManager = new GeoServerManager();
 
 		if (oGeoServerManager.styleExists(sName)) {
-			oGeoServerManager.removeStyle(sName);
-		}
-	}
-
-	private void computationalNodesAddStyle(String sSessionId, String sStyleName, String sStyleDescription, Boolean bPublic, String sFilePath) {
-		// In the main node: start a thread to update all the computing nodes
-		try {
-			Utils.debugLog("StyleResource.computationalNodesAddStyle: this is the main node, starting Worker to add to computing nodes");
-
-			NodeRepository oNodeRepo = new NodeRepository();
-			List<Node> aoNodes = oNodeRepo.getNodesList();
-
-			boolean bIsPublic = (bPublic == null ? false : bPublic.booleanValue());
-
-			//This is the main node: forward the request to other nodes
-			StyleAddFileWorker oAddWorker = new StyleAddFileWorker(aoNodes, sSessionId, sStyleName, sStyleDescription, bIsPublic, sFilePath);
-
-			oAddWorker.start();
-
-			Utils.debugLog("StyleResource.computationalNodesAddStyle: Worker started");
-		} catch (Exception oEx) {
-			Utils.debugLog("StyleResource.computationalNodesAddStyle: error starting AddWorker " + oEx.toString());
+			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName;
+			oGeoServerManager.removeStyle(sStyleFilePath);
 		}
 	}
 
