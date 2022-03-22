@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.utils.WasdiFileUtils.*;
+import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
+import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,7 +38,6 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
-import it.fadeout.threads.styles.StyleAddFileWorker;
 import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
 import wasdi.shared.business.Node;
@@ -45,9 +45,9 @@ import wasdi.shared.business.Style;
 import wasdi.shared.business.StyleSharing;
 import wasdi.shared.business.User;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.StyleSharingRepository;
-import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
