@@ -81,7 +81,6 @@ public class StyleResource {
 			}
 
 			String sUserId = oUser.getUserId();
-
 			
 			// Check the uniqueness of the name
 			if (isStyleNameTaken(sName)) {
@@ -89,7 +88,6 @@ public class StyleResource {
 				oResult.setStringValue("The style's name is already used.");
 				return oResult;
 			}
-
 
 			// File checking
 
@@ -99,7 +97,6 @@ public class StyleResource {
 				oResult.setStringValue("Invalid file");
 				return oResult;
 			}
-
 
 			// filesystem-side work
 
@@ -129,12 +126,10 @@ public class StyleResource {
 				return oResult;
 			}
 
-
 			//computational-node-side work
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
-				computationalNodesAddStyle(sSessionId, sName, sDescription, bPublic, oStyleSldFile.getPath());
-			}
-
+//			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+//				computationalNodesAddStyle(sSessionId, sName, sDescription, bPublic, oStyleSldFile.getPath());
+//			}
 
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
@@ -173,7 +168,7 @@ public class StyleResource {
 	@POST
 	@Path("/updatefile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response updateFile(@FormDataParam("file") InputStream fileInputStream,
+	public Response updateFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId) {
 		Utils.debugLog("StyleResource.updateFile( InputStream, StyleId: " + sStyleId);
@@ -197,7 +192,7 @@ public class StyleResource {
 
 			// File checking
 			// Checks whether null file is passed
-			if (fileInputStream == null) {
+			if (oFileInputStream == null) {
 				Utils.debugLog("StyleResource.updateFile( Session: " + sSessionId + ", Style: " + sStyleId + " ): invalid file");
 				return Response.status(400).build();
 			}
@@ -234,6 +229,11 @@ public class StyleResource {
 
 			// original sld file
 			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
+			
+			if (!oStyleSldFile.exists()) {
+				Utils.debugLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
+				return Response.status(404).build();
+			}
 
 			// new sld file
 			File oStyleSldFileTemp = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp");
@@ -242,7 +242,7 @@ public class StyleResource {
 			// save uploaded file in ".temp" format
 
 			try {
-				writeFile(fileInputStream, oStyleSldFileTemp);
+				writeFile(oFileInputStream, oStyleSldFileTemp);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -267,12 +267,6 @@ public class StyleResource {
 			}
 
 
-			// DB-side work
-			// Updates the location on the current server
-			oStyle.setFilePath(oStyleSldFile.getPath());
-			oStyleRepository.updateStyle(oStyle);
-
-
 			//computational-node-side work
 			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
 				computationalNodesUpdateStyle(sSessionId, sStyleId, oStyleSldFile.getPath());
@@ -283,6 +277,7 @@ public class StyleResource {
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
 		} catch (Exception oEx2) {
 			Utils.debugLog("StyleResource.updateFile: " + oEx2);
+			return Response.serverError().build();
 		}
 
 		return Response.ok().build();
@@ -603,10 +598,14 @@ public class StyleResource {
 		GeoServerManager oGeoServerManager = new GeoServerManager();
 
 		if (oGeoServerManager.styleExists(sName)) {
-			oGeoServerManager.removeStyle(sName);
+			Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, call remove style");
+			if (!oGeoServerManager.removeStyle(sStyleFilePath)) {
+				Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: remove style returned false!!");
+			}
 		}
 
 		if (sStyleFilePath != null) {
+			Utils.debugLog("StyleResource.geoServerUpdateStyleIfExists: call publish style");
 			oGeoServerManager.publishStyle(sStyleFilePath);
 		}
 	}
