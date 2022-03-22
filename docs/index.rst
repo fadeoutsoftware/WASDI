@@ -24,7 +24,8 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
    :caption: Getting started
 
    WasdiTutorial.rst
-   SynchAsynch.rst
+   LibsConcepts.rst
+
 
 WASDI Marketplace
 ---------------------------
@@ -58,10 +59,16 @@ If you already know WASDI features and you are a Python developer check out the 
    :hidden:
    :caption: Programming tutorials
 
-   LibsConcepts.rst
-   PythonLandsatTutorial.rst
-   LibWorkspaces.rst
    PythonTutorial.rst
+   PythonLandsatTutorial.rst
+   SearchImport.rst
+   LibWorkspaces.rst
+   SynchAsynch.rst
+   C#Tutorial.rst
+   UITutorial.rst
+   PythonTutorial.rst
+   javascript/JavascriptTutorialHtml.rst
+   JavascriptTutorial.rst
 
 
 Reference center
@@ -78,6 +85,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    python/waspy.rst
    octave/octave.rst
    java/WasdiLib.rst
+   c#/WasdiLib.rst
+   typescript/wasdi.rst
 
 
 

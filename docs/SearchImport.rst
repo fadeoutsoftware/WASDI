@@ -92,7 +92,7 @@ It is a single function with different options.
 		"""
 	
 The only mandatory params are:
-*sPlatform: a string with the code of the platform. Each search is done for a single platform. S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5 are the actually supported platforms
+*sPlatform: a string with the code of the platform. Each search is done for a single platform. S1|S2|S3|S5P|VIIRS|L8|ENVI|ERA5 are the currently supported platforms
 *sDateFrom: start date of the search. It is a string in the format YYYY-MM-DD (ie "2021-12-15")
 *sDateFrom: end date of the search. It is a string in the format YYYY-MM-DD (ie "2021-12-15")
 
@@ -495,20 +495,20 @@ The following python app make a search of S1 images and import the results in sy
 			# Log how many images we found
 			wasdi.wasdiLog("S1 found " + str(len(aoFound)))
 
-			# Take the actual product list
-			asActualFiles = wasdi.getProductsByActiveWorkspace()
+			# Take the current product list
+			asCurrentFiles = wasdi.getProductsByActiveWorkspace()
 
-			if asActualFiles is not None:
-				wasdi.wasdiLog("Products in the workspace before the import:  " + str(len(asActualFiles)))
+			if asCurrentFiles is not None:
+				wasdi.wasdiLog("Products in the workspace before the import:  " + str(len(asCurrentFiles)))
 
 			# Import products, it may take time...
 			wasdi.importProductList(aoFound)
 
 			# Refresh the list
-			asActualFiles = wasdi.getProductsByActiveWorkspace()
+			asCurrentFiles = wasdi.getProductsByActiveWorkspace()
 
-			if asActualFiles is not None:
-				wasdi.wasdiLog("Products in the workspace after the import:  " + str(len(asActualFiles)))
+			if asCurrentFiles is not None:
+				wasdi.wasdiLog("Products in the workspace after the import:  " + str(len(asCurrentFiles)))
 
 
 
@@ -582,11 +582,11 @@ The same work can be done in an asynch way:
 			# Log how many images we found
 			wasdi.wasdiLog("S1 found " + str(len(aoFound)))
 
-			# Take the actual product list
-			asActualFiles = wasdi.getProductsByActiveWorkspace()
+			# Take the current product list
+			asCurrentFiles = wasdi.getProductsByActiveWorkspace()
 
-			if asActualFiles is not None:
-				wasdi.wasdiLog("Products in the workspace before the import:  " + str(len(asActualFiles)))
+			if asCurrentFiles is not None:
+				wasdi.wasdiLog("Products in the workspace before the import:  " + str(len(asCurrentFiles)))
 
 			# Import products, in an async mode
 			asProcIds = wasdi.asynchImportProductList(aoFound)
@@ -603,10 +603,10 @@ The same work can be done in an asynch way:
 			wasdi.wasdiLog("Imports done")
 
 			# Refresh the list
-			asActualFiles = wasdi.getProductsByActiveWorkspace()
+			asCurrentFiles = wasdi.getProductsByActiveWorkspace()
 
-			if asActualFiles is not None:
-				wasdi.wasdiLog("Products in the workspace after the import:  " + str(len(asActualFiles)))
+			if asCurrentFiles is not None:
+				wasdi.wasdiLog("Products in the workspace after the import:  " + str(len(asCurrentFiles)))
 
 		except Exception as oE:
 			wasdi.wasdiLog("Error " + str(oE))

@@ -31,8 +31,12 @@ extensions = ['javasphinx',
 'sphinxemoji.sphinxemoji',
 'sphinx.ext.autodoc',
 'sphinxcontrib.matlab',
-'myst_parser']
+'myst_parser',
+'sphinx_js']
 
+js_language = 'typescript'
+js_source_path = '../libraries/jswasdilib/src/lib/TS-index.ts'
+jsdoc_config_path = '../libraries/jswasdilib/src/lib/tsconfig.json'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -79,4 +83,6 @@ os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
 os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py")
 
+os.system("echo --- FIX for npm version ---")
+os.system('cd ~ ; npm install -g typedoc;')
 
