@@ -184,7 +184,7 @@ var StyleController = (function () {
                     oController.getListOfEnabledUsers(oController.m_oStyle.styleId);
                 }
                 else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING STYLE");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING STYLE<br>" + data.data.stringValue);
                 }
                 // reload the sharing list
 
@@ -267,14 +267,13 @@ var StyleController = (function () {
         }
         this.isUploadingStyle = true;
         var oController = this;
-        this.m_oStyleService.uploadByFile(sName, sDescription, oBody, bIsPublic).then(function (data) {
-            if (utilsIsObjectNullOrUndefined(data.data) == false) {
+        this.m_oStyleService.uploadFile(sName, sDescription, oBody, bIsPublic).then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 //Reload list o styles
                 var oDialog = utilsVexDialogAlertBottomRightCorner("STYLE UPLOADED<br>" + sName.toUpperCase());
                 utilsVexCloseDialogAfter(4000, oDialog);
-
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID STYLE FILE");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>" + data.data.stringValue);
             }
 
             oController.isUploadingStyle = false;
@@ -303,7 +302,6 @@ var StyleController = (function () {
         var oController = this;
         // update name, description, public
         oController.m_oStyleService.updateStyleParameters(this.m_oStyle.styleId,
-            oController.m_oStyle.name,
             oController.m_oStyle.description,
             oController.m_oStyle.public).then(function () {
                 // update file only if File is uploaded
@@ -312,6 +310,8 @@ var StyleController = (function () {
                     oBody.append('file', oController.m_oFile[0]);
                     oController.m_oStyleService.updateStyleFile(oController.m_oStyle.styleId, oBody).then(function (data) {
                         if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                            oController.getStyleXml(oController.m_oStyle.styleId);
+
                             var oDialog = utilsVexDialogAlertBottomRightCorner("UPDATED STYLE<br>READY");
                             utilsVexCloseDialogAfter(4000, oDialog);
                         } else {

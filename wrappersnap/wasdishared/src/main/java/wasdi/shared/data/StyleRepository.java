@@ -71,6 +71,54 @@ public class StyleRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get a style by name.
+	 *
+	 * @param sName style name
+	 * @return the style corresponding to the name
+	 */
+	public Style getStyleByName(String sName) {
+
+		try {
+			long lCounter = getCollection(m_sThisCollection).countDocuments(new Document("name", sName));
+
+			if (lCounter == 0) {
+				return null;
+			}
+
+			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("name", sName)).first();
+
+			String sJSON = oWSDocument.toJson();
+
+			Style oStyle = s_oMapper.readValue(sJSON, Style.class);
+
+			return oStyle;
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check if the name is already taken by other style.
+	 *
+	 * @param sName style name
+	 * @return true if there is already a style with the same style, false otherwise
+	 */
+	public boolean isStyleNameTaken(String sName) {
+
+		try {
+			long lCounter = getCollection(m_sThisCollection).countDocuments(new Document("name", sName));
+
+			return (lCounter > 0);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get all the style that can be accessed by UserId
 	 *
 	 * @param sUserId
@@ -78,7 +126,7 @@ public class StyleRepository extends MongoRepository {
 	 */
 	public List<Style> getStylePublicAndByUser(String sUserId) {
 		// migrated to set in order to avoid redundancy
-		final Set<Style> aoReturnList = new HashSet<>();
+		final Set<Style> aoReturnSet = new HashSet<>();
 
 		try {
 			// Then search all the other style using UserId of the current user
@@ -86,14 +134,14 @@ public class StyleRepository extends MongoRepository {
 			// the public ones
 			Bson oOrFilter = Filters.or(new Document("userId", sUserId), new Document("isPublic", true));
 
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter);
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oOrFilter).sort(new Document("name", 1));
 
-			fillList(aoReturnList, oWSDocuments, Style.class);
+			fillList(aoReturnSet, oWSDocuments, Style.class);
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
 
-		return new ArrayList<Style>(aoReturnList);
+		return new ArrayList<>(aoReturnSet);
 	}
 
 	/**
@@ -105,7 +153,7 @@ public class StyleRepository extends MongoRepository {
 		final List<Style> aoReturnList = new ArrayList<>();
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find();
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find().sort(new Document("name", 1));
 
 			fillList(aoReturnList, oWSDocuments, Style.class);
 		} catch (Exception oEx) {

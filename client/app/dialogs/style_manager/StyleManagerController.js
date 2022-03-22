@@ -109,6 +109,7 @@
         this.m_oStyleService.deleteStyle(oStyle.styleId).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.getStylesByUser();
+                oController.m_oSelectedStyle = null;
             } else {
                 //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE STYLE");
@@ -165,6 +166,11 @@
                 //Reload list o workFlows
                 oController.getStylesByUser();
                 oController.cleanAllUploadStyleFields();
+
+                if (oController.selectStyle) {
+                    oController.selectStyle(oController.selectStyle);
+                }
+
                 var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD");
                 utilsVexCloseDialogAfter(4000, oDialog);
             } else {
@@ -182,7 +188,7 @@
         return true;
     };
 
-    StyleManagerController.prototype.selectStyle = function(style) {        
+    StyleManagerController.prototype.selectStyle = function(style) {
         this.m_oSelectedStyle = style;
 
         this.m_asStyleXml = "";
@@ -248,6 +254,7 @@
 
     StyleManagerController.prototype.openEditStyleDialog = function (oStyle) {
         var oController = this;
+        oController.m_asStyleXml = null;
 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/style_edit/StyleView.html",
@@ -264,6 +271,10 @@
 
                 //Load styles
                 oController.getStylesByUser();
+
+                if (oStyle) {
+                    oController.getStyleXml(oStyle.styleId);
+                }
             });
         });
     }

@@ -620,6 +620,7 @@ public class ProductResource {
                                 }
                                 else {
                                 	Utils.debugLog("ProductResource.UpdateProductViewModel: style file not found, this will be a problem");
+                                	//TODO: trigger the copy of the sld file to the filesystem of the node
                                 }
                     		}
                     		
