@@ -483,7 +483,6 @@
             "name": "THEMATICS",
             "indexname": "platformname",
             "indexvalue": "StaticFiles",
-            "selected": true,
             "filters": [
                 {
                     "indexname": "producttype",
