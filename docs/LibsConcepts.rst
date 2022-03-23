@@ -168,13 +168,13 @@ Basic Parameters are:
 
 Advanced configuration can be controlled adding these entries to the config file:
 
-* **BASEPATH**=c:/local/path/ - This is the local base path used by wasdi to read and save the data you are using in your application. 
-* **DOWNLOADACTIVE**=1 - If 1, WASDI will automatically download the data you need in your code when requested
-* **UPLOADACTIVE**=1 - If 1, WASDI will automatically upload your data to the cloud when requested.
-* **BASEURL**=https://www.wasdi.net/wasdiwebserver/rest - base url of the WASDI APIs
-* **WORKSPACEID**=364c24ff-4891-4d0a-83bd-2772d292f918 - Id of the workspace, can be used as an alternative to the WORKSPACE name option
-* **VERBOSE**=1 1 to make local console verbose log of the lib, 0 to deactivate
-* **REQUESTSTIMEOUT**=5 - seconds of timeout for the lib http calls
+* BASEPATH=c:/local/path/ - This is the local base path used by wasdi to read and save the data you are using in your application. 
+* DOWNLOADACTIVE=1 - If 1, WASDI will automatically download the data you need in your code when requested
+* UPLOADACTIVE=1 - If 1, WASDI will automatically upload your data to the cloud when requested.
+* BASEURL=https://www.wasdi.net/wasdiwebserver/rest - base url of the WASDI APIs
+* WORKSPACEID=364c24ff-4891-4d0a-83bd-2772d292f918 - Id of the workspace, can be used as an alternative to the WORKSPACE name option
+* VERBOSE=1 1 to make local console verbose log of the lib, 0 to deactivate
+* REQUESTSTIMEOUT=5 - seconds of timeout for the lib http calls
 
 
 Local File System
