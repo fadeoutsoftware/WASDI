@@ -9,7 +9,9 @@ Introduction
 ------------------------------------------
 
 Here we introduce how to create a User Interface (UI) for an app that has already been deployed and made visible on the marketplace.
+
 The UI represents a user-friendly way to enter the parameters that otherwise should be defined in the params.json file.
+
 Indeed, the UI maps all parameters of the params.json file to an interface where the user can enter the parameter values,
 using different pieces of the interface itself that describe what parameter is expected and guide the user in the selection.
 
