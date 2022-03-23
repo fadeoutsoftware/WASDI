@@ -46,10 +46,11 @@ Add your App to WASDI
 Unleash the real power of WASDI, developing and uploading your own downstream application to run it on EO images on the fly!
 Wasdi supports several programming languages:
 
-* **Python 2.7**
 * **Python 3.x**
 * **IDL 3.7.2**
 * **Octave 6.x**
+* **C#**
+* **Javascript**
 
 
 If you already know WASDI features and you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
@@ -74,7 +75,7 @@ If you already know WASDI features and you are a Python developer check out the 
 Reference center
 ---------------------------
 
-WASDI allows users and developer to interact though **libraries** and **APIs**.
+WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu.
 
 
 .. toctree::
