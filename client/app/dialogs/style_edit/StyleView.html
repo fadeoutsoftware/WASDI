@@ -1,0 +1,75 @@
+<div class="modal fade processor-dialog">
+    <div class="modal-dialog modal-dialog-extra-large modal-wasdi">
+        <div class="modal-content ">
+
+            <div class="modal-header">
+                <i class="fa fa-gears" aria-hidden="true"></i>&nbsp;{{m_oController.m_sDialogTitle}}
+            </div>
+
+            <div class="modal-body">
+                <!-- TAB NAVIGATION -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Base'}" ng-click="m_oController.m_sSelectedTab = 'Base'">
+                        <a href="" role="tab" data-toggle="tab">
+                            <i class="fa fa-gears" ></i>
+                            {{"DIALOG_STYLE_TAB_BASE" | translate}}
+                        </a>
+                    </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Share'}" ng-click="m_oController.m_sSelectedTab = 'Share'"
+                    ng-show="m_oController.m_bEditMode == true"
+                    >
+                        <a href="" role="tab" data-toggle="tab">
+                            <i class="fa fa-share-alt" ></i>
+                            {{"DIALOG_STYLE_TAB_SHARE" | translate}}
+                        </a>
+                    </li>
+
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'Xml'}" ng-click="m_oController.m_sSelectedTab = 'Xml'"
+                    ng-show="m_oController.m_bEditMode == true"
+                    >
+                        <a href="" role="tab" data-toggle="tab">
+                            <i class="fa fa-edit" ></i>
+                            Edit XML
+                        </a>
+                    </li>
+                </ul>
+
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content pt-5">
+                    <!------- BASE ------->
+                    <div class="tab-pane fade in" id="Base"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'Base'}"
+                         ng-hide="m_oController.m_sSelectedTab != 'Base'">
+                        <ng-include src="'dialogs/style_edit/TabBaseStyle.html'"></ng-include>
+                    </div>
+
+                    <!------- SHARE ------->
+                    <div class="tab-pane fade in" id="Share"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'Share' || m_oController.m_bEditMode==false}"
+                         ng-hide="m_oController.m_sSelectedTab != 'Share'">
+                        <ng-include src="'dialogs/style_edit/TabShareStyle.html'"></ng-include>
+                    </div>
+
+                    <!------- EDIT ------->
+                    <div class="tab-pane fade in" id="Share"
+                         ng-class="{'active':m_oController.m_sSelectedTab === 'Xml' || m_oController.m_bEditMode==false}"
+                         ng-hide="m_oController.m_sSelectedTab != 'Xml'">
+                        <ng-include src="'dialogs/style_edit/TabEditXml.html'"></ng-include>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="m_oController.m_oClose(null, 500)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="m_oController.apply()" class="my-button" data-dismiss="modal">
+                    Apply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

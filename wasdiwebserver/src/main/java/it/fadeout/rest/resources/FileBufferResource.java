@@ -249,7 +249,7 @@ public class FileBufferResource {
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
-			
+			oReturnValue.setPayload(sProcessObjId);
 		}catch (IOException e) {
 			Utils.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;

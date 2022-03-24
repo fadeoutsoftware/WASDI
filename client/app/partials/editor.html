@@ -183,7 +183,7 @@
                         <div ng-repeat="oBand in m_oController.m_aoVisibleBands">
 
                             <div class="row-v4" style="padding-top: 15px;">
-                                <div class="col-xs-6" style="padding-left: 30px;word-wrap: break-word;">
+                                <div class="col-xs-5" style="padding-left: 30px;word-wrap: break-word;">
                                     <!--<span class="layer-details-heading">Product name </span>:-->
                                     {{oBand.productName}}
                                     <br>
@@ -206,21 +206,28 @@
                                     </button>
 
                                 </div>
+                                <div class="col-xs-1">
+                                    <button class="btn btn-wasdi fa btn-outline-primary" title="Legend"
+                                        ng-click="m_oController.showLayerLegend($index)"
+                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        <em class="fa fa-image" aria-hidden="true"></em>
+                                    </button>
 
-
+                                </div>                                
                                 <div class="col-xs-4">
-
                                     <label class="color-value">
                                         {{oBand.opacity}} %
                                     </label>
                                     <!-- Index is zero based and the [0] layer is the map-->
                                     <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class=""
                                         ng-change="m_oController.setLayerOpacity(oBand.opacity,oBand.layerId)">
-
-
-
                                 </div>
                             </div>
+                            <div class="row-v4" style="padding-top: 15px;" ng-show="oBand.showLegend" ng-click="m_oController.showLayerLegend($index)">
+                                <div class="col-xs-12">
+                                    <img src="{{oBand.legendUrl}}"/>
+                                </div>
+                            </div>                            
                         </div>
 
                     </div>

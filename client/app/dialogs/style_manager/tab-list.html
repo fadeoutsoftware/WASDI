@@ -1,0 +1,19 @@
+<div class="modal-body d-flex flex-column" style="height:70vh">
+    <div class="row-v4" ng-show="m_oController.m_bIsLoadingStyleList === true"> <!---->
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="loadIcon">
+                <invader style ="margin-top: calc(100% / 5);margin-bottom: calc(100% / 5);"></invader>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row-v4" ng-show="m_oController.m_bIsLoadingStyleList === false">
+        <div class="col-v4" style="height:70vh">
+            <ng-include src="'dialogs/style_manager/style-list.html'"></ng-include>
+        </div>
+        <div class="col-v4" style="height:70vh">
+            <ng-include src="'dialogs/style_manager/style-item.html'"></ng-include>
+        </div>
+    </div>
+</div>

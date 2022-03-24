@@ -9,9 +9,10 @@ In this tutorial the WASDI app store will be introduced.
 The document will cover and highlight the main feature of this WASDI sections and also, will present how a WASDI application can be launched.
 
 The app store concept is pretty common for mobile devices and our efforts
-was invested to develop the same user experience for the WASDI web service.
+was invested to develop the same user experience for WASDI.
 An user can upload, execute and share his own application directly on
 a web browser, with a fast and consistent user experience.
+
 Also, a dedicated graphical interface(UI) can be added to the application,
 allowing to supply other users a well taylored experience. |:smile:|
 
@@ -33,7 +34,7 @@ Also, an user can enable some filters related to categories, developer, ratings 
 Launch an application
 ------------------------
 
-Let's try an application, in particular, search for **e-DRIFT flood event V 2.0**.
+Let's try an application, in particular, search for **Automatic S1-S2 Floods**.
 This application can be used to identify flooded areas, using Sentinel-1 and Sentinel-2 products.
 
 The application, at the lowest level of parameters specification, requires the date of the
@@ -41,7 +42,7 @@ flood events and the area where the study must be done.
 WASDI, will then connect to dedicated servers (DIAS) to gather images and elaborates them to
 obtain the final product map.
 
-Click on the edrif_flood_event2 icon
+Click on the **Automatic S1-S2 Floods** icon
 
 .. image:: _static/appstore_images/4.png
 
@@ -49,7 +50,7 @@ and then on *Open Application*
 
 .. image:: _static/appstore_images/5.png
 
-The application UI it is now shown. Several tabs are available to the user, allowing to customize the elaboration:
+The application UI it is shown. Several tabs are available to the user, allowing to customize the elaboration:
 
 * **Advanced** allows to select the number of days before events to be evaluated, plus the selection of the Data Provider
 * **SAR** give the possibility of a fine tuning of SAR(Syntethic Aperture Radar) parameters

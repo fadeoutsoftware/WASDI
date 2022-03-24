@@ -27,6 +27,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.PagesService',
     'wasdi.ProcessorService', 
     'wasdi.WorkflowService', 
+    'wasdi.StyleService', 
+    'wasdi.FeedbackService', 
     'wasdi.ProcessorParametersTemplateService',
     'wasdi.OpportunitySearchService', 
     'wasdi.TreeService',
@@ -227,6 +229,8 @@ wasdiApp.controller("DownloadProductInWorkspaceController", window.DownloadProdu
 //wasdiApp.controller("MaskManagerController", window.MaskManagerController);
 wasdiApp.controller("ImportAdvanceFiltersController", window.ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController", window.WorkFlowManagerController);
+wasdiApp.controller("StyleManagerController", window.StyleManagerController);
+wasdiApp.controller("StyleController", window.StyleController);
 wasdiApp.controller("GetListOfWorkspacesController", window.GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", window.ProcessorController);
 wasdiApp.controller("WorkflowController", window.WorkflowController);
@@ -240,10 +244,13 @@ wasdiApp.controller("MosaicController", window.MosaicController);
 //wasdiApp.controller("EditPanelController", window.EditPanelController);
 wasdiApp.controller("ProcessorLogsController", window.ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController);
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
+
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 
 //wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);

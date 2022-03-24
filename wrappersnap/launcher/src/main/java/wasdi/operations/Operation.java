@@ -194,8 +194,8 @@ public abstract class Operation {
             return;
         }
 
-        m_oLocalLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.GetFormatFileDimension(lSize));
-        oProcessWorkspace.setFileSize(Utils.GetFormatFileDimension(lSize));
+        m_oLocalLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.getFormatFileDimension(lSize));
+        oProcessWorkspace.setFileSize(Utils.getFormatFileDimension(lSize));
     }
     
     /**

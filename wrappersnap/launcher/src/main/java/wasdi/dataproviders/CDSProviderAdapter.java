@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.BoundingBoxUtils;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.gis.BoundingBoxUtils;
 
 public class CDSProviderAdapter extends ProviderAdapter {
 

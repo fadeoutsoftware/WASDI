@@ -156,7 +156,11 @@ public class Utils {
 
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
-	
+
+	public static String formatToYyyyDashMMDashdd(Date oDate) {
+		return new SimpleDateFormat("yyyy-MM-dd").format(oDate);
+	}
+
 	public static Date getWasdiDate(String sWasdiDate) {
 
 		try {
@@ -235,7 +239,7 @@ public class Utils {
 	 * @param lBytes
 	 * @return
 	 */
-	public static String GetFormatFileDimension(long lBytes) {
+	public static String getFormatFileDimension(long lBytes) {
 		int iUnit = 1024;
 		if (lBytes < iUnit)
 			return lBytes + " B";

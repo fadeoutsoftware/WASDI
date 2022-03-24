@@ -51,7 +51,9 @@ public class QueryTranslatorTerrascope extends QueryTranslator {
 		// Convert the WASDI Query in the view model
 		QueryViewModel oWasdiQuery = parseWasdiClientQuery(sQueryFromClient);
 
-		if (Utils.isNullOrEmpty(oWasdiQuery.platformName)) {
+		if (Utils.isNullOrEmpty(oWasdiQuery.platformName)
+				|| Utils.isNullOrEmpty(oWasdiQuery.startFromDate)
+				|| Utils.isNullOrEmpty(oWasdiQuery.endToDate)) {
 			return Collections.emptyList();
 		}
 

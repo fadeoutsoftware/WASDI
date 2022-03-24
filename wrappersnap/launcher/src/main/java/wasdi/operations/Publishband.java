@@ -1,26 +1,14 @@
 package wasdi.operations;
 
-import java.awt.Dimension;
-import java.awt.image.ColorModel;
-import java.awt.image.RenderedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.geotiff.GeoTIFF;
-import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
-import org.geotools.referencing.CRS;
 
 import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
-import wasdi.io.WasdiProductWriter;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
@@ -39,6 +27,7 @@ import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 public class Publishband extends Operation {
@@ -64,20 +53,18 @@ public class Publishband extends Operation {
         	
         	PublishBandParameter oParameter = (PublishBandParameter) oParam;
 
-            if (oProcessWorkspace != null) {
-                updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
-            }
+            updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
             // Read File Name
-            String sFile = oParameter.getFileName();
+            String sInputFile = oParameter.getFileName();
             
             // Check integrity
-            if (Utils.isNullOrEmpty(sFile)) {
+            if (Utils.isNullOrEmpty(sInputFile)) {
                 // File not good!!
                 m_oLocalLogger.debug("Publishband.executeOperation: file is null or empty");
                 String sError = "Input File path is null";
 
-                m_oProcessWorkspaceLogger.log("Input file is null...");
+                m_oProcessWorkspaceLogger.log(sError);
 
                 // Send KO to Rabbit
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -85,39 +72,56 @@ public class Publishband extends Operation {
                 return false;
             }            
 
-            // Generate full path name
-            sFile = LauncherMain.getWorkspacePath(oParameter) + sFile;
-
+            // Generate full path name of the input file
+            sInputFile = LauncherMain.getWorkspacePath(oParameter) + sInputFile;
+            
+            // Debug Utils: to debug publish band in local, we can force the path of the file to be published
+            String sBackup = sInputFile;
+            
+            if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	// Force it as it was on the standard server path
+            	sInputFile = "/data/wasdi/" + oParam.getWorkspaceOwnerId() + "/" + oParam.getWorkspace() + "/" + oParameter.getFileName();
+            }
+            
+            // Try to get the file
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFile);
+            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sInputFile);
 
             if (oDownloadedFile == null) {
-                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sFile + "]");
+                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sInputFile + "]");
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Cannot find product to publish", oParameter.getExchange());
                 return false;
+            }
+            
+            if (WasdiConfig.Current.geoserver.localDebugPublisBand) {
+            	// it was only for backup, restore the real local path
+            	sInputFile = sBackup;
             }
 
             // Get the product name
             String sProductName = oDownloadedFile.getProductViewModel().getName();
 
             m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
-            m_oLocalLogger.debug("Publishband.executeOperation:  File = " + sFile);
+            m_oLocalLogger.debug("Publishband.executeOperation: " + sProductName + " - " + oParameter.getBandName());
 
-            // Create file object
-            File oFile = new File(sFile);
-            String sInputFileNameOnly = oFile.getName();
+            // Create input file object
+            File oInputFile = new File(sInputFile);
 
             // set file size
-            setFileSizeToProcess(oFile, oProcessWorkspace);
+            setFileSizeToProcess(oInputFile, oProcessWorkspace);
 
-            // Generate Layer Id
-            sLayerId = sInputFileNameOnly;
-            sLayerId = Utils.getFileNameWithoutLastExtension(sFile);
-            sLayerId += "_" + oParameter.getBandName();
+            // Generate Layer Id: filename_band
+//            sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
+//            
+//            if (WasdiFileUtils.isShapeFile(sInputFile) == false) {
+//            	sLayerId += "_" + oParameter.getBandName();
+//            }
+            
+            sLayerId = Utils.getRandomName();
 
             // Is already published?
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-            PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sFile, oParameter.getBandName());
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.getPublishedBand(sInputFile, oParameter.getBandName());
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 10);
 
@@ -139,61 +143,33 @@ public class Publishband extends Operation {
             }
 
             // Default Style: can be changed in the following lines depending by the product
-            String sStyle = "raster";
-            
-            sStyle = getStyleByFileName(sFile);
-            
+            String sStyle = getStyleByFileName(sInputFile);
+                        
+            // Finally, if specified, we set the style specified by the product
             if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
                 sStyle = oParameter.getStyle();
             }
+            
+            m_oLocalLogger.debug("Publishband.executeOperation:  Generating Band Image with style " + sStyle);
+            m_oProcessWorkspaceLogger.log("Generate Band Image with style " + sStyle);
 
-            m_oProcessWorkspaceLogger.log("Using style " + sStyle);
-
-            m_oLocalLogger.debug("Publishband.executeOperation:  Generating Band Image...");
-
-            m_oProcessWorkspaceLogger.log("Generate Band Image");
-
-            // Read the product
-			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oFile);
+            // Create the Product Reader
+			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oInputFile);
 			
-			Product oProduct = oReadProduct.getSnapProduct();
+			// Ask to obtain the file to send to geoserver
+			File oFileToCopy = oReadProduct.getFileForPublishBand(oParameter.getBandName(), sLayerId);
 			
-			String sEPSG = "EPSG:4326";
-
-            if (oProduct == null) {
-            	
-            	boolean bContinue = false;
-            	
-    			if (sInputFileNameOnly.toUpperCase().startsWith("S5P")) {
-    				
-    				if (convertSentinel5PtoGeotiff(oFile.getAbsolutePath(), oParameter.getBandName() + ".tif", oParameter.getBandName())) {
-    					String sNewPath = oFile.getParentFile().getPath();
-    					if (!sNewPath.endsWith("/")) sNewPath += "/";
-    					sNewPath += oParameter.getBandName() + ".tif";
-    					sFile = sNewPath;
-    					oFile = new File(sFile);
-    					
-    					bContinue = true;
-    				}
-    				
-    			}
-				
-    			if (!bContinue) {
-                    // TODO: HERE CHECK IF IT IS A SHAPE FILE!!!!!					
-    				m_oProcessWorkspaceLogger.log("Impossible to read the input file sorry");
-    				m_oLocalLogger.error("Publishband.executeOperation: Not a SNAP Product Return empyt layer id for [" + sFile + "]");
-    				return false;    				
-    			}
+			if (oFileToCopy == null) {
+                m_oLocalLogger.debug("Publishband.executeOperation:  File for geoserver is null, return");
+                m_oProcessWorkspaceLogger.log("Sorry, but we do not know how to show this file on the map");
+                m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Looks we cannot show\nthis file on map", oParameter.getExchange());
+                return false;
 			}
-			else {
-				sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(), true);
-			}
-
+			            
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
             // write the data directly to GeoServer Data Dir
-            String sGeoServerDataDir = WasdiConfig.Current.paths.geoserverDataDir;
-            String sTargetDir = sGeoServerDataDir;
+            String sTargetDir = WasdiConfig.Current.paths.geoserverDataDir;
 
             if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
             sTargetDir += sLayerId + "/";
@@ -202,125 +178,92 @@ public class Publishband extends Operation {
             if (!oTargetDir.exists())
                 oTargetDir.mkdirs();
 
+            // List of the files copied
+            ArrayList<String> asCopiedFiles = new ArrayList<String>();
+            
             // Output file Path
-            String sOutputFilePath = sTargetDir + sLayerId + ".tif";
+            String sOutputFilePath = sTargetDir + oFileToCopy.getName();
 
             // Output File
             File oOutputFile = new File(sOutputFilePath);
 
-            m_oLocalLogger.debug("Publishband.executeOperation: to " + sOutputFilePath + " [LayerId] = " + sLayerId);
-
-            // Check if is already a .tif image
-            if ((sFile.toLowerCase().endsWith(".tif") || sFile.toLowerCase().endsWith(".tiff")) == false) {
-
-                // Check if it is a S2
-                if (oProduct.getProductType().startsWith("S2")
-                        && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
-
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Managing S2 Product");
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Getting Band " + oParameter.getBandName());
-
-                    Band oBand = oProduct.getBand(oParameter.getBandName());
-                    Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
-                    oGeotiffProduct.addBand(oBand);
-                    sOutputFilePath = new WasdiProductWriter(m_oProcessWorkspaceRepository, oProcessWorkspace)
-                            .WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
-                    oOutputFile = new File(sOutputFilePath);
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Geotiff File Created (EPSG=" + sEPSG + "): "
-                            + sOutputFilePath);
-
-                } else {
-
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Managing NON S2 Product");
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Getting Band " + oParameter.getBandName());
-
-                    // Get the Band
-                    Band oBand = oProduct.getBand(oParameter.getBandName());
-                    // Get Image
-                    // MultiLevelImage oBandImage = oBand.getSourceImage();
-                    RenderedImage oBandImage = oBand.getSourceImage();
-
-                    // Check if the Colour Model is present
-                    ColorModel oColorModel = oBandImage.getColorModel();
-
-                    // Tested for Copernicus Marine - netcdf files
-                    if (oColorModel == null) {
-
-                        // Colour Model not present: try a different way to get the Image
-                        BandImageManager oImgManager = new BandImageManager(oProduct);
-
-                        // Create full dimension and View port
-                        Dimension oOutputImageSize = new Dimension(oBand.getRasterWidth(), oBand.getRasterHeight());
-
-                        // Render the image
-                        oBandImage = oImgManager.buildImageWithMasks(oBand, oOutputImageSize, null, false, true);
-                    }
-
-                    // Get TIFF Metadata
-                    GeoTIFFMetadata oMetadata = ProductUtils.createGeoTIFFMetadata(oProduct);
-
-                    m_oLocalLogger.debug("Publishband.executeOperation:  Output file: " + sOutputFilePath);
-                    
-                    GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
-                }
-            } else {
-                // This is a geotiff, just copy
-                FileUtils.copyFile(oFile, oOutputFile);
+            m_oLocalLogger.debug("Publishband.executeOperation: copy geoserver ready file to " + sOutputFilePath + " [LayerId] = " + sLayerId);
+            
+            FileUtils.copyFile(oFileToCopy, oOutputFile);
+            asCopiedFiles.add(oOutputFile.getPath());
+            
+            m_oLocalLogger.debug("Publishband.executeOperation: search for other files to copy (same name, different extension)");
+            
+			ArrayList<String> asFilesToCopy = new ArrayList<String>();
+			File oWorkspaceFolder = new File(oFileToCopy.getParent());
+			
+			// Take all the files in the folder
+			File[] aoWorkspaceFiles = oWorkspaceFolder.listFiles();
+			
+			// We are searching for files with the same name but different extension
+			String sBaseFileNameFilter = oFileToCopy.getName();
+			sBaseFileNameFilter = Utils.getFileNameWithoutLastExtension(sBaseFileNameFilter);
+			sBaseFileNameFilter += ".";
+			
+			if (aoWorkspaceFiles != null) {
+				for (File oChild : aoWorkspaceFiles) {
+					// Is it me?
+					if (oChild.getName().equals(oFileToCopy.getName())) continue;
+					
+					// Does it match?
+					if (oChild.getName().startsWith(sBaseFileNameFilter))  {
+						asFilesToCopy.add(oChild.getPath());
+						m_oLocalLogger.debug("Publishband.executeOperation: found other file to copy " + oChild.getName());
+					}
+				}
+			}
+            
+            if (asFilesToCopy.size()>0) {
+    			for (String sFileToCopy : asFilesToCopy) {
+    				String sOtherOutputFile = oOutputFile.getPath();
+    				String sOtherOutputExtension = Utils.GetFileNameExtension(sOtherOutputFile);
+    				String sNewExtension = Utils.GetFileNameExtension(sFileToCopy);
+    				
+    				sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
+    				
+    				m_oLocalLogger.debug("Publishband.executeOperation: copy also " + sFileToCopy + " to " + sOtherOutputFile);
+    				
+    				FileUtils.copyFile(new File(sFileToCopy), new File(sOtherOutputFile));
+    				asCopiedFiles.add(sOtherOutputFile);
+    			}            	
             }
+            
 
             m_oProcessWorkspaceLogger.log("Publish on geoserver");
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
-            // Ok publish
+            // Create the geoserver Manager
             GeoServerManager oGeoServerManager = new GeoServerManager();
-
-            // Do we have the style in this Geoserver?
-            if (!oGeoServerManager.styleExists(sStyle)) {
-
-                // Not yet: obtain styles root path
-                String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
-                if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
-                sStylePath += "styles" + File.separator;
-
-                // Set the style file
-                sStylePath += sStyle + ".sld";
-
-                File oStyleFile = new File(sStylePath);
-
-                // Do we have the file?
-                if (!oStyleFile.exists()) {
-                    // No, Download style
-                    m_oLocalLogger.info("Publishband.executeOperation: download style " + sStyle + " from main node");
-                    String sRet = downloadStyle(sStyle, oParameter.getSessionID(), sStylePath);
-
-                    // Check download result
-                    if (!sRet.equals(sStylePath)) {
-                        // Not good...
-                        m_oLocalLogger.error("Publishband.executeOperation: error downloading style " + sStyle);
-                    }
-                }
-
-                // Publish the style
-                if (oGeoServerManager.publishStyle(sStylePath)) {
-                    m_oLocalLogger.info("Publishband.executeOperation: published style " + sStyle + " on local geoserver");
-                } else {
-                    m_oLocalLogger.error("Publishband.executeOperation: error publishing style " + sStyle + " reset on raster");
-                    sStyle = "raster";
-                }
-            }
-
+            
+            // Check or Get the style from WASDI
+            sStyle = checkOrGetStyle(oGeoServerManager, sStyle, oParam);
+            
+            //Ok publish
             Publisher oPublisher = new Publisher();
-
-            try {
-                oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.Current.geoserver.maxGeotiffDimensionPyramid);
-            } catch (Exception e) {
-                m_oLocalLogger.error("Publishband.executeOperation: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 1024");
-                oPublisher.m_lMaxMbTiffPyramid = 1024L;
+            
+            WasdiProductReader oFileToPublishReader = WasdiProductReaderFactory.getProductReader(oOutputFile);
+            
+            String sEPSG = oFileToPublishReader.getEPSG();
+            
+            if (Utils.isNullOrEmpty(sEPSG)) {
+            	m_oLocalLogger.error("Publishband.executeOperation: EPSG is still null. Try to recover with default EPSG:4326");
+            	sEPSG = "EPSG:4326";
             }
-
-            m_oLocalLogger.debug("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
-            sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);
+            
+            if (sOutputFilePath.toLowerCase().endsWith(".shp")) {
+                m_oLocalLogger.debug("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                sLayerId = oPublisher.publishShapeFile(sOutputFilePath, asCopiedFiles, sLayerId, sEPSG, sStyle, oGeoServerManager);
+            }
+            else {
+                m_oLocalLogger.debug("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);            	
+            }
 
             m_oLocalLogger.debug("Publishband.executeOperation: Obtained sLayerId = " + sLayerId);
 
@@ -377,9 +320,8 @@ public class Publishband extends Operation {
                 oVM.setGeoserverBoundingBox(sGeoserverBBox);
                 oVM.setGeoserverUrl(oPublishedBand.getGeoserverUrl());
 
-                // P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the
-                // process
-                Thread.sleep(5000);
+                // P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the process
+                Thread.sleep(1000);
 
                 m_oSendToRabbit.SendRabbitMessage(bResultPublishBand, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
                 
@@ -402,7 +344,7 @@ public class Publishband extends Operation {
             
         } catch (Exception oEx) {
 
-            m_oProcessWorkspaceLogger.log("Exception");
+            m_oProcessWorkspaceLogger.log("Exception " + oEx.toString());
 
             m_oLocalLogger.error("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
@@ -466,94 +408,58 @@ public class Publishband extends Operation {
             sStyle = "s5p_so2";
         }
         
+        if (WasdiFileUtils.isShapeFile(sFile)) {
+        	sStyle = "polygon";
+        }
+        
         return sStyle;
 	}
-    
-	protected boolean convertSentinel5PtoGeotiff(String sInputFile, String sOutputFile, String sBand) {
-		try {
-			
-			if (Utils.isNullOrEmpty(sInputFile)) return false;
-			if (Utils.isNullOrEmpty(sOutputFile)) return false;
-			if (Utils.isNullOrEmpty(sBand)) return false;
-			
-			String sInputPath = "";
-			File oFile = new File(sInputFile);
-			sInputPath = oFile.getParentFile().getPath();
-			if (!sInputPath.endsWith("/")) sInputPath += "/";
-			
-			String sGdalCommand = "gdal_translate";
-			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
-			
-			ArrayList<String> asArgs = new ArrayList<String>();
-			asArgs.add(sGdalCommand);
-			
-			asArgs.add("-co");
-			asArgs.add("WRITE_BOTTOMUP=NO");
-			
-			asArgs.add("-of");
-			asArgs.add("VRT");
-			
-			String sGdalInput = "NETCDF:\""+sInputFile+"\":/PRODUCT/"+sBand;
-			
-			asArgs.add(sGdalInput);
-			asArgs.add(sInputPath + sBand + ".vrt");
+	
+	/**
+	 * Checks if the requested style is on geoserver. If it is not
+	 * it downloads it
+	 * @param oGeoServerManager GeoServer Manager 
+	 * @param sStyle Style to check
+	 * @param oParameter Base Parameter, to use the session to download the style if needed
+	 * @return
+	 */
+	protected String checkOrGetStyle(GeoServerManager oGeoServerManager, String sStyle, BaseParameter oParameter) {
+        // Do we have the style in this Geoserver?
+        if (!oGeoServerManager.styleExists(sStyle)) {
 
-			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-		
-//			String sCommand = "";
-//			for (String sArg : asArgs) {
-//				sCommand += sArg + " ";
-//			}
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				m_oLocalLogger.debug("Publishband.convertS5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();			
-			
-			asArgs = new ArrayList<String>();
-			sGdalCommand = "gdalwarp";
-			sGdalCommand = LauncherMain.adjustGdalFolder(sGdalCommand);
-			
-			asArgs.add(sGdalCommand);
-			asArgs.add("-geoloc");
-			asArgs.add("-t_srs");
-			asArgs.add("EPSG:4326");
-			asArgs.add("-overwrite");
-			asArgs.add(sInputPath + sBand+ ".vrt");
-			asArgs.add(sInputPath + sOutputFile);
-			
-			oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-		
-//			sCommand = "";
-//			for (String sArg : asArgs) {
-//				sCommand += sArg + " ";
-//			}
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			while ((sLine = oReader.readLine()) != null)
-				m_oLocalLogger.debug("Publishband.convertSentine5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();
-			
-			if (new File(sInputPath + sOutputFile).exists()) return true;
-			else return false;
-		}
-		catch (Exception oEx) {
-			
-			m_oLocalLogger.debug("Publishband.convertSentinel5PtoGeotiff: Exception = " + oEx.toString());
-			
-			return false;
-		}
+            // Not yet: obtain styles root path
+            String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
+            if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
+            sStylePath += "styles" + File.separator;
+
+            // Set the style file
+            sStylePath += sStyle + ".sld";
+
+            File oStyleFile = new File(sStylePath);
+
+            // Do we have the file?
+            if (!oStyleFile.exists()) {
+                // No, Download style
+                m_oLocalLogger.info("Publishband.executeOperation: download style " + sStyle + " from main node");
+                String sRet = downloadStyle(sStyle, oParameter.getSessionID(), sStylePath);
+
+                // Check download result
+                if (!sRet.equals(sStylePath)) {
+                    // Not good...
+                    m_oLocalLogger.error("Publishband.executeOperation: error downloading style " + sStyle);
+                }
+            }
+
+            // Publish the style
+            if (oGeoServerManager.publishStyle(sStylePath)) {
+                m_oLocalLogger.info("Publishband.executeOperation: published style " + sStyle + " on local geoserver");
+            } else {
+                m_oLocalLogger.error("Publishband.executeOperation: error publishing style " + sStyle + " reset on raster");
+                sStyle = "raster";
+            }
+        }
+        
+        return sStyle;
 	}
 	
     /**

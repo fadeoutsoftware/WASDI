@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Polly;
 
 namespace WasdiLib.Configuration
 {
     internal static class HttpClientsConfiguration
     {
-        public static void ConfigureHttpClients(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureHttpClients(this IServiceCollection services)
         {
             services.AddHttpClient("WasdiApi", c =>
             {

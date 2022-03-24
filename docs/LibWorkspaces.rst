@@ -14,18 +14,23 @@ This tutorial has to goal to intruduce the main functionality of the WASDI Libra
 Introduction
 ------------------------------------------
 Workspaces are the space where you can import files, run applications, run workflows, run your code, create and add your own files.
+
 Each workspace has a Name, an Id (guid) and a owner.
+
 Each workspace is hosted on a WASDI Computing node: this can be a shared node for generic users or a dedicated Computing node for premium users.
+
 Each workspace can be shared with other WASDI Users.
+
 Developers can access their own workspaces or the workspaces other users shared with them.
 
 Workspace functionalities
 ------------------------------------------
 Using the libraries, a developer can:
-*Get the id of the active workspace*
-*Get the name of a workpace from the Id or viceversa*
-*Open another workspace*
-*Get the list of user workspaces*
+
+* Get the id of the active workspace
+* Get the name of a workpace from the Id or viceversa
+* Open another workspace
+* Get the list of user workspaces
 
 Workspaces Sample Code
 ------------------------------------------
@@ -70,9 +75,10 @@ The following python app make some sample of what you can do with workspaces:
 		wasdi.init('./config.json')
 		run()
 
-At the beginning we read the Id of the active workspace (getActiveWorkspaceId). This is defined in the config file and is the workspace where your code is running. 
-Then we get the name of this workspace (getWorkspaceNameById).
-We want next to get the list of the users' workspaces (getWorkspaces): this method returns a list of dictionaries: each object has these properties
+At the beginning we read the Id of the active workspace (**getActiveWorkspaceId**). This is defined in the config file and is the workspace where your code is running. 
+Then we get the name of this workspace (**getWorkspaceNameById**).
+
+We want next to get the list of the users' workspaces (**getWorkspaces**): this method returns a list of dictionaries: each object has these properties
 
 .. code-block:: java
 
@@ -81,8 +87,8 @@ We want next to get the list of the users' workspaces (getWorkspaces): this meth
 	"workspaceId":STRING,
 	"workspaceName":STRING
 
-Next step is to open another workspace (openWorkspace): this method returns the workspaceId if ok, an empty string in case of error.
-Finally, we come back to our original workspace using the id we collected before (openWorkspaceById) and verify using its name (getWorkspaceNameById).
+Next step is to open another workspace (**openWorkspace**): this method returns the workspaceId if ok, an empty string in case of error.
+Finally, we come back to our original workspace using the id we collected before (**openWorkspaceById**) and verify using its name (**getWorkspaceNameById**).
 
 The output will be something similar to this:
 .. code-block::
@@ -98,20 +104,24 @@ Products functionalities
 ------------------------------------------
 The functionalities to work with products are:
 
-*get the list of products in a workspace*
-*check if a product is in the workspace or not*
-*get the local path of the product*
-*add a new product to the workspace*
+* get the list of products in a workspace
+* check if a product is in the workspace or not
+* get the local path of the product
+* add a new product to the workspace
 
 
 Products Sample Code
 ------------------------------------------
 
 The following python app make some sample of what you can do with products.
+
 To make it run, you should create a workspace and put there at least one file using the WASDI Search web user interface or the upload.
+
 Please note that this code can take some time to be executed the first time you run it beacuse it shows how to access file locally (so download) and to upload results in WASDI.
 
-The goal of this tutorial is not to manipulate files so, the "new" file, is created just making a copy of an existing one with a different name.
+
+.. note::
+	The goal of this tutorial is not to manipulate files so, the "new" file, is created just making a copy of an existing one with a different name.
 
 .. code-block:: python
 
@@ -154,7 +164,10 @@ The goal of this tutorial is not to manipulate files so, the "new" file, is crea
 		wasdi.init('./config.json')
 		run()
 
-The code starts taking a list of the products in the workspace (getProductsByActiveWorkspace). Just to show the functionality, it then checks if the first file is really available on WASDI (fileExistsOnWasdi).
-The next step is to simulate a local file access: to open a file, you need a full local path: this must be requested to WASDI (getPath).
+The code starts taking a list of the products in the workspace (**getProductsByActiveWorkspace**). Just to show the functionality, it then checks if the first file is really available on WASDI (**fileExistsOnWasdi**).
+
+The next step is to simulate a local file access: to open a file, you need a full local path: this must be requested to WASDI (**getPath**).
+
 The same function can be used also to obtain a path to use to save your own file: our code just makes a copy of a file in a workspace with another name, using again getPath to have to path to use to save the file. 
-This copy is a new file for WASDI: to add it to the workspace use addFileToWASDI: please note that add file to WASDI takes as input only the file name and not the full path.
+
+This copy is a new file for WASDI: to add it to the workspace use **addFileToWASDI**: please note that add file to WASDI takes as input only the file name and not the full path.

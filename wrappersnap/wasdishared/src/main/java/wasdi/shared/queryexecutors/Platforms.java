@@ -26,5 +26,7 @@ public class Platforms {
 
 	public static String DEM = "DEM";
 	public static String WORLD_COVER = "WorldCover";
+	
+	public static String STATICS = "StaticFiles";
 
 }

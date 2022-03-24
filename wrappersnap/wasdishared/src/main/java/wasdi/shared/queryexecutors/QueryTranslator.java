@@ -104,6 +104,11 @@ public abstract class QueryTranslator {
 	 * Token of PLANET platform
 	 */
 	private static final String s_sPLATFORMNAME_PLANET = "platformname:PLANET";
+	
+	/**
+	 * Token of STATICS platform
+	 */
+	private static final String s_sPLATFORMNAME_STATICS = "platformname:StaticFiles";
 	/**
 	 * Token of product type
 	 */
@@ -321,7 +326,9 @@ public abstract class QueryTranslator {
 		QueryViewModel oResult = new QueryViewModel();
 
 		try {
-
+			
+			String sOriginalQuery = sQuery;
+			
 			// Prepare the text that is uniform
 			sQuery = prepareQuery(sQuery);
 
@@ -491,6 +498,10 @@ public abstract class QueryTranslator {
 
 			// Try get Info about WorldCover
 			parseWorldCover(sQuery, oResult);
+			
+			// Try get Info about Statics: needs the original query to avoid
+			// Conflits with the "AND" literal
+			parseStatics(sOriginalQuery, oResult);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
@@ -791,6 +802,20 @@ public abstract class QueryTranslator {
 			oResult.platformName = Platforms.WORLD_COVER;
 
 			oResult.productType = extractValue(sQuery, "dataset");
+		}
+	}
+	
+	/**
+	 * Fills the Query View Model with Statics Info
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseStatics(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_STATICS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_STATICS);
+
+			oResult.platformName = Platforms.STATICS;
+			oResult.productType = extractValue(sQuery, "producttype");
 		}
 	}
 

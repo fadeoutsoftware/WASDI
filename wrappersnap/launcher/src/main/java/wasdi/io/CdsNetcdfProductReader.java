@@ -263,5 +263,12 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 
 		return oProduct;
 	}
+	
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		return null;
+	}
+
 
 }
+

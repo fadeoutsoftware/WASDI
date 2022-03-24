@@ -5,9 +5,10 @@ var RootController = (function() {
 
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
+    function RootController($rootScope, $scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
                             $timeout,oModalService,oRabbitStompService, $window) {
-
+                        
+        this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -466,17 +467,48 @@ var RootController = (function() {
 
     RootController.prototype.openSearchorbit = function()
     {
+        this.m_oRootScope.title = null;
         this.m_oState.go("root.searchorbit", { });
     };
 
     RootController.prototype.openMarketPlace = function()
     {
+        this.m_oRootScope.title = null;
         this.m_oState.go("root.marketplace", { });
+    };
+
+    RootController.prototype.openWorkspaces = function()
+    {
+        this.m_oRootScope.title = null;
+        this.m_oState.go("root.workspaces", { });
     };
 
     RootController.prototype.openImportPage = function () {
         var oController = this;
+        this.m_oRootScope.title = null;
         oController.m_oState.go("root.import", { });
+    };
+
+    RootController.prototype.openSendFeedbackDialog = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/send_feedback/SendFeedbackDialog.html",
+            controller: "SendFeedbackController",
+            inputs: {
+                extras: {
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+            });
+        });
     };
 
     RootController.prototype.activePageCss = function(oPage)
@@ -720,6 +752,7 @@ var RootController = (function() {
 
     /*********************************************************************/
     RootController.$inject = [
+        '$rootScope',
         '$scope',
         'ConstantsService',
         'AuthService',

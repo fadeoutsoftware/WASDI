@@ -171,6 +171,13 @@
 
 }
 
+.wsNameTextBox {
+    position: relative;
+    box-sizing: border-box;
+    border-color: $wasdi-input-text-border-color;
+    margin-left: 5px;
+}
+
 @keyframes flash {
     0%, 35%, 55% {
         opacity: 1;

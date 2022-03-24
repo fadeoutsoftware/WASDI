@@ -408,7 +408,7 @@ var WasdiApplicationUIController = (function () {
     /**
      * Generate the JSON that has to be sent to the Procesor
      */
-    WasdiApplicationUIController.prototype.generateParamsAndRun = function () {
+    WasdiApplicationUIController.prototype.generateParamsAndRun = function (sUserProvidedWorkspaceName) {
 
         let bCheck = this.checkParams();
 
@@ -429,12 +429,19 @@ var WasdiApplicationUIController = (function () {
         // Reference to the application name
         let sApplicationName = this.m_oConstantsService.getSelectedApplication();
 
-        let oToday = new Date();
-        let sToday = oToday.toISOString()
-
-        let sWorkspaceName = sApplicationName + "_" + sToday;
-
         if (this.m_oSelectedWorkspace == null) {
+
+            let sWorkspaceName;
+
+            if (sUserProvidedWorkspaceName) {
+                sWorkspaceName = sUserProvidedWorkspaceName;
+            } else {
+                let oToday = new Date();
+                let sToday = oToday.toISOString()
+
+                sWorkspaceName = sApplicationName + "_" + sToday;
+            }
+
             // Create a new Workspace
             this.m_oWorkspaceService.createWorkspace(sWorkspaceName).then(function (data, status) {
 
@@ -451,11 +458,17 @@ var WasdiApplicationUIController = (function () {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
                 });
 
+                oController.m_oRootScope.title = sWorkspaceName;
+
             }
                 , function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
                 });
         } else {
+            if (this.m_oSelectedWorkspace) {
+                this.m_oRootScope.title = this.m_oSelectedWorkspace.workspaceName;
+            }
+
             this.executeProcessorInWorkspace(this, sApplicationName, oProcessorInput, this.m_oSelectedWorkspace);
         }
     }

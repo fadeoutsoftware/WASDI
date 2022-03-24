@@ -25,7 +25,6 @@ public class WasdiProductWriter  {
 	}
 	
 	public WasdiProductWriter(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
-		super();
 		this.m_oProcessWorkspaceRepository = oProcessWorkspaceRepository;
 		this.m_oProcessWorkspace = oProcessWorkspace;
 	}

@@ -1,5 +1,5 @@
 <div class="dropdown-menu-container">
-    <div class="dropdown dropdownUI"></div> <!-- {{$ctrl.tooltip}}-->
+    <div class="dropdown dropdownUI"> <!-- {{$ctrl.tooltip}}-->
         <button class="btn btn-default dropdown-btn dropdown-toggle" type="button" id="dropdownMenuDirective" data-toggle="dropdown"  uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right">
             <div class="row">
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11 col-plr0 text-left">
@@ -17,7 +17,7 @@
 
         </button>
         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuDirective" 
-        style="z-index: 10000;">
+        style="height: 150px; overflow: auto;">
             <input class="form-control dropdown-input"  type="text" placeholder="Search..." ng-show="enableSearchFilter" ng-model="textFilter">
             <hr class="divider-line-style1">
             <li role="presentation" ng-repeat="value in listOfValues | filter:textFilter"> <!-- onClickFunction({sValue:value})  ng-click="changeSelectedValueOnClick(value)"-->

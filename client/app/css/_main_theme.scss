@@ -1,4 +1,4 @@
-@import "../fonts/hero_light/stylesheet.css";
+@import "../fonts/hero/stylesheet.css";
 @import "../fonts/astronaut/stylesheet.css";
 @import "../fonts/starlight/stylesheet.css";
 /************** MAIN COLOR **************/
@@ -25,19 +25,19 @@ $wasdi-blue-logo-complementary-4:#1B2B46;
 
 //INPOOR HERO LIGHT
 @font-face {
-  font-family:'Hero-Light' ;
-  src:url(../fonts/hero_light/Hero_Light.eot);
-  src:url(../fonts/hero_light/Hero_Light.ttf);
-  src:url(../fonts/hero_light/Hero_Light.woff);
-  //src:url(../fonts/hero_light/Hero_Light.svg);
+    font-family:'Hero' ;
+    src:url(../fonts/hero/Hero.eot);
+    src:url(../fonts/hero/Hero.ttf);
+    src:url(../fonts/hero/Hero.woff);
+    src:url(../fonts/hero/Hero.svg);
 }
 
-$wasdi-font-web: 'Hero-Light' ,Helvetica, sans-serif;//arial
+$wasdi-font-web: 'Hero' ,Helvetica, sans-serif;//arial
 $wasdi-font-web-small-dimension:Bell Gothic, sans-serif;
 $wasdi-font-web-normal: sans-serif;
 $wasdi-font-size:14px;
 $wasdi-line-height: 1.42857;
-$wasdi-font-weight:600;
+$wasdi-font-weight:400;
 $wasdi-font-weight-normal:400;
 
 
