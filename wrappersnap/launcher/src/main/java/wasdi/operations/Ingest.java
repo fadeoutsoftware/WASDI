@@ -41,7 +41,9 @@ public class Ingest extends Operation {
         	
             IngestFileParameter oParameter = (IngestFileParameter) oParam;
             
-            File oFileToIngestPath = new File(oParameter.getFilePath());
+            String sFilePath = oParameter.getFilePath();
+            
+            File oFileToIngestPath = new File(sFilePath);
 
             if (!oFileToIngestPath.canRead()) {
                 String sMsg = "Ingest.executeOperation: ERROR: unable to access file to Ingest " + oFileToIngestPath.getAbsolutePath();

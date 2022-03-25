@@ -9,6 +9,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
@@ -156,7 +157,7 @@ public abstract class WasdiProductReader {
         	return null;
         }
         
-        if (m_oProductFile.getName().toUpperCase().startsWith("S5P")) {
+        if (WasdiFileUtils.isSentinel5PFile(m_oProductFile)) {
         	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
         	return null;        	
         }
