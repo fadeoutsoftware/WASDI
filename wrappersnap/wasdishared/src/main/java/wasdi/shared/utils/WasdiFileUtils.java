@@ -398,6 +398,24 @@ public class WasdiFileUtils {
 		}
 		return false;
 	}
+	
+	public static boolean isSentinel5PFile(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			if (oFile.getName().toLowerCase().startsWith("s5p") && ! (oFile.getName().toLowerCase().endsWith(".tif")|| oFile.getName().toLowerCase().endsWith(".tiff"))) {
+				return true;
+			}
+			else {
+				return false;
+			}
+			
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel5PFile( File ): " + oE);
+		}
+		return false;
+	}
 
 	private static boolean isSentinel3ZippedFile(String sName) {
 		try {

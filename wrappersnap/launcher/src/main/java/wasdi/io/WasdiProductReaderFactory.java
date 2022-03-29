@@ -23,7 +23,7 @@ public class WasdiProductReaderFactory {
 			return new VrtProductReader(oFile);
 		}
 		
-		if (oFile.getName().toLowerCase().startsWith("s5p")) { 
+		if (WasdiFileUtils.isSentinel5PFile(oFile)) { 
 			return new Sentinel5ProductReader(oFile);
 		}
 
