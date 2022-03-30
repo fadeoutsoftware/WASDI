@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 .. _PythonLandsatTutorial:
 
-Add a Data Provider in WASDI
+Add a Data Provider to WASDI
 ===========================
 
 Introduction
