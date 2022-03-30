@@ -60,6 +60,7 @@ Each mission is a JSON similar to this one:
                     "indexname": "filename",
                     "indexlabel": "Satellite Platform",
                     "indexvalues": "S1A_*|S1B_*",
+					"indexvalue": "S1A_*"
                     "regex": ".*"
 
                 },
@@ -67,20 +68,32 @@ Each mission is a JSON similar to this one:
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
                     "indexvalues": "SLC|GRD|OCN",
+					"indexvalue": "GRD"
                     "regex": ".*"
 
                 }
             ]
         }
 
-name will be used to create the apposite tab in the WASDI search section.
-indexname - indexvalue are used to create a new variable from the client to the server. The "platformname" indexname must be used to set the Platform Code as defined in the Java Platforms object. "indexvalue" for platformname is, so, the code of the Platform in WASDI. 
-You can add as many filters as required/supported by the Data Provider. WASDI automatically handles the date interval, the bounding box, platformname and, if supplied, the producttype. Other filters can be added and will have to be supported server side.
+*name* will be used to create the apposite tab in the WASDI search section.
+
+Filters can be added to the search form of the data provider. Each filter has an indexname that represents the name of the filter and a indexvalue will contain the value of filter selected by the user.
+
+*indexname* - *indexvalue* are an arrau used to create a new variable from the client to the server. 
+
+*indexname:"platformname"*  is a filter that *must* be used to set the Platform Code as defined in the Java Platforms object.  *"indexvalue"* for platformname is, so, the code of the Platform in WASDI. 
+
+You can add as many filters as required/supported by the Data Provider. 
+
+WASDI automatically handles the date interval, the bounding box, platformname and, if supplied, the producttype. 
+
+Other filters can be added and will have to be supported server side by your own QueryTranslator.
 
 Query Executor, Query Translator and Response Translator
 ---------------------------
 This section is needed to make wasdi search the new Data Provider. WASDI receives always the query as string that must be translated in for the provider. Results must then be converted to the WASDI format.
-When the user wants to donwload a file, QueryExecutor will pass to the ProviderAdapter the link and the filename found. 
+
+When the user wants to donwload a file, QueryExecutor will pass to the ProviderAdapter the link and the filename that must be imported. 
 
 In general, the name is the key element: since WASDI supports automatic data provider selection, the system will search the highest priority provider adapter that supports that plaform. The Download Operation will use the QueryExecutor to obtain the url to use for downloadfrom the filename. 
 Since a platform can be supported by many Data Providers, this method assures to get always the right file also from different sources.
