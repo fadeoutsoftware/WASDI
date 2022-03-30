@@ -8,7 +8,7 @@
 
 Wasdi Web Platform access and basic usage
 =========================================
-The home page of WASDI is reachable at the address:
+The Home page of WASDI is reachable at the address:
 
 https://www.wasdi.net/
 
