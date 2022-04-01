@@ -50,7 +50,7 @@ angular.module('wasdi.wapSelectArea', [])
                     // this.maxSide = window.maxSide;
                     // this.maxRatioSide = window.maxRatioSide;
 
-                    console.log(this); // logs your item object
+                    //console.log(this); // logs your item object
                 };
 
 

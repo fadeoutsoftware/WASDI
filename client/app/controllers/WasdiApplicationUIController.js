@@ -316,17 +316,6 @@ var WasdiApplicationUIController = (function () {
                 var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
 
-                // Get the root scope
-                //let oRootScope = oController.m_oScope.$parent;
-                //while(oRootScope.$parent != null || oRootScope.$parent != undefined)
-                //{
-                //    oRootScope = oRootScope.$parent;
-                //}
-
-                // send the message to show the processor log dialog
-                //let oPayload = { processId: data.data.processingIdentifier };
-                //oRootScope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, oPayload);
-
                 oController.m_oConstantsService.setActiveWorkspace(null);
 
                 // Move to the editor
@@ -339,7 +328,9 @@ var WasdiApplicationUIController = (function () {
         });
     }
 
-    WasdiApplicationUIController.prototype.checkParams = function () {
+    WasdiApplicationUIController.prototype.checkParams = function (asMessages) {
+
+        let bReturn = true;
 
         // For each tab
         for (let iTabs = 0; iTabs < this.m_asTabs.length; iTabs++) {
@@ -356,23 +347,32 @@ var WasdiApplicationUIController = (function () {
                     if (this.m_bRenderAsStrings) {
                         let sStringValue = oElement.getStringValue();
 
-                        if (utilsIsStrNullOrEmpty(sStringValue)) return false;
+                        if (utilsIsStrNullOrEmpty(sStringValue)) {
+
+                            let sMsg = oElement.label + " is required";
+                            asMessages.push(sMsg);
+
+                            bReturn = false;
+                        }
                     } else {
                         let oValue = oElement.getValue();
-                        if (utilsIsObjectNullOrUndefined(oValue)) return false;
+                        if (utilsIsObjectNullOrUndefined(oValue)) {
+                            let sMsg = oElement.label + " is required";
+                            asMessages.push(sMsg);
+
+                            bReturn = false;
+                        }
                     }
                 }
 
                 //checks wether the function exists 
                 if (typeof oElement.isValid === "function") { 
-                    if (!oElement.isValid()) return false;
+                    if (!oElement.isValid(asMessages)) bReturn = false;
                 }
-
-
             }
         }
 
-        return true;
+        return bReturn;
     }
 
     WasdiApplicationUIController.prototype.createParams = function () {
@@ -410,11 +410,36 @@ var WasdiApplicationUIController = (function () {
      */
     WasdiApplicationUIController.prototype.generateParamsAndRun = function (sUserProvidedWorkspaceName) {
 
-        let bCheck = this.checkParams();
+        let asMessages = [];
+
+        let bCheck = this.checkParams(asMessages);
 
         if (!bCheck) {
-            var oVexWindow = utilsVexDialogAlertBottomRightCorner("PLEASE INSERT REQUIRED FIELDS");
-            utilsVexCloseDialogAfter(4000, oVexWindow);
+
+            let sMessage = "PLEASE INSERT REQUIRED FIELDS<br>AND CHECK INSERTED VALUES";
+
+            let bLongMessage = false;
+
+            if (utilsIsObjectNullOrUndefined(asMessages) == false){
+                if (asMessages.length>0) {
+                    sMessage = "GURU MEDITATION <BR>";
+                    let iCount = 0;
+                    for (iCount = 0; iCount<asMessages.length; iCount++) {
+                        sMessage = sMessage + asMessages[iCount] + "<br>";
+                    }
+
+                    bLongMessage = true;
+                }
+            }
+
+            if (bLongMessage) {
+                var oVexWindow = utilsVexDialogAlertTop(sMessage);
+            }
+            else {
+                var oVexWindow = utilsVexDialogAlertBottomRightCorner(sMessage);
+                utilsVexCloseDialogAfter(4000, oVexWindow);    
+            }
+
             return;
         }
 
