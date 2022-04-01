@@ -15,9 +15,9 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.ShapeFileUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.ShapeFileUtils;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class Ingest extends Operation {

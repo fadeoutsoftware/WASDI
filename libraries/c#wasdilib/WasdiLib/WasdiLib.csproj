@@ -6,7 +6,7 @@
 	<Nullable>enable</Nullable>
 	<PackageId>WasdiLib</PackageId>
 	<Authors>WASDI (LU) S.a.r.l.</Authors>
-	<PackageVersion>0.0.2.6</PackageVersion>
+	<PackageVersion>0.0.3.5</PackageVersion>
 	<Description>WASDI (LU) S.a.r.l.
 
 **Disclaimer ** 
@@ -39,7 +39,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.0.2.6</Description>
+Version 0.0.3.5</Description>
 	<PackageTags>WASDI C#</PackageTags>
 	<PackageProjectUrl>https://www.wasdi.net/</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/fadeoutsoftware/WASDI/tree/master/libraries/libraries/c%23wasdilib</RepositoryUrl>
@@ -48,14 +48,15 @@ Version 0.0.2.6</Description>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<PackageIcon>wasdi_logo.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<AssemblyVersion>0.0.2.6</AssemblyVersion>
-	<FileVersion>0.0.2.6</FileVersion>
-	<PackageReleaseNotes>Version 0.0.2.6</PackageReleaseNotes>
+	<AssemblyVersion>0.0.3.5</AssemblyVersion>
+	<FileVersion>0.0.3.5</FileVersion>
+	<PackageReleaseNotes>Version 0.0.3.5</PackageReleaseNotes>
 	<Copyright>WASDI (LU) S.a.r.l.</Copyright>
 	<ApplicationIcon>wasdi_logo.ico</ApplicationIcon>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<Version>0.0.2.6</Version>
+	<Version>0.0.3.5</Version>
 	<PackageLicenseExpression>CC-BY-4.0</PackageLicenseExpression>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -92,7 +93,7 @@ Version 0.0.2.6</Description>
 
   <ItemGroup>
 	<None Update="appsettings.json">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</None>
 	<None Update="WasdiLib.nlog.config">
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -93,7 +93,7 @@
 
                         <!-- HOME BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ui-sref="root.workspaces" >
+                            <a ng-click="m_oController.openWorkspaces();" href=""   >
                                 <i class="fa fa-save fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
@@ -126,7 +126,13 @@
                                 <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
                             </a>
                         </li>
-
+                        <!-- SEND FEEDBACK BUTTON-->
+                        <li> <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
+                            <a ng-click="m_oController.openSendFeedbackDialog()"  href="" > <!---->
+                                <i class="fa fa-comment fa-lg" aria-hidden="true" ></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}
+                            </a>
+                        </li>
 
                     </ul>
                 </div>

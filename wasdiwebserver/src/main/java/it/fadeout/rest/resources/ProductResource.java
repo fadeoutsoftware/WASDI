@@ -572,7 +572,70 @@ public class ProductResource {
             if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle))) {
                 // Update the 2 fields that can be updated
                 oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
-                oDownloaded.setDefaultStyle(oProductViewModel.getStyle());             
+                oDownloaded.setDefaultStyle(oProductViewModel.getStyle());
+                
+                try {
+                    if (!sOriginalStyle.equals(sNewStyle)) {
+                    	
+                    	PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+                    	List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oDownloaded.getFilePath());
+                    	
+                    	for (PublishedBand oPublishedBand : aoPublishedBands) {
+                    		Utils.debugLog("ProductResource.UpdateProductViewModel: change style for " + oPublishedBand.getLayerId());
+                    		
+                    		String sGeoServerUrl = oPublishedBand.getGeoserverUrl();
+                    		
+                    		if (Utils.isNullOrEmpty(sGeoServerUrl)) {
+                    			sGeoServerUrl = WasdiConfig.Current.geoserver.address;
+                    		}
+                    		else {
+                    			if (sGeoServerUrl.endsWith("/ows?")) {
+                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-5);
+                    			}
+                    			else if (sGeoServerUrl.endsWith("/ows")) {
+                    				sGeoServerUrl = sGeoServerUrl.substring(0, sGeoServerUrl.length()-4);
+                    			}                    			
+                    		}
+                    		
+                    		Utils.debugLog("ProductResource.UpdateProductViewModel: sGeoServerUrl " + sGeoServerUrl);
+                    		GeoServerManager oGeoServerManager = new GeoServerManager(sGeoServerUrl, WasdiConfig.Current.geoserver.user, WasdiConfig.Current.geoserver.password);
+                    		
+                    		
+                    		
+                    		if (!oGeoServerManager.styleExists(sNewStyle)) {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: style does not exists: add it");
+                    			
+                                String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
+                                if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
+                                sStylePath += "styles" + File.separator;
+
+                                // Set the style file
+                                sStylePath += sNewStyle + ".sld";
+
+                                File oStyleFile = new File(sStylePath);
+
+                                // Do we have the file?
+                                if (oStyleFile.exists()) {
+                                	oGeoServerManager.publishStyle(sStylePath);
+                                }
+                                else {
+                                	Utils.debugLog("ProductResource.UpdateProductViewModel: style file not found, this will be a problem");
+                                	//TODO: trigger the copy of the sld file to the filesystem of the node
+                                }
+                    		}
+                    		
+                    		if (oGeoServerManager.configureLayerStyle(oPublishedBand.getLayerId(), sNewStyle)) {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: style changed");
+                    		}
+                    		else {
+                    			Utils.debugLog("ProductResource.UpdateProductViewModel: error changing style");
+                    		}
+                    	}
+                    }                	
+                }
+                catch (Exception oStyleEx) {
+                	Utils.debugLog("ProductResource.UpdateProductViewModel: Exception changing geoserver style " + oStyleEx.toString());
+				}
 
                 // Save
                 if (oDownloadedFilesRepository.updateDownloadedFile(oDownloaded) == false) {

@@ -1,6 +1,7 @@
 package wasdi.shared.queryexecutors.terrascope;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -53,6 +54,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 	public int executeCount(String sQuery) {
 		int iCount = 0;
 
+		sQuery = adjustUserProvidedDatesTo2020(sQuery);
+
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 
 		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
@@ -92,6 +95,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 		try {
 			String sQuery = oQuery.getQuery();
 
+			sQuery = adjustUserProvidedDatesTo2020(sQuery);
+
 			if (!sQuery.contains("&offset")) sQuery += "&offset=" + oQuery.getOffset();
 			if (!sQuery.contains("&limit")) sQuery += "&limit=" + oQuery.getLimit();
 
@@ -124,6 +129,33 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 		}
 
 		return aoReturnList;
+	}
+
+	/**
+	 * Adjust the user provided dates (beginPosition & endPosition) to 2020-01-01 in order to make sure that the search produces valid results
+	 * @param sQuery the initial query
+	 * @return the query with the adjusted dates
+	 */
+	private static String adjustUserProvidedDatesTo2020(String sQuery) {
+		if (!sQuery.contains("platformname:WorldCover") && !sQuery.contains("platformname:DEM")) {
+			return sQuery;
+		}
+
+		if (!sQuery.contains("beginPosition") || !sQuery.contains("endPosition")) {
+			return sQuery;
+		}
+
+		String sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("[", sQuery.indexOf("beginPosition")) + 1, sQuery.indexOf("TO", sQuery.indexOf("beginPosition"))).trim();
+		String sReplacedWithDate = "2020-01-01T00:00:00.000Z";
+
+		sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
+
+		sOriginalDateToReplace = sQuery.substring(sQuery.indexOf("TO", sQuery.indexOf("beginPosition")) + 3, sQuery.indexOf("]", sQuery.indexOf("beginPosition"))).trim();
+		sReplacedWithDate = Utils.formatToYyyyDashMMDashdd(new Date()) + "T23:59:59.999Z";
+
+		sQuery = sQuery.replace(sOriginalDateToReplace, sReplacedWithDate);
+
+		return sQuery;
 	}
 
 }

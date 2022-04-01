@@ -20,7 +20,7 @@ namespace WasdiLib.Services
 
         PrimitiveResult ProcessingMosaic(string sUrl, string sSessionId, MosaicSetting oMosaicSetting);
 
-        List<QueryResultViewModel> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
+        List<QueryResult> SearchQueryList(string sUrl, string sSessionId, string sQueryBody);
 
         PrimitiveResult FilebufferDownload(string sBaseUrl, string sSessionId, string sWorkspaceId, string sProvider, string sFileUrl, string sFileName, string sBoundingBox);
 

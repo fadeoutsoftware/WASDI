@@ -4,6 +4,7 @@
 //$screen-lg: map-get($grid-breakpoints, "lg");
 
 @import "variables";
+
 @import "functions";
 @import "main_theme";
 @import "layout/modal";
@@ -114,7 +115,7 @@ html, body, #cesiumContainer {
 }
 
 h1 {
-    font-family: $wasdi-font-web;
+    font-family: $wasdi-font-web; 
     font-weight: $wasdi-font-weight;
 }
 
@@ -1048,5 +1049,3 @@ textarea{
         margin-top: 10em ;
     }
 }
-
-

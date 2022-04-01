@@ -171,6 +171,13 @@ Work with WASDI
 Add the WasdiLib dependency to your application
 +++++++++++++++++++++++++++++++++++++++++++++++
 
+|
+
+.. note::
+	The code showed in this section can also be found on the dedicated public GitHub repository: https://github.com/wasdi-cloud/TutorialSeeSharpApp.
+
+|
+
 Find the WasdiLib on NuGet.
 Open a page in a browser and navigate to https://www.nuget.org/packages/WasdiLib.
 
@@ -654,6 +661,22 @@ Minimizing the logging panel, the downloaded products become visible on the work
    :scale: 36%
    :align: center
    :alt: workspace with products.
+
+|
+
+The GitHub repository
+////////////////////////////////
+
+The code showed in this tutorial can also be found on the dedicated public GitHub repository: https://github.com/wasdi-cloud/TutorialSeeSharpApp.
+
+.. image:: _static/c#_tutorial_images/71_github_repo.PNG
+   :scale: 36%
+   :align: center
+   :alt: the GitHub repository
+
+|
+
+You can clone the project or download the code as a ZIP archive. The `commits page <https://github.com/wasdi-cloud/TutorialSeeSharpApp/commits/main>`_ highlights the steps of this tutorial.
 
 |
 

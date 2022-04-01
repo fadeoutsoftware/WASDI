@@ -1,14 +1,14 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.utils.WasdiFileUtils.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.Timestamp;
@@ -112,28 +112,19 @@ public class WorkflowsResource {
             // Get Download Path
             String sDownloadRootPath = Wasdi.getDownloadPath();
 
-            File oWorkflowsPath = new File(sDownloadRootPath + "workflows/");
+            String sDirectoryPathname = sDownloadRootPath + "workflows/";
 
-            if (!oWorkflowsPath.exists()) {
-                oWorkflowsPath.mkdirs();
-            }
+            createDirectoryIfDoesNotExist(sDirectoryPathname);
 
             // Generate Workflow Id and file
             String sWorkflowId = UUID.randomUUID().toString();
-            File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
+            String sFilePathname = sDirectoryPathname + sWorkflowId + ".xml";
+            File oWorkflowXmlFile = new File(sFilePathname);
 
             Utils.debugLog("WorkflowsResource.uploadFile: workflow file Path: " + oWorkflowXmlFile.getPath());
 
             // save uploaded file
-            int iRead = 0;
-            byte[] ayBytes = new byte[1024];
-
-            try (OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFile)) {
-                while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-                    oOutStream.write(ayBytes, 0, iRead);
-                }
-                oOutStream.flush();
-            }
+            writeFile(fileInputStream, oWorkflowXmlFile);
 
             // Create Entity
             SnapWorkflow oWorkflow = new SnapWorkflow();
@@ -226,11 +217,9 @@ public class WorkflowsResource {
 
             Utils.debugLog("WorkflowsResource.updateFile: download path " + sDownloadRootPath);
 
-            File oWorkflowsPath = new File(sDownloadRootPath + "workflows/");
+            String sDirectoryPathname = sDownloadRootPath + "workflows/";
 
-            if (!oWorkflowsPath.exists()) {
-                oWorkflowsPath.mkdirs();
-            }
+            createDirectoryIfDoesNotExist(sDirectoryPathname);
 
             // Check that the workflow exists on db
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
@@ -255,19 +244,15 @@ public class WorkflowsResource {
             File oWorkflowXmlFileTemp = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml.temp");
             //if the new one is ok delete the old and rename the ".temp" file
             // save uploaded file in ".temp" format
-            int iRead = 0;
-            // flush the temp
-            byte[] ayBytes = new byte[1024];
-            try (OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFileTemp)) {
-                while ((iRead = fileInputStream.read(ayBytes)) != -1) { // While EOF
-                    oOutStream.write(ayBytes, 0, iRead);
-                }
-                oOutStream.flush();
+            
+            try {
+                writeFile(fileInputStream, oWorkflowXmlFileTemp);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             oWorkflow.getInputNodeNames().clear();
             oWorkflow.getOutputNodeNames().clear();
             // checks that the graph field is valid by checking the nodes

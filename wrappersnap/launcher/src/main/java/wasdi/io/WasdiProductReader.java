@@ -1,11 +1,17 @@
 package wasdi.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
+import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalInfoResult;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -98,11 +104,36 @@ public abstract class WasdiProductReader {
     public abstract MetadataViewModel getProductMetadataViewModel();
     
     /**
-     * 
+     * Applies any needed adjustment to the file immediatly after the download
      * @return
      */
     public abstract String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider);
 	
+    /**
+     * Get the file in a format suitable for publish band
+     * @return
+     */
+    public abstract File getFileForPublishBand(String sBand, String sLayerId);
+    
+    /**
+     * Get the EPSG of the file
+     * @return
+     */
+    public String getEPSG() {
+		try {
+			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
+			if (oGdalInfoResult != null) {
+				LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): WKT " + oGdalInfoResult.coordinateSystemWKT);
+				CoordinateReferenceSystem oCRS = CRS.parseWKT(oGdalInfoResult.coordinateSystemWKT);
+				String sEPSG = CRS.lookupIdentifier(oCRS, true);
+				return sEPSG;
+			}
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): exception " + oEx.toString());
+		}
+		return null;    	
+    }
 	
     /**
      * Read a SNAP Product: this is supported directly in the main class
@@ -128,6 +159,13 @@ public abstract class WasdiProductReader {
         if (m_oProductFile.getName().toUpperCase().startsWith("S5P")) {
         	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
         	return null;        	
+        }
+        
+        if (m_oProductFile.getName().toUpperCase().endsWith(".ZIP")) {
+        	if (!ZipFileUtils.isValidZipFile(m_oProductFile)) {
+            	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: not valid zip file, return null");
+            	return null;        	        		
+        	}
         }
         
         try {

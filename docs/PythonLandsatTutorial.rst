@@ -9,33 +9,38 @@ Python Landsat Tutorial
 
 Requirements
 ---------------------------
-This tutorial is designed to show how to work with Landsat 8 files in WASDI: is out of the scope of this tutorial to configure your own environment or to go in details of Landsat 8 mission.
-In this tutorial we use PyCharm as a free Python Development tool, but the code can be ran on every different Python environment.
+This tutorial is designed to show how to work with Landsat 8 files in WASDI. 
+Details of the Landsat 8 mission and/or guidelines on how to configure your own environment are out of the scope of this tutorial
+In this tutorial we use PyCharm as a free Python Development tool, but the code can be executed on every different Python environment.
 
-This tutorial requires gdal working in your python env: we know this can be not easy.
+.. note::
+	This tutorial requires gdal working in your python env: we know this can be tricky.
 
-For Windows 10, we suggest to follow this tutorial:
+	For Windows 10, we suggest following this tutorial:
 
-https://opensourceoptions.com/blog/how-to-install-gdal-for-python-with-pip-on-windows/
+	https://opensourceoptions.com/blog/how-to-install-gdal-for-python-with-pip-on-windows/
 
-The main concept is that here
+	The key is that here:
 
-https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
+	https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
 
-you can find different pre-build GDAL "images" that can be installed directly asking pip to use the file.
+	you can find different pre-build GDAL "images" that can be installed directly asking pip to use the file.
 
 Overview
 ---------------------------
-In this tutorial we will learn how to work with Landsat 8 Images in WASDI. The tutorial will implement a processor that takes in input:
-   .Name of a Landsat 8 file
-   .List of Bands to extract, by default B5 and B4
-   .Resolution to use
+In this tutorial, we will learn how to work with Landsat 8 Images in WASDI. The tutorial will implement a processor that takes as input:
 
-The processor will open the Landsat image, create a tiff with only the selected bands, reprojected at the desired resolution, and then will calculate NDVI assuming that the first extracted band is NIR and the second is RED.
+* Name of a Landsat 8 file
+* List of Bands to extract, by default B5 and B4
+* Resolution to use
 
-NDVI is calculated as [NIR-RED]/[NIR+RED].
+The processor will open the Landsat image, create a tiff with only the selected bands, reprojected to the desired resolution, and then it will calculate NDVI, assuming that the first extracted band is NIR and the second is RED.
 
-To run this processor, the user MUST before import a Landsat Image using the WASDI web interface.
+The equation to compute NDVI is: [NIR-RED]/[NIR+RED].
+
+.. note::
+	It is mandatory that at least 1 Landsat image is imported in the workspace (using the WASDI web interface, i.e. Search) BEFORE running this processor.
+	Check `Wasdi Web Platform access and basic usage <https://wasdi.readthedocs.io/en/latest/WasdiTutorial.html>`_ for more general info on this.
 
 
 Setup
@@ -45,7 +50,7 @@ Open PyCharm and start a new project.
 
 .. image:: _static/python_tutorial_images/openPyCharmAndStartANewProject.png
 
-Call it "Landsat8Tutorial" (or however you wish, just remember to be coherent). You may wish to create a new virtual environment or use an existing one. Uncheck the option for creating a "main.py" welcome script (or, at least, remember to delete it later on).
+Name it “Landsat8Tutorial” (or however you wish, just remember to be coherent). You may wish to create a new virtual environment or use an existing one. Uncheck the option for creating a “main.py” welcome script (or, at least, remember to delete it later on).
 
 Let's install the library we need. In the terminal write:
 
@@ -53,11 +58,13 @@ Let's install the library we need. In the terminal write:
   
    pip install wasdi
    
-and press enter
+and hit enter
 
 .. image:: _static/python_tutorial_images/pipInstallWasdi.png
 
-hint: if you previously installed wasdi, you may wish to update it by adding the --upgrade flag, i.e.:
+.. note::
+	Remember you need also to have gdal installed.
+	If you previously installed wasdi, you may wish to update it by adding the --upgrade flag, i.e.:
 
 .. code-block:: python
   
@@ -68,8 +75,8 @@ Create first files
 Now we need to create these three fundamental files (right click on the Projec Icon, new -> ...):
 
 * myProcessor.py: create a python file, then call it myProcessor.py
-* config.json: create a file, then call it config.json (PyCharm will recognize automatically it's a JSON file)
-* params.json: create a file, then call it params.json (PyCharm will recognize automatically it's a JSON file)
+* config.json: create a file, then call it config.json (PyCharm will recognize automatically it is a JSON file)
+* params.json: create a file, then call it params.json (PyCharm will recognize automatically it is a JSON file)
 
 .. image:: _static/python_tutorial_images/createPythonFile.png
 
@@ -95,7 +102,7 @@ Call it params.json
 
 Next, point your browser to wasdi.net, log in, go in the Workspaces Section and create a new workspace. Call it "Landsat8Tutorial".
 
-Go in the search section and select L8 data type and a bounding box in Europe
+Go to the search section and select L8 data type and a bounding box in Europe
 
 .. image:: _static/python_l8_tutorial_images/searchL8Image.jpg
 
@@ -103,7 +110,7 @@ Select one image and click on the + button to add the image to the Landsat8Tutor
 
 .. image:: _static/python_l8_tutorial_images/addToWS.jpg
 
-Come back in the edit section, and check that WASDI has been able to fetch the image.
+Come back to the edit section, and check that WASDI has been able to fetch the image.
 
 .. image:: _static/python_l8_tutorial_images/imageInWorkspace.jpg
 
@@ -113,13 +120,14 @@ LC08_L1GT_196029_20211227_20211227_01_RT
 
 but this can be changed with any image you imported.
 
-Leave the browser open on that page, we’ll need it later on.
+Leave the browser open on that page, we will need it later on.
 
 First lines
 ----------------------
-Let's begin by editing the config.json file. It's a JSON file, containing the user credentials and some fundamental parameters to get you started (see :doc:`Wasdi Libraries Concepts </LibsConcepts>`):
+Let's begin by editing the **config.json** file. It is a JSON file, containing the user credentials and some fundamental parameters to get you started (see :doc:`Wasdi Libraries Concepts </LibsConcepts>`):
 
-.. code-block:: JSON
+.. code-block::
+
     {
       "USER": "your user name here",
       "PASSWORD": "your password here",
@@ -127,27 +135,30 @@ Let's begin by editing the config.json file. It's a JSON file, containing the us
       "WORKSPACE": "AdvancedTutorialTest"
     }
  
-NOTE: please, keep this file for yourself. You should never give this file to anyone else, and you do not need to upload to WASDI, as we'll see later on. You just need this file in your project for working with the WASDI python library.
-Use this file to change the workspace where you want to work.
+.. note::
+	please, keep this file for yourself. You should never give this file to anyone else, and you do not need to upload to WASDI, as we'll see later on. You just need this file in your project for working with the WASDI python library.
+	Use this file to change the workspace where you want to work.
 
-Let's then edit params.json file. It's a JSON file that represents the inputs needed by our processor. The WASDI Developer can decide the parameters he needs; each parameter has a unique name within the processor. Each parameter can be of different types (i.e. Strings, Integers, Float, Arrays, Complex Objects...).
-params.json is where you declare and valorize your inputs. The same inputs will be avaiable in the WASDI Web Interface when we will publish the processor.
+Let’s then edit **params.json** file. It is a JSON file that represents the inputs needed by our processor. The WASDI Developer can decide what parameters are needed; each parameter has a unique name within the processor. Each parameter can be of different types (i.e. Strings, Integers, Float, Arrays, Complex Objects…). 
+params.json is where you declare and valorize your inputs. The same inputs will be avaiable in the WASDI Web Interface when publishing the processor.
 
-.. code-block:: JSON
+.. code-block::
+
     {
       "BANDS": ["B5", "B4"],
        "RESOLUTION": "30",
        "L8FILE": "LC08_L1GT_196029_20211227_20211227_01_RT.zip"
     }
 
-Now, open myProcessor.py, create a main and a method called run. The latter is required for WASDI to work (more on that later on).
+Now, open **myProcessor.py**, create a main and a method called run. The latter is required for WASDI to work (more on that later on).
 
-Note: these are two requirements necessary to use WASDI:
+.. note::
+	These are two requirements necessary to use WASDI:
+		* have a python file called myProcessor.py
+		* have a function called run() (no params) within myProcessor.py
 
-* have a python file called myProcessor.py
-* have a function called run() (no params) within myProcessor.py
-
-After that, you can include as many python files as you need, no matter if they are organized in directories. You just need to have a myProcessor.py with a method run() as entry point.
+After that, you can include as many python files as you need, regardless their organization in directories. 
+You just need to have a myProcessor.py with a method run() as entry point.																		  
 
 The main method will initiate the WASDI library and call the run method:
 
@@ -168,7 +179,11 @@ As you can see, we call wasdi.init and pass the relative path of the config file
 
 .. image:: _static/python_tutorial_images/wasdi_init.png
 
-Let's debug to see the effects of this. Note: if a file main.py was created automatically for you, remember to define another debug configuration. The easiest way to do so is by right clicking on your code and select Debug 'myProcessor.py'.
+Let's debug to see the effects of this. 
+
+.. note::
+	If a file main.py was created automatically for you, remember to define another debug configuration. The easiest way to do so is by right clicking on your code and select Debug ‘myProcessor.py’.
+
 
 .. image:: _static/python_tutorial_images/helloWASDIWorldDebug0.png
 
@@ -199,21 +214,23 @@ If you have the same situation, we are configured and ready to start!!
 
 Extract Bands
 -----------------
-The first step of our processor will be to extract the bands from the L8 image.
-WASDI ingest L8 images as a .zip file. Each .zip file contains different .tif images, one for each band, and some other files.
-We want to implement a function able to take in input the name of the L8 zip file, a list of bands,  a resolution and that creates a new .tif file with only the extracted bands at the desired resolution.
-L8 bands are:
-     B1 - Coastal aerosol 30m
-     B2 - Blue	30m
-     B3 - Green	30m
-     B4 - Red	30m
-     B5 - Near Infrared (NIR) 30m
-     B6 - SWIR 1 30m
-     B7 - SWIR 2 30m
-     B8 - Panchromatic 15m
-     B9 - Cirrus 30m
-     B10 - Thermal Infrared (TIRS) 1 100m
-     B11 - Thermal Infrared (TIRS) 2 100m
+The first step of our processor will be to extract the bands from the L8 image. 
+WASDI ingest L8 images as a .zip file.  Each .zip file contains different .tif images, one for each band, and some other files.
+We want to implement a function that takes as input the name of the L8 zip file, a list of bands, a resolution 
+and that then creates a new .tif file with only the extracted bands at the desired resolution. 
+The L8 bands are:
+
+* B1 - Coastal aerosol 30m
+* B2 - Blue	30m
+* B3 - Green	30m
+* B4 - Red	30m
+* B5 - Near Infrared (NIR) 30m
+* B6 - SWIR 1 30m
+* B7 - SWIR 2 30m
+* B8 - Panchromatic 15m
+* B9 - Cirrus 30m
+* B10 - Thermal Infrared (TIRS) 1 100m
+* B11 - Thermal Infrared (TIRS) 2 100m
 
 Our function is implemented like this:
 
@@ -410,9 +427,9 @@ In the same way, when you add the file to WASDI, the lib will updload for your r
 Now that the core of our processor is done, lets make it a little bit more WASDI-integrated.
 We want to give some feedback to the user while the app is runnig and we do this using:
 
-wasdi.wasdiLog: locally just a print to console, when on the server, it sends the logs to the web user interface
-wasdi.updateProgressPerc: when on the server, updates the progress bar of the processor
-wasdi.setPayload: allows to save a user-defined object associated to the processor run
+* wasdi.wasdiLog: locally just a print to console, when on the server, it sends the logs to the web user interface
+* wasdi.updateProgressPerc: when on the server, updates the progress bar of the processor
+* wasdi.setPayload: allows to save a user-defined object associated to the processor run
 
 .. code-block:: python
 

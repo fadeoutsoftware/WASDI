@@ -1,0 +1,55 @@
+<div class="modal fade wapps-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title ">
+                    <i class="fa fa-paint-brush" aria-hidden="true"></i>&nbsp;{{"DIALOG_TITLE_STYLES"|translate}}
+                </h4>
+            </div>
+
+            <div class="modal-body d-flex flex-column">
+                <!-- TAB NAVIGATION -->
+                <div class="row-v4">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li ng-class="{'active':m_oController.m_sSelectedStyleTab === 'StyleTab1'}"
+                            ng-click="m_oController.m_sSelectedStyleTab = 'StyleTab1'">
+                            <a href="" role="tab" data-toggle="tab">
+                                <i class="fa fa-list" aria-hidden="true"></i>&nbsp;
+                                {{"DIALOG_STYLE_MANAGER_TAB_LIST" | translate}}
+                            </a>
+                        </li>
+                        
+                        <li 
+                            ng-click="m_oController.openEditStyleDialog(null)">
+                            <a href="">
+                                <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>&nbsp;
+                                    {{"DIALOG_STYLE_MANAGER_TAB_NEW" | translate}}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content" style="height: 100vh;">
+                    <!------- STYLES LIST ------->
+                    <div class="tab-pane fade in" id="StyleTab1"
+                        ng-class="{'active':m_oController.m_sSelectedStyleTab === 'StyleTab1'}"
+                        >
+                        <ng-include src="'dialogs/style_manager/tab-list.html'"></ng-include>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" ng-click="close()" class="my-button" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

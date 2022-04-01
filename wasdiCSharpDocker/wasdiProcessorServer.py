@@ -220,7 +220,7 @@ def run(processId):
 		oConfigFile.write('"UPLOADACTIVE": "0",'+'\r\n');
 		oConfigFile.write('"VERBOSE": "0",'+'\r\n');
 		oConfigFile.write('"PARAMETERSFILEPATH": "' + sParamFilePath+'",\r\n');
-		oConfigFile.write('"BASEURL": "https://test.wasdi.net/wasdiwebserver/rest/",\r\n')
+		oConfigFile.write('"BASEURL": "https://www.wasdi.net/wasdiwebserver/rest/",\r\n')
 		oConfigFile.write('"MYPROCID": "'+ processId +'"\r\n');
 		oConfigFile.write("}")
 		oConfigFile.close()
@@ -233,22 +233,8 @@ def run(processId):
 		oParamsFile.write(json_string)
 		oParamsFile.close()
 		
-		
-		asFiles = []
-		for (dirpath, dirnames, filenames) in os.walk(sLocalPath):
-			asFiles.extend(filenames)
-			break
-		
-		sExe = ""
-		for sFile in asFiles:
-			if sFile.endswith(".exe"):
-				sExe = sFile
-		
-		sDll = sExe.replace(".exe", ".dll")
-		
-		wasdi.wasdiLog("wasdiProcessorServer Found Exe "  + sDll)
-		
-		oProcess = subprocess.Popen(["dotnet", sLocalPath + sDll])
+				
+		oProcess = subprocess.Popen(["dotnet", sLocalPath + "WasdiRunner.dll"])
 		
 		wasdi.wasdiLog("wasdiProcessorServer Process Started with local pid "  + str(oProcess.pid))
 		#Update the server with the subprocess pid

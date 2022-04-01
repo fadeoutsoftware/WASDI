@@ -4,12 +4,12 @@
 
 var ProductEditorInfoController = (function() {
 
-    function ProductEditorInfoController($scope, oClose,oExtras,oProductService, oConstantsService,oFileBufferService) {
+    function ProductEditorInfoController($scope, oClose,oExtras,oProductService, oConstantsService, oStyleService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oProduct = oExtras.product;
         this.m_oProductService = oProductService;
-        this.m_oFileBufferService = oFileBufferService;
+        this.m_oStyleService = oStyleService;
         this.m_oReturnProduct = oExtras.product;
         this.m_oOldFriendlyName = oExtras.product.productFriendlyName;
         this.workspaceId = oConstantsService.getActiveWorkspace().workspaceId;
@@ -27,14 +27,14 @@ var ProductEditorInfoController = (function() {
             oClose(oController.m_oReturnProduct, 500); // close, but give 500ms for bootstrap to animate
         };
 
-        this.m_oFileBufferService.getStyles().then(function(data){
+        this.m_oStyleService.getStylesByUser().then(function(data) {
                 if(data.status !== 200)
                 {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR GETTING STYLES");
                     utilsVexCloseDialogAfter(5000,oDialog);
                 }
                 else {
-                    oController.m_asStyles = data.data;
+                    oController.m_asStyles = data.data.map(item => item.name);
                     oController.m_aoStylesMap = oController.m_asStyles.map(name => ({name}))
 
                     oController.m_aoStylesMap.forEach((oValue, sKey) => {
@@ -106,7 +106,7 @@ var ProductEditorInfoController = (function() {
         'extras',
         'ProductService',
         'ConstantsService',
-        'FileBufferService'
+        'StyleService'
     ];
     return ProductEditorInfoController;
 })();

@@ -3,8 +3,6 @@ package wasdi.dataproviders;
 import java.io.File;
 
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.config.DataProviderConfig;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
 import wasdi.shared.utils.LoggerWrapper;

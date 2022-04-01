@@ -21,7 +21,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		return getDownloadFileSizeViaHttp(sFileURL);
+		return getDownloadFileSizeViaHttp(sFileURL.replace("_part", ".part"));
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			Utils.debugLog("VIIRSProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 			
 			try {
-				sResult = downloadViaHttp(sFileURL, "", "", sSaveDirOnServer);
+				sResult = downloadViaHttp(sFileURL.replace("_part", ".part"), "", "", sSaveDirOnServer);
 				
 				File oOriginalFile = new File(sResult);
 				File oRenamedFile = new File(sResult.replace(".part", "_part"));

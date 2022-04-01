@@ -16,7 +16,6 @@ public class WasdiProductReaderFactory {
 		}
 		
 		if(WasdiFileUtils.isShapeFile(oFile)) {
-		//if (oFile.getName().toLowerCase().endsWith("shp")) { 
 			return new ShapeProductReader(oFile);
 		}
 		

@@ -2,11 +2,12 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
+    function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
         oModalService, oTranslate, oCatalogService,
         $window) {
         // Reference to the needed Services
+        this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oLocation = $location;
@@ -24,7 +25,10 @@ var EditorController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
 
-
+        if (this.m_oConstantsService.getActiveWorkspace()) {
+            this.m_oRootScope.title = this.m_oConstantsService.getActiveWorkspace().name;
+        }
+        
         this.m_oTranslate = oTranslate;
         this.m_oCatalogService = oCatalogService;
         // Flag to know if in the big map is 2d (true) or 3d (false)
@@ -188,6 +192,14 @@ var EditorController = (function () {
                 subMenu: [],
                 onClick: this.openProcessorDialog,
                 icon: "fa fa-lg fa-plus-square"
+            },
+            // --- Style ---
+            {
+                name: "",
+                icon: "fa fa-paint-brush",
+                caption_i18n: "EDITOR_OPERATION_TITLE_STYLE",
+                subMenu: [],
+                onClick: this.openStyleManagerDialog
             },
             {
                 name: "",//Share
@@ -534,7 +546,7 @@ var EditorController = (function () {
                 oController.receivedNewProductMessage(oMessage);
                 break;
             case "DELETE":
-                oController.getProductListByWorkspace();
+                //oController.getProductListByWorkspace();
                 break;
         }
 
@@ -608,6 +620,8 @@ var EditorController = (function () {
         oBand.bbox = oPublishedBand.boundingBox;
         oBand.geoserverBoundingBox = oPublishedBand.geoserverBoundingBox;
         oBand.geoserverUrl = oPublishedBand.geoserverUrl;
+        oBand.showLegend=false;
+        oBand.legendUrl = this.getBandLegendUrl(oBand)
 
         // Set the tree node as selected and published
         this.setTreeNodeAsSelected(sNodeID);
@@ -1200,38 +1214,6 @@ var EditorController = (function () {
     };
 
     /**
-     * openWPSDialog
-     * @returns {boolean}
-     */
-    EditorController.prototype.openMosaicDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/mosaic/MosaicView.html",
-            controller: "MosaicController",
-            inputs: {
-                extras: {
-                    // products:oController.m_aoProducts
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-
-        return true;
-    };
-
-    /**
      *
      * @returns {boolean}
      */
@@ -1257,6 +1239,39 @@ var EditorController = (function () {
             modal.close.then(function (oResult) {
 
                 oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+
+    /**
+     *
+     * @returns {boolean}
+     */
+     EditorController.prototype.openStyleManagerDialog = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/style_manager/StyleManagerView.html",
+            controller: "StyleManagerController",
+            inputs: {
+                extras: {
+                    products: oController.m_aoStyleList,
+                    //styleId: oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                //oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -1811,8 +1826,6 @@ var EditorController = (function () {
                                                 }));
                                             }
                                         });
-
-
                                     }
 
                                 }
@@ -1896,10 +1909,10 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
+
                 // REMOVE CHECKBOXES
                 oNode.a_attr = new Object();
                 oNode.a_attr.class = "no_checkbox";
-
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];
@@ -2113,6 +2126,31 @@ var EditorController = (function () {
         }
     }
 
+    EditorController.prototype.showLayerLegend = function (iLayerIndex) {
+        this.m_aoVisibleBands[iLayerIndex].showLegend = !this.m_aoVisibleBands[iLayerIndex].showLegend;
+    }
+
+    EditorController.prototype.getBandLegendUrl = function (oLayer) {
+
+        if (oLayer == null) return "";
+
+        var sGeoserverUrl = oLayer.geoserverUrl
+
+        if (utilsIsStrNullOrEmpty(sGeoserverUrl)) sGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
+
+        if (sGeoserverUrl.endsWith("?")) {
+            sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+        }
+        else {
+            sGeoserverUrl = sGeoserverUrl.replace("ows", "wms?");
+        }
+
+        sGeoserverUrl = sGeoserverUrl + "request=GetLegendGraphic&format=image/png&WIDTH=12&HEIGHT=12&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True&LAYER=";
+        sGeoserverUrl = sGeoserverUrl + "wasdi:" + oLayer.layerId;
+
+        return sGeoserverUrl;
+    }
+
     EditorController.prototype.deleteProductInGlobe = function (aoVisibleBands, oChildrenNode) {
         var iLengthLayer = aoVisibleBands.length;
         var iLengthChildren_d = oChildrenNode.length;//that.temp.children_d
@@ -2134,6 +2172,7 @@ var EditorController = (function () {
     };
 
     EditorController.$inject = [
+        '$rootScope',
         '$scope',
         '$location',
         '$interval',
