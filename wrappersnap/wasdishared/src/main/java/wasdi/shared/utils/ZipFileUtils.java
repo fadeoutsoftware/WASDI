@@ -563,6 +563,44 @@ public class ZipFileUtils {
 		}
 	}
 
+	public static void extractInnerZipFileAndCleanZipFile(File oZipFile, File oDestDir) throws Exception {
+		if (oZipFile == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
+			return;
+		} else if (!oZipFile.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+		}
+
+		if (oDestDir == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
+			return;
+		} else if (!oDestDir.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
+		}
+
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
+
+		String sFilename = oZipFile.getAbsolutePath();
+		String sPath = oDestDir.getAbsolutePath();
+
+		String sDirPath = completeDirPath(sPath);
+		String sSimpleFilename = removeZipExtension(oZipFile.getName());
+		String unzippedDirectoryPath = completeDirPath(sDirPath + sSimpleFilename);
+
+		oZipExtractor.unzip(sFilename, unzippedDirectoryPath);
+
+		String fileZipPath = sDirPath + oZipFile.getName();
+
+		if (fileExists(unzippedDirectoryPath)) {
+			boolean fileMovedFlag = moveFile(unzippedDirectoryPath + sSimpleFilename + ".tif", sDirPath);
+
+			if (fileMovedFlag) {
+				deleteFile(unzippedDirectoryPath);
+				deleteFile(fileZipPath);
+			}
+		}
+	}
+
 	public static void fixZipFileInnerSafePath(String zipFilePath) throws Exception {
 		if (zipFilePath == null) {
 			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
