@@ -572,7 +572,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 				}
 
 				Element td1Element = tds.get(1);
-				Element aElement = td1Element.selectFirst("a");
+				Element aElement = td1Element.select("a").first();
 				String sName = aElement.attr("href");
 
 				String lastModified = tds.get(2).text().trim();
