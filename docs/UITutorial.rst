@@ -166,7 +166,7 @@ Numeric field
 
 To add to “Tab Name 1” a control in the form of a float number, first set the cursor between the square brackets after “controls” and then click on the button Numeric field (to the left of the screen).
 
-.. image:: _static/ui_images/17.png
+.. image:: _static/ui_images/NumericField.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -179,8 +179,8 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Numeric field control appears in the UI:
 
-.. image:: _static/ui_images/18.png
-    :scale: 50%
+.. image:: _static/ui_images/NumericFieldApp.png
+    :scale: 100%
 
 In this case, here is how the properties of this control were set:
 
@@ -197,7 +197,7 @@ Dropdown
 
 To add to “Tab Name 1” a control in the form of a drop down menu with several options to choose from, first set the cursor between the square brackets after “controls” and then click on the button Dropdown (to the left of the screen).
 
-.. image:: _static/ui_images/19.png
+.. image:: _static/ui_images/DropDown.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -210,7 +210,7 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Dropdown menu control appears in the UI:
 
-.. image:: _static/ui_images/20.png
+.. image:: _static/ui_images/DropDownApp.png
     :scale: 50%
 
 In this case, here is how the properties of this control were set:
@@ -231,7 +231,7 @@ Select Area
 
 To add to “Tab Name 1” a control in the form of a bounding box, that the user can either draw on the displayed map or that can be inputted as the 4 values of North, South, East, West within a pop up window in the UI, first set the cursor between the square brackets after “controls” and then click on the button Select Area (to the left of the screen).
 
-.. image:: _static/ui_images/21.png
+.. image:: _static/ui_images/SelectArea.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -241,31 +241,7 @@ The property "label" is used to define the name the parameter in the UI. In this
 The property "required" is used to define is the parameter is mandatory or not. It can be either true or false (careful: no "").
 Again, careful with the trailing comma! If you add one more control to this specific tab, click after the final comma, otherwise take case of removing the final comma.
 
-This is an example of how a Select Area control appears in the UI:
-
-.. image:: _static/ui_images/22.png
-    :scale: 50%
-
-In this case, here is how the properties of this control were set:
-
-.. code-block:: json
-
-    {
-    "label": "Bounding Box",
-    "required": true
-    }
-
-The option highlighted in the figure below is used to manually draw a rectangle:
-
-.. image:: _static/ui_images/23.png
-    :scale: 50%
-
-The other option, highlighted in the figure below, allow the user to manually enter the values of the bounding box:
-
-.. image:: _static/ui_images/24.png
-    :scale: 50%
-
-The control also allows to set some limits to the area selected. In case on or more of these constraints are
+The control also allows to set some **limits** to the area selected. In case on or more of these constraints are
 violated, the user will receive a specific feedback and the application cannot be launched.
 
 The limitations can be imposed upon:
@@ -277,26 +253,55 @@ The limitations can be imposed upon:
 The last constraint can be used to avoid that application users, by mistake, set a bounding box very thin but also very large: imagine for instance 1 meter per 1000 kilometers.
 This setup will require the load of several tiles and will slow down the performances in general.
 
-If maximum ratio is set to a reasonable value can guide users to avoid such errors.
+If maximum ratio is set to a reasonable value it can help users to avoid such errors.
 
+This is an example of how a Select Area control appears in the UI:
 
+.. image:: _static/ui_images/SelectAreaApp.png
+    :scale: 100%
 
+In this case, here is how the properties of this control were set:
 
 .. code-block:: json
 
     {
-    [...]
-        "maxArea": 269837,
-        "maxSide": 100000,
-        "maxRatioSide": 2
-
+        "param": "PARAM_NAME",
+        "type": "bbox",
+        "label": "Bounding Box",
+        "required": false,
+        "tooltip": "",
+        "maxArea": 10000,
+        "maxSide": 1500,
+        "maxRatioSide": 10
     }
+
+The option highlighted in the figure below is used to manually draw a rectangle:
+
+.. image:: _static/ui_images/SelectAreaAppBB.png
+    :scale: 100%
+
+If the area selected surpass the limits, a dedicated error message is shown and its not possible, for the user, to launch the application.
+
+.. image:: _static/ui_images/SelectAreaAppBBError.png
+    :scale: 100%
+
+The other option, highlighted in the figure below, allow the user to manually enter the values of the bounding box:
+
+.. image:: _static/ui_images/SelectAreaManual.png
+    :scale: 50%
+
+
+
+
+
+
+
 
 Number Slider
 ----------------------
 To add to “Tab Name 1” a control in the form of an integer number within a range of values, first set the cursor between the square brackets after “controls” and then click on the button Number Slider (to the left of the screen).
 
-.. image:: _static/ui_images/25.png
+.. image:: _static/ui_images/Slider.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -311,8 +316,8 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Number Slider control appears in the UI:
 
-.. image:: _static/ui_images/26.png
-    :scale: 50%
+.. image:: _static/ui_images/SliderApp.png
+    :scale: 100%
 
 In this case, here is how the properties of this control were set:
 
@@ -331,7 +336,7 @@ Date
 ----------------
 To add to “Tab Name 1” a control in the form of a date, first set the cursor between the square brackets after “controls” and then click on the button Date (to the left of the screen).
 
-.. image:: _static/ui_images/27.png
+.. image:: _static/ui_images/Date.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -343,11 +348,9 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Date control appears in the UI:
 
-.. image:: _static/ui_images/28.png
-    :scale: 50%
+.. image:: _static/ui_images/DateApp.png
+    :scale: 100%
 
-.. image:: _static/ui_images/29.png
-    :scale: 50%
 
 In this case, here is how the properties of this control were set:
 
@@ -363,7 +366,7 @@ Bool
 
 To add to “Tab Name 1” a control in the form of a Boolean variable, first set the cursor between the square brackets after “controls” and then click on the button Bool (to the left of the screen).
 
-.. image:: _static/ui_images/30.png
+.. image:: _static/ui_images/Boolean.png
     :scale: 100%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -376,7 +379,7 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Bool control appears in the UI:
 
-.. image:: _static/ui_images/31.png
+.. image:: _static/ui_images/BooleanApp.png
     :scale: 50%
 
 In this case, here is how the properties of this control were set:
@@ -389,12 +392,12 @@ In this case, here is how the properties of this control were set:
     "required": true
     }
 
-Product Combo Box
+Products Combo Box
 ---------------------------
 
 To add to “Tab Name 1” a control in the form of Product Combo Box to allow selecting a product from an existing workspace, first set the cursor between the square brackets after “controls” and then click on the button Product Combo Box (to the left of the screen).
 
-.. image:: _static/ui_images/32.png
+.. image:: _static/ui_images/ProductsCombo.png
     :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
@@ -407,11 +410,10 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 This is an example of how a Product Combo Box control appears in the UI:
 
-.. image:: _static/ui_images/32.png
-    :scale: 50%
+.. image:: _static/ui_images/ProductsComboApp.png
+    :scale: 100%
 
-.. image:: _static/ui_images/33.png
-    :scale: 50%
+
 
 In this case, here is how the properties of this control were set:
 
