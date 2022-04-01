@@ -367,7 +367,7 @@ Bool
 To add to “Tab Name 1” a control in the form of a Boolean variable, first set the cursor between the square brackets after “controls” and then click on the button Bool (to the left of the screen).
 
 .. image:: _static/ui_images/Boolean.png
-    :scale: 100%
+    :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
 The property "param" is used to identify the parameter to be used here. "PARAM_NAME" has to be exactly the same as in the params.json file. Please change it to the name of your parameter if you want to.
@@ -431,8 +431,8 @@ Search EO Image
 
 To add to “Tab Name 1” a control in the form of …, first set the cursor between the square brackets after “controls” and then click on the button Search EO Image (to the left of the screen).
 
-.. image:: _static/ui_images/34.png
-    :scale: 100%
+.. image:: _static/ui_images/SearchEo.png
+    :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
 The property "param" is used to identify the parameter to be used here. "PARAM_NAME" has to be exactly the same as in the params.json file. Please change it to the name of your parameter if you want to.
@@ -445,8 +445,8 @@ Hidden Field
 -----------------
 To add to “Tab Name 1” a control in the form of an **Hidden filed**, first set the cursor between the square brackets after “controls” and then click on the button Hidden Field (to the left of the screen).
 
-.. image:: _static/ui_images/35.png
-    :scale: 100%
+.. image:: _static/ui_images/Hidden.png
+    :scale: 50%
 
 Careful: in case you have only one control in this specific tab, make sure to remove the trailing  comma!
 The property "param" is used to identify the parameter to be used here. "PARAM_NAME" has to be exactly the same as in the params.json file. Please change it to the name of your parameter if you want to.
@@ -456,8 +456,8 @@ Again, careful with the trailing comma! If you add one more control to this spec
 
 One additional option concerns the button “Render As Strings”. You can add this right after the very first curly brackets (i.e. before the section with the tabs).
 
-.. image:: _static/ui_images/36.png
-    :scale: 100%
+.. image:: _static/ui_images/Render.png
+    :scale: 50%
 
 The idea behind this button is that, without “Render As Strings” WASDI cannot generate primitive parameters. In other words, without “Render As Strings” a calendar will return a date, a map will return a bbox object, a slider will return a number. But with “Render As Strings”, WASDI will automatically convert all the parameters to strings.
 “Render As Strings” is required with IDL and Matlab processors. In case of a Python processor, the developer has the choice between primitive types and strings.
