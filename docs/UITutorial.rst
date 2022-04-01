@@ -147,7 +147,7 @@ Again, careful with the trailing comma! If you add one more control to this spec
 This is an example of how a Textbox control appears in the UI:
 
 .. image:: _static/ui_images/16.png
-    :scale: 50%
+    :scale: 100%
 
 In this case, here is how the properties of this control were set:
 
@@ -262,6 +262,33 @@ The other option, highlighted in the figure below, allow the user to manually en
 
 .. image:: _static/ui_images/24.png
     :scale: 50%
+
+The control also allows to set some limits to the area selected. In case on or more of these constraints are
+violated, the user will receive a specific feedback and the application cannot be launched.
+
+The limitations can be imposed upon:
+
+- Max area in square kilometre
+- Max side in kilometre
+- Maximum ratio between the sides of the selected area computed as the greater side over the smaller one. (e.g. a bounding box of 2 kilometre by 1 kilometer will have the ratio equals to 2)
+
+The last constraint can be used to avoid that application users, by mistake, set a bounding box very thin but also very large: imagine for instance 1 meter per 1000 kilometers.
+This setup will require the load of several tiles and will slow down the performances in general.
+
+If maximum ratio is set to a reasonable value can guide users to avoid such errors.
+
+
+
+
+.. code-block:: json
+
+    {
+    [...]
+        "maxArea": 269837,
+        "maxSide": 100000,
+        "maxRatioSide": 2
+
+    }
 
 Number Slider
 ----------------------
