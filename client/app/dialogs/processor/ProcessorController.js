@@ -760,7 +760,7 @@ var ProcessorController = (function() {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "textbox",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
          }
          else if (sElementType === "numeric") {
-            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "numeric",\n\t\t"label": "description",\n\t\t"default": "0",\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
+            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "numeric",\n\t\t"label": "description",\n\t\t"default": "0",\n\t\t"min": 0,\n\t\t"max": 100,\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
         }
          else if (sElementType === "dropdown") {
              sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "dropdown",\n\t\t"label": "description",\n\t\t"default": "",\n\t\t"values": [],\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
@@ -794,7 +794,9 @@ var ProcessorController = (function() {
          else if (sElementType === "renderAsStrings") {
              sTextToInsert = '\n\t"renderAsStrings": true,\n\t';
          }
-
+         else if (sElementType === "listbox") {
+            sTextToInsert = '\n\t{\n\t\t"param": "PARAM_NAME",\n\t\t"type": "listbox",\n\t\t"label": "description",\n\t\t"values": [],\n\t\t"required": false,\n\t\t"tooltip":""\n\t},';
+        }
          this.m_bUIChanged = true;
 
          this.m_oRootScope.$broadcast('add', sTextToInsert);
