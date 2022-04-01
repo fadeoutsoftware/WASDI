@@ -8,6 +8,11 @@ How to create a User Interface (UI)
 Introduction
 ------------------------------------------
 
+.. note::
+	In this tutorial you can click on all images to see them at full resolution.
+
+	Use back command on your browser to get back to the documentation.
+
 Here we introduce how to create a User Interface (UI) for an app that has already been deployed and made visible on the marketplace.
 
 The UI represents a user-friendly way to enter the parameters that otherwise should be defined in the params.json file.
