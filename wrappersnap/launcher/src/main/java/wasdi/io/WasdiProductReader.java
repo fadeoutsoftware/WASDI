@@ -9,6 +9,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
@@ -156,7 +157,7 @@ public abstract class WasdiProductReader {
         	return null;
         }
         
-        if (m_oProductFile.getName().toUpperCase().startsWith("S5P")) {
+        if (WasdiFileUtils.isSentinel5PFile(m_oProductFile)) {
         	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
         	return null;        	
         }
@@ -176,12 +177,16 @@ public abstract class WasdiProductReader {
             long lEndTime = System.currentTimeMillis();
             
             LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: read done in " + (lEndTime - lStartTime) + "ms");
+
+            if(null== oProduct) {
+            	LauncherMain.s_oLogger.error("WasdiProductReader.readSnapProduct: apparently SNAP could not read it, the returned product is null");
+            }
             
             return oProduct;
             
         } catch (Throwable oEx) {
             oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: exception: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: exception: " + oEx);
         }
 
         return null;

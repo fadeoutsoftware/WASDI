@@ -94,6 +94,7 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    :caption: Inside wasdi
 
    AddDataProvider.rst
+   AddAppUIControl.rst
 
 
 

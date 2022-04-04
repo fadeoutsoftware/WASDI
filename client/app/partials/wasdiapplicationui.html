@@ -252,6 +252,13 @@
 
                                 </div>
 
+                                <!--list box-->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"
+                                    ng-if="viewElement.type === 'listbox'">
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <waplistbox options="viewElement.aoElements" selected="viewElement.aoSelected"
+                                        tooltip="viewElement.tooltip"></waplistbox>
+                                </div>                                
 
                             </div>
 
