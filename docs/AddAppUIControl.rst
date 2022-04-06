@@ -17,7 +17,7 @@ Look the `How to create a User Interface (UI) <https://wasdi.readthedocs.io/en/l
 
 Here we see how to create and add a new control that WASDI App developers will be able to add their own user interface.
 
-Existing Controls
+Existing Controls 
 ---------------------------
 The concept of User Interface control is very old in the IT history; it is present for sure from the first versions of Windows and Apple operating systems. The user controls are a component of the user interface where the user can interact to insert, read or update a specific kind of data.
 

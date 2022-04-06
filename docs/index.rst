@@ -67,7 +67,6 @@ If you already know WASDI features and you are a Python developer check out the 
    SynchAsynch.rst
    C#Tutorial.rst
    UITutorial.rst
-   PythonTutorial.rst
    javascript/JavascriptTutorialHtml.rst
    JavascriptTutorial.rst
 
@@ -88,6 +87,14 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    java/WasdiLib.rst
    c#/WasdiLib.rst
    typescript/wasdi.rst
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Inside wasdi
+
+   AddDataProvider.rst
+   AddAppUIControl.rst
 
 
 
