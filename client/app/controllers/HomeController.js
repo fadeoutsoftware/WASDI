@@ -43,16 +43,15 @@ var HomeController = (function () {
         var oController = this;
 
         console.log("HomeController: start waitForKeycloak")
-
+        // define in any case the listener
+        this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
+            oController.checkKeycloakAuthStatus(oController);
+        });
         if (bKeyCloakInitialized) {
             this.checkKeycloakAuthStatus(oController);
         }
         else {
             this.waitForKeycloak(oController);
-
-            this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
-                oController.checkKeycloakAuthStatus(oController);
-            });
         }
 
 
@@ -89,11 +88,11 @@ var HomeController = (function () {
 
     HomeController.prototype.waitForKeycloak = function (oController) {
         if (bKeyCloakInitialized == false) {
-            console.log("waitForKeycloak: bKeyCloakInitialized == false try again")
+            //console.log("waitForKeycloak: bKeyCloakInitialized == false try again")
             window.setTimeout(this.waitForKeycloak, 100, oController); /* this checks the flag every 100 milliseconds*/
             return;
         } else {
-            console.log("waitForKeycloak: bKeyCloakInitialized == true");
+            //console.log("waitForKeycloak: bKeyCloakInitialized == true");
             oController.m_oRootScope.$broadcast("KC_INIT_DONE");
         }
     }
