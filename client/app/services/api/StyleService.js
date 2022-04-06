@@ -17,7 +17,7 @@
      };
 
      // Upload a style by file
-     this.uploadByFile = function (sName, sDescription, oBody, bIsPublic) {
+     this.uploadFile = function (sName, sDescription, oBody, bIsPublic) {
          return this.m_oHttp.post(this.APIURL + '/styles/uploadfile?' + "name=" + sName +
              "&description=" + sDescription + "&public=" + bIsPublic, oBody, this.m_oOptions);
      };
@@ -28,16 +28,15 @@
      }
 
      // Update style parameters
-     this.updateStyleParameters = function (sStyleId, sName, sDescription, bIsPublic) {
+     this.updateStyleParameters = function (sStyleId, sDescription, bIsPublic) {
          return this.m_oHttp.post(this.APIURL + '/styles/updateparams?styleId=' + sStyleId +
-             '&name=' + sName +
              '&description=' + sDescription +
              '&public=' + bIsPublic);
      }
 
      // Delete style
      this.deleteStyle = function (sStyleId) {
-         return this.m_oHttp.get(this.APIURL + '/styles/delete?styleId=' + sStyleId);
+         return this.m_oHttp.delete(this.APIURL + '/styles/delete?styleId=' + sStyleId);
      };
 
      // Get Style list by user

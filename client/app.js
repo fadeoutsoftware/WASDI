@@ -28,6 +28,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ProcessorService', 
     'wasdi.WorkflowService', 
     'wasdi.StyleService', 
+    'wasdi.FeedbackService', 
     'wasdi.ProcessorParametersTemplateService',
     'wasdi.OpportunitySearchService', 
     'wasdi.TreeService',
@@ -243,10 +244,13 @@ wasdiApp.controller("MosaicController", window.MosaicController);
 //wasdiApp.controller("EditPanelController", window.EditPanelController);
 wasdiApp.controller("ProcessorLogsController", window.ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController);
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
+
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 
 //wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);

@@ -24,7 +24,8 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
    :caption: Getting started
 
    WasdiTutorial.rst
-   SynchAsynch.rst
+   LibsConcepts.rst
+
 
 WASDI Marketplace
 ---------------------------
@@ -45,10 +46,11 @@ Add your App to WASDI
 Unleash the real power of WASDI, developing and uploading your own downstream application to run it on EO images on the fly!
 Wasdi supports several programming languages:
 
-* **Python 2.7**
 * **Python 3.x**
 * **IDL 3.7.2**
 * **Octave 6.x**
+* **C#**
+* **Javascript**
 
 
 If you already know WASDI features and you are a Python developer check out the :doc:`python tutorial </PythonTutorial>`
@@ -58,16 +60,22 @@ If you already know WASDI features and you are a Python developer check out the 
    :hidden:
    :caption: Programming tutorials
 
-   LibsConcepts.rst
-   PythonLandsatTutorial.rst
-   LibWorkspaces.rst
    PythonTutorial.rst
+   PythonLandsatTutorial.rst
+   SearchImport.rst
+   LibWorkspaces.rst
+   SynchAsynch.rst
+   C#Tutorial.rst
+   UITutorial.rst
+   PythonTutorial.rst
+   javascript/JavascriptTutorialHtml.rst
+   JavascriptTutorial.rst
 
 
 Reference center
 ---------------------------
 
-WASDI allows users and developer to interact though **libraries** and **APIs**.
+WASDI allows users and developer to interact though **libraries** and **APIs**. Find the reference of your language library on the left menu.
 
 
 .. toctree::
@@ -78,6 +86,8 @@ WASDI allows users and developer to interact though **libraries** and **APIs**.
    python/waspy.rst
    octave/octave.rst
    java/WasdiLib.rst
+   c#/WasdiLib.rst
+   typescript/wasdi.rst
 
 
 

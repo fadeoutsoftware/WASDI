@@ -477,10 +477,31 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
     }
 
-	/**
-	 * Download a file via Http using Basic HTTP authentication if sDownloadUser is not null
-	 */
-	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+    /**
+     * Download a file via Http GET using Basic HTTP authentication if sDownloadUser is not null
+     * @param sFileURL Url of the file to download
+     * @param sDownloadUser Downlaod User
+     * @param sDownloadPassword Download Password
+     * @param sSaveDirOnServer Folder where to save the file
+     * @return Full Path of the downlaoded file. Empty in case of problems
+     * @throws IOException
+     */
+    protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+    	return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, "");
+    }
+
+
+    /**
+     * Download a file via Http GET using Basic HTTP authentication if sDownloadUser is not null
+     * @param sFileURL Url of the file to download
+     * @param sDownloadUser Downlaod User
+     * @param sDownloadPassword Download Password
+     * @param sSaveDirOnServer Folder where to save the file
+     * @param sOutputFileName Force Output file Name
+     * @return Full Path of the downlaoded file. Empty in case of problems
+     * @throws IOException
+     */
+	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, String sOutputFileName) throws IOException {
 
 		// Return file path
 		String sReturnFilePath = null;
@@ -503,7 +524,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				});
 			}
 
-			sReturnFilePath = downloadViaHttp(sFileURL, Collections.emptyMap(), sSaveDirOnServer);
+			sReturnFilePath = downloadViaHttp(sFileURL, Collections.emptyMap(), sSaveDirOnServer, sOutputFileName);
 		}
 		catch (Exception oEx) {
 			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
@@ -513,23 +534,55 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	}
 
 	/**
-	 * Download a file via Http
+	 * Download a file via Http GET
+	 * @param sFileURL Url of the file to download
+	 * @param asHeaders Dictionary with additional headers
+	 * @param sSaveDirOnServer Folder where to save the file
+	 * @return Full Path of the downlaoded file. Empty in case of problems
+	 * @throws IOException
 	 */
 	protected String downloadViaHttp(String sFileURL, Map<String, String> asHeaders, String sSaveDirOnServer) throws IOException {
-		return downloadViaHttp(sFileURL, "GET", asHeaders, null, sSaveDirOnServer);
+		return downloadViaHttp(sFileURL, "GET", asHeaders, null, sSaveDirOnServer, null);
 	}
-
+	
 	/**
-	 * Download a file via Http
+	 * Download a file via Http GET
+	 * @param sFileURL Url of the file to download
+	 * @param asHeaders Dictionary with additional headers
+	 * @param sSaveDirOnServer Folder where to save the file
+	 * @param sOutputFileName Force the output name of the file
+	 * @return Full Path of the downlaoded file. Empty in case of problems
+	 * @throws IOException
+	 */
+	protected String downloadViaHttp(String sFileURL, Map<String, String> asHeaders, String sSaveDirOnServer, String sOutputFileName) throws IOException {
+		return downloadViaHttp(sFileURL, "GET", asHeaders, null, sSaveDirOnServer, sOutputFileName);
+	}
+	
+	/**
+	 * Download a file via Http POST
+	 * @param sFileURL Url of the file to download
+	 * @param asHeaders Dictionary with additional headers
+	 * @param sPayload Payload to add to the http POST request
+	 * @param sSaveDirOnServer Folder where to save the file
+	 * @return Full Path of the downlaoded file. Empty in case of problems
+	 * @throws IOException
 	 */
 	protected String downloadViaHttpPost(String sFileURL, Map<String, String> asHeaders, String sPayload, String sSaveDirOnServer) throws IOException {
-		return downloadViaHttp(sFileURL, "POST", asHeaders, sPayload, sSaveDirOnServer);
+		return downloadViaHttp(sFileURL, "POST", asHeaders, sPayload, sSaveDirOnServer, null);
 	}
 
 	/**
-	 * Download a file via Http
+	 * Download a file via Http using the specified HTTP Method
+	 * @param sFileURL Url of the file to download
+	 * @param sRequestMethod HTTP Request Method: supported "GET" and "POST"
+	 * @param asHeaders Dictionary with additional headers
+	 * @param sPayload Payload to add to the http POST request
+	 * @param sSaveDirOnServer Folder where to save the file
+	 * @param sOutputFileName Force output file name. Can be null to retrive it from the content disposition or if not available from the url (last part)
+	 * @return Full Path of the downlaoded file. Empty in case of problems
+	 * @throws IOException
 	 */
-	protected String downloadViaHttp(String sFileURL, String sRequestMethod, Map<String, String> asHeaders, String sPayload, String sSaveDirOnServer) throws IOException {
+	protected String downloadViaHttp(String sFileURL, String sRequestMethod, Map<String, String> asHeaders, String sPayload, String sSaveDirOnServer, String sOutputFileName) throws IOException {
 		
 		// Return file path
 		String sReturnFilePath = null;
@@ -567,41 +620,46 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
 
 			String sFileName = "";
-			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 			String sContentType = oHttpConn.getContentType();
 			long lContentLength = oHttpConn.getContentLengthLong();
 
-			boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
-			if (bFromDisposition) {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
-				// extracts file name from header field
-				String sFileNameKey = "filename=";
-				int iStart = sDisposition.indexOf(sFileNameKey);
-				if (iStart > 0) {
-					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
-					int iEnd = sDisposition.indexOf(' ', iStart);
-					if(iEnd < 0) {
-						iEnd = sDisposition.length();
+			if (Utils.isNullOrEmpty(sOutputFileName)) {
+				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
+				if (bFromDisposition) {
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
+					// extracts file name from header field
+					String sFileNameKey = "filename=";
+					int iStart = sDisposition.indexOf(sFileNameKey);
+					if (iStart > 0) {
+						m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+						int iEnd = sDisposition.indexOf(' ', iStart);
+						if(iEnd < 0) {
+							iEnd = sDisposition.length();
+						}
+						sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
+						while(sFileName.startsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(1);
+						}
+						assert(!sFileName.startsWith("\""));
+						while(sFileName.endsWith("\"") && sFileName.length()>1) {
+							sFileName=sFileName.substring(0, sFileName.length()-1);
+						}
+						assert(!sFileName.endsWith("\""));
+						
+						
+					} else {
+						bFromDisposition = false;
 					}
-					sFileName = sDisposition.substring(iStart + sFileNameKey.length(), iEnd);
-					while(sFileName.startsWith("\"") && sFileName.length()>1) {
-						sFileName=sFileName.substring(1);
-					}
-					assert(!sFileName.startsWith("\""));
-					while(sFileName.endsWith("\"") && sFileName.length()>1) {
-						sFileName=sFileName.substring(0, sFileName.length()-1);
-					}
-					assert(!sFileName.endsWith("\""));
-					
-					
-				} else {
-					bFromDisposition = false;
 				}
+				if(!bFromDisposition) {
+					// extracts file name from URL
+					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+				}				
 			}
-			if(!bFromDisposition) {
-				// extracts file name from URL
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
-				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
+			else {
+				sFileName = sOutputFileName;
 			}
 			m_oLogger.debug("fileName = " + sFileName);
 			

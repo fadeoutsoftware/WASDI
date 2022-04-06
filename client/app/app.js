@@ -35,6 +35,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.NodeService',
     'wasdi.WorkflowService',
     'wasdi.StyleService',
+    'wasdi.FeedbackService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -224,6 +225,7 @@ wasdiApp.controller("UploadController", UploadController);
 wasdiApp.controller("MosaicController", MosaicController);
 wasdiApp.controller("ProcessorLogsController", ProcessorLogsController);
 wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
+wasdiApp.controller("SendFeedbackController", SendFeedbackController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 

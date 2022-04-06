@@ -39,4 +39,5 @@ require('./app/dialogs/share_workspace/ShareWorkspaceController.js');
 require('./app/dialogs/manual_insert_bbox/ManualInsertBboxController.js');
 require('./app/dialogs/payload_dialog/PayloadDialogController.js');
 require('./app/dialogs/processor_parameters_template/ProcessorParametersTemplateController.js');
+require('./app/dialogs/send_feedback/SendFeedbackController.js');
 

@@ -1,5 +1,6 @@
 package wasdi.shared.utils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -51,6 +53,11 @@ public final class HttpUtils {
 	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
 		String sMessage = "";
 
+		if (sUrl == null || sUrl.isEmpty()) {
+			Utils.debugLog("Wasdi.httpGet: invalid URL, aborting");
+			return sMessage;
+		}
+
 		try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -69,6 +76,64 @@ public final class HttpUtils {
 			oConnection.connect();
 
 			sMessage = readHttpResponse(oConnection);
+
+			oConnection.disconnect();
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return sMessage;
+	}
+
+	/**
+	 * Standard http delete utility function
+	 * 
+	 * @param sUrl url to call
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpDelete(String sUrl, Map<String, String> asHeaders) {
+		String sMessage = "";
+
+		if (sUrl == null || sUrl.isEmpty()) {
+			Utils.debugLog("Wasdi.httpDelete: invalid URL, aborting");
+			return sMessage;
+		}
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			oConnection.setRequestMethod("DELETE");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			oConnection.connect();
+
+			int iResponseCode =  oConnection.getResponseCode();
+
+			if (200 <= iResponseCode && 299 >= iResponseCode) {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+				String sInputLine;
+				StringBuilder oResponse = new StringBuilder();
+
+				while ((sInputLine = oInputBuffer.readLine()) != null) {
+					oResponse.append(sInputLine);
+				}
+				oInputBuffer.close();
+
+				return oResponse.toString();
+			} else {
+				sMessage = oConnection.getResponseMessage();
+				Utils.debugLog("Wasdi.httpDelete:  connection failed, message follows");
+				Utils.debugLog(sMessage);
+
+				sMessage = "";
+			}
 
 			oConnection.disconnect();
 		} catch (Exception oEx) {

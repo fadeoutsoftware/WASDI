@@ -546,7 +546,7 @@ var EditorController = (function () {
                 oController.receivedNewProductMessage(oMessage);
                 break;
             case "DELETE":
-                oController.getProductListByWorkspace();
+                //oController.getProductListByWorkspace();
                 break;
         }
 
@@ -1214,38 +1214,6 @@ var EditorController = (function () {
     };
 
     /**
-     * openWPSDialog
-     * @returns {boolean}
-     */
-    EditorController.prototype.openMosaicDialog = function (oWindow) {
-        var oController;
-        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
-            oController = this;
-        } else {
-            oController = oWindow;
-        }
-
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/mosaic/MosaicView.html",
-            controller: "MosaicController",
-            inputs: {
-                extras: {
-                    // products:oController.m_aoProducts
-                    products: oController.m_aoProducts,
-
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (oResult) {
-
-            });
-        });
-
-        return true;
-    };
-
-    /**
      *
      * @returns {boolean}
      */
@@ -1858,8 +1826,6 @@ var EditorController = (function () {
                                                 }));
                                             }
                                         });
-
-
                                     }
 
                                 }
@@ -1943,10 +1909,10 @@ var EditorController = (function () {
                 } else {
                     oNode.text = "<span class='band-not-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
+
                 // REMOVE CHECKBOXES
                 oNode.a_attr = new Object();
                 oNode.a_attr.class = "no_checkbox";
-
 
                 //BAND
                 oNode.band = oaBandsItems[iIndexBandsItems];
@@ -2172,7 +2138,12 @@ var EditorController = (function () {
 
         if (utilsIsStrNullOrEmpty(sGeoserverUrl)) sGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
 
-        sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+        if (sGeoserverUrl.endsWith("?")) {
+            sGeoserverUrl = sGeoserverUrl.replace("ows?", "wms?");
+        }
+        else {
+            sGeoserverUrl = sGeoserverUrl.replace("ows", "wms?");
+        }
 
         sGeoserverUrl = sGeoserverUrl + "request=GetLegendGraphic&format=image/png&WIDTH=12&HEIGHT=12&legend_options=fontAntiAliasing:true;fontSize:10&LEGEND_OPTIONS=forceRule:True&LAYER=";
         sGeoserverUrl = sGeoserverUrl + "wasdi:" + oLayer.layerId;

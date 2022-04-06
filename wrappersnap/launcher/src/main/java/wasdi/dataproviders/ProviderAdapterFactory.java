@@ -36,6 +36,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("CDS", CDSProviderAdapter::new);
 		aoDownloaders.put("PLANET", PLANETProviderAdapter::new);
 		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);
+		aoDownloaders.put("STATICS", STATICSProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

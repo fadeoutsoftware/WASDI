@@ -522,6 +522,9 @@ public class WasdiFileUtils {
 			else if (sFileName.toUpperCase().startsWith("ESA_WORLDCOVER")) {
 				return Platforms.WORLD_COVER;
 			}
+			else if (sFileName.toUpperCase().startsWith("WASDI_STATIC_")) {
+				return Platforms.STATICS;
+			}			
 			
 			return null;
 		}
