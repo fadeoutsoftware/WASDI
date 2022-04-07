@@ -1,0 +1,31 @@
+.waplistbox-directive
+{
+
+  .list-group
+  {
+    overflow-y: auto;
+    max-height:160px;
+    min-height: 50px;
+
+    border: 1px solid #43516A;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    a
+    {
+      //color: $wasdi-blue-logo;
+      //border-color: $wasdi-blue-logo;
+      border-color: transparent;
+    }
+    a:hover
+    {
+      background-color: darkgrey;
+    }
+  }
+
+  .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    z-index: 2;
+    color: #fff;
+    background-color: #009036;
+    border-color:white;//#337ab7;
+  }
+}

@@ -16,6 +16,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
+import wasdi.shared.queryexecutors.gpm.QueryExecutorGPM;
 import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
 import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
@@ -52,6 +53,7 @@ public class QueryExecutorFactory {
 		aoMap.put("PLANET", QueryExecutorPLANET::new);
 		aoMap.put("TERRASCOPE", QueryExecutorTerrascope::new);
 		aoMap.put("STATICS", QueryExecutorSTATICS::new);
+		aoMap.put("GPM", QueryExecutorGPM::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

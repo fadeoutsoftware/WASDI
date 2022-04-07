@@ -162,7 +162,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
                 	
                     // Download the File
-                    sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+                	sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
                     
                     // Is it null?!?
                     if (Utils.isNullOrEmpty(sFileName)) {
@@ -459,6 +459,10 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 				// Create and configure the Provider Adapter
 	            ProviderAdapter oProviderAdapter = getProviderAdapater(oDataProviderConfig.name, oParameter, oProcessWorkspace);
 	            
+	            if (oProviderAdapter == null) {
+	            	continue;
+	            }
+	            
 	            // Compute the score for this Provider Adapter				
 	            int iScore = oProviderAdapter.getScoreForFile(oParameter.getName());
 	            
@@ -579,7 +583,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		}
 		catch (Exception oEx) {
         	
-            m_oLocalLogger.error("Download.getBestProviderAdapater: Exception "
+            m_oLocalLogger.error("Download.getProviderAdapater: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 		

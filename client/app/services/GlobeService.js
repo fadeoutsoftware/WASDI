@@ -546,7 +546,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             },
             {
                 name : "SENTINEL1B",
-                icon : "assets/icons/sat_01.svg",
+                icon : "assets/icons/S1B.svg",
                 label : "S1B",
                 description : "ESA Sentinel 1 B"
             },

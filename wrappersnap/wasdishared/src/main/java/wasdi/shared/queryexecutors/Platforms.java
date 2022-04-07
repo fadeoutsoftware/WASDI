@@ -29,4 +29,6 @@ public class Platforms {
 	
 	public static String STATICS = "StaticFiles";
 
+	public static String IMERG = "IMERG";
+
 }

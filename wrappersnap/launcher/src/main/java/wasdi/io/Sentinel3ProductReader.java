@@ -4,7 +4,10 @@
 package wasdi.io;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
@@ -52,16 +55,16 @@ public class Sentinel3ProductReader extends SnapProductReader {
 
 			//remove .SEN3 from the file name -> required for CREODIAS
 			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");
-			
+
 			oZipExtractor.unzip(sDownloadPath + File.separator + sNewFileName, sDownloadPath);
 			deleteDownloadedZipFile(sDownloadedFileFullPath);
-			
+
 			//remove .zip and add .SEN3 if required
 			sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
 			if(!sNewFileName.endsWith(".SEN3")) {
 				sNewFileName = sNewFileName + ".SEN3";
 			}
-			
+
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
 			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
@@ -93,7 +96,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		}
 	}
 
-	
+
 	/**
 	 * Get the SNAP product or null if this is not a product readable by Snap
 	 * 
@@ -101,21 +104,67 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	 */
 	@Override
 	public Product getSnapProduct() {
+		if(m_bSnapReadAlreadyDone) {
+			return m_oProduct;
+		}
+		
+		//prepare path
+		String sBase = null;
 		try {
-			//save File pointing to directory
-			m_oProductFile = new File(m_oProductFile.getAbsolutePath() + File.separator + "xfdumanifest.xml");
-			//business as usual
+			sBase = m_oProductFile.getAbsolutePath();
+			if(sBase.endsWith(".zip")) {
+				sBase = sBase.replaceAll(".zip", ".SEN3");
+			}
+			sBase += File.separator;
+		} catch (Exception oE) {
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: setting paths failed due to: " + oE);
+		}
+		
+		//prepare list of plausible file names
+		List<String> asNames = new LinkedList<>();
+		asNames.add("xfdumanifest.xml");
+		asNames.add("measurement.nc");
+		asNames.add("standard_measurement.nc");
+		asNames.add("enhanced_measurement.nc");
+		asNames.add("reduced_measurement.nc");
+		
+		//try reading files until a good one is found
+		for (String sFileName : asNames) {
+			if(null==m_oProduct) {
+				readProductBandFromFile(sBase, sFileName);
+			} else {
+				break;
+			}
+		}
+
+		//reset the File pointer
+		m_oProductFile = m_oProductFile.getParentFile();
+
+		return m_oProduct;
+	}
+
+	/**
+	 * @param sBase
+	 * @param sFileName
+	 */
+	private void readProductBandFromFile(String sBase, String sFileName) {
+		try {
+			m_oProductFile = new File(sBase + sFileName);
+			if(!m_oProductFile.exists()) {
+				LauncherMain.s_oLogger.warn("Sentinel3ProductReader.getSnapProduct: file " + sBase + sFileName + " does not exist");
+				return;
+			}
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
 			}
-			//reset the File pointer
-			m_oProductFile = m_oProductFile.getParentFile();
-			
-			return m_oProduct;
+			if(null!=m_oProduct) {
+				m_bSnapReadAlreadyDone = true;
+			} else {
+				m_bSnapReadAlreadyDone = false;
+			}
 		}
 		catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: " + oE);
+			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: tried to read " + sFileName + " but failed: " + oE);
 		}
-		return null;
 	}
 }

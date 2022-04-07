@@ -487,13 +487,41 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
 
                 }
             ]
-        }        
+        },
+        {
+            "name": "IMERG",
+            "indexname": "platformname",
+            "indexvalue": "IMERG",
+            "filters": [
+                {
+                    "indexname": "latency",
+                    "indexlabel": "Latency",
+                    "indexvalues": "Early|Late",
+                    "regex": ".*",
+                    "indexvalue":"Late"
+                },
+                {
+                    "indexname": "duration",
+                    "indexlabel": "Duration",
+                    "indexvalues": "HHR|DAY|MO",
+                    "regex": ".*",
+                    "indexvalue":"DAY"
+                },
+                {
+                    "indexname": "accumulation",
+                    "indexlabel": "Accumulation (only for HHR)",
+                    "indexvalues": "30min|1day|3day - only for Late|7day - only for Late|3hr|All",
+                    "regex": ".*",
+                    "indexvalue":"1day"
+                }
+            ]
+        }
     ],
     "orbitsearch":{
         "sensortypes":["SAR","Optical"],
