@@ -3,7 +3,7 @@ function ViewElementFactory() {
     /**
      * Creates a single view element from a control in input.
      * @param oControl Control Description: minimum properties are param, type, label
-     * @returns {TextBox|SelectArea|ProductList|ProductsCombo|CheckBox|SearchEOImage|DateTimePicker|*}
+     * @returns {TextBox|SelectArea|ProductList|ProductsCombo|CheckBox|SearchEOImage|DateTimePicker|ListBox|*}
      */
     this.createViewElement = function (oControl) {
 
@@ -35,8 +35,15 @@ function ViewElementFactory() {
 
             // See if we have a default
             if (oControl.default) {
-                oViewElement.m_sValue = parseFloat(oControl.default);
                 oViewElement.m_sText = parseFloat(oControl.default);
+            }
+
+            if (oControl.min) {
+                oViewElement.m_fMin = oControl.min;
+            }
+
+            if (oControl.max) {
+                oViewElement.m_fMax = oControl.max;
             }
         }
         else if (oControl.type === "dropdown") {
@@ -64,11 +71,7 @@ function ViewElementFactory() {
             // Bounding Box from Map
 
             oViewElement = new SelectArea();
-            //oViewElement.maxarea = oControl.maxarea;
 
-            // oViewElement.maxarea= oControl.maxArea;
-            // oViewElement.maxside  = oControl.maxSide;
-            // oViewElement.maxratioSide  = oControl.maxRatioSide;
             if (!utilsIsObjectNullOrUndefined(oControl.maxArea)) {
                 oViewElement.maxArea = oControl.maxArea;
             }
@@ -79,11 +82,6 @@ function ViewElementFactory() {
             if (!utilsIsObjectNullOrUndefined(oControl.maxRatioSide)) {
                 oViewElement.maxRatioSide = oControl.maxRatioSide;
             }
-
-
-
-
-
         }
         else if (oControl.type === "date") {
             oViewElement = new DateTimePicker();
@@ -120,12 +118,24 @@ function ViewElementFactory() {
             if (utilsIsObjectNullOrUndefined(oControl.default) == false) {
                 oViewElement.m_iValue = oControl.default;
             }
-
         }
         else if (oControl.type === "hidden") {
             oViewElement = new Hidden();
             oViewElement.m_oValue = oControl.default;
         }
+        else if (oControl.type === "listbox") {
+            // List Box
+            oViewElement = new ListBox();
+
+            let iValues = 0;
+
+            oViewElement.aoElements = [];
+            oViewElement.aoSelected = [];
+
+            for (; iValues < oControl.values.length; iValues++) {
+                oViewElement.aoElements.push(oControl.values[iValues]);
+            }
+        }        
         else {
             oViewElement = new TextBox();
         }
@@ -335,7 +345,7 @@ class SelectArea extends UIComponent {
                 return "";
             }
         }
-        this.isValid = function(){
+        this.isValid = function(asMessages){
             // this checks that the value assigned is different from the default.
             return this.oBoundingBox.northEast != "" && this.oBoundingBox.southWest != "" ; 
         }
@@ -379,8 +389,34 @@ class NumericBox extends UIComponent {
     constructor() {
         super();
 
-        this.m_sValue = 0;
-        this.m_sText = this.m_sValue.toString();
+        this.m_sText = "";
+        this.m_fMin = null;
+        this.m_fMax = null;
+
+        this.isValid = function(asMessages) {
+            try {
+                let fValue = parseFloat(this.m_sText)
+
+                if (utilsIsObjectNullOrUndefined(this.m_fMin)==false) {
+                    if (fValue<this.m_fMin) {
+                        asMessages.push(this.label + " - Value must be greater than " + this.m_fMin);
+                        return false;
+                    }
+                }
+
+                if (utilsIsObjectNullOrUndefined(this.m_fMax)==false) {
+                    if (fValue>this.m_fMax) {
+                        asMessages.push(this.label + " - Value must be smaller than " + this.m_fMax);
+                        return false;
+                    }
+                }                
+            }
+            catch(oError) {
+                return false;
+            }
+
+            return true;
+        }
 
         /**
          * Get the value of the numericbox
@@ -395,7 +431,7 @@ class NumericBox extends UIComponent {
          * @returns {string} String in the numericbox
          */
         this.getStringValue = function () {
-            return this.m_sValue.toString();
+            return this.m_sText.toString();
         }
     };
 }
@@ -553,4 +589,46 @@ class Slider extends UIComponent {
         }
 
     }
+}
+
+/**
+ * List Box Control Class
+ * @constructor
+ */
+ class ListBox extends UIComponent {
+    constructor() {
+        super();
+
+        this.aoElements = [];
+        this.aoSelected = [];
+
+        /**
+         * Return the selected product
+         * @returns {{}}
+         */
+        this.getValue = function () {
+            return this.aoSelected;
+        }
+
+        /**
+         * Return the name of the selected product
+         * @returns {{}}
+         */
+        this.getStringValue = function () {
+
+            let sReturn = "";
+            let iSel = 0;
+
+            if (this.aoSelected != undefined) {
+                if (this.aoSelected != null) {
+                    for (iSel = 0; iSel<this.aoSelected.length; iSel++) {
+                        if (iSel>0) sReturn = sReturn + ";";
+                        sReturn = sReturn + this.aoSelected[iSel];
+                    }
+                }
+            }
+            return sReturn;
+        }
+
+    };
 }

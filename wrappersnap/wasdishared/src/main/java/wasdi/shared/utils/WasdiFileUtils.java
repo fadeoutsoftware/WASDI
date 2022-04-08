@@ -398,6 +398,44 @@ public class WasdiFileUtils {
 		}
 		return false;
 	}
+	
+	public static boolean isSentinel5PFile(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			if (oFile.getName().toLowerCase().startsWith("s5p") && ! (oFile.getName().toLowerCase().endsWith(".tif")|| oFile.getName().toLowerCase().endsWith(".tiff"))) {
+				return true;
+			}
+			else {
+				return false;
+			}
+			
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isSentinel5PFile( File ): " + oE);
+		}
+		return false;
+	}
+
+	public static boolean isGpmZipFile(File oFile) {
+		try {
+			if (null == oFile) {
+				return false;
+			}
+
+			if ((oFile.getName().toUpperCase().startsWith("3B-") || oFile.getName().toUpperCase().contains("IMERG"))
+					&& oFile.getName().toLowerCase().endsWith(".zip")) {
+				return true;
+			} else {
+				return false;
+			}
+			
+		} catch (Exception oE) {
+			Utils.debugLog("WasdiFileUtils.isGpmZipFile( File ): " + oE);
+		}
+
+		return false;
+	}
 
 	private static boolean isSentinel3ZippedFile(String sName) {
 		try {
@@ -524,7 +562,10 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("WASDI_STATIC_")) {
 				return Platforms.STATICS;
-			}			
+			}
+			else if (sFileName.toUpperCase().startsWith("3B-") || sFileName.toUpperCase().contains("IMERG")) {
+				return Platforms.IMERG;
+			}
 			
 			return null;
 		}

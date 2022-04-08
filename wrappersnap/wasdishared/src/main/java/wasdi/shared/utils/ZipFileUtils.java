@@ -18,12 +18,15 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.log4j.Logger;
@@ -63,6 +66,9 @@ public class ZipFileUtils {
 	 * Static logger reference
 	 */
 	static Logger s_oLogger = Logger.getLogger(ZipFileUtils.class);
+	private long m_lTotal;
+	private int m_iEntries;
+	private long m_lSingle;
 
 
 	/**
@@ -75,114 +81,167 @@ public class ZipFileUtils {
 	 * - errors occurs (I.E. a file is bigger than the limit imposed)
 	 * - the unzip is completed without errors
 	 *
-	 * @param sFilename the filename of the Zip file to be extracted
-	 * @param sPath     The intended path in which the file should be extracted
-	 * @throws java.io.IOException Throws IO exception in case the zip file is not founded
+	 * @param sZipFileAbsolutePath the filename of the Zip file to be extracted
+	 * @param sDestinationPath     The intended path in which the file should be extracted
+	 * @throws Exception 
 	 */
-	public String unzip(String sFilename, String sPath) throws java.io.IOException {
-
-		FileInputStream oFis = new FileInputStream(WasdiFileUtils.fixPathSeparator(sFilename));
-
-		int iEntries = 0;
-		long lTotal = 0;
-		long lSingle = 0;
-
-		int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
-
-		String sTemp = "tmp-" + iRandom + File.separator;
-		String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
-
-		if(!sTempPath.endsWith(File.separator)) {
-			sTempPath += File.separator;
-		}
-		sTempPath += sTemp;
-
-		Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
-		if (oPath.toFile().mkdir()) {
-			s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempPath);
-		} else {
-			throw new IOException("Can't create temporary dir " + sTempPath);
-		}
-
-		try (ArchiveInputStream oZis = new ZipArchiveInputStream(oFis, "UTF-8", false, true)){
-
-			ArchiveEntry oEntry;
-			while ((oEntry = oZis.getNextEntry()) != null) {
-				try {
-					if (!oZis.canReadEntryData(oEntry)) {
-						s_oLogger.warn(m_sLoggerPrefix + ": can't read entry: " + oEntry + ", skipping");
-						continue;
-					}
-					
-					s_oLogger.info(m_sLoggerPrefix + "Extracting: " + oEntry);
-					int iCount;
-
-					byte[] ayData = new byte[BUFFER];
-					// Write the files to the disk, but ensure that the filename is valid,
-					// and that the file is not insanely big
-					String sName = validateFilename(sTempPath + oEntry.getName(), sTempPath); // throws exception in case
-
-					// Random used to mitigate attacks
-					if (!oEntry.isDirectory()) {
-						File oFile = new File(sName);
-						if (!oFile.getParentFile().exists()) {
-							s_oLogger.info(m_sLoggerPrefix + "unzip: Creating parent directory " + oFile.getParent());
-							oFile.getParentFile().mkdirs();
-						}
-					}
-					else {
-						new File(sName).mkdirs();
-						continue;
-					}
-
-					FileOutputStream oFos = new FileOutputStream(sName);
-
-					try (BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
-
-						while ( (lTotal + BUFFER <= m_lToobigtotal || m_lToobigtotal==0) && (lSingle + BUFFER <= m_lToobigsingle || m_lToobigsingle == 0) && (iCount = oZis.read(ayData, 0, BUFFER)) != -1) {
-							oDest.write(ayData, 0, iCount);
-							lTotal += iCount;
-							lSingle += iCount;
-						}
-
-						oDest.flush();
-						//oZis.closeEntry();
-						iEntries++;
-
-						if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
-							cleanTempDir(sTempPath, sTemp);
-							s_oLogger.error(m_sLoggerPrefix + "unzip: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
-							throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
-						}
-						if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
-							cleanTempDir(sTempPath, sTemp);
-							s_oLogger.error(m_sLoggerPrefix + "unzip: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
-							throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
-						}
-						if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
-							cleanTempDir(sTempPath, sTemp);
-							s_oLogger.error(m_sLoggerPrefix + "unzip: Too many files inside the archive. The limit is "+m_lToomany);
-							throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
-						}
-
-						// resets single file byte-counter
-						lSingle = 0; 
-					}					
-				}
-				catch (Exception e) {
-					s_oLogger.error(m_sLoggerPrefix + "unzip: error extracting entry: "+ e.toString());
-					throw e;
-				}
-
+	public String unzip(String sZipFileAbsolutePath, String sDestinationPath) throws Exception {
+		String sTempRelativeDirectory = null;
+		String sTempAbsolutePath = null;
+		try {
+			m_iEntries = 0;
+			m_lTotal = 0;
+	
+			sTempRelativeDirectory = nameRandomTempLocalDirectory();
+			sTempAbsolutePath = buildTempFullPath(sDestinationPath, sTempRelativeDirectory);
+	
+			Path oPath = Paths.get(sTempAbsolutePath).toAbsolutePath().normalize();
+			if (oPath.toFile().mkdirs()) {
+				s_oLogger.info(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
+			} else {
+				throw new IOException("Can't create temporary dir " + sTempAbsolutePath);
 			}
-
-			// IF everything went well cp temp content to original folder (overwrite it's fine) and delete temp dir
+	
+			File oInputFile = new File(sZipFileAbsolutePath);
+			try(ZipFile oZipFile = new ZipFile(oInputFile)){
+				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
+				while(aoZipArchiveEntries.hasMoreElements()) {
+					extractOneEntry(sTempRelativeDirectory, sTempAbsolutePath, oZipFile, aoZipArchiveEntries);
+	
+				}
+			}
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + ".unzip: " + oE);
+			throw oE;
+		} finally {
+			// make sure temporary directory gets deleted
 			s_oLogger.info(m_sLoggerPrefix + "Copy and clean tmp dir.");
-			if (!cleanTempDir(sTempPath, sTemp)) {
-				s_oLogger.error(m_sLoggerPrefix + " cleanTempDir( " + sTempPath + ", " + sTemp + " returned false...");
+			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
+				s_oLogger.error(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
 			}
 		}
-		return sTempPath;
+		return sTempAbsolutePath;
+	}
+
+	/**
+	 * @param sTempRelativeDirectory
+	 * @param sTempAbsolutePath
+	 * @param oZipFile
+	 * @param aoZipArchiveEntries
+	 * @throws Exception
+	 */
+	private void extractOneEntry(String sTempRelativeDirectory, String sTempAbsolutePath, ZipFile oZipFile,
+			Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries) throws Exception {
+		try {
+			ZipArchiveEntry oEntry = aoZipArchiveEntries.nextElement();
+			s_oLogger.info(m_sLoggerPrefix + "unzip: extracting: " + oEntry);
+
+			String sName = validateFilename(sTempAbsolutePath + oEntry.getName(), sTempAbsolutePath); // throws exception in case
+
+			if(oEntry.isDirectory()) {
+				new File(sName).mkdirs();
+				return;
+			}
+
+			//it's a file: create required directories
+			File oFile = new File(sName);
+			File oParent = oFile.getParentFile(); 
+			if(null!=oParent && !oParent.exists()) {
+				s_oLogger.info(m_sLoggerPrefix + "unzip: creating parent directory " + oParent);
+				if(!oParent.mkdirs()) {
+					String sMessage = "failed creating required directories of " + oFile;
+					s_oLogger.error(m_sLoggerPrefix + "unzip: " + sMessage);
+					throw new RuntimeException(sMessage);
+				}
+			}
+			
+			byte[] ayData = new byte[BUFFER];
+			try (FileOutputStream oFos = new FileOutputStream(sName); BufferedOutputStream oDest = new BufferedOutputStream(oFos, BUFFER)){
+				InputStream oZis = oZipFile.getInputStream(oEntry);
+				copyOneEntryOutOfArchive(oZis, ayData, oDest);
+				m_iEntries++;
+			}
+			checkUnzipStatus(m_iEntries, m_lTotal, sTempRelativeDirectory, sTempAbsolutePath, m_lSingle);
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + "unzip: error extracting entry: "+ oE);
+			throw oE;
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	private String nameRandomTempLocalDirectory() {
+		try {
+			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
+			String sTempDirectory = "tmp-" + iRandom + File.separator;
+			return sTempDirectory;
+		}catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + "nameRandomTempLocalDirectory: " + oE);
+			return null;
+		}
+	}
+
+	/**
+	 * @param oZis
+	 * @param ayData
+	 * @param oDest
+	 * @throws IOException
+	 */
+	private void copyOneEntryOutOfArchive(InputStream oZipInputStream, byte[] ayData, BufferedOutputStream oDest) throws IOException {
+		m_lSingle = 0;
+		int iCount = 0;
+		while (
+				(m_lTotal + BUFFER <= m_lToobigtotal || m_lToobigtotal<=0) &&
+				(m_lSingle + BUFFER <= m_lToobigsingle || m_lToobigsingle <= 0) &&
+				(iCount = oZipInputStream.read(ayData, 0, BUFFER)) != -1) {
+			oDest.write(ayData, 0, iCount);
+			m_lTotal += iCount;
+			m_lSingle += iCount;
+		}
+		oDest.flush();
+	}
+
+	/**
+	 * @param iEntries
+	 * @param lTotal
+	 * @param sTempDirectory
+	 * @param sTempFullPath
+	 * @param lSingle
+	 * @throws IllegalStateException
+	 */
+	private void checkUnzipStatus(int iEntries, long lTotal, String sTempDirectory, String sTempFullPath, long lSingle)
+			throws IllegalStateException {
+		if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
+			cleanTempDir(sTempFullPath, sTempDirectory);
+			s_oLogger.error(m_sLoggerPrefix + "checkUnzipStatus: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+			throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+		}
+		if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
+			cleanTempDir(sTempFullPath, sTempDirectory);
+			s_oLogger.error(m_sLoggerPrefix + "checkUnzipStatus: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+			throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+		}
+		if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
+			cleanTempDir(sTempFullPath, sTempDirectory);
+			s_oLogger.error(m_sLoggerPrefix + "checkUnzipStatus: Too many files inside the archive. The limit is "+m_lToomany);
+			throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
+		}
+	}
+
+	private String buildTempFullPath(String sPath, String sTemp) {
+		try {
+			String sTempPath = WasdiFileUtils.fixPathSeparator(sPath);
+	
+			if(!sTempPath.endsWith(File.separator)) {
+				sTempPath += File.separator;
+			}
+			sTempPath += sTemp;
+			return sTempPath;
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix + "buildTempFullPath: " + oE);
+			return null;
+		}
 	}
 
 	/**
@@ -269,47 +328,52 @@ public class ZipFileUtils {
 	 * @return True if the operation is done without errors nor exceptions. False instead
 	 */
 	private boolean cleanTempDir(String sTempPath, String sTemp) {
-
-		// point the temp dir
-		File oDir = new File(sTempPath); 
-
-		try (Stream<Path> aoPathStream = Files.walk(oDir.toPath())){
-
-			// this make the dir before other files
-			aoPathStream.sorted(Comparator.naturalOrder()).map(Path::toFile).forEach(oFile -> {
-				try {
-					// removes the tmp-part from the destination files
-					File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
-					// checks the existence of the dir
-					if (oFile.isDirectory()) {
-						oDest.mkdir();
-						return;
-					}
-
-					if  (!oDest.getParentFile().exists()) {
-						oDest.mkdirs();
-					}
-
-					Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
-					try {
-						Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
-					}
-					catch (Exception e) {
-					}
-
-				} catch (Exception oE) {
-					oE.printStackTrace();
-				}
-			});
-		} catch (IOException oE) {
-			oE.printStackTrace();
-			return false;
-		}
-
 		try {
-			deleteDirectory(oDir.toPath());
-		} catch (IOException oE) {
-			oE.printStackTrace();
+			// point the temp dir
+			File oDir = new File(sTempPath); 
+	
+			try (Stream<Path> aoPathStream = Files.walk(oDir.toPath())){
+	
+				// this make the dir before other files
+				aoPathStream.sorted(Comparator.naturalOrder()).map(Path::toFile).forEach(oFile -> {
+					try {
+						// removes the tmp-part from the destination files
+						File oDest = new File(oFile.getCanonicalPath().replace(sTemp, ""));
+						// checks the existence of the dir
+						if (oFile.isDirectory()) {
+							oDest.mkdir();
+							return;
+						}
+	
+						if  (!oDest.getParentFile().exists()) {
+							oDest.mkdirs();
+						}
+	
+						Files.copy(oFile.getCanonicalFile().toPath(), oDest.getCanonicalFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+						try {
+							Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
+						}
+						catch (Exception oE) {
+							s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: set posix file permissions failed because: " + oE);
+						}
+	
+					} catch (Exception oE) {
+						s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: map for each file failed because: " + oE);
+					}
+				});
+			} catch (IOException oE) {
+				s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: files walk failed because: " + oE);
+				return false;
+			}
+	
+			try {
+				deleteDirectory(oDir.toPath());
+			} catch (IOException oE) {
+				s_oLogger.error(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
+				return false;
+			}
+		} catch (Exception oE) {
+			s_oLogger.error(m_sLoggerPrefix +".cleanTempDir (outmost): " + oE);
 			return false;
 		}
 
@@ -450,10 +514,10 @@ public class ZipFileUtils {
 				while ((iLength = oFis.read(bytes)) >= 0) {
 					oZipOut.write(bytes, 0, iLength);
 				}
-//				oFis.close();				
+				//				oFis.close();				
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			System.out.println("ZipFileUtils.zipFile: " + oE);
 		}
 	}
 
@@ -461,9 +525,9 @@ public class ZipFileUtils {
 	 * Extract the content of a zip file, removing the initial file.
 	 * @param zipFile the zip file to be extracted
 	 * @param destDir the destination directory where the content should be moved
-	 * @throws IOException in case of any issue
+	 * @throws Exception 
 	 */
-	public static void cleanUnzipFile(File zipFile, File destDir) throws IOException {
+	public static void cleanUnzipFile(File zipFile, File destDir) throws Exception {
 		if (zipFile == null) {
 			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
 			return;
@@ -499,12 +563,50 @@ public class ZipFileUtils {
 		}
 	}
 
-	public static void fixZipFileInnerSafePath(String zipFilePath) throws IOException {
+	public static void extractInnerZipFileAndCleanZipFile(File oZipFile, File oDestDir) throws Exception {
+		if (oZipFile == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
+			return;
+		} else if (!oZipFile.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+		}
+
+		if (oDestDir == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
+			return;
+		} else if (!oDestDir.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
+		}
+
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
+
+		String sFilename = oZipFile.getAbsolutePath();
+		String sPath = oDestDir.getAbsolutePath();
+
+		String sDirPath = completeDirPath(sPath);
+		String sSimpleFilename = removeZipExtension(oZipFile.getName());
+		String unzippedDirectoryPath = completeDirPath(sDirPath + sSimpleFilename);
+
+		oZipExtractor.unzip(sFilename, unzippedDirectoryPath);
+
+		String fileZipPath = sDirPath + oZipFile.getName();
+
+		if (fileExists(unzippedDirectoryPath)) {
+			boolean fileMovedFlag = moveFile(unzippedDirectoryPath + sSimpleFilename + ".tif", sDirPath);
+
+			if (fileMovedFlag) {
+				deleteFile(unzippedDirectoryPath);
+				deleteFile(fileZipPath);
+			}
+		}
+	}
+
+	public static void fixZipFileInnerSafePath(String zipFilePath) throws Exception {
 		if (zipFilePath == null) {
 			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
 			return;
 		}
-		
+
 		File zipFile = new File(zipFilePath);
 		if (!zipFile.exists()) {
 			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
