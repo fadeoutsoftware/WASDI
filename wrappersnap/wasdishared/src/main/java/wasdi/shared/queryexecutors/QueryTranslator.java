@@ -1097,10 +1097,7 @@ public abstract class QueryTranslator {
 							iEnd = sQuery.indexOf(')', iStart);
 						}
 						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = iStart + 12;
+							iEnd = sQuery.length();
 						}
 						String sTimeliness = sQuery.substring(iStart, iEnd);
 						sTimeliness = sTimeliness.trim();

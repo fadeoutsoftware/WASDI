@@ -253,7 +253,7 @@
                 {
                     "indexname": "timeliness",
                     "indexlabel": "Timeliness",
-                    "indexvalues":"Offline|Near Real Time|Reprocessing",
+                    "indexvalues":"Offline|Near real time|Reprocessing",
                     "regex": ".*"
 
                 },
