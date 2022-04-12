@@ -225,10 +225,10 @@ public class QueryExecutorGPM extends QueryExecutor {
 	}
 
 	private static Date getDefaultStartDate() {
-		Date now = new Date();
+		Date oNow = new Date();
 
 		Calendar oStartDateCalendar = Calendar.getInstance();
-		oStartDateCalendar.setTimeInMillis(now.getTime());
+		oStartDateCalendar.setTimeInMillis(oNow.getTime());
 		oStartDateCalendar.set(Calendar.HOUR, 0);
 		oStartDateCalendar.set(Calendar.MINUTE, 0);
 		oStartDateCalendar.set(Calendar.SECOND, 0);
@@ -240,10 +240,10 @@ public class QueryExecutorGPM extends QueryExecutor {
 	}
 
 	private static Date getDefaultEndDate() {
-		Date now = new Date();
+		Date oNow = new Date();
 
 		Calendar oEndDateCalendar = Calendar.getInstance();
-		oEndDateCalendar.setTimeInMillis(now.getTime());
+		oEndDateCalendar.setTimeInMillis(oNow.getTime());
 		oEndDateCalendar.set(Calendar.HOUR, 23);
 		oEndDateCalendar.set(Calendar.MINUTE, 59);
 		oEndDateCalendar.set(Calendar.SECOND, 59);
@@ -373,9 +373,9 @@ public class QueryExecutorGPM extends QueryExecutor {
 					continue;
 				}
 
-				List<QueryRetrieveResponseEntry> list = parseRetrieveResponse(sHtmlPageSource);
+				List<QueryRetrieveResponseEntry> aoList = parseRetrieveResponse(sHtmlPageSource);
 
-				List<QueryRetrieveResponseEntry> filteredList = list.stream()
+				List<QueryRetrieveResponseEntry> aoFilteredList = aoList.stream()
 						.filter(t -> sDuration.equalsIgnoreCase(t.getDuration()))
 						.filter(t -> sExtension.equalsIgnoreCase(t.getExtension()))
 						.filter(t -> sAccumulation == null || sAccumulation.equalsIgnoreCase(t.getAccumulation()))
@@ -384,42 +384,42 @@ public class QueryExecutorGPM extends QueryExecutor {
 						.collect(Collectors.toList());
 
 
-				for (QueryRetrieveResponseEntry qre : filteredList) {
-					QueryResultViewModel qrvm = new QueryResultViewModel();
+				for (QueryRetrieveResponseEntry oQueryResponse : aoFilteredList) {
+					QueryResultViewModel oViewModel = new QueryResultViewModel();
 
 					// for the list of results, force the extension to tif
 					String sTitle;
-					if (qre.getExtension().equalsIgnoreCase(EXTENSION_TIF)) {
-						sTitle = qre.getName();
+					if (oQueryResponse.getExtension().equalsIgnoreCase(EXTENSION_TIF)) {
+						sTitle = oQueryResponse.getName();
 					} else {
-						sTitle = qre.getName().replace(sExtension, EXTENSION_TIF);
+						sTitle = oQueryResponse.getName().replace(sExtension, EXTENSION_TIF);
 					}
 
-					qrvm.setId(qre.getName());
-					qrvm.setTitle(sTitle);
-					qrvm.setLink(sUrl + qre.getName());
-					qrvm.setProvider("GPM");
-					qrvm.setSummary("No summary, yet!");
+					oViewModel.setId(oQueryResponse.getName());
+					oViewModel.setTitle(sTitle);
+					oViewModel.setLink(sUrl + oQueryResponse.getName());
+					oViewModel.setProvider("GPM");
+					oViewModel.setSummary("No summary, yet!");
 
-					Map<String, String> properties = qrvm.getProperties();
-					properties.put("platformname", oGPMQuery.platformName);
-					properties.put("satellite", "MS");
-					properties.put("instrument", "MRG");
-					properties.put("algorithm", "3IMERG");
-					properties.put("title", sTitle);
-					properties.put("date", qre.getLastModified());
-					properties.put("size", qre.getSize());
-					properties.put("link", sUrl + qre.getName());
-					properties.put("duration", qre.getDuration());
-					properties.put("accumulation", qre.getAccumulation());
-					properties.put("type", "tif");
+					Map<String, String> aoProperties = oViewModel.getProperties();
+					aoProperties.put("platformname", oGPMQuery.platformName);
+					aoProperties.put("satellite", "MS");
+					aoProperties.put("instrument", "MRG");
+					aoProperties.put("algorithm", "3IMERG");
+					aoProperties.put("title", sTitle);
+					aoProperties.put("date", oQueryResponse.getLastModified());
+					aoProperties.put("size", oQueryResponse.getSize());
+					aoProperties.put("link", sUrl + oQueryResponse.getName());
+					aoProperties.put("duration", oQueryResponse.getDuration());
+					aoProperties.put("accumulation", oQueryResponse.getAccumulation());
+					aoProperties.put("type", "tif");
 
 					if (iOffset > 0) {
 						iOffset--;
 						continue;
 					}
 
-					aoResults.add(qrvm);
+					aoResults.add(oViewModel);
 
 					if (aoResults.size() >= iLimit) {
 						return aoResults;
@@ -431,6 +431,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 			return aoResults;
 		} catch (Exception oEx) {
+			oEx.printStackTrace();
 			Utils.debugLog("QueryExecutorGPM.executeAndRetrieve: error " + oEx.toString());
 		}
 
@@ -461,166 +462,173 @@ public class QueryExecutorGPM extends QueryExecutor {
 		return sResult;
 	}
 
-	public static List<QueryCountResponseEntry> parseCountResponse(String source, String relativePath) {
-		List<QueryCountResponseEntry> list = new ArrayList<>();
+	public static List<QueryCountResponseEntry> parseCountResponse(String sSource, String sRelativePath) {
+		List<QueryCountResponseEntry> aoList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(source)) {
-			return list;
+		if (Utils.isNullOrEmpty(sSource)) {
+			return aoList;
 		}
 
-		String[] lines = source.split("\n");
+		String[] asLines = sSource.split("\n");
 
-		for (String line : lines) {
-			QueryCountResponseEntry qcre = parseLine(line, relativePath);
+		for (String sLine : asLines) {
+			QueryCountResponseEntry oQuerCountResponse = parseLine(sLine, sRelativePath);
 
-			if (qcre == null) {
+			if (oQuerCountResponse == null) {
 				continue;
 			}
 
-			list.add(qcre);
+			aoList.add(oQuerCountResponse);
 		}
 
-		return list;
+		return aoList;
 	}
 
-	private static QueryCountResponseEntry parseLine(String line, String relativePath) {
-		QueryCountResponseEntry qcre = null;
+	private static QueryCountResponseEntry parseLine(String sLine, String sRelativePath) {
+		QueryCountResponseEntry oQueryCountResponse = null;
 
-		if (Utils.isNullOrEmpty(line)) {
-			return qcre;
+		if (Utils.isNullOrEmpty(sLine)) {
+			return oQueryCountResponse;
 		}
 
-		if (!line.contains(relativePath)) {
-			return qcre;
+		if (!sLine.contains(sRelativePath)) {
+			return oQueryCountResponse;
 		}
 
-		String name = line.replace(relativePath, "");
+		String sName = sLine.replace(sRelativePath, "");
 
 
-		int indexOf3B = name.indexOf("3B-");
+		int iIndexOf3B = sName.indexOf("3B-");
 
-		if (indexOf3B == -1) {
-			return qcre;
+		if (iIndexOf3B == -1) {
+			return oQueryCountResponse;
 		}
 
-		int indexOfFirstDash = name.indexOf("-", indexOf3B + 3);
+		int iIndexOfFirstDash = sName.indexOf("-", iIndexOf3B + 3);
 
-		if (indexOfFirstDash == -1) {
-			return qcre;
+		if (iIndexOfFirstDash == -1) {
+			return oQueryCountResponse;
 		}
 
-		String sDuration = name.substring(indexOf3B + 3, indexOfFirstDash);
+		String sDuration = sName.substring(iIndexOf3B + 3, iIndexOfFirstDash);
 
 
-		int indexOfImerg = name.indexOf("IMERG");
+		int iIndexOfImerg = sName.indexOf("IMERG");
 
-		if (indexOfImerg == -1) {
-			return qcre;
+		if (iIndexOfImerg == -1) {
+			return oQueryCountResponse;
 		}
 
-		int indexOfFirstDot = name.indexOf(".", indexOfImerg);
+		int iIndexOfFirstDot = sName.indexOf(".", iIndexOfImerg);
 
-		if (indexOfFirstDot == -1) {
-			return qcre;
+		if (iIndexOfFirstDot == -1) {
+			return oQueryCountResponse;
 		}
 
-		String sDate = name.substring(indexOfFirstDot + 1, indexOfFirstDot + 9);
+		String sDate = sName.substring(iIndexOfFirstDot + 1, iIndexOfFirstDot + 9);
 
 		if (Utils.isNullOrEmpty(sDate)) {
-			return qcre;
+			return oQueryCountResponse;
 		}
 
 		Date oDate = Utils.getYyyyMMddDate(sDate);
 
-		int indexOfExtensionDot = name.lastIndexOf(".");
+		int iIndexOfExtensionDot = sName.lastIndexOf(".");
 
-		int indexOfAccumulationDot = name.substring(0, indexOfExtensionDot).lastIndexOf(".");
+		int iIndexOfAccumulationDot = sName.substring(0, iIndexOfExtensionDot).lastIndexOf(".");
 
-		String sAccumulation = name.substring(indexOfAccumulationDot + 1, indexOfExtensionDot);
+		String sAccumulation = sName.substring(iIndexOfAccumulationDot + 1, iIndexOfExtensionDot);
 
-		String sExtension = name.substring(indexOfExtensionDot);
+		String sExtension = sName.substring(iIndexOfExtensionDot);
 
-		qcre = new QueryCountResponseEntry();
-		qcre.setName(name);
-		qcre.setDuration(sDuration);
-		qcre.setAccumulation(sAccumulation);
-		qcre.setExtension(sExtension);
-		qcre.setDate(oDate);
+		oQueryCountResponse = new QueryCountResponseEntry();
+		oQueryCountResponse.setName(sName);
+		oQueryCountResponse.setDuration(sDuration);
+		oQueryCountResponse.setAccumulation(sAccumulation);
+		oQueryCountResponse.setExtension(sExtension);
+		oQueryCountResponse.setDate(oDate);
 
-		return qcre;
+		return oQueryCountResponse;
 	}
 
-	private static List<QueryRetrieveResponseEntry> parseRetrieveResponse(String source) {
-		List<QueryRetrieveResponseEntry> list = new ArrayList<>();
+	private static List<QueryRetrieveResponseEntry> parseRetrieveResponse(String sPageSource) {
+		List<QueryRetrieveResponseEntry> aoReturnList = new ArrayList<>();
 
-		if (Utils.isNullOrEmpty(source)) {
-			return list;
+		if (Utils.isNullOrEmpty(sPageSource)) {
+			return aoReturnList;
 		}
 
-		Document doc = Jsoup.parse(source);
+		Document oDoc = Jsoup.parse(sPageSource);
 
-		for (Element table : doc.select("table")) {
-			for (Element row : table.select("tr")) {
-				Elements tds = row.select("td");
+		for (Element oTable : oDoc.select("table")) {
+			for (Element oRow : oTable.select("tr")) {
+				try {
+					Elements aoTdElements = oRow.select("td");
 
-				if (tds.isEmpty()) {
-					continue;
-				}
+					if (aoTdElements.isEmpty()) {
+						continue;
+					}
 
-				if (tds.get(1).text().equalsIgnoreCase("Parent Directory")) {
-					continue;
-				}
+					if (aoTdElements.get(1).text().equalsIgnoreCase("Parent Directory")) {
+						continue;
+					}
 
-				Element td1Element = tds.get(1);
-				Element aElement = td1Element.select("a").first();
-				String sName = aElement.attr("href");
+					Element oTd1Element = aoTdElements.get(1);
+					Element oAncorElement = oTd1Element.select("a").first();
+					String sName = oAncorElement.attr("href");
+					
+					Utils.debugLog(sName);
 
-				String lastModified = tds.get(2).text().trim();
-				String sSize = tds.get(3).text();
+					String sLastModified = aoTdElements.get(2).text().trim();
+					String sSize = aoTdElements.get(3).text();
 
-				QueryRetrieveResponseEntry qreObject = new QueryRetrieveResponseEntry();
+					QueryRetrieveResponseEntry oResponseObject = new QueryRetrieveResponseEntry();
 
-				qreObject.setName(sName);
+					oResponseObject.setName(sName);
 
-				int indexOf3B = sName.indexOf("3B-");
-				int indexOfFirstDash = sName.indexOf("-", indexOf3B + 3);
-				String sDuration = sName.substring(indexOf3B + 3, indexOfFirstDash);
-				qreObject.setDuration(sDuration);
+					int iIndexOf3B = sName.indexOf("3B-");
+					int iIndexOfFirstDash = sName.indexOf("-", iIndexOf3B + 3);
+					String sDuration = sName.substring(iIndexOf3B + 3, iIndexOfFirstDash);
+					oResponseObject.setDuration(sDuration);
 
-				int indexOfExtensionDot = sName.lastIndexOf(".");
+					int iIndexOfExtensionDot = sName.lastIndexOf(".");
 
-				int indexOfAccumulationDot = sName.substring(0, indexOfExtensionDot).lastIndexOf(".");
+					int iIndexOfAccumulationDot = sName.substring(0, iIndexOfExtensionDot).lastIndexOf(".");
 
-				String sAccumulation = sName.substring(indexOfAccumulationDot + 1, indexOfExtensionDot);
-				qreObject.setAccumulation(sAccumulation);
+					String sAccumulation = sName.substring(iIndexOfAccumulationDot + 1, iIndexOfExtensionDot);
+					oResponseObject.setAccumulation(sAccumulation);
 
-				String sExtension = sName.substring(indexOfExtensionDot);
-				qreObject.setExtension(sExtension);
+					String sExtension = sName.substring(iIndexOfExtensionDot);
+					oResponseObject.setExtension(sExtension);
 
-				qreObject.setLastModified(lastModified);
+					oResponseObject.setLastModified(sLastModified);
 
+					int iIndexOfImerg = sName.indexOf("IMERG");
 
-				int indexOfImerg = sName.indexOf("IMERG");
+					if (iIndexOfImerg > -1) {
+						int iIndexOfFirstDot = sName.indexOf(".", iIndexOfImerg);
 
-				if (indexOfImerg > -1) {
-					int indexOfFirstDot = sName.indexOf(".", indexOfImerg);
+						if (iIndexOfFirstDot > -1) {
+							String sDate = sName.substring(iIndexOfFirstDot + 1, iIndexOfFirstDot + 9);
 
-					if (indexOfFirstDot > -1) {
-						String sDate = sName.substring(indexOfFirstDot + 1, indexOfFirstDot + 9);
-
-						if (!Utils.isNullOrEmpty(sDate)) {
-							qreObject.setDate(Utils.getYyyyMMddDate(sDate));
+							if (!Utils.isNullOrEmpty(sDate)) {
+								oResponseObject.setDate(Utils.getYyyyMMddDate(sDate));
+							}
 						}
 					}
+
+					oResponseObject.setSize(sSize);
+
+					aoReturnList.add(oResponseObject);					
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("QueryExecutorGPM.parseRetrieveResponse: exception handling a row of answers: " + oEx.toString());
 				}
 
-				qreObject.setSize(sSize);
-
-				list.add(qreObject);
 			}
 		}
 
-		return list;
+		return aoReturnList;
 	}
 
 }
