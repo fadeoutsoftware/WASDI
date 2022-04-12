@@ -24,7 +24,7 @@ angular.module('wasdi.wapSelectArea', [])
             // uib-tooltip="I'm a tooltip!" alternative using bootstrap-UI
             // title="My Tooltip!" data-toggle="tooltip" data-placement="top" tooltip
             // the first on relies on a library, UI-boostrap, the second one relies on a directive
-            template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right"></div>`,
+            template: `<div class="map-container" ng-attr-id="{{$ctrl.mapId}}" ng-style="$ctrl.oMapStyle" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="top" tooltip-class="blueWasdi" tooltip-popup-delay='750'></div>`,
 
             controller: function ($translate) {
 
