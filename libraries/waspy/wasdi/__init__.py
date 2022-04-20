@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.4
+Version 0.7.4.2
 
-Last Update: 01/01/2022
+Last Update: 20/04/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -1738,7 +1738,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                    fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
                    sProductType=None, iOrbitNumber=None,
                    sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=None, oBoundingBox=None):
+                   sProvider=None, oBoundingBox=None, aoParams=None):
     """
     Search EO images
 
@@ -1767,6 +1767,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param sProvider: WASDI Data Provider to query (AUTO|LSA|ONDA|CREODIAS|SOBLOO|VIIRS|SENTINEL). None means default node provider = AUTO.
     
     :param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
+    
+    :param aoParams: dictionary of search keys to add to the query. The system will add key=value to the query sent to WASDI. 
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
@@ -1931,8 +1933,15 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             except:
                 wasdiLog('[WARNING] waspy.searchEOImages: could not convert iOrbitNumber to an int, ignoring it' +
                          '  ******************************************************************************')
-
-            # Close the first block
+    
+    if aoParams is not None:
+        try:
+            for sKey in aoParams:
+                sQuery += " AND " + sKey + ":" + aoParams[sKey]
+        except:
+            wasdiLog('[WARNING] waspy.searchEOImages: exception adding generic params')
+    
+    # Close the first block
     sQuery += ") "
 
     # Date Block
@@ -3297,6 +3306,39 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
                 continue
 
     return asProcesses
+
+def bboxStringToObject(sBbox):
+    """
+    Convert the WASDI String BBOX format "N,W,S,W" to Object format {"northEast": {"lat":, lng":}, {"southWest":{"lat":, "lng":} } 
+    """
+    oBbox = {}
+    
+    try:
+        asBbox = sBbox.split(",")
+        oBbox["northEast"] = {}
+        oBbox["northEast"]["lat"] = float(asBbox[0])
+        oBbox["northEast"]["lng"] = float(asBbox[3])
+        oBbox["southWest"] = {}
+        oBbox["southWest"]["lat"] = float(asBbox[2])
+        oBbox["southWest"]["lng"] = float(asBbox[1])
+        
+    except Exception as oEx:
+        wasdiLog("[ERROR] bboxStringToObject: " + str(oEx))
+    
+    return oBbox
+    
+    
+def bboxObjectToString(oBbox):
+    """
+    Convert the WASDI Object BBOX format {"northEast": {"lat":, lng":}, {"southWest":{"lat":, "lng":} } to the String format "N,W,S,W"  
+    """
+    
+    try:
+        sBbox = str(oBbox["northEast"]["lat"])+"," + str(oBbox["southWest"]["lng"]) + "," + str(oBbox["southWest"]["lat"]) + "," + str(oBbox["northEast"]["lng"])         
+    except Exception as oEx:
+        wasdiLog("[ERROR] bboxObjectToString: " + str(oEx))
+    
+    return sBbox    
 
 
 def _log(sLog):
