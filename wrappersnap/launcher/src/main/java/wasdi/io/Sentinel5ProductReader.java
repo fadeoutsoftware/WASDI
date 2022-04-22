@@ -277,6 +277,18 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				
 				sFileName = sFolderName + ".nc";
 				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+				
+				String sCdlFileName = sFolderName + ".cdl";
+				
+				File oCdlFile = new File(sCdlFileName);
+				
+				if (oCdlFile.exists()) {
+					oCdlFile.delete();
+					LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: deleted cdl file " + sCdlFileName);
+				}
+				else {
+					LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: impossible to find cdl file " + oCdlFile.getPath());
+				}
 
 				m_oProductFile = new File(sFileName);
 			}			
