@@ -539,9 +539,37 @@ var ImportController = (function() {
                 if (filter.visibilityConditions) {
 
                     let visibilityConditionsArray = filter.visibilityConditions.split("&");
+
                     for (let visibilityCondition of visibilityConditionsArray) {
-                        if (!this.m_oModel.missionFilter.includes(visibilityCondition)) {
-                            isFilterVisible = false;
+
+                        let innerVisibilityConditions;
+                        if (visibilityCondition.startsWith("(") && visibilityCondition.endsWith(")")) {
+                            innerVisibilityConditions = visibilityCondition.substring(1, visibilityCondition.length - 1);
+                        } else {
+                            innerVisibilityConditions = visibilityCondition;
+                        }
+
+                        if (innerVisibilityConditions.includes("|")) {
+                            let innerVisibilityConditionsArray = innerVisibilityConditions.split("|");
+
+                            let innerFilterVisibleFlag = false;
+
+                            for (let innerVisibilityCondition of innerVisibilityConditionsArray) {
+                                if (this.m_oModel.missionFilter.includes(innerVisibilityCondition)) {
+                                    innerFilterVisibleFlag = true;
+                                    break;
+                                }
+                            }
+
+                            if (!innerFilterVisibleFlag) {
+                                isFilterVisible = false;
+                                break;
+                            }
+                        } else {
+                            if (!this.m_oModel.missionFilter.includes(visibilityCondition)) {
+                                isFilterVisible = false;
+                                break;
+                            }
                         }
                     }
 

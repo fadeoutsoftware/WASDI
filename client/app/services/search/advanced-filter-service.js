@@ -46,10 +46,37 @@ angular
                   let isFilterVisible = true;
 
                   for (let visibilityCondition of visibilityConditionsArray) {
-                    if (!filter.includes(visibilityCondition)) {
-                      isFilterVisible = false;
+
+                    let innerVisibilityConditions;
+                    if (visibilityCondition.startsWith("(") && visibilityCondition.endsWith(")")) {
+                      innerVisibilityConditions = visibilityCondition.substring(1, visibilityCondition.length - 1);
+                    } else {
+                      innerVisibilityConditions = visibilityCondition;
                     }
-                  }
+
+                    if (innerVisibilityConditions.includes("|")) {
+                      let innerVisibilityConditionsArray = innerVisibilityConditions.split("|");
+
+                      let innerFilterVisibleFlag = false;
+
+                      for (let innerVisibilityCondition of innerVisibilityConditionsArray) {
+                        if (filter.includes(innerVisibilityCondition)) {
+                          innerFilterVisibleFlag = true;
+                          break;
+                        }
+                      }
+
+                      if (!innerFilterVisibleFlag) {
+                        isFilterVisible = false;
+                        break;
+                      }
+                    } else {
+                      if (!filter.includes(visibilityCondition)) {
+                        isFilterVisible = false;
+                        break;
+                      }
+                    }
+                }
 
                   if (isFilterVisible) {
                     filter = filter + ' AND '+modelFilter[i].filters[j].indexname+':'
@@ -89,23 +116,53 @@ angular
         }
 
         for (let filter of allFilters) {
-            let isFilterVisible = true;
+          let isFilterVisible = true;
 
-            if (filter.visibilityConditions) {
+          if (filter.visibilityConditions) {
 
-                let visibilityConditionsArray = filter.visibilityConditions.split("&");
-                for (let visibilityCondition of visibilityConditionsArray) {
-                    if (!missionFilter.includes(visibilityCondition)) {
-                        isFilterVisible = false;
-                    }
+            let visibilityConditionsArray = filter.visibilityConditions.split("&");
+
+            for (let visibilityCondition of visibilityConditionsArray) {
+
+              let innerVisibilityConditions;
+              if (visibilityCondition.startsWith("(") && visibilityCondition.endsWith(")")) {
+                innerVisibilityConditions = visibilityCondition.substring(1, visibilityCondition.length - 1);
+              } else {
+                innerVisibilityConditions = visibilityCondition;
+              }
+
+              if (innerVisibilityConditions.includes("|")) {
+                let innerVisibilityConditionsArray = innerVisibilityConditions.split("|");
+
+                let innerFilterVisibleFlag = false;
+
+                for (let innerVisibilityCondition of innerVisibilityConditionsArray) {
+                  if (missionFilter.includes(innerVisibilityCondition)) {
+                    innerFilterVisibleFlag = true;
+                    break;
+                  }
                 }
 
+                if (!innerFilterVisibleFlag) {
+                  isFilterVisible = false;
+                  break;
+                }
+              } else {
+                if (!missionFilter.includes(visibilityCondition)) {
+                  isFilterVisible = false;
+                  break;
+                }
+              }
             }
 
-            if (isFilterVisible) {
-                visibleFilters.push(filter);
-            }
-        }
+          }
+
+          if (isFilterVisible) {
+              visibleFilters.push(filter);
+          }
+      }
+
+
 
         return visibleFilters;
     };
