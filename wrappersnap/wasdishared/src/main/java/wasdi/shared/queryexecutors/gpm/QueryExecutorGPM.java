@@ -40,8 +40,8 @@ public class QueryExecutorGPM extends QueryExecutor {
 	private static final String URL_LATE = "https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/";
 	private static final String URL_EARLY = "https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/early/";
 
-	private static final String EARLY = "Early";
-	private static final String LATE = "Late";
+	private static final String LATENCY_EARLY = "Early";
+	private static final String LATENCY_LATE = "Late";
 
 	private static final String DURATION_HHR = "HHR";
 	private static final String DURATION_DAY = "DAY";
@@ -123,11 +123,25 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 		String sBaseUrl;
 
-		final String sDuration = oGPMQuery.productType;
+		final String sDuration;
 		final String sAccumulation;
 		final String sExtension;
 
-		if (EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
+		if (oGPMQuery.productName == null) {
+			oGPMQuery.productName = LATENCY_LATE;
+		}
+
+		if (oGPMQuery.productType == null) {
+			if (LATENCY_EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
+				oGPMQuery.productType = DURATION_HHR;
+			} else {
+				oGPMQuery.productType = DURATION_DAY;
+			}
+		}
+
+		sDuration = oGPMQuery.productType;
+
+		if (LATENCY_EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
 			sBaseUrl = URL_TEXT_EARLY;
 
 			if (DURATION_DAY.equalsIgnoreCase(oGPMQuery.productType)
@@ -316,11 +330,25 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 			String sBaseUrl;
 
-			final String sDuration = oGPMQuery.productType;
+			final String sDuration;
 			final String sAccumulation;
 			final String sExtension;
 
-			if (EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
+			if (oGPMQuery.productName == null) {
+				oGPMQuery.productName = LATENCY_LATE;
+			}
+
+			if (oGPMQuery.productType == null) {
+				if (LATENCY_EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
+					oGPMQuery.productType = DURATION_HHR;
+				} else {
+					oGPMQuery.productType = DURATION_DAY;
+				}
+			}
+
+			sDuration = oGPMQuery.productType;
+
+			if (LATENCY_EARLY.equalsIgnoreCase(oGPMQuery.productName)) {
 				sBaseUrl = URL_EARLY;
 
 				if (DURATION_DAY.equalsIgnoreCase(oGPMQuery.productType)
@@ -574,10 +602,14 @@ public class QueryExecutorGPM extends QueryExecutor {
 					}
 
 					Element oTd1Element = aoTdElements.get(1);
+					Elements oaAncorElements = oTd1Element.select("a");
+
+					if (oaAncorElements == null || oaAncorElements.size() == 0) {
+						continue;
+					}
+
 					Element oAncorElement = oTd1Element.select("a").first();
 					String sName = oAncorElement.attr("href");
-					
-					Utils.debugLog(sName);
 
 					String sLastModified = aoTdElements.get(2).text().trim();
 					String sSize = aoTdElements.get(3).text();
