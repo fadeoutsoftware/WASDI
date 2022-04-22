@@ -509,15 +509,33 @@
                 {
                     "indexname": "duration",
                     "indexlabel": "Duration",
+                    "indexvalues": "HHR",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Early",
+                    "indexvalue":"HHR"
+                },
+                {
+                    "indexname": "duration",
+                    "indexlabel": "Duration",
                     "indexvalues": "HHR|DAY|MO",
                     "regex": ".*",
+                    "visibilityConditions": "latency:Late",
                     "indexvalue":"DAY"
                 },
                 {
                     "indexname": "accumulation",
-                    "indexlabel": "Accumulation (only for HHR)",
-                    "indexvalues": "30min|1day|3day - only for Late|7day - only for Late|3hr|All",
+                    "indexlabel": "Accumulation",
+                    "indexvalues": "30min|1day|3hr|All",
                     "regex": ".*",
+                    "visibilityConditions": "latency:Early&duration:HHR",
+                    "indexvalue":"1day"
+                },
+                {
+                    "indexname": "accumulation",
+                    "indexlabel": "Accumulation",
+                    "indexvalues": "30min|1day|3day|7day|3hr|All",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Late&duration:HHR",
                     "indexvalue":"1day"
                 }
             ]

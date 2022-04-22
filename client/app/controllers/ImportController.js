@@ -530,7 +530,29 @@ var ImportController = (function() {
     ImportController.prototype.clearInput = function(parentIndex, index){
         //console.log("parentIndex    clearFilter",parentIndex);
         if(this.m_aoMissions[parentIndex] && this.m_aoMissions[parentIndex].filters[index]) {
-            this.m_aoMissions[parentIndex].filters[index].indexvalue = "";
+
+            let visibleFilters = [];
+
+            for (let filter of this.m_aoMissions[parentIndex].filters) {
+                let isFilterVisible = true;
+
+                if (filter.visibilityConditions) {
+
+                    let visibilityConditionsArray = filter.visibilityConditions.split("&");
+                    for (let visibilityCondition of visibilityConditionsArray) {
+                        if (!this.m_oModel.missionFilter.includes(visibilityCondition)) {
+                            isFilterVisible = false;
+                        }
+                    }
+
+                }
+
+                if (isFilterVisible) {
+                    visibleFilters.push(filter);
+                }
+            }
+
+            visibleFilters[index].indexvalue = "";
         }
 
     };

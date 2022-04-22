@@ -176,7 +176,7 @@
                             <div class="mission-details-wrapper container-fluid flex-grow-1">
                                 <div class="row-v4" ng-repeat="mission in $ctrl.getMissions()" ng-show="$ctrl.isMissionTabOpen($index)">
 
-                                    <div class="col-v4-6 mt-2" ng-repeat="filter in mission.filters">
+                                    <div class="col-v4-6 mt-2" ng-repeat="filter in mission.filters | filterOutInvisibleFilters : $ctrl.m_oModel.missionFilter">
                                         <!-- INPUT -->
                                         <div ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <div class="group">
