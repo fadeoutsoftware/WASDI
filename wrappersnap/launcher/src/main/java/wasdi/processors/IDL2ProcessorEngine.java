@@ -84,6 +84,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			String sCallIdlFile = sProcessorFolder + "/call_idl.pro";
 			String sWasdiWrapperFile = sProcessorFolder + "/wasdi_wrapper.pro";
 			String sRunFile = sProcessorFolder + "/runProcessor.sh";
+			String sGetPIDFile = sProcessorFolder + "/getPid.sh";
 						
 			// GENERATE Call IDL File
 			File oCallIdlFile = new File (sCallIdlFile);
@@ -92,6 +93,24 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				if(null!= oCallIdlWriter) {
 					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.DeployProcessor: Creating call_idl.pro file");
 					
+					oCallIdlWriter.write("iArgs = 0");
+					oCallIdlWriter.newLine();
+					
+					oCallIdlWriter.write("aoArgs = COMMAND_LINE_ARGS(COUNT=iArgs)");
+					oCallIdlWriter.newLine();
+					
+					oCallIdlWriter.write("sConfigFile = 'config.properties'");
+					oCallIdlWriter.newLine();					
+
+					oCallIdlWriter.write("IF (iArgs GT 0) THEN sConfigFile=aoArgs[0]");
+					oCallIdlWriter.newLine();
+
+					oCallIdlWriter.write("sConfigFile = '/home/wasdi/'+sConfigFile");
+					oCallIdlWriter.newLine();
+
+					oCallIdlWriter.write("print, 'Config File ', sConfigFile");
+					oCallIdlWriter.newLine();		
+
 					if (bAddLibraryFit) {
 						oCallIdlWriter.write("!PATH = EXPAND_PATH('<IDL_DEFAULT>:+" + sLocalProcessorFolder + "mpfit')");
 						oCallIdlWriter.newLine();						
@@ -99,7 +118,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					
 					oCallIdlWriter.write(".r " + sLocalProcessorFolder + "idlwasdilib.pro");
 					oCallIdlWriter.newLine();
-					oCallIdlWriter.write("STARTWASDI, '"+sLocalProcessorFolder+"config.properties'");
+					oCallIdlWriter.write("STARTWASDI, sConfigFile");
 					oCallIdlWriter.newLine();
 					oCallIdlWriter.write(".r "+sLocalProcessorFolder + sProcessorName + ".pro");
 					oCallIdlWriter.newLine();
@@ -151,8 +170,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				}							
 			}
 						
-			Runtime.getRuntime().exec("chmod u+x "+sRunFile);			
-
+			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
+			Runtime.getRuntime().exec("chmod u+x "+sGetPIDFile);
 			
 		} catch (Exception e) {
 			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.deploy: Exception Creating Files :"+e.toString());
