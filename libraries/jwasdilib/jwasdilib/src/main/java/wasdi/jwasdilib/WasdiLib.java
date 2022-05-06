@@ -1282,7 +1282,7 @@ public class WasdiLib {
 		try {
 			String sFullPath = m_sBasePath;
 
-			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") || !sFullPath.endsWith(File.separator)) ){
+			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") || sFullPath.endsWith(File.separator)) ){
 				sFullPath += File.separator;
 			}
 

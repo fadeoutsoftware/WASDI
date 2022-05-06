@@ -31,4 +31,6 @@ public class Platforms {
 
 	public static String IMERG = "IMERG";
 
+	public static String CM = "CM";
+
 }

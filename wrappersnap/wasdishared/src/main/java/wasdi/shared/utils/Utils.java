@@ -471,8 +471,8 @@ public class Utils {
 	}
 	
 	public static String getNormalizedSize(Double dSize, int iStartingIndex) {
-		String sChosenUnit = null;
-		String sSize = null;
+		String sChosenUnit = sUnits[iStartingIndex];
+		String sSize = Long.toString(Math.round(dSize)) + " " + sChosenUnit;
 		 
 		int iUnitIndex = Math.max(0, iStartingIndex);
 		int iLim = sUnits.length -1;

@@ -7,7 +7,16 @@
            ng-mouseleave="$ctrl.changeStyleRectangleMouseLeave(layer.rectangle)"
            id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
     <!------------------------------- SUMMARY ------------------------------->
-    <tr class="info-layer" >
+    <tr ng-if="layer.properties && layer.properties.error">
+        <td class="info-cell">
+            <div>
+                <span><b>Error:</b></span>
+                <span>{{layer.properties.error}}</span>
+            </div>
+        </td>
+    </tr>
+
+    <tr class="info-layer" ng-if="!layer.properties || !layer.properties.error">
         <!-- BUTTONS -->
         <td class="button-cell">
             <div class="btn-group-vertical" role="group" >
@@ -39,44 +48,61 @@
         </td>
         <!-- IMAGE CELL -->
         <td class="image-cell">
-            <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
-            <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
+            <span class="label label-success" ng-if="layer.summary && layer.summary.Mode">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
+            <span class="label label-success" ng-if="layer.summary && layer.summary.Instrument"> {{layer.summary.Instrument}}</span><!--Instrument-->
             <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
-            <span class="badge">{{layer.summary.Size}}</span><!--Size-->
+            <span class="badge" ng-if="layer.summary && layer.summary.Size">{{layer.summary.Size}}</span><!--Size-->
         </td>
         <!-- INFO CELL -->
         <td class="info-cell">
 
-            <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
+            <div ng-if="layer.summary && layer.summary.Date">{{layer.summary.Date|date:'medium'}}</div><!--Date-->
             </br>
 
-            <div>
+            <div ng-if="layer.title">
                 <span>Name: </span>
                 <span><b>{{layer.title}}</b></span>
             </div>
 
-            <div>
+            <div ng-if="layer.summary && layer.summary.Mode">
                 <span>Polarisation: </span>
                 <span><b>{{layer.summary.Mode}}</b></span>
             </div>
 
-            <div>
+            <div ng-if="layer.properties && layer.properties.relativeorbitnumber">
                 <span>Relative Orbit: </span>
                 <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
             </div>
 
-            <div>
+            <div ng-if="layer.provider">
                 <span>Provider:</span>
                 <span><b>{{layer.provider}}</b></span>
             </div>
 
-            <div>
+            <div ng-if="layer.properties && layer.properties.platformname">
                 <span>Platform name:</span>
                 <span><b>{{layer.properties.platformname}}</b></span>
             </div>
-            <div>
+            <div ng-if="layer.properties && layer.properties.sensoroperationalmode">
                 <span>Sensor Operational mode:</span>
                 <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
+            </div>
+
+            <div ng-if="layer.properties && layer.properties.productType">
+                <span>Product Type:</span>
+                <span><b>{{layer.properties.productType}}</b></span>
+            </div>
+            <div ng-if="layer.properties && layer.properties.dataset">
+                <span>Dataset:</span>
+                <span><b>{{layer.properties.dataset}}</b></span>
+            </div>
+            <div ng-if="layer.properties && layer.properties.variables">
+                <span>Variables:</span>
+                <span><b>{{layer.properties.variables}}</b></span>
+            </div>
+            <div ng-if="layer.properties && layer.properties.protocol">
+                <span>Protocol:</span>
+                <span><b>{{layer.properties.protocol}}</b></span>
             </div>
         </td>
 

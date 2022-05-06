@@ -15,6 +15,7 @@ import org.jsoup.select.Elements;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -426,11 +427,11 @@ public class QueryExecutorGPM extends QueryExecutor {
 					oViewModel.setId(oQueryResponse.getName());
 					oViewModel.setTitle(sTitle);
 					oViewModel.setLink(sUrl + oQueryResponse.getName());
-					oViewModel.setProvider("GPM");
+					oViewModel.setProvider(m_sProvider);
 					oViewModel.setSummary("No summary, yet!");
 
 					Map<String, String> aoProperties = oViewModel.getProperties();
-					aoProperties.put("platformname", oGPMQuery.platformName);
+					aoProperties.put("platformname", Platforms.IMERG);
 					aoProperties.put("satellite", "MS");
 					aoProperties.put("instrument", "MRG");
 					aoProperties.put("algorithm", "3IMERG");

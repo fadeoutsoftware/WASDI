@@ -111,9 +111,14 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_STATICS = "platformname:StaticFiles";
 
 	/**
-	 * Token of DEM platform
+	 * Token of IMERG platform
 	 */
 	private static final String s_sPLATFORMNAME_IMERG = "platformname:IMERG";
+
+	/**
+	 * Token of IMERG platform
+	 */
+	private static final String s_sPLATFORMNAME_CM = "platformname:CM";
 
 	/**
 	 * Token of product type
@@ -512,6 +517,8 @@ public abstract class QueryTranslator {
 			// Try get Info about IMERG
 			parseIMERG(sQuery, oResult);
 
+			// Try get Info about CM
+			parseCM(sQuery, oResult);
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -845,6 +852,27 @@ public abstract class QueryTranslator {
 			oResult.productName = extractValue(sQuery, "latency");
 			oResult.productType = extractValue(sQuery, "duration");
 			oResult.productLevel = extractValue(sQuery, "accumulation");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with CM info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseCM(String sQuery, QueryViewModel oResult) {
+		Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
+
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
+
+			oResult.platformName = Platforms.CM;
+
+			oResult.productType= extractValue(sQuery, "producttype");
+			oResult.productLevel = extractValue(sQuery, "protocol");
+			oResult.productName = extractValue(sQuery, "dataset");
+			oResult.sensorMode = extractValue(sQuery, "variables");
 		}
 	}
 

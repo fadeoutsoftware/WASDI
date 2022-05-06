@@ -38,6 +38,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);
 		aoDownloaders.put("STATICS", STATICSProviderAdapter::new);
 		aoDownloaders.put("GPM", GPMProviderAdapter::new);
+		aoDownloaders.put("COPERNICUSMARINE", CMProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 
