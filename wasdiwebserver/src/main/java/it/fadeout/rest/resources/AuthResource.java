@@ -22,6 +22,8 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
@@ -142,6 +144,18 @@ public class AuthResource {
 
 			if(!Utils.isNullOrEmpty(sAuthResult)) { 
 				bLoginSuccess = true;
+				
+				try {
+					JSONObject oAuthResponse = new JSONObject(sAuthResult);
+					
+					String sRefreshToken = oAuthResponse.optString("refresh_token", null);
+					
+					m_oKeycloakService.logout(sRefreshToken);
+				} catch (Exception oE) {
+					Utils.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
+				}
+				
+				
 			} else {
 				// Try to log in with the WASDI old password
 				bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oUser.getPassword() );
@@ -268,6 +282,10 @@ public class AuthResource {
 			}
 
 		} else {
+			
+			//boolean bResult = m_oKeycloakService.logout(sSessionId);
+			//oResult.setBoolValue(bResult);
+			
 			return PrimitiveResult.getInvalid();
 		}
 		return oResult;

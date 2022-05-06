@@ -961,9 +961,6 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session: " + sSessionId );
 				return oProcess;
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return oProcess;
-			}
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -971,9 +968,12 @@ public class ProcessWorkspaceResource {
 			// Get Process
 			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
-			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ) && (sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
+			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) 
+					&& 
+					(sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
 					// No end-date set: put it here
 					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}
@@ -984,11 +984,12 @@ public class ProcessWorkspaceResource {
 			if (iPerc>=0 && iPerc<=100) {
 				oProcessWorkspace.setProgressPerc(iPerc);
 			}
-			
 
 			oRepository.updateProcess(oProcessWorkspace);
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			
+			Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status updated : " +  oProcess.getStatus());
 
 			// Check if we need to send the asynch rabbit message
 			if (Utils.isNullOrEmpty(sSendToRabbit) == false) {
