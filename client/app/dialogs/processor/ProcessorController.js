@@ -299,8 +299,10 @@ var ProcessorController = (function() {
                 this.m_oPublic = false;
             }
 
+            let sProcessorName = encodeURIComponent(this.m_oInputProcessor.processorName);
+
             // Read also the details
-            this.m_oProcessorService.getMarketplaceDetail(this.m_oInputProcessor.processorName).then(function (data) {
+            this.m_oProcessorService.getMarketplaceDetail(sProcessorName).then(function (data) {
                 if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
                     oController.m_oProcessorDetails = data.data;
@@ -321,7 +323,7 @@ var ProcessorController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP DETAILS");
             });
 
-            this.m_oProcessorService.getProcessorUI(this.m_oInputProcessor.processorName).then(function (data) {
+            this.m_oProcessorService.getProcessorUI(sProcessorName).then(function (data) {
                 if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
                     oController.m_sProcessorUI = JSON.stringify(data.data, undefined, 4);
@@ -456,7 +458,10 @@ var ProcessorController = (function() {
             oController.m_sName = oController.m_sName.toLowerCase();
         }
 
-        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody)
+        let sName = encodeURIComponent(oController.m_sName);
+        let sDescription = encodeURIComponent(oController.m_sDescription);
+
+        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,sName,oController.m_sVersion, sDescription, sType, oController.m_sJSONSample,sPublic, oBody)
             .then(function (data) {
 
             var sMessage = ""
@@ -464,9 +469,11 @@ var ProcessorController = (function() {
                 sMessage = "PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE"
             }
             else {
-                sMessage = "ERROR UPLOADING PROCESSOR<br>ERROR CODE: " + data.data.intValue;
-                if (!utilsIsStrNullOrEmpty(data.stringValue)) {
-                    sMessage += "<br>"+data.stringValue;
+                sMessage = "ERROR UPLOADING PROCESSOR";
+                if (utilsIsStrNullOrEmpty(data.data.stringValue)) {
+                    sMessage = "<br>ERROR CODE: " + data.data.intValue;
+                } else {
+                    sMessage += "<br>"+data.data.stringValue;
                 }
             }
 
@@ -714,7 +721,7 @@ var ProcessorController = (function() {
 
              this.m_oProcessorMediaService.uploadProcessorImage(this.m_oInputProcessor.processorId, oBody).then(function (data) {
 
-                 oController.m_oProcessorDetails.images.push(data.data.stringValue);
+                 oController.m_oProcessorDetails.images.push(encodeURIComponent(data.data.stringValue));
 
                  var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR IMAGE ADDED");
                  utilsVexCloseDialogAfter(4000,oDialog);
