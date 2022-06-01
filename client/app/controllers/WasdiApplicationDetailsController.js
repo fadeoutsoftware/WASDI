@@ -15,9 +15,10 @@ var WasdiApplicationDetailsController = (function() {
      * @param oProcessorService
      * @param oModalService
      * @param oProcessWorkspaceService
+     * @param oTranslate
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessWorkspaceService) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessWorkspaceService, oTranslate) {
         /**
          * Angular Scope
          */
@@ -100,6 +101,11 @@ var WasdiApplicationDetailsController = (function() {
          * @type {*[]}
          */
         this.m_asImages = [];
+
+        /**
+         * Translate Service
+         */
+        this.m_oTranslate = oTranslate;
 
         /**
          * Reviews Wrapper View Model with the summary and the list of reviews
@@ -679,7 +685,8 @@ var WasdiApplicationDetailsController = (function() {
         'ProcessorService',
         'ProcessorMediaService',
         'ModalService',
-        'ProcessWorkspaceService'
+        'ProcessWorkspaceService',
+        '$translate',
     ];
 
     return WasdiApplicationDetailsController;

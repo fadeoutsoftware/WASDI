@@ -88,10 +88,10 @@
                         <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
                             <td>
                                 <smallinvaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'"></smallinvaderfixed>
-                                <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
-                                <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
-                                <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
-                                <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>
+                                <span class="label label-info" ng-show="oProcess.status === 'CREATED'">{{"PROCESSING_BAR_WAITING"|translate}}</span>
+                                <span class="label label-warning" ng-show="oProcess.status === 'DONE'">{{"PROCESSING_BAR_LOG"|translate}}</span>
+                                <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">{{"PROCESSING_BAR_STOPPED"|translate}}</span>
+                                <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >{{"PROCESSING_BAR_ERROR"|translate}}</span>
                             </td>
                             <td>
                                 {{m_oController.getOperationDescription(oProcess)}}
@@ -128,10 +128,10 @@
                                 </div>
                             </td>
                             <td class="over-icon" ng-click="m_oController.openProcessorLogsDialog(oProcess)" >
-                                <i class="fa fa-file-alt" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
+                                <i class="fa fa-file-alt" aria-hidden="true" title='{{"PROCESSING_BAR_LOGS"|translate}}' data-placement="bottom" data-toggle="tooltip"></i>
                             </td>
                             <td class="over-icon" >
-                                <i class="fa fa-database" aria-hidden="true" title="Payload" data-placement="bottom" data-toggle="tooltip"
+                                <i class="fa fa-database" aria-hidden="true" title='{{"PROCESSING_BAR_PAYLOAD"|translate}}' data-placement="bottom" data-toggle="tooltip"
                                    ng-hide="(oProcess.payload==null)"
                                    ng-click="m_oController.openPayloadDialog(oProcess)" ></i>
                             </td>
@@ -145,7 +145,7 @@
         <div class="row-v4">
             <div class="col-v4-auto ml-auto">
                 <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openProcessLogsDialog()">
-                    <i class="fa fa-list mr-2" aria-hidden="true"></i>Load more...
+                    <i class="fa fa-list mr-2" aria-hidden="true"></i>{{"PROCESSING_BAR_LOAD_MORE"|translate}}
                 </button>
             </div>
         </div>

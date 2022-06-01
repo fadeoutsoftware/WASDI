@@ -6,7 +6,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
                             <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <li class="link-login pull-right  nav-item"> <a class="text-white" href="http://www.wasdi.cloud" target="_blank">INFO</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" href="http://www.wasdi.cloud" target="_blank"> {{"LOGIN_LINK_WEBSITE"|translate}}</a> </li>
                     </ul>
                 </div>
             </nav>
@@ -48,14 +48,6 @@
 
                 </form>
 
-                <!--br -->
-
-                <!--GOOGLE BUTTON-->
-<!--                <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>-->
-
-<!--                <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>-->
-
-                <!--br-->
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
@@ -64,7 +56,7 @@
                 <br>
                 <div  ng-hide="m_oController.m_bRegisterIsVisible || m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.keycloakRegister()">
-                        New User? Register here!
+                        {{"LOGIN_LINK_NEW_USER"|translate}}
                     </a>
                 </div>
                 <!-- NEW WASDI LOGIN  -->
@@ -99,7 +91,7 @@
 
                     <a href="" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                        BACK
+                        {{"LOGIN_LINK_BACK"|translate}}
                     </a>
 
                 </form>
@@ -108,7 +100,7 @@
 
             <!------------------------ REGISTRATION FORM ------------------------>
             <div class="signin-content" ng-show="m_oController.m_bRegisterIsVisible" >
-                <!--Work in progress... If you want a test account contact us: wasdi@fadeout.it-->
+
                 <form class="form-signin" name="signinForm" ng-submit="m_oController.signingUser()" >
                     <div class="form-group">
                         <input type="email" name="useremail" placeholder="{{'SIGN_IN_PLACEHOLDER_EMAIL'|translate}}" class="form-control"
@@ -154,7 +146,7 @@
 
                     <div class="form-group">
                         <input type="checkbox" id="accept" name="accept"  ng-model="m_oController.m_oRegistrationUser.accept" required>
-                        I agree to WASDI <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">Privacy Statement</a>
+                        {{"SIGN_IN_TERMS_AGREE_1"|translate}} <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank" rel="noopener noreferrer">{{"SIGN_IN_TERMS_AGREE_2"|translate}}</a> {{"SIGN_IN_TERMS_AGREE_3"|translate}} <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">{{"SIGN_IN_TERMS_AGREE_4"|translate}}</a>
                         <h6 class="error-message" ng-if="(signinForm.accept.$dirty === true) &&
                                                          (!signinForm.accept.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_ACCEPT_CONDITIONS"|translate}}
@@ -192,14 +184,11 @@
                 </div>
 
                 <div class="col-md-3">
-                    <!--img  class="loghi_fadeout_acrotec img-responsive center-block" alt="FADEOUT - ACROTEC"-->
                 </div>
                 <div class="col-md-6">
                     <h4>Web Advanced Space Developer Interface</h4>
-                    <!--a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce login-more-icon" aria-hidden="true"></i></a-->
                 </div>
                 <div class="col-md-3">
-                    <!--img  class="loghi_esa_asi img-responsive center-block" alt="ESA - ASI"-->
                 </div>
 
             </div>
