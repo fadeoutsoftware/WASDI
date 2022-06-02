@@ -1,10 +1,16 @@
 package wasdi.operations;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.apiclients.pip.PipApiClient;
+import wasdi.shared.business.Package;
+import wasdi.shared.business.PackageManager;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
@@ -14,6 +20,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class Redeployprocessor extends Operation {
 
@@ -53,7 +60,7 @@ public class Redeployprocessor extends Operation {
             String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
             if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 
-            String sProcessorFolder = sDownloadRootPath + "/processors/" + sProcessorName + "/";            
+            String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
             File oProcessorFolder = new File(sProcessorFolder);
             
             // Is the processor installed in this node?
@@ -88,7 +95,7 @@ public class Redeployprocessor extends Operation {
 	        			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 	        				sNodeCode = oWorkspace.getNodeCode();
 	        			}
-	        			
+
 	        			// This is the computing node where the request came from?
 	        			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
 	        				
@@ -101,6 +108,47 @@ public class Redeployprocessor extends Operation {
 				            
 				            if (!bRet) {
 				            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
+				            } else {
+
+				            	if (sNodeCode.equals("wasdi")) {
+
+					        		String sIp = "127.0.0.1";
+					        		int iPort = oProcessor.getPort();
+					        		m_oLocalLogger.debug("Redeployprocessor.executeOperation | iPort: " + iPort);
+
+					        		try {
+					        			PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
+
+						        		PackageManager oPackageManager = pipApiClient.getManagerVersion();
+
+										List<Package> aoPackagesOutdated = pipApiClient.listPackages("o");
+
+						        		List<Package> aoPackagesUptodate = pipApiClient.listPackages("u");
+
+						        		Map<String, Object> aoPackagesInfo = new HashMap<>();
+						        		aoPackagesInfo.put("packageManager", oPackageManager);
+						        		aoPackagesInfo.put("outdated", aoPackagesOutdated);
+						        		aoPackagesInfo.put("uptodate", aoPackagesUptodate);
+
+						        		String sJson = LauncherMain.s_oMapper.writeValueAsString(aoPackagesInfo);
+	        			        		if (Utils.isNullOrEmpty(sJson)) {
+	        			        			sJson = "JSON is empty!";
+	        			        		}
+
+						        		String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+						        		m_oLocalLogger.debug("Redeployprocessor.executeOperation | sFileFullPath: " + sFileFullPath);
+
+						        		boolean bResult = WasdiFileUtils.writeFile(sJson, sFileFullPath);
+
+						        		if (bResult) {
+						        			m_oLocalLogger.debug("the file was created.");
+						        		} else {
+						        			m_oLocalLogger.debug("the file was not created.");
+						        		}
+					        		} catch (Exception oEx) {
+					        			Utils.debugLog("Redeployprocessor.executeOperation: " + oEx);
+					        		}
+					            }
 				            }
 				            
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
@@ -110,7 +158,7 @@ public class Redeployprocessor extends Operation {
 	        	
 	        }
 	        catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Deployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
+				m_oLocalLogger.error("Redeployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
             
             return bRet;	        

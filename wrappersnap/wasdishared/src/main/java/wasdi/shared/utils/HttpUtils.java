@@ -242,6 +242,10 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
+		return standardHttpGETQuery(sUrl, asHeaders, 0);
+	}
+
+	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders, int iResult) {
 
 		String sResult = null;
 		try {
@@ -262,6 +266,9 @@ public final class HttpUtils {
 			try {
 				int iResponseCode = oConnection.getResponseCode();
 				Utils.debugLog("HttpUtils.standardHttpGETQuery: Response Code : " + iResponseCode);
+
+				iResult = iResponseCode;
+
 				String sResponseExtract = null;
 				if (200 == iResponseCode) {
 					InputStream oInputStream = oConnection.getInputStream();

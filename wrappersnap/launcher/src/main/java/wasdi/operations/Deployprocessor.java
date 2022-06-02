@@ -1,11 +1,25 @@
 package wasdi.operations;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.apiclients.pip.PipApiClient;
+import wasdi.shared.business.Package;
+import wasdi.shared.business.PackageManager;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * Deploy Processor Operation
@@ -57,6 +71,71 @@ public class Deployprocessor extends Operation {
 	            
 	            if (!bRet) {
 	            	sInfo = "GURU MEDITATION<br>There was an error deploying " + sName + " :(";
+	            } else {
+	            	
+	            	String sOriginalWorkspaceId = oParam.getExchange();
+	            	if (!Utils.isNullOrEmpty(sOriginalWorkspaceId)) {
+	            		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	            		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sOriginalWorkspaceId);
+
+	            		if (oWorkspace != null) {
+	            			String sNodeCode = "wasdi";
+
+	            			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+	            				sNodeCode = oWorkspace.getNodeCode();
+	            			}
+
+	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | sNodeCode: " + sNodeCode);
+	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | WasdiConfig.Current.nodeCode: " + WasdiConfig.Current.nodeCode);
+
+	            			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
+	        	            	if (sNodeCode.equals("wasdi")) {
+	        		        		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+	        		        		Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
+
+	        		        		String sIp = "127.0.0.1";
+	        		        		int iPort = oProcessor.getPort();
+	        		        		m_oLocalLogger.debug("Deployprocessor.executeOperation | iPort: " + iPort);
+
+	        		        		try {
+	        		        			PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
+
+	        			        		PackageManager oPackageManager = pipApiClient.getManagerVersion();
+
+	        			        		List<Package> aoPackagesOutdated = pipApiClient.listPackages("o");
+
+	        			        		List<Package> aoPackagesUptodate = pipApiClient.listPackages("u");
+
+	        			        		Map<String, Object> aoPackagesInfo = new HashMap<>();
+	        			        		aoPackagesInfo.put("packageManager", oPackageManager);
+	        			        		aoPackagesInfo.put("outdated", aoPackagesOutdated);
+	        			        		aoPackagesInfo.put("uptodate", aoPackagesUptodate);
+
+	        			        		String sJson = LauncherMain.s_oMapper.writeValueAsString(aoPackagesInfo);
+	        			        		if (Utils.isNullOrEmpty(sJson)) {
+	        			        			sJson = "JSON is empty!";
+	        			        		}
+
+	        			        		String sProcessorFolder = oEngine.getProcessorFolder(sName);
+	        			        		String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+	        			        		m_oLocalLogger.debug("Deployprocessor.executeOperation | sFileFullPath: " + sFileFullPath);
+
+	        			        		boolean bResult = WasdiFileUtils.writeFile(sJson, sFileFullPath);
+
+						        		if (bResult) {
+						        			m_oLocalLogger.debug("the file was created.");
+						        		} else {
+						        			m_oLocalLogger.debug("the file was not created.");
+						        		}
+
+	        		        		} catch (Exception oEx) {
+	        		        			Utils.debugLog("Deployprocessor.executeOperation: " + oEx);
+	        		        		}
+	        		            }
+	            			}
+	            		}
+	            	}
+
 	            }
 	            
 	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        	

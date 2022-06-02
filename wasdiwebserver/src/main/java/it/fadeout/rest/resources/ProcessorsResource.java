@@ -45,6 +45,7 @@ import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
+import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -1641,6 +1642,119 @@ public class ProcessorsResource  {
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessorResource.libraryUpdate: " + oEx);
+			return Response.serverError().build();
+		}
+	}
+	
+	/**
+	 * Force the update of the environment of a processor
+	 * 
+	 * @param sSessionId User Session Id
+	 * @param sProcessorId Processor Id
+	 * @param sWorkspaceId Workspace Id
+	 * @param sWorkspaceId Workspace Id
+	 * @return std http response
+	 */
+	@GET
+	@Path("/environmentupdate")
+	public Response environmentUpdate(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspace") String sWorkspaceId,
+			@QueryParam("updateCommand") String sUpdateCommand) {
+		Utils.debugLog("ProcessorResources.environmentupdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ProcessorResources.environmentupdate( updateCommand: " + sUpdateCommand + " )");
+
+		try {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Utils.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			if (Utils.isNullOrEmpty(sUpdateCommand)) {
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.environmentupdate: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessorToForceUpdate == null) {
+				Utils.debugLog("ProcessorsResource.environmentupdate: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.environmentupdate: processor not of user " + oProcessorToForceUpdate.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			// Schedule the process to run the processor
+			String sProcessObjId = Utils.getRandomName();
+			
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+			
+			// Get the dedicated special workpsace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			
+			Utils.debugLog("ProcessorsResource.environmentupdate: create local operation");
+			
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
+			oProcessorParameter.setProcessorID(oProcessorToForceUpdate.getProcessorId());
+			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+
+			Map<String, String> asCommand = new HashMap<>();
+			asCommand.put("updateCommand", sUpdateCommand);
+			String sJson = MongoRepository.s_oMapper.writeValueAsString(asCommand);
+			oProcessorParameter.setJson(sJson);
+			Utils.debugLog("ProcessorResources.environmentupdate( sJson: " + sJson + " )");
+
+			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), sPath, oProcessorParameter);
+			
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				
+				// In the main node: start a thread to update all the computing nodes
+				
+				try {
+					Utils.debugLog("ProcessorsResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
+					
+					//This is the main node: forward the request to other nodes
+					UpdateProcessorEnvironmentWorker oUpdateWorker = new UpdateProcessorEnvironmentWorker();
+					
+					NodeRepository oNodeRepo = new NodeRepository();
+					List<Node> aoNodes = oNodeRepo.getNodesList();
+					
+					oUpdateWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, sUpdateCommand);
+					oUpdateWorker.start();
+					
+					Utils.debugLog("ProcessorsResource.environmentupdate: Worker started");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessorsResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
+				}
+			}			
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.environmentupdate: " + oEx);
 			return Response.serverError().build();
 		}
 	}

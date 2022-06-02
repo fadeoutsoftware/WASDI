@@ -32,11 +32,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		
 		String sProcessorName = oParameter.getName();
 		
-		// Set the processor path
-		String sDownloadRootPath = m_sWorkingRootPath;
-		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
-		
-		String sProcessorFolder = sDownloadRootPath+ "processors" + File.separator + sProcessorName + File.separator;
+		String sProcessorFolder = getProcessorFolder(sProcessorName);
 		
 		// Generate shell script file
 		String sMainFile = sProcessorFolder+"myProcessor.m";

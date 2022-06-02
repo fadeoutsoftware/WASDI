@@ -6,6 +6,7 @@ import os
 import wasdi
 import json
 import urllib.parse
+import re
 import subprocess
 import traceback
 from distutils.dir_util import copy_tree
@@ -271,6 +272,232 @@ def run(processId):
 def hello():
 	print("wasdiProcessoServer Hello request")
 	return jsonify({'hello': 'hello waspi'})
+
+
+@app.route('/packageManager/listPackages/', defaults={'flag': ''})
+@app.route('/packageManager/listPackages/<flag>/')
+def pm_list_packages(flag: str):
+    print('/packageManager/listPackages/' + flag)
+
+    command: str = 'pip list'
+    if flag != '':
+        command = command + ' -' + flag
+
+    output: str = __execute_pip_command_and_get_output(command)
+    dependencies: list = __parse_list_command_output(output)
+
+    return json.dumps(dependencies), 200, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/getPackage/<name>/')
+def pm_get_package(name: str):
+    print('/packageManager/getPackage/' + name)
+
+    command: str = 'pip show ' + name
+
+    output: str = __execute_pip_command_and_get_output(command)
+    info: dict = __parse_show_command_output(output)
+
+    if 'Name' in output \
+            and name in output:
+        return json.dumps(info), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps(info), 404, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/addPackage/<name>/', defaults={'version': ''})
+@app.route('/packageManager/addPackage/<name>/<version>/')
+def pm_add_package(name: str, version: str):
+    print('/packageManager/addPackage/' + name + '/' + version)
+
+    command: str = 'pip install ' + name
+    if version != '':
+        command = command + '==' + version
+
+    output: str = __execute_pip_command_and_get_output(command)
+
+    if 'Successfully' in output:
+        return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/upgradePackage/<name>/', defaults={'version': ''})
+@app.route('/packageManager/upgradePackage/<name>/<version>/')
+def pm_upgrade_package(name: str, version: str):
+    print('/packageManager/upgradePackage/' + name + '/' + version)
+
+    command: str = 'pip install -U ' + name
+    if version != '':
+        command = command + '==' + version
+
+    output: str = __execute_pip_command_and_get_output(command)
+
+    if 'Successfully' in output:
+        return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/removePackage/<name>/')
+def pm_remove_package(name: str):
+    print('/packageManager/removePackage/' + name)
+
+    command: str = 'pip uninstall ' + name + ' -y'
+
+    output: str = __execute_pip_command_and_get_output(command)
+
+    if 'Successfully' in output:
+        return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/packageVersions/<name>/')
+def pm_package_versions(name: str):
+    print('/packageManager/packageVersions/' + name)
+
+    command: str = 'pip -V'
+
+    version: dict = __get_version(command)
+
+    version_major: int = int(version['major'])
+    version_minor: int = int(version['minor'])
+
+    new_command: str = 'pip'
+    if version_major >= 21:
+        if version_minor >= 2:
+            new_command = 'pip index versions ' + name
+        elif version_minor >= 1:
+            new_command = 'pip install ' + name + '== '
+        else:
+            new_command = 'pip install --use-deprecated=legacy-resolver ' + name + '=='
+    elif version_major >= 20:
+        if version_minor >= 3:
+            new_command = 'pip install --use-deprecated=legacy-resolver ' + name + '=='
+        else:
+            new_command = 'pip install ' + name + '== '
+    elif version_major >= 9:
+        new_command = 'pip install ' + name + '== '
+
+    output: str = __execute_pip_command_and_get_output(new_command)
+    versions_string: str = __extract_versions_from_output(output)
+    versions_list: list = versions_string.split(', ')
+
+    if 'none' not in output:
+        return json.dumps(versions_list), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps(versions_list), 404, {'Content-Type': 'application/json'}
+
+
+@app.route('/packageManager/managerVersion/')
+def pm_manager_version():
+    print('/packageManager/managerVersion/')
+
+    command: str = 'pip -V'
+
+    version: dict = __get_version(command)
+
+    return json.dumps(version), 200, {'Content-Type': 'application/json'}
+
+
+def __execute_pip_command_and_get_output(command: str) -> str:
+    print('__execute_pip_command_and_get_output: ' + command)
+
+    cpe = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+
+    sOutput = open('tmp', 'r').read()
+    os.remove('tmp')
+
+    stderr: str = cpe.stderr.decode("utf-8")
+
+    if stderr != '':
+        if sOutput == '':
+            sOutput = stderr
+        else:
+            sOutput += stderr
+
+    return sOutput
+
+
+def __get_version(command: str) -> dict:
+    print('__get_version')
+    output: str = __execute_pip_command_and_get_output(command)
+    return __version_string_2_dictionary(__extract_version_from_output(output))
+
+
+def __extract_version_from_output(output: str) -> str:
+    start: str = 'pip '
+    end: str = ' from '
+
+    return __extract_substring_limited_by(output, start, end)
+
+
+def __extract_versions_from_output(output: str) -> str:
+    start: str = '\\(from versions: '
+    end: str = '\\)'
+
+    result: str = __extract_substring_limited_by(output, start, end)
+
+    return result
+
+
+def __extract_substring_limited_by(full_string: str, start: str, end: str) -> str:
+    return re.search('%s(.*)%s' % (start, end), full_string).group(1)
+
+
+def __version_string_2_dictionary(version: str) -> dict:
+    asVersion: list = version.split('.')
+    oVersion: dict = {
+        "name": "pip",
+        "version": version,
+        "major": asVersion[0],
+        "minor": asVersion[1],
+        "patch": asVersion[2]
+    }
+
+    return oVersion
+
+
+def __parse_show_command_output(output: str) -> dict:
+    info: dict = {}
+
+    asLines: list = output.splitlines()
+
+    for sLine in asLines:
+        asTokens: list = sLine.split(': ')
+        info[asTokens[0]] = asTokens[1]
+
+    return info
+
+
+def __parse_list_command_output(output: str) -> list:
+    asLines: list = output.splitlines()
+
+    sHeader: str = asLines[0]
+    asHeaders: list = sHeader.split()
+
+    for i in range(len(asHeaders)):
+        asHeaders[i] = asHeaders[i].lower()
+
+    aoDependencies: list = []
+
+    for sLine in asLines[2:]:
+        asColumns = sLine.split()
+
+        if len(asHeaders) == 2:
+            aoDependencies.append({"manager": "pip",
+                                   asHeaders[0]: asColumns[0],
+                                   asHeaders[1]: asColumns[1]})
+        elif len(asHeaders) == 4:
+            aoDependencies.append({"manager": "pip",
+                                   asHeaders[0]: asColumns[0],
+                                   asHeaders[1]: asColumns[1],
+                                   asHeaders[2]: asColumns[2],
+                                   asHeaders[3]: asColumns[3]})
+
+    return aoDependencies
+
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=False, use_reloader=False)
