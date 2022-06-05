@@ -218,6 +218,7 @@ var WasdiApplicationDetailsController = (function() {
             }
         }
 
+        var sDataErrorMsg = this.m_oTranslate.instant("MSG_MKT_DATA_ERROR");
         /**
          * Ask the list of Applications to the WASDI server
          */
@@ -232,14 +233,15 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+                utilsVexDialogAlertTop(sDataErrorMsg);
             }
             oController.m_bWaiting=false;
         },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+            utilsVexDialogAlertTop(sDataErrorMsg);
             oController.m_bWaiting=false;
         });
 
+        var sStatErrorMsg = this.m_oTranslate.instant("MSG_MKT_STATS_ERROR");
         /**
          * Ask the list of Applications to the WASDI server
          */
@@ -250,10 +252,10 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
+                utilsVexDialogAlertTop(sStatErrorMsg);
             }
         },(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION STATS");
+            utilsVexDialogAlertTop(sStatErrorMsg);
         }));
 
         // Get the reviews
@@ -269,6 +271,8 @@ var WasdiApplicationDetailsController = (function() {
 
         var oController = this;
 
+        var sReviewsErrorMsg = this.m_oTranslate.instant("MSG_MKT_REVIEWS_ERROR");
+
         this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
@@ -277,12 +281,12 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+                utilsVexDialogAlertTop(sReviewsErrorMsg);
             }
 
             oController.m_bReviewsWaiting = false;
         },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            utilsVexDialogAlertTop(sReviewsErrorMsg);
             oController.m_bReviewsWaiting = false;
         });
 
@@ -298,6 +302,8 @@ var WasdiApplicationDetailsController = (function() {
 
         var oController = this;
 
+        var sCommentsErrorMsg = this.m_oTranslate.instant("MSG_MKT_COMMENTS_ERROR");
+
         this.m_oProcessorMediaService.getReviewComments(sSelectedReviewId).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
@@ -307,12 +313,12 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING REVIEW COMMENTS");
+                utilsVexDialogAlertTop(sCommentsErrorMsg);
             }
 
             oController.m_bCommentsWaiting = false;
         },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING REVIEW COMMENTS");
+            utilsVexDialogAlertTop(sCommentsErrorMsg);
             oController.m_bCommentsWaiting = false;
         });
 
@@ -360,6 +366,9 @@ var WasdiApplicationDetailsController = (function() {
         var oController =this;
         this.m_iReviewsPage = this.m_iReviewsPage + 1;
         this.m_bReviewsWaiting = true;
+
+        var sReviewsErrorMsg = this.m_oTranslate.instant("MSG_MKT_REVIEWS_ERROR");
+
         // Get the reviews
         this.m_oProcessorMediaService.getProcessorReviews(this.m_sSelectedApplication, this.m_iReviewsPage, this.m_iReviewItemsPerPage = 4).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
@@ -374,11 +383,11 @@ var WasdiApplicationDetailsController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+                utilsVexDialogAlertTop(sReviewsErrorMsg);
             }
             oController.m_bReviewsWaiting = false;
         },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APP REVIEWS");
+            utilsVexDialogAlertTop(sReviewsErrorMsg);
             oController.m_bReviewsWaiting = false;
         });
     }
@@ -391,12 +400,15 @@ var WasdiApplicationDetailsController = (function() {
 
         this.m_oUserReview.processorId = this.m_oApplication.processorId;
 
+        var sSavedMsg = this.m_oTranslate.instant("MSG_MKT_REVIEW_SAVED");
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_REVIEW_SAVE_ERROR");
+
         this.m_oProcessorMediaService.addProcessorReview(this.m_oUserReview).then(function (data) {
             oController.m_oUserReview.title="";
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
 
-            var oDialog = utilsVexDialogAlertBottomRightCorner("REVIEW SAVED");
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sSavedMsg);
             utilsVexCloseDialogAfter(4000,oDialog);
 
             oController.m_iReviewsPage = 0;
@@ -407,7 +419,7 @@ var WasdiApplicationDetailsController = (function() {
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE REVIEW");
+            utilsVexDialogAlertTop(sErrorMsg);
         });
     }
 
@@ -422,12 +434,15 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oUserReview.id = this.m_oSelectedReview.id;
         this.m_oSelectedReview = null;
 
+        var sSavedMsg = this.m_oTranslate.instant("MSG_MKT_REVIEW_UPDATED");
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_REVIEW_UPDATE_ERROR");        
+
         this.m_oProcessorMediaService.updateProcessorReview(this.m_oUserReview).then(function (data) {
             oController.m_oUserReview.title="";
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
 
-            var oDialog = utilsVexDialogAlertBottomRightCorner("REVIEW UPDATED");
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sSavedMsg);
             utilsVexCloseDialogAfter(4000,oDialog);
 
             oController.m_iReviewsPage = 0;
@@ -438,7 +453,7 @@ var WasdiApplicationDetailsController = (function() {
             oController.m_oUserReview.comment="";
             oController.m_oUserReview.vote=-1;
 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE REVIEW");
+            utilsVexDialogAlertTop(sErrorMsg);
         });
     }
 
@@ -447,6 +462,7 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oReview.reviewId = reviewId;
     }
 
+    
     WasdiApplicationDetailsController.prototype.setSelectedReview = function (review) {
         this.m_oSelectedReview = review;
 
@@ -491,11 +507,14 @@ var WasdiApplicationDetailsController = (function() {
 
         this.m_oReviewComment.reviewId = this.m_oReview.reviewId;
 
+        var sSavedMsg = this.m_oTranslate.instant("MSG_MKT_COMMENT_SAVED");
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_COMMENT_SAVE_ERROR");             
+
         this.m_oProcessorMediaService.addReviewComment(this.m_oReviewComment).then(function (data) {
 
             oController.m_oReviewComment.text="";
 
-            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT SAVED");
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sSavedMsg);
             utilsVexCloseDialogAfter(4000,oDialog);
 
             oController.m_iCommentsPage = 0;
@@ -504,7 +523,7 @@ var WasdiApplicationDetailsController = (function() {
         },function (error) {
             oController.m_oReviewComment.text="";
 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SAVING THE COMMENT");
+            utilsVexDialogAlertTop(sErrorMsg);
         });
     }
 
@@ -517,10 +536,13 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oReviewComment.commentId = this.m_oSelectedComment.commentId;
         this.m_oSelectedComment = null;
 
+        var sSavedMsg = this.m_oTranslate.instant("MSG_MKT_COMMENT_UPDATED");
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_COMMENT_UPDATED_ERROR");                 
+
         this.m_oProcessorMediaService.updateReviewComment(this.m_oReviewComment).then(function (data) {
 
             oController.m_oReviewComment.text = "";
-            var oDialog = utilsVexDialogAlertBottomRightCorner("COMMENT UPDATED");
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sSavedMsg);
             utilsVexCloseDialogAfter(4000,oDialog);
 
             oController.m_iCommentsPage = 0;
@@ -529,7 +551,7 @@ var WasdiApplicationDetailsController = (function() {
         },function (error) {
             oController.m_oReviewComment.text = "";
 
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING THE COMMENT");
+            utilsVexDialogAlertTop(sErrorMsg);
         });
     }
 
@@ -540,13 +562,16 @@ var WasdiApplicationDetailsController = (function() {
 
         var oController = this;
 
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_REVIEWS_ERROR");
+        var sConfirmMsg = this.m_oTranslate.instant("MSG_MKT_REVIEW_DELETE_CONFIRM");
+
         var oDeleteReviewCallback = function (value) {
 
             if (value) {
                 oController.m_oProcessorMediaService.deleteProcessorReview(oController.m_oApplication.processorId, sReviewId).then(function (data) {
                     oController.refreshReviews();
                 },function (error) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING THE REVIEWS");
+                    utilsVexDialogAlertTop(sErrorMsg);
                 });
 
                 return true;
@@ -556,7 +581,7 @@ var WasdiApplicationDetailsController = (function() {
         };
 
         //ask user if he confirms to delete the review
-        utilsVexDialogConfirm("DELETE REVIEW:<br>ARE YOU SURE?", oDeleteReviewCallback);
+        utilsVexDialogConfirm(sConfirmMsg, oDeleteReviewCallback);
     }
 
     /**
@@ -567,13 +592,16 @@ var WasdiApplicationDetailsController = (function() {
         this.m_oReviewComment.reviewId = oComment.reviewId;
         this.m_oReviewComment.commentId = oComment.commentId;
 
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_COMMENTS_ERROR");
+        var sConfirmMsg = this.m_oTranslate.instant("MSG_MKT_COMMENT_DELETE_CONFIRM");        
+
         var oDeleteCommentCallback = function (value) {
 
             if (value) {
                 oController.m_oProcessorMediaService.deleteReviewComment(oController.m_oReviewComment.reviewId, oController.m_oReviewComment.commentId).then(function (data) {
                     oController.refreshComments(oController.m_oReviewComment.reviewId);
                 },function (error) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING THE COMMENTS");
+                    utilsVexDialogAlertTop(sErrorMsg);
                 });
 
                 return true;
@@ -583,7 +611,7 @@ var WasdiApplicationDetailsController = (function() {
         };
 
         //ask user if he confirms to delete the review
-        utilsVexDialogConfirm("DELETE COMMENT:<br>ARE YOU SURE?", oDeleteCommentCallback);
+        utilsVexDialogConfirm(sConfirmMsg, oDeleteCommentCallback);
     }
 
     /**
