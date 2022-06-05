@@ -6,7 +6,7 @@
                 <div class="row-v4">
                     <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
                         <h4 class="modal-title ">
-                            WASDI Processor Logs [ID: {{m_oController.getProcessWorkspaceId()}}]
+                            {{"DIALOG_LOGS_TITLE"|translate}} {{m_oController.getProcessWorkspaceId()}}
                         </h4>
                     </div>
                     <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
@@ -18,17 +18,11 @@
             <div class="modal-body container-fluid-v12">
                 <div class="row d-flex">
                     <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" >
-                        Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch"> Operation: <strong>{{m_oController.getOperationDescription()}}</strong> Name: <strong>{{m_oController.getProcessorName()}}</strong> Status: <strong>{{m_oController.getProcessorStatus()}}</strong>
-                        <!--<button style="margin-left: 20px;" type="button" ng-click="m_oController.getPayload()" class="btn btn-primary btn-wasdi " >
-                            View Payload
-                        </button>
-                        <button style="margin-left: 20px;" type="button" ng-click="m_oController.copyPayload()" class="btn btn-primary btn-wasdi " >
-                            Copy Payload
-                        </button>-->
+                        {{"DIALOG_LOGS_SEARCH_TEXT"|translate}} <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch"> {{"DIALOG_LOGS_OPERATION"|translate}} <strong>{{m_oController.getOperationDescription()}}</strong> {{"DIALOG_LOGS_NAME"|translate}} <strong>{{m_oController.getProcessorName()}}</strong> {{"DIALOG_LOGS_STATUS"|translate}} <strong>{{m_oController.getProcessorStatus()}}</strong>
                     </div>
                     <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" >
                         <a ng-click="m_oController.downloadLogFile()" download="download"
-                            style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download</span></a>
+                            style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> {{"DIALOG_LOGS_DOWNLOAD"|translate}}</span></a>
                     </div>
                 </div>
               	<div class="container-v4 table-container">
@@ -36,13 +30,13 @@
                         <thead>
                         <tr>
                             <th scope="col" class="pointer-cursor-hover" ng-click="m_oController.sortBy('Date')">
-                                Date
+                                {{"DIALOG_LOGS_DATE"|translate}}
                                 <i class="fa fa-caret-down" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Date','fa-caret-down')"></i>
                                 <i class="fa fa-caret-up" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Date','fa-caret-up')"></i>
 
                             </th>
                             <th scope="col" class="pointer-cursor-hover" ng-click="m_oController.sortBy('Row')">
-                                Row
+                                {{"DIALOG_LOGS_ROW"|translate}}
                                 <i class="fa fa-caret-down" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Row','fa-caret-down')"></i>
                                 <i class="fa fa-caret-up" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Row','fa-caret-up')"></i>
                             </th>
@@ -67,7 +61,7 @@
             <!-- FOOTER -->
             <div class="modal-footer">
                 <button type="button" ng-click="m_oController.getProcessorLogs(m_oController.m_oProcess.processObjId)" class="btn btn-primary btn-wasdi " >
-                    Refresh
+                    {{"DIALOG_LOGS_REFRESH"|translate}}
                 </button>
                 <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}

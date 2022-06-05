@@ -6,11 +6,11 @@
                 <h4 class="modal-title "></h4>
             </div>
             <div class="modal-body">
-                <h3>Are you sure to kill this running process?</h3>
+                <h3>{{"DELETE_PROCESS_QUESTION"|translate}}</h3>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close('delete')" class="my-button" data-dismiss="modal">Yeah, Kill it</button>
-                <button type="button" ng-click="close('close')" class="my-button" data-dismiss="modal">Uhm, no, not really</button>
+                <button type="button" ng-click="close('delete')" class="my-button" data-dismiss="modal">{{"DELETE_PROCESS_YES"|translate}}</button>
+                <button type="button" ng-click="close('close')" class="my-button" data-dismiss="modal">{{"DELETE_PROCESS_NO"|translate}}</button>
             </div>
         </div>
     </div>

@@ -3,90 +3,90 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title ">Satellite: {{m_oController.m_oOrbit.SatelliteName}}</h4>
+                <h4 class="modal-title ">{{"ORBIT_INFO_SAT"|translate}} {{m_oController.m_oOrbit.SatelliteName}}</h4>
             </div>
             <div class="modal-body">
                 <div class="orbit-info-table">
                     <h4>
                         <table class="table table-hover">
-                            <caption>Orbit info</caption>
+                            <caption>{{"ORBIT_INFO_TITLE"|translate}}</caption>
                             <thead>
                             <tr>
-                                <th scope="col">Property</th>
-                                <th scope="col">Value</th>
+                                <th scope="col">{{"ORBIT_INFO_PROPERTY"|translate}}</th>
+                                <th scope="col">{{"ORBIT_INFO_VALUE"|translate}}</th>
                             </tr>
                             </thead>
                             <tbody >
                             <tr>
-                                <td>Acquisition start time:</td>
+                                <td>{{"ORBIT_INFO_ACQUISITION_START"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.AcquisitionStartTime |date:'medium'}}</td>
                             </tr>
                             <tr>
-                                <td>Acquisition end time:</td>
+                                <td>{{"ORBIT_INFO_ACQUISITION_END"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.AcquisitionEndTime |date:'medium'}}</td>
                             </tr>
                             <tr>
-                                <td>Angle:</td>
+                                <td>{{"ORBIT_INFO_ANGLE"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.Angle}}</td>
                             </tr>
                             <tr>
-                                <td>Coverage:</td>
+                                <td>{{"ORBIT_INFO_COVERAGE"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.Coverage}}</td>
                             </tr>
                             <tr>
-                                <td>Coverage length:</td>
+                                <td>{{"ORBIT_INFO_COVERAGE_LEN"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.CoverageLength}}</td>
                             </tr>
                             <tr>
-                                <td>Coverage width:</td>
+                                <td>{{"ORBIT_INFO_COVERAGE_WID"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.CoverageWidth}}</td>
                             </tr>
                             <tr>
-                                <td>Covered area:</td>
+                                <td>{{"ORBIT_INFO_COVERED_AREA"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.CoveredArea}}</td>
                             </tr>
                             <tr>
-                                <td>Covered area name:</td>
+                                <td>{{"ORBIT_INFO_COVERED_AREA_NAME"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.CoveredAreaName}}</td>
                             </tr>
                             <tr>
-                                <td>Frame foot print:</td>
+                                <td>{{"ORBIT_INFO_FOOT_PRINT"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.FrameFootPrint}}</td>
                             </tr>
                             <tr>
-                                <td>Frame foot print geometry:</td>
+                                <td>{{"ORBIT_INFO_FOOT_PRINT_GEOMETRY"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.FrameFootPrintGeometry}}</td>
                             </tr>
                             <tr>
-                                <td>Id trigger type:</td>
+                                <td>{{"ORBIT_INFO_TRIGGER_TYPE"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.IdTriggerType}}</td>
                             </tr>
                             <tr>
-                                <td>Is ascending:</td>
+                                <td>{{"ORBIT_INFO_ASCENDING"|translate}}Is ascending:</td>
                                 <td>{{m_oController.m_oOrbit.IsAscending}}</td>
                             </tr>
                             <tr>
-                                <td>Satellite name:</td>
+                                <td>{{"ORBIT_INFO_SAT_NAME"|translate}} </td>
                                 <td>{{m_oController.m_oOrbit.SatelliteName}}</td>
                             </tr>
                             <tr>
-                                <td>Sensor look direction:</td>
+                                <td>{{"ORBIT_INFO_LOOK"|translate}} </td>
                                 <td>{{m_oController.m_oOrbit.SensorLookDirection}}</td>
                             </tr>
                             <tr>
-                                <td>Sensor mode:</td>
+                                <td>{{"ORBIT_INFO_SENS_MODE"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.SensorMode}}</td>
                             </tr>
                             <tr>
-                                <td>Sensor name:</td>
+                                <td>{{"ORBIT_INFO_SENS_NAME"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.SensorName}}</td>
                             </tr>
                             <tr>
-                                <td>Sensor type:</td>
+                                <td>{{"ORBIT_INFO_SENS_TYPE"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.SensorType}}</td>
                             </tr>
                             <tr>
-                                <td>Swath name:</td>
+                                <td>{{"ORBIT_INFO_SWATH_NAME"|translate}}</td>
                                 <td>{{m_oController.m_oOrbit.SwathName}}</td>
                             </tr>
                             </tbody>

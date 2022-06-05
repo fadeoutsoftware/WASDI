@@ -5,7 +5,7 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
                 </button>
-                <h4 class="modal-title ">Workspace Details - {{m_oController.m_oWorkspaceViewModel.name}}</h4>
+                <h4 class="modal-title ">{{"DIALOG_WS_INFO_TITLE"|translate}} {{m_oController.m_oWorkspaceViewModel.name}}</h4>
 
 
             </div>
@@ -13,30 +13,30 @@
             <div class="modal-body" style="height: 50vh;">
                 <div class="row-v4">
                     <div class="col-v4-8">
-                        <div><span class="workspace-details-heading"> Owner :</span>
+                        <div><span class="workspace-details-heading">{{"DIALOG_WS_INFO_OWNER"|translate}}</span>
                             {{m_oController.m_oWorkspaceViewModel.userId}}
                         </div>
                         <div><span class="workspace-details-heading"
-                                   ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"> Node:</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}
+                                   ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null">{{"DIALOG_WS_INFO_NODE"|translate}}</span>{{m_oController.m_oWorkspaceViewModel.nodeCode}}
                         </div>
                         <div ng-hide="m_oController.getSLALink() == ''">
-                            <span class="workspace-details-heading"> SLA Link:</span> <a href="{{m_oController.getSLALink()}}" target="_blank">{{m_oController.m_oWorkspaceViewModel.cloudProvider}} SLA</a>
+                            <span class="workspace-details-heading">{{"DIALOG_WS_INFO_SLA"|translate}}</span> <a href="{{m_oController.getSLALink()}}" target="_blank">{{m_oController.m_oWorkspaceViewModel.cloudProvider}} SLA</a>
                         </div>
-                        <div><span class="workspace-details-heading"> Last Update :</span>
+                        <div><span class="workspace-details-heading">{{"DIALOG_WS_INFO_UPDATE"|translate}}</span>
                             {{m_oController.getLastTouchDate()}}
                         </div>
-                        <div><span class="workspace-details-heading"> Workspace id :</span>
+                        <div><span class="workspace-details-heading">{{"DIALOG_WS_INFO_ID"|translate}}</span>
                             {{m_oController.m_workspaceId}}
                         </div>
-                        <div><span class="workspace-details-heading">Total Files :</span>
+                        <div><span class="workspace-details-heading">{{"DIALOG_WS_INFO_FILES"|translate}}</span>
                             {{m_oController.m_oCountProduct}}
                         </div>
                         <div><span class="workspace-details-heading"
-                                   ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null">Processes Executed :</span>
+                                   ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null">{{"DIALOG_WS_INFO_PROCS"|translate}}</span>
                             {{m_oController.m_oWorkspaceViewModel.processesCount}}
                         </div>
                         <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
-                            <span class="workspace-details-heading">Workspace sharing :</span>
+                            <span class="workspace-details-heading">{{"DIALOG_WS_INFO_SHARINGS"|translate}}</span>
                             <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                 <li> {{shared}}</li>
                             </div>
@@ -71,7 +71,7 @@
                     {{ "DIALOG_WORKSPACE_DETAILS_CLOSE" | translate }}
                 </button>
 
-                <button type="button" ng-click="m_oController.saveNodeCode()" class="my-button" data-dismiss="modal"> <!--data-dismiss="modal"-->
+                <button type="button" ng-click="m_oController.saveNodeCode()" class="my-button" data-dismiss="modal">
                     {{ "DIALOG_WORKSPACE_DETAILS_APPLY" | translate }}
                 </button>
 

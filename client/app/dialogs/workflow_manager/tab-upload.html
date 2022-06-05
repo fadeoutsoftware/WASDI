@@ -5,11 +5,11 @@
     <div class="row-v4">
         <div class="col-v4">
             <div class="form-v4-group">
-                <label class="">Name</label>
+                <label class="">{{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}</label>
                 <input type="text" name="name"  class="form-v4-control-plaintext wasdi-input" required="required" ng-model="m_oController.m_oWorkflowFileData.workflowName">
             </div>
             <div class="form-v4-group">
-                <label for="comment">Description:</label>
+                <label for="comment">{{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}</label>
                 <textarea class="form-control wasdi-input not-resizable" rows="5" id="comment"maxlength="150" ng-model="m_oController.m_oWorkflowFileData.workflowDescription"></textarea>
             </div>
             <div class="form-v4-group">
@@ -19,7 +19,7 @@
                 <i class="fa fa-check-square " aria-hidden="true"
                    ng-hide="m_oController.m_oWorkflowFileData.isPublic === false"
                    ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
-                <span>Set workflow public</span>
+                <span> {{"DIALOG_WORKFLOW_SET_PUBLIC"|translate}}</span>
             </div>
         </div>
 
@@ -31,7 +31,7 @@
                      accept="text/xml"
                      ngf-pattern="'text/xml'">
                     <!---->
-                    <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                    <div ng-show="m_oController.m_oFile">{{"DIALOG_WORKFLOW_FILE"|translate}} {{m_oController.m_oFile[0].name}}</div>
                     <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
                 </div>
             </div>
@@ -46,7 +46,4 @@
             <button class = "btn btn-primary btn-lg btn-wasdi" ng-click="m_oController.uploadUserGraphOnServer()" ng-show="m_oController.isUploadedNewWorkFlow()">Upload file</button>
         </div>
     </div>
-
-
-
 </div>

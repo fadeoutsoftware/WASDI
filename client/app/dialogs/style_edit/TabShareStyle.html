@@ -4,27 +4,27 @@
 
         <div class="row give-permission-row">
             <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                <label>Share Style:</label>
+                <label>{{"DIALOG_STYLE_SHARE"|translate}}</label>
             </div>
 
             <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                <input type="text" name="name" id="" class="form-control wasdi-input" value="" title=""  ng-model="m_oController.m_sUserEmail" required="required" placeholder="Insert WASDI User email">
+                <input type="text" name="name" id="" class="form-control wasdi-input" value="" title=""  ng-model="m_oController.m_sUserEmail" required="required" placeholder='{{"DIALOG_STYLE_SHARE_MAIL"|translate}}'>
             </div>
 
             <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                 <button class="btn btn-primary btn-wasdi"
                         ng-click="m_oController.shareStyleByUserEmail(m_oController.m_sUserEmail)">
                     <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
-                    <span class="ng-binding">Share</span>
+                    <span class="ng-binding">{{"DIALOG_STYLE_SHARE_SHARE"|translate}}</span>
                 </button>
             </div>
         </div>
 
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <label>Active sharings:</label>
+                <label>{{"DIALOG_STYLE_SHARE_ACTIVE"|translate}}</label>
                 <table class="table table-hover">
-                    <description>Active sharings</description>
+                    <description>{{"DIALOG_STYLE_SHARE_ACTIVE"|translate}}</description>
                     <tbody>
                     <tr ng-repeat="oUser in m_oController.m_aoEnabledUsers">
                         <td class="over-icon">
@@ -32,7 +32,7 @@
                                     ng-click="m_oController.removeUserSharing(oUser.userId)">
                                 <!--Remove Sharing-->
                                 <i class="fa fa-trash fa-lg" aria-hidden="true" style="margin-right: 0px;"></i>
-                                <span class="ng-binding">Remove</span>
+                                <span class="ng-binding">{{"DIALOG_STYLE_SHARE_REMOVE"|translate}}</span>
                             </button>
                         </td>
                         <td>
@@ -43,7 +43,5 @@
                 </table>
             </div>
         </div>
-
-
     </div>
 </div>
