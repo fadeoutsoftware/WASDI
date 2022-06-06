@@ -490,13 +490,26 @@ public class ProductResource {
             for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
 
                 // Get the downloaded file
-                DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+                //DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+            	
+            	String sFullPath = aoProductWorkspace.get(iProducts).getProductName();
+            	
+            	Boolean bInserted = false; 
 
                 // Add View model to return list
-                if (oDownloaded != null) {
-                    aoProductList.add(oDownloaded.getFileName());
-
-                } else {
+                if (!Utils.isNullOrEmpty(sFullPath)) {
+                	
+                	sFullPath = sFullPath.replace("\\", "/");
+                	String [] asParts = sFullPath.split("/");
+                	
+                	if (asParts != null) {
+                		if (asParts.length>0) {
+                    		aoProductList.add(asParts[asParts.length-1]);
+                    		bInserted = true;
+                		}
+                	}
+                } 
+                if (!bInserted) {
                     Utils.debugLog("ProductResource.getNamesByWorkspace: WARNING: the product "
                             + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
                             + " but is not a Downloaded File");
