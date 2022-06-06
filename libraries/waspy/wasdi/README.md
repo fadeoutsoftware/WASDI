@@ -1,7 +1,7 @@
 # WASDI python programming library (aka waspy)
 
 [WASDI](https://www.wasdi.net/) is a cloud platform for processing 
-_Earth Observation_ data. 
+_Earth Observation_  data. 
 It allows expert users to search and retrieve data from multiple 
 catalogues, process them, and publish the result over the Internet. 
 

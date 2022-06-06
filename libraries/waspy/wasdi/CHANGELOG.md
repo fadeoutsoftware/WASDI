@@ -3,6 +3,11 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.4.3] - 2022-06-06
+
+### Fixed
+- setProcessPayload: use POST instead of get to allow big payloads
+
 ## [0.7.4.2] - 2022-04-20
 
 ### Added
