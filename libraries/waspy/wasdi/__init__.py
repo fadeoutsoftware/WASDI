@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.4.2
+Version 0.7.4.3
 
-Last Update: 20/04/2022
+Last Update: 06/06/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -974,14 +974,15 @@ def getProductsByWorkspaceId(sWorkspaceId):
     except Exception as oEx:
         wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
-    if oResult.ok is True:
-        oJsonResults = oResult.json()
-
-        for sProduct in oJsonResults:
-            try:
-                asProducts.append(sProduct)
-            except:
-                continue
+    if oResult is not None:
+        if oResult.ok is True:
+            oJsonResults = oResult.json()
+    
+            for sProduct in oJsonResults:
+                try:
+                    asProducts.append(sProduct)
+                except:
+                    continue
 
     return asProducts
 
@@ -1400,12 +1401,11 @@ def setProcessPayload(sProcessId, data):
 
     try:
         asHeaders = _getStandardHeaders()
-        payload = {'procws': sProcessId, 'payload': json.dumps(data)}
 
-        sUrl = getWorkspaceBaseUrl() + '/process/setpayload'
+        sUrl = getWorkspaceBaseUrl() + '/process/setpayload?procws=' + sProcessId
 
         try:
-            oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
+            oResult = requests.post(sUrl, data=json.dumps(data), headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
             wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
