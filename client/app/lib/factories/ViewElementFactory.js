@@ -396,7 +396,10 @@ class NumericBox extends UIComponent {
         this.isValid = function(asMessages) {
             try {
                 let fValue = parseFloat(this.m_sText)
-
+                // if we can't parse the value as a number
+                if (isNaN(fValue)) {
+                    return false;
+                }
                 if (utilsIsObjectNullOrUndefined(this.m_fMin)==false) {
                     if (fValue<this.m_fMin) {
                         asMessages.push(this.label + " - Value must be greater than " + this.m_fMin);
