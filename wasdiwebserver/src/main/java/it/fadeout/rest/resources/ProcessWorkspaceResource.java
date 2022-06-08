@@ -1019,7 +1019,7 @@ public class ProcessWorkspaceResource {
 	}
 	
 	/**
-	 * Set the payload of a Process Workspace
+	 * Set the payload of a Process Workspace with a GET Method
 	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessObjId Process Workspace Id
@@ -1029,8 +1029,27 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/setpayload")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel setProcessPayload(@HeaderParam("x-session-token") String sSessionId,
+	public ProcessWorkspaceViewModel setProcessPayloadGET(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("procws") String sProcessObjId, @QueryParam("payload") String sPayload) {
+		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
+	}
+	
+	/**
+	 * Set the payload of a Process Workspace with a POST Method
+	 * @param sSessionId User Session Id
+	 * @param sProcessObjId Process Workspace Id
+	 * @param sPayload Payload to save
+	 * @return Updated Process Workspace View Model
+	 */
+	@POST
+	@Path("/setpayload")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel setProcessPayloadPOST(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("procws") String sProcessObjId, String sPayload) {
+		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
+	}	
+	
+	protected ProcessWorkspaceViewModel internalSetPaylod(String sSessionId, String sProcessObjId, String sPayload) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload" );
 
@@ -1068,7 +1087,7 @@ public class ProcessWorkspaceResource {
 		}
 
 		return oProcess;
-	}
+	}		
 	
 	/**
 	 * Set the sub-pid for a running process workspace.
