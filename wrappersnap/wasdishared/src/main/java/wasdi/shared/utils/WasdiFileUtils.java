@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -258,6 +259,26 @@ public class WasdiFileUtils {
 		File oFile = new File(sFileFullPath);
 
 		return writeFile(sContent, oFile);
+	}
+
+	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
+		s_oLogger.debug("WasdiFileUtils.writeMapAsJsonFile | sFileFullPath: " + sFileFullPath);
+
+		if (aoJSONMap == null) {
+			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
+
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFileFullPath)) {
+			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
+
+			return false;
+		}
+
+		String sJson = JsonUtils.stringify(aoJSONMap);
+
+		return writeFile(sJson, sFileFullPath);
 	}
 
 	/**

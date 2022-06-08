@@ -1,16 +1,12 @@
 package wasdi.operations;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.apiclients.pip.PipApiClient;
-import wasdi.shared.business.Package;
-import wasdi.shared.business.PackageManager;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
@@ -112,6 +108,8 @@ public class Redeployprocessor extends Operation {
 
 				            	if (sNodeCode.equals("wasdi")) {
 
+				            		Thread.sleep(1000);
+
 					        		String sIp = "127.0.0.1";
 					        		int iPort = oProcessor.getPort();
 					        		m_oLocalLogger.debug("Redeployprocessor.executeOperation | iPort: " + iPort);
@@ -119,26 +117,12 @@ public class Redeployprocessor extends Operation {
 					        		try {
 					        			PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
 
-						        		PackageManager oPackageManager = pipApiClient.getManagerVersion();
-
-										List<Package> aoPackagesOutdated = pipApiClient.listPackages("o");
-
-						        		List<Package> aoPackagesUptodate = pipApiClient.listPackages("u");
-
-						        		Map<String, Object> aoPackagesInfo = new HashMap<>();
-						        		aoPackagesInfo.put("packageManager", oPackageManager);
-						        		aoPackagesInfo.put("outdated", aoPackagesOutdated);
-						        		aoPackagesInfo.put("uptodate", aoPackagesUptodate);
-
-						        		String sJson = LauncherMain.s_oMapper.writeValueAsString(aoPackagesInfo);
-	        			        		if (Utils.isNullOrEmpty(sJson)) {
-	        			        			sJson = "JSON is empty!";
-	        			        		}
+					        			Map<String, Object> aoPackagesInfo = pipApiClient.getPackagesInfo();
 
 						        		String sFileFullPath = sProcessorFolder + "packagesInfo.json";
 						        		m_oLocalLogger.debug("Redeployprocessor.executeOperation | sFileFullPath: " + sFileFullPath);
 
-						        		boolean bResult = WasdiFileUtils.writeFile(sJson, sFileFullPath);
+						        		boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
 						        		if (bResult) {
 						        			m_oLocalLogger.debug("the file was created.");
@@ -146,7 +130,7 @@ public class Redeployprocessor extends Operation {
 						        			m_oLocalLogger.debug("the file was not created.");
 						        		}
 					        		} catch (Exception oEx) {
-					        			Utils.debugLog("Redeployprocessor.executeOperation: " + oEx);
+					        			m_oLocalLogger.error("Redeployprocessor.executeOperation: " + oEx);
 					        		}
 					            }
 				            }

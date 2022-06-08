@@ -29,7 +29,10 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
+
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
  * Utility class for HTTP operations.
@@ -38,6 +41,11 @@ import org.json.JSONObject;
  *
  */
 public final class HttpUtils {
+
+	/**
+	 * Static logger reference
+	 */
+	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(HttpUtils.class));
 
 	private HttpUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
@@ -242,10 +250,6 @@ public final class HttpUtils {
 	}
 
 	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
-		return standardHttpGETQuery(sUrl, asHeaders, 0);
-	}
-
-	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders, int iResult) {
 
 		String sResult = null;
 		try {
@@ -266,9 +270,6 @@ public final class HttpUtils {
 			try {
 				int iResponseCode = oConnection.getResponseCode();
 				Utils.debugLog("HttpUtils.standardHttpGETQuery: Response Code : " + iResponseCode);
-
-				iResult = iResponseCode;
-
 				String sResponseExtract = null;
 				if (200 == iResponseCode) {
 					InputStream oInputStream = oConnection.getInputStream();
@@ -311,6 +312,63 @@ public final class HttpUtils {
 			Utils.debugLog("HttpUtils.standardHttpGETQuery: " + oE);
 		}
 		return sResult;
+	}
+
+	public static HttpCallResponse newStandardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+
+		String sResult = null;
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			s_oLogger.debug("Sending 'GET' request to URL : " + sUrl);
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: Response Code : " + iResponseCode);
+
+				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+				if (200 <= iResponseCode && 299 >= iResponseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpCallResponse.setResponseBody(sResult);
+					}
+				} else {
+					s_oLogger.debug("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+					sResult = oBytearrayOutputStream.toString();
+					oHttpCallResponse.setResponseBody(sResult);
+				}
+			} catch (Exception oEint) {
+				s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+		} catch (Exception oE) {
+			s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: " + oE);
+		}
+
+		return oHttpCallResponse;
 	}
 
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {

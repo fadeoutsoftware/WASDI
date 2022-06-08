@@ -35,6 +35,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -967,10 +968,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUrl: " + sUrl);
 
     		Map<String, String> asHeaders = Collections.emptyMap();
-    		int iResult = 0;
-    		String sResponse = HttpUtils.standardHttpGETQuery(sUrl, asHeaders, iResult);
 
-        	if (iResult == 200) {
+    		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+    		Integer iResult = oHttpCallResponse.getResponseCode();
+    		String sResponse = oHttpCallResponse.getResponseBody();
+
+            LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: iResult: " + iResult);
+        	LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: " + sResponse);
+
+        	if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
                 LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: Output from Server .... \n");
             	LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: " + sResponse);
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: env updated");

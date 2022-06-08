@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +28,8 @@ public class PackageManagerResource {
 			@QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 
+		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sName + " was not found\"}";
+
 		try {
 			// Session checking
 			User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -48,22 +49,21 @@ public class PackageManagerResource {
 			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
 				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
 				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
+			} else {
+				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " found");
 			}
 
-			String sOutput = Arrays.stream(oDirFile.listFiles())
-				.filter(File::isFile)
-				.filter(WasdiFileUtils::isPackagesInfoFile)
-				.map(File::getAbsolutePath)
-				.map(WasdiFileUtils::fileToText)
-				.findFirst()
-				.orElseGet(() -> "");
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+			}
 
-			return sOutput;
 		} catch (Exception oEx) {
 			Utils.debugLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
 		}
 
-		return "{\"warning\": \"the packagesInfo.json file for the processor " + sName + " was not found\"}";
+		return sOutput;
 	}
 
 	@GET

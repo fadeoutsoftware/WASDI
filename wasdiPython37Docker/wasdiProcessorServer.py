@@ -437,9 +437,7 @@ def __extract_versions_from_output(output: str) -> str:
     start: str = '\\(from versions: '
     end: str = '\\)'
 
-    result: str = __extract_substring_limited_by(output, start, end)
-
-    return result
+    return __extract_substring_limited_by(output, start, end)
 
 
 def __extract_substring_limited_by(full_string: str, start: str, end: str) -> str:
