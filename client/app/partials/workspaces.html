@@ -101,12 +101,12 @@
                         <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true"
                              ng-show="m_oController.m_bIsOpenInfo">
                              <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"><i class="fa fa-cloud text-blu-wasdi" st></i>&nbsp;Cloud:</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading"><img src="assets/img/placeholder/user-placeholder-blu.png" style="width: 16px">&nbsp;Owner:</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"><i class="fa fa-cloud text-blu-wasdi" st></i>&nbsp;{{"WORKSPACES_CLOUD" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading"><img src="assets/img/placeholder/user-placeholder-blu.png" style="width: 16px">&nbsp;{{"WORKSPACES_OWNER" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
                             <!--div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div-->
-                            <div><span class="workspace-details-heading"><i class="fa fa-globe text-blu-wasdi" ></i>&nbsp;Products:</span> {{m_oController.getProductList().length}}</div>
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null"><i class="fa fa-rocket text-blu-wasdi" ></i>&nbsp;Processes Executed :</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
+                            <div><span class="workspace-details-heading"><i class="fa fa-globe text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_PRODUCTS" | translate}}</span> {{m_oController.getProductList().length}}</div>
+                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null"><i class="fa fa-rocket text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_PROC_COUNT" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
                             <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
-                                <span class="workspace-details-heading"><i class="fa fa-share-alt text-blu-wasdi" ></i>&nbsp;Shared with :</span>
+                                <span class="workspace-details-heading"><i class="fa fa-share-alt text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_SHARED_WITH" | translate}}</span>
                                 <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
                                     <li> {{shared}}</li>
                                 </div>
@@ -156,7 +156,7 @@
                     <label>
                         <input type="checkbox" ng-model="value" ng-init="value = true"
                                ng-click="m_oController.deleteSentinel1a(value)">
-                        Show Satellite
+                               {{"WORKSPACES_SHOW_SATS" | translate}}
                     </label>
                 </div>
                 <div class="btn-group" role="group" aria-label="...">

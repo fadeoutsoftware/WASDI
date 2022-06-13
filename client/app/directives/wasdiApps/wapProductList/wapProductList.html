@@ -26,32 +26,32 @@
                 </br>
 
                 <div>
-                    <span>Name: </span>
+                    <span>{{"IMPORT_PRODUCT_LIST_NAME"|translate}}</span>
                     <span><strong>{{layer.title}}</strong></span>
                 </div>
 
                 <div>
-                    <span>Polarisation: </span>
+                    <span>{{"IMPORT_PRODUCT_LIST_POLARIZATION"|translate}} </span>
                     <span><strong>{{layer.summary.Mode}}</strong></span>
                 </div>
 
                 <div>
-                    <span>Relative Orbit: </span>
+                    <span>{{"IMPORT_PRODUCT_LIST_ORBIT"|translate}} </span>
                     <span><strong>{{layer.properties.relativeorbitnumber}}</strong></span>
                 </div>
 
                 <!--<div>{{"layer"+layer.id}}</div>-->
                 <div>
-                    <span>Provider:</span>
+                    <span>{{"IMPORT_PRODUCT_LIST_PROVIDER"|translate}}</span>
                     <span><strong>{{layer.provider}}</strong></span>
                 </div>
 
                 <div>
-                    <span>Platform name:</span>
+                    <span>{{"IMPORT_PRODUCT_LIST_PLATFORM"|translate}}</span>
                     <span><strong>{{layer.properties.platformname}}</strong></span>
                 </div>
                 <div>
-                    <span>Sensor Operational mode:</span>
+                    <span>{{"IMPORT_PRODUCT_LIST_SENSOR"|translate}}</span>
                     <span><strong>{{layer.properties.sensoroperationalmode}}</strong></span>
                 </div>
             </td>
@@ -71,7 +71,7 @@
 
                 <button class="btn btn-default btn-wasdi"
                         ng-click="$ctrl.parentController.loadMore()" >
-                    <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
+                    <i class="fa fa-refresh mr-2" aria-hidden="true"></i>{{"DIALOG_PROCESSES_LOGS_LOAD_MORE"|translate}}
                 </button>
 
             </td>

@@ -10,7 +10,7 @@
     <tr ng-if="layer.properties && layer.properties.error">
         <td class="info-cell">
             <div>
-                <span><b>Error:</b></span>
+                <span><b>{{'IMPORT_PRODUCT_LIST_ERROR'|translate}}</b></span>
                 <span>{{layer.properties.error}}</span>
             </div>
         </td>
@@ -60,48 +60,48 @@
             </br>
 
             <div ng-if="layer.title">
-                <span>Name: </span>
+                <span>{{'IMPORT_PRODUCT_LIST_NAME'|translate}}</span>
                 <span><b>{{layer.title}}</b></span>
             </div>
 
             <div ng-if="layer.summary && layer.summary.Mode">
-                <span>Polarisation: </span>
+                <span>{{'IMPORT_PRODUCT_LIST_POLARIZATION'|translate}}</span>
                 <span><b>{{layer.summary.Mode}}</b></span>
             </div>
 
             <div ng-if="layer.properties && layer.properties.relativeorbitnumber">
-                <span>Relative Orbit: </span>
+                <span>{{'IMPORT_PRODUCT_LIST_ORBIT'|translate}}</span>
                 <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
             </div>
 
             <div ng-if="layer.provider">
-                <span>Provider:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_PROVIDER'|translate}}</span>
                 <span><b>{{layer.provider}}</b></span>
             </div>
 
             <div ng-if="layer.properties && layer.properties.platformname">
-                <span>Platform name:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_PLATFORM'|translate}}</span>
                 <span><b>{{layer.properties.platformname}}</b></span>
             </div>
             <div ng-if="layer.properties && layer.properties.sensoroperationalmode">
-                <span>Sensor Operational mode:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_SENSOR'|translate}}</span>
                 <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
             </div>
 
             <div ng-if="layer.properties && layer.properties.productType">
-                <span>Product Type:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_TYPE'|translate}}</span>
                 <span><b>{{layer.properties.productType}}</b></span>
             </div>
             <div ng-if="layer.properties && layer.properties.dataset">
-                <span>Dataset:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_DATASET'|translate}}</span>
                 <span><b>{{layer.properties.dataset}}</b></span>
             </div>
             <div ng-if="layer.properties && layer.properties.variables">
-                <span>Variables:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_VARIABLES'|translate}}</span>
                 <span><b>{{layer.properties.variables}}</b></span>
             </div>
             <div ng-if="layer.properties && layer.properties.protocol">
-                <span>Protocol:</span>
+                <span>{{'IMPORT_PRODUCT_LIST_PROTOCOL'|translate}}</span>
                 <span><b>{{layer.properties.protocol}}</b></span>
             </div>
         </td>

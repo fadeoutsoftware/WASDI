@@ -9,10 +9,10 @@
                 <div class="product-info-table">
                     <h4>
                         <table class="table table-hover">
-                            <caption>Product info</caption>
+                            <caption>{{"DIALOG_PRODUCT_INFO_TITLE"|translate}}</caption>
                             <thead>
-                            <th scope="col">Property</th>
-                            <th scope="col">Value</th>
+                            <th scope="col">{{"DIALOG_PRODUCT_INFO_PROP"|translate}}</th>
+                            <th scope="col">{{"DIALOG_PRODUCT_INFO_VALUE"|translate}}</th>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="property in m_oController.m_oPropertiesList" ng-hide="m_oController.m_oPropertiesList.length === 0">
@@ -30,7 +30,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">{{"DIALOG_OK_BUTTON"|translate}}</button>
             </div>
         </div>
     </div>

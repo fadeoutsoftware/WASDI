@@ -17,7 +17,7 @@
                     <i class="fa fa-search" aria-hidden="true"></i>{{"IMPORT_SEARCHLIST_BUTTON"|translate}}</button>
                 <button type="button" class="btn btn-primary btn-wasdi search-button" ng-class="{'disabled': ($ctrl.m_bIsVisibleListOfLayers === false)}"
                         ng-click="$ctrl.openModalDownloadSelectedProductsInSelectedWorkspaces()" >
-                    <i class="fa fa-download" aria-hidden="true"></i>Download selected</button>
+                    <i class="fa fa-download" aria-hidden="true"></i>{{"IMPORT_DOWNLOAD_SELECTED"|translate}}</button>
             </div>
         </div>
     </div>
@@ -59,18 +59,18 @@
                                 <div class="col-v4-auto">
                                     <button type="button" class="btn btn-primary btn-wasdi selected-time-series h-100"
                                             ng-click="$ctrl.openAdvanceFiltersDialog(); $ctrl.m_sTypeOfFilterSelected = 'Time series'">
-                                        <em class="fa fa-calendar"></em>CronTab
+                                        <em class="fa fa-calendar"></em>{{"IMPORT_CRONTAB"|translate}}
                                     </button>
                                 </div>
                                 <div class="col-v4-auto">
-                                    <multiselectdropdownmenu options="$ctrl.m_aListOfProvider" name="Providers"></multiselectdropdownmenu>
+                                    <multiselectdropdownmenu options="$ctrl.m_aListOfProvider" name="{{'IMPORT_PROVIDERS'|translate}}"></multiselectdropdownmenu>
                                 </div>
                             </div>
 
                             <!-- From / To date pickers -->
                             <div class="row-v4 mt-2 time-container" ng-hide="$ctrl.m_sTypeOfFilterSelected != 'Time period'">
                                 <div class="col-v4">
-                                    From:
+                                    {{'IMPORT_DATE_FROM'|translate}}
                                     <div class="input-calendar-container" >
 
                                         <p class="input-group">
@@ -95,7 +95,7 @@
                                     </div>
                                 </div>
                                 <div class="col-v4">
-                                    To:
+                                    {{'IMPORT_DATE_TO'|translate}}
                                     <div class=" advanced-calendar-input input-calendar-container " >
                                         <p class="input-group" >
 
@@ -148,10 +148,10 @@
                             <div class="container-fluid-v4">
                                 <div class="row-v4 product-search-wrapper">
                                     <div class="col-v4-auto d-flex flex-column justify-content-center">
-                                        <div>Product<br>Name</div>
+                                        <div>{{"IMPORT_PRODUCT_NAME"|translate}}</div>
                                     </div>
                                     <div class="col-v4">
-                                        <input type="text" ng-model="$ctrl.m_oModel.textQuery" placeholder="Search..." >
+                                        <input type="text" ng-model="$ctrl.m_oModel.textQuery" placeholder='{{"IMPORT_PRODUCT_NAME_SEARCH"|translate}}' >
                                     </div>
                                 </div>
                             </div>
@@ -159,7 +159,7 @@
                             <!-- Missions tabs -->
                             <div class="row-v4 mission-tabs-wrapper mt-3">
                                 <div class="col-v4-12">
-                                    <div class="container-fluid-v4"><label>Select missions</label></div>
+                                    <div class="container-fluid-v4"><label>{{"IMPORT_PRODUCT_SELECTED_MISSIONS"|translate}}</label></div>
                                     <ul class="nav-v4 nav-v4-tabs nav-v4-fill">
                                         <li class="nav-v4-item" ng-repeat="mission in $ctrl.getMissions()"
                                             ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)">

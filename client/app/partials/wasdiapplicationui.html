@@ -4,8 +4,7 @@
         <div class="container mt-4">
             <div class="row sticky-bar">
                 <div class="border-bottom py-3 mb-3 d-print-flex justify-content-between">
-                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the
-                        Future</span>
+                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>{{ "WAP_BACK" | translate }}</span>
                 </div>
                 <!--APP TITLE-->
                 <div class="app-title d-flex justify-content-between align-items-center border-bottom pb-3">
@@ -15,18 +14,18 @@
                             style="background-image: url({{m_oController.m_oApplication.imgLink}})"></div>
                         <div>
                             <span class="title">{{m_oController.m_oApplication.friendlyName}}</span><br>
-                            <span>Publisher: <span
+                            <span>{{ "WAP_PUBLISHER" | translate }} <span
                                     class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></span>
                             <div class="edit-btn ml-3" ng-if="m_oController.m_oApplication.isMine"
                                 ng-click="m_oController.editClick()">
                                 <span class="fa fa-edit mr-1"></span>
-                                Edit
+                                {{ "WAP_EDIT" | translate }}
                             </div>
                             <br>
 
                             <div class="back-link mt-1 collapsed" type="button" data-toggle="collapse"
                                 data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                                <span class="more">MORE</span><span class="less">LESS</span> DETAILS
+                                <span class="more">{{ "WAP_MORE" | translate }}</span><span class="less">{{ "WAP_LESS" | translate }}</span> {{ "WAP_DETAILS" | translate }}
                             </div>
 
                         </div>
@@ -40,10 +39,10 @@
                                     name="exampleRadios" id="newWorkspace" value="new" checked
                                     ng-click="m_oController.newWorkspaceClicked()">
                                 <label class="form-check-label" for="newWorkspace">
-                                    New Workspace
+                                    {{ "WAP_NEW_WORKSPACE" | translate }}
                                 </label>
                                 
-                                <input type="text" name="workspaceName" placeholder="[AUTO NAME]" ng-model="workspaceName"
+                                <input type="text" name="workspaceName" placeholder='{{ "WAP_WORKSPACE_AUTO_NAME" | translate }}' ng-model="workspaceName"
                                     class="wsNameTextBox ng-pristine ng-valid ng-empty ng-touched"  ng-show="workspaceChose == 'new'"/>
                             </div>
                             <div class="form-check d-flex align-items-center mr-2">
@@ -51,20 +50,12 @@
                                     name="exampleRadios" id="openWorkspace" value="open"
                                     ng-click="m_oController.openWorkspaceClicked()">
                                 <label class="form-check-label" for="openWorkspace">
-                                    <span>Open Workspace</span>
+                                    <span>{{ "WAP_OPEN_WORKSPACE" | translate }}</span>
                                 </label>
 
-                                <!--MOSTRA SOLO SE SELEZIONATO-->
-
-
+                                <!--SHOW ONLY IF SELECTED-->
 
                                 <div class="dropdown" ng-show="workspaceChose == 'open'">
-
-
-
-                                    <!-- <button class="dropdown-toggle dropdown-workspace" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <div class="open-workspace-label">{{m_oController.m_oSelectedWorkspace === null ? "Select Workspace" : m_oController.m_oSelectedWorkspace.workspaceName}} </div>
-                                    </button> -->
 
                                     <dropdownmenudirective list-of-values="m_oController.m_aoWorkspaceListForDirective"
                                         selected-value="m_oController.m_oSelectedWorkspaceForDirective"
@@ -72,17 +63,13 @@
                                         enable-search-filter="true" dropdown-name="'Select workspace'">
                                     </dropdownmenudirective>
 
-                                    <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                     <div class="dropdown-workspace-item" ng-repeat="oWorkspace in m_oController.m_aoWorkspaceList" ng-click="m_oController.selectedWorkspace(oWorkspace)">
-                                           {{oWorkspace.workspaceName}}</div>
-                                   </div>-->
                                 </div>
 
                             </div>
                         </div>
                         <div class="blue-big-btn run-btn d-flex align-items-center justify-content-center flex-row"
                             ng-click="m_oController.generateParamsAndRun(workspaceName)">
-                            <span>RUN</span>
+                            <span>{{ "WAP_RUN" | translate }}</span>
                             <div class="slide-out">
                                 <div class="rocket-animation ml-2">
                                     <div class="hide-circle"></div>
@@ -97,17 +84,17 @@
                 <div class="collapse border-bottom mb-3" id="collapseExample">
                     <div class="row pb-3">
                         <div class="col-12 col-md-8">
-                            <span>Description: </span><span
+                            <span>{{ "WAP_DESCRIPTION2" | translate }}</span><span
                                 class="text-green-wasdi">{{m_oController.m_oApplication.processorDescription}}</span>
                         </div>
                         <div class="col-12 col-md-4 border-left">
-                            <div>Contact: <span class="text-green-wasdi"><a
+                            <div>{{ "WAP_CONTACT" | translate }} <span class="text-green-wasdi"><a
                                         ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span>
                             </div>
-                            <div>WebSite: <span class="text-green-wasdi"><a
+                            <div>{{ "WAP_WEB" | translate }} <span class="text-green-wasdi"><a
                                         ng-href="{{m_oController.m_oApplication.link}}"
                                         target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
-                            <div>Last Update: <span
+                            <div>{{ "WAP_LAST_UPDATE" | translate }} <span
                                     class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span>
                             </div>
                         </div>
@@ -131,20 +118,20 @@
                         <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'help'}"
                             ng-click="m_oController.activeTabChanged('help')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
-                                Help
+                                {{ "WAP_HELP" | translate }}
                             </a>
                         </div>
                         <div class="side-tab px-4 py-2" ng-class="{'active':m_oController.m_sSelectedTab === 'history'}"
                             ng-click="m_oController.activeTabChanged('history')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
-                                History
+                                {{ "WAP_HISTORY" | translate }}
                             </a>
                         </div>
                         <div class="side-tab px-4 py-2"
                             ng-class="{'active':m_oController.m_sSelectedTab === 'json_prms'}"
                             ng-click="m_oController.activeTabChanged('json_prms')">
                             <a class="text-white" href="" role="tab" data-toggle="tab">
-                                JSON
+                                {{ "WAP_JSON" | translate }}
                             </a>
                         </div>
 
@@ -282,13 +269,13 @@
                             ng-class="{'active':m_oController.m_sSelectedTab === 'history'}">
                             <div class="row table-header py-2">
                                 <div class="col col-lg-3">
-                                    Date
+                                    {{ "WAP_HISTORY_DATE" | translate }}
                                 </div>
                                 <div class="col col-lg-2">
-                                    Status
+                                    {{ "WAP_HISTORY_STATUS" | translate }}
                                 </div>
                                 <div class="col col-lg-7">
-                                    Workspace
+                                    {{ "WAP_HISTORY_WS" | translate }}
                                 </div>
                             </div>
                             <div class="loadIcon" ng-show="m_oController.m_bHistoryLoading">

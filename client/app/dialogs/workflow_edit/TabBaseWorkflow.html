@@ -5,12 +5,12 @@
     <div class="row-v4">
         <div class="col-v4">
             <div class="form-v4-group">
-                <label class="">Name</label>
+                <label class="">{{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}</label>
                 <input type="text" name="name" class="form-v4-control-plaintext wasdi-input" required="required"
                     ng-model="m_oController.m_oWorkflow.name">
             </div>  
             <div class="form-v4-group">
-                <label for="comment">Description:</label>
+                <label for="comment">{{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}</label>
                 <textarea class="form-control wasdi-input not-resizable" rows="5" id="comment" maxlength="150"
                     ng-model="m_oController.m_oWorkflow.description"></textarea>
             </div>
@@ -19,7 +19,7 @@
                     ng-click="m_oController.m_oWorkflow.public = !m_oController.m_oWorkflow.public"></i>
                 <i class="fa fa-check-square " aria-hidden="true" ng-hide="m_oController.m_oWorkflow.public === false"
                     ng-click="m_oController.m_oWorkflow.public = !m_oController.m_oWorkflow.public"></i>
-                <span>Set workflow public</span>
+                <span>{{"DIALOG_WORKFLOW_SET_PUBLIC"|translate}}</span>
             </div>
         </div>
 
@@ -41,7 +41,4 @@
             </div>
         </div>
     </div>
-
-
-
 </div>

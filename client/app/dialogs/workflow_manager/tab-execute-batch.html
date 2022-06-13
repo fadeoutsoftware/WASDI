@@ -17,7 +17,7 @@
             <div>
                 <input class="wasdi-input"
                        ng-model="searchText.name"
-                       placeholder="Filter WorkFlow Name..." style="margin-bottom: 15px;">
+                       placeholder='{{"DIALOG_WORKFLOW_FILTER_NAME" | translate}}' style="margin-bottom: 15px;">
                 </label>
             </div>
 
@@ -58,15 +58,6 @@
                                 <strong>{{workflow.name.replaceAll("_"," ")}}</strong>
                             </h4>
                         </div>
-<!--                        <div>
-                            <label> <strong>Description:</strong> </label>
-                            <span>{{workflow.description.replaceAll("_"," ")}}</span>
-                        </div>
-
-                        <div>
-                            <label><strong>Owner:</strong> </label>
-                            <span> {{workflow.userId}}</span>
-                        </div>-->
                     </div>
 
 
@@ -81,12 +72,12 @@
                 <div class="" ng-hide="m_oController.m_oSelectedWorkflow == null">
                     <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>
                     <div>
-                        <label><strong>Owner:</strong>
+                        <label><strong>{{"DIALOG_STYLE_OWNER" | translate}}</strong>
                         </label>
                         <span> {{m_oController.m_oSelectedMultiInputWorkflow.userId}}</span>
                     </div>
                     <div>
-                        <label> <strong>Description:</strong>
+                        <label> <strong>{{"DIALOG_STYLE_DESCRIPTION" | translate}}</strong>
                         </label>
                         <span>{{m_oController.m_oSelectedMultiInputWorkflow.description.replaceAll("_", " ")}}</span>
                     </div>
@@ -108,21 +99,6 @@
                 </div>
             </div>
         </div>
-
-        <!--            new COLUMN   imported from execute batch -->
-        <!--<div class="col-v4-auto d-flex flex-fill mt-3 mb-3">
-            <h3> {{m_oController.m_oSelectedWorkflow.name}} </h3>
-            &lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; LIST OF PRODUCTS &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;
-            <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">
-            </multiselect>
-
-            <div class="w-100 text-right">
-                <button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.runWorkFlowPerProducts();" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"
-                        ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" data-dismiss="modal" >
-                    {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
-                </button>
-            </div>
-        </div>-->
     </div>
 </div>
 

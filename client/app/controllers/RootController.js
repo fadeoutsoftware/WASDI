@@ -6,7 +6,7 @@ var RootController = (function() {
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
     function RootController($rootScope, $scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
-                            $timeout,oModalService,oRabbitStompService, $window) {
+                            $timeout,oModalService,oRabbitStompService, $window, oTranslate) {
                         
         this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
@@ -30,6 +30,7 @@ var RootController = (function() {
         this.m_isRabbitConnected = true;
         this.m_oSummary = {};
         this.m_oWindow = $window;
+        this.m_oTranslate = oTranslate;
         var oController = this;
 
 
@@ -273,6 +274,7 @@ var RootController = (function() {
         {
             return null;
         }
+
         var oLastProcessRunning = null;
         var iTotalProcessesNumber = aoProcessesRunning.length;
         // Search the last one that is in running state
@@ -288,12 +290,14 @@ var RootController = (function() {
 
     RootController.prototype.getSummary = function()
     {
+        var sMessage = this.m_oTranslate.instant("MSG_SUMMARY_ERROR");
+
         var oController = this;
         this.m_oProcessWorkspaceService.getSummary()
             .then(function (data, status) {
                 if(utilsIsObjectNullOrUndefined(data.data) === true || data.data.BoolValue === false)
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
+                    utilsVexDialogAlertTop(sMessage);
                 }
                 else
                 {
@@ -303,7 +307,7 @@ var RootController = (function() {
                 }
 
             },(function (data,status) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
+                utilsVexDialogAlertTop(sMessage);
 
             }));
     };
@@ -390,6 +394,8 @@ var RootController = (function() {
 
         var oController = this;
 
+        var sMessage = this.m_oTranslate.instant("MSG_ERROR_READING_WS");
+
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data != null)
             {
@@ -400,7 +406,7 @@ var RootController = (function() {
                 }
             }
         },(function (data,status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
+            utilsVexDialogAlertTop(sMessage);
         }));
     };
 
@@ -611,7 +617,10 @@ var RootController = (function() {
                 oController.m_bIsEditModelWorkspaceNameActive = false;
             }); // no error handling in this case
         };
-        utilsVexPrompt("Insert Workspace Name:<br>", oController.m_oConstantsService.getActiveWorkspace().name, oCallback);
+
+        var sMessage = this.m_oTranslate.instant("MSG_INSERT_WS_NAME");
+
+        utilsVexPrompt(sMessage, oController.m_oConstantsService.getActiveWorkspace().name, oCallback);
 
         this.m_bIsEditModelWorkspaceNameActive = true;
     };
@@ -644,6 +653,8 @@ var RootController = (function() {
         if (this.m_oConstantsService.getUser() != null) {
             if (this.m_oConstantsService.getUser() != undefined) {
 
+                var sMessage = this.m_oTranslate.instant("MSG_ERROR_READING_WS");
+
                 var oController = this;
 
                 this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
@@ -653,7 +664,7 @@ var RootController = (function() {
                     }
 
                 },(function (data,status) {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
+                    utilsVexDialogAlertTop(sMessage);
 
                 }));
             }
@@ -762,7 +773,8 @@ var RootController = (function() {
         '$timeout',
         'ModalService',
         'RabbitStompService',
-        '$window'
+        '$window',
+        '$translate'
     ];
 
     return RootController;

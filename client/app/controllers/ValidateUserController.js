@@ -3,7 +3,7 @@
  */
 
 var ValidateUserController  = (function() {
-    function ValidateUserController($scope, $location, oConstantsService, oAuthService, oState, oTimeout) {
+    function ValidateUserController($scope, $location, oConstantsService, oAuthService, oState, oTimeout, oTranslate) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
@@ -11,6 +11,7 @@ var ValidateUserController  = (function() {
         this.m_oAuthService = oAuthService;
         this.m_sMessage = "Waiting...";
         this.m_oTimeout = oTimeout;
+        this.m_oTranslate = oTranslate;
         this.m_oScope.m_oController = this;
         var sEmail = this.m_oLocation.$$search.email;
         var sValidationCode = this.m_oLocation.$$search.validationCode;
@@ -32,23 +33,30 @@ var ValidateUserController  = (function() {
     ValidateUserController.prototype.validateUser = function(sEmail,sValidationCode)
     {
         var oController = this;
+
+        var sOkMsg = this.m_oTranslate.instant("MSG_USER_VALIDATED");
+        var sKoMsg = this.m_oTranslate.instant("MSG_USER_NOT_VALIDATED");
+        var sRedirectMsg = this.m_oTranslate.instant("MSG_USER_REDIRECT");
+        var sErrorMsg = this.m_oTranslate.instant("MSG_USER_VALIDATE_ERROR");
+
+
         this.m_oAuthService.validateUser(sEmail,sValidationCode).then(
         function (data,status) {
             if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
                 if(data.data.boolValue === true)
                 {
-                    oController.m_sMessage = "User validated";
+                    oController.m_sMessage = sOkMsg;
                 }
                 else
                 {
-                    oController.m_sMessage = "Server error: impossible to validate the user";
+                    oController.m_sMessage = sKoMsg;
                 }
-                oController.m_sMessage = oController.m_sMessage + " Redirecting...";
+                oController.m_sMessage = oController.m_sMessage + sRedirectMsg;
                 oController.timeoutRedirect();
             }
         },(function (data,status){
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR VALIDATING USER");
+            utilsVexDialogAlertTop(sErrorMsg);
             oController.timeoutRedirect();
 
         }));
@@ -60,7 +68,8 @@ var ValidateUserController  = (function() {
         'ConstantsService',
         'AuthService',
         '$state',
-        '$timeout'
+        '$timeout',
+        "$translate"
     ];
 
     return ValidateUserController;

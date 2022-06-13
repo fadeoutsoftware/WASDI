@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function () {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope, oTranslate) {
         /**
          * Angular Scope
          */
@@ -67,6 +67,10 @@ var WasdiApplicationUIController = (function () {
          * SCE Angular Service
          */
         this.m_oSceService = $sce;
+        /**
+         * Translate Service
+         */
+        this.m_oTranslate = oTranslate;
         /**
          * Contains one property for each tab. Each Property is an array of the Tab Controls
          * @type {*[]}
@@ -175,7 +179,7 @@ var WasdiApplicationUIController = (function () {
             }
         }
 
-
+        var sAppUiError = this.m_oTranslate.instant("MSG_MKT_APP_UI_ERROR");
         /**
          * Ask the Processor UI to the WASDI server
          */
@@ -199,8 +203,10 @@ var WasdiApplicationUIController = (function () {
                 }
             }
         }, function (oError) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: READING APP UI");
+            utilsVexDialogAlertTop(sAppUiError);
         });
+
+        var sAppDataError = this.m_oTranslate.instant("MSG_MKT_APP_DATA_ERROR");
 
         /**
          * Ask the list of Applications to the WASDI server
@@ -209,11 +215,14 @@ var WasdiApplicationUIController = (function () {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.m_oApplication = data.data;
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+                utilsVexDialogAlertTop(sAppDataError);
             }
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING APPLICATION DATA");
+            utilsVexDialogAlertTop(sAppDataError);
         });
+
+        var sNoHelp = this.m_oTranslate.instant("MSG_MKT_APP_NO_HELP")
+        var sHelpError = this.m_oTranslate.instant("MSG_MKT_APP_HELP_ERROR")
 
         // Retrive also the help
         this.m_oProcessorService.getHelpFromProcessor(this.m_sSelectedApplication).then(function (data) {
@@ -233,17 +242,17 @@ var WasdiApplicationUIController = (function () {
                 }
                 //If the message is empty from the server or is null
                 if (sHelpMessage === "") {
-                    sHelpMessage = "There isn't any help message."
+                    sHelpMessage = sNoHelp;
                 }
 
                 var oConverter = new showdown.Converter({tables: true});
 
                 oController.m_sHelpHtml = oController.m_oSceService.trustAsHtml(oConverter.makeHtml(sHelpMessage));
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
+                utilsVexDialogAlertTop(sHelpError);
             }
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING APP HELP");
+            utilsVexDialogAlertTop(sHelpError);
             oController.cleanAllExecuteWorkflowFields();
         });
     }
@@ -298,11 +307,16 @@ var WasdiApplicationUIController = (function () {
      * @param oWorkspace Workpsace
      */
     WasdiApplicationUIController.prototype.executeProcessorInWorkspace = function (oController, sApplicationName, oProcessorInput, oWorkspace) {
+
+        var sErrorOpenWs = this.m_oTranslate.instant("MSG_MKT_SUBSCRIBE_WS");
+        var sScheduled = this.m_oTranslate.instant("MSG_MKT_PROC_SCHEDULED");
+        var sError = this.m_oTranslate.instant("MSG_MKT_RUN_ERROR");
+
         try {
             // Subscribe to the asynch notifications
             oController.m_oRabbitStompService.subscribe(oWorkspace.workspaceId);
         } catch (error) {
-            let oDialog = utilsVexDialogAlertBottomRightCorner('ERROR SUBSCRIBING<br>THE WORKSPACE');
+            let oDialog = utilsVexDialogAlertBottomRightCorner(sErrorOpenWs);
             utilsVexCloseDialogAfter(4000, oDialog);
         }
 
@@ -313,7 +327,7 @@ var WasdiApplicationUIController = (function () {
         oController.m_oProcessorService.runProcessor(sApplicationName, JSON.stringify(oProcessorInput)).then(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 // Ok, processor scheduled, notify the user
-                var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
+                var oDialog = utilsVexDialogAlertBottomRightCorner(sScheduled);
                 utilsVexCloseDialogAfter(4000, oDialog);
 
                 oController.m_oConstantsService.setActiveWorkspace(null);
@@ -321,16 +335,18 @@ var WasdiApplicationUIController = (function () {
                 // Move to the editor
                 oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
+                utilsVexDialogAlertTop(sError);
             }
         }, function () {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING APPLICATION");
+            utilsVexDialogAlertTop(sError);
         });
     }
 
     WasdiApplicationUIController.prototype.checkParams = function (asMessages) {
 
         let bReturn = true;
+
+        var sRequiredString = this.m_oTranslate.instant("MSG_MKT_REQUIRED");
 
         // For each tab
         for (let iTabs = 0; iTabs < this.m_asTabs.length; iTabs++) {
@@ -349,7 +365,7 @@ var WasdiApplicationUIController = (function () {
 
                         if (utilsIsStrNullOrEmpty(sStringValue)) {
 
-                            let sMsg = oElement.label + " is required";
+                            let sMsg = oElement.label + sRequiredString;
                             asMessages.push(sMsg);
 
                             bReturn = false;
@@ -357,7 +373,7 @@ var WasdiApplicationUIController = (function () {
                     } else {
                         let oValue = oElement.getValue();
                         if (utilsIsObjectNullOrUndefined(oValue)) {
-                            let sMsg = oElement.label + " is required";
+                            let sMsg = oElement.label + sRequiredString;
                             asMessages.push(sMsg);
 
                             bReturn = false;
@@ -389,9 +405,6 @@ var WasdiApplicationUIController = (function () {
                 // Take the element
                 let oElement = this.m_aoViewElements[sTab][iControls];
 
-                // Debug only log
-                //console.log(oElement.paramName + " ["+oElement.type+"]: " + oElement.getValue());
-
                 // Save the value to the output json
                 if (this.m_bRenderAsStrings && oElement.type != 'numeric') {
                     oProcessorInput[oElement.paramName] = oElement.getStringValue();
@@ -416,13 +429,13 @@ var WasdiApplicationUIController = (function () {
 
         if (!bCheck) {
 
-            let sMessage = "PLEASE INSERT REQUIRED FIELDS<br>AND CHECK INSERTED VALUES";
+            let sMessage = this.m_oTranslate.instant("MSG_MKT_INSERT_REQUIRED");
 
             let bLongMessage = false;
 
             if (utilsIsObjectNullOrUndefined(asMessages) == false){
                 if (asMessages.length>0) {
-                    sMessage = "GURU MEDITATION <BR>";
+                    sMessage = this.m_oTranslate.instant("MSG_MKT_GURU");
                     let iCount = 0;
                     for (iCount = 0; iCount<asMessages.length; iCount++) {
                         sMessage = sMessage + asMessages[iCount] + "<br>";
@@ -467,6 +480,9 @@ var WasdiApplicationUIController = (function () {
                 sWorkspaceName = sApplicationName + "_" + sToday;
             }
 
+            let sOpenError = this.m_oTranslate.instant("MSG_MKT_WS_OPEN_ERROR");
+            let sCreateError = this.m_oTranslate.instant("MSG_MKT_WS_CREATE_ERROR");
+
             // Create a new Workspace
             this.m_oWorkspaceService.createWorkspace(sWorkspaceName).then(function (data, status) {
 
@@ -480,14 +496,14 @@ var WasdiApplicationUIController = (function () {
                         oController.executeProcessorInWorkspace(oController, sApplicationName, oProcessorInput, oData.data);
                     }
                 }, function () {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
+                    utilsVexDialogAlertTop(sOpenError);
                 });
 
                 oController.m_oRootScope.title = sWorkspaceName;
 
             }
                 , function () {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR CREATING WORKSPACE");
+                    utilsVexDialogAlertTop(sCreateError);
                 });
         } else {
             if (this.m_oSelectedWorkspace) {
@@ -606,6 +622,7 @@ var WasdiApplicationUIController = (function () {
         var oController = this;
 
         this.m_bHistoryLoading = true;
+        var sErrorMsg = this.m_oTranslate.instant("MSG_MKT_HISTORY");
 
         this.m_oProcessWorkspaceService.getProcessesByProcessor(this.m_sSelectedApplication).then(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
@@ -616,7 +633,7 @@ var WasdiApplicationUIController = (function () {
             oController.m_bHistoryLoading = false;
         }, function (data, status) {
             oController.m_bHistoryLoading = false;
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING HISTORY');
+            utilsVexDialogAlertTop(sErrorMsg);
         });
     }
 
@@ -666,15 +683,19 @@ var WasdiApplicationUIController = (function () {
      */
     WasdiApplicationUIController.prototype.openWorkspaceClicked = function () {
         var oController = this;
+
+        var sError1 = this.m_oTranslate.instant("MSG_MKT_WS_ERROR");
+        var sError2 = this.m_oTranslate.instant("MSG_MKT_PRODUCT_LIST_ERROR");
+
         this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.m_aoWorkspaceList = data.data;
                 oController.m_aoWorkspaceListForDirective = oController.getDropdownMenuList(data.data);
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
+                utilsVexDialogAlertTop(sError1);
             }
         }, function () {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR READING USER WORKSPACES");
+            utilsVexDialogAlertTop(sError2);
         })
     };
 
@@ -686,6 +707,7 @@ var WasdiApplicationUIController = (function () {
         this.m_oSelectedWorkspace = oWorkspace;
 
         let oController = this;
+        var sError2 = this.m_oTranslate.instant("MSG_MKT_PRODUCT_LIST_ERROR");
 
         this.m_oProductService.getProductListByWorkspace(oWorkspace.workspaceId).then(function (data, status) {
 
@@ -728,7 +750,7 @@ var WasdiApplicationUIController = (function () {
 
 
         }, function (data, status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
+            utilsVexDialogAlertTop(sError2);
         });
     }
 
@@ -771,7 +793,8 @@ var WasdiApplicationUIController = (function () {
         'ProcessWorkspaceService',
         'ModalService',
         '$sce',
-        '$rootScope'
+        '$rootScope',
+        '$translate'
     ];
 
     return WasdiApplicationUIController;

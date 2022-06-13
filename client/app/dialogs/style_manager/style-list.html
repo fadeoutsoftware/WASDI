@@ -1,7 +1,7 @@
 <div>
     <input class = "wasdi-input"
             ng-model="SearchTextStyle"
-            placeholder="Filter Style Name..." style="margin-bottom: 15px;">
+            placeholder='{{"DIALOG_STYLE_FILTER"|translate}}' style="margin-bottom: 15px;">
 </div>
 <div class="row-v4 styles-list">
     <div class="col-v4-4 mb-4" ng-repeat="style in m_oController.m_aoStyleList | filter: {name:SearchTextStyle}">
@@ -9,17 +9,17 @@
             <div class="row-v4">
                 <div class="col-v4-12">
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===style.userId || style.sharedWithMe"
-                            class="wapps-button" title="Download"
+                            class="wapps-button" title='{{"DIALOG_DOWNLOAD_BUTTON"|translate}}'
                             ng-click="m_oController.downloadStyle(style)">
                         <em class="fa fa-download"></em>
                     </button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===style.userId || style.sharedWithMe"
-                            class="wapps-button" title="Edit"
+                            class="wapps-button" title='{{"DIALOG_EDIT_BUTTON"|translate}}'
                             ng-click="m_oController.openEditStyleDialog(style)">
                         <em class="fa fa-edit"></em>
                     </button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===style.userId || style.sharedWithMe"
-                            class="wapps-button" title="Delete"
+                            class="wapps-button" title='{{"DIALOG_DELETE_BUTTON"|translate}}'
                             ng-click="m_oController.openDeleteStyleDialog(style)">
                         <em class="fa fa-times"></em>
                     </button>
