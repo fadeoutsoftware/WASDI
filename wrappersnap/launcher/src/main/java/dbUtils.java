@@ -8,10 +8,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,6 +25,14 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.locationtech.jts.index.bintree.NodeBase;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import com.mongodb.client.model.geojson.Polygon;
+import com.mongodb.client.model.geojson.PolygonCoordinates;
+import com.mongodb.client.model.geojson.Position;
 
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -39,6 +53,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
+import wasdi.shared.business.ecostress.EcoStressItem;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -55,6 +70,7 @@ import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
+import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -2111,6 +2127,8 @@ public class dbUtils {
                 // Configure also the local connection
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
+            
+            MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 
             boolean bExit = false;
 
@@ -2132,6 +2150,7 @@ public class dbUtils {
                 System.out.println("\t10 - Categories");
                 System.out.println("\t11 - ProcessWorkspace");
                 System.out.println("\t12 - Logs");
+                System.out.println("\t13 - EcoStress");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2162,6 +2181,8 @@ public class dbUtils {
                     processWorkpsaces();
                 } else if (sInputString.equals("12")) {
                     logs();
+                } else if (sInputString.equals("13")) {
+                    ecoStress();
                 } else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {
@@ -2180,6 +2201,83 @@ public class dbUtils {
             e.printStackTrace();
         }
     }
+
+	private static void ecoStress() {
+		
+	    // Instantiate the Factory
+		DocumentBuilderFactory oDocBuilderFactory = DocumentBuilderFactory.newInstance();
+		
+		try {
+			
+			String [] asFiles;
+			String sFolder = "C:\\Temp\\Ecostress\\";
+			
+			EcoStressRepository oEcoStressRepository = new EcoStressRepository();
+			
+			File oXmlFolder = new File(sFolder);
+			
+			asFiles = oXmlFolder.list();
+			
+			for (String sFile : asFiles) {
+				
+				File oActualFile = new File(sFolder+sFile);
+				
+		        // parse XML file
+		        DocumentBuilder oDocBuilder = oDocBuilderFactory.newDocumentBuilder();
+		
+		        Document oDoc = oDocBuilder.parse(oActualFile);
+		
+		        oDoc.getDocumentElement().normalize();
+		        
+		        // get <staff>
+		        String sFileName = oActualFile.getName();
+		        sFileName = sFileName.replace(".xml", "");
+		        
+		        String sWest = oDoc.getElementsByTagName("WestBoundingCoordinate").item(0).getTextContent();
+		        String sNorth = oDoc.getElementsByTagName("NorthBoundingCoordinate").item(0).getTextContent();
+		        String sEast = oDoc.getElementsByTagName("EastBoundingCoordinate").item(0).getTextContent();
+		        String sSouth = oDoc.getElementsByTagName("SouthBoundingCoordinate").item(0).getTextContent();
+		        
+		        double dWest = Double.parseDouble(sWest);
+		        double dNorth = Double.parseDouble(sNorth);
+		        double dEast = Double.parseDouble(sEast);
+		        double dSouth = Double.parseDouble(sSouth);
+		        
+		        
+		        String sOrbit = oDoc.getElementsByTagName("StartOrbitNumber").item(0).getTextContent();
+		        
+		        String sDayNight = oDoc.getElementsByTagName("DayNightFlag").item(0).getTextContent();
+		        
+		        EcoStressItem oItem = new EcoStressItem();
+		        
+		        
+		        Polygon oImageFootPrint = new Polygon(Arrays.asList(new Position(dWest, dNorth),
+		                new Position(dWest, dSouth),
+		                new Position(dEast, dSouth),
+		                new Position(dEast, dNorth),
+		                new Position(dWest, dNorth)
+		                ));
+		        
+		        oItem.setFileName(sFileName);
+		        oItem.setLocation(oImageFootPrint);
+		        oItem.setOrbit(Integer.parseInt(sOrbit));
+		        oItem.setDayNight(sDayNight);
+		        //oItem.setDate(null);
+		        
+		        
+		        oEcoStressRepository.insertEcoStressItem(oItem);
+		        
+		        System.out.println(sFileName);				
+			}
+			
+	
+
+	
+	      } 
+		catch (Exception e) {
+	          e.printStackTrace();
+	    }
+	}
 
 
 }

@@ -72,6 +72,11 @@ public class WasdiConfig {
 	public MongoConfig mongoLocal;	
 	
 	/**
+	 * Mongo db Configuration
+	 */
+	public MongoConfig mongoEcostress;		
+	
+	/**
 	 * Keycloack auth server Configuration
 	 */
 	public KeycloackConfig keycloack;
