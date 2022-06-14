@@ -2,56 +2,35 @@ package wasdi.shared.business.ecostress;
 
 import com.mongodb.client.model.geojson.Polygon;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 public class EcoStressItem {
-	
+
 	private String fileName;
-	
-	private int orbit;
-	
-	private String dayNight;
-	
-	private Double date;
-	
+
+	private int startOrbitNumber;
+	private int stopOrbitNumber;
+
+	private String dayNightFlag;
+
+	private Double beginningDate;
+	private Double endingDate;
+
 	private Polygon location;
 
-	public String getFileName() {
-		return fileName;
-	}
+	private String platform;
+	private String instrument;
+	private String sensor;
+	private String parameterName;
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	public int getOrbit() {
-		return orbit;
-	}
-
-	public void setOrbit(int orbit) {
-		this.orbit = orbit;
-	}
-
-	public String getDayNight() {
-		return dayNight;
-	}
-
-	public void setDayNight(String dayNight) {
-		this.dayNight = dayNight;
-	}
-
-	public Double getDate() {
-		return date;
-	}
-
-	public void setDate(Double date) {
-		this.date = date;
-	}
-
-	public Polygon getLocation() {
-		return location;
-	}
-
-	public void setLocation(Polygon location) {
-		this.location = location;
-	}
+	private String s3Path;
+	private String url;
 	
 }

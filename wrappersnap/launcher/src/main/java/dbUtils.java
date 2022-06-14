@@ -14,10 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -25,15 +23,12 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.locationtech.jts.index.bintree.NodeBase;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import com.mongodb.client.model.geojson.Polygon;
-import com.mongodb.client.model.geojson.PolygonCoordinates;
 import com.mongodb.client.model.geojson.Position;
 
+import wasdi.dbutils.helpers.S3Helper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -70,11 +65,12 @@ import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
-import wasdi.shared.data.ecostress.EcoStressRepository;
+
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
+
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -2203,81 +2199,12 @@ public class dbUtils {
     }
 
 	private static void ecoStress() {
-		
-	    // Instantiate the Factory
-		DocumentBuilderFactory oDocBuilderFactory = DocumentBuilderFactory.newInstance();
-		
+
 		try {
-			
-			String [] asFiles;
-			String sFolder = "C:\\Temp\\Ecostress\\";
-			
-			EcoStressRepository oEcoStressRepository = new EcoStressRepository();
-			
-			File oXmlFolder = new File(sFolder);
-			
-			asFiles = oXmlFolder.list();
-			
-			for (String sFile : asFiles) {
-				
-				File oActualFile = new File(sFolder+sFile);
-				
-		        // parse XML file
-		        DocumentBuilder oDocBuilder = oDocBuilderFactory.newDocumentBuilder();
-		
-		        Document oDoc = oDocBuilder.parse(oActualFile);
-		
-		        oDoc.getDocumentElement().normalize();
-		        
-		        // get <staff>
-		        String sFileName = oActualFile.getName();
-		        sFileName = sFileName.replace(".xml", "");
-		        
-		        String sWest = oDoc.getElementsByTagName("WestBoundingCoordinate").item(0).getTextContent();
-		        String sNorth = oDoc.getElementsByTagName("NorthBoundingCoordinate").item(0).getTextContent();
-		        String sEast = oDoc.getElementsByTagName("EastBoundingCoordinate").item(0).getTextContent();
-		        String sSouth = oDoc.getElementsByTagName("SouthBoundingCoordinate").item(0).getTextContent();
-		        
-		        double dWest = Double.parseDouble(sWest);
-		        double dNorth = Double.parseDouble(sNorth);
-		        double dEast = Double.parseDouble(sEast);
-		        double dSouth = Double.parseDouble(sSouth);
-		        
-		        
-		        String sOrbit = oDoc.getElementsByTagName("StartOrbitNumber").item(0).getTextContent();
-		        
-		        String sDayNight = oDoc.getElementsByTagName("DayNightFlag").item(0).getTextContent();
-		        
-		        EcoStressItem oItem = new EcoStressItem();
-		        
-		        
-		        Polygon oImageFootPrint = new Polygon(Arrays.asList(new Position(dWest, dNorth),
-		                new Position(dWest, dSouth),
-		                new Position(dEast, dSouth),
-		                new Position(dEast, dNorth),
-		                new Position(dWest, dNorth)
-		                ));
-		        
-		        oItem.setFileName(sFileName);
-		        oItem.setLocation(oImageFootPrint);
-		        oItem.setOrbit(Integer.parseInt(sOrbit));
-		        oItem.setDayNight(sDayNight);
-		        //oItem.setDate(null);
-		        
-		        
-		        oEcoStressRepository.insertEcoStressItem(oItem);
-		        
-		        System.out.println(sFileName);				
-			}
-			
-	
-
-	
-	      } 
-		catch (Exception e) {
-	          e.printStackTrace();
-	    }
+			S3Helper.parseS3Bucket();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-
 
 }
