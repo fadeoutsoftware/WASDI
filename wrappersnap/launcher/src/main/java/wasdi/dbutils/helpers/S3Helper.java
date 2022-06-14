@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -28,6 +30,7 @@ import wasdi.shared.business.ecostress.EcoStressItem;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.Utils;
 
 public final class S3Helper {
 
@@ -155,15 +158,12 @@ public final class S3Helper {
 			double dNorth = Double.parseDouble(sNorth);
 			double dEast = Double.parseDouble(sEast);
 			double dSouth = Double.parseDouble(sSouth);
-	
-			Polygon oImageFootPrint = new Polygon(Arrays.asList(new Position(dWest, dNorth),
-					new Position(dWest, dSouth),
-					new Position(dEast, dSouth),
-					new Position(dEast, dNorth),
-					new Position(dWest, dNorth)
-					));
+			
+			String sCoordinates = "[[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]]"; 
+			
+			String sLocationJson = "{'type': 'Polygon', 'coordinates': " + sCoordinates +"}";
 
-			return oImageFootPrint;
+			return sLocationJson;
 		} catch (Exception oEx) {
 			System.out.println("asProperties: " + asProperties);
 			oEx.printStackTrace();
@@ -260,5 +260,40 @@ public final class S3Helper {
 
 		return TimeEpochUtils.fromDateStringToEpoch(sComposedDate);
 	}
+	
+	public static void importEcoStressFolder(String sFolder) {
+		
+		try {
+			
+			String [] asFiles;
+			
+			EcoStressRepository oEcoStressRepository = new EcoStressRepository();
+			
+			File oXmlFolder = new File(sFolder);
+			
+			asFiles = oXmlFolder.list();
+			
+			for (String sFile : asFiles) {
+				
+				File oActualFile = new File(sFolder+sFile);
+				
+				Map<String, String> asProperties = parseXmlFile(sFolder+sFile);
+				//EcoStressItem oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
+			}
+		} 
+		catch (Exception e) {
+	          e.printStackTrace();
+	    }		
+	}
+	
+	public static void importEcoStress(String sLocalFolder) {
+		
+		if (Utils.isNullOrEmpty(sLocalFolder)) {
+			parseS3Bucket();
+		}
+		else {
+			importEcoStressFolder(sLocalFolder);
+		}
+	}	
 
 }
