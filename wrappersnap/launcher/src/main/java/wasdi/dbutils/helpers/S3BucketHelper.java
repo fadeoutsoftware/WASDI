@@ -14,6 +14,9 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -74,9 +77,11 @@ public final class S3BucketHelper {
 		do {
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
 				EcoStressItem oItem = parseEntry(sBucketName, oS3ObjectSummary.getKey());
-				oEcoStressRepository.insertEcoStressItem(oItem);
-
-				iCounter++;
+				
+				if (oItem != null) {
+					oEcoStressRepository.insertEcoStressItem(oItem);
+					iCounter++;					
+				}
 			}
 			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
 		} while (oObjectListing.getObjectSummaries().size() != 0);
@@ -162,11 +167,42 @@ public final class S3BucketHelper {
 			double dEast = Double.parseDouble(sEast);
 			double dSouth = Double.parseDouble(sSouth);
 			
+			/*
+			double adPoint1[] = { dWest, dNorth };
+			double adPoint2[] = { dWest, dSouth };
+			double adPoint3[] = { dEast, dSouth };
+			double adPoint4[] = { dEast, dNorth };
+			double adPoint5[] = { dWest, dNorth };
+			
+			JSONArray oPoint1 = new JSONArray(adPoint1);
+			JSONArray oPoint2 = new JSONArray(adPoint2);
+			JSONArray oPoint3 = new JSONArray(adPoint3);
+			JSONArray oPoint4 = new JSONArray(adPoint4);
+			JSONArray oPoint5 = new JSONArray(adPoint5);
+			
+			JSONArray oFirstArray = new JSONArray();
+			oFirstArray.put(oPoint1);
+			oFirstArray.put(oPoint2);
+			oFirstArray.put(oPoint3);
+			oFirstArray.put(oPoint4);
+			oFirstArray.put(oPoint5);
+			
+			JSONArray oSecondArray = new JSONArray();
+			oSecondArray.put(oFirstArray);
+			
+			
+			JSONObject oLocation = new JSONObject();
+			oLocation.put("type", "Polygon");
+			oLocation.put("coordinates", oSecondArray);
+			*/
+			
 			String sCoordinates = "[[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]]"; 
 			
-			String sLocationJson = "{'type': 'Polygon', 'coordinates': " + sCoordinates +"}";
+			String sLocationJson = "{\"type\": \"Polygon\", \"coordinates\": " + sCoordinates +"}";
 
 			return sLocationJson;
+			
+			//return oLocation;
 		} catch (Exception oEx) {
 			System.out.println("asProperties: " + asProperties);
 			oEx.printStackTrace();

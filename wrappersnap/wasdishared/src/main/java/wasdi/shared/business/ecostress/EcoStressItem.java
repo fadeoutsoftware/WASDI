@@ -1,6 +1,6 @@
 package wasdi.shared.business.ecostress;
 
-import com.mongodb.client.model.geojson.Polygon;
+import org.json.JSONObject;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +23,7 @@ public class EcoStressItem {
 	private Double beginningDate;
 	private Double endingDate;
 
-	private Polygon location;
+	private String location;
 
 	private String platform;
 	private String instrument;
