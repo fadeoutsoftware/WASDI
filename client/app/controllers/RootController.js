@@ -764,6 +764,7 @@ var RootController = (function() {
     // Function used to swap language of the interface
     RootController.prototype.swapLanguage = function (sCountryCode){
         this.m_oTranslate.use(sCountryCode);
+        this.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
     }
 
 
