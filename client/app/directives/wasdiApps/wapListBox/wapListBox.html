@@ -1,0 +1,9 @@
+<div class="waplistbox-directive">
+    <input type="text"  class="form-control" placeholder="Search..." ng-model="textFilter">
+
+    <div class="list-group" >
+        <a href="" class="list-group-item" ng-repeat="option in optionsDirective | filter:textFilter track by $index " ng-class="{active: isOptionSelected(option)}" ng-click="pushOptionInSelectedList(option);">
+            {{option}}
+        </a>
+    </div>
+</div>
