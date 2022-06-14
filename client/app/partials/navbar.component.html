@@ -1,6 +1,6 @@
 <div class="row-v4 header-wrapper">
     <div class="col-v4-auto">
-        <a  href=""  ng-click="m_oController.openSnake()">
+        <a href="" ng-click="m_oController.openSnake()">
             <img class="brand-logo" id="brand-logo" alt="logo">
             <script>
                 // Script fix an error with Firefox which does not
@@ -9,9 +9,9 @@
                 $(document).ready(function () {
                     var oImage = $("#brand-logo");
                     var imageSrc = oImage.css("content");
-                    imageSrc = imageSrc.replace("url(\"","");
-                    imageSrc = imageSrc.replace("\")","");
-                    oImage.attr("src",imageSrc);
+                    imageSrc = imageSrc.replace("url(\"", "");
+                    imageSrc = imageSrc.replace("\")", "");
+                    oImage.attr("src", imageSrc);
                 })
             </script>
         </a>
@@ -19,10 +19,11 @@
 
 
     <div class="col-v4 my-nav-bar pl-0">
-        <nav class="navbar navbar-default navbar-wasdi" >
+        <nav class="navbar navbar-default navbar-wasdi">
             <div class="container-fluid-v4">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -34,30 +35,35 @@
                     <!-- EDIT NAME -->
                     <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
                         <div class="form-group">
-                            <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
-                                   ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
-                                   ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
-                            <strong class="cursor" ></strong>
+                            <input type="text" readonly
+                                ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                                ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
+                                ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
+                            <strong class="cursor"></strong>
 
                         </div>
                     </div>
                     <!------------------------------ USER ------------------------------>
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
-                            <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                <img src="assets/icons/white-user-icon2.png"
-                                     style="width: 26px"
-                                     alt="user icon"
-                                     onmouseover="this.src='assets/icons/green-user-icon2.png';"
-                                     onmouseout="this.src='assets/icons/white-user-icon2.png';" />
+                            <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="true">
+                                <img src="assets/icons/white-user-icon2.png" style="width: 26px" alt="user icon"
+                                    onmouseover="this.src='assets/icons/green-user-icon2.png';"
+                                    onmouseout="this.src='assets/icons/white-user-icon2.png';" />
                             </div>
                             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
-                                <li role="presentation"  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
+                                <li role="presentation" ng-click="m_oController.editUserInfo()">
+                                    <!--dropdown-header-->
                                     <a role="menuitem" tabindex="-1">
 
                                         <i class="far fa-user fa-lg" aria-hidden="true"></i>
-                                        <span class="" ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>
-                                        <span ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.userId}}</span>
+                                        <span class=""
+                                            ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}}
+                                            {{m_oController.m_oUser.name}}</span>
+                                        <span
+                                            ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}}
+                                            {{m_oController.m_oUser.userId}}</span>
                                     </a>
 
                                 </li>
@@ -65,7 +71,7 @@
                                 <li role="presentation" class="divider"></li>
 
                                 <li role="presentation" ng-click="m_oController.openDocumentatonCenter()">
-                                    <a role="menuitem" tabindex="-1" href="" >
+                                    <a role="menuitem" tabindex="-1" href="">
                                         <i class="fa fa-book fa-lg" aria-hidden="true"></i>
                                         <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
                                     </a>
@@ -76,6 +82,54 @@
                                         <span>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</span>
                                     </a>
                                 </li>
+
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!------------------------------ LANGUAGE ------------------------------>
+                    <div class="nav navbar-nav navbar-right user-container">
+                        <div class="dropdown">
+                            <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="true">
+                                <i class="far fa-flag fa-lg" aria-hidden="true"></i>
+                            </div>
+                            <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
+                                <li role="presentation" ng-click="m_oController.swapLanguage('en')">
+                                    <!--dropdown-header-->
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="https://flagicons.lipis.dev/flags/4x3/gb.svg" style="width: 27px;"/></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">English</span>
+
+                                    </a>
+
+                                </li>
+
+                                <!--li role="presentation" class="divider"></li>
+                                <li role="presentation" ng-click="m_oController.swapLanguage('it')">
+                                    
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i class="far fa-user fa-lg" aria-hidden="true"></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Italian</span>
+
+                                    </a>
+
+                                </li-->
+
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" ng-click="m_oController.swapLanguage('vn')">
+                                    <!--dropdown-header-->
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="https://flagicons.lipis.dev/flags/4x3/vn.svg" style="width: 27px;"/></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Tiếng Việt</span>
+
+                                    </a>
+
+                                </li>
+
                             </ul>
                         </div>
                     </div>
@@ -83,8 +137,8 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <!-- APPSTORE BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.marketplace')}"  >
-                            <a ng-click="m_oController.openMarketPlace();" href=""   >
+                        <li ng-class="{active:m_oController.activePageCss('root.marketplace')}">
+                            <a ng-click="m_oController.openMarketPlace();" href="">
                                 <i class="fa fa-rocket" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_APPSTORE"|translate}}
                             </a>
@@ -93,43 +147,50 @@
 
                         <!-- HOME BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ng-click="m_oController.openWorkspaces();" href=""   >
+                            <a ng-click="m_oController.openWorkspaces();" href="">
                                 <i class="fa fa-save fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
                         <!-- PLAN BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
-                            <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
-                                <i class="fa fa-calendar fa-lg" aria-hidden="true" ></i>
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}">
+                            <!-- -->
+                            <a ng-click="m_oController.openSearchorbit()" href="">
+                                <!---->
+                                <i class="fa fa-calendar fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
                         <!-- SEARCH BUTTON-->
-                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
-                            <a ng-click="m_oController.openImportPage()" href=""   >
-                                <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                        <li ng-class="{active:m_oController.activePageCss('root.import')}">
+                            <a ng-click="m_oController.openImportPage()" href="">
+                                <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                <!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
                         <!-- EDITOR BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
-                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                        <li ng-class="{active:m_oController.activePageCss('root.editor')}"
+                            ng-disabled="m_oController.disableEditorButton()">
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href=""
+                                ng-style="{cursor:m_oController.cursorCss()}">
                                 <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
                         <!-- HELP BUTTON-->
                         <li role="presentation" ng-click="m_oController.openDocumentatonCenter()">
-                            <a role="menuitem" tabindex="-1" href="" >
+                            <a role="menuitem" tabindex="-1" href="">
                                 <i class="fa fa-book fa-lg" aria-hidden="true"></i>
                                 <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
                             </a>
                         </li>
                         <!-- SEND FEEDBACK BUTTON-->
-                        <li> <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
-                            <a ng-click="m_oController.openSendFeedbackDialog()"  href="" > <!---->
-                                <i class="fa fa-comment fa-lg" aria-hidden="true" ></i>
+                        <li>
+                            <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
+                            <a ng-click="m_oController.openSendFeedbackDialog()" href="">
+                                <!---->
+                                <i class="fa fa-comment fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}
                             </a>
                         </li>

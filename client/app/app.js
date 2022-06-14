@@ -91,6 +91,7 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, 
 
     $translateProvider.preferredLanguage('it');
     $translateProvider.useSanitizeValueStrategy('escaped');
+    $translateProvider.fallbackLanguage('en');
 
 }]);
 

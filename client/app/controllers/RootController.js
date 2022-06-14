@@ -761,6 +761,12 @@ var RootController = (function() {
         return utilsConvertOperationToDescription(oOperation);
     }
 
+    // Fucntion used to swap language of the interface
+    RootController.prototype.swapLanguage = function (sCountryCode){
+        this.m_oTranslate.use(sCountryCode);
+    }
+
+
     /*********************************************************************/
     RootController.$inject = [
         '$rootScope',
