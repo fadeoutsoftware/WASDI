@@ -18,8 +18,10 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -32,50 +34,51 @@ import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 
-public final class S3Helper {
+public final class S3BucketHelper {
 
-	private static final AWSCredentials credentials;
+	private static final AWSCredentials m_oCredentials;
+	private static final AmazonS3 m_oConn;
 
 	static {
-		credentials = new BasicAWSCredentials(WasdiConfig.Current.s3Bucket.accessKey, WasdiConfig.Current.s3Bucket.secretKey);
+		m_oCredentials = new BasicAWSCredentials(WasdiConfig.Current.s3Bucket.accessKey, WasdiConfig.Current.s3Bucket.secretKey);
+
+		m_oConn = new AmazonS3Client(m_oCredentials);
+		m_oConn.setEndpoint(WasdiConfig.Current.s3Bucket.endpoint);
 	}
 
-	private S3Helper() {
+	private S3BucketHelper() {
 		throw new java.lang.UnsupportedOperationException("This is a helper class and cannot be instantiated");
 	}
 
 	public static void parseS3Bucket() {
-		AmazonS3 oConn = new AmazonS3Client(credentials);
-		oConn.setEndpoint(WasdiConfig.Current.s3Bucket.endpoint);
-
 		String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
 		String sFolders = WasdiConfig.Current.s3Bucket.folders;
 
 		String[] asFolders = sFolders.split(", ");
 
 		for (String sFolder : asFolders) {
-			parseFolder(oConn, sBucketName, sFolder);
+			parseFolder(sBucketName, sFolder);
 		}
 	}
 
-	public static void parseFolder(AmazonS3 oConn, String sBucketName, String sFolderPath) {
+	public static void parseFolder(String sBucketName, String sFolderPath) {
 		System.out.println("parseFolder | bucketName: " + sBucketName + " | folderPath: " + sFolderPath);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
 		Date oStartDate = new Date();
 
-		ObjectListing oObjectListing = oConn.listObjects(sBucketName, sFolderPath);
+		ObjectListing oObjectListing = m_oConn.listObjects(sBucketName, sFolderPath);
 		int iCounter = -1;
 
 		do {
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
-				EcoStressItem oItem = parseEntry(oConn, sBucketName, oS3ObjectSummary.getKey());
+				EcoStressItem oItem = parseEntry(sBucketName, oS3ObjectSummary.getKey());
 				oEcoStressRepository.insertEcoStressItem(oItem);
 
 				iCounter++;
 			}
-			oObjectListing = oConn.listNextBatchOfObjects(oObjectListing);
+			oObjectListing = m_oConn.listNextBatchOfObjects(oObjectListing);
 		} while (oObjectListing.getObjectSummaries().size() != 0);
 
 		Date oEndDate = new Date();
@@ -85,7 +88,7 @@ public final class S3Helper {
 		System.out.println("counter: " + iCounter);
 	}
 
-	private static EcoStressItem parseEntry(AmazonS3 oConn, String sBucketName, String sEntryKey) {
+	private static EcoStressItem parseEntry(String sBucketName, String sEntryKey) {
 		String[] asTokens = sEntryKey.split("/");
 
 		if (asTokens.length < 4) {
@@ -100,7 +103,7 @@ public final class S3Helper {
 
 		String sUrl = WasdiConfig.Current.s3Bucket.endpoint + sBucketName + "/"+ sDirectoryName + "/" + sFileName;
 
-		String sXml = readFile(oConn, sBucketName, sXmlFilePath);
+		String sXml = readFile(sBucketName, sXmlFilePath);
 
 		Map<String, String> asProperties = parseXml(sXml);
 
@@ -136,7 +139,7 @@ public final class S3Helper {
 		oItem.setInstrument(asProperties.get("InstrumentShortName"));
 		oItem.setSensor(asProperties.get("SensorShortName"));
 		oItem.setParameterName(asProperties.get("ParameterName"));
-		
+
 		oItem.setS3Path(sS3Path);
 		oItem.setUrl(sUrl);
 
@@ -172,9 +175,9 @@ public final class S3Helper {
 		return null;
 	}
 
-	private static String readFile(AmazonS3 oConn, String sBucketName, String sFilePath) {
-		S3Object oS3Object = oConn.getObject(
-		        new GetObjectRequest(sBucketName, sFilePath)
+	private static String readFile(String sBucketName, String sFilePath) {
+		S3Object oS3Object = m_oConn.getObject(
+				new GetObjectRequest(sBucketName, sFilePath)
 		);
 
 		S3ObjectInputStream oS3ObjectInputStream = oS3Object.getObjectContent();
@@ -183,11 +186,30 @@ public final class S3Helper {
 		return sXml;
 	}
 
+	public static String downloadFile(String sBucketName, String sFilePath, String sDownloadPath) {
+		m_oConn.getObject(
+				new GetObjectRequest(sBucketName, sFilePath),
+				new File(sDownloadPath)
+		);
+
+		return sDownloadPath + "/" + sFilePath;
+	}
+
+	public static long getFileSize(String sBucketName, String sFilePath) {
+		ObjectMetadata objectMetadata = m_oConn.getObjectMetadata(
+				new GetObjectMetadataRequest(sBucketName, sFilePath)
+		);
+
+		long lInstanceLength = objectMetadata.getInstanceLength();
+
+		return lInstanceLength;
+	}
+
 	private static String s3ObjectInputStreamToString(S3ObjectInputStream s3ObjectInputStream) {
 		try {
-		    String xml = inputStreamToString(s3ObjectInputStream);
+			String xml = inputStreamToString(s3ObjectInputStream);
 
-		    return xml;
+			return xml;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -233,10 +255,10 @@ public final class S3Helper {
 
 	private static String fileToString(String sFilePath) {
 		try {
-		    File oFile = new File(sFilePath);
-		    String sXml = inputStreamToString(new FileInputStream(oFile));
+			File oFile = new File(sFilePath);
+			String sXml = inputStreamToString(new FileInputStream(oFile));
 
-		    return sXml;
+			return sXml;
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
@@ -245,14 +267,14 @@ public final class S3Helper {
 	}
 
 	public static String inputStreamToString(InputStream is) throws IOException {
-	    StringBuilder oSb = new StringBuilder();
-	    String sLine;
-	    BufferedReader oBr = new BufferedReader(new InputStreamReader(is));
-	    while ((sLine = oBr.readLine()) != null) {
-	        oSb.append(sLine);
-	    }
-	    oBr.close();
-	    return oSb.toString();
+		StringBuilder oSb = new StringBuilder();
+		String sLine;
+		BufferedReader oBr = new BufferedReader(new InputStreamReader(is));
+		while ((sLine = oBr.readLine()) != null) {
+			oSb.append(sLine);
+		}
+		oBr.close();
+		return oSb.toString();
 	}
 
 	private static Long parseDate(String sDate, String sTime) {

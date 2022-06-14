@@ -28,7 +28,7 @@ import org.w3c.dom.Document;
 import com.mongodb.client.model.geojson.Polygon;
 import com.mongodb.client.model.geojson.Position;
 
-import wasdi.dbutils.helpers.S3Helper;
+import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -2201,7 +2201,7 @@ public class dbUtils {
 	private static void ecoStress() {
 
 		try {
-			S3Helper.parseS3Bucket();
+			S3BucketHelper.parseS3Bucket();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
