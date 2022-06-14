@@ -123,8 +123,8 @@ public final class S3Helper {
 			oItem.setEndingDate(beginningDate.doubleValue());
 		}
 
-		Polygon oImageFootPrint = extractFootprint(asProperties);
-		oItem.setLocation(oImageFootPrint);
+		String sImageFootPrint = extractFootprint(asProperties);
+		oItem.setLocation(sImageFootPrint);
 
 		oItem.setPlatform(asProperties.get("PlatformShortName"));
 		oItem.setInstrument(asProperties.get("InstrumentShortName"));
@@ -137,7 +137,7 @@ public final class S3Helper {
 		return oItem;
 	}
 
-	private static Polygon extractFootprint(Map<String, String> asProperties) {
+	private static String extractFootprint(Map<String, String> asProperties) {
 		try {
 			String sWest = asProperties.get("WestBoundingCoordinate");
 			String sNorth = asProperties.get("NorthBoundingCoordinate");
