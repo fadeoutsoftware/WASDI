@@ -92,6 +92,11 @@ public class WasdiConfig {
 	public RabbitConfig rabbit;
 	
 	/**
+	 * S3 Bucket configuration
+	 */
+	public S3BucketConfig s3Bucket;
+	
+	/**
 	 * Snap configuration
 	 */
 	public SnapConfig snap;

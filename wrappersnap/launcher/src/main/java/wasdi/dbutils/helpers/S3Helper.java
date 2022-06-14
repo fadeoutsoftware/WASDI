@@ -25,30 +25,34 @@ import com.mongodb.client.model.geojson.Polygon;
 import com.mongodb.client.model.geojson.Position;
 
 import wasdi.shared.business.ecostress.EcoStressItem;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.TimeEpochUtils;
 
 public final class S3Helper {
 
-
 	private static final AWSCredentials credentials;
 
 	static {
-		credentials = new BasicAWSCredentials("Access_Key", "Secret_Key");
+		credentials = new BasicAWSCredentials(WasdiConfig.Current.s3Bucket.accessKey, WasdiConfig.Current.s3Bucket.secretKey);
 	}
 
 	private S3Helper() {
 		throw new java.lang.UnsupportedOperationException("This is a helper class and cannot be instantiated");
 	}
-	
+
 	public static void parseS3Bucket() {
 		AmazonS3 oConn = new AmazonS3Client(credentials);
-		oConn.setEndpoint("https://cf2.cloudferro.com:8080/");
+		oConn.setEndpoint(WasdiConfig.Current.s3Bucket.endpoint);
 
-		String sBucketName = "ECOSTRESS";
+		String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
+		String sFolders = WasdiConfig.Current.s3Bucket.folders;
 
-		parseFolder(oConn, sBucketName, "EEH/EEHSW/xml/");
-//		parseFolder(oConn, sBucketName, "EEH/EEHCM/xml/");
+		String[] asFolders = sFolders.split(", ");
+
+		for (String sFolder : asFolders) {
+			parseFolder(oConn, sBucketName, sFolder);
+		}
 	}
 
 	public static void parseFolder(AmazonS3 oConn, String sBucketName, String sFolderPath) {
@@ -63,10 +67,9 @@ public final class S3Helper {
 
 		do {
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
-//				if (iCounter > 130) { 
 				EcoStressItem oItem = parseEntry(oConn, sBucketName, oS3ObjectSummary.getKey());
 				oEcoStressRepository.insertEcoStressItem(oItem);
-//				}
+
 				iCounter++;
 			}
 			oObjectListing = oConn.listNextBatchOfObjects(oObjectListing);
@@ -86,19 +89,19 @@ public final class S3Helper {
 			return null;
 		}
 
-		String sDirectoryName = asTokens[1];
+		String sDirectoryName = asTokens[0] + "/" + asTokens[1];
 		String sFileName = asTokens[3].substring(0, asTokens[3].length() - 4);
 
-		String sXmlFilePath = "EEH/" + sDirectoryName + "/xml/" + sFileName + ".xml";
-		String sH5FilePath = "EEH/" + sDirectoryName + "/" + sFileName;
+		String sXmlFilePath = sDirectoryName + "/xml/" + sFileName + ".xml";
+		String sH5FilePath = sDirectoryName + "/" + sFileName;
 
-		String sUrl = "https://cf2.cloudferro.com:8080/ECOSTRESS/EEH/" + sDirectoryName + "/" + sFileName;
+		String sUrl = WasdiConfig.Current.s3Bucket.endpoint + sBucketName + "/"+ sDirectoryName + "/" + sFileName;
 
 		String sXml = readFile(oConn, sBucketName, sXmlFilePath);
 
-		Map<String, String> map = parseXml(sXml);
+		Map<String, String> asProperties = parseXml(sXml);
 
-		EcoStressItem oItem = buildEcoStressItem(map, sFileName, sH5FilePath, sUrl);
+		EcoStressItem oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
 
 		return oItem;
 	}
