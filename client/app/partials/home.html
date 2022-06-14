@@ -1,18 +1,63 @@
-    <div class="container-fluid">
+<div class="container-fluid">
     <div class="login-view row section_full_height">
         <div class="login-top">
             <nav class="navbar navbar-inverse bg_bluewasdi">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
-                            <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <li class="link-login pull-right  nav-item"> <a class="text-white" href="http://www.wasdi.cloud" target="_blank"> {{"LOGIN_LINK_WEBSITE"|translate}}</a> </li>
+
+
+                        <li class="link-login pull-right nav-item link-login-first"
+                            ng-show="m_oController.m_bVisualizeLink === true"
+                            ng-click="m_oController.changeVisibilityLoginRegister('Login')">
+                            <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span>
+                                {{"LOGIN_LINK_FORM"|translate}}</a>
+                        </li>
+
+
+
+
+                        <li class="link-login pull-right  nav-item"> <a class="text-white" href="http://www.wasdi.cloud"
+                                target="_blank"> {{"LOGIN_LINK_WEBSITE"|translate}}</a> </li>
+
+                        <li class="link-login pull-right  nav-item">
+                            <div class="dropdown">
+                                <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    <i class="far fa-flag fa-lg text-white" aria-hidden="true" style ="padding: 13px 10px;"></i>
+                                </div>
+                                <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
+                                    <li role="presentation" ng-click="m_oController.swapLanguage('en')">
+                                        <!--dropdown-header-->
+                                        <a role="menuitem" tabindex="-1">
+
+                                            <i><img src="https://flagicons.lipis.dev/flags/4x3/gb.svg"
+                                                    style="width: 27px;" /></i>
+                                            <span class="" ng-hide="m_oController.m_oUser.name === null">English</span>
+
+                                        </a>
+
+                                    </li>
+
+                                    <li role="presentation" class="divider"></li>
+                                <li role="presentation" ng-click="m_oController.swapLanguage('vn')">
+                                    <!--dropdown-header-->
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="https://flagicons.lipis.dev/flags/4x3/vn.svg" style="width: 27px;"/></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Tiếng Việt</span>
+
+                                    </a>
+
+                                </li>
+                                </ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </nav>
 
             <!------------------------------- LOGO(write) ------------------------------->
-            <div  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
+            <div ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
 
                 <img class="write-logo" id="write-logo" alt="WASDI">
                 <script>
@@ -22,9 +67,9 @@
                     $(document).ready(function () {
                         var oImage = $("#write-logo");
                         var imageSrc = oImage.css("content");
-                        imageSrc = imageSrc.replace("url(\"","");
-                        imageSrc = imageSrc.replace("\")","");
-                        oImage.attr("src",imageSrc);
+                        imageSrc = imageSrc.replace("url(\"", "");
+                        imageSrc = imageSrc.replace("\")", "");
+                        oImage.attr("src", imageSrc);
                     })
                 </script>
 
@@ -32,64 +77,72 @@
 
 
             <!------------------------ LOGIN FORM ------------------------>
-            <div class="login-content" ng-show="m_oController.m_bLoginIsVisible === true" >
+            <div class="login-content" ng-show="m_oController.m_bLoginIsVisible === true">
 
-                <form class="form-signin" ng-submit="m_oController.login()" ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+                <form class="form-signin" ng-submit="m_oController.login()"
+                    ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <div class="form-group">
-                        <input type="text"  placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="userName" ng-model="m_oController.m_sUserName">
+                        <input type="text" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control"
+                            id="userName" ng-model="m_oController.m_sUserName">
                     </div>
                     <div class="form-group">
-                        <input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
+                        <input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}"
+                            class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
                     </div>
                     <label>
                         <input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}
                     </label>
-                    <button class="btn btn-md btn-primary btn-block btn-signin" type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>
+                    <button class="btn btn-md btn-primary btn-block btn-signin"
+                        type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>
 
                 </form>
 
-                <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
-                    <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
+                <div ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+                    <a href="#" class="forgot-password"
+                        ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
                     </a>
                 </div>
                 <br>
-                <div  ng-hide="m_oController.m_bRegisterIsVisible || m_oController.m_bIsVisibleRecoveryPassword">
+                <div ng-hide="m_oController.m_bRegisterIsVisible || m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.keycloakRegister()">
                         {{"LOGIN_LINK_NEW_USER"|translate}}
                     </a>
                 </div>
                 <!-- NEW WASDI LOGIN  -->
-                
-                <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
 
-                <br><hr><br>
+                <div ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
 
-                <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
+                    <br>
+                    <hr><br>
+
+                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
                         ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
-                    {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
-                </button>
+                        {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
+                    </button>
                 </div>
 
 
 
                 <!-- RECOVERY FORM -->
-                <form class="form-signin" name="recoveryForm"  ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
+                <form class="form-signin" name="recoveryForm"
+                    ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
                     <div>
                         {{"RECOVERY_EMAIL_TITLE"|translate}}
                     </div>
                     <div class="form-group">
                         <input type="email" name="recoveryemail" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}"
-                               class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
+                            class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
 
                     </div>
                     <button class="btn btn-md btn-primary btn-block btn-signin" type="submit"
-                            ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
-                            ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
+                        ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
+                        ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
                         {{"RECOVERY_EMAIL_BUTTON"|translate}}
                     </button>
 
-                    <a href="" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
+                    <a href=""
+                        ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         {{"LOGIN_LINK_BACK"|translate}}
                     </a>
@@ -99,45 +152,49 @@
             </div>
 
             <!------------------------ REGISTRATION FORM ------------------------>
-            <div class="signin-content" ng-show="m_oController.m_bRegisterIsVisible" >
+            <div class="signin-content" ng-show="m_oController.m_bRegisterIsVisible">
 
-                <form class="form-signin" name="signinForm" ng-submit="m_oController.signingUser()" >
+                <form class="form-signin" name="signinForm" ng-submit="m_oController.signingUser()">
                     <div class="form-group">
-                        <input type="email" name="useremail" placeholder="{{'SIGN_IN_PLACEHOLDER_EMAIL'|translate}}" class="form-control"
-                               ng-model="m_oController.m_oRegistrationUser.userId" required>
+                        <input type="email" name="useremail" placeholder="{{'SIGN_IN_PLACEHOLDER_EMAIL'|translate}}"
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.userId" required>
                         <h6 class="error-message" ng-if="(signinForm.useremail.$dirty === true) &&
                                                          (!signinForm.useremail.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
                     <div class="form-group">
-                        <input type="password" name="userpassword"  ng-model="m_oController.m_oRegistrationUser.password"
-                               placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"  ng-minlength="8" required>
-                        <h6 class="error-message" ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) && (!signinForm.userpassword.$valid)">
+                        <input type="password" name="userpassword" ng-model="m_oController.m_oRegistrationUser.password"
+                            placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
+                            ng-minlength="8" required>
+                        <h6 class="error-message"
+                            ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) && (!signinForm.userpassword.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
 
                     <div class="form-group">
-                        <input type="password" name="userrepeatpassword" placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
-                               ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
-                        <h6 class="error-message" ng-if="(signinForm.userrepeatpassword.$dirty === true) &&
+                        <input type="password" name="userrepeatpassword"
+                            placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
+                            ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
+                        <h6 class="error-message"
+                            ng-if="(signinForm.userrepeatpassword.$dirty === true) &&
                                                         (signinForm.userpassword.$viewValue !== signinForm.userrepeatpassword.$viewValue)">
                             {{"SIGN_IN_ERROR_INVALID_DIFFERENT_PASSWORDS"|translate}}
                         </h6>
                     </div>
 
-                    <div class ="form-group" >
-                        <input type="text" name="username" placeholder="{{'SIGN_IN_PLACEHOLDER_NAME'|translate}}" class="form-control"
-                               ng-model="m_oController.m_oRegistrationUser.name" required>
+                    <div class="form-group">
+                        <input type="text" name="username" placeholder="{{'SIGN_IN_PLACEHOLDER_NAME'|translate}}"
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.name" required>
                         <h6 class="error-message" ng-if="(signinForm.username.$dirty === true) &&
                                                          (!signinForm.username.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_INSERT_NAME"|translate}}
                         </h6>
                     </div>
                     <div class="form-group">
-                        <input type="text" name="usersurname" placeholder="{{'SIGN_IN_PLACEHOLDER_SURNAME'|translate}}" class="form-control"
-                               ng-model="m_oController.m_oRegistrationUser.surname" required>
+                        <input type="text" name="usersurname" placeholder="{{'SIGN_IN_PLACEHOLDER_SURNAME'|translate}}"
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.surname" required>
                         <h6 class="error-message" ng-if="(signinForm.usersurname.$dirty === true) &&
                                                          (!signinForm.usersurname.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_INSERT_SURNAME"|translate}}
@@ -145,28 +202,33 @@
                     </div>
 
                     <div class="form-group">
-                        <input type="checkbox" id="accept" name="accept"  ng-model="m_oController.m_oRegistrationUser.accept" required>
-                        {{"SIGN_IN_TERMS_AGREE_1"|translate}} <a href="http://www.wasdi.net/index.php?title=Terms" target="_blank" rel="noopener noreferrer">{{"SIGN_IN_TERMS_AGREE_2"|translate}}</a> {{"SIGN_IN_TERMS_AGREE_3"|translate}} <a href="http://www.wasdi.net/index.php?title=Privacy" target="_blank">{{"SIGN_IN_TERMS_AGREE_4"|translate}}</a>
+                        <input type="checkbox" id="accept" name="accept"
+                            ng-model="m_oController.m_oRegistrationUser.accept" required>
+                        {{"SIGN_IN_TERMS_AGREE_1"|translate}} <a href="http://www.wasdi.net/index.php?title=Terms"
+                            target="_blank" rel="noopener noreferrer">{{"SIGN_IN_TERMS_AGREE_2"|translate}}</a>
+                        {{"SIGN_IN_TERMS_AGREE_3"|translate}} <a href="http://www.wasdi.net/index.php?title=Privacy"
+                            target="_blank">{{"SIGN_IN_TERMS_AGREE_4"|translate}}</a>
                         <h6 class="error-message" ng-if="(signinForm.accept.$dirty === true) &&
                                                          (!signinForm.accept.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_ACCEPT_CONDITIONS"|translate}}
                         </h6>
                     </div>
 
-                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
-                            type="submit">
+                    <button class="btn btn-md btn-primary btn-block btn-signin"
+                        ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
+                        type="submit">
                         {{"SIGN_IN_BUTTON"|translate}}
                     </button>
 
-                    <div class="alert alert-success" role="alert" ng-show ="m_oController.m_bSuccess === true">
+                    <div class="alert alert-success" role="alert" ng-show="m_oController.m_bSuccess === true">
                         {{"SIGN_IN_ERROR_SUCCESS_REGISTRATION"|translate}}
                     </div>
                     <div class="alert alert-danger" role="alert"
-                                ng-hide = "m_oController.m_bError === false || m_oController.m_sMessageError || m_oController.m_sMessageError.length > 0">
+                        ng-hide="m_oController.m_bError === false || m_oController.m_sMessageError || m_oController.m_sMessageError.length > 0">
                         {{"SIGN_IN_ERROR_GENERAL_ERROR"|translate}}
                     </div>
-                    <div class="alert alert-danger" role="alert" ng-show ="m_oController.m_bError === true"
-                                ng-show = "!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
+                    <div class="alert alert-danger" role="alert" ng-show="m_oController.m_bError === true"
+                        ng-show="!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
                         {{m_oController.m_sMessageError}}
                     </div>
 
@@ -195,7 +257,7 @@
 
         </section>
     </div>
-    
 
-    </div>
+
+</div>
 </div>

@@ -362,6 +362,12 @@ var HomeController = (function () {
 
         return true;
     }
+
+    // Function used to swap language of the interface
+    HomeController.prototype.swapLanguage = function (sCountryCode) {
+        this.m_oTranslate.use(sCountryCode);
+    }
+
     HomeController.$inject = [
         '$rootScope',
         '$scope',
