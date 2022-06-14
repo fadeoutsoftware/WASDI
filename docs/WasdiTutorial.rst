@@ -39,7 +39,7 @@ Workspace Management
 --------------------
 Each user in WASDI can work in one or more Workspaces. A Workspace is a set of files (original EO data or elaborated by some processor) that are grouped in the same “project”.
 
-The workspace concept is the same of many other development tools or languages: can be called workspace or project and is just a name given to a specific set of files.
+The workspace concept is the same of many other development tools or languages: it can be called workspace or project and is just a name given to a specific set of files.
 
 
 Once logged for the first time, the user is asked to create a new workspace.
