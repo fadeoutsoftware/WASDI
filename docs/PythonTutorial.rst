@@ -480,13 +480,24 @@ If you click on the list icon in the bottom right corner of the screen, you can 
 
 Step 4: create an 8-bit RGB GeoTIFF out of a Sentinel-2 image
 -------------------------------------------------------------
-Now we want to open one of those Sentinel-2 images, extract bands for Red, Green and Blue (RGB) and use them to construct an RGB GeoTIFF. We are going to use numpy and GDAL. GDAL is a set of tool for working with geo referenced images. You may need to install it in your enviroment. In that case, execute
+Now we want to open one of those Sentinel-2 images, extract bands for Red, Green and Blue (RGB) and use them to construct an RGB GeoTIFF. We are going to use numpy and GDAL. GDAL is a set of tool for working with geo referenced images. You may need to install it in your environment. In that case, execute
 
 .. code-block:: python
 
  pip install GDAL
 
 in your terminal.
+
+Make sure you have the latest version of Microsoft Visual C++ Build Tools installed, you can download the installer from this link https://visualstudio.microsoft.com/it/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16.
+ 
+If you get some error, try to install GDAL following these steps:
+
+1. Download the wheel from (https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) the website has many libraries that are very useful.
+
+	1.1	Pay attention to the last part of the wheel to choose the correct one suitable 			for your PC, for example check if it is 64 or 32 bit.(For more information 			check: https://realpython.com/python-wheels/#what-is-a-python-wheel).
+
+2. Open the Windows Terminal (CMD) and type "pip install (the path the wheel located in)".
+
 
 Add the following imports:
 
