@@ -398,6 +398,7 @@ class NumericBox extends UIComponent {
                 let fValue = parseFloat(this.m_sText)
                 // if we can't parse the value as a number
                 if (isNaN(fValue)) {
+                    asMessages.push(this.label + " - Please check parameters ");
                     return false;
                 }
                 if (utilsIsObjectNullOrUndefined(this.m_fMin)==false) {
