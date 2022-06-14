@@ -1,7 +1,5 @@
 package wasdi.shared.business.ecostress;
 
-import org.json.JSONObject;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +9,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class EcoStressItem {
+public class EcoStressItemForReading {
 
 	private String fileName;
 
@@ -23,7 +21,7 @@ public class EcoStressItem {
 	private Double beginningDate;
 	private Double endingDate;
 
-	private String location;
+	private EcoStressLocation location;
 
 	private String platform;
 	private String instrument;

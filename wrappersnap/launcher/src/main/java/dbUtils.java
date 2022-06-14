@@ -8,14 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -23,10 +19,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.w3c.dom.Document;
-
-import com.mongodb.client.model.geojson.Polygon;
-import com.mongodb.client.model.geojson.Position;
 
 import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
@@ -48,7 +40,6 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
-import wasdi.shared.business.ecostress.EcoStressItem;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;

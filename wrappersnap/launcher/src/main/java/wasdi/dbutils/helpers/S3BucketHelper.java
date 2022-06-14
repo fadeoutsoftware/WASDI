@@ -6,16 +6,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -28,10 +24,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.mongodb.client.model.geojson.Polygon;
-import com.mongodb.client.model.geojson.Position;
 
-import wasdi.shared.business.ecostress.EcoStressItem;
+//import wasdi.shared.business.ecostress.EcoStressItem;
+import wasdi.shared.business.ecostress.EcoStressItemForWriting;
+//import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.utils.TimeEpochUtils;
@@ -76,7 +72,7 @@ public final class S3BucketHelper {
 
 		do {
 			for (S3ObjectSummary oS3ObjectSummary : oObjectListing.getObjectSummaries()) {
-				EcoStressItem oItem = parseEntry(sBucketName, oS3ObjectSummary.getKey());
+				EcoStressItemForWriting oItem = parseEntry(sBucketName, oS3ObjectSummary.getKey());
 				
 				if (oItem != null) {
 					oEcoStressRepository.insertEcoStressItem(oItem);
@@ -93,7 +89,7 @@ public final class S3BucketHelper {
 		System.out.println("counter: " + iCounter);
 	}
 
-	private static EcoStressItem parseEntry(String sBucketName, String sEntryKey) {
+	private static EcoStressItemForWriting parseEntry(String sBucketName, String sEntryKey) {
 		String[] asTokens = sEntryKey.split("/");
 
 		if (asTokens.length < 4) {
@@ -112,13 +108,13 @@ public final class S3BucketHelper {
 
 		Map<String, String> asProperties = parseXml(sXml);
 
-		EcoStressItem oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
+		EcoStressItemForWriting oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
 
 		return oItem;
 	}
 
-	private static EcoStressItem buildEcoStressItem(Map<String, String> asProperties, String sFileName, String sS3Path, String sUrl) {
-		EcoStressItem oItem = new EcoStressItem();
+	private static EcoStressItemForWriting buildEcoStressItem(Map<String, String> asProperties, String sFileName, String sS3Path, String sUrl) {
+		EcoStressItemForWriting oItem = new EcoStressItemForWriting();
 
 		oItem.setFileName(sFileName);
 
@@ -139,6 +135,9 @@ public final class S3BucketHelper {
 
 		String sImageFootPrint = extractFootprint(asProperties);
 		oItem.setLocation(sImageFootPrint);
+
+//		EcoStressLocation oImageFootPrint = extractFootprint(asProperties);
+//		oItem.setLocation(oImageFootPrint);
 
 		oItem.setPlatform(asProperties.get("PlatformShortName"));
 		oItem.setInstrument(asProperties.get("InstrumentShortName"));
@@ -166,43 +165,12 @@ public final class S3BucketHelper {
 			double dNorth = Double.parseDouble(sNorth);
 			double dEast = Double.parseDouble(sEast);
 			double dSouth = Double.parseDouble(sSouth);
-			
-			/*
-			double adPoint1[] = { dWest, dNorth };
-			double adPoint2[] = { dWest, dSouth };
-			double adPoint3[] = { dEast, dSouth };
-			double adPoint4[] = { dEast, dNorth };
-			double adPoint5[] = { dWest, dNorth };
-			
-			JSONArray oPoint1 = new JSONArray(adPoint1);
-			JSONArray oPoint2 = new JSONArray(adPoint2);
-			JSONArray oPoint3 = new JSONArray(adPoint3);
-			JSONArray oPoint4 = new JSONArray(adPoint4);
-			JSONArray oPoint5 = new JSONArray(adPoint5);
-			
-			JSONArray oFirstArray = new JSONArray();
-			oFirstArray.put(oPoint1);
-			oFirstArray.put(oPoint2);
-			oFirstArray.put(oPoint3);
-			oFirstArray.put(oPoint4);
-			oFirstArray.put(oPoint5);
-			
-			JSONArray oSecondArray = new JSONArray();
-			oSecondArray.put(oFirstArray);
-			
-			
-			JSONObject oLocation = new JSONObject();
-			oLocation.put("type", "Polygon");
-			oLocation.put("coordinates", oSecondArray);
-			*/
-			
+
 			String sCoordinates = "[[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]]"; 
-			
+
 			String sLocationJson = "{\"type\": \"Polygon\", \"coordinates\": " + sCoordinates +"}";
 
 			return sLocationJson;
-			
-			//return oLocation;
 		} catch (Exception oEx) {
 			System.out.println("asProperties: " + asProperties);
 			oEx.printStackTrace();
@@ -210,6 +178,56 @@ public final class S3BucketHelper {
 
 		return null;
 	}
+
+//	private static EcoStressLocation extractFootprint(Map<String, String> asProperties) {
+//		try {
+//			String sWest = asProperties.get("WestBoundingCoordinate");
+//			String sNorth = asProperties.get("NorthBoundingCoordinate");
+//			String sEast = asProperties.get("EastBoundingCoordinate");
+//			String sSouth = asProperties.get("SouthBoundingCoordinate");
+//
+//			if (sWest == null || sNorth == null || sEast == null || sSouth == null) {
+//				return null;
+//			}
+//
+//			double dWest = Double.parseDouble(sWest);
+//			double dNorth = Double.parseDouble(sNorth);
+//			double dEast = Double.parseDouble(sEast);
+//			double dSouth = Double.parseDouble(sSouth);
+//
+////			String sCoordinates = "[[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]]"; 
+////
+////			String sLocationJson = "{\"type\": \"Polygon\", \"coordinates\": " + sCoordinates +"}";
+//
+//			EcoStressLocation oEcoStressLocation = new EcoStressLocation();
+//			oEcoStressLocation.setType("Polygon");
+//
+//			List<Double> aoPoint_1 = Arrays.asList(dWest, dNorth);
+//			List<Double> aoPoint_2 = Arrays.asList(dWest, dSouth);
+//			List<Double> aoPoint_3 = Arrays.asList(dEast, dSouth);
+//			List<Double> aoPoint_4 = Arrays.asList(dEast, dNorth);
+//			List<Double> aoPoint_5 = Arrays.asList(dWest, dNorth);
+//
+//			List<List<Double>> aoPolygon = new ArrayList<>();
+//			aoPolygon.add(aoPoint_1);
+//			aoPolygon.add(aoPoint_2);
+//			aoPolygon.add(aoPoint_3);
+//			aoPolygon.add(aoPoint_4);
+//			aoPolygon.add(aoPoint_5);
+//
+//			List<List<List<Double>>> aoCoordinates = new ArrayList<>();
+//			aoCoordinates.add(aoPolygon);
+//
+//			oEcoStressLocation.setCoordinates(aoCoordinates);
+//
+//			return oEcoStressLocation;
+//		} catch (Exception oEx) {
+//			System.out.println("asProperties: " + asProperties);
+//			oEx.printStackTrace();
+//		}
+//
+//		return null;
+//	}
 
 	private static String readFile(String sBucketName, String sFilePath) {
 		S3Object oS3Object = m_oConn.getObject(
@@ -223,12 +241,13 @@ public final class S3BucketHelper {
 	}
 
 	public static String downloadFile(String sBucketName, String sFilePath, String sDownloadPath) {
+		String sFileName = sFilePath.substring(sFilePath.lastIndexOf("/") + 1);
 		m_oConn.getObject(
 				new GetObjectRequest(sBucketName, sFilePath),
-				new File(sDownloadPath)
+				new File(sDownloadPath + sFileName)
 		);
 
-		return sDownloadPath + "/" + sFilePath;
+		return sDownloadPath + sFileName;
 	}
 
 	public static long getFileSize(String sBucketName, String sFilePath) {

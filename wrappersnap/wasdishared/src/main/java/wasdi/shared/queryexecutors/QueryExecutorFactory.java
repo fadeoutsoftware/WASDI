@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
+import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
 import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
@@ -56,6 +57,7 @@ public class QueryExecutorFactory {
 		aoMap.put("STATICS", QueryExecutorSTATICS::new);
 		aoMap.put("GPM", QueryExecutorGPM::new);
 		aoMap.put("COPERNICUSMARINE", QueryExecutorCM::new);
+		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		

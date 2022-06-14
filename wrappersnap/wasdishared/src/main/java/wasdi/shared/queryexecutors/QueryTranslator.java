@@ -121,6 +121,11 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_CM = "platformname:CM";
 
 	/**
+	 * Token of ECOSTRESS platform
+	 */
+	private static final String s_sPLATFORMNAME_ECOSTRESS = "platformname:ECOSTRESS";
+
+	/**
 	 * Token of product type
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -519,6 +524,9 @@ public abstract class QueryTranslator {
 
 			// Try get Info about CM
 			parseCM(sQuery, oResult);
+
+			// Try get Info about ECOSTRESS
+			parseECOSTRESS(sQuery, oResult);
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -800,6 +808,22 @@ public abstract class QueryTranslator {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_DEM);
 
 			oResult.platformName = Platforms.DEM;
+
+			oResult.productType = extractValue(sQuery, "dataset");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with ECOSTRESS info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseECOSTRESS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ECOSTRESS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ECOSTRESS);
+
+			oResult.platformName = Platforms.ECOSTRESS;
 
 			oResult.productType = extractValue(sQuery, "dataset");
 		}

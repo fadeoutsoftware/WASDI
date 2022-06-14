@@ -676,6 +676,20 @@
                     "indexvalue":"CHL+CHL_error+CHL_flags"
                 }
             ]
+        },
+        {
+            "name": "ECOSTRESS",
+            "indexname": "platformname",
+            "indexvalue": "ECOSTRESS",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "EEHCM|EEHSW",
+                    "regex": ".*",
+                    "indexvalue":"EEHCM"
+                }
+            ]
         }
     ],
     "orbitsearch":{
