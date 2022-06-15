@@ -18,6 +18,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * Query Executor for Cloudferro Data Center.
@@ -65,6 +66,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public int executeCount(String sQuery) {
+		Utils.debugLog("QueryExecutorCloudferro.executeCount | sQuery: " + sQuery);
+
 		int iCount = 0;
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
@@ -79,13 +82,35 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		List<QueryResultViewModel> aoReturnList = new ArrayList<>();
+		Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve | sQuery: " + oQuery.getQuery());
+
+		List<QueryResultViewModel> aoResults = new ArrayList<>();
+
+		// Parse the query
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+
+		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			return aoResults;
+		}
+
+		String sProtocol = oQueryViewModel.productLevel;
+		String sService = oQueryViewModel.productType;
+		String sProduct = oQueryViewModel.productName;
+
+		System.out.println("sProtocol: " + sProtocol);
+		System.out.println("sService: " + sService);
+		System.out.println("sProduct: " + sProduct);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList();
+		Double dWest = oQueryViewModel.west;
+		Double dNorth = oQueryViewModel.north;
+		Double dEast = oQueryViewModel.east;
+		Double dSouth = oQueryViewModel.south;
 
-		aoReturnList = aoItemList.stream()
+		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth);
+
+		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)
 			.collect(Collectors.toList());
 
@@ -124,7 +149,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 //			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: Exception = " + oEx.toString());
 //		}
 
-		return aoReturnList;
+		return aoResults;
 	}
 
 	private static QueryResultViewModel translate(EcoStressItemForReading oItem) {

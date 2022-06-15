@@ -72,6 +72,46 @@ public class EcoStressRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get all the EcoStress Items
+	 * @return the full list of items
+	 */
+	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth) {
+
+		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+		
+		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
+
+		System.out.println(sCoordinates);
+
+		String sQuery = 
+				"   {\r\n" + 
+				"     location: {\r\n" + 
+				"       $geoIntersects: {\r\n" + 
+				"          $geometry: {\r\n" + 
+				"             type: \"Polygon\" ,\r\n" + 
+				"             coordinates: [\r\n" + 
+				sCoordinates + 
+				"             ]\r\n" + 
+				"          }\r\n" + 
+				"       }\r\n" + 
+				"     }\r\n" + 
+				"   }" + 
+				"";
+
+		System.out.println(sQuery);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).limit(10);
+
+			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	/**
 	 * Get a EcoStress Item by file name
 	 * @param sFileName
 	 * @return the item
