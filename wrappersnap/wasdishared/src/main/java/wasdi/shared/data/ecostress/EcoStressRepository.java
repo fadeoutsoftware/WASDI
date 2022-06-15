@@ -70,15 +70,8 @@ public class EcoStressRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
-
-	/**
-	 * Get all the EcoStress Items
-	 * @return the full list of items
-	 */
-	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth) {
-
-		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
-		
+	
+	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService) {
 		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
 
 		System.out.println(sCoordinates);
@@ -94,9 +87,27 @@ public class EcoStressRepository extends MongoRepository {
 				"             ]\r\n" + 
 				"          }\r\n" + 
 				"       }\r\n" + 
-				"     }\r\n" + 
-				"   }" + 
+				"     }\r\n";
+		if (!Utils.isNullOrEmpty(sService)) {
+			// {$regex : "son"}
+			sQuery += ", s3Path: {$regex : \"" + sService + "\"}";
+		}
+		
+		sQuery += "   }" + 
 				"";
+		
+		return sQuery;
+	}
+
+	/**
+	 * Get all the EcoStress Items
+	 * @return the full list of items
+	 */
+	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService) {
+
+		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
+		
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService);
 
 		System.out.println(sQuery);
 
@@ -136,8 +147,21 @@ public class EcoStressRepository extends MongoRepository {
 		return  null;
 	}
 
-	public long countItems() {
-		return getCollection(m_sThisCollection).countDocuments();
+	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService) {
+		
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService);
+
+		System.out.println(sQuery);
+
+		try {
+			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
+
+			return lCount;
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return -1;
 	}
 
 }

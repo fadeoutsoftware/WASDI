@@ -69,12 +69,32 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Utils.debugLog("QueryExecutorCloudferro.executeCount | sQuery: " + sQuery);
 
 		int iCount = 0;
+		
+		// Parse the query
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+
+		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			return -1;
+		}
+
+		String sProtocol = oQueryViewModel.productLevel;
+		String sService = oQueryViewModel.productType;
+		String sProduct = oQueryViewModel.productName;
+
+		System.out.println("sProtocol: " + sProtocol);
+		System.out.println("sService: " + sService);
+		System.out.println("sProduct: " + sProduct);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
-		oEcoStressRepository.countItems();
+		Double dWest = oQueryViewModel.west;
+		Double dNorth = oQueryViewModel.north;
+		Double dEast = oQueryViewModel.east;
+		Double dSouth = oQueryViewModel.south;		
 
-		return iCount;
+		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService);
+
+		return (int) lCount;
 	}
 
 	/**
@@ -108,46 +128,11 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Double dEast = oQueryViewModel.east;
 		Double dSouth = oQueryViewModel.south;
 
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth);
+		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService);
 
 		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)
 			.collect(Collectors.toList());
-
-//		try {
-//			String sQuery = oQuery.getQuery();
-//
-//
-//			if (!sQuery.contains("&offset")) sQuery += "&offset=" + oQuery.getOffset();
-//			if (!sQuery.contains("&limit")) sQuery += "&limit=" + oQuery.getLimit();
-//
-//			List<String> aoCloudferroQuery = ((QueryTranslatorCloudferro) m_oQueryTranslator).translateMultiple(sQuery);
-//			for (String sCloudferroQuery : aoCloudferroQuery) {
-//				if (!Utils.isNullOrEmpty(sCloudferroQuery)) {
-//					String encodedUrl = ((QueryTranslatorCloudferro) m_oQueryTranslator).encode(sCloudferroQuery);
-//
-//					// Make the call
-//					String sCloudferroResults = HttpUtils.httpGetResults(encodedUrl);
-//
-//					Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: got result, start conversion");
-//
-//					aoReturnList.addAll(m_oResponseTranslator.translateBatch(sCloudferroResults, bFullViewModel));
-//				}
-//			}
-//
-//			String sCloudferroQuery = m_oQueryTranslator.translateAndEncodeParams(sQuery);
-//
-//			if (Utils.isNullOrEmpty(sCloudferroQuery)) return aoReturnList;
-//
-//			// Make the query
-//			String sCloudferroResults = HttpUtils.httpGetResults(sCloudferroQuery);
-//
-//			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: got result, start conversion");
-//
-//			return m_oResponseTranslator.translateBatch(sCloudferroResults, bFullViewModel);
-//		} catch (Exception oEx) {
-//			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: Exception = " + oEx.toString());
-//		}
 
 		return aoResults;
 	}

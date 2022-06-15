@@ -363,12 +363,6 @@
             ]
         },
         {
-            "name": "CMEMS",
-            "indexname": "productMainClass",
-            "indexvalue": "Copernicus-marine",
-            "filters": []
-        },
-        {
             "name": "Viirs",
             "indexname": "platformname",
             "indexvalue": "VIIRS",
