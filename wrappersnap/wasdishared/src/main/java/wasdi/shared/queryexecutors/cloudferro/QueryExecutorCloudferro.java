@@ -67,8 +67,6 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	@Override
 	public int executeCount(String sQuery) {
 		Utils.debugLog("QueryExecutorCloudferro.executeCount | sQuery: " + sQuery);
-
-		int iCount = 0;
 		
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
@@ -80,10 +78,12 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sProtocol = oQueryViewModel.productLevel;
 		String sService = oQueryViewModel.productType;
 		String sProduct = oQueryViewModel.productName;
+		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 
 		System.out.println("sProtocol: " + sProtocol);
 		System.out.println("sService: " + sService);
 		System.out.println("sProduct: " + sProduct);
+		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -105,7 +105,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		System.out.println("lDateFrom: " + lDateFrom.toString());
 		System.out.println("lDateTo: " + lDateTo.toString());
 
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo);
+		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit);
 
 		return (int) lCount;
 	}
@@ -116,8 +116,6 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve | sQuery: " + oQuery.getQuery());
-
-
 
 		String sOffset = oQuery.getOffset();
 		String sLimit = oQuery.getLimit();
@@ -149,10 +147,12 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sProtocol = oQueryViewModel.productLevel;
 		String sService = oQueryViewModel.productType;
 		String sProduct = oQueryViewModel.productName;
+		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 
 		System.out.println("sProtocol: " + sProtocol);
 		System.out.println("sService: " + sService);
 		System.out.println("sProduct: " + sProduct);
+		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -175,7 +175,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		System.out.println("lDateTo: " + lDateTo.toString());
 
 		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
-				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iOffset, iLimit);
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, iOffset, iLimit);
 
 		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)
