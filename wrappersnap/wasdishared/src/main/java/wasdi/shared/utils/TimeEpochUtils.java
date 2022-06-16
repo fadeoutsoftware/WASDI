@@ -7,6 +7,7 @@
 package wasdi.shared.utils;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -113,4 +114,17 @@ public class TimeEpochUtils {
 		return getLaterDate(oCurrentDate.getTime(), iDaysLater);
 	}
 
+	public static Instant fromDateStringToInstant(String sDate) {
+		Instant oDateFrom = null;
+
+		if(!Utils.isNullOrEmpty(sDate)) {
+			try {
+				oDateFrom = Instant.parse(sDate);
+			} catch (Exception oE) {
+				Utils.debugLog("TimeEpochUtils.fromDateStringToInstant: could not convert start date " + sDate + " to a valid date, ignoring it");
+			}
+		}
+
+		return oDateFrom;
+	}
 }

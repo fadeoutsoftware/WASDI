@@ -90,9 +90,22 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Double dWest = oQueryViewModel.west;
 		Double dNorth = oQueryViewModel.north;
 		Double dEast = oQueryViewModel.east;
-		Double dSouth = oQueryViewModel.south;		
+		Double dSouth = oQueryViewModel.south;
 
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService);
+
+		String sDateFrom = oQueryViewModel.startFromDate;
+		String sDateTo = oQueryViewModel.endToDate;
+
+		System.out.println("sDateFrom: " + sDateFrom);
+		System.out.println("sDateTo: " + sDateTo);
+
+		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
+		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+
+		System.out.println("lDateFrom: " + lDateFrom.toString());
+		System.out.println("lDateTo: " + lDateTo.toString());
+
+		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo);
 
 		return (int) lCount;
 	}
@@ -128,7 +141,20 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		Double dEast = oQueryViewModel.east;
 		Double dSouth = oQueryViewModel.south;
 
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService);
+
+		String sDateFrom = oQueryViewModel.startFromDate;
+		String sDateTo = oQueryViewModel.endToDate;
+
+		System.out.println("sDateFrom: " + sDateFrom);
+		System.out.println("sDateTo: " + sDateTo);
+
+		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
+		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+
+		System.out.println("lDateFrom: " + lDateFrom.toString());
+		System.out.println("lDateTo: " + lDateTo.toString());
+
+		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo);
 
 		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)

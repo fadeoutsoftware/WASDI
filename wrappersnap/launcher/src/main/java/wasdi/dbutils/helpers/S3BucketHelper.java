@@ -14,9 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -24,6 +27,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.util.AwsHostNameUtils;
 
 //import wasdi.shared.business.ecostress.EcoStressItem;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
@@ -35,14 +39,19 @@ import wasdi.shared.utils.Utils;
 
 public final class S3BucketHelper {
 
-	private static final AWSCredentials m_oCredentials;
 	private static final AmazonS3 m_oConn;
 
 	static {
-		m_oCredentials = new BasicAWSCredentials(WasdiConfig.Current.s3Bucket.accessKey, WasdiConfig.Current.s3Bucket.secretKey);
+		AWSCredentials oCredentials = new BasicAWSCredentials(WasdiConfig.Current.s3Bucket.accessKey,
+				WasdiConfig.Current.s3Bucket.secretKey);
 
-		m_oConn = new AmazonS3Client(m_oCredentials);
-		m_oConn.setEndpoint(WasdiConfig.Current.s3Bucket.endpoint);
+		String sEndpoint = WasdiConfig.Current.s3Bucket.endpoint;
+
+		m_oConn = AmazonS3ClientBuilder.standard()
+				.withCredentials(new AWSStaticCredentialsProvider(oCredentials))
+				.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(sEndpoint,
+						AwsHostNameUtils.parseRegion(sEndpoint, AmazonS3Client.S3_SERVICE_NAME)))
+				.build();
 	}
 
 	private S3BucketHelper() {
