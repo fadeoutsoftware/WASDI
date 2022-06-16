@@ -117,6 +117,26 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve | sQuery: " + oQuery.getQuery());
 
+
+
+		String sOffset = oQuery.getOffset();
+		String sLimit = oQuery.getLimit();
+
+		int iOffset = 0;
+		int iLimit = 10;
+
+		try {
+			iOffset = Integer.parseInt(sOffset);
+		} catch (Exception oE) {
+			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+		}
+
+		try {
+			iLimit = Integer.parseInt(sLimit);
+		} catch (Exception oE) {
+			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+		}
+
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
 
 		// Parse the query
@@ -154,7 +174,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		System.out.println("lDateFrom: " + lDateFrom.toString());
 		System.out.println("lDateTo: " + lDateTo.toString());
 
-		List<EcoStressItemForReading> aoItemList = oEcoStressRepository.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo);
+		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iOffset, iLimit);
 
 		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)

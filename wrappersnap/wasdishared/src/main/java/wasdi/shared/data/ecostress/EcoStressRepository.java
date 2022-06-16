@@ -112,7 +112,7 @@ public class EcoStressRepository extends MongoRepository {
 	 * @return the full list of items
 	 */
 	public List<EcoStressItemForReading> getEcoStressItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
-			Long lDateFrom, Long lDateTo) {
+			Long lDateFrom, Long lDateTo, int iOffset, int iLimit) {
 
 		final List<EcoStressItemForReading> aoReturnList = new ArrayList<>();
 		
@@ -121,7 +121,7 @@ public class EcoStressRepository extends MongoRepository {
 		System.out.println(sQuery);
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).limit(10);
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
