@@ -39,9 +39,10 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 
 		long lSizeInBytes = 0L;
 
-		if (sFileURL.contains("&filePath=")) {
+		if (sFileURL.contains(",")) {
+			String sEndpoint = WasdiConfig.Current.s3Bucket.endpoint;
 			String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
-			String sFilePath = sFileURL.substring(sFileURL.indexOf("&filePath=") + 10);
+			String sFilePath = sFileURL.substring(0, sFileURL.indexOf(",")).replace(sEndpoint + sBucketName + "/", "");
 
 			lSizeInBytes = S3BucketHelper.getFileSize(sBucketName, sFilePath);
 		}
@@ -57,9 +58,10 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 
 		String sResult = "";
 		
-		if (sFileURL.contains("&filePath=")) {
+		if (sFileURL.contains(",")) {
+			String sEndpoint = WasdiConfig.Current.s3Bucket.endpoint;
 			String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
-			String sFilePath = sFileURL.substring(sFileURL.indexOf("&filePath=") + 10);
+			String sFilePath = sFileURL.substring(0, sFileURL.indexOf(",")).replace(sEndpoint + sBucketName + "/", "");
 
 			sResult = S3BucketHelper.downloadFile(sBucketName, sFilePath, sSaveDirOnServer);
 		}
@@ -73,10 +75,8 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 
 		String sFileName = "";
 
-		if (sFileURL.contains("?fileName=")) {
-			String sFilePath = sFileURL.substring(sFileURL.indexOf("?fileName=") + 10, sFileURL.indexOf("&filePath=", sFileURL.indexOf("?fileName=")));
-
-			sFileName = sFilePath;
+		if (sFileURL.contains(",")) {
+			sFileName = sFileURL.substring(sFileURL.indexOf(",") + 1, sFileURL.indexOf(",", sFileURL.indexOf(",") + 1));
 		}
 
 		return sFileName;

@@ -54,7 +54,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 //		oResult.setPreview(null);
 //		protected String summary;
 
-		buildLink(oItem, oResult);
+		buildLink(oResult);
 		buildSummary(oResult);
 
 		return oResult;
@@ -191,9 +191,53 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		}
 	}
 
-	private void buildLink(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
-		String sLink = oItem.getUrl() + "?fileName=" + oItem.getFileName() + "&filePath=" + oItem.getS3Path();
-		oResult.setLink(sLink);
+	private void buildLink(QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oResult, "result view model is null");
+
+		StringBuilder oLink = new StringBuilder("");
+
+		String sItem = "";
+
+		sItem = oResult.getProperties().get(SURL);
+		if (sItem == null || sItem.isEmpty()) {
+			Utils.debugLog("ResponseTranslatorCloudferro.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
+			sItem = "http://";
+		}
+		oLink.append(sItem).append(SLINK_SEPARATOR); //0
+
+		sItem = oResult.getTitle();
+		if (sItem == null) {
+			sItem = "";
+		}
+
+		oLink.append(sItem).append(SLINK_SEPARATOR); //1
+
+		sItem = oResult.getProperties().get(SSIZE_IN_BYTES);
+		if (sItem == null) {
+			sItem = "";
+		}
+		oLink.append(sItem).append(SLINK_SEPARATOR); //2
+
+		sItem = oResult.getProperties().get("status");
+		if (sItem == null) {
+			sItem = "";
+		}
+		oLink.append(sItem).append(SLINK_SEPARATOR); //3
+
+		sItem = oResult.getProperties().get(SSELF);
+		if (sItem == null) {
+			sItem = "";
+		}
+		oLink.append(sItem).append(SLINK_SEPARATOR); //4
+
+		sItem = oResult.getProperties().get(SPRODUCTIDENTIFIER);
+		if (sItem == null) {
+			sItem = "";
+		}
+		oLink.append(sItem).append(SLINK_SEPARATOR); //5
+
+		oResult.getProperties().put(SLINK, oLink.toString());
+		oResult.setLink(oLink.toString());
 	}
 
 }
