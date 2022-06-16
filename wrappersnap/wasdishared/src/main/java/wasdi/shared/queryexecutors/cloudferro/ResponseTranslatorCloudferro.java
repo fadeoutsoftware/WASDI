@@ -9,16 +9,27 @@ import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.utils.Utils;
 
 public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
+	private static final String SLINK_SEPARATOR = ",";
+	private static final String SLINK = "link";
+
+	private static final String SSIZE_IN_BYTES = "sizeInBytes";
+	private static final String SHREF = "href";
+	private static final String SURL = "url";
+//	private static final String SPOLARISATION = "polarisation";
+	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
 	private static final String SSIZE = "size";
 	private static final String SPLATFORM = "platform";
 	private static final String SSENSOR_MODE = "sensorMode";
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
+//	private static final String STYPE = "type";
+	private static final String SSELF = "self";
 	private static final String STITLE = "title";
-	private static final String SRELATIVEORBITNUMBER = "relativeOrbitNumber";
+	private static final String SPRODUCTIDENTIFIER = "productIdentifier";
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
@@ -31,11 +42,12 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 	}
 
 	public QueryResultViewModel translate(EcoStressItemForReading oItem) {
+		Preconditions.checkNotNull(oItem, "ResponseTranslatorCloudferro.translate: null json");
+
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		oResult.setProvider("CLOUDFERRO");
 
-		oResult.setId(oItem.getFileName());
-		oResult.setTitle(oItem.getFileName());
+		parseMainInfo(oItem, oResult);
 
 		parseProperties(oItem, oResult);
 		parseFootPrint(oItem.getLocation(), oResult);
@@ -49,11 +61,14 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		return oResult;
 	}
 
-	private static void parseFootPrint(EcoStressLocation sLocation, QueryResultViewModel oResult) {
+	private void parseMainInfo(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
+		oResult.setId(oItem.getFileName());
+		oResult.setTitle(oItem.getFileName());
+	}
+
+	private void parseFootPrint(EcoStressLocation sLocation, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(sLocation, "QueryExecutorCloudferro.parseFootPrint: input sLocation is null");
 		Preconditions.checkNotNull(oResult, "QueryExecutorCloudferro.parseFootPrint: QueryResultViewModel is null");
-
-		// "POLYGON((7.734924852848054 42.06684525433608,7.734924852848054 44.2482410267701,11.206604540348055 44.2482410267701,11.206604540348055 42.06684525433608,7.734924852848054 42.06684525433608))"
 
 		if (sLocation.getType().equalsIgnoreCase("Polygon")) {
 			StringBuilder oFootPrint = new StringBuilder("POLYGON");
@@ -106,7 +121,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.setSummary(sSummary);
 	}
 
-	private static void parseProperties(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
+	private void parseProperties(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oItem, "QueryExecutorCloudferro.addProperties: input oItem is null");
 		Preconditions.checkNotNull(oResult, "QueryExecutorCloudferro.addProperties: QueryResultViewModel is null");
 
