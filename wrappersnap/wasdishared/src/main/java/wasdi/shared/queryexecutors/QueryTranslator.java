@@ -835,7 +835,8 @@ public abstract class QueryTranslator {
 					Utils.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
 				}
 			}
-			
+
+			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
 		}
 	}
 

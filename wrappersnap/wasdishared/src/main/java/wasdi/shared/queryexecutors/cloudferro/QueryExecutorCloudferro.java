@@ -79,11 +79,13 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sService = oQueryViewModel.productType;
 		String sProduct = oQueryViewModel.productName;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDayNightFlag = oQueryViewModel.timeliness;
 
 		System.out.println("sProtocol: " + sProtocol);
 		System.out.println("sService: " + sService);
 		System.out.println("sProduct: " + sProduct);
 		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
+		System.out.println("sDayNightFlag: " + sDayNightFlag);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -105,7 +107,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		System.out.println("lDateFrom: " + lDateFrom.toString());
 		System.out.println("lDateTo: " + lDateTo.toString());
 
-		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit);
+		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
 
 		return (int) lCount;
 	}
@@ -148,11 +150,13 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sService = oQueryViewModel.productType;
 		String sProduct = oQueryViewModel.productName;
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
+		String sDayNightFlag = oQueryViewModel.timeliness;
 
 		System.out.println("sProtocol: " + sProtocol);
 		System.out.println("sService: " + sService);
 		System.out.println("sProduct: " + sProduct);
 		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
+		System.out.println("sDayNightFlag: " + sDayNightFlag);
 
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
@@ -175,7 +179,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		System.out.println("lDateTo: " + lDateTo.toString());
 
 		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
-				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, iOffset, iLimit);
+				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag, iOffset, iLimit);
 
 		aoResults = aoItemList.stream()
 			.map(QueryExecutorCloudferro::translate)
