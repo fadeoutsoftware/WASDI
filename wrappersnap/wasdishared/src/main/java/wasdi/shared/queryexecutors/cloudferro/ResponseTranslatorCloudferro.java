@@ -48,9 +48,8 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.setProvider("CLOUDFERRO");
 
 		parseMainInfo(oItem, oResult);
-
-		parseProperties(oItem, oResult);
 		parseFootPrint(oItem.getLocation(), oResult);
+		parseProperties(oItem, oResult);
 
 		oResult.setPreview(null);
 //		protected String summary;
@@ -125,6 +124,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		Preconditions.checkNotNull(oItem, "QueryExecutorCloudferro.addProperties: input oItem is null");
 		Preconditions.checkNotNull(oResult, "QueryExecutorCloudferro.addProperties: QueryResultViewModel is null");
 
+		oResult.setTitle(oItem.getFileName());
 		oResult.getProperties().put(STITLE, oItem.getFileName());
 
 		if (oItem.getBeginningDate() != null) {
