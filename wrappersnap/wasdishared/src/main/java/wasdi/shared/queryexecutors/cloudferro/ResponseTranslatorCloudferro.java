@@ -51,11 +51,11 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		parseFootPrint(oItem.getLocation(), oResult);
 		parseProperties(oItem, oResult);
 
-		oResult.setPreview(null);
+//		oResult.setPreview(null);
 //		protected String summary;
 
-		String sLink = oItem.getUrl() + "?fileName=" + oItem.getFileName() + "&filePath=" + oItem.getS3Path();
-		oResult.setLink(sLink);
+		buildLink(oItem, oResult);
+		buildSummary(oResult);
 
 		return oResult;
 	}
@@ -127,8 +127,11 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.setTitle(oItem.getFileName());
 		oResult.getProperties().put(STITLE, oItem.getFileName());
 
+		oResult.setPreview(null);
+
 		if (oItem.getBeginningDate() != null) {
 			String sStartDate = TimeEpochUtils.fromEpochToDateString(oItem.getBeginningDate().longValue());
+			oResult.getProperties().put(SDATE, sStartDate);
 			oResult.getProperties().put("startDate", sStartDate);
 			oResult.getProperties().put("beginposition", sStartDate);
 		}
@@ -136,8 +139,10 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.getProperties().put((SSENSOR_MODE), oItem.getSensor());
 		oResult.getProperties().put("sensoroperationalmode", oItem.getSensor());
 
-		oResult.getProperties().put(SPLATFORM, oItem.getPlatform());
-		oResult.getProperties().put("platformname", oItem.getPlatform());
+//		oResult.getProperties().put(SPLATFORM, oItem.getPlatform());
+//		oResult.getProperties().put("platformname", oItem.getPlatform());
+		oResult.getProperties().put(SPLATFORM, "ECOSTRESS");
+		oResult.getProperties().put("platformname", "ECOSTRESS");
 
 		oResult.getProperties().put(SINSTRUMENT, oItem.getInstrument());
 		oResult.getProperties().put("instrumentshortname", oItem.getInstrument());
@@ -145,6 +150,50 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 		oResult.getProperties().put(SRELATIVEORBITNUMBER, Integer.valueOf(oItem.getStartOrbitNumber()).toString());
 		oResult.getProperties().put("relativeorbitnumber", Integer.valueOf(oItem.getStartOrbitNumber()).toString());
 
+		oResult.getProperties().put("polarisationmode", oItem.getDayNightFlag());
+
+		parseLinks(oItem, oResult);
+
+		parseServices(oResult, oItem);
+	}
+
+	/**
+	 * @param oItem
+	 * @param oResult
+	 */
+	private void parseLinks(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
+		Preconditions.checkNotNull(oItem, "oItem is null");
+		Preconditions.checkNotNull(oResult, "result view model is null");
+
+		oResult.getProperties().put(SHREF, oItem.getUrl());
+	}
+
+	/**
+	 * @param oResult
+	 * @param oProperties
+	 */
+	private void parseServices(QueryResultViewModel oResult, EcoStressItemForReading oItem) {
+		String sUrl = null;
+
+		long lSize = 0;
+
+		sUrl = oItem.getUrl();
+		oResult.getProperties().put(SSIZE_IN_BYTES, "" + lSize);
+		String sSize = "";
+		oResult.getProperties().put(SSIZE, sSize);
+
+		if (!Utils.isNullOrEmpty(sUrl)) {
+			oResult.getProperties().put(SURL, sUrl);
+			oResult.setLink(sUrl);
+		} else {
+			Utils.debugLog("ResponseTranslatorCloudferro.parseServices: download link not found! dumping object:\n"
+					+ "Object DUMP BEGIN\n" + oItem.toString() + "Object DUMP END");
+		}
+	}
+
+	private void buildLink(EcoStressItemForReading oItem, QueryResultViewModel oResult) {
+		String sLink = oItem.getUrl() + "?fileName=" + oItem.getFileName() + "&filePath=" + oItem.getS3Path();
+		oResult.setLink(sLink);
 	}
 
 }
