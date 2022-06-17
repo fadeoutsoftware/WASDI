@@ -341,7 +341,7 @@
 	"DIALOG_LOGS_OPERATION": "Operazione: ",
 	"DIALOG_LOGS_NAME": "Nome: ",
 	"DIALOG_LOGS_STATUS": "Stato: ",
-	"DIALOG_LOGS_DOWNLOAD": "Ricerca testuale: ",
+	"DIALOG_LOGS_DOWNLOAD": "Scarica logs",
 	"DIALOG_LOGS_DATE": "Data: ",
 	"DIALOG_LOGS_ROW": "Riga",
 	"DIALOG_LOGS_REFRESH": "Aggiorna",
