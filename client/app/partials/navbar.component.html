@@ -107,7 +107,7 @@
 
                                 </li>
 
-                                <!--li role="presentation" class="divider"></li>
+                                <li role="presentation" class="divider"></li>
 
                                 <li role="presentation" ng-click="m_oController.swapLanguage('it')">
 
@@ -117,7 +117,19 @@
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Italiano</span>
 
                                     </a>
-                                </li-->
+                                </li>
+
+                                <li role="presentation" class="divider"></li>
+
+                                <li role="presentation" ng-click="m_oController.swapLanguage('fr')">
+
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="assets/flags/4x3/fr.svg" style="width: 27px;"/></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Français</span>
+
+                                    </a>
+                                </li>
 
 
                                 <li role="presentation" class="divider"></li>
@@ -127,6 +139,19 @@
 
                                         <i><img src="assets/flags/4x3/vn.svg" style="width: 27px;"/></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Tiếng Việt</span>
+
+                                    </a>
+
+                                </li>
+
+
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" ng-click="m_oController.swapLanguage('ro')">
+                                    <!--dropdown-header-->
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="assets/flags/4x3/ro.svg" style="width: 27px;"/></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Română</span>
 
                                     </a>
 
