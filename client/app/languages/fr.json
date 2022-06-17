@@ -378,7 +378,7 @@
 	"DIALOG_PARAMS_DELETE": "Supprimer",
 	"DIALOG_PARAMS_NO_PARAMS": "Aucun paramètre disponible pour cette application. Voulez-vous",
 	"DIALOG_PARAMS_ADD_ONE": "en ajouter un?",
-	"DIALOG_PARAMS_PUBLISHER": "Éditeur:",
+	"DIALOG_PARAMS_PUBLISHER": "Auteur:",
 	"DIALOG_PARAMS_NAME": "Nom",
 	"DIALOG_PARAMS_DESCRIPTION": "Description",
 	"DIALOG_PARAMS_CREATE_DATE": "Date de création",
