@@ -5,9 +5,18 @@
 
 package wasdi.shared.utils;
 
-import static wasdi.shared.utils.WasdiFileUtils.*;
+import static wasdi.shared.utils.WasdiFileUtils.completeDirPath;
+import static wasdi.shared.utils.WasdiFileUtils.deleteFile;
+import static wasdi.shared.utils.WasdiFileUtils.fileExists;
+import static wasdi.shared.utils.WasdiFileUtils.moveFile;
+import static wasdi.shared.utils.WasdiFileUtils.removeZipExtension;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,13 +30,9 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.log4j.Logger;
 
@@ -557,6 +562,44 @@ public class ZipFileUtils {
 			boolean filesMovedFlag = moveFile(unzippedDirectoryPath, dirPath);
 
 			if (filesMovedFlag) {
+				deleteFile(unzippedDirectoryPath);
+				deleteFile(fileZipPath);
+			}
+		}
+	}
+
+	public static void extractInnerZipFileAndCleanZipFile(File oZipFile, File oDestDir) throws Exception {
+		if (oZipFile == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
+			return;
+		} else if (!oZipFile.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+		}
+
+		if (oDestDir == null) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
+			return;
+		} else if (!oDestDir.exists()) {
+			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
+		}
+
+		ZipFileUtils oZipExtractor = new ZipFileUtils();
+
+		String sFilename = oZipFile.getAbsolutePath();
+		String sPath = oDestDir.getAbsolutePath();
+
+		String sDirPath = completeDirPath(sPath);
+		String sSimpleFilename = removeZipExtension(oZipFile.getName());
+		String unzippedDirectoryPath = completeDirPath(sDirPath + sSimpleFilename);
+
+		oZipExtractor.unzip(sFilename, unzippedDirectoryPath);
+
+		String fileZipPath = sDirPath + oZipFile.getName();
+
+		if (fileExists(unzippedDirectoryPath)) {
+			boolean fileMovedFlag = moveFile(unzippedDirectoryPath + sSimpleFilename + ".tif", sDirPath);
+
+			if (fileMovedFlag) {
 				deleteFile(unzippedDirectoryPath);
 				deleteFile(fileZipPath);
 			}

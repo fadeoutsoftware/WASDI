@@ -130,14 +130,25 @@ public class ProcessorsResource  {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		
+
+		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
+		sDescription = URLDecoder.decode(sDescription, StandardCharsets.UTF_8.name());
+
 		try {
-			if(sName.contains("/") || sName.contains("\\")) {
+			if(sName.contains("/") || sName.contains("\\") || sName.contains("#")) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: ( " +sSessionId + "...: " + sName + " is not a valid filename, aborting");
 				oResult.setIntValue(400);
+				oResult.setStringValue(sName + " is not a valid filename");
 				return oResult;
 			}
-			
+
+			if(!isNameUnique(sName)) {
+				Utils.debugLog("ProcessorsResource.uploadProcessor: ( " +sSessionId + "...: " + sName + " the name is already used, aborting");
+				oResult.setIntValue(409);
+				oResult.setStringValue("The name " + sName + " is already used. Please use a different name.");
+				return oResult;
+			}
+
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessor: invalid session, aborting");
@@ -296,7 +307,14 @@ public class ProcessorsResource  {
 		}
 		
 	}
-	
+
+	private boolean isNameUnique(String sProcessorName) {
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName.toLowerCase().trim());
+
+		return oProcessor == null;
+	}
+
 	/**
 	 * Get a list of processors available
 	 * This is used to get all the processors and not only the one enabled in the marketplace.
@@ -621,7 +639,7 @@ public class ProcessorsResource  {
 	@GET
 	@Path("/getmarketdetail")
 	public Response getMarketPlaceAppDetail(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorname") String sProcessorName) throws Exception {
-		
+		sProcessorName = URLDecoder.decode(sProcessorName, StandardCharsets.UTF_8.name());
 		Utils.debugLog("ProcessorsResource.getMarketPlaceAppDetail");
 		
 		try {
@@ -1678,7 +1696,7 @@ public class ProcessorsResource  {
 			
 			if (Utils.isNullOrEmpty(oUpdatedProcessorVM.getParamsSample())==false) {				
 				try {
-					String sDecodedJSON = java.net.URLDecoder.decode(oUpdatedProcessorVM.getParamsSample(), StandardCharsets.UTF_8.name());
+					String sDecodedJSON = URLDecoder.decode(oUpdatedProcessorVM.getParamsSample(), StandardCharsets.UTF_8.name());
 					MongoRepository.s_oMapper.readTree(sDecodedJSON);
 				}
 				catch (Exception oJsonEx) {
@@ -2518,6 +2536,7 @@ public class ProcessorsResource  {
 	@Path("/ui")
 	public Response getUI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("ProcessorsResource.getUI( Name: " + sName + " )");
+		sName = URLDecoder.decode(sName, StandardCharsets.UTF_8.name());
 		
 		try {
 			// Check User 
@@ -2594,7 +2613,7 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(sUIJson)==false) {				
 				try {
 					
-					String sDecodedJSON = java.net.URLDecoder.decode(sUIJson, StandardCharsets.UTF_8.name());
+					String sDecodedJSON = URLDecoder.decode(sUIJson, StandardCharsets.UTF_8.name());
 					MongoRepository.s_oMapper.readTree(sDecodedJSON);
 				}
 				catch (Exception oJsonEx) {

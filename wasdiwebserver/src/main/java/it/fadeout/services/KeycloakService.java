@@ -210,13 +210,31 @@ public class KeycloakService implements AuthProviderService {
 		return oNewUser;
 	}
 	
-	public String getOldStyleRandomSession() {
-		return UUID.randomUUID().toString();
-	}
-	
-	public String insertOldStyleSession(String sUserId){
+	@Override
+	public boolean logout(String sSessionId) {
 		
-		return "";
+		try {
+			String sUrl = WasdiConfig.Current.keycloack.address;
+			//URL
+			if(!sUrl.endsWith("/")) {
+				sUrl += "/";
+			}
+			sUrl += "realms/wasdi/protocol/openid-connect/logout";
+			//payload
+			String sPayload = "client_id=wasdi_api" +
+					"&client_secret=" + WasdiConfig.Current.keycloack.clientSecret + 
+					"&refresh_token=" + sSessionId;
+			//headers
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+			//POST -> authenticate on keycloak 
+			Utils.debugLog("KeycloakService.logout: about to logout: " + sUrl + ", " + sPayload);
+			String sLogoutResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
+			return true;
+		} catch (Exception oE) {
+			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
+		}
+		return false;
 	}
 }
 

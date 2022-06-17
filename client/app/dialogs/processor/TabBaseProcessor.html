@@ -2,30 +2,30 @@
 <div class="container-fluid">
     <div class="row d-flex">
         <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
-            <label for="procname">Name</label>
-            <input id="procname" ng-readonly="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName">
+            <label for="procname">{{"DIALOG_PROCESSOR_BASE_NAME"|translate}}</label>
+            <input id="procname" ng-readonly="m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_BASE_NAME"|translate}}' ng-model="m_oController.m_sName">
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-            <label>Type</label>
+            <label>{{"DIALOG_PROCESSOR_BASE_TYPE"|translate}}</label>
             <div ng-show="!m_oController.m_bEditMode"> <dropdownmenudirective  list-of-values="m_oController.m_aoProcessorTypes"
                                                                                selected-value="m_oController.m_sSelectedType"
                                                                                enable-search-filter="true"
                                                                                dropdown-name="'Select Your Programming Language'"></dropdownmenudirective></div>
-            <input id="typeread" ng-readonly="m_oController.m_bEditMode" ng-show="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sTypeNameOnly">
+            <input id="typeread" ng-readonly="m_oController.m_bEditMode" ng-show="m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_BASE_TYPE"|translate}}' ng-model="m_oController.m_sTypeNameOnly">
         </div>
 
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-bottom">
             <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
                     ng-click="m_oController.forceLibUpdate(m_oController.m_sProcessorId)">
                 <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
-                <span class="ng-binding">Update Lib</span>
+                <span class="ng-binding">{{"DIALOG_PROCESSOR_BASE_UPDATE_LIB"|translate}}</span>
             </button>
         </div>
         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 d-flex justify-content-end align-bottom"></div>
             <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
                     ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)">
                 <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
-                <span class="ng-binding">Re-Deploy</span>
+                <span class="ng-binding">{{"DIALOG_PROCESSOR_BASE_REDEPLOY"|translate}}</span>
             </button>
         </div>
 
@@ -39,18 +39,18 @@
                  accept="application/zip"
                  ngf-pattern="'.zip'" ng-show="m_oController.m_bEditMode==false">
                 <i class="fa fa-file-archive-o fa-4x mb-4" aria-hidden="true"></i>
-                <span>Drag and Drop here the .zip file with your WASDI App or click to browse.</span>
+                <span>{{"DIALOG_PROCESSOR_BASE_DRAG_ZIP"|translate}}</span>
 
-                <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                <div ng-show="m_oController.m_oFile">{{"DIALOG_PROCESSOR_BASE_FILE"|translate}} {{m_oController.m_oFile[0].name}}</div>
             </div>
 
             <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                  ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                   ng-show="m_oController.m_bEditMode">
                 <i class="fa fa-file-archive-o fa-4x mb-4" aria-hidden="true"></i>
-                <span>Drag and Drop here the .zip or single file to update your WASDI App or click to browse.</span>
+                <span>{{"DIALOG_PROCESSOR_BASE_DRAG_FILES"|translate}}</span>
 
-                <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                <div ng-show="m_oController.m_oFile">{{"DIALOG_PROCESSOR_BASE_FILE"|translate}} {{m_oController.m_oFile[0].name}}</div>
             </div>
 
 
@@ -61,21 +61,21 @@
         
 
         <div ng-show="!m_oController.showDragAndDrop()">
-            <br>File Update not available for this Application Type
+            <br>{{"DIALOG_PROCESSOR_BASE_NO_UPDATE"|translate}}
             <br>
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <label for="procdescr">Short Description</label> <textarea class="form-control h-100" rows="6"  id = "procdescr" ng-model="m_oController.m_sDescription"></textarea><br/>
+            <label for="procdescr">{{"DIALOG_PROCESSOR_BASE_SHORT_DESCRIPTION"|translate}}</label> <textarea class="form-control h-100" rows="6"  id = "procdescr" ng-model="m_oController.m_sDescription"></textarea><br/>
 
            <div class="col-12">
                <div class="row">
                    <!--timeout-->
                    <div class="col-md-12">
-                       <label for="timeout">TimeOut [min]</label>
-                       <input id="timeout" type="text" class="form-control" placeholder="Timeout [min]" ng-model="m_oController.m_iMinuteTimeout">
+                       <label for="timeout">{{"DIALOG_PROCESSOR_BASE_TIMEOUT"|translate}}</label>
+                       <input id="timeout" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_BASE_TIMEOUT"|translate}}' ng-model="m_oController.m_iMinuteTimeout">
                    </div>
                    <!--public-->
                     <div class="col-md-12 mt-5">
@@ -85,7 +85,7 @@
                         <i class="fa fa-check-square " aria-hidden="true"
                            ng-hide="m_oController.m_oPublic === false"
                            ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
-                        <span>Make Application Public</span>
+                        <span>{{"DIALOG_PROCESSOR_BASE_PUBLIC"|translate}}</span>
                     </div>
 
             </div>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <label for="jsonsample">JSON Sample</label>
+            <label for="jsonsample">{{"DIALOG_PROCESSOR_BASE_JSON"|translate}}</label>
             <textarea class="form-control h-100"  style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="14" id="jsonsample" ng-model="m_oController.m_sJSONSample"></textarea>
         </div>
 

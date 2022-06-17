@@ -648,7 +648,7 @@ public final class HttpUtils {
 	 * @throws IOException
 	 * @throws CopyStreamException
 	 */
-	private static String readHttpResponse(HttpURLConnection oConnection) {
+	public static String readHttpResponse(HttpURLConnection oConnection) {
 		try {
 			// response
 
@@ -813,6 +813,27 @@ public final class HttpUtils {
 		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
 
 		Map<String, String> asHeaders = new HashMap<>();
+
+		long lStart = System.nanoTime();
+		String sResult = standardHttpGETQuery(sUrl, asHeaders);
+		long lEnd = System.nanoTime();
+
+		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
+
+		return sResult;
+	}
+
+	public static String httpGetResults(String sUrl, String sDownloadUser, String sDownloadPassword) {
+		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
+
+		// Add the auth header
+		String sAuth = sDownloadUser + ":" + sDownloadPassword;
+		String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+		String sAuthHeaderValue = "Basic " + sEncodedAuth;
+
+		Map<String, String> asHeaders = new HashMap<>();
+		asHeaders.put("Authorization", sAuthHeaderValue);
+
 
 		long lStart = System.nanoTime();
 		String sResult = standardHttpGETQuery(sUrl, asHeaders);

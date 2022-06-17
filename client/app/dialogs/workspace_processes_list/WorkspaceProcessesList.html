@@ -9,8 +9,7 @@
             </div>
             <div class="modal-body">
                 <div ng-hide="m_oController.hasError == false">
-                    <h4 class="m-4">No workspace selected, cannot loading data. If you refreshed the page please go to
-                        Workspace section and select one.</h4>
+                    <h4 class="m-4">{{"DIALOG_PROCESSES_LOGS_NO_WS"|translate}}</h4>
                 </div>
                 <div ng-hide="m_oController.hasError == true">
                     <div class="row">
@@ -31,49 +30,49 @@
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="0" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("None")'>
-                                                        None
+                                                       {{"DIALOG_PROCESSES_LOGS_NONE"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="0" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("CREATED")'>
-                                                        CREATED
+                                                       {{"DIALOG_PROCESSES_LOGS_CREATED"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="1" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("RUNNING")'>
-                                                        RUNNING
+                                                       {{"DIALOG_PROCESSES_LOGS_RUNNING"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="2" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("WAITING")'>
-                                                        WAITING
+                                                       {{"DIALOG_PROCESSES_LOGS_WAITING"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="3" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("READY")'>
-                                                        READY
+                                                       {{"DIALOG_PROCESSES_LOGS_READY"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="4" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("DONE")'>
-                                                        DONE
+                                                       {{"DIALOG_PROCESSES_LOGS_DONE"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="5" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("ERROR")'>
-                                                        ERROR
+                                                       {{"DIALOG_PROCESSES_LOGS_ERROR"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="6" href="" class="ng-binding"
                                                        ng-click='m_oController.comboStatusClick("STOPPED")'>
-                                                        STOPPED
+                                                       {{"DIALOG_PROCESSES_LOGS_STOPPED"|translate}}
                                                     </a>
                                                 </li>
                                             </ul>
@@ -91,96 +90,96 @@
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="0" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("None")'>
-                                                        None
+                                                       {{"DIALOG_PROCESSES_LOGS_NONE"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="0" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("RUNPROCESSOR")'>
-                                                        RUNPROCESSOR
+                                                       {{"DIALOG_PROCESSES_LOGS_RUNPROCESSOR"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="1" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("RUNIDL")'>
-                                                        RUNIDL
+                                                       {{"DIALOG_PROCESSES_LOGS_RUNIDL"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="2" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("RUNMATLAB")'>
-                                                        RUNMATLAB
+                                                       {{"DIALOG_PROCESSES_LOGS_RUNMATLAB"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="3" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("INGEST")'>
-                                                        INGEST
+                                                       {{"DIALOG_PROCESSES_LOGS_INGEST"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="4" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("DOWNLOAD")'>
-                                                        DOWNLOAD
+                                                       {{"DIALOG_PROCESSES_LOGS_DOWNLOAD"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="5" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("PUBLISHBAND")'>
-                                                        PUBLISHBAND
+                                                       {{"DIALOG_PROCESSES_LOGS_PUBLISHBAND"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="6" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("GRAPH")'>
-                                                        GRAPH
+                                                       {{"DIALOG_PROCESSES_LOGS_GRAPH"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="6" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("DEPLOYPROCESSOR")'>
-                                                        DEPLOYPROCESSOR
+                                                       {{"DIALOG_PROCESSES_LOGS_DEPLOYPROCESSOR"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="7" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("COPYTOSFTP")'>
-                                                        COPYTOSFTP
+                                                       {{"DIALOG_PROCESSES_LOGS_COPYTOSFTP"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="8" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("FTPUPLOAD")'>
-                                                        FTPUPLOAD
+                                                       {{"DIALOG_PROCESSES_LOGS_FTPUPLOAD"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="9" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("MOSAIC")'>
-                                                        MOSAIC
+                                                       {{"DIALOG_PROCESSES_LOGS_MOSAIC"|translate}}
                                                     </a>
                                                 </li>
                                                 <li role="presentation" class="ng-scope">
                                                     <a role="menuitem" tabindex="10" href="" class="ng-binding"
                                                        ng-click='m_oController.comboTypeClick("MULTISUBSET")'>
-                                                        MULTISUBSET
+                                                       {{"DIALOG_PROCESSES_LOGS_MULTISUBSET"|translate}}
                                                     </a>
                                                 </li>
                                             </ul>
                                         </div>
                                     </th>
                                     <th><input type="text" class="" ng-model="m_oController.m_oFilter.m_sName"
-                                               placeholder="Name..."></th>
+                                               placeholder='{{"DIALOG_PROCESSES_LOGS_NAME"|translate}}'></th>
                                     <th scope="col"><input type="text" class=""
                                                            ng-model="m_oController.m_oFilter.m_sDate"
-                                                           placeholder="Date..." ng-disabled="true"></th>
+                                                           placeholder='{{"DIALOG_PROCESSES_LOGS_DATE"|translate}}' ng-disabled="true"></th>
                                     <th><a ng-click="m_oController.applyFilters()" style="cursor:pointer"><span><i
-                                        class="custom-icon fa fa-filter"></i>&nbsp;Apply Filters</span></a></th>
+                                        class="custom-icon fa fa-filter"></i>&nbsp;{{"DIALOG_PROCESSES_LOGS_APPLY_FILTERS"|translate}}</span></a></th>
                                     <th><a ng-click="m_oController.resetFilters()" style="cursor:pointer"><span><i
-                                        class="custom-icon fa fa-remove"></i>&nbsp;Reset Filters</span></a></th>
+                                        class="custom-icon fa fa-remove"></i>&nbsp;{{"DIALOG_PROCESSES_LOGS_RESET_FILTERS"|translate}}</span></a></th>
                                     <th></th>
                                     <th><a ng-click="m_oController.downloadProcessesFile()" download="download"
-                                           style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i> Download</span></a>
+                                           style="cursor:pointer"><span><i class="custom-icon fa fa-download"></i>{{"DIALOG_DOWNLOAD_BUTTON"|translate}}</span></a>
                                     </th>
                                     <th></th>
                                     <th></th>
@@ -218,13 +217,13 @@
                                         <invaderfixed
                                             ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'"></invaderfixed>
                                         <span class="label label-info"
-                                              ng-show="oProcess.status === 'CREATED'">Waiting</span>
+                                              ng-show="oProcess.status === 'CREATED'">{{"DIALOG_PROCESSES_LOGS_WAIT"|translate}}</span>
                                         <span class="label label-warning"
-                                              ng-show="oProcess.status === 'DONE'">Log</span>
+                                              ng-show="oProcess.status === 'DONE'">{{"DIALOG_PROCESSES_LOGS_LOG"|translate}}</span>
                                         <span class="label label-danger"
-                                              ng-show="oProcess.status === 'STOPPED'">Stopped</span>
+                                              ng-show="oProcess.status === 'STOPPED'">{{"DIALOG_PROCESSES_LOGS_STOP"|translate}}</span>
                                         <span class="label label-danger"
-                                              ng-show="oProcess.status === 'ERROR'">Error</span>
+                                              ng-show="oProcess.status === 'ERROR'">{{"DIALOG_PROCESSES_LOGS_ERR"|translate}}</span>
                                     </td>
                                     <td>
                                         {{m_oController.getOperationDescription(oProcess)}}
@@ -261,20 +260,19 @@
                                         <div class="pointer-cursor-hover"
                                              ng-click="m_oController.deleteProcess(oProcess)"
                                              ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'|| oProcess.status === 'WAITING' || oProcess.status === 'READY'">
-                                            <!--class="btn btn-default btn-wasdi"-->
                                             <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip"
-                                               title="Stop processes" data-placement="bottom"></i>
+                                               title='{{"DIALOG_PROCESSES_LOGS_STOP_PROCESSES"|translate}}' data-placement="bottom"></i>
                                         </div>
                                     </td>
                                     <td>
                                         <td class="over-icon" ng-click="m_oController.openProcessorLogsDialog(oProcess)"
                                                 style="margin-bottom: 5px;margin-right: 5px;color:#43516A;">
-                                            <i class="fa fa-file-alt" aria-hidden="true" title="Logs"
+                                            <i class="fa fa-file-alt" aria-hidden="true" title='{{"DIALOG_PROCESSES_LOGS_LOG"|translate}}'
                                                data-placement="bottom" data-toggle="tooltip"></i>
                                         </td>
                                         <td class="over-icon"
                                             style="color:#43516A;">
-                                            <i class="fa fa-database" aria-hidden="true" title="Payload"
+                                            <i class="fa fa-database" aria-hidden="true" title='{{"DIALOG_PROCESSES_LOGS_PAYLOAD"|translate}}'
                                                data-placement="bottom" data-toggle="tooltip"
                                                ng-click="m_oController.openPayloadDialog(oProcess)" ng-hide="(oProcess.payload==null)"
                                             ></i>
@@ -302,7 +300,7 @@
                             class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xs-offset-6 col-sm-offset-6 col-md-offset-6 col-lg-offset-6">
                             <button class="btn btn-default btn-wasdi" ng-click="m_oController.getAllProcessesLogs()"
                                     ng-disabled="!m_oController.isLoadMoreButtonClickable">
-                                <i class="fa fa-refresh mr-2" aria-hidden="true"></i>Load more...
+                                <i class="fa fa-refresh mr-2" aria-hidden="true"></i>{{"DIALOG_PROCESSES_LOGS_LOAD_MORE"|translate}}
                             </button>
                         </div>
                     </div>

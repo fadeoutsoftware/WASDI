@@ -39,8 +39,53 @@ angular
             if(modelFilter[i].filters[j].indexvalue && modelFilter[i].filters[j].indexvalue.trim() != '')
             {
               if(modelFilter[i].filters[j].indexname && modelFilter[i].filters[j].indexname.trim() != '') {
-                filter = filter + ' AND '+modelFilter[i].filters[j].indexname+':'
-                +modelFilter[i].filters[j].indexvalue;
+
+                if (modelFilter[i].filters[j].visibilityConditions && modelFilter[i].filters[j].visibilityConditions.trim() != '') {
+                  let visibilityConditionsArray = modelFilter[i].filters[j].visibilityConditions.split("&");
+
+                  let isFilterVisible = true;
+
+                  for (let visibilityCondition of visibilityConditionsArray) {
+
+                    let innerVisibilityConditions;
+                    if (visibilityCondition.startsWith("(") && visibilityCondition.endsWith(")")) {
+                      innerVisibilityConditions = visibilityCondition.substring(1, visibilityCondition.length - 1);
+                    } else {
+                      innerVisibilityConditions = visibilityCondition;
+                    }
+
+                    if (innerVisibilityConditions.includes("|")) {
+                      let innerVisibilityConditionsArray = innerVisibilityConditions.split("|");
+
+                      let innerFilterVisibleFlag = false;
+
+                      for (let innerVisibilityCondition of innerVisibilityConditionsArray) {
+                        if (filter.includes(innerVisibilityCondition)) {
+                          innerFilterVisibleFlag = true;
+                          break;
+                        }
+                      }
+
+                      if (!innerFilterVisibleFlag) {
+                        isFilterVisible = false;
+                        break;
+                      }
+                    } else {
+                      if (!filter.includes(visibilityCondition)) {
+                        isFilterVisible = false;
+                        break;
+                      }
+                    }
+                }
+
+                  if (isFilterVisible) {
+                    filter = filter + ' AND '+modelFilter[i].filters[j].indexname+':'
+                    +modelFilter[i].filters[j].indexvalue;
+                  }
+                } else {
+                  filter = filter + ' AND '+modelFilter[i].filters[j].indexname+':'
+                  +modelFilter[i].filters[j].indexvalue;
+                }
               }
               else {
                 filter = filter + ' AND '+modelFilter[i].filters[j].indexvalue;
@@ -59,5 +104,66 @@ angular
     clearAdvancedFilter: function(){},
     setClearAdvancedFilter: function(method){this.clearAdvancedFilter = method;}    
   };
-});
+})
 
+.filter('filterOutInvisibleFilters', function() {
+    return function(allFilters, missionFilter) {
+
+        let visibleFilters = [];
+
+        if (!missionFilter) {
+            return allFilters;
+        }
+
+        for (let filter of allFilters) {
+          let isFilterVisible = true;
+
+          if (filter.visibilityConditions) {
+
+            let visibilityConditionsArray = filter.visibilityConditions.split("&");
+
+            for (let visibilityCondition of visibilityConditionsArray) {
+
+              let innerVisibilityConditions;
+              if (visibilityCondition.startsWith("(") && visibilityCondition.endsWith(")")) {
+                innerVisibilityConditions = visibilityCondition.substring(1, visibilityCondition.length - 1);
+              } else {
+                innerVisibilityConditions = visibilityCondition;
+              }
+
+              if (innerVisibilityConditions.includes("|")) {
+                let innerVisibilityConditionsArray = innerVisibilityConditions.split("|");
+
+                let innerFilterVisibleFlag = false;
+
+                for (let innerVisibilityCondition of innerVisibilityConditionsArray) {
+                  if (missionFilter.includes(innerVisibilityCondition)) {
+                    innerFilterVisibleFlag = true;
+                    break;
+                  }
+                }
+
+                if (!innerFilterVisibleFlag) {
+                  isFilterVisible = false;
+                  break;
+                }
+              } else {
+                if (!missionFilter.includes(visibilityCondition)) {
+                  isFilterVisible = false;
+                  break;
+                }
+              }
+            }
+
+          }
+
+          if (isFilterVisible) {
+              visibleFilters.push(filter);
+          }
+      }
+
+
+
+        return visibleFilters;
+    };
+  });

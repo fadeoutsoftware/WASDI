@@ -35,6 +35,9 @@ import wasdi.shared.business.ProcessWorkspace;
  */
 public class Utils {
 
+	public static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_yyyyMMdd = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMMdd"));
+	public static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_yyyyMMddTZ = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+
 	public static int s_iSessionValidityMinutes = 24 * 60;
 	private static SecureRandom s_oUtilsRandom = new SecureRandom();
 
@@ -166,6 +169,26 @@ public class Utils {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sWasdiDate);
 		} catch (ParseException e) {
+			return null;
+		}
+	}
+
+	public static Date getYyyyMMddDate(String sDate) {
+
+		try {
+			return SIMPLE_DATE_FORMAT_yyyyMMdd.get().parse(sDate);
+		} catch (ParseException oE) {
+			Utils.debugLog("Utils.getYyyyMMddDate( " + sDate + "  ): could not be parsed due to " + oE);
+			return null;
+		}
+	}
+
+	public static Date getYyyyMMddTZDate(String sDate) {
+
+		try {
+			return SIMPLE_DATE_FORMAT_yyyyMMddTZ.get().parse(sDate);
+		} catch (ParseException oE) {
+			Utils.debugLog("Utils.getYyyyMMddTZDate( " + sDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
@@ -448,8 +471,8 @@ public class Utils {
 	}
 	
 	public static String getNormalizedSize(Double dSize, int iStartingIndex) {
-		String sChosenUnit = null;
-		String sSize = null;
+		String sChosenUnit = sUnits[iStartingIndex];
+		String sSize = Long.toString(Math.round(dSize)) + " " + sChosenUnit;
 		 
 		int iUnitIndex = Math.max(0, iStartingIndex);
 		int iLim = sUnits.length -1;

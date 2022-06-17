@@ -12,9 +12,10 @@ var MarketPlaceController = (function() {
      * @param oAuthService
      * @param oProcessorService
      * @param oProcessorMediaService
+     * @param oTranslate
      * @constructor
      */
-    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService) {
+    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oTranslate) {
         /**
          * Angular Scope
          */
@@ -46,6 +47,11 @@ var MarketPlaceController = (function() {
          * Processors Media Service
          */
         this.m_oProcessorMediaService = oProcessorMediaService;
+
+        /**
+         * Translate Service
+         */
+        this.m_oTranslate = oTranslate;
 
         /**
          * Name Filter
@@ -126,6 +132,9 @@ var MarketPlaceController = (function() {
             }
         };
 
+        var sMessage = this.m_oTranslate.instant("MSG_WAPPS_ERROR");
+        var sCategoriesError = this.m_oTranslate.instant("MSG_WAPPS_CATEGORY_ERROR");
+        var sPublishersError = this.m_oTranslate.instant("MSG_WAPPS_PUBLISHERS_ERROR");
 
         // Ask the list of Applications to the WASDI server
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).then(function (data) {
@@ -135,11 +144,11 @@ var MarketPlaceController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+                utilsVexDialogAlertTop(sMessage);
             }
             oController.m_bWaiting = false;
         },(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            utilsVexDialogAlertTop(sMessage);
             oController.m_bWaiting = false;
         })) ;
 
@@ -151,10 +160,10 @@ var MarketPlaceController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
+                utilsVexDialogAlertTop(sCategoriesError);
             }
         },(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING CATEGORIES");
+            utilsVexDialogAlertTop(sCategoriesError);
         }));
 
         // Get the list of publishers
@@ -165,10 +174,10 @@ var MarketPlaceController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
+                utilsVexDialogAlertTop(sPublishersError);
             }
         },(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING PUBLISHERS");
+            utilsVexDialogAlertTop(sPublishersError);
         }));
     }
 
@@ -179,6 +188,8 @@ var MarketPlaceController = (function() {
     MarketPlaceController.prototype.refreshAppList = function() {
 
         let oController = this;
+
+        var sMessage = this.m_oTranslate.instant("MSG_WAPPS_ERROR");
 
         if (this.m_sNameFilter !== this.m_oAppFilter.name) {
             this.m_oAppFilter.page = 0;
@@ -209,12 +220,12 @@ var MarketPlaceController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+                utilsVexDialogAlertTop(sMessage);
             }
 
             oController.m_bWaiting = false;
         },(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST")
+            utilsVexDialogAlertTop(sMessage)
             oController.m_bWaiting = false;
 
         }));
@@ -368,7 +379,8 @@ var MarketPlaceController = (function() {
         'ConstantsService',
         'AuthService',
         'ProcessorService',
-        'ProcessorMediaService'
+        'ProcessorMediaService',
+        '$translate'
     ];
 
     return MarketPlaceController;

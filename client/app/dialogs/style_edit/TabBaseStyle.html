@@ -5,14 +5,14 @@
     <div class="row-v4">
         <div class="col-v4">
             <div class="form-v4-group">
-                <label class="">Name</label>
-                <input type="text" name="name"
+                <label class="">{{"DIALOG_STYLE_NAME"|translate}}</label>
+                <input type="text" name='{{"DIALOG_STYLE_NAME"|translate}}'
                     class="form-v4-control-plaintext wasdi-input form-control" required="required"
                     ng-readonly="m_oController.m_bEditMode" readonly="readOnly"
                     ng-model="m_oController.m_oStyle.name">
             </div>
             <div class="form-v4-group">
-                <label for="comment">Description:</label>
+                <label for="comment">{{"DIALOG_STYLE_DESCRIPTION"|translate}}</label>
                 <textarea class="form-control wasdi-input not-resizable" rows="5" id="comment" maxlength="150"
                     ng-model="m_oController.m_oStyle.description"></textarea>
             </div>
@@ -21,7 +21,7 @@
                     ng-click="m_oController.m_oStyle.public = !m_oController.m_oStyle.public"></i>
                 <i class="fa fa-check-square " aria-hidden="true" ng-hide="m_oController.m_oStyle.public === false"
                     ng-click="m_oController.m_oStyle.public = !m_oController.m_oStyle.public"></i>
-                <span>Set Style public</span>
+                <span>{{"DIALOG_STYLE_SET_PUBLIC"|translate}}</span>
             </div>
         </div>
 

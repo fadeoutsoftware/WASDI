@@ -3,7 +3,19 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
-## [0.7.4] - 2021-01-01
+## [0.7.4.3] - 2022-06-06
+
+### Fixed
+- setProcessPayload: use POST instead of get to allow big payloads
+
+## [0.7.4.2] - 2022-04-20
+
+### Added
+- bboxStringToObject: converts wasdi bbox string format in wasdi bbox object format
+- bboxObjectToString: converts wasdi bbox object format in wasdi bbox string format
+- searchEOImages: added generic aoParams paramter to support generic Data Providers
+
+## [0.7.4] - 2022-02-09
 
 ### Added
 - Support to the AUTO Data Provider

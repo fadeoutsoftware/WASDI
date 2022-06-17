@@ -1050,3 +1050,28 @@ textarea{
         margin-top: 10em ;
     }
 }
+
+
+
+    /* Specify styling for tooltip contents */
+    .tooltip.blueWasdi .tooltip-inner {
+        //color: #000000;
+        background-color: #43516A;
+        box-shadow: 0 6px 12px rgba(0,0,0,.175);
+        width: auto;
+        font-family: Hero;
+        color: #F8F8F8;
+        //font-weight: bold;
+        max-width: 500px;
+        overflow-wrap: break-word;
+        
+    }
+    /* Hide arrow */
+    .tooltip.blueWasdi .tooltip-arrow {
+        color: #43516A;
+    }
+
+
+    .tooltip.top .tooltip-arrow {
+        border-top-color: #43516A;;
+    }

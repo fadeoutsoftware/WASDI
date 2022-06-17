@@ -200,6 +200,8 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 		oClient.setConnectionManagerTimeout(2000);
 
 		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		
+		Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Entries = " + oFeed.getEntries().size());
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
@@ -236,6 +238,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");
 			
+			/*
 			if (oLink != null) {
 
 				try {
@@ -253,7 +256,8 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 				catch (Exception e) {
 					Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
 				}					
-			} 
+			}
+			*/
 			aoResults.add(oResult);
 		} 
 		Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Search Done: found " + aoResults.size() + " results");

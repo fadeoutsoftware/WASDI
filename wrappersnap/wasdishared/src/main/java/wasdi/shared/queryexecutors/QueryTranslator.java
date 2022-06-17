@@ -109,6 +109,22 @@ public abstract class QueryTranslator {
 	 * Token of STATICS platform
 	 */
 	private static final String s_sPLATFORMNAME_STATICS = "platformname:StaticFiles";
+
+	/**
+	 * Token of IMERG platform
+	 */
+	private static final String s_sPLATFORMNAME_IMERG = "platformname:IMERG";
+
+	/**
+	 * Token of IMERG platform
+	 */
+	private static final String s_sPLATFORMNAME_CM = "platformname:CM";
+
+	/**
+	 * Token of ECOSTRESS platform
+	 */
+	private static final String s_sPLATFORMNAME_ECOSTRESS = "platformname:ECOSTRESS";
+
 	/**
 	 * Token of product type
 	 */
@@ -503,6 +519,14 @@ public abstract class QueryTranslator {
 			// Conflits with the "AND" literal
 			parseStatics(sOriginalQuery, oResult);
 
+			// Try get Info about IMERG
+			parseIMERG(sQuery, oResult);
+
+			// Try get Info about CM
+			parseCM(sQuery, oResult);
+
+			// Try get Info about ECOSTRESS
+			parseECOSTRESS(sQuery, oResult);
 		} catch (Exception oEx) {
 			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -790,6 +814,33 @@ public abstract class QueryTranslator {
 	}
 
 	/**
+	 * Fills the Query View Model with ECOSTRESS info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseECOSTRESS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_ECOSTRESS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_ECOSTRESS);
+
+			oResult.platformName = Platforms.ECOSTRESS;
+
+			oResult.productType = extractValue(sQuery, "dataset");
+
+			String sRelativeOrbitNumber = extractValue(sQuery, "relativeorbitnumber");
+			if (!Utils.isNullOrEmpty(sRelativeOrbitNumber)) {
+				try {
+					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
+				}
+			}
+
+			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
+		}
+	}
+
+	/**
 	 * Fills the Query View Model with WorldCover info
 	 * 
 	 * @param sQuery the query
@@ -816,6 +867,47 @@ public abstract class QueryTranslator {
 
 			oResult.platformName = Platforms.STATICS;
 			oResult.productType = extractValue(sQuery, "producttype");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with IMERG info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseIMERG(String sQuery, QueryViewModel oResult) {
+		Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
+
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_IMERG)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_IMERG);
+
+			oResult.platformName = Platforms.IMERG;
+
+			oResult.productName = extractValue(sQuery, "latency");
+			oResult.productType = extractValue(sQuery, "duration");
+			oResult.productLevel = extractValue(sQuery, "accumulation");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with CM info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseCM(String sQuery, QueryViewModel oResult) {
+		Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
+
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
+
+			oResult.platformName = Platforms.CM;
+
+			oResult.productType= extractValue(sQuery, "producttype");
+			oResult.productLevel = extractValue(sQuery, "protocol");
+			oResult.productName = extractValue(sQuery, "dataset");
+			oResult.sensorMode = extractValue(sQuery, "variables");
 		}
 	}
 
@@ -1068,10 +1160,7 @@ public abstract class QueryTranslator {
 							iEnd = sQuery.indexOf(')', iStart);
 						}
 						if (iEnd < 0) {
-							iEnd = sQuery.indexOf(' ', iStart);
-						}
-						if (iEnd < 0) {
-							iEnd = iStart + 12;
+							iEnd = sQuery.length();
 						}
 						String sTimeliness = sQuery.substring(iStart, iEnd);
 						sTimeliness = sTimeliness.trim();

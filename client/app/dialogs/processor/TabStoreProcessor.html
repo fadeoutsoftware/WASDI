@@ -1,26 +1,26 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-4">
-            <label for="friendlyname">Friendly Name</label>
-            <input id="friendlyname" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Friendly Name" ng-model="m_oController.m_oProcessorDetails.friendlyName">
+            <label for="friendlyname">{{"DIALOG_PROCESSOR_STORE_FRIEND_NAME"|translate}}</label>
+            <input id="friendlyname" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_STORE_FRIEND_NAME"|translate}}' ng-model="m_oController.m_oProcessorDetails.friendlyName">
         </div>
         <div class="col-md-4">
-            <label for="link">Link</label>
-            <input id="link" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Link" ng-model="m_oController.m_oProcessorDetails.link">
+            <label for="link">{{"DIALOG_PROCESSOR_STORE_LINK"|translate}}</label>
+            <input id="link" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_STORE_LINK"|translate}}' ng-model="m_oController.m_oProcessorDetails.link">
         </div>
         <div class="col-md-4">
-            <label for="email">E-Mail</label>
-            <input id="email" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Email" ng-model="m_oController.m_oProcessorDetails.email">
+            <label for="email">{{"DIALOG_PROCESSOR_STORE_MAIL"|translate}}</label>
+            <input id="email" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_STORE_MAIL"|translate}}' ng-model="m_oController.m_oProcessorDetails.email">
         </div>
     </div>
     <div class="row mt-4">
         <div class="col-md-2">
-            <label for="ondemandPrice">On Demand Price</label>
-            <input id="ondemandPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="On Demand Price" ng-model="m_oController.m_oProcessorDetails.ondemandPrice">
+            <label for="ondemandPrice">{{"DIALOG_PROCESSOR_STORE_ONDEMAND"|translate}}</label>
+            <input id="ondemandPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_STORE_ONDEMAND"|translate}}' ng-model="m_oController.m_oProcessorDetails.ondemandPrice">
         </div>
         <div class="col-md-2">
-            <label for="subscriptionPrice">Subscription Price</label>
-            <input id="subscriptionPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder="Subscription Price" ng-model="m_oController.m_oProcessorDetails.subscriptionPrice">
+            <label for="subscriptionPrice">{{"DIALOG_PROCESSOR_STORE_SUBSCRIPTION"|translate}}</label>
+            <input id="subscriptionPrice" ng-readonly="!m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_STORE_SUBSCRIPTION"|translate}}' ng-model="m_oController.m_oProcessorDetails.subscriptionPrice">
 
         </div>
         <div class="col-md-2 checkbox-after-input">
@@ -30,20 +30,20 @@
             <i class="fa fa-check-square " aria-hidden="true"
                ng-hide="m_oController.m_oProcessorDetails.showInStore === false"
                ng-click = "m_oController.m_oProcessorDetails.showInStore = !m_oController.m_oProcessorDetails.showInStore"></i>
-            <span>Show Application in the Store</span>
+            <span>{{"DIALOG_PROCESSOR_STORE_SHOW"|translate}}</span>
         </div>
     </div>
 
 
     <div class="row mt-4">
         <div class="col-md-6">
-            <label for="longDescription">Long Description</label>
+            <label for="longDescription">{{"DIALOG_PROCESSOR_STORE_LONG_DESCRIPTION"|translate}}</label>
             <textarea class="form-control" ng-readonly="!m_oController.m_bEditMode" rows="10"  id = "longDescription"  ng-model="m_oController.m_oProcessorDetails.longDescription"></textarea>
         </div>
         <div class="col-md-6">
             <!--category-->
             <div class="category mt-1 mb-3">
-                <label class="border-bottom py-1 mb-2 subtitle w-100">Category</label>
+                <label class="border-bottom py-1 mb-2 subtitle w-100">{{"DIALOG_PROCESSOR_STORE_CATEGORY"|translate}}</label>
                 <div class="row">
                     <div class="col-md-6"> <!-- TODO PAOLO DA PRENDERE SOLO QUELLI CON INDEX DISPARI-->
                         <div class="input-group-text d-flex align-items-center pb-1" ng-repeat="oCategory in m_oController.m_aoCategories">

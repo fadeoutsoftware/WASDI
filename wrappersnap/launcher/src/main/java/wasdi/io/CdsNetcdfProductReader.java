@@ -55,45 +55,45 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
 			oNodeGroupViewModel.setNodeName("Bands");
 
-			Set<String> excludedVariableSet = new HashSet<>(Arrays.asList("longitude", "latitude", "time"));
+			Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList("longitude", "latitude", "time"));
 
-			List<Variable> variablesList = oFile.getVariables();
+			List<Variable> asVariablesList = oFile.getVariables();
 
 			List<BandViewModel> oBands = new ArrayList<>();
-			int latitudeLength = 0;
-			int longitudeLength = 0;
-			List<Integer> timeHoursList = Collections.emptyList();
+			int iLatitudeLength = 0;
+			int iLongitudeLength = 0;
+			List<Integer> aiTimeHoursList = Collections.emptyList();
 
-			for (Variable v : variablesList) {
-				String variableShortName = v.getShortName();
+			for (Variable oVariable : asVariablesList) {
+				String sVariableShortName = oVariable.getShortName();
 
-				if (variableShortName.equalsIgnoreCase("longitude")) {
-					longitudeLength = extractValueFromShape(v);
+				if (sVariableShortName.equalsIgnoreCase("longitude")) {
+					iLongitudeLength = extractValueFromShape(oVariable);
 				}
 
-				if (variableShortName.equalsIgnoreCase("latitude")) {
-					latitudeLength = extractValueFromShape(v);
+				if (sVariableShortName.equalsIgnoreCase("latitude")) {
+					iLatitudeLength = extractValueFromShape(oVariable);
 				}
 
-				if (variableShortName.equalsIgnoreCase("time")) {
-					int[] hoursArray = (int[]) (v.read().getStorage());
-					timeHoursList = IntStream.of(hoursArray).map(i -> i % 24).boxed().collect(Collectors.toList());
+				if (sVariableShortName.equalsIgnoreCase("time")) {
+					int[] aiHoursArray = (int[]) (oVariable.read().getStorage());
+					aiTimeHoursList = IntStream.of(aiHoursArray).map(i -> i % 24).boxed().collect(Collectors.toList());
 				}
 			}
 
-			for (Variable v : variablesList) {
-				String variableShortName = v.getShortName();
-				String description = v.getDescription();
-				if (!excludedVariableSet.contains(variableShortName)) {
-					for (Integer timeHour : timeHoursList) {
+			for (Variable oVariable : asVariablesList) {
+				String sVariableShortName = oVariable.getShortName();
+				String sDescription = oVariable.getDescription();
+				if (!asExcludedVariableSet.contains(sVariableShortName)) {
+					for (Integer timeHour : aiTimeHoursList) {
 						// Create the single band representing the shape
 						BandViewModel oBandViewModel = new BandViewModel();
 						oBandViewModel.setPublished(false);
 						oBandViewModel.setGeoserverBoundingBox("");
-						oBandViewModel.setHeight(latitudeLength);
-						oBandViewModel.setWidth(longitudeLength);
+						oBandViewModel.setHeight(iLatitudeLength);
+						oBandViewModel.setWidth(iLongitudeLength);
 						oBandViewModel.setPublished(false);
-						oBandViewModel.setName(description.replaceAll("[\\W]", "_") + "_" + String.format("%02d" , timeHour) + "hh");
+						oBandViewModel.setName(sDescription.replaceAll("[\\W]", "_") + "_" + String.format("%02d" , timeHour) + "hh");
 
 						oBands.add(oBandViewModel);
 					}
@@ -109,16 +109,16 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 		return oRetViewModel;
 	}
 
-	private static int extractValueFromShape(Variable v) {
-		int value = 0;
+	private static int extractValueFromShape(Variable oVariable) {
+		int iValue = 0;
 
-		int[] shapeArray = v.getShape();
+		int[] aiShapeArray = oVariable.getShape();
 
-		if (shapeArray != null && shapeArray.length > 0) {
-			value = shapeArray[0];
+		if (aiShapeArray != null && aiShapeArray.length > 0) {
+			iValue = aiShapeArray[0];
 		}
 
-		return value;
+		return iValue;
 	}
 
 	@Override
@@ -140,79 +140,79 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 		return null;
 	}
 
-	private static String extractBboxFromFile(String fileName) throws IOException {
-		NetcdfFile oFile = NetcdfFiles.open(fileName);
+	private static String extractBboxFromFile(String sFileName) throws IOException {
+		NetcdfFile oFile = NetcdfFiles.open(sFileName);
 
-		Variable latitudeVariable = getVariableByName(oFile, "latitude");
-		Variable longitudeVariable = getVariableByName(oFile, "longitude");
+		Variable oLatitudeVariable = getVariableByName(oFile, "latitude");
+		Variable oLongitudeVariable = getVariableByName(oFile, "longitude");
 
-		Array latArray = getArrayFromVariable(latitudeVariable);
-		Object latStorage = getStorageFromArray(latArray);
-		float[] latitudeCoordinates = extractExtremeCoordinatesFromStorage(latStorage);
+		Array oLatArray = getArrayFromVariable(oLatitudeVariable);
+		Object oLatStorage = getStorageFromArray(oLatArray);
+		float[] afLatitudeCoordinates = extractExtremeCoordinatesFromStorage(oLatStorage);
 
-		Array lonArray = getArrayFromVariable(longitudeVariable);
-		Object lonStorage = getStorageFromArray(lonArray);
-		float[] longitudeCoordinates = extractExtremeCoordinatesFromStorage(lonStorage);
+		Array oLonArray = getArrayFromVariable(oLongitudeVariable);
+		Object oLonStorage = getStorageFromArray(oLonArray);
+		float[] afLongitudeCoordinates = extractExtremeCoordinatesFromStorage(oLonStorage);
 
-		float fLatN = latitudeCoordinates[1];
-		float fLonW = longitudeCoordinates[0];
-		float fLatS = latitudeCoordinates[0];
-		float fLonE = longitudeCoordinates[1];
+		float fLatN = afLatitudeCoordinates[1];
+		float fLonW = afLongitudeCoordinates[0];
+		float fLatS = afLatitudeCoordinates[0];
+		float fLonE = afLongitudeCoordinates[1];
 
 		String sBBox = fLatN + "," + fLonW + "," + fLatS + "," + fLonE;
 
 		return sBBox;
 	}
 
-	private static float[] extractExtremeCoordinatesFromStorage(Object storage) {
-		float[] extremeCoordinates = new float[] {0F, 0F};
+	private static float[] extractExtremeCoordinatesFromStorage(Object oStorage) {
+		float[] afExtremeCoordinates = new float[] {0F, 0F};
 
-		if (storage != null && storage instanceof float[]) {
-			float[] floatArray = (float[]) storage;
+		if (oStorage != null && oStorage instanceof float[]) {
+			float[] afFloatArray = (float[]) oStorage;
 
-			extremeCoordinates = extractExtremeValuesFromArray(floatArray);
+			afExtremeCoordinates = extractExtremeValuesFromArray(afFloatArray);
 		}
 
-		return extremeCoordinates;
+		return afExtremeCoordinates;
 	}
 
-	private static float[] extractExtremeValuesFromArray(float[] floatArray) {
-		float minf = 181F;
-		float maxf = - 181F;
+	private static float[] extractExtremeValuesFromArray(float[] afFloatArray) {
+		float fMinf = 181F;
+		float fMaxf = - 181F;
 
-		if (floatArray != null) {
-			for (float f : floatArray) {
-				if (f > maxf) {
-					maxf = f;
+		if (afFloatArray != null) {
+			for (float fNumber : afFloatArray) {
+				if (fNumber > fMaxf) {
+					fMaxf = fNumber;
 				}
 
-				if (f < minf) {
-					minf = f;
+				if (fNumber < fMinf) {
+					fMinf = fNumber;
 				}
 			}
 		}
 
-		return new float[] {minf, maxf};
+		return new float[] {fMinf, fMaxf};
 	}
 
 	/**
 	 * Get the specified variable from the Netcdf file.
 	 * @param oFile the Netcdf file
-	 * @param variableName the name of the variable to be found
+	 * @param sVariableName the name of the variable to be found
 	 * @return the variable with the specified name
 	 */
-	private static Variable getVariableByName(NetcdfFile oFile, String variableName) {
-		Group rootGroup = oFile.getRootGroup();
-		List<Group> rootGroupGroups = rootGroup.getGroups();
+	private static Variable getVariableByName(NetcdfFile oFile, String sVariableName) {
+		Group oRootGroup = oFile.getRootGroup();
+		List<Group> aoRootGroupGroups = oRootGroup.getGroups();
 
-		for (Group g : rootGroupGroups) {
-			if (g.getShortName().equalsIgnoreCase("PRODUCT")) {
+		for (Group oGroup : aoRootGroupGroups) {
+			if (oGroup.getShortName().equalsIgnoreCase("PRODUCT")) {
 
-				List<Variable> variableList = g.getVariables();
-				for (Variable v : variableList) {
-					String variableShortName = v.getShortName();
-					if (variableShortName.equalsIgnoreCase(variableName)) {
-						return v;
+				List<Variable> aoVariableList = oGroup.getVariables();
+				for (Variable oVariable : aoVariableList) {
+					String oVariableShortName = oVariable.getShortName();
+					if (oVariableShortName.equalsIgnoreCase(sVariableName)) {
+						return oVariable;
 					}
 				}
 			}
@@ -221,24 +221,24 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 		return null;
 	}
 
-	private static Array getArrayFromVariable(Variable variable) throws IOException {
-		Array array = null;
+	private static Array getArrayFromVariable(Variable oVariable) throws IOException {
+		Array oArray = null;
 
-		if (variable != null) {
-			array = variable.read();
+		if (oVariable != null) {
+			oArray = oVariable.read();
 		}
 
-		return array;
+		return oArray;
 	}
 
-	private static Object getStorageFromArray(Array array) {
-		Object o = null;
+	private static Object getStorageFromArray(Array oArray) {
+		Object oObject = null;
 
-		if (array != null) {
-			o = array.getStorage();
+		if (oArray != null) {
+			oObject = oArray.getStorage();
 		}
 
-		return o;
+		return oObject;
 	}
 
 	@Override

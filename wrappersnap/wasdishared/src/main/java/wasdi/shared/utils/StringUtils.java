@@ -3,6 +3,8 @@ package wasdi.shared.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -59,6 +61,16 @@ public final class StringUtils {
 			IOUtils.closeQuietly(zi);
 		}
 		return result;
+	}
+
+	public static String encodeUrl(String sUrl) {
+		try {
+			return URLEncoder.encode(sUrl, java.nio.charset.StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException oE) {
+			Utils.debugLog("StringUtils.encodeUrl: could not encode URL due to " + oE + ".");
+		}
+
+		return sUrl;
 	}
 
 }

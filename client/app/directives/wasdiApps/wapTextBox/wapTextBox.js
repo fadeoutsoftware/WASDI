@@ -8,7 +8,7 @@ angular.module('wasdi.wapTextBox', [])
                 inputText: '=',
                 tooltip:'='
             },
-            template: `<input type="text" class="form-control"  ng-model="$ctrl.inputText" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right">`,
+            template: `<input type="text" class="form-control"  ng-model="$ctrl.inputText" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="top" tooltip-class="blueWasdi" tooltip-popup-delay='750'>`,
             controller: function() {
 
             },

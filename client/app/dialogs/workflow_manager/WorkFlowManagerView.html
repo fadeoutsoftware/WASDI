@@ -6,21 +6,12 @@
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;
                 </button>
                 <h4 class="modal-title ">
-                    <!--<img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" alt="SnapLogo">-->
                     <i class="fa fa-cogs" aria-hidden="true"></i>&nbsp;
                     <a href="http://step.esa.int/main/toolboxes/snap/" target="_blank" style="color: white"
                         rel="noopener noreferrer">{{"DIALOG_WORKFLOW_MANAGER_TITLE" | translate}}</a>
                 </h4>
 
             </div>
-      <!-- REFERENCE FOR BUTTON NEW WORKFLOW      
-          <div class="modal-body d-flex flex-column">
-                <div class="row-v4"><button class="btn btn-primary btn-wasdi">
-                    <i class="custom-icon fa fa-lg fa-plus-square" aria-hidden="true"></i>New Workflow
-                    </button>
-                </div>
-            </div>
-        -->
             <div class="modal-body d-flex flex-column">
                 <!-- TAB NAVIGATION -->
                 <div class="row-v4">
@@ -72,7 +63,7 @@
 
             <div class="modal-footer">
                 <button type="button" ng-click="close()" class="my-button" data-dismiss="modal">
-                    Close
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
             </div>
 

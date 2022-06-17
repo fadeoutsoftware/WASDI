@@ -1,52 +1,284 @@
 #!/bin/bash
-script_file="/home/wasdi/call_idl.pro"
-echo "executing WASDI idl script..."
-i=0
+
+#### PARAMETER ####
+commandIdl="/usr/local/bin/idl"
+wasdiHome="/home/wasdi"
+scriptFile="${wasdiHome}/call_idl.pro"
 sStatus="RUNNING"
-# read session ID from config.properties
-sSessionId=`awk -F"=" '$1=="SESSIONID"{print $2}' config.properties`
-sSessionId=`echo $sSessionId | sed 's/\\r//g'`
-echo "Session ID is: "$sSessionId
-sProcessObjId=`awk -F"=" '$1=="MYPROCID"{print $2}' config.properties`
-sProcessObjId=`echo $sProcessObjId | sed 's/\\r//g'`
-echo "Process Obj Id is: "$sProcessObjId
 iDuration=-1
-while (( i < 5 ))
+loopMax=5
+#### /PARAMETER ####
+
+
+
+
+#### FUNCTION ####
+function showHelp() {
+    local _exitCode="${1}"
+
+    echo
+    echo "------"
+    echo "Usage: /bin/bash ${0} --pid-file <path to the PID file> --process-object-id <process object ID> --session-id <session ID>"
+
+    if [[ -n "${_exitCode}" ]]
+    then
+        exit ${_exitCode}
+    fi
+}
+
+function wasdiLog() {
+    local _lineToLog="${1}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ${_lineToLog}"
+}
+
+function getStatus() {
+    local _sProcessObjId="${1}"
+    local _sSessionId="${2}"
+    local _sStatus=""
+    local _returnCode=0
+
+    _sStatus="$(curl --silent --insecure --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?procws=${_sProcessObjId}" --header "x-session-token: ${_sSessionId}")"
+    _returnCode=${?}
+    echo "${_sStatus^^}"
+    return ${_returnCode}
+}
+
+function setStatusError() {
+    local _sProcessObjId="${1}"
+    local _sSessionId="${2}"
+    local _sResult=""
+    local _returnCode=0
+
+    _sResult="$(curl --silent --insecure --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/updatebyid?procws=${_sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${_sSessionId}")"
+    _returnCode=${?}
+    echo "${_sResult^^}"
+    return ${_returnCode}
+}
+#### /FUNCTION ####
+
+
+
+
+#### ARGUMENT MANAGEMENT ####
+while test ${#} -gt 0
 do
-	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?procws=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
-	if [[ "$sStatus" == "DONE" ]] || [[ "$sStatus" == "ERROR" ]] || [[ "$sStatus" == "STOPPED" ]]
-	then
-		break
-	fi
-	echo "[${sProcessObjId}] Trying to launch script: "$i
-	start=`date +%s`
-	umask 000; /usr/local/bin/idl ${script_file}
-	end=`date +%s`
-	iDuration=$((end-start))
-	echo "[${sProcessObjId}] Execution apparently took "$iDuration" seconds"
-	((i++))
-	#echo "Getting proces status"
-	# get status
-	sStatus=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/getstatusbyid?procws=${sProcessObjId}" --header "x-session-token: ${sSessionId}")
-	if [[ "RUNNING" == "$sStatus" ]]
-	then
-		echo "[${sProcessObjId}] Retrying after 1 m sleep"
-		sleep 1m
-	else
-		#echo "Done"
-		break
-	fi
+    case "${1}" in
+        -h|--help)
+            showHelp 0
+        ;;
+
+        --pid-file)
+            shift
+
+            if [[ -n "${1}" ]]
+            then
+                pidFileTemporary="${1}"
+            fi
+
+            shift
+        ;;
+
+        --process-object-id)
+            shift
+
+            if [[ -n "${1}" ]]
+            then
+                sProcessObjId="${1}"
+            fi
+
+            shift
+        ;;
+
+        --session-id)
+            shift
+
+            if [[ -n "${1}" ]]
+            then
+                sSessionId="${1}"
+            fi
+
+            shift
+        ;;
+
+        *)
+            wasdiLog "The argument '${1}' is not recognized"
+            errorDetected="true"
+            shift
+        ;;
+    esac
 done
-echo "[${sProcessObjId}] After loop, status is now "$sStatus
-# status now must be either DONE or ERROR or STOPPED
-sResult='to be initialized'
-if [ "$sStatus" != "DONE" ] && [ "$sStatus" != "ERROR" ] && [ "$sStatus" != "STOPPED" ]
+#### /ARGUMENT MANAGEMENT ####
+
+
+
+
+#### CONTROL ####
+if [[ -z "${pidFileTemporary}" ]]
 then
-	echo "[${sProcessObjId}] Something did not work, forcing status to ERROR, sorry"
-	# todo force status = ERROR
-	sResult=$(curl -k --location --request GET "https://172.17.0.1/wasdiwebserver/rest/process/updatebyid?procws=${sProcessObjId}&status=ERROR&perc=-1" --header "x-session-token: ${sSessionId}")
-	#echo $sResult
+    wasdiLog "[ERROR] The variable '\${pidFile}' is empty"
+    errorDetected="true"
 else
-	echo "[${sProcessObjId}] IDL Processor done!"
+    pidFile="$(realpath -m "${pidFileTemporary}")"
 fi
 
+if [[ -n "${pidFile}" && -d "${pidFile}" ]]
+then
+    wasdiLog "[ERROR] The variable '\${pidFile}' is pointing an existing directory"
+    errorDetected="true"
+fi
+
+if [[ -z "${sProcessObjId}" ]]
+then
+    wasdiLog "[ERROR] The variable '\${sProcessObjId}' is empty"
+    errorDetected="true"
+fi
+
+if [[ -z "${sSessionId}" ]]
+then
+    wasdiLog "[ERROR] The variable '\${sSessionId}' is empty"
+    errorDetected="true"
+fi
+
+if [[ "${errorDetected}" == "true" ]]
+then
+    showHelp 1
+fi
+#### /CONTROL ####
+
+
+
+
+#### SCRIPT ####
+wasdiLog "---- WASDI IDL SCRIPT ----"
+
+wasdiLog "Session ID is: ${sSessionId}"
+wasdiLog "[${sProcessObjId}] Process Obj Id is: ${sProcessObjId}"
+
+for currentLoop in $(seq 1 ${loopMax})
+do
+    wasdiLog "-- [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+    wasdiLog "[${sProcessObjId}] Control the process status"
+    sStatus="$(getStatus "${sProcessObjId}" "${sSessionId}")"
+
+    if [[ "${sStatus}" == "DONE" || "${sStatus}" == "ERROR" || "${sStatus}" == "STOPPED" ]]
+    then
+        wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we stop now"
+        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+        break
+    else
+        wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we will execute the IDL script"
+    fi
+
+    wasdiLog "[${sProcessObjId}] Executing the IDL script"
+    idlScriptStart="$(date +%s)"
+
+    # execute in background to be able to retrieve the PID directly (needed by WASDI)
+    umask 000 ; ${commandIdl} ${scriptFile} -args "${sProcessObjId}.config" &
+    currentPid=${!}
+    echo "${currentPid}" > ${pidFile}
+    wasdiLog "[${sProcessObjId}] PID = ${currentPid}"
+    wasdiLog "[${sProcessObjId}] Waiting for the PID '${currentPid}' to finish"
+
+    ## loop as long as the process exists
+    while [[ true ]]
+    do
+        ps -p ${currentPid} > /dev/null 2>&1
+
+        if [[ ${?} -ne 0 ]]
+        then
+            break
+        fi
+
+        sleep 1s
+    done
+
+    idlScriptEnd="$(date +%s)"
+    iDuration=$(( idlScriptEnd - idlScriptStart ))
+    wasdiLog "[${sProcessObjId}] Execution tooks ${iDuration} seconds"
+
+    wasdiLog "[${sProcessObjId}] Control the process status"
+    sStatus="$(getStatus "${sProcessObjId}" "${sSessionId}")"
+
+    if [[ "${sStatus}" == "RUNNING" ]]
+    then
+        wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we recheck in 1 minute"
+        sleep 1m
+    else
+        wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we stop the loop"
+        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+        break
+    fi
+
+    wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+done
+
+wasdiLog "[${sProcessObjId}] Remove the file '${pidFile}'"
+
+if [[ "$(realpath -m ${pidFile})" != "/" ]]
+then
+    rm -f ${pidFile}
+
+    if [[ ${?} -eq 0 && ! -f "${pidFile}" ]]
+    then
+        wasdiLog "[${sProcessObjId}] OK"
+    else
+        wasdiLog "[${sProcessObjId}] ERROR"
+    fi
+else
+    wasdiLog "[${sProcessObjId}] ERROR WITH THE VARIABLE VALUE"
+fi
+
+wasdiLog "[${sProcessObjId}] Remove the file '${wasdiHome}/${sProcessObjId}.config'"
+
+if [[ "$(realpath -m ${wasdiHome}/${sProcessObjId}.config)" != "/" ]]
+then
+    rm -f ${wasdiHome}/${sProcessObjId}.config
+
+    if [[ ${?} -eq 0 && ! -f "${wasdiHome}/${sProcessObjId}.config" ]]
+    then
+        wasdiLog "[${sProcessObjId}] OK"
+    else
+        wasdiLog "[${sProcessObjId}] ERROR"
+    fi
+else
+    wasdiLog "[${sProcessObjId}] ERROR WITH THE VARIABLE VALUE"
+fi
+
+wasdiLog "[${sProcessObjId}] Remove the file '${wasdiHome}/${sProcessObjId}.params'"
+
+if [[ "$(realpath -m ${wasdiHome}/${sProcessObjId}.params)" != "/" ]]
+then
+    rm -f ${wasdiHome}/${sProcessObjId}.params
+
+    if [[ ${?} -eq 0 && ! -f "${wasdiHome}/${sProcessObjId}.params" ]]
+    then
+        wasdiLog "[${sProcessObjId}] OK"
+    else
+        wasdiLog "[${sProcessObjId}] ERROR"
+    fi
+else
+    wasdiLog "[${sProcessObjId}] ERROR WITH THE VARIABLE VALUE"
+fi
+
+wasdiLog "[${sProcessObjId}] After loop, status is now: '${sStatus}'"
+
+# status now must be either DONE or ERROR or STOPPED
+sResult="to be initialized"
+
+if [[ "${sStatus}" != "DONE" && "${sStatus}" != "ERROR" && "${sStatus}" != "STOPPED" ]]
+then
+    wasdiLog "[${sProcessObjId}] Something did not work."
+    wasdiLog "[${sProcessObjId}] Forcing status to ERROR"
+    sResult="$(setStatusError "${sProcessObjId}" "${sSessionId}")"
+
+    if [[ ${?} -eq 0 ]]
+    then
+        wasdiLog "[${sProcessObjId}] OK"
+    else
+        wasdiLog "[${sProcessObjId}] ERROR"
+    fi
+fi
+
+wasdiLog "---- /WASDI IDL SCRIPT ----"
+exit 0
+#### /SCRIPT ####

@@ -4,7 +4,7 @@
 
 var HomeController = (function () {
     function HomeController($rootScope, $scope, $location, oConstantsService, oAuthService, oRabbitStompService, oState,
-        oWindow, $anchorScroll) {
+        oWindow, $anchorScroll, oTranslate) {
         this.m_oScope = $scope;
         this.m_oRootScope = $rootScope;
         this.m_oLocation = $location;
@@ -13,6 +13,7 @@ var HomeController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oState = oState;
         this.m_oAnchorService = $anchorScroll;
+        this.m_oTranslate = oTranslate;
 
         this.m_sEmailToRecoverPassword = "";
         this.m_oScope.m_oController = this;
@@ -43,16 +44,15 @@ var HomeController = (function () {
         var oController = this;
 
         console.log("HomeController: start waitForKeycloak")
-
+        // define in any case the listener
+        this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
+            oController.checkKeycloakAuthStatus(oController);
+        });
         if (bKeyCloakInitialized) {
             this.checkKeycloakAuthStatus(oController);
         }
         else {
             this.waitForKeycloak(oController);
-
-            this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
-                oController.checkKeycloakAuthStatus(oController);
-            });
         }
 
 
@@ -89,11 +89,9 @@ var HomeController = (function () {
 
     HomeController.prototype.waitForKeycloak = function (oController) {
         if (bKeyCloakInitialized == false) {
-            console.log("waitForKeycloak: bKeyCloakInitialized == false try again")
             window.setTimeout(this.waitForKeycloak, 100, oController); /* this checks the flag every 100 milliseconds*/
             return;
         } else {
-            console.log("waitForKeycloak: bKeyCloakInitialized == true");
             oController.m_oRootScope.$broadcast("KC_INIT_DONE");
         }
     }
@@ -124,12 +122,14 @@ var HomeController = (function () {
         oLoginInfo.userId = oController.m_sUserName;
         oLoginInfo.userPassword = oController.m_sUserPassword;
         this.m_oConstantsService.setUser(null);
+
+        var sMessage = this.m_oTranslate.instant("MSG_LOGIN_ERROR");
         this.m_oAuthService.legacyLogin(oLoginInfo).then(
             function (data, status) {
                 oController.callbackLogin(data.data, status, oController)
             }, function (data, status) {
                 //alert('error');
-                utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
+                utilsVexDialogAlertTop(sMessage);
 
             });
     }
@@ -320,15 +320,20 @@ var HomeController = (function () {
             return false;
         }
         var oController = this;
+
+        var sMessage1 = this.m_oTranslate.instant("MSG_RECOVER_1");
+        var sMessage2 = this.m_oTranslate.instant("MSG_RECOVER_2");
+        var sMessage3 = this.m_oTranslate.instant("MSG_LOGIN_ERROR");
+
         this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).then(
             function (data, status) {
                 // oController.callbackLogin(data, status,oController);
                 if (utilsIsObjectNullOrUndefined(data) !== true) {
                     if (data.data.boolValue === true) {
                         oController.m_bSuccess = true;
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ACCOUNT RECOVER MESSAGE SENT TO "
+                        utilsVexDialogAlertTop(sMessage1
                             + sEmailToRecoverPassword
-                            + " <br> PLEASE, CHECK YOUR E-MAIL");
+                            + sMessage2);
                         // then hide the recovery password dialog
                         oController.m_bIsVisibleRecoveryPassword = !oController.m_bIsVisibleRecoveryPassword;
 
@@ -339,11 +344,11 @@ var HomeController = (function () {
                         oController.m_bError = true;
                     }
                 } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+                    utilsVexDialogAlertTop(sMessage3);
                 }
             }, (function (data, status) {
                 //alert('error');
-                utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+                utilsVexDialogAlertTop(sMessage3);
 
             }));
 
@@ -357,6 +362,12 @@ var HomeController = (function () {
 
         return true;
     }
+
+    // Function used to swap language of the interface
+    HomeController.prototype.swapLanguage = function (sCountryCode) {
+        this.m_oTranslate.use(sCountryCode);
+    }
+
     HomeController.$inject = [
         '$rootScope',
         '$scope',
@@ -366,7 +377,8 @@ var HomeController = (function () {
         'RabbitStompService',
         '$state',
         '$window',
-        '$anchorScroll'
+        '$anchorScroll',
+        '$translate'
     ];
 
     return HomeController;

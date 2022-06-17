@@ -38,6 +38,11 @@ service('ConstantsService', [function () {
     this.AUTHURL = environment.authUrl;
 
     /**
+     * BASE URL
+     *
+     */
+    this.BASEURL = environment.baseurl;
+    /**
      * Flag to ignore the workspace's ApiUrl and use the main server's Url
      * @type {boolean}
      */
@@ -126,7 +131,7 @@ service('ConstantsService', [function () {
     };
 
     /**
-     * Get flag ignore workspace's Api Url 
+     * Get flag ignore workspace's Api Url
      * @returns {boolean}
      */
      this.getIgnoreWorkspaceApiUrl = function() {
@@ -344,7 +349,7 @@ service('ConstantsService', [function () {
 
         return this.WEBSTOMPURL;
     }
-    
+
     /*------------- COOKIES --------------*/
 
     //set by w3school.com

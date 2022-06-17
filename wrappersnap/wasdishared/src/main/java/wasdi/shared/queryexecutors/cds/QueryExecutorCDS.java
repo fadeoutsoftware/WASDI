@@ -15,6 +15,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -41,7 +42,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 	public QueryExecutorCDS() {
 		
-		m_sProvider="CDS";
+		m_sProvider = "CDS";
 		s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(m_sProvider);
 		
 		this.m_oQueryTranslator = new QueryTranslatorCDS();
@@ -148,12 +149,12 @@ public class QueryExecutorCDS extends QueryExecutor {
 					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, sBoundingBox, sFormat);
 
 					String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
-					String sUrlEncoded = encodeUrl(sUrl);
+					String sUrlEncoded = StringUtils.encodeUrl(sUrl);
 
 					oResult.setLink(sUrlEncoded);
 					String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
 					oResult.setSummary("Date: "  + sDateTime +  ", Mode: " + oCDSQuery.sensorMode +  ", Instrument: " + oCDSQuery.timeliness);
-					oResult.setProvider(s_oDataProviderConfig.name);
+					oResult.setProvider(m_sProvider);
 					oResult.setFootprint(extractFootprint(oQuery.getQuery()));
 					oResult.getProperties().put("platformname", Platforms.ERA5);
 					oResult.getProperties().put("dataset", oCDSQuery.productName);
@@ -199,16 +200,6 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 
 		return sPayload;
-	}
-
-	private static String encodeUrl(String sUrl) {
-		try {
-			return URLEncoder.encode(sUrl, java.nio.charset.StandardCharsets.UTF_8.toString());
-		} catch (UnsupportedEncodingException oE) {
-			Utils.debugLog("QueryExecutorCDS.encodeUrl: could not encode URL due to " + oE + ".");
-		}
-
-		return sUrl;
 	}
 
 	private static String extractFootprint(String sQuery) {

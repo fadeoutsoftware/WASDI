@@ -72,6 +72,11 @@ public class WasdiConfig {
 	public MongoConfig mongoLocal;	
 	
 	/**
+	 * Mongo db Configuration
+	 */
+	public MongoConfig mongoEcostress;		
+	
+	/**
 	 * Keycloack auth server Configuration
 	 */
 	public KeycloackConfig keycloack;
@@ -85,6 +90,11 @@ public class WasdiConfig {
 	 * Rabbit messaging configuration
 	 */
 	public RabbitConfig rabbit;
+	
+	/**
+	 * S3 Bucket configuration
+	 */
+	public S3BucketConfig s3Bucket;
 	
 	/**
 	 * Snap configuration

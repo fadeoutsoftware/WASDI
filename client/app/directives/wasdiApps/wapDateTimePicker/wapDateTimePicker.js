@@ -14,7 +14,7 @@ angular.module('wasdi.wapDateTimePicker', [])
                 tooltip:'='
             },
             template: `
-            <div class="date-directive" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="right">
+            <div class="date-directive" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="top" tooltip-class="blueWasdi" tooltip-popup-delay='750'>
                 <div class=" time-picker-container ">
                     <div    class="input-group"
                         moment-picker="$ctrl.dateTime"

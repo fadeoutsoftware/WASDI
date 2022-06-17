@@ -9,22 +9,22 @@
                 <div class="col-v4-auto" style="padding-right: 0px">
                     <input type="text" name="name" class="wasdi-input" value="" title=""
                         ng-model="m_oController.m_sTextQueryFilterInTree" required="required"
-                        placeholder="Products Filter...">
+                        placeholder="{{'EDITOR_PRODUCTS_FILTER'|translate}}">
                 </div>
                 <div class="col-v4-auto" style="padding-left: 3px">
-                    <button class="btn btn-wasdi fa btn-outline-primary" title="Apply Filter"
+                    <button class="btn btn-wasdi fa btn-outline-primary" title="{{'EDITOR_PRODUCTS_FILTER_APPLY'|translate}}"
                         ng-disabled="m_oController.m_sTextQueryFilterInTree.length  === 0"
                         ng-click="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">
                         <em class="fa fa-search" aria-hidden="true" style="margin-right: 0px;"></em>
                     </button>
 
-                    <button class="btn btn-wasdi fa btn-outline-primary" title="Clean Filter"
+                    <button class="btn btn-wasdi fa btn-outline-primary" title="{{'EDITOR_PRODUCTS_FILTER_CLEAN'|translate}}"
                         ng-click="m_oController.cleanFilterTree(); "
                         ng-disabled="m_oController.m_bIsFilteredTree === false">
                         <em class="fa fa-bath" aria-hidden="true" style="margin-right: 0px;"></em>
                     </button>
 
-                    <button class="btn btn-wasdi fa btn-outline-primary" title="Select"
+                    <button class="btn btn-wasdi fa btn-outline-primary" title="{{'EDITOR_PRODUCTS_FILTER_SELECT'|translate}}"
                         ng-click="m_oController.selectFiltered();" ng-show="m_oController.m_bIsFilteredTree === true">
                         <em class="fa fa-square" aria-hidden="true" style="margin-right: 0px;"
                             ng-show="m_oController.m_bAllSelected"></em>
@@ -32,8 +32,7 @@
                             ng-show="!m_oController.m_bAllSelected"></em>
                     </button>
 
-
-                    <button class="btn btn-wasdi fa btn-outline-primary" title="Workspace Info"
+                    <button class="btn btn-wasdi fa btn-outline-primary" title="{{'EDITOR_PRODUCTS_WS_INFO'|translate}}"
                         ng-click="m_oController.openWorkspaceDetailsDialog(); ">
                         <!--ng-disabled="m_oController.m_bIsFilteredTree === false"-->
 

@@ -112,28 +112,24 @@
                     "indexlabel": "Satellite Platform",
                     "indexvalues": "S1A_*|S1B_*",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
                     "indexvalues": "SLC|GRD|OCN",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "polarisationmode",
                     "indexlabel": "Polarisation",
                     "indexvalues": "HH|VV|HV|VH|HH+HV|VV+VH",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "sensoroperationalmode",
                     "indexlabel": "Sensor Mode",
                     "indexvalues": "SM|IW|EW|WV",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "relativeorbitnumber",
@@ -141,13 +137,11 @@
                     "indexhint" : "(from 1 to 175)",
                     "indexvalues": "",
                     "regex": "[1-9]|[1-9][0-9]|[1-9][0-7][0-5]"
-
                 },
                 {
                     "indexname": "swathidentifier",
                     "indexlabel": "Swath",
                     "regex": ".*"
-
                 }
             ]
         },
@@ -161,14 +155,12 @@
                     "indexlabel": "Satellite Platform",
                     "indexvalues":"S2A_*|S2B_*",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
                     "indexvalues":"S2MSI1C|S2MSI2Ap|S2MSI2A",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "cloudcoverpercentage",
@@ -178,9 +170,7 @@
                     "indexmin":"0",
                     "indexmax":"100",
                     "regex": ".*"
-
                 }
-
             ]
         } ,
         {
@@ -188,47 +178,48 @@
             "indexname": "platformname",
             "indexvalue": "Sentinel-3",
             "filters": [
-
                 {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues":"SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS|SR_2_LAN___",
-                    "regex": ".*"
-
-                },
-                {
-                    "indexname": "timeliness",
-                    "indexlabel": "Timeliness",
-                    "indexvalues":"Near Real Time|Short Time Critical|Non Time Critical",
-                    "regex": ".*"
-
+                    "indexname": "productlevel",
+                    "indexlabel": "Product Level",
+                    "indexvalues":"L1|L2",
+                    "regex": ".*",
+                    "indexvalue":"L1"
                 },
                 {
                     "indexname": "Instrument",
                     "indexlabel": "Instrument",
                     "indexvalues":"SRAL",
                     "regex": ".*"
-
                 },
                 {
-                    "indexname": "productlevel ",
-                    "indexlabel": "Product Level ",
-                    "indexvalues":"L1|L2",
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"SR_1_SRA___|SR_1_SRA_A_|SR_1_SRA_BS",
+                    "regex": ".*",
+                    "visibilityConditions": "productlevel:L1"
+                },
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"SR_2_LAN___",
+                    "regex": ".*",
+                    "visibilityConditions": "productlevel:L2"
+                },
+                {
+                    "indexname": "timeliness",
+                    "indexlabel": "Timeliness",
+                    "indexvalues":"Near Real Time|Short Time Critical|Non Time Critical",
                     "regex": ".*"
-
                 },
                 {
-                    "indexname": "relativeorbitstart ",
+                    "indexname": "relativeorbitstart",
                     "indexlabel": "Relative Orbit Start",
                         "indexhint" : "e.g. [1-385]",
                     "indexvalues":"",
                     "indexmin":"1",
                     "indexmax":"385",
                     "regex": ".*"
-
                 }
-
-
             ]
         },
         {
@@ -237,28 +228,34 @@
             "indexvalue": "Sentinel-5P",
             "filters": [
                 {
-                    "indexname": "productlevel ",
-                    "indexlabel": "Product Level ",
+                    "indexname": "productlevel",
+                    "indexlabel": "Product Level",
                     "indexvalues":"LEVEL1B|LEVEL2",
-                    "regex": ".*"
-
+                    "regex": ".*",
+                    "indexvalue":"LEVEL1B"
                 },
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues":"L1B_IR_SIR|L1B_IR_UVN|L1B_RA_BD1|L1B_RA_BD2|L1B_RA_BD3|L1B_RA_BD4|L1B_RA_BD5|L1B_RA_BD6|L1B_RA_BD7|L1B_RA_BD8|L2__AER_AI|L2__AER_LH|L2__CH4___|L2__CLOUD_|L2__CO____|L2__HCHO__|L2__NO2___|L2__NP_BD3|L2__NP_BD6|L2__NP_BD7|L2__O3_TCL|L2__O3____|L2__SO2___|AUX_CTMFCT|AUX_CTMANA",
-                    "regex": ".*"
-
+                    "indexvalues":"L1B_IR_SIR|L1B_IR_UVN|L1B_RA_BD1|L1B_RA_BD2|L1B_RA_BD3|L1B_RA_BD4|L1B_RA_BD5|L1B_RA_BD6|L1B_RA_BD7|L1B_RA_BD8|AUX_CTMFCT|AUX_CTMANA",
+                    "regex": ".*",
+                    "visibilityConditions": "productlevel:LEVEL1B"
+                },
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"L2__AER_AI|L2__AER_LH|L2__CH4___|L2__CLOUD_|L2__CO____|L2__HCHO__|L2__NO2___|L2__NP_BD3|L2__NP_BD6|L2__NP_BD7|L2__O3_TCL|L2__O3____|L2__SO2___|AUX_CTMFCT|AUX_CTMANA",
+                    "regex": ".*",
+                    "visibilityConditions": "productlevel:LEVEL2"
                 },
                 {
                     "indexname": "timeliness",
                     "indexlabel": "Timeliness",
-                    "indexvalues":"Offline|Near Real Time|Reprocessing",
+                    "indexvalues":"Offline|Near real time|Reprocessing",
                     "regex": ".*"
-
                 },
                 {
-                    "indexname": "absoluteorbit ",
+                    "indexname": "absoluteorbit",
                     "indexlabel": "Absolute Orbit Number",
                     "indexvalues":"",
                     "regex": ".*"
@@ -271,14 +268,12 @@
             "indexvalue": "Proba-V",
             "provider":"Proba-V",
             "filters": [
-
                 {
                     "indexname": "collection",
                     "indexlabel": "Collection",
                     "indexvalues":"urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001|urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001",
                     "regex": ".*",
                     "indexvalue":"urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001"
-
                 },
                 {
                     "indexname": "cloudcoverpercentage",
@@ -297,37 +292,31 @@
                     "indexmin":"0",
                     "indexmax":"100",
                     "regex": ".*"
-
                 },{
                     "indexname": "productref",
                     "indexlabel": "productref",
                     "indexvalues":"",
                     "regex": ".*"
-
                 },{
                     "indexname": "cameraId",
                     "indexlabel": "Camera Id",
                     "indexvalues":"",
                     "regex": ".*"
-
                 },{
                     "indexname": "ProductID",
                     "indexlabel": "Product ID",
                     "indexvalues":"",
                     "regex": ".*"
-
                 },{
                     "indexname": "Year",
                     "indexlabel": "Year",
                     "indexvalues":"",
                     "regex": ".*"
-
                 },{
                     "indexname": "Instrument",
                     "indexlabel": "Instrument",
                     "indexvalues":"VG1|VG2",
                     "regex": ".*"
-
                 }
             ]
         },
@@ -342,13 +331,11 @@
                     "indexlabel": "Type",
                     "indexvalues":"ASA_IM__0P|ASA_WS__0P",
                     "regex": ".*"
-
                 },{
                     "indexname": "orbitDirection",
                     "indexlabel": "Orbit Direction",
                     "indexvalues":"ASCENDING|DESCENDING",
                     "regex": ".*"
-
                 }
             ]
         },
@@ -363,7 +350,6 @@
                     "indexlabel": "Type",
                     "indexvalues":"L1T|L1G|L1GT|L1GS|L1TP",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "cloudCoverPercentage",
@@ -377,12 +363,6 @@
             ]
         },
         {
-            "name": "CMEMS",
-            "indexname": "productMainClass",
-            "indexvalue": "Copernicus-marine",
-            "filters": []
-        },
-        {
             "name": "Viirs",
             "indexname": "platformname",
             "indexvalue": "VIIRS",
@@ -392,7 +372,6 @@
                 "indexvalues":"VIIRS_1d_composite|VIIRS_5d_composite",
                 "regex": ".*",
                 "indexvalue":"VIIRS_1d_composite"
-
             }]
         },
         {
@@ -412,6 +391,7 @@
                     "indexlabel": "Product type",
                     "indexvalues": "reanalysis|ensemble_mean|ensemble_members|ensemble_spread",
                     "regex": ".*",
+                    "visibilityConditions": "dataset:reanalysis-era5-pressure-levels|dataset:reanalysis-era5-single-levels",
                     "indexvalue":"reanalysis"
                 },
                 {
@@ -419,14 +399,24 @@
                     "indexlabel": "Pressure levels in hPa",
                     "indexvalues": "1|2|1+2|1000",
                     "regex": ".*",
+                    "visibilityConditions": "dataset:reanalysis-era5-pressure-levels",
                     "indexvalue":"1000"
                 },
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "RH|U|V|RH+U+V|SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "indexvalues": "RH|U|V|RH+U+V",
                     "regex": ".*",
+                    "visibilityConditions": "dataset:reanalysis-era5-pressure-levels",
                     "indexvalue":"RH+U+V"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "SST+SP+TP|10U+10V+2DT+2T+SP",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:reanalysis-era5-single-levels",
+                    "indexvalue":"SST+SP+TP"
                 },
                 {
                     "indexname": "format",
@@ -490,10 +480,225 @@
                     "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
-
                 }
             ]
-        }        
+        },
+        {
+            "name": "IMERG",
+            "indexname": "platformname",
+            "indexvalue": "IMERG",
+            "filters": [
+                {
+                    "indexname": "latency",
+                    "indexlabel": "Latency",
+                    "indexvalues": "Early|Late",
+                    "regex": ".*",
+                    "indexvalue":"Late"
+                },
+                {
+                    "indexname": "duration",
+                    "indexlabel": "Duration",
+                    "indexvalues": "HHR",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Early",
+                    "indexvalue":"HHR"
+                },
+                {
+                    "indexname": "duration",
+                    "indexlabel": "Duration",
+                    "indexvalues": "HHR|DAY|MO",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Late",
+                    "indexvalue":"DAY"
+                },
+                {
+                    "indexname": "accumulation",
+                    "indexlabel": "Accumulation",
+                    "indexvalues": "30min|1day|3hr|All",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Early&duration:HHR",
+                    "indexvalue":"1day"
+                },
+                {
+                    "indexname": "accumulation",
+                    "indexlabel": "Accumulation",
+                    "indexvalues": "30min|1day|3day|7day|3hr|All",
+                    "regex": ".*",
+                    "visibilityConditions": "latency:Late&duration:HHR",
+                    "indexvalue":"1day"
+                }
+            ]
+        },
+        {
+            "name": "CM",
+            "indexname": "platformname",
+            "indexvalue": "CM",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "regex": ".*",
+                    "indexvalue":"OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS"
+                },
+                {
+                    "indexname": "protocol",
+                    "indexlabel": "Protocol",
+                    "indexvalues": "SUBS|FTP",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "indexvalue":"SUBS"
+                },
+                {
+                    "indexname": "protocol",
+                    "indexlabel": "Protocol",
+                    "indexvalues": "FTP",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:INSITU_MED_NRT_OBSERVATIONS_013_035",
+                    "indexvalue":"FTP"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "dataset-oc-med-chl-multi-l4-chl_1km_monthly-rt-v02|dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02|dataset-oc-med-chl-olci_a-l4-chl_1km_monthly-rt-v02|dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS",
+                    "indexvalue":"dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS",
+                    "indexvalue":"SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2|SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b|SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS",
+                    "indexvalue":"SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "global-analysis-forecast-wav-001-027",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS&protocol:SUBS",
+                    "indexvalue":"global-analysis-forecast-wav-001-027"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "global-analysis-forecast-wav-001-027|global-analysis-forecast-wav-001-027-statics",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS&protocol:FTP",
+                    "indexvalue":"global-analysis-forecast-wav-001-027"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "med_multiparameter_nrt",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:INSITU_MED_NRT_OBSERVATIONS_013_035&protocol:FTP",
+                    "indexvalue":"med_multiparameter_nrt"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "indexvalue":"dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL+CHL_count+CHL_error|CHL|CHL_count|CHL_error",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:dataset-oc-med-chl-multi-l4-chl_1km_monthly-rt-v02|dataset:dataset-oc-med-chl-olci_a-l4-chl_1km_monthly-rt-v02|dataset:dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt)&protocol:SUBS",
+                    "indexvalue":"CHL+CHL_count+CHL_error"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02&protocol:SUBS",
+                    "indexvalue":"CHL"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst|adjusted_sea_surface_temperature|quality_level|sea_surface_temperature|source_of_sst",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b)&protocol:SUBS",
+                    "indexvalue":"adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "analysed_sst+analysis_error|analysed_sst|analysis_error",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2|dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2)&protocol:SUBS",
+                    "indexvalue":"analysed_sst+analysis_error"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "sst_anomaly",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b|dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d)&protocol:SUBS",
+                    "indexvalue":"sst_anomaly"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK|VHM0|VHM0_SW1|VHM0_SW2|VHM0_WW|VMDR|VMDR_SW1|VMDR_SW2|VMDR_WW|VPED|VSDX|VSDY|VTM01_SW1|VTM01_SW2|VTM01_WW|VTM02|VTM10|VTPK",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:global-analysis-forecast-wav-001-027&protocol:SUBS",
+                    "indexvalue":"VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL+CHL_error+CHL_flags|CHL|CHL_error|CHL_flags",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt&protocol:SUBS",
+                    "indexvalue":"CHL+CHL_error+CHL_flags"
+                }
+            ]
+        },
+        {
+            "name": "ECOSTRESS",
+            "indexname": "platformname",
+            "indexvalue": "ECOSTRESS",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "EEHCM|EEHSEBS|EEHSTIC|EEHSW|EEHTES|EEHTSEB",
+                    "regex": ".*",
+                    "indexvalue":"EEHCM"
+                },
+                {
+                    "indexname": "relativeorbitnumber",
+                    "indexlabel": "Orbit Range",
+                    "indexhint" : "(from 1 to 19999)",
+                    "indexvalues": "",
+                    "regex": "[1-9]|[1-9][0-9]||[1-9][0-9][0-9]||[1-9][0-9][0-9][0-9]||[1][0-9][0-9][0-9][0-9]"
+                },
+                {
+                    "indexname": "dayNightFlag",
+                    "indexlabel": "DayNightFlag",
+                    "indexvalues": "Day|Night",
+                    "regex": ".*",
+                    "indexvalue":""
+                }
+            ]
+        }
     ],
     "orbitsearch":{
         "sensortypes":["SAR","Optical"],

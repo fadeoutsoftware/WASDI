@@ -34,6 +34,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
@@ -141,25 +142,10 @@ public class ProcessWorkspaceResource {
 					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
 				}
 			}
-			
-			Instant oDateFrom = null;
-			if(!Utils.isNullOrEmpty(sDateFrom)) {
-				try {
-					oDateFrom = Instant.parse(sDateFrom);
-				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert start date " + sDateFrom + " to a valid date, ignoring it");
-				}
-			}
-			
-			Instant oDateTo = null;
-			if(!Utils.isNullOrEmpty(sDateTo)){
-				try {
-					oDateTo = Instant.parse(sDateTo);
-				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert end date " + sDateFrom + " to a valid date, ignoring it");
-				}
-			}
-			
+
+			Instant oDateFrom = TimeEpochUtils.fromDateStringToInstant(sDateFrom);
+			Instant oDateTo = TimeEpochUtils.fromDateStringToInstant(sDateTo);
+
 			if (iStartIndex != null && iEndIndex != null) {
 				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo, iStartIndex, iEndIndex);
 			}
@@ -961,9 +947,6 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session: " + sSessionId );
 				return oProcess;
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return oProcess;
-			}
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -971,9 +954,12 @@ public class ProcessWorkspaceResource {
 			// Get Process
 			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessObjId);
 			
-			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ) && (sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
+			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.READY.name())) 
+					&& 
+					(sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
 					// No end-date set: put it here
 					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
 				}
@@ -984,11 +970,12 @@ public class ProcessWorkspaceResource {
 			if (iPerc>=0 && iPerc<=100) {
 				oProcessWorkspace.setProgressPerc(iPerc);
 			}
-			
 
 			oRepository.updateProcess(oProcessWorkspace);
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			
+			Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status updated : " +  oProcess.getStatus());
 
 			// Check if we need to send the asynch rabbit message
 			if (Utils.isNullOrEmpty(sSendToRabbit) == false) {
@@ -1018,7 +1005,7 @@ public class ProcessWorkspaceResource {
 	}
 	
 	/**
-	 * Set the payload of a Process Workspace
+	 * Set the payload of a Process Workspace with a GET Method
 	 *
 	 * @param sSessionId User Session Id
 	 * @param sProcessObjId Process Workspace Id
@@ -1028,8 +1015,27 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/setpayload")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel setProcessPayload(@HeaderParam("x-session-token") String sSessionId,
+	public ProcessWorkspaceViewModel setProcessPayloadGET(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("procws") String sProcessObjId, @QueryParam("payload") String sPayload) {
+		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
+	}
+	
+	/**
+	 * Set the payload of a Process Workspace with a POST Method
+	 * @param sSessionId User Session Id
+	 * @param sProcessObjId Process Workspace Id
+	 * @param sPayload Payload to save
+	 * @return Updated Process Workspace View Model
+	 */
+	@POST
+	@Path("/setpayload")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel setProcessPayloadPOST(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("procws") String sProcessObjId, String sPayload) {
+		return internalSetPaylod(sSessionId, sProcessObjId, sPayload);
+	}	
+	
+	protected ProcessWorkspaceViewModel internalSetPaylod(String sSessionId, String sProcessObjId, String sPayload) {
 		
 		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload" );
 
@@ -1067,7 +1073,7 @@ public class ProcessWorkspaceResource {
 		}
 
 		return oProcess;
-	}
+	}		
 	
 	/**
 	 * Set the sub-pid for a running process workspace.

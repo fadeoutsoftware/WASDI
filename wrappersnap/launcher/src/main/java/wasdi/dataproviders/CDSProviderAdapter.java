@@ -23,7 +23,7 @@ import wasdi.shared.utils.gis.BoundingBoxUtils;
 public class CDSProviderAdapter extends ProviderAdapter {
 
 	private static final String CDS_URL_SEARCH = "https://cds.climate.copernicus.eu/api/v2/resources";
-	private static final String CDS_URL_GET_STATUS = "https://cds.climate.copernicus.eu/broker/api/v1/0/request/";
+	private static final String CDS_URL_GET_STATUS = "https://cds.climate.copernicus.eu/broker/api/v1/0/requests";
 	
 	/**
 	 * Basic constructor
@@ -72,23 +72,33 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		sCdsSearchRequestState = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "state");
 		String sCdsSearchRequestId = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "request_id");
 
+		String sUrlDownload = null;
 
-		if ("queued".equalsIgnoreCase(sCdsSearchRequestState)) {
-			String sUrlRequestStatus = CDS_URL_GET_STATUS + sCdsSearchRequestId;
-
+		if ("completed".equalsIgnoreCase(sCdsSearchRequestState)) {
+			sUrlDownload = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "location");
+		} else if ("queued".equalsIgnoreCase(sCdsSearchRequestState)) {
 			String sCdsGetStatusRequestResult;
-			Map<String, Object> oCdsGetStatusRequestResult;
-			String sCdsGetStatusRequestState;
-			
-			String sUrlDownload = null;
+			Map<String, Object> oCdsGetStatusRequestResult = new HashMap<>();
+			String sCdsGetStatusRequestId;
+			String sCdsGetStatusRequestState = "undefined";
 
 			for (int i = 0; i < 120; i++) {
 				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: attemp #" + i);
-				sCdsGetStatusRequestResult = performCdsGetStatusRequest(sUrlRequestStatus, sDownloadUser, sDownloadPassword, sCdsSearchRequestId, iMaxRetry);
+				sCdsGetStatusRequestResult = performCdsGetStatusRequest(sDownloadUser, sDownloadPassword, sCdsSearchRequestId, iMaxRetry);
 
-				oCdsGetStatusRequestResult = JsonUtils.jsonToMapOfObjects(sCdsGetStatusRequestResult);
+				List<Map<String, Object>> aoRequests = JsonUtils.jsonToListOfMapOfObjects(sCdsGetStatusRequestResult);
+
+				for (Map<String, Object> aoRequest : aoRequests) {
+					sCdsGetStatusRequestId = (String) JsonUtils.getProperty(aoRequest, "metadata.requestId");
+
+					if (sCdsSearchRequestId.equalsIgnoreCase(sCdsGetStatusRequestId)) {
+						oCdsGetStatusRequestResult = aoRequest;
+						break;
+					}
+				}
+
 				sCdsGetStatusRequestState = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.state");
-				
+
 				if ("queued".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(60);
@@ -113,13 +123,12 @@ public class CDSProviderAdapter extends ProviderAdapter {
 					break;
 				}
 			}
+		}
 
-			if (!Utils.isNullOrEmpty(sUrlDownload)) {
-				String sCdsDownloadRequestResult = performCdsDownloadRequest(sUrlDownload, sDownloadUser, sDownloadPassword, sSaveDirOnServer, iMaxRetry);
+		if (!Utils.isNullOrEmpty(sUrlDownload)) {
+			String sCdsDownloadRequestResult = performCdsDownloadRequest(sUrlDownload, sDownloadUser, sDownloadPassword, sSaveDirOnServer, iMaxRetry);
 
-				return WasdiFileUtils.renameFile(sCdsDownloadRequestResult, sDesiredFileName);
-			}
-
+			return WasdiFileUtils.renameFile(sCdsDownloadRequestResult, sDesiredFileName);
 		}
 
 		return null;
@@ -150,7 +159,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 
-	private String performCdsGetStatusRequest(String sUrl, String sDownloadUser, String sDownloadPassword, String sRequestId, int iMaxRetry) {
+	private String performCdsGetStatusRequest(String sDownloadUser, String sDownloadPassword, String sRequestId, int iMaxRetry) {
 		String sResult = "";
 
 		// Add the auth header
@@ -170,7 +179,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			}
 
 			try {
-				sResult = HttpUtils.httpGet(sUrl, asHeaders);
+				sResult = HttpUtils.httpGet(CDS_URL_GET_STATUS, asHeaders);
 			} catch (Exception oEx) {
 				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: exception in http get call: " + oEx.toString());
 			}

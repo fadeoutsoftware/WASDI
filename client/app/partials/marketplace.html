@@ -14,7 +14,7 @@
                 <div class="right-side d-flex">
                     <!--SEARCH-->
                     <div class="search-wrapper mr-2 d-flex">
-                        <input type="text" name="search" placeholder="SEARCH APP" class="search-field" ng-model="m_oController.m_sNameFilter">
+                        <input type="text" name="search" placeholder='{{"MARKET_SEARCH_APP"|translate}}' class="search-field" ng-model="m_oController.m_sNameFilter">
                         <div class="search-icon-wrapper px-4 d-flex align-items-center" ng-click="m_oController.refreshAppList()">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </div>
@@ -26,7 +26,7 @@
                         type="button"
                         ng-class="m_oController.m_oAppFilter.orderBy=='name'?'filter-active':''"
                         ng-click="m_oController.orderByClicked('name')">
-                        NAME
+                        {{"MARKET_NAME"|translate}}
                         <span class="fa fa-filter"></span>
                         <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
                     </button>
@@ -35,7 +35,7 @@
                         type="button"
                         ng-class="m_oController.m_oAppFilter.orderBy=='date'?'filter-active':''"
                         ng-click="m_oController.orderByClicked('date')">
-                        DATE
+                        {{"MARKET_DATE"|translate}}
                         <span class="fa fa-filter"></span>
                         <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
                     </button>
@@ -44,7 +44,7 @@
                         type="button"
                         ng-class="m_oController.m_oAppFilter.orderBy=='price'?'filter-active':''"
                         ng-click="m_oController.orderByClicked('price')">
-                        PRICE
+                        {{"MARKET_PRICE"|translate}}
                         <span class="fa fa-filter"></span>
                         <span class="fa direction" ng-class="m_oController.m_oAppFilter.orderDirection==-1?'fa-chevron-up':m_oController.m_oAppFilter.orderDirection==1?'fa-chevron-down':''"></span>
                     </button>
@@ -64,11 +64,11 @@
             <div class="col-12 col-md-2 filter-side-bar sidebar-wrapper">
                 <!--title large screen-->
                 <div class="d-none d-md-block title p-2 px-3 mb-2">
-                    <span class="fa fa-filter mr-2" style="cursor: pointer" aria-hidden="true"></span>CATEGORY
+                    <span class="fa fa-filter mr-2" style="cursor: pointer" aria-hidden="true"></span>{{"MARKET_CATEGORY"|translate}}
                 </div>
                 <!--title mobile screen-->
                 <div class="d-block d-md-none title p-2 px-3 mb-4 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsebleFilter" aria-expanded="false" aria-controls="collapsebleFilter">
-                    <div><span class="fa fa-bath mr-2" aria-hidden="true"></span>FILTERS</div>
+                    <div><span class="fa fa-bath mr-2" aria-hidden="true"></span>{{"MARKET_FILTERS"|translate}}</div>
                     <div><span class="fa fa-chevron-down"></span>
                         <span class="fa fa-times"></span>
                     </div>
@@ -97,7 +97,7 @@
                     <!--developer-->
                     <div class="developer mt-1 mb-3">
                         <div class="d-none d-md-block title p-2 px-3 mb-2">
-                            <span class="fa fa-code mr-2" style="cursor: pointer" aria-hidden="true"></span>DEVELOPER
+                            <span class="fa fa-code mr-2" style="cursor: pointer" aria-hidden="true"></span>{{"MARKET_DEVELOPER"|translate}}
                         </div>
 
                         <!--div class="border-bottom py-1 mb-2 subtitle">
@@ -114,12 +114,12 @@
                     <div class="ratings mt-1 mb-3">
                         <!--div class="border-bottom py-1 mb-2 subtitle">RATINGS</div-->
                         <div class="d-none d-md-block title p-2 px-3 mb-2">
-                            <span class="fa fa-star mr-2" style="cursor: pointer" aria-hidden="true"></span>RATINGS
+                            <span class="fa fa-star mr-2" style="cursor: pointer" aria-hidden="true"></span>{{"MARKET_RATINGS"|translate}}
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
                             <input id="allstar" type="radio" name="rating" aria-label="Checkbox for following text input" checked="checked" ng-click="m_oController.rankingClicked(0)">
                             <label for="allstar">
-                                <span>all ratings</span>
+                                <span>{{"MARKET_RATINGS_ALL"|translate}}</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
@@ -130,7 +130,7 @@
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">and more</span>
+                                <span class="ml-2">{{"MARKET_MORE_STARS"|translate}}</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
@@ -141,7 +141,7 @@
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">and more</span>
+                                <span class="ml-2">{{"MARKET_MORE_STARS"|translate}}</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
@@ -152,7 +152,7 @@
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">and more</span>
+                                <span class="ml-2">{{"MARKET_MORE_STARS"|translate}}</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
@@ -163,7 +163,7 @@
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star checked"></span>
                                 <span class="fa fa-star"></span>
-                                <span class="ml-2">and more</span>
+                                <span class="ml-2">{{"MARKET_MORE_STARS"|translate}}</span>
                             </label>
                         </div>
                         <div class="input-group-text d-flex align-items-center pb-1">
@@ -184,7 +184,7 @@
                     <div class="price mt-1 mb-3">
                         <!--div class="border-bottom py-1 mb-2 subtitle">PRICE</div-->
                         <div class="d-none d-md-block title p-2 px-3 mb-2">
-                            <span class="fa fa-dollar-sign mr-2" style="cursor: pointer" aria-hidden="true"></span>PRICE
+                            <span class="fa fa-dollar-sign mr-2" style="cursor: pointer" aria-hidden="true"></span>{{"MARKET_PRICE"|translate}}
                         </div>
                         <rzslider rz-slider-model="m_oController.m_oSlider.value" rz-slider-options="m_oController.m_oSlider.options"></rzslider>
                     </div>
@@ -213,14 +213,14 @@
                                 </div>
                             </div>
                             <div class="buyed-tag" ng-if="processor.buyed">
-                                <span class="fa fa-check mr-1"></span>Already Buyed!
+                                <span class="fa fa-check mr-1"></span>{{"MARKET_BUYED"|translate}}
                             </div>
                             <!--APP DETAILS-->
                             <h5 class="application_title mt-4">{{processor.friendlyName}}</h5>
                             <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
                             <div class="publisher mb-1">
-                                <span ng-if="!m_oController.isMine(processor)">Published by <span class="pub-name">{{processor.publisher}}</span></span>
-                                <span ng-if="m_oController.isMine(processor)"><span class="fa fa-flask mr-1"></span>You are the Master!</span>
+                                <span ng-if="!m_oController.isMine(processor)">{{"MARKET_PUBLISHED_BY"|translate}}<span class="pub-name">{{processor.publisher}}</span></span>
+                                <span ng-if="m_oController.isMine(processor)"><span class="fa fa-flask mr-1"></span>{{"MARKET_OWNER"|translate}}</span>
                             </div>
                             <div class="tile-footer d-flex justify-content-between align-items-center border-top pt-3">
                                 <div class="star-rating">
@@ -232,8 +232,8 @@
                                     &nbsp;{{ processor.votes}}
                                 </div>
                                 <div  class="price-tag shadow-sm">
-                                    <span ng-if="processor.price>0">from € {{processor.price}}</span>
-                                    <span ng-if="processor.price==0">Free</span>
+                                    <span ng-if="processor.price>0">{{"MARKET_START_PRICE"|translate}} {{processor.price}}</span>
+                                    <span ng-if="processor.price==0">{{"MARKET_FREE"|translate}}</span>
                                 </div>
                             </div>
                         </div>
@@ -241,7 +241,7 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-center" ng-show="m_oController.m_bWaiting==false">
-                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-class="!m_oController.m_bLoadMoreEnabled?'btn-disabled':''"><span class="fa fa-refresh mr-2"></span>LOAD MORE SPACE APPS</div>
+                    <div class="load-more-btn" ng-click="m_oController.loadMore()" ng-class="!m_oController.m_bLoadMoreEnabled?'btn-disabled':''"><span class="fa fa-refresh mr-2"></span>{{"MARKET_LOAD_MORE"|translate}}</div>
                 </div>
 
 

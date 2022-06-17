@@ -15,6 +15,7 @@ angular.module('wasdi.wapListBox', [])
                 // * Two-way binding ('=' or '=?') *
                 // * Function binding ('&' or '&?') *
             },
+            
 
             templateUrl:"directives/wasdiApps/wapListBox/wapListBox.html",
             link: function(scope, elem, attrs) {
