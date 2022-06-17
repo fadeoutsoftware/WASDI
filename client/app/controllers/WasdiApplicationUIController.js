@@ -300,7 +300,7 @@ var WasdiApplicationUIController = (function () {
     };
 
     /**
-     * Triggers the execution of Application with Paramteres in a specific Workpsace
+     * Triggers the execution of Application with Parameteres in a specific Workspace
      * @param oController Reference to the controller
      * @param sApplicationName Name of the application
      * @param oProcessorInput Processor Input Parameter Object
