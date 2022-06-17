@@ -23,7 +23,7 @@
             <div class="container-fluid-v4">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                            data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -36,10 +36,9 @@
                     <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
                         <div class="form-group">
                             <input type="text" readonly
-                                   ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name"
-                                   placeholder="..."
-                                   ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
-                                   ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
+                                ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                                ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
+                                ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
                             <strong class="cursor"></strong>
 
                         </div>
@@ -48,19 +47,19 @@
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
                             <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown"
-                                 aria-haspopup="true" aria-expanded="true">
+                                aria-haspopup="true" aria-expanded="true">
                                 <img src="assets/icons/white-user-icon2.png" style="width: 26px" alt="user icon"
-                                     onmouseover="this.src='assets/icons/green-user-icon2.png';"
-                                     onmouseout="this.src='assets/icons/white-user-icon2.png';"/>
+                                    onmouseover="this.src='assets/icons/green-user-icon2.png';"
+                                    onmouseout="this.src='assets/icons/white-user-icon2.png';" />
                             </div>
                             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
                                 <li role="presentation" ng-click="m_oController.editUserInfo()">
-                                    <!--dropdown-header-->
+                                   
                                     <a role="menuitem" tabindex="-1">
 
                                         <i class="far fa-user fa-lg" aria-hidden="true"></i>
                                         <span class=""
-                                              ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}}
+                                            ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}}
                                             {{m_oController.m_oUser.name}}</span>
                                         <span
                                             ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}}
@@ -92,15 +91,15 @@
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
                             <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown"
-                                 aria-haspopup="true" aria-expanded="true">
+                                aria-haspopup="true" aria-expanded="true">
                                 <i class="far fa-flag fa-lg" aria-hidden="true"></i>
                             </div>
                             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
                                 <li role="presentation" ng-click="m_oController.swapLanguage('en')">
-                                    <!--dropdown-header-->
+                                   
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i><img src="assets/flags/4x3/gb.svg" style="width: 27px;"/></i>
+                                        <i><img src="assets/flags/4x3/gb.svg" style="width: 27px;" /></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">English</span>
 
                                     </a>
@@ -113,7 +112,7 @@
 
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i><img src="assets/flags/4x3/it.svg" style="width: 27px;"/></i>
+                                        <i><img src="assets/flags/4x3/it.svg" style="width: 27px;" /></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Italiano</span>
 
                                     </a>
@@ -125,8 +124,18 @@
 
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i><img src="assets/flags/4x3/fr.svg" style="width: 27px;"/></i>
+                                        <i><img src="assets/flags/4x3/fr.svg" style="width: 27px;" /></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Français</span>
+
+                                    </a>
+                                </li>
+
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" ng-click="m_oController.swapLanguage('de')">
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <i><img src="assets/flags/4x3/de.svg" style="width: 27px;" /></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">Deutsche</span>
 
                                     </a>
                                 </li>
@@ -134,10 +143,10 @@
 
                                 <li role="presentation" class="divider"></li>
                                 <li role="presentation" ng-click="m_oController.swapLanguage('vn')">
-                                    <!--dropdown-header-->
+                                   
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i><img src="assets/flags/4x3/vn.svg" style="width: 27px;"/></i>
+                                        <i><img src="assets/flags/4x3/vn.svg" style="width: 27px;" /></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Tiếng Việt</span>
 
                                     </a>
@@ -147,10 +156,10 @@
 
                                 <li role="presentation" class="divider"></li>
                                 <li role="presentation" ng-click="m_oController.swapLanguage('ro')">
-                                    <!--dropdown-header-->
+                                   
                                     <a role="menuitem" tabindex="-1">
 
-                                        <i><img src="assets/flags/4x3/ro.svg" style="width: 27px;"/></i>
+                                        <i><img src="assets/flags/4x3/ro.svg" style="width: 27px;" /></i>
                                         <span class="" ng-hide="m_oController.m_oUser.name === null">Română</span>
 
                                     </a>
@@ -200,7 +209,7 @@
                         <li ng-class="{active:m_oController.activePageCss('root.editor')}"
                             ng-disabled="m_oController.disableEditorButton()">
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href=""
-                               ng-style="{cursor:m_oController.cursorCss()}">
+                                ng-style="{cursor:m_oController.cursorCss()}">
                                 <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>

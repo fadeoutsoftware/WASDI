@@ -15,23 +15,22 @@
 
 
                         <li class="link-login pull-right  nav-item"><a class="text-white" href="http://www.wasdi.cloud"
-                                                                       target="_blank">
-                            {{"LOGIN_LINK_WEBSITE"|translate}}</a></li>
+                                target="_blank">
+                                {{"LOGIN_LINK_WEBSITE"|translate}}</a></li>
 
                         <li class="link-login pull-right  nav-item">
                             <div class="dropdown">
                                 <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser"
-                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                     <i class="far fa-flag fa-lg text-white" aria-hidden="true"
-                                       style="padding: 13px 10px;"></i>
+                                        style="padding: 13px 10px;"></i>
                                 </div>
                                 <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
                                     <li role="presentation" ng-click="m_oController.swapLanguage('en')">
-                                        <!--dropdown-header-->
+
                                         <a role="menuitem" tabindex="-1">
 
-                                            <i><img src="assets/flags/4x3/gb.svg"
-                                                    style="width: 27px;"/></i>
+                                            <i><img src="assets/flags/4x3/gb.svg" style="width: 27px;" /></i>
                                             <span class="" ng-hide="m_oController.m_oUser.name === null">English</span>
 
                                         </a>
@@ -42,7 +41,7 @@
                                     <li role="presentation" ng-click="m_oController.swapLanguage('it')">
                                         <a role="menuitem" tabindex="-1">
 
-                                            <i><img src="assets/flags/4x3/it.svg" style="width: 27px;"/></i>
+                                            <i><img src="assets/flags/4x3/it.svg" style="width: 27px;" /></i>
                                             <span class="" ng-hide="m_oController.m_oUser.name === null">Italiano</span>
 
                                         </a>
@@ -52,20 +51,31 @@
                                     <li role="presentation" ng-click="m_oController.swapLanguage('fr')">
                                         <a role="menuitem" tabindex="-1">
 
-                                            <i><img src="assets/flags/4x3/fr.svg" style="width: 27px;"/></i>
+                                            <i><img src="assets/flags/4x3/fr.svg" style="width: 27px;" /></i>
                                             <span class="" ng-hide="m_oController.m_oUser.name === null">Français</span>
 
                                         </a>
                                     </li>
 
                                     <li role="presentation" class="divider"></li>
-                                    <li role="presentation" ng-click="m_oController.swapLanguage('vn')">
-                                        <!--dropdown-header-->
+                                    <li role="presentation" ng-click="m_oController.swapLanguage('de')">
                                         <a role="menuitem" tabindex="-1">
 
-                                            <i><img src="assets/flags/4x3/vn.svg" style="width: 27px;"/></i>
-                                            <span class=""
-                                                  ng-hide="m_oController.m_oUser.name === null">Tiếng Việt</span>
+                                            <i><img src="assets/flags/4x3/de.svg" style="width: 27px;" /></i>
+                                            <span class="" ng-hide="m_oController.m_oUser.name === null">Deutsche</span>
+
+                                        </a>
+                                    </li>
+
+
+                                    <li role="presentation" class="divider"></li>
+                                    <li role="presentation" ng-click="m_oController.swapLanguage('vn')">
+
+                                        <a role="menuitem" tabindex="-1">
+
+                                            <i><img src="assets/flags/4x3/vn.svg" style="width: 27px;" /></i>
+                                            <span class="" ng-hide="m_oController.m_oUser.name === null">Tiếng
+                                                Việt</span>
 
                                         </a>
 
@@ -73,12 +83,11 @@
 
                                     <li role="presentation" class="divider"></li>
                                     <li role="presentation" ng-click="m_oController.swapLanguage('ro')">
-                                        <!--dropdown-header-->
+
                                         <a role="menuitem" tabindex="-1">
 
-                                            <i><img src="assets/flags/4x3/ro.svg" style="width: 27px;"/></i>
-                                            <span class=""
-                                                  ng-hide="m_oController.m_oUser.name === null">Română</span>
+                                            <i><img src="assets/flags/4x3/ro.svg" style="width: 27px;" /></i>
+                                            <span class="" ng-hide="m_oController.m_oUser.name === null">Română</span>
 
                                         </a>
 
@@ -114,27 +123,27 @@
             <div class="login-content" ng-show="m_oController.m_bLoginIsVisible === true">
 
                 <form class="form-signin" ng-submit="m_oController.login()"
-                      ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+                    ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <div class="form-group">
                         <input type="text" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control"
-                               id="userName" ng-model="m_oController.m_sUserName">
+                            id="userName" ng-model="m_oController.m_sUserName">
                     </div>
                     <div class="form-group">
                         <input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}"
-                               class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
+                            class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
                     </div>
                     <label>
                         <input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}
                     </label>
                     <button class="btn btn-md btn-primary btn-block btn-signin"
-                            type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}
+                        type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}
                     </button>
 
                 </form>
 
                 <div ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password"
-                       ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
+                        ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
                     </a>
                 </div>
@@ -153,7 +162,7 @@
                     <br>
 
                     <button class="btn btn-md btn-primary btn-block btn-signin" ng-click="m_oController.keycloakLogin()"
-                            ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
+                        ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_BUTTON_SIGN_IN_2"|translate}}
                     </button>
                 </div>
@@ -161,23 +170,23 @@
 
                 <!-- RECOVERY FORM -->
                 <form class="form-signin" name="recoveryForm"
-                      ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
+                    ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
                     <div>
                         {{"RECOVERY_EMAIL_TITLE"|translate}}
                     </div>
                     <div class="form-group">
                         <input type="email" name="recoveryemail" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}"
-                               class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
+                            class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
 
                     </div>
                     <button class="btn btn-md btn-primary btn-block btn-signin" type="submit"
-                            ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
-                            ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
+                        ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
+                        ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
                         {{"RECOVERY_EMAIL_BUTTON"|translate}}
                     </button>
 
                     <a href=""
-                       ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
+                        ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         {{"LOGIN_LINK_BACK"|translate}}
                     </a>
@@ -192,7 +201,7 @@
                 <form class="form-signin" name="signinForm" ng-submit="m_oController.signingUser()">
                     <div class="form-group">
                         <input type="email" name="useremail" placeholder="{{'SIGN_IN_PLACEHOLDER_EMAIL'|translate}}"
-                               class="form-control" ng-model="m_oController.m_oRegistrationUser.userId" required>
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.userId" required>
                         <h6 class="error-message" ng-if="(signinForm.useremail.$dirty === true) &&
                                                          (!signinForm.useremail.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
@@ -200,8 +209,8 @@
                     </div>
                     <div class="form-group">
                         <input type="password" name="userpassword" ng-model="m_oController.m_oRegistrationUser.password"
-                               placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
-                               ng-minlength="8" required>
+                            placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
+                            ng-minlength="8" required>
                         <h6 class="error-message"
                             ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) && (!signinForm.userpassword.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
@@ -210,8 +219,8 @@
 
                     <div class="form-group">
                         <input type="password" name="userrepeatpassword"
-                               placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
-                               ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
+                            placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
+                            ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
                         <h6 class="error-message"
                             ng-if="(signinForm.userrepeatpassword.$dirty === true) &&
                                                         (signinForm.userpassword.$viewValue !== signinForm.userrepeatpassword.$viewValue)">
@@ -221,7 +230,7 @@
 
                     <div class="form-group">
                         <input type="text" name="username" placeholder="{{'SIGN_IN_PLACEHOLDER_NAME'|translate}}"
-                               class="form-control" ng-model="m_oController.m_oRegistrationUser.name" required>
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.name" required>
                         <h6 class="error-message" ng-if="(signinForm.username.$dirty === true) &&
                                                          (!signinForm.username.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_INSERT_NAME"|translate}}
@@ -229,7 +238,7 @@
                     </div>
                     <div class="form-group">
                         <input type="text" name="usersurname" placeholder="{{'SIGN_IN_PLACEHOLDER_SURNAME'|translate}}"
-                               class="form-control" ng-model="m_oController.m_oRegistrationUser.surname" required>
+                            class="form-control" ng-model="m_oController.m_oRegistrationUser.surname" required>
                         <h6 class="error-message" ng-if="(signinForm.usersurname.$dirty === true) &&
                                                          (!signinForm.usersurname.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_INSERT_SURNAME"|translate}}
@@ -238,11 +247,11 @@
 
                     <div class="form-group">
                         <input type="checkbox" id="accept" name="accept"
-                               ng-model="m_oController.m_oRegistrationUser.accept" required>
+                            ng-model="m_oController.m_oRegistrationUser.accept" required>
                         {{"SIGN_IN_TERMS_AGREE_1"|translate}} <a href="http://www.wasdi.net/index.php?title=Terms"
-                                                                 target="_blank" rel="noopener noreferrer">{{"SIGN_IN_TERMS_AGREE_2"|translate}}</a>
+                            target="_blank" rel="noopener noreferrer">{{"SIGN_IN_TERMS_AGREE_2"|translate}}</a>
                         {{"SIGN_IN_TERMS_AGREE_3"|translate}} <a href="http://www.wasdi.net/index.php?title=Privacy"
-                                                                 target="_blank">{{"SIGN_IN_TERMS_AGREE_4"|translate}}</a>
+                            target="_blank">{{"SIGN_IN_TERMS_AGREE_4"|translate}}</a>
                         <h6 class="error-message" ng-if="(signinForm.accept.$dirty === true) &&
                                                          (!signinForm.accept.$valid)">
                             {{"SIGN_IN_ERROR_INVALID_ACCEPT_CONDITIONS"|translate}}
@@ -250,8 +259,8 @@
                     </div>
 
                     <button class="btn btn-md btn-primary btn-block btn-signin"
-                            ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
-                            type="submit">
+                        ng-class="{disabled: signinForm.$invalid === true || m_oController.m_bRegistering }"
+                        type="submit">
                         {{"SIGN_IN_BUTTON"|translate}}
                     </button>
 
@@ -259,11 +268,11 @@
                         {{"SIGN_IN_ERROR_SUCCESS_REGISTRATION"|translate}}
                     </div>
                     <div class="alert alert-danger" role="alert"
-                         ng-hide="m_oController.m_bError === false || m_oController.m_sMessageError || m_oController.m_sMessageError.length > 0">
+                        ng-hide="m_oController.m_bError === false || m_oController.m_sMessageError || m_oController.m_sMessageError.length > 0">
                         {{"SIGN_IN_ERROR_GENERAL_ERROR"|translate}}
                     </div>
                     <div class="alert alert-danger" role="alert" ng-show="m_oController.m_bError === true"
-                         ng-show="!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
+                        ng-show="!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
                         {{m_oController.m_sMessageError}}
                     </div>
 
