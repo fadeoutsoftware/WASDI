@@ -826,6 +826,17 @@ public abstract class QueryTranslator {
 			oResult.platformName = Platforms.ECOSTRESS;
 
 			oResult.productType = extractValue(sQuery, "dataset");
+
+			String sRelativeOrbitNumber = extractValue(sQuery, "relativeorbitnumber");
+			if (!Utils.isNullOrEmpty(sRelativeOrbitNumber)) {
+				try {
+					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
+				}
+			}
+
+			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
 		}
 	}
 
