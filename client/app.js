@@ -90,7 +90,7 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function ($httpProvider,
         suffix: '.json'
     });
 
-    $translateProvider.preferredLanguage('it');
+    $translateProvider.preferredLanguage('en');
     $translateProvider.useSanitizeValueStrategy('escaped');
 
 }]);
