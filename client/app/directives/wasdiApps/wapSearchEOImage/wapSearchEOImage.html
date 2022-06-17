@@ -10,7 +10,7 @@
         </div>
         <div>
             <button class="btn btn-primary btn-wasdi search-button" ng-click="$ctrl.lightSearch()" ng-disabled = "$ctrl.isAreaSelected() === false">
-                Search
+                {{"DIRECTIVE_DD_SEARCH"|translate}}
             </button>
         </div>
     </div>
@@ -33,13 +33,11 @@
     <div class="d-flex justify-content-between mt-3 pt-3 border-top">
         <button class="btn btn-primary btn-wasdi search-button mb-2" ng-click="$ctrl.backToLightSearch()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-            back
+            {{"DIRECTIVE_DD_BACK"|translate}}
         </button>
         <button class="btn btn-success btn-wasdi search-button mb-2" ng-click="$ctrl.selectedProducts()">
             <i class="fa fa-save" aria-hidden="true"></i>
-            save selection
+            {{"DIRECTIVE_DD_SAVE_SELECTION"|translate}}
         </button>
     </div>
-
-
 </div>

@@ -512,7 +512,7 @@ var EditorController = (function () {
             if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
             if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>" + sErrorDescription;
 
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS' + sErrorDescription);
+            var oDialog = utilsVexDialogAlertTop(oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_1") + sOperation + oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_2") + sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
             
             if (oMessage.messageCode == "PUBLISHBAND") {
@@ -550,7 +550,7 @@ var EditorController = (function () {
                 break;
         }
 
-        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage, oController.m_oTranslate);
     };
 
     /**
@@ -559,8 +559,10 @@ var EditorController = (function () {
      */
     EditorController.prototype.receivedNewProductMessage = function (oMessage) {
 
+        var sMessage = this.m_oTranslate.instant("MSG_EDIT_PRODUCT_ADDED");
+
         // Alert the user
-        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
+        var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfter(4000, oDialog);
 
         // Update product list
@@ -579,7 +581,8 @@ var EditorController = (function () {
     EditorController.prototype.receivedPublishMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult == "KO") {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR PUBLISHING THE PRODUCT');
+            var sMessage = this.m_oTranslate.instant("MSG_PUBLISH_ERROR");
+            utilsVexDialogAlertTop(sMessage);
             return;
         }
     };
@@ -795,7 +798,8 @@ var EditorController = (function () {
 
             }
         }, (function (data, status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
+            var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
+            utilsVexDialogAlertTop(sMessage);
         }));
     };
 
@@ -813,7 +817,8 @@ var EditorController = (function () {
                     // new condition: check that the viewmodel received is non empty 
                     if (data.data.workspaceId == null){
                         oController.m_oState.go("home");
-                        var oDialog = utilsVexDialogAlertTop('FORBIDDEN <br> TRYING TO ACCES A PRIVATE RESOURCE YOU HAVE NO RIGHTS ON');
+                        var sMessage = this.m_oTranslate.instant("MSG_FORBIDDEN")
+                        var oDialog = utilsVexDialogAlertTop(sMessage);
                         utilsVexCloseDialogAfter(10000 , oDialog);
                     }
                     else{
@@ -824,14 +829,14 @@ var EditorController = (function () {
                     oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                     if (oController.m_oRabbitStompService.isSubscrbed() == false) {
-                        //oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
                         oController._subscribeToRabbit();
                     }
                     }
                 }
             }
         }, (function (data, status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITOR')
+            var sMessage = this.m_oTranslate.instant("MSG_ERROR_READING_WS");
+            utilsVexDialogAlertTop(sMessage)
         }));
 
         return true;
@@ -896,12 +901,14 @@ var EditorController = (function () {
                 }
 
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
+                var sMessage = this.m_oTranslate.instant("MSG_PUBLISH_BAND_ERROR");
+                utilsVexDialogAlertTop(sMessage + oBand.name);
                 oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
             }
         }, (function (data, status) {
             console.log('publish band error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
+            var sMessage = this.m_oTranslate.instant("MSG_PUBLISH_BAND_ERROR");
+            utilsVexDialogAlertTop(sMessage);
             oController.setTreeNodeAsDeselected(oBand.productName + "_" + oBand.name);
         }));
     };
@@ -966,7 +973,7 @@ var EditorController = (function () {
                 utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false) {
                 sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
             }
-            if (utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
+            if (utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)
             {
                 this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
                 utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced, this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
@@ -981,7 +988,6 @@ var EditorController = (function () {
     EditorController.prototype.removeBandLayersIn3dMaps = function (sLayerId) {
         // We are in 3d Mode
         var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
-        // var oGlobe = this.m_oGlobeService.getGlobe();
 
         //Remove band layer
         for (var iIndexLayer = 0; iIndexLayer < aoGlobeLayers.length; iIndexLayer++) {
@@ -997,8 +1003,6 @@ var EditorController = (function () {
                     var sMapLayer = "wasdi:" + oLayer.imageryProvider.layers;
                     if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sMapLayer == sLayerId) {
                         aoGlobeLayers.remove(oLayer);
-                        // oLayer = oGlobe.remove(oLayer);
-                        //break;
                         iIndexLayer = 0;
                     }
                 }
@@ -1264,14 +1268,11 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     products: oController.m_aoStyleList,
-                    //styleId: oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-
-                //oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -1435,8 +1436,6 @@ var EditorController = (function () {
             modal.close.then(function (result) {
                 if (utilsIsObjectNullOrUndefined(result) === true)
                     return false;
-                //TODO ADD FILENAME = RESULT
-                // oController.m_oScope.Result = result;
             });
         });
 
@@ -1600,7 +1599,6 @@ var EditorController = (function () {
                 $("#jstree").jstree(true).deselect_all();
                 // CARE WE CAN'T DO OPEN_NODE AND SELECET_NODE AT THE SAME TIME
                 $("#jstree").jstree(true).select_node(m[i].id, true);
-                // $("#jstree").jstree(true).open_node(m[i].id,true);
                 break;
             }
         }
@@ -1683,6 +1681,18 @@ var EditorController = (function () {
                     //only the band has property $node.original.band
                     // menu showed when a band is selecte
                     var oReturnValue = null;
+
+                    var sZoom2D = oController.m_oTranslate.instant("MENU_ZOOM_2D");
+                    var sZoom3D = oController.m_oTranslate.instant("MENU_ZOOM_3D");
+                    var sDownload = oController.m_oTranslate.instant("MENU_DOWNLOAD");
+                    var sSendToFtp = oController.m_oTranslate.instant("MENU_SEND_FTP");
+                    var sDelete = oController.m_oTranslate.instant("MENU_DELETE");
+                    var sProperties = oController.m_oTranslate.instant("MENU_PROPERTIES");
+                    var sDeleteConfirm = oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
+                    var sDeleteError = oController.m_oTranslate.instant("MSG_DELETE_ERROR");
+                    var sDeleteManyConfirm1 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_1");
+                    var sDeleteManyConfirm2 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_2");
+
                     if (utilsIsObjectNullOrUndefined($node.original.band) == false) { 
                         //******************************** BAND *************************************
                         var oBand = $node.original.band;
@@ -1690,7 +1700,7 @@ var EditorController = (function () {
                         oReturnValue =
                         {
                             "Zoom2D": {
-                                "label": "Zoom Band 2D Map",
+                                "label": sZoom2D,
                                 "action": function (obj) {
                                     if (utilsIsObjectNullOrUndefined(oBand) == false) {
                                         oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
@@ -1699,7 +1709,7 @@ var EditorController = (function () {
                                 "_disabled": false
                             },
                             "Zoom3D": {
-                                "label": "Zoom Band 3D Map",
+                                "label": sZoom3D,
                                 "action": function (obj) {
                                     if (utilsIsObjectNullOrUndefined(oBand) == false) {
                                         oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
@@ -1708,7 +1718,7 @@ var EditorController = (function () {
                                 "_disabled": false
                             },
                             "Download": {
-                                "label": "Download",
+                                "label": sDownload,
                                 "icon": "fa fa-download",
                                 "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
@@ -1721,7 +1731,7 @@ var EditorController = (function () {
                                 }
                             },
                             "SendToFtp": {
-                                "label": "Send To Ftp",
+                                "label": sSendToFtp,
                                 "icon": "fa fa-upload",
                                 "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
@@ -1733,12 +1743,12 @@ var EditorController = (function () {
                             },
 
                             "DeleteProduct": {
-                                "label": "Delete Product",
+                                "label": sDelete,
                                 "icon": "delete-icon-context-menu-jstree",
 
                                 "action": function (obj) {
 
-                                    utilsVexDialogConfirm("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
+                                    utilsVexDialogConfirm(sDeleteConfirm, function (value) {
                                         if (value) {
                                             bDeleteFile = true;
                                             bDeleteLayer = true;
@@ -1750,14 +1760,14 @@ var EditorController = (function () {
                                             oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
                                                 oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
                                             }, (function (error) {
-                                                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                utilsVexDialogAlertTop(sDeleteError);
                                             }));
                                         }
                                     });
                                 }
                             },
                             "Properties": {
-                                "label": "Properties ",
+                                "label": sProperties,
                                 "icon": "info-icon-context-menu-jstree",
                                 "separator_before": true,
                                 "action": function (obj) {
@@ -1775,7 +1785,7 @@ var EditorController = (function () {
                         oReturnValue =
                         {
                             "Download": {
-                                "label": "Download",
+                                "label": sDownload,
                                 "icon": "fa fa-download",
                                 "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
@@ -1788,7 +1798,7 @@ var EditorController = (function () {
                                 }
                             },
                             "SendToFtp": {
-                                "label": "Send To Ftp",
+                                "label": sSendToFtp,
                                 "icon": "fa fa-upload",
                                 "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "action": function (obj) {
@@ -1807,7 +1817,7 @@ var EditorController = (function () {
                                     let asSelectedProducts = oController.getSelectedNodesFromTree($node.original.fileName);
                                     // first, check that something were selected
                                     if (asSelectedProducts.length > 0) {
-                                        utilsVexDialogConfirm("DELETING " + asSelectedProducts.length + " PRODUCTS.<br>ARE YOU SURE?", function (value) {
+                                        utilsVexDialogConfirm(sDeleteManyConfirm1 + asSelectedProducts.length + sDeleteManyConfirm2, function (value) {
                                             if (value) {
                                                 bDeleteFile = true;
                                                 bDeleteLayer = true;
@@ -1822,7 +1832,7 @@ var EditorController = (function () {
                                                     $("#jstree").jstree().deselect_all(true);
 
                                                 }, (function (error) {
-                                                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                    utilsVexDialogAlertTop(sDeleteError);
                                                 }));
                                             }
                                         });
@@ -1831,7 +1841,7 @@ var EditorController = (function () {
                                 }
                             },
                             "Properties": {
-                                "label": "Properties ",
+                                "label": sProperties,
                                 "icon": "info-icon-context-menu-jstree",
                                 "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
                                 "separator_before": true,
@@ -1873,10 +1883,12 @@ var EditorController = (function () {
             oNode.productIndex = iIndexProduct;
 
             // var oThat = this;
+            var sMetadata = oController.m_oTranslate.instant("");
+            var sBands = oController.m_oTranslate.instant("");
 
             oNode.children = [
                 {
-                    "text": "Metadata",
+                    "text": sMetadata,
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked": false,//semaphore
@@ -1886,7 +1898,7 @@ var EditorController = (function () {
                     }
                 },
                 {
-                    "text": "Bands",
+                    "text": sBands,
                     "icon": "assets/icons/bandsTree.png",
                     "children": [],
                     a_attr: {
@@ -1935,11 +1947,16 @@ var EditorController = (function () {
      */
     EditorController.prototype.getDeleteLabel = function () {
         let iCount = this.getSelectedNodesFromTree(null).length;
+
+        var sDeleteMany1 = this.m_oTranslate.instant("MENU_DELETE_MANY_1");
+        var sDeleteMany2 = this.m_oTranslate.instant("MENU_DELETE_MANY_2");
+        var sDeleteSingle = this.m_oTranslate.instant("MENU_DELETE_SINGLE");
+        
         if (iCount > 1) {
-            return "Delete " + iCount + " products";
+            return sDeleteMany1 + iCount + sDeleteMany2;
         }
         else {
-            return "Delete product";
+            return sDeleteSingle;
         }
     }
 

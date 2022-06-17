@@ -5,7 +5,7 @@
 var WorkspaceController = (function () {
     function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService, $state,
                                  oProductService, oRabbitStompService, oGlobeService, $rootScope, oOpportunitySearchService,
-                                 $interval) {
+                                 $interval, oTranslate) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oAuthService = oAuthService;
@@ -17,7 +17,7 @@ var WorkspaceController = (function () {
         this.m_oProductService = oProductService;
         this.m_oState = $state;
         this.m_oScope.m_oController = this;
-        this.m_aoProducts = [];//the products of the workspace selected
+        this.m_aoProducts = [];
         this.m_bIsOpenInfo = false;
         this.m_bIsVisibleFiles = false;
         this.m_bLoadingWSFiles = false;
@@ -31,6 +31,8 @@ var WorkspaceController = (function () {
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
         this.m_oUfoPointer = null;
+
+        this.m_oTranslate = oTranslate;
 
 
         this.m_oWorkspaceViewModel = null; // the model view of the selected workspace
@@ -103,6 +105,7 @@ var WorkspaceController = (function () {
     WorkspaceController.prototype.createWorkspace = function () {
 
         var oController = this;
+        var sError = this.m_oTranslate.instant("MSG_MKT_WS_CREATE_ERROR");
 
         this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
             if (data.data != null) {
@@ -114,7 +117,7 @@ var WorkspaceController = (function () {
             }
         },(function (data, status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
+            utilsVexDialogAlertTop(sError);
         }));
     };
 
@@ -123,6 +126,7 @@ var WorkspaceController = (function () {
         // Stop loading new workspaces.. we are leaving!
         this.m_bOpeningWorkspace = true;
         var oController = this;
+        var sError = this.m_oTranslate.instant("MSG_MKT_WS_OPEN_ERROR");
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data.data != null) {
@@ -139,7 +143,7 @@ var WorkspaceController = (function () {
             }
         },(function (data, status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
+            utilsVexDialogAlertTop(sError);
         }));
     }
 
@@ -154,6 +158,8 @@ var WorkspaceController = (function () {
 
 
     WorkspaceController.prototype.fetchWorkspaceInfoList = function () {
+
+        var sError = this.m_oTranslate.instant("MSG_MKT_WS_OPEN_ERROR");
 
         if (this.m_oConstantsService.getUser() != null) {
             if (this.m_oConstantsService.getUser() != undefined) {
@@ -170,7 +176,7 @@ var WorkspaceController = (function () {
                     }
                     oController.m_bIsLoading = false;
                 },(function (data, status) {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
+                    utilsVexDialogAlertTop(sError);
                     oController.m_bIsLoading = false;
                 }));
             }
@@ -220,14 +226,14 @@ var WorkspaceController = (function () {
         this.m_bIsOpenInfo = false;
         var oWorkspaceId = oWorkspace.workspaceId;
         this.m_bIsVisibleFiles = true;
-
+        var sError = this.m_oTranslate.instant("MSG_MKT_WS_OPEN_ERROR");
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data.data;
             }
         },(function (data, status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE INFO");
+            utilsVexDialogAlertTop(sError);
         }));
 
         this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).then(function (data, status) {
@@ -255,7 +261,7 @@ var WorkspaceController = (function () {
             oController.m_bLoadingWSFiles = false;
         },(function (data, status) {
             oController.m_bLoadingWSFiles = false;
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE PRODUCTS");
+            utilsVexDialogAlertTop(sError);
         }));
 
         return true;
@@ -390,28 +396,6 @@ var WorkspaceController = (function () {
         if (utilsIsObjectNullOrUndefined(this.m_aoProducts) || this.m_aoProducts.length == 0) return true;
         return false;
     };
-    /**
-     *
-     * @param oWorkspace
-     * @returns {*}
-     */
-    // WorkspaceController.prototype.isSelectedRowInWorkspaceTableCSS = function(oWorkspace)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(oWorkspace))
-    //         return '';
-    //     if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
-    //         return '';
-    //
-    //     if(utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected))
-    //         return '';
-    //     if(utilsIsStrNullOrEmpty(this.m_oWorkspaceSelected.workspaceId))
-    //         return '';
-    //
-    //     if(oWorkspace.workspaceId != this.m_oWorkspaceSelected.workspaceId)
-    //         return '';
-    //
-    //     return 'selected-row';
-    // };
 
     WorkspaceController.prototype.isSelectedRowInWorkspaceTable = function (oWorkspace) {
         if (utilsIsObjectNullOrUndefined(oWorkspace))
@@ -438,9 +422,13 @@ var WorkspaceController = (function () {
 
         var oController = this;
         let oWorkspaceViewModel = undefined;
+
+        var sConfirmMsg1 = this.m_oTranslate.instant("MSG_DELETE_WS_1");
+        var sConfirmMsg2 = this.m_oTranslate.instant("MSG_DELETE_WS_2");
+
         oController.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             oWorkspaceViewModel = data.data;
-            utilsVexDialogConfirm("DELETING WORKSPACE " + oWorkspaceViewModel.name +" <br>ARE YOU SURE?", function (value) {
+            utilsVexDialogConfirm(sConfirmMsg1 + oWorkspaceViewModel.name + sConfirmMsg2, function (value) {
                 if (value) {
                     bDeleteFile = true;
                     bDeleteLayer = true;
@@ -645,7 +633,8 @@ var WorkspaceController = (function () {
         'GlobeService',
         '$rootScope',
         'OpportunitySearchService',
-        '$interval'
+        '$interval',
+        '$translate'
     ];
     return WorkspaceController;
 })();

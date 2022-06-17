@@ -212,6 +212,8 @@ public class Wasdi extends ResourceConfig {
 		catch (Throwable e) {
 			e.printStackTrace();
 		}
+
+		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 		
 		// Local path the the web application
 		try {

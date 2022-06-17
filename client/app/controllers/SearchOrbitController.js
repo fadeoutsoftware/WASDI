@@ -10,7 +10,7 @@
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
                                    oMapService, oOpportunitySearchService,oProcessWorkspaceService,oWorkspaceService,
-                                   oRabbitStompService,oModalService, oProductService,$filter ,oTreeService) {
+                                   oRabbitStompService,oModalService, oProductService,$filter ,oTreeService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
@@ -31,6 +31,7 @@ var SearchOrbitController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
         this.m_oProductService = oProductService;
+        this.m_oTranslate = oTranslate;
         this.m_bMasterCheck = false;
         this.m_bisLoadingAllOrbitInMap = false;
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -58,7 +59,6 @@ var SearchOrbitController = (function() {
             if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
             {
                 this.openWorkspace(this.m_oState.params.workSpace);
-                //this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
             else
             {
@@ -92,13 +92,13 @@ var SearchOrbitController = (function() {
 
         var oController = this;
 
+        var sConfigErrorMsg = this.m_oTranslate.instant("MSG_CONFIG_ERROR");
+
         this.m_oConfigurationService.getConfiguration().then(function (configuration) {
             if(!utilsIsObjectNullOrUndefined(configuration))
             {
                 oController.m_oConfiguration = configuration;
-                // if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
-                // {
-                // }
+
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensortypes))
                 {
                     //check as selected all sensor type
@@ -123,10 +123,10 @@ var SearchOrbitController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE GET CONFIGURATION.");
+                utilsVexDialogAlertTop(sConfigErrorMsg);
             }
         },function error(data, status, header, config) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE GET CONFIGURATION.");
+            utilsVexDialogAlertTop(sConfigErrorMsg);
         });
 
         this.m_oMapService.initMapWithDrawSearch('orbitMap');
@@ -165,6 +165,8 @@ var SearchOrbitController = (function() {
 
         var oController = this;
 
+        var sErrorMsg = this.m_oTranslate.instant("MSG_ERROR_READING_WS");
+
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data.data != null)
             {
@@ -172,15 +174,12 @@ var SearchOrbitController = (function() {
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data.data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
-                    /*Start Rabbit WebStomp*/
-                    // oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
                     oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 }
             }
         },(function (data,status) {
-            //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE')
+            utilsVexDialogAlertTop(sErrorMsg)
         }));
     };
 
@@ -232,7 +231,7 @@ var SearchOrbitController = (function() {
             if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
             if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
 
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            var oDialog = utilsVexDialogAlertTop(oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_1") + sOperation + oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_2") + sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
 
             return;
@@ -252,7 +251,7 @@ var SearchOrbitController = (function() {
                 break;
         }
 
-        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage, oController.m_oTranslate);
     }
     /**
      *
@@ -260,7 +259,7 @@ var SearchOrbitController = (function() {
      * @param oController
      */
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
-        var sMessage = 'PRODUCT ADDED TO THE WORKSPACE<br>READY';
+        var sMessage = this.m_oTranslate.instant("MSG_EDIT_PRODUCT_ADDED");
 
         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfter(4000, oDialog);
@@ -285,7 +284,9 @@ var SearchOrbitController = (function() {
 
         var sText = oNode.text;
         var sFootPrint = oNode.original.FrameFootPrint;
-        console.log(sFootPrint);
+        
+        var sErrorMsg = this.m_oTranslate.instant("MSG_KML_ERROR");
+
         this.m_oOpportunitySearchService.getKML(sText,sFootPrint)
             .then(function(data,state){
                 if( utilsIsObjectNullOrUndefined(data.data) === false )
@@ -298,10 +299,10 @@ var SearchOrbitController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD KML");
+                    utilsVexDialogAlertTop(sErrorMsg);
                 }
             },(function(data,state){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN  DOWNLOAD KML");
+                utilsVexDialogAlertTop(sErrorMsg);
             }));
 
         return true;
@@ -325,7 +326,6 @@ var SearchOrbitController = (function() {
             plugins: ['checkbox','contextmenu'],
             "contextmenu": { // my right click menu
                 "items":function($node){
-                    // var oController = this;
                     var bIsEmptyNodeFootPrint = oController.isEmptyNodeFootPrint($node);
 
                     var oReturnValue = {
@@ -578,14 +578,11 @@ var SearchOrbitController = (function() {
             return null;
         }
 
+        var sMessage = this.m_oTranslate.instant("MSG_ORBIT_ERROR");
         //create oRectangle
         var sFrame = oOrbit.FrameFootPrint;
         var aasNewContent = [];
 
-        // sFrame = sFrame.replace("POLYGON","");
-        // sFrame = sFrame.replace("((","");
-        // sFrame = sFrame.replace("))","");
-        // sFrame = sFrame.split(",");
         sFrame = utilsProjectGetPolygonArray(sFrame);
 
         for (var iIndexBounds = 0; iIndexBounds < sFrame.length; iIndexBounds++)
@@ -604,7 +601,7 @@ var SearchOrbitController = (function() {
         var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, sColor, 0);
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
-            utilsVexDialogAlertTop("THERE ARE PROBLEMS IN ORBIT VISUALIZATION");
+            utilsVexDialogAlertTop(sMessage);
             return null;
         }
         return oRectangle;
@@ -613,6 +610,8 @@ var SearchOrbitController = (function() {
     SearchOrbitController.prototype.getSatellitesResources = function()
     {
         var oController = this;
+        var sMessage = this.m_oTranslate.instant("MSG_ORBIT_ERROR2");
+
         this.m_oOpportunitySearchService.getSatellitesResources()
             .then(function(data,status){
                 if(utilsIsObjectNullOrUndefined(data.data) === false || status !== 200)
@@ -637,10 +636,10 @@ var SearchOrbitController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
+                    utilsVexDialogAlertTop(sMessage);
                 }
             },(function(data,status){
-                utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
+                utilsVexDialogAlertTop(sMessage);
             }))
     };
 
@@ -746,9 +745,6 @@ var SearchOrbitController = (function() {
             "children": []
         }];
 
-        // var sIdDiv = this.m_sIdDivSatelliteResourceTree;
-        // var oController = this;
-
         //for each satellite
         for(var iSatellite = 0 ; iSatellite < iNumberOfSatellites; iSatellite++)
         {
@@ -782,9 +778,6 @@ var SearchOrbitController = (function() {
                 }
 
             }
-
-            // var oSatelliteTree = this.generateNode(oSatelliteTree,sSatelliteName);
-
         }
 
         return oReturnValue;
@@ -796,7 +789,7 @@ var SearchOrbitController = (function() {
         var sError = "";
         if(utilsIsObjectNullOrUndefined(this.m_oGeoJSON))
         {
-            sError += "PLEASE SELECT AREA OF INTEREST<br>TOP RIGHT CORNER OF THE MAP<br>";
+            sError += this.m_oTranslate.instant("MSG_SEARCH_ERROR_BBOX");
             utilsVexDialogAlertDefault(sError);
             return false;
         }
@@ -817,17 +810,17 @@ var SearchOrbitController = (function() {
             acquisitionStartTime:sAcquisitionStartTime,
             acquisitionEndTime:sAcquisitionEndTime
         }
+
         this.m_bIsVisibleLoadingIcon = true;
-        // oJSON = JSON.string
-        // ify(oJSON);
         this.m_isDisabledSearchButton = true;
+
+        var sErrorMessage = this.m_oTranslate.instant("MSG_ORBIT_ERROR");
 
         this.m_oOpportunitySearchService.searchOrbit(oJSON)
             .then(function (data, status, headers, config) {
                 if(!utilsIsObjectNullOrUndefined(data.data))
                 {
-                    //var oDataTree = oController.generateDataTree(data.data);
-                    // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data.data));
+
                     oController.m_aoOrbits = data.data;
 
                     if(utilsIsObjectNullOrUndefined(oController.m_oOpportunitiesTree) === true)
@@ -844,19 +837,15 @@ var SearchOrbitController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                    utilsVexDialogAlertTop(sErrorMessage);
                     oController.m_isDisabledSearchButton = false;
                 }
-                // oController.initOrbitSearch();
                 oController.m_bIsVisibleLoadingIcon = false;
-                // oController.m_aoSatelliteResources=[];
             },(function (data, status, header, config) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
-                // oController.initOrbitSearch();
+                utilsVexDialogAlertTop(sErrorMessage);
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
                 oController.m_isDisabledSearchButton = false;
-                // oController.m_aoSatelliteResources=[];
             }));
 
     };
@@ -998,11 +987,7 @@ var SearchOrbitController = (function() {
             }
 
         }
-
-
-        // this.setEnableAllSelectedCheckFilters(aoSelectedFilters,aoSatelliteResources);
-        // aoSatelliteResources;
-        // aoJSONReturnValue = aoSatelliteResources;
+        
         return aoJSONReturnValue;
     };
 
@@ -1168,7 +1153,8 @@ var SearchOrbitController = (function() {
         'ModalService',
         'ProductService',
         '$filter',
-        'TreeService'
+        'TreeService',
+        "$translate"
     ];
 
     return SearchOrbitController;

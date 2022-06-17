@@ -7,7 +7,7 @@
                     </div>
                     <div class="col-v4-4">
                         <label>
-                            <strong ng-hide="m_oController.m_oSelectedStyle === null">Owner:</strong>
+                            <strong ng-hide="m_oController.m_oSelectedStyle === null">{{"DIALOG_STYLE_OWNER"|translate}}</strong>
                         </label>
                         <span> {{m_oController.m_oSelectedStyle.userId}}</span>
                     </div>
@@ -16,7 +16,7 @@
                 <div class="row-v4">
                     <div>
                         <label>
-                            <strong ng-hide="m_oController.m_oSelectedStyle === null">Description:</strong>
+                            <strong ng-hide="m_oController.m_oSelectedStyle === null">{{"DIALOG_STYLE_DESCRIPTION"|translate}}</strong>
                         </label>
                         <span>{{m_oController.m_oSelectedStyle.description.replaceAll("_", " ")}}</span>
                     </div>
@@ -27,7 +27,7 @@
                 <div class="row-v4" ng-hide="m_oController.m_oSelectedStyle === null">
                     <div>
                         <label>
-                            <strong>Style XML:</strong>
+                            <strong>{{"DIALOG_STYLE_XML"|translate}}</strong>
                         </label>
                     </div>
                     

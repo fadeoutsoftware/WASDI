@@ -690,6 +690,9 @@ public class WasdiFileUtils {
 			else if (sFileName.toUpperCase().startsWith("3B-") || sFileName.toUpperCase().contains("IMERG")) {
 				return Platforms.IMERG;
 			}
+			else if (sFileName.toUpperCase().startsWith("EEHCM") || sFileName.toUpperCase().startsWith("EEHSW")) {
+				return Platforms.ECOSTRESS;
+			}
 			else if (sFileName.toLowerCase().contains("dataset") || sFileName.toLowerCase().contains("med") || sFileName.toLowerCase().contains("global-analysis-forecast") || sFileName.toUpperCase().contains("-GLO-")) {
 				return Platforms.CM;
 			}

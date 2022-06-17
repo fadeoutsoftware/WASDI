@@ -2,22 +2,22 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 mb-3">
-        <label for="appui">App UI</label> <label> - Add elements (take care of commas!):&nbsp;&nbsp;&nbsp;</label>
+        <label for="appui">{{"DIALOG_PROCESSOR_UI_APP"|translate}}</label> <label> {{"DIALOG_PROCESSOR_UI_ADD_ELEMENTS"|translate}}&nbsp;&nbsp;&nbsp;</label>
         </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex flex-column">
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">Tab</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('renderAsStrings')">Render As Strings</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('textbox')">Textbox</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('numeric')">Numeric field</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('dropdown')">Dropdown</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('bbox')">Select Area</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('slider')">Number Slider</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('date')">Date</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('boolean')">Bool</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('productscombo')">Product Combo Box</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('searcheoimage')">Search&nbsp;EO Image</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('listbox')">List Box</div>
-            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('hidden')">Hidden Field</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('tab')">{{"DIALOG_PROCESSOR_UI_TAB"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('renderAsStrings')">{{"DIALOG_PROCESSOR_UI_STRINGS"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('textbox')">{{"DIALOG_PROCESSOR_UI_TEXTBOX"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('numeric')">{{"DIALOG_PROCESSOR_UI_NUMERIC_FIELD"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('dropdown')">{{"DIALOG_PROCESSOR_UI_DROPDOWN"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('bbox')">{{"DIALOG_PROCESSOR_UI_SELECT_AREA"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('slider')">{{"DIALOG_PROCESSOR_UI_NUMBER_SLIDE"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('date')">{{"DIALOG_PROCESSOR_UI_DATE"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('boolean')">{{"DIALOG_PROCESSOR_UI_BOOL"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('productscombo')">{{"DIALOG_PROCESSOR_UI_PRODUCT_COMBO"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('searcheoimage')">{{"DIALOG_PROCESSOR_UI_SEARCH_EO_IMAGE"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('listbox')">{{"DIALOG_PROCESSOR_UI_LISTBOX"|translate}}</div>
+            <div class="addUIElementCommand" ng-click="m_oController.addUIElement('hidden')">{{"DIALOG_PROCESSOR_UI_HIDDEN_FIELD"|translate}}</div>
         </div>
         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
             <textarea insertable-text-area="" class="form-control h-100"  style="font-family:'Courier New',sans-serif;font-size: 16px;" rows="20" id="appui" ng-model="m_oController.m_sProcessorUI" ng-change="m_oController.m_bUIChanged = true"></textarea>

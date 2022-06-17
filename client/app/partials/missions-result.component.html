@@ -58,7 +58,7 @@
                 <div ng-show = "$ctrl.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
                     <div style="margin: auto; text-align: center" ng-show="$ctrl.m_oPageService.getNumberOfProductByProvider(provider.name)==0">
                         <span><h3>
-                            No results from {{provider.description}}
+                            {{"IMPORT_NO_MORE_RESULTS"|translate}} {{provider.description}}
                             </h3>
                         </span>
                         <img src="assets/img/Guybrush2.gif"
@@ -67,7 +67,7 @@
                     </div>
                     <div style="margin: auto; text-align: center" ng-show="$ctrl.m_oPageService.getNumberOfProductByProvider(provider.name)==-1">
                         <span><h3>
-                            Got Error from {{provider.description}}
+                            {{"IMPORT_ERROR"|translate}} {{provider.description}}
                             </h3>
                         </span>
                         <img src="assets/img/LemmingExplode.gif"

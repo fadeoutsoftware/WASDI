@@ -20,6 +20,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -55,10 +56,12 @@ import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
+
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
+
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -2111,6 +2114,8 @@ public class dbUtils {
                 // Configure also the local connection
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
+            
+            MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 
             boolean bExit = false;
 
@@ -2132,6 +2137,7 @@ public class dbUtils {
                 System.out.println("\t10 - Categories");
                 System.out.println("\t11 - ProcessWorkspace");
                 System.out.println("\t12 - Logs");
+                System.out.println("\t13 - EcoStress");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2162,6 +2168,8 @@ public class dbUtils {
                     processWorkpsaces();
                 } else if (sInputString.equals("12")) {
                     logs();
+                } else if (sInputString.equals("13")) {
+                    ecoStress();
                 } else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {
@@ -2181,5 +2189,13 @@ public class dbUtils {
         }
     }
 
+	private static void ecoStress() {
+
+		try {
+			S3BucketHelper.parseS3Bucket();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
