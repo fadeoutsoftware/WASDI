@@ -31,7 +31,9 @@ public class WasdiProductReaderFactory {
 			return new GpmZipProductReader(oFile);
 		}
 
-		if (oFile.getName().toLowerCase().startsWith("adaptor.mars.internal") || oFile.getName().toLowerCase().contains("era5")) { 
+		if (oFile.getName().toLowerCase().startsWith("adaptor.mars.internal")
+				|| oFile.getName().toLowerCase().contains("era5")
+				|| oFile.getName().toLowerCase().contains("cams")) { 
 			if (oFile.getName().toLowerCase().endsWith(".netcdf")) {
 				return new CdsNetcdfProductReader(oFile);
 			} else  if (oFile.getName().toLowerCase().endsWith(".grib")) {

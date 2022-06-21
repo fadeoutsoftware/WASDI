@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
 import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.queryexecutors.cloudferro.QueryExecutorCloudferro;
 import wasdi.shared.queryexecutors.cm.QueryExecutorCM;
@@ -50,6 +51,7 @@ public class QueryExecutorFactory {
 		aoMap.put("CREODIAS", QueryExecutorCREODIAS::new);
 		aoMap.put("LSA", QueryExecutorLSA::new);
 		aoMap.put("VIIRS", QueryExecutorVIIRS::new);
+		aoMap.put("ADS", QueryExecutorADS::new);
 		aoMap.put("CDS", QueryExecutorCDS::new);
 		aoMap.put("PROBAV", QueryExecutorPROBAV::new);
 		aoMap.put("PLANET", QueryExecutorPLANET::new);
