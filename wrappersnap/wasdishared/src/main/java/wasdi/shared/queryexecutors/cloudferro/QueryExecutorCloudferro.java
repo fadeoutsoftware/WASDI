@@ -46,7 +46,11 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
 		if (sProduct.toUpperCase().startsWith("EEHCM")
-				|| sProduct.toUpperCase().startsWith("EEHSW")) {
+				|| sProduct.toUpperCase().startsWith("EEHSEBS")
+				|| sProduct.toUpperCase().startsWith("EEHSTIC")
+				|| sProduct.toUpperCase().startsWith("EEHSW")
+				|| sProduct.toUpperCase().startsWith("EEHTES")
+				|| sProduct.toUpperCase().startsWith("EEHTSEB")) {
 			return sOriginalUrl;
 		}
 		return null;

@@ -566,7 +566,12 @@ public class WasdiFileUtils {
 			else if (sFileName.toUpperCase().startsWith("3B-") || sFileName.toUpperCase().contains("IMERG")) {
 				return Platforms.IMERG;
 			}
-			else if (sFileName.toUpperCase().startsWith("EEHCM") || sFileName.toUpperCase().startsWith("EEHSW")) {
+			else if (sFileName.toUpperCase().startsWith("EEHCM")
+					|| sFileName.toUpperCase().startsWith("EEHSEBS")
+					|| sFileName.toUpperCase().startsWith("EEHSTIC")
+					|| sFileName.toUpperCase().startsWith("EEHSW")
+					|| sFileName.toUpperCase().startsWith("EEHTES")
+					|| sFileName.toUpperCase().startsWith("EEHTSEB")) {
 				return Platforms.ECOSTRESS;
 			}
 			else if (sFileName.toLowerCase().contains("dataset") || sFileName.toLowerCase().contains("med") || sFileName.toLowerCase().contains("global-analysis-forecast") || sFileName.toUpperCase().contains("-GLO-")) {
