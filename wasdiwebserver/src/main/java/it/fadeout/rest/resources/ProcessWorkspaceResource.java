@@ -34,6 +34,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
@@ -141,25 +142,10 @@ public class ProcessWorkspaceResource {
 					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
 				}
 			}
-			
-			Instant oDateFrom = null;
-			if(!Utils.isNullOrEmpty(sDateFrom)) {
-				try {
-					oDateFrom = Instant.parse(sDateFrom);
-				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert start date " + sDateFrom + " to a valid date, ignoring it");
-				}
-			}
-			
-			Instant oDateTo = null;
-			if(!Utils.isNullOrEmpty(sDateTo)){
-				try {
-					oDateTo = Instant.parse(sDateTo);
-				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert end date " + sDateFrom + " to a valid date, ignoring it");
-				}
-			}
-			
+
+			Instant oDateFrom = TimeEpochUtils.fromDateStringToInstant(sDateFrom);
+			Instant oDateTo = TimeEpochUtils.fromDateStringToInstant(sDateTo);
+
 			if (iStartIndex != null && iEndIndex != null) {
 				aoProcess = oRepository.getProcessByWorkspace(sWorkspaceId, eStatus, eLauncherOperation, sNamePattern, oDateFrom, oDateTo, iStartIndex, iEndIndex);
 			}

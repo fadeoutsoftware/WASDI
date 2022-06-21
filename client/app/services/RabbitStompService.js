@@ -3,8 +3,8 @@
  */
 
 angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service('RabbitStompService',
-    ['$http', 'ConstantsService', '$interval', 'ProcessWorkspaceService', '$q', '$rootScope',
-        function ($http, oConstantsService, $interval, oProcessWorkspaceService, $q, $rootScope, $scope) {
+    ['$http', 'ConstantsService', '$interval', 'ProcessWorkspaceService', '$q', '$rootScope', '$translate',
+        function ($http, oConstantsService, $interval, oProcessWorkspaceService, $q, $rootScope, $scope, oTranslate) {
 
             // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
             this.m_oInterval = $interval;
@@ -13,6 +13,9 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
             // Scope
             this.m_oScope = $scope;
             this.m_oRootScope = $rootScope;
+
+            // Translate
+            this.m_oTranslate = oTranslate;
 
             this.m_oWebSocket = null;
             this.m_oReconnectTimerPromise = null;

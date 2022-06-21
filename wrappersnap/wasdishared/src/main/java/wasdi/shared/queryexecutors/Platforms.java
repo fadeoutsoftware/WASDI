@@ -33,4 +33,6 @@ public class Platforms {
 
 	public static String CM = "CM";
 
+	public static String ECOSTRESS = "ECOSTRESS";
+
 }

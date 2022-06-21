@@ -16,7 +16,7 @@
                          ngf-pattern="'*/*'">
 
                         <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
-                        <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+                        <div ngf-no-file-drop>{{'DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED'|translate}}</div>
 
                     </div>
                 </div>
@@ -43,7 +43,7 @@
         <div class="col-v4 container">
             <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi"
             ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false">
-                Upload file
+            {{'DIALOG_IMPORT_UPLOAD_UPLOAD'|translate}}
             </button>
         </div>
 
