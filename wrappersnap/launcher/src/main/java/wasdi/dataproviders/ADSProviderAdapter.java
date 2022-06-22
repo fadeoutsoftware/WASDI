@@ -81,7 +81,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 			String sAdsGetStatusRequestId;
 			String sAdsGetStatusRequestState = "undefined";
 
-			for (int i = 0; i < 120; i++) {
+			for (int i = 0; i < 1440; i++) {
 				Utils.debugLog("ADSProviderAdapter.performAdsGetStatusRequest: attemp #" + i);
 				sAdsGetStatusRequestResult = performAdsGetStatusRequest(sDownloadUser, sDownloadPassword, sAdsSearchRequestId, iMaxRetry);
 

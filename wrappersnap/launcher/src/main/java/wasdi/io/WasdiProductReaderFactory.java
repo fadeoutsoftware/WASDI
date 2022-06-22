@@ -36,8 +36,10 @@ public class WasdiProductReaderFactory {
 				|| oFile.getName().toLowerCase().contains("cams")) { 
 			if (oFile.getName().toLowerCase().endsWith(".netcdf")) {
 				return new CdsNetcdfProductReader(oFile);
-			} else  if (oFile.getName().toLowerCase().endsWith(".grib")) {
+			} else if (oFile.getName().toLowerCase().endsWith(".grib")) {
 				return new CdsGribProductReader(oFile);
+			} else if (oFile.getName().toLowerCase().endsWith(".netcdf_zip")) {
+				return new AdsNetcdfZipProductReader(oFile);
 			}
 		}
 		
