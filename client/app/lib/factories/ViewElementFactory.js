@@ -37,12 +37,13 @@ function ViewElementFactory() {
             if (oControl.default) {
                 oViewElement.m_sText = parseFloat(oControl.default);
             }
-
-            if (oControl.min) {
+            // check if the field can be parsed as number
+            // this will solve the ignored constraints when the value is set to 0
+            if (!isNaN(parseFloat(oControl.min))) {
                 oViewElement.m_fMin = oControl.min;
             }
-
-            if (oControl.max) {
+            // same for the max
+            if (!isNaN(parseFloat(oControl.max))) {
                 oViewElement.m_fMax = oControl.max;
             }
         }
