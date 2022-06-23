@@ -2,7 +2,7 @@
 
     <!-- APPLICATION LOGO-->
     <div class="row">
-        Application Logo:
+        {{"DIALOG_PROCESSOR_MEDIA_LOGO"|translate}}
     </div>
     <div class="row">
         <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
@@ -15,9 +15,9 @@
                      ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                      accept="application/image"
                      ngf-pattern="'.png,.jpg,.svg'">
-                    Drag and Drop here the Application Logo
+                     {{"DIALOG_PROCESSOR_MEDIA_LOGO_DROP"|translate}}
 
-                    <div ng-show="m_oController.m_oProcessorLogo">File: {{m_oController.m_oProcessorLogo[0].name}}</div>
+                    <div ng-show="m_oController.m_oProcessorLogo">{{"DIALOG_PROCESSOR_MEDIA_FILE"|translate}} {{m_oController.m_oProcessorLogo[0].name}}</div>
                 </div>
 
                 <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
@@ -25,7 +25,7 @@
         </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             <button type="button" ng-click="m_oController.updateLogo()" class="my-button" data-dismiss="modal">
-                Update Logo
+                {{"DIALOG_PROCESSOR_MEDIA_UPDATE_LOGO"|translate}}
             </button>
         </div>
     </div>
@@ -34,7 +34,7 @@
     <div class="row" ng-show="m_oController.m_oProcessorDetails.images.length<m_oController.m_oProcessorDetails.maxImages">
         <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
             <div>
-                Add an Image to the App Gallery (Available: {{m_oController.m_oProcessorDetails.maxImages-m_oController.m_oProcessorDetails.images.length}})
+                {{"DIALOG_PROCESSOR_MEDIA_GALLERY"|translate}} {{m_oController.m_oProcessorDetails.maxImages-m_oController.m_oProcessorDetails.images.length}}
             </div>
         </div>
         <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
@@ -43,9 +43,9 @@
                      ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                      accept="application/image"
                      ngf-pattern="'.png,.jpg,.svg'">
-                    Drag and Drop here a new Application Image
+                     {{"DIALOG_PROCESSOR_MEDIA_GALLERY_DROP"|translate}}
 
-                    <div ng-show="m_oController.m_oImageToUpload">File: {{m_oController.m_oImageToUpload[0].name}}</div>
+                    <div ng-show="m_oController.m_oImageToUpload">{{"DIALOG_PROCESSOR_MEDIA_FILE"|translate}} {{m_oController.m_oImageToUpload[0].name}}</div>
                 </div>
 
                 <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
@@ -53,7 +53,7 @@
         </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             <button type="button" ng-click="m_oController.addApplicationImage()" class="my-button">
-                Add App Image
+                {{"DIALOG_PROCESSOR_MEDIA_GALLERY_ADD"|translate}}
             </button>
         </div>
     </div>
@@ -66,7 +66,7 @@
         </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
             <button type="button" ng-click="m_oController.removeProcessorImage(sImage)" class="my-button">
-                Remove Image
+                {{"DIALOG_PROCESSOR_MEDIA_GALLERY_REMOVE"|translate}}
             </button>
         </div>
     </div>

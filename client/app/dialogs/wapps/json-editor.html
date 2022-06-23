@@ -2,9 +2,9 @@
 
     <div class="row-v4">
         <div class="col-v4-auto">
-            <label class="m-0">{{m_oController.getProcessorNameAsTitle()}} Parameters (JSON)</label>
+            <label class="m-0">{{m_oController.getProcessorNameAsTitle()}} {{"DIALOG_WAPPS_JSON_PARAMS"|translate}}</label>
         </div>
-        <div class="col-v4-auto ml-auto mr-2">JSON Editor</div>
+        <div class="col-v4-auto ml-auto mr-2">{{"DIALOG_WAPPS_JSON_EDITOR"|translate}}</div>
         <div class="col-v4-auto">
             <div class="btn-switch-square" ng-class="{'btn-switch--on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
                  ng-click="m_oController.m_bIsJsonEditModeActive = !m_oController.m_bIsJsonEditModeActive">
@@ -30,10 +30,10 @@
     <div class="row-v4">
         <div class="col-v4 text-right">
             <button type="button" ng-click="m_oController.runProcessor()" class="my-button">
-                <i class="fa fa-play mr-3" aria-hidden="true"></i>Run
+                <i class="fa fa-play mr-3" aria-hidden="true"></i>{{"DIALOG_WAPPS_JSON_RUN"|translate}}
             </button>
             <button type="button" ng-click="m_oController.getHelpFromProcessor()" class="my-button">
-                <i class="fa fa-question-circle mr-3" aria-hidden="true"></i>Help
+                <i class="fa fa-question-circle mr-3" aria-hidden="true"></i>{{"DIALOG_WAPPS_JSON_HELP"|translate}}
 
             </button>
         </div>

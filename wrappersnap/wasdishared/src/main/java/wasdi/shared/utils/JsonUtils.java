@@ -63,7 +63,7 @@ public final class JsonUtils {
 
 			return aoJSONMap;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToMapOfStringss: could not parse the JSON payload due to " + oE + ".");
+			Utils.debugLog("JsonUtils.jsonToMapOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;
@@ -77,7 +77,21 @@ public final class JsonUtils {
 
 			return aoJSONList;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToListOfStringss: could not parse the JSON payload due to " + oE + ".");
+			Utils.debugLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
+		}
+
+		return null;
+	}
+
+	public static List<Map<String, Object>> jsonToListOfMapOfObjects(String sJson) {
+
+		List<Map<String, Object>> aoJSONList;
+		try {
+			aoJSONList = s_oMapper.readValue(sJson, new TypeReference<List<Map<String, Object>>>(){});
+
+			return aoJSONList;
+		} catch (JsonProcessingException oE) {
+			Utils.debugLog("JsonUtils.jsonToListOfMapOfObjects: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;

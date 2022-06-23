@@ -5,7 +5,7 @@
         <div class="container mt-4">
             <div class="row">
                 <div class="border-bottom py-3 mb-5 d-print-flex justify-content-between">
-                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>Back to the Future</span>
+                    <span class="back-link" onclick="goBack()"><span class="fa fa-chevron-left mr-2"></span>{{ "WAP_BACK" | translate }}</span>
                 </div>
             </div>
 
@@ -41,17 +41,17 @@
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>2.25&&m_oController.m_oApplication.score<2.75?'checked-half':m_oController.m_oApplication.score>=2.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>3.25&&m_oController.m_oApplication.score<3.75?'checked-half':m_oController.m_oApplication.score>=3.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oApplication.score>4.25&&m_oController.m_oApplication.score<4.75?'checked-half':m_oController.m_oApplication.score>=4.75?'checked':''"></span>
-                        <span class="ml-2 small">{{m_oController.m_oApplication.reviewsCount}} reviews</span>
+                        <span class="ml-2 small">{{m_oController.m_oApplication.reviewsCount}} {{"WAP_REVIEWS"|translate}}</span>
                     </div>
                     <!--PUBLISHER-->
                     <div class="publisher mb-1">
-                        <span  ng-if="!m_oController.m_oApplication.isMine">Published by <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
+                        <span  ng-if="!m_oController.m_oApplication.isMine">{{"WAP_PUBLISHED"|translate}} <span class="pub-name">{{m_oController.m_oApplication.publisher}}</span></span>
                         <span class="d-flex align-items-center" ng-if="m_oController.m_oApplication.isMine">
                             <span class="fa fa-flask mr-1"></span>
-                            You are the master!&nbsp;
+                            {{"MARKET_OWNER"|translate}}&nbsp;
                             <div class="edit-btn ml-3" ng-click="m_oController.editClick()">
                                 <span class="fa fa-edit mr-1"></span>
-                                Edit
+                                {{"WAP_EDIT"|translate}}
                             </div>
                         </span>
                     </div>
@@ -61,7 +61,7 @@
                         <div class="d-flex align-items-center">
                             <div>
                                 <span class="fa fa-tags mr-2"></span>
-                                <span>CATEGORIES</span>
+                                <span>{{"WAP_CATEGORIES"|translate}}</span>
                             </div>
                             <hr class="ml-3 flex-grow-1">
                         </div>
@@ -86,7 +86,7 @@
                                     <span>{{m_oController.m_oApplication.ondemandPrice}}</span><span> €</span>
                                 </div>
                                 <div class="text-center small">
-                                    RUN ONCE
+                                    {{"WAP_RUN_ONCE"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                                     <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
                                 </div>
                                 <div class="text-center small">
-                                    SUBSCRIBE
+                                    {{"WAP_SUBSCRIBE"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                                     <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
                                 </div>
                                 <div class="text-center small">
-                                    SUBSCRIBED!
+                                    {{"WAP_SUBSCRIBED"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -121,7 +121,7 @@
                                     <span>{{m_oController.m_oApplication.ondemandPrice}}</span><span> €</span>
                                 </div>
                                 <div class="text-center small">
-                                    RUN PRICE
+                                    {{"WAP_RUN_PRICE"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -129,10 +129,10 @@
                         <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.isMine==true && (m_oController.m_oApplication.ondemandPrice > 0 || m_oController.m_oApplication.subscriptionPrice > 0)">
                             <div class="big-price-tag subscription premium">
                                 <div class="text-center">
-                                    <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> €/month</span>
+                                    <span>{{m_oController.m_oApplication.subscriptionPrice}}</span><span> {{"WAP_PRICE_PER_MONTH"|translate}}</span>
                                 </div>
                                 <div class="text-center small">
-                                    SUBSCRIBE PRICE
+                                    {{"WAP_SUBSCRIBE_PRICE"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -141,7 +141,7 @@
                         <div class="col-12 col-md-6" ng-if="m_oController.m_oApplication.ondemandPrice == 0 && m_oController.m_oApplication.subscriptionPrice == 0">
                             <div class="big-price-tag free" >
                                 <div class="text-center large">
-                                    FREE
+                                    {{"WAP_FREE"|translate}}
                                 </div>
                             </div>
                         </div>
@@ -154,7 +154,7 @@
                                 <div class="d-flex align-items-center">
                                     <div>
                                         <span class="fa fa-briefcase mr-2"></span>
-                                        <span>DESCRIPTION</span>
+                                        <span>{{"WAP_DESCRIPTION"|translate}}</span>
                                     </div>
                                     <hr class="ml-3 flex-grow-1">
                                 </div>
@@ -167,7 +167,7 @@
 
                     <!--LAUNCH APP-->
                     <div class="launch-btn" ng-click="m_oController.openApplicationPage()">
-                        <span>Open Application</span>
+                        <span>{{"WAP_OPEN_APPLICATION"|translate}}</span>
                         <div class="arrow">
                             <span></span>
                             <span></span>
@@ -186,23 +186,23 @@
             <div class="d-flex align-items-center">
                 <div>
                     <span class="fa fa-rocket mr-2"></span>
-                    <span>APPLICATION DETAILS</span>
+                    <span>{{"WAP_APPLICATION_DETAILS"|translate}}</span>
                 </div>
                 <hr class="ml-3 flex-grow-1">
             </div>
             <div class="row">
                 <div class="col-12 col-md-6 border-right">
-                    <div>Publisher: <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
-                    <div>Contact: <span class="text-green-wasdi"><a ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span></div>
-                    <div>WebSite: <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
+                    <div>{{"WAP_PUBLISHER"|translate}} <span class="text-green-wasdi">{{m_oController.m_oApplication.publisher}}</span></div>
+                    <div>{{"WAP_CONTACT"|translate}} <span class="text-green-wasdi"><a ng-href="mailto:{{m_oController.m_oApplication.email}}">{{m_oController.m_oApplication.email}}</a></span></div>
+                    <div>{{"WAP_WEB"|translate}} <span class="text-green-wasdi"><a ng-href="{{m_oController.m_oApplication.link}}" target="_blank">{{m_oController.m_oApplication.link}}</a></span></div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <div>Publication Date: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.publishDate)}}</span></div>
-                    <div>Last Update: <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
+                    <div>{{"WAP_PUBBLICATION_DATE"|translate}} <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.publishDate)}}</span></div>
+                    <div>{{"WAP_LAST_UPDATE"|translate}} <span class="text-green-wasdi">{{m_oController.formatDate(m_oController.m_oApplication.updateDate)}}</span></div>
                     <!--div>Purchased: <span class="text-green-wasdi">{{m_oController.m_oApplication.purchased}}</span></div-->
-                    <div>Executions: <span class="text-green-wasdi">{{m_oController.m_oStats.runs}}</span></div>
-                    <div>Success rate: <span class="text-green-wasdi">{{m_oController.getStatSuccess()}}</span>%</div>
-                    <div>Medium Time [min]: <span class="text-green-wasdi">{{m_oController.m_oStats.mediumTime}}</span></div>
+                    <div>{{"WAP_EXECUTIONS"|translate}} <span class="text-green-wasdi">{{m_oController.m_oStats.runs}}</span></div>
+                    <div>{{"WAP_SUCCESS_RATE"|translate}} <span class="text-green-wasdi">{{m_oController.getStatSuccess()}}</span>%</div>
+                    <div>{{"WAP_MEDIUM_TIME"|translate}} <span class="text-green-wasdi">{{m_oController.m_oStats.mediumTime}}</span></div>
                 </div>
 
             </div>
@@ -215,7 +215,7 @@
             <div class="d-flex align-items-center">
                 <div>
                     <span class="fa fa-comments mr-2"></span>
-                    <span>REVIEWS</span>
+                    <span>{{"WAP_REVIEWS2"|translate}}</span>
                 </div>
                 <hr class="ml-3 flex-grow-1">
             </div>
@@ -228,11 +228,11 @@
                         <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>2.25&&m_oController.m_oReviewsWrapper.avgVote<2.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=2.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>3.25&&m_oController.m_oReviewsWrapper.avgVote<3.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=3.75?'checked':''"></span>
                         <span class="fa fa-star" ng-class="m_oController.m_oReviewsWrapper.avgVote>4.25&&m_oController.m_oReviewsWrapper.avgVote<4.75?'checked-half':m_oController.m_oReviewsWrapper.avgVote>=4.75?'checked':''"></span>
-                        <span class="ml-2" ng-show="m_oController.m_oReviewsWrapper.avgVote>=0">{{m_oController.m_oReviewsWrapper.avgVote}} on 5</span>
+                        <span class="ml-2" ng-show="m_oController.m_oReviewsWrapper.avgVote>=0">{{m_oController.m_oReviewsWrapper.avgVote}} {{"WAP_STARS_TOT"|translate}}</span>
                         <span class="" ng-show="m_oController.m_oReviewsWrapper.avgVote<0 && ! (m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId())"><br/>Be the first to rate this app</span>
                     </div>
                     <!--TOTAL REVIEWS-->
-                    <div><span class="">{{m_oController.m_oApplication.reviewsCount}} total reviews</span></div>
+                    <div><span class="">{{m_oController.m_oApplication.reviewsCount}} {{"WAP_TOTAL_REVIEWS"|translate}}</span></div>
                     <hr>
                     <!--5 STAR PERCENTAGE -->
                     <div class="mb-2">
@@ -281,13 +281,13 @@
                     </div>
                     <hr>
                     <div class="green-big-btn" type="button" data-toggle="modal" ng-show="!m_oController.m_oReviewsWrapper.alreadyVoted && ! (m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId())" data-target="#writeReviewsModal">
-                        WRITE A REVIEW
+                        {{"WAP_WRITE_REVIEW"|translate}}
                     </div>
                     <div class="blue-big-btn" type="button" ng-show="m_oController.m_oReviewsWrapper.alreadyVoted">
-                        ALREADY REVIEWED
+                        {{"WAP_ALREADY_REVIEW"|translate}}
                     </div>
                     <div class="blue-big-btn" type="button" ng-show="m_oController.m_oApplication.publisher == m_oController.m_oConstantsService.getUserId()">
-                        NOT FAIR TO AUTO REVIEW
+                        {{"WAP_AUTO_REVIEW"|translate}}
                     </div>
 
 
@@ -308,8 +308,8 @@
                                     <span class="reviews-name">{{review.userId}}</span>
                                 </div>
                                 <div class="d-flex justify-content-end">
-                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" data-toggle="modal" ng-show="true" data-target="#writeReviewsModal" ng-click="m_oController.setSelectedReview(review)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
-                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" data-toggle="modal" ng-show="true" data-target="#writeReviewsModal" ng-click="m_oController.setSelectedReview(review)">&nbsp;<span class="fa fa-edit mr-2"> </span>{{"WAP_UPDATE"|translate}}</div>
+                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineReview(review)" ng-click="m_oController.deleteReview(review.id)">&nbsp;<span class="fa fa-trash mr-2"> </span>{{"WAP_DELETE"|translate}}</div>
                                 </div>
                             </div>
                             <!--RATE-->
@@ -333,20 +333,20 @@
                             <div class="d-flex justify-content-end">
                                 <div>
                                     <div class="d-flex align-items-center"></div>
-                                    <div class="delete-btn ml-3" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedReviewId(review.id)">&nbsp;<span class="fa fa-comment mr-2"> </span>ADD A COMMENT</div>
+                                    <div class="delete-btn ml-3" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedReviewId(review.id)">&nbsp;<span class="fa fa-comment mr-2"> </span>{{"WAP_ADD_COMMENT"|translate}}</div>
                                 </div>
                                 
                                 <div ng-click="m_oController.refreshComments(review.id)">
                                     <div ng-model="collapsed" ng-click="collapsed=!collapsed" ng-show="!collapsed">
                                         <div class="d-flex align-items-center"></div>
-                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>SHOW COMMENTS</div>
+                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>{{"WAP_SHOW_COMMENTS"|translate}}</div>
                                     </div>
                                 </div>
                                 
                                 <div>
                                     <div ng-model="collapsed" ng-click="collapsed=!collapsed" ng-show="collapsed">
                                         <div class="d-flex align-items-center"></div>
-                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>HIDE COMMENTS</div>
+                                        <div class="delete-btn ml-3" >&nbsp;<span class="fa fa-comments-o mr-2"> </span>{{"WAP_HIDE_COMMENTS"|translate}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -364,8 +364,8 @@
                                                     <span class="reviews-name">{{comment.userId}}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-end">
-                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-edit mr-2"> </span>UPDATE</div>
-                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>DELETE</div>
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" data-toggle="modal" ng-show="true" data-target="#writeCommentModal" ng-click="m_oController.setSelectedComment(comment)">&nbsp;<span class="fa fa-edit mr-2"> </span>{{"WAP_UPDATE"|translate}}</div>
+                                                    <div class="delete-btn ml-3" ng-show="m_oController.isMineComment(comment)" ng-click="m_oController.deleteComment(comment)">&nbsp;<span class="fa fa-trash mr-2"> </span>{{"WAP_DELETE"|translate}}</div>
                                                 </div>
                                             </div>
             
@@ -381,7 +381,7 @@
                                     <div ng-show="!m_oController.m_oCommentsWrapper[review.id].length && !oController.m_bShowLoadComments">
                                         <div class="reviews-list border shadow-sm p-3 mb-4" >
                                             <div class="d-flex align-items-center justify-content-between">
-                                                THERE ARE NO COMMENTS
+                                                {{"WAP_NO_COMMENTS"|translate}}
                                             </div>
                                         </div>
                                     </div>
@@ -391,10 +391,10 @@
                         </div>
                     </div>
                     <div class="reviews-load-more text-center" ng-click="m_oController.loadMoreReviews()" ng-show="m_oController.m_bShowLoadMoreReviews">
-                        LOAD MORE REVIEWS...
+                        {{"WAP_LOAD_MORE_REVIEWS"|translate}}
                     </div>
                     <div class="reviews-load-more text-center" ng-show="!m_oController.m_bShowLoadMoreReviews">
-                        NO MORE REVIEWS
+                        {{"WAP_LOAD_NO_REVIEWS"|translate}}
                     </div>
 
                 </div>
@@ -412,7 +412,7 @@
                             </div>
                             <div class="modal-body">
                                 <div>
-                                    <p>Select your rating*</p>
+                                    <p>{{"WAP_SELECT_RATINGS"|translate}}</p>
                                     <div class="star-rating mb-2">
                                         <span class="fa fa-star" ng-mouseover="previewRating=1" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=1" ng-class="previewRating>=1?'checked':m_oController.m_oUserReview.vote>=1?'checked':''"></span>
                                         <span class="fa fa-star" ng-mouseover="previewRating=2" ng-mouseleave="previewRating=0" ng-click="m_oController.m_oUserReview.vote=2" ng-class="previewRating>=2?'checked':m_oController.m_oUserReview.vote>=2?'checked':''"></span>
@@ -424,14 +424,14 @@
                                 <!--REVIEW FORM-->
                                 <form class="py-4">
                                     <div class="form-group">
-                                        <label for="title">Write a title for your review*</label>
+                                        <label for="title">{{"WAP_REVIEW_TITLE"|translate}}</label>
                                         <input type="text" class="form-control" id="title" aria-describedby="title" placeholder="Title" ng-model="m_oController.m_oUserReview.title">
-                                        <small id="titleHelp" class="form-text text-muted">Summary about your experience whit this app.</small>
+                                        <small id="titleHelp" class="form-text text-muted">{{"WAP_REVIEW_TITLE_HELP"|translate}}</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="comment">Write a comment*</label>
-                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..." ng-model="m_oController.m_oUserReview.comment"></textarea>
-                                        <small id="coomentHelp" class="form-text text-muted">Give more information about your feedback</small>
+                                        <label for="comment">{{"WAP_REVIEW_COMMENT"|translate}}</label>
+                                        <textarea type="text" class="form-control" id="comment" placeholder="{{'WAP_REVIEW_COMMENT_PLACEHOLDER'|translate}}" ng-model="m_oController.m_oUserReview.comment"></textarea>
+                                        <small id="coomentHelp" class="form-text text-muted">{{"WAP_REVIEW_COMMENT_HELP"|translate}}</small>
                                     </div>
                                     <!--div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="exampleCheck1">
@@ -443,8 +443,8 @@
                             </div>
                             <div class="modal-footer rounded-0">
                                 <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal"> <span class="fa fa-trash mr-2" ng-click="m_oController.setSelectedReview(null)"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedReview"  data-dismiss="modal" ng-class="(m_oController.m_oUserReview.title.length > 0 && m_oController.m_oUserReview.comment.length > 0 && m_oController.m_oUserReview.vote > 0) ? '' : 'disabled'" ng-click="m_oController.updateReview()"><span class="fa fa-save mr-2"></span>Update My Review</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedReview" data-dismiss="modal" ng-class="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1?'':'disabled'" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>Add My Review</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedReview"  data-dismiss="modal" ng-class="(m_oController.m_oUserReview.title.length > 0 && m_oController.m_oUserReview.comment.length > 0 && m_oController.m_oUserReview.vote > 0) ? '' : 'disabled'" ng-click="m_oController.updateReview()"><span class="fa fa-save mr-2"></span>{{"WAP_UPDATE_REVIEW"|translate}}</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedReview" data-dismiss="modal" ng-class="m_oController.m_oUserReview.title.length>0&&m_oController.m_oUserReview.comment.length>0&&m_oController.m_oUserReview.vote>-1?'':'disabled'" ng-click="m_oController.addNewReview()"><span class="fa fa-save mr-2"></span>{{"WAP_ADD_REVIEW"|translate}}</button>
                             </div>
                         </div>
                     </div>
@@ -464,16 +464,16 @@
                                 <!--REVIEW FORM-->
                                 <form class="py-4">
                                     <div class="form-group">
-                                        <label for="comment">Write a comment*</label>
-                                        <textarea type="text" class="form-control" id="comment" placeholder="A long time ago, in a galaxy far far away..." ng-model="m_oController.m_oReviewComment.text"></textarea>
-                                        <small id="coomentHelp" class="form-text text-muted">Leave a comment about the review</small>
+                                        <label for="comment">{{"WAP_WRITE_COMMENT"|translate}}</label>
+                                        <textarea type="text" class="form-control" id="comment" placeholder="{{'WAP_REVIEW_COMMENT_PLACEHOLDER'|translate}}" ng-model="m_oController.m_oReviewComment.text"></textarea>
+                                        <small id="coomentHelp" class="form-text text-muted">{{"WAP_WRITE_COMMENT_HELP"|translate}}</small>
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer rounded-0">
                                 <button type="button" class="blue-big-btn d-inline-block border-0" data-dismiss="modal" ng-click="m_oController.setSelectedComment(null)"> <span class="fa fa-trash mr-2"></span>Cancel</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedComment"  data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.updateComment()"><span class="fa fa-save mr-2"></span>Update My Comment</button>
-                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedComment" data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.addNewComment()"><span class="fa fa-save mr-2"></span>Add My Comment</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="m_oController.m_oSelectedComment"  data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.updateComment()"><span class="fa fa-save mr-2"></span>{{"WAP_COMMENT_UPDATE"|translate}}</button>
+                                <button type="button" class="green-big-btn d-inline-block border-0" ng-show="!m_oController.m_oSelectedComment" data-dismiss="modal" ng-class="m_oController.m_oReviewComment.text.length> 0 ? '' : 'disabled'" ng-click="m_oController.addNewComment()"><span class="fa fa-save mr-2"></span>{{"WAP_COMMENT_ADD"|translate}}</button>
                             </div>
                         </div>
                     </div>

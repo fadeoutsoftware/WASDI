@@ -5,7 +5,7 @@
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title ">
-                    <i class="fa fa-comment" aria-hidden="true"></i>&nbsp;Send feedback to WASDI as: {{m_oController.m_oUser.name}} - {{m_oController.m_oUser.userId}}
+                    <i class="fa fa-comment" aria-hidden="true"></i>&nbsp;{{"DIALOG_FEEDBACK_SEND"|translate}} {{m_oController.m_oUser.name}} - {{m_oController.m_oUser.userId}}
                 </h4>
             </div>
 
@@ -17,27 +17,27 @@
                             <img src="assets/icons/globeIcons/UFO2.gif" width="100px">
                         </div>
                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                            <label>Would you like to try our <strong>live support</strong>?</label><br/>
-                            <a href="https://discord.gg/JYuNhPaZbE" target="_blank">Houston, we have a problem!</a>
+                            <label>{{"DIALOG_FEEDBACK_TRY"|translate}} <strong>{{"DIALOG_FEEDBACK_LIVE_SUPPORT"|translate}}</strong>?</label><br/>
+                            <a href="https://discord.gg/JYuNhPaZbE" target="_blank">{{"DIALOG_FEEDBACK_LIVE_HUSTON"|translate}}</a>
                         </div>
                     </div>           
                     <div class="row">
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         </div>                        
                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                            <label>Do you prefer to <strong>write us</strong>?</label>
+                            <label>{{"DIALOG_FEEDBACK_LIVE_PREFER"|translate}} <strong>{{"DIALOG_FEEDBACK_LIVE_WRITE"|translate}}?</strong></label>
                         </div>
                     </div>                             
                     <div class="row">    
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 
                             <div class="form-v4-group">
-                                <label for="title">Title</label>
+                                <label for="title">{{"DIALOG_FEEDBACK_LIVE_TITLE"|translate}}</label>
                                 <input type="text" id="title" class="form-v4-control-plaintext wasdi-input" required="required"
                                     ng-model="m_oController.m_oFeedback.title">
                             </div>  
                             <div class="form-v4-group">
-                                <label for="message">Message:</label>
+                                <label for="message">{{"DIALOG_FEEDBACK_LIVE_MESSAGE"|translate}}</label>
                                 <textarea class="form-control wasdi-input not-resizable" rows="5" id="message" maxlength="150"
                                     ng-model="m_oController.m_oFeedback.message"></textarea>
                             </div>

@@ -5,7 +5,7 @@
         <div class="col-v4-auto ml-auto">
             <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"
                     ng-class="{'disabled': m_oController.m_isDisabledSearchButton}" ng-disabled="m_oController.m_isDisabledSearchButton">
-                <i class="fa fa-search" aria-hidden="true"></i>Search
+                <i class="fa fa-search" aria-hidden="true"></i>{{"PLAN_SEARCH"|translate}}
             </button>
         </div>
     </div>
@@ -33,7 +33,7 @@
                         <div class="row-v4">
                             <div class="col-v4 filter-datetime-picker-wrapper">
                                 <!------------------------- TIME PICKER START -------------------->
-                                <label>FROM:</label>
+                                <label>{{"PLAN_FROM"|translate}}</label>
                                 <div class=" time-picker-container ">
                                     <div class="input-group"
                                          moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
@@ -41,7 +41,7 @@
                                          today="true">
 
                                         <input class="form-control"
-                                               placeholder="Select acquisition start time"
+                                               placeholder='{{"PLAN_FROM_TOOLTIP"|translate}}'
                                                ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
                                                ng-model-options="{ updateOn: 'blur' }">
 
@@ -53,7 +53,7 @@
                             </div>
                             <div class="col-v4 filter-datetime-picker-wrapper">
                                 <!---------------------- TIME PICKER END -------------------->
-                                <label>TO:</label>
+                                <label>{{"PLAN_TO"|translate}}</label>
                                 <div class=" time-picker-container">
                                     <div class="input-group"
                                          moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
@@ -61,7 +61,7 @@
                                          today="true">
 
                                         <input class="form-control"
-                                               placeholder="Select acquisition end time"
+                                               placeholder='{{"PLAN_TO_TOOLTIP"|translate}}'
                                                ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
                                                ng-model-options="{ updateOn: 'blur' }">
 
@@ -79,19 +79,19 @@
                                 <div class="btn-group" role="group" aria-label="...">
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)">
-                                        open selected nodes
+                                            {{"PLAN_OPEN_SELECTED_NODES"|translate}}
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
-                                        close nodes
+                                            {{"PLAN_CLOSE_NODES"|translate}}
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.openAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
-                                        open nodes
+                                            {{"PLAN_OPEN_NODES"|translate}}
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.uncheckAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
-                                        deselect nodes
+                                            {{"PLAN_DESELECT_NODES"|translate}}
                                     </button>
                                 </div>
                             </div>
@@ -107,7 +107,7 @@
                         <div class="row-v4">
                             <div class="col-v4">
                                     <div class="mt-3">
-                                        selected nodes: <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)}}</span>
+                                        {{"PLAN_SELECTED_NODES"|translate}} <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)}}</span>
                                     </div>
                             </div>
                         </div>
@@ -120,15 +120,15 @@
                                 <div class="btn-group" role="group" aria-label="...">
                                     <button type="button" class="btn btn-primary btn-wasdi"
                                             ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDiv)">
-                                        open selected nodes
+                                            {{"PLAN_OPEN_SELECTED_NODES"|translate}}
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi"
                                             ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDiv)">
-                                        close nodes
+                                            {{"PLAN_CLOSE_NODES"|translate}}
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi"
                                             ng-click="m_oController.m_oTreeService.openAllNodes(m_oController.m_sIdDiv)">
-                                        open nodes
+                                            {{"PLAN_OPEN_NODES"|translate}}
                                     </button>
 
 
@@ -146,7 +146,7 @@
                         <div class="row-v4 p-4">
                             <div class="col-v4-lg-12 col-v4-md-12 col-v4-sm-12 col-v4-xs-12">
                                 <div>
-                                    selected nodes: <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDiv)}}</span>
+                                    {{"PLAN_SELECTED_NODES"|translate}} <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDiv)}}</span>
                                 </div>
                             </div>
                         </div>

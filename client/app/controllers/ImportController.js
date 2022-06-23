@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessWorkspaceService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
+                              oProcessWorkspaceService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice, oTranslate ) {
         // Service references
         this.m_oScope = $scope;
         this.m_oConstantsService = oConstantsService;
@@ -28,6 +28,7 @@ var ImportController = (function() {
         this.m_oModalService = oModalService;
         this.m_oOpenSearchService = oOpenSearchService;
         this.m_oPageService = oPageservice;
+        this.m_oTranslate = oTranslate;
 
         // Self link for the scope
         this.m_oScope.m_oController = this;
@@ -315,11 +316,6 @@ var ImportController = (function() {
                             scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
                         });
 
-                        //container.animate({scrollTop: 485}, 2000);
-                        //container.scrollTop(
-                        //    scrollTo.offset().top - container.offset().top + container.scrollTop()
-                        //);
-
                     }
                 }
 
@@ -416,8 +412,6 @@ var ImportController = (function() {
 
     ImportController.prototype.updateFilter = function(parentIndex){
 
-        //console.log("parentIndex",parentIndex);
-        // var selected = false;
         for(var i=0; i<this.m_aoMissions[parentIndex].filters.length; i++) {
             if(this.m_aoMissions[parentIndex].filters[i].indexvalue &&
                 this.m_aoMissions[parentIndex].filters[i].indexvalue.trim() != '') {
@@ -427,10 +421,8 @@ var ImportController = (function() {
                 break;
             }
         }
-        // this.m_aoMissions[parentIndex].selected=selected;
-        this.setFilter();
-        //console.log("filter",AdvancedFilterService.getAdvancedFilter());
 
+        this.setFilter();
     };
 
 
@@ -700,6 +692,8 @@ var ImportController = (function() {
         oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
         oProvider.isLoaded = false;
 
+        var sMessage = oController.m_oTranslate.instant("MSG_SEARCH_ERROR");
+
         oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
 
@@ -713,10 +707,8 @@ var ImportController = (function() {
                     oProvider.isLoaded = true;
                 }
             }, function errorCallback(response) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST");
+                utilsVexDialogAlertTop(sMessage);
                 oProvider.isLoaded = true;
-                // oController.m_bIsVisibleListOfLayers = false;//visualize filter list
-                // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
             });
 
 
@@ -730,13 +722,13 @@ var ImportController = (function() {
 
         // Check input data
         if(this.thereIsAtLeastOneProvider() === false) {
-            var sError= "SELECT AT LEAST ONE PROVIDER<br>NO PROVIDERS, NO IMAGES";
+            var sError= this.m_oTranslate.instant("MSG_SEARCH_SELECT_PROVIDER");
             utilsVexDialogAlertDefault(sError,null);
             return false;
         }
 
         if (utilsIsStrNullOrEmpty(this.m_oModel.geoselection)) {
-            var sError= "THE WORLD IS TOO BIG<br>PLEASE SELECT AN AREA OF INTEREST<br>LOOK AT THE TOP RIGHT CORNER OF THE MAP";
+            var sError= this.m_oTranslate.instant("MSG_SEARCH_ERROR_BBOX");
             utilsVexDialogAlertDefault(sError,null);
             return false;
         }
@@ -848,6 +840,7 @@ var ImportController = (function() {
                 console.log("Impossible get products number");
             });
 
+        var sMessage = oController.m_oTranslate.instant("MSG_SEARCH_ERROR");
 
         // Call the complete Search for all the queries of this provider
         oController.m_oSearchService.searchList(asTimePeriodsFilters).then(function(result){
@@ -863,7 +856,7 @@ var ImportController = (function() {
                 oProvider.isLoaded = true;
             }
         }, function errorCallback(response) {
-            var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST");
+            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
             utilsVexCloseDialogAfter(4000, oDialog);
 
             oController.m_bIsVisibleListOfLayers = false;//visualize filter list
@@ -886,15 +879,17 @@ var ImportController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(oCallback) === true)
         {
+            var sMessage = this.m_oTranslate.instant("MSG_IMPORTING");
             oCallback = function (data, status) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
+                var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
                 utilsVexCloseDialogAfter("3000",oDialog);
             }
         }
         if(utilsIsObjectNullOrUndefined(oError) === true)
         {
+            var sMessage = this.m_oTranslate.instant("MSG_ERROR_IMPORTING");
             oError = function (data,status) {
-                utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                utilsVexDialogAlertTop(sMessage);
                 // oProduct.isDisabledToDoDownload = false;
             };
         }
@@ -956,8 +951,10 @@ var ImportController = (function() {
                 console.log("Error there isn't workspaceID or layer")
                 return false;
             }
+            var sMessage = this.m_oTranslate.instant("MSG_ERROR_IMPORTING");
+
             var oError = function (data,status) {
-                utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                utilsVexDialogAlertTop(sMessage);
                 oProduct.isDisabledToDoDownload = false;
             }
 
@@ -974,6 +971,8 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(aoProducts))
             return false;
         var oThat = this;
+
+        var sMessage = this.m_oTranslate.instant("MSG_ERROR_IMPORTING");
 
         var oDialogCallback = function(result) {
 
@@ -992,7 +991,7 @@ var ImportController = (function() {
                 aoProducts[iIndexProduct].isDisabledToDoDownload = true;
                 var url = aoProducts[iIndexProduct].link;
                 var oError = function (data,status) {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                    utilsVexDialogAlertTop(sMessage);
                     aoProducts[iIndexProduct].isDisabledToDoDownload = false;
                 }
 
@@ -1075,16 +1074,7 @@ var ImportController = (function() {
      */
     ImportController.prototype.updateLayerListForActiveTab = function(sProvider) {
         var oController = this;
-/*
-        if (utilsIsObjectNullOrUndefined(oController.m_aListOfProvider)) return;
-        if (iActiveTab >= oController.m_aListOfProvider.length) return;
 
-        for (var iProviders = 0; iProviders< oController.m_aListOfProvider.length; iProviders++) {
-            if (oController.m_aListOfProvider[iProviders].selected == false) iActiveTab++;
-        }
-
-        var sProvider = oController.m_aListOfProvider[iActiveTab].name;
-        */
         var aaoAllBounds = [];
 
         oController.deleteLayers();
@@ -1250,10 +1240,6 @@ var ImportController = (function() {
                 console.log("Function polygonToBounds: Error in parse operation");
                 return [];
             }
-
-
-
-            //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
 
             aasNewContent.push(oLatLonArray);
         }
@@ -1460,9 +1446,12 @@ var ImportController = (function() {
             return false;
         }
 
+        var sMessage = this.m_oTranslate.instant("MSG_ADD_TO_WS");
+        var sErrorMessage = this.m_oTranslate.instant("MSG_ERROR_IMPORTING");
+
         var oOptions = {
-            titleModal:"Add to workspaces",
-            buttonName:"Add to workspace"
+            titleModal: sMessage,
+            buttonName: sMessage
         };
 
         var oThat = this;
@@ -1486,7 +1475,7 @@ var ImportController = (function() {
                 oProduct.isDisabledToDoDownload = true;
                 var sUrl = oProduct.link;
                 var oError = function (data,status) {
-                            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                            utilsVexDialogAlertTop(sErrorMessage);
                             oProduct.isDisabledToDoDownload = false;
                         };
 
@@ -1516,9 +1505,12 @@ var ImportController = (function() {
             return false;
         }
 
+        var sMessage = this.m_oTranslate.instant("MSG_ADD_TO_WS");
+        var sErrorMessage = this.m_oTranslate.instant("MSG_ERROR_IMPORTING");
+
         var oOptions = {
-            titleModal:"Add to workspaces",
-            buttonName:"Add to workspace"
+            titleModal: sMessage,
+            buttonName: sMessage
         };
         var oThat = this;
         var oCallback= function(result)
@@ -1546,7 +1538,7 @@ var ImportController = (function() {
                     aoListOfSelectedProducts[iIndexProduct].isDisabledToDoDownload = true;
                     var url = aoListOfSelectedProducts[iIndexProduct].link;
                     var oError = function (data,status) {
-                        utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                        utilsVexDialogAlertTop(sErrorMessage);
                         aoListOfSelectedProducts[iIndexProduct].isDisabledToDoDownload = false;
                     }
 
@@ -1582,7 +1574,7 @@ var ImportController = (function() {
             if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
             if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
 
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            var oDialog = utilsVexDialogAlertTop(oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_1") + sOperation +  oController.m_oTranslate.instant("MSG_ERROR_IN_OPERATION_2")+ sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
 
             return;
@@ -1602,17 +1594,22 @@ var ImportController = (function() {
                 break;
         }
 
-        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage, oController.m_oTranslate);
     };
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
-        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
+
+        var sMessage = this.m_oTranslate.instant("MSG_EDIT_PRODUCT_ADDED");
+
+        var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfter(3000, oDialog);
     };
 
     ImportController.prototype.openWorkspace = function (sWorkspaceId) {
 
         var oController = this;
+
+        var sErrorMessage = this.m_oTranslate.instant("MSG_ERROR_READING_WS");
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).then(function (data, status) {
             if (data.data != null)
@@ -1629,7 +1626,7 @@ var ImportController = (function() {
                 }
             }
         },function (data,status) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
+            utilsVexDialogAlertTop(sErrorMessage);
         });
     };
 
@@ -1673,20 +1670,12 @@ var ImportController = (function() {
     ImportController.prototype.setPaginationVariables = function()
     {
         this.m_bClearFiltersEnabled = true;
-        // this.m_iTotalOfProducts = 0;
-        // this.m_iCurrentPage = 1;
-        // this.m_iProductsPerPageSelected = 10;
-        // this.m_iTotalPages = 1;
+
         this.m_bIsVisibleListOfLayers = false;
-        // this.m_oModel.geoselection = "";
         //set default pages
         this.m_oPageService.setDefaultPaginationValuesForProvider();
 
         this.m_oResultsOfSearchService.setIsVisibleListOfProducts(false);
-        // this.m_oResultsOfSearchService.setTotalPages(1);
-        // this.m_oResultsOfSearchService.setProductsPerPageSelected(10);
-        // this.m_oResultsOfSearchService.setCurrentPage(1);
-        // this.m_oResultsOfSearchService.setTotalOfProducts(0);
     };
 
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
@@ -1694,7 +1683,6 @@ var ImportController = (function() {
         var bReturnValue = false;
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
-        // if(oLayer.isDisabledToDoDownload)
         if(this.m_oProcessWorkspaceService.checkIfFileIsDownloading(oLayer,this.m_oProcessWorkspaceService.getTypeOfProcessProductDownload()) === true)
         {
             bReturnValue = true;
@@ -1715,7 +1703,6 @@ var ImportController = (function() {
         if(utilsIsString(this.m_oMergeSearch.period)) return false;
         if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period)) return false;
 
-        //TODO HTTP REQUEST
         return true;
     };
 
@@ -1935,16 +1922,7 @@ var ImportController = (function() {
         }
 
     };
-    // ImportController.prototype.initDefaultDays = function()
-    // {
-    //
-    //     for(var iIndex = 0 ; iIndex < 31; iIndex++)
-    //     {
-    //         var sIndex = (iIndex + 1).toString();
-    //         this.m_oAdvanceFilter.listOfDays.push(sIndex);
-    //     }
-    //
-    // };
+
     ImportController.prototype.initDefaultMonths = function()
     {
         /*
@@ -2545,7 +2523,8 @@ var ImportController = (function() {
         'ResultsOfSearchService',
         'ModalService',
         'OpenSearchService',
-        'PagesService'
+        'PagesService',
+        '$translate'
     ];
 
     return ImportController;

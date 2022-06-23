@@ -132,7 +132,7 @@ function utilsProjectGetArrayOfValuesForParameterInOperation(oJSONInput,sPropert
     }
 }
 
-function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
+function utilsProjectShowRabbitMessageUserFeedBack(oMessage, oTranslate) {
 
     var sMessageCode = oMessage.messageCode;
     var sUserMessage = "";
@@ -140,67 +140,67 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
     switch(sMessageCode)
     {
         case "DOWNLOAD":
-            sUserMessage = "PRODUCT ADDED TO THE WORKSPACE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_DOWNLOAD");
             break;
         case "PUBLISHBAND":
-            sUserMessage = "BAND PUBLISHED: " + oMessage.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
+            sUserMessage = oTranslate.instant("MSG_PUBLISHBAND_1") + oMessage.payload.bandName + oTranslate.instant("MSG_PUBLISHBAND_2") + oMessage.payload.productName + oTranslate.instant("MSG_MSG_PUBLISHBAND_3");
             break;
         case "UPDATEPROCESSES":
             console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
             break;
         case "MOSAIC":
-            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_MOSAIC");
             break;
         case "SUBSET":
-            sUserMessage = "SUBSET COMPLETED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_SUBSET");
             break;
         case "MULTISUBSET":
-            sUserMessage = "MULTISUBSET COMPLETED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_MULTISUBSET");
             break;
         case "GRAPH":
-            sUserMessage = "WORKFLOW COMPLETED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_GRAPH");
             break;
         case "RUNPROCESSOR":
-            sUserMessage = "APP DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_RUNPROCESSOR");
             break;
         case "RUNIDL":
-            sUserMessage = "APP DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_RUNPROCESSOR");
             break;
         case "RUNMATLAB":
-            sUserMessage = "APP DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_RUNPROCESSOR");
             break;
         case "FTPUPLOAD":
-            sUserMessage = "FTP UPLOAD DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_FTPUPLOAD");
             break;
         case "RASTERGEOMETRICRESAMPLE":
-            sUserMessage = "GEOMETRIC RESAMPLE DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_RASTERGEOMETRICRESAMPLE");
             break;
         case "FILTER":
-            sUserMessage = "FILTER DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_FILTER");
             break;
         case "REGRID":
-            sUserMessage = "REGRID DONE<br>READY";
+            sUserMessage = oTranslate.instant("MSG_REGRID");
             break;
         case "DEPLOYPROCESSOR":
-            sUserMessage = "APP PUBLISHED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_DEPLOYPROCESSOR");
             break;
         case "DELETEPROCESSOR":
-            sUserMessage = "APP DELETED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_DELETEPROCESSOR");
             break;
         case "INFO":
             sUserMessage =  oMessage.payload;
             break;
         case "REDEPLOYPROCESSOR":
-            sUserMessage = "APP RE DEPLOYED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_REDEPLOYPROCESSOR");
             break;
         case "LIBRARYUPDATE":
-            sUserMessage = "WASDI LIB UPDATED FOR APP<br>READY";
+            sUserMessage = oTranslate.instant("MSG_LIBRARYUPDATE");
             break;
         case "KILLPROCESSTREE":
-            sUserMessage = "PROCESS KILLED<br>READY";
+            sUserMessage = oTranslate.instant("MSG_KILLPROCESSTREE");
             break;
         case "READMETADATA":
-            sUserMessage = "METADATA READ<br>READY";
+            sUserMessage = oTranslate.instant("MSG_READMETADATA");
             break;
         default:
             console.log("ERROR: GOT EMPTY MESSAGE<br>READY");

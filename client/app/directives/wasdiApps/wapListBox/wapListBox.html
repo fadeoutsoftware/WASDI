@@ -1,5 +1,5 @@
 <div class="waplistbox-directive">
-    <input type="text"  class="form-control" placeholder="Search..." ng-model="textFilter">
+    <input type="text"  class="form-control" placeholder='{{"DIRECTIVE_DD_SEARCH"|translate}}' ng-model="textFilter">
 
     <div class="list-group" uib-tooltip="{{$ctrl.tooltip}}" tooltip-placement="top" tooltip-class="blueWasdi" tooltip-popup-delay='750'>
         <a href="" class="list-group-item" ng-repeat="option in optionsDirective | filter:textFilter track by $index " ng-class="{active: isOptionSelected(option)}" ng-click="pushOptionInSelectedList(option);">
