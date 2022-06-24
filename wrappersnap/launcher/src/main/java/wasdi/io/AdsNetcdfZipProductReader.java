@@ -2,6 +2,7 @@ package wasdi.io;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import wasdi.LauncherMain;
@@ -39,12 +40,12 @@ public class AdsNetcdfZipProductReader extends WasdiProductReader {
 
 		String sDownloadedFileFullPath = m_oProductFile.getAbsolutePath();
 		String sFileNameFromProvider = m_oProductFile.getName();
-		List<String> osFileNames = unzipAndReadFiles(sDownloadedFileFullPath, sFileNameFromProvider);
+		List<String> asDates = extractDates(sDownloadedFileFullPath, sFileNameFromProvider);
 
 		List<BandViewModel> aoBands = new ArrayList<>();
 
-		for (String sFileName : osFileNames) {
-			aoBands.add(toBand(sFileName));
+		for (String sDate : asDates) {
+			aoBands.add(toBand(sDate));
 		}
 
 		oNodeGroupViewModel.setBands(aoBands);
@@ -90,30 +91,26 @@ public class AdsNetcdfZipProductReader extends WasdiProductReader {
 		return sFileName;
 	}
 
-	private List<String> unzipAndReadFiles(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		List<String> osFileNames = new ArrayList<>();
+	private List<String> extractDates(String sDownloadedFileFullPath, String sFileNameFromProvider) {
+		List<String> asDates = new ArrayList<>();
 
 		try {
-			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
-			String sTargetDirectoryPath = sDownloadPath;
-//			File oSourceFile = new File(sDownloadedFileFullPath);
-			File oTargetDirectory = new File(sTargetDirectoryPath + "/tmp/");
+			List<String> asFileNames = ZipFileUtils.peepZipArchiveContent(sDownloadedFileFullPath);
 
-			ZipFileUtils oZipExtractor = new ZipFileUtils();
-			oZipExtractor.unzip(sDownloadedFileFullPath, sTargetDirectoryPath + "/tmp/");
-
-			if (oTargetDirectory.isDirectory()) {
-				File[] aoFiles = oTargetDirectory.listFiles();
-
-				for (File oFile : aoFiles) {
-					osFileNames.add(oFile.getName());
-				}
+			for (String sFileName : asFileNames) {
+				asDates.add(extractDateFromFileName(sFileName));
 			}
 		} catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("AdsNetcdfZipProductReader.unzipAndReadFiles: error ", oEx);
+			LauncherMain.s_oLogger.error("AdsNetcdfZipProductReader.readZipArchiveFileNames: error ", oEx);
 		}
 
-		return osFileNames;
+		Collections.sort(asDates);
+
+		return asDates;
+	}
+
+	private static String extractDateFromFileName(String sFileName) {
+		return sFileName.replace("date_", "").replace(".nc", "");
 	}
 
 	@Override

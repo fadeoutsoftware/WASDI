@@ -28,6 +28,7 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -75,6 +76,33 @@ public class ZipFileUtils {
 	private int m_iEntries;
 	private long m_lSingle;
 
+
+	/**
+	 * Look into a zip file and extract the list of file names.
+	 * @param sZipFileAbsolutePath the path of the zip file
+	 * @return the list of file names
+	 * @throws Exception in case of any issue with reading the zip file
+	 */
+	public static List<String> peepZipArchiveContent(String sZipFileAbsolutePath) throws Exception {
+		List<String> asFileNames = new ArrayList<>();
+
+		try {
+			File oInputFile = new File(sZipFileAbsolutePath);
+
+			try (ZipFile oZipFile = new ZipFile(oInputFile)) {
+				Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries = oZipFile.getEntries();
+				while(aoZipArchiveEntries.hasMoreElements()) {
+					ZipArchiveEntry oEntry = aoZipArchiveEntries.nextElement();
+					asFileNames.add(oEntry.getName());
+				}
+			}
+		} catch (Exception oE) {
+			s_oLogger.error("ZipFileUtils.pokeZipArchiveContent: Error during creation of zip archive " );
+			throw oE;
+		}
+
+		return asFileNames;
+	}
 
 	/**
 	 * Safer version of the unzip method.
