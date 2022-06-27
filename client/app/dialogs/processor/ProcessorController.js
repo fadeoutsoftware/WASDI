@@ -111,6 +111,13 @@ var ProcessorController = (function() {
          * @type {number}
          */
         this.m_iMinuteTimeout = 180;
+
+        /**
+         * Environment Update Command
+         * @type {string}
+         */
+         this.m_sEnvUpdCommand = "";
+
         /**
          * Flag to know if we are in Edit Mode
          * @type {boolean}
@@ -619,6 +626,34 @@ var ProcessorController = (function() {
 
         return true;
     };
+
+    /**
+     * Force the update of the env for the processor on the server
+     * @param sProcessorId
+     * @returns {boolean}
+     */
+     ProcessorController.prototype.forceEnvUpdate = function(sProcessorId) {
+
+       if (utilsIsObjectNullOrUndefined(sProcessorId) === true)
+       {
+           return false;
+       }
+
+       if (utilsIsObjectNullOrUndefined(this.m_sEnvUpdCommand) === true)
+       {
+           return false;
+       };
+
+       this.m_oProcessorService.forceEnvUpdate(sProcessorId, this.m_sEnvUpdCommand)
+           .then(function (data) {
+               var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSORS IMAGE<br>ENV UPDATE SCHEDULED");
+               utilsVexCloseDialogAfter(5000,oDialog);
+           },function (error) {
+              utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPDATING ENV");
+       });
+
+       return true;
+   };
 
      /**
       * Force the redeploy of the processor on the server
