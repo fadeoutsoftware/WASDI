@@ -12,7 +12,6 @@ import org.json.JSONObject;
 
 import wasdi.shared.business.Package;
 import wasdi.shared.business.PackageManager;
-
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
@@ -124,6 +123,29 @@ public class PipApiClient {
 		aoPackagesInfo.put("uptodate", aoPackagesUptodate);
 
 		return aoPackagesInfo;
+	}
+
+	public void operatePackageChange(String sUpdateCommand) {
+		// Call localhost:port
+		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
+		s_oLogger.debug("PipApiClient.operatePackageChange: sUrl: " + sUrl);
+
+		Map<String, String> asHeaders = Collections.emptyMap();
+
+		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		Integer iResult = oHttpCallResponse.getResponseCode();
+		String sResponse = oHttpCallResponse.getResponseBody();
+
+		s_oLogger.debug("PipApiClient.operatePackageChange: iResult: " + iResult);
+		s_oLogger.debug("PipApiClient.operatePackageChange: " + sResponse);
+
+		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
+			s_oLogger.info("PipApiClient.operatePackageChange: Output from Server .... \n");
+			s_oLogger.info("PipApiClient.operatePackageChange: " + sResponse);
+			s_oLogger.debug("PipApiClient.operatePackageChange: env updated");
+		} else {
+			throw new RuntimeException(sResponse);
+		}
 	}
 
 }

@@ -13,10 +13,10 @@ import lombok.ToString;
 @ToString
 public class Package {
 
-	private String sManagerName;
-	private String sPackageName;
-	private String sCurrentVersion;
-	private String sLatestVersion;
-	private String sType;
+	private String managerName;
+	private String packageName;
+	private String currentVersion;
+	private String latestVersion;
+	private String type;
 
 }

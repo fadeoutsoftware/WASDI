@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.apiclients.pip.PipApiClient;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
@@ -31,11 +31,9 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -963,30 +961,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     		String sUpdateCommand = (String) oJsonItem.get("updateCommand");
             LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
-            // Call localhost:port
-            String sUrl = "http://localhost:" + oProcessor.getPort() + "/packageManager/" + sUpdateCommand;
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUrl: " + sUrl);
+    		String sIp = "127.0.0.1";
+    		int iPort = oProcessor.getPort();
 
-    		Map<String, String> asHeaders = Collections.emptyMap();
+            PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
+            pipApiClient.operatePackageChange(sUpdateCommand);
 
-    		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
-    		Integer iResult = oHttpCallResponse.getResponseCode();
-    		String sResponse = oHttpCallResponse.getResponseBody();
+            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: iResult: " + iResult);
-        	LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: " + sResponse);
-
-        	if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-                LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: Output from Server .... \n");
-            	LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: " + sResponse);
-                LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: env updated");
-
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
-                return true;
-        	} else {
-        		throw new RuntimeException(sResponse);
-        	}
+            return true;
         } catch (Exception oEx) {
             LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate Exception", oEx);
             try {
