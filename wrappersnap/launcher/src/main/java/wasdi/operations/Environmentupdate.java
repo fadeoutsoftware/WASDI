@@ -1,12 +1,8 @@
 package wasdi.operations;
 
-import java.io.File;
-import java.util.Map;
-
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.apiclients.pip.PipApiClient;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
@@ -16,7 +12,6 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 
 public class Environmentupdate extends Operation {
 
@@ -40,7 +35,6 @@ public class Environmentupdate extends Operation {
 			ProcessorParameter oParameter = (ProcessorParameter) oParam;
 
 			// First Check if processor exists
-			String sProcessorName = oParameter.getName();
 			String sProcessorId = oParameter.getProcessorID();
 
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -51,21 +45,6 @@ public class Environmentupdate extends Operation {
 				LauncherMain.s_oLogger
 						.error("Environmentupdate.executeOperation: oProcessor is null [" + sProcessorId + "]");
 				return false;
-			}
-
-			// Set the processor path
-			String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-			if (!sDownloadRootPath.endsWith("/"))
-				sDownloadRootPath = sDownloadRootPath + "/";
-
-			String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
-			File oProcessorFolder = new File(sProcessorFolder);
-
-			// Is the processor installed in this node?
-			if (!oProcessorFolder.exists()) {
-				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: Processor [" + sProcessorName
-						+ "] environment not updated in this node, return");
-				return true;
 			}
 
 			WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
@@ -112,31 +91,9 @@ public class Environmentupdate extends Operation {
 							} else {
 
 								if (sNodeCode.equals("wasdi")) {
+									Thread.sleep(2000);
 
-				            		Thread.sleep(1000);
-
-									String sIp = "127.0.0.1";
-									int iPort = oProcessor.getPort();
-									m_oLocalLogger.debug("Environmentupdate.executeOperation | iPort: " + iPort);
-
-									try {
-										PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
-
-										Map<String, Object> aoPackagesInfo = pipApiClient.getPackagesInfo();
-
-										String sFileFullPath = sProcessorFolder + "packagesInfo.json";
-										m_oLocalLogger.debug("Environmentupdate.executeOperation | sFileFullPath: " + sFileFullPath);
-
-										boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
-
-										if (bResult) {
-											m_oLocalLogger.debug("the file was created.");
-										} else {
-											m_oLocalLogger.debug("the file was not created.");
-										}
-									} catch (Exception oEx) {
-										m_oLocalLogger.debug("Environmentupdate.executeOperation: " + oEx);
-									}
+									oEngine.refreshPackagesInfo(oParameter);
 								}
 							}
 

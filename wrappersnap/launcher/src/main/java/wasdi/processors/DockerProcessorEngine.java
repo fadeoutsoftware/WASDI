@@ -20,13 +20,13 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.apiclients.pip.PipApiClient;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
@@ -917,78 +917,134 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         }
     }
 
-    @Override
-    public boolean environmentUpdate(ProcessorParameter oParameter) {
+    protected abstract IPackageManager getPackageManager(String sIp, int iPort);
 
-        if (oParameter == null) {
-            LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: oParameter is null");
-            return false;
-        }
+	@Override
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
 
-        if (Utils.isNullOrEmpty(oParameter.getJson())) {
-            LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: update command is null or empty");
-            return false;
-        }
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: oParameter is null");
+			return false;
+		}
 
-        ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
-        ProcessWorkspace oProcessWorkspace = null;
+		if (Utils.isNullOrEmpty(oParameter.getJson())) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: update command is null or empty");
+			return false;
+		}
 
-        try {
-        	oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            oProcessWorkspace = m_oProcessWorkspace;
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;
 
-            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = m_oProcessWorkspace;
 
-            // First Check if processor exists
-            String sProcessorName = oParameter.getName();
-            String sProcessorId = oParameter.getProcessorID();
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
-            ProcessorRepository oProcessorRepository = new ProcessorRepository();
-            Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
 
-            // Check processor
-            if (oProcessor == null) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: oProcessor is null [" + sProcessorId + "]");
-                return false;
-            }
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-            LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: update env for " + sProcessorName);
+			// Check processor
+			if (oProcessor == null) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate: oProcessor is null [" + sProcessorId + "]");
+				return false;
+			}
 
-            String sJson = oParameter.getJson();
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
-    		JSONObject oJsonItem = new JSONObject(sJson);
+			LauncherMain.s_oLogger.info("DockerProcessorEngine.environmentUpdate: update env for " + sProcessorName);
 
-    		String sUpdateCommand = (String) oJsonItem.get("updateCommand");
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
+			String sJson = oParameter.getJson();
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
+			JSONObject oJsonItem = new JSONObject(sJson);
 
-    		String sIp = "127.0.0.1";
-    		int iPort = oProcessor.getPort();
+			String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
-            PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
-            pipApiClient.operatePackageChange(sUpdateCommand);
+			String sIp = "127.0.0.1";
+			int iPort = oProcessor.getPort();
 
-            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+			oPackageManager.operatePackageChange(sUpdateCommand);
 
-            return true;
-        } catch (Exception oEx) {
-            LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate Exception", oEx);
-            try {
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
-                if (oProcessWorkspace != null) {
-                    // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
-                    }
+			return true;
+		} catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate Exception", oEx);
+			try {
 
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                }
-            } catch (Exception e) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate Exception", e);
-            }
+				if (oProcessWorkspace != null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					}
 
-            return false;
-        }
-    }
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
+			} catch (Exception e) {
+				LauncherMain.s_oLogger.error("DockerProcessorEngine.environmentUpdate Exception", e);
+			}
+
+			return false;
+		}
+	}
+
+	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.refreshPackagesInfo: oParameter is null");
+			return false;
+		}
+
+		String sProcessorName = oParameter.getName();
+		String sProcessorId = oParameter.getProcessorID();
+
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+
+		// Set the processor path
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
+		if (!sDownloadRootPath.endsWith("/"))
+			sDownloadRootPath = sDownloadRootPath + "/";
+
+		String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
+		File oProcessorFolder = new File(sProcessorFolder);
+
+		// Is the processor installed in this node?
+		if (!oProcessorFolder.exists()) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName
+					+ "] environment not updated in this node, return");
+			return true;
+		}
+
+		String sIp = "127.0.0.1";
+		int iPort = oProcessor.getPort();
+
+		try {
+			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+
+			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
+
+			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.refreshPackagesInfo | sFileFullPath: " + sFileFullPath);
+
+			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
+
+			if (bResult) {
+				LauncherMain.s_oLogger.debug("the file was created.");
+			} else {
+				LauncherMain.s_oLogger.debug("the file was not created.");
+			}
+
+			return bResult;
+		} catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.refreshPackagesInfo: " + oEx);
+		}
+
+		return false;
+	}
 
 }
-

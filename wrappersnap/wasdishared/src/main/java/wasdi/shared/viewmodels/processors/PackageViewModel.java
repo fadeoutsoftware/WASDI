@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.viewmodels.processors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Package {
+public class PackageViewModel {
 
 	private String managerName;
 	private String packageName;

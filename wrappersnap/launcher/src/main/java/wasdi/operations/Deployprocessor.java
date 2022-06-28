@@ -1,20 +1,14 @@
 package wasdi.operations;
 
-import java.util.Map;
-
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.apiclients.pip.PipApiClient;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 
 /**
  * Deploy Processor Operation
@@ -84,38 +78,11 @@ public class Deployprocessor extends Operation {
 	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | WasdiConfig.Current.nodeCode: " + WasdiConfig.Current.nodeCode);
 
 	            			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
-	        	            	if (sNodeCode.equals("wasdi")) {
+	            				if (sNodeCode.equals("wasdi")) {
+	            					Thread.sleep(2000);
 
-	        	            		Thread.sleep(1000);
-
-	        		        		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-	        		        		Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
-
-	        		        		String sIp = "127.0.0.1";
-	        		        		int iPort = oProcessor.getPort();
-	        		        		m_oLocalLogger.debug("Deployprocessor.executeOperation | iPort: " + iPort);
-
-	        		        		try {
-	        		        			PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
-
-	        		        			Map<String, Object> aoPackagesInfo = pipApiClient.getPackagesInfo();
-
-	        			        		String sProcessorFolder = oEngine.getProcessorFolder(sName);
-	        			        		String sFileFullPath = sProcessorFolder + "packagesInfo.json";
-	        			        		m_oLocalLogger.debug("Deployprocessor.executeOperation | sFileFullPath: " + sFileFullPath);
-
-	        			        		boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
-
-						        		if (bResult) {
-						        			m_oLocalLogger.debug("the file was created.");
-						        		} else {
-						        			m_oLocalLogger.debug("the file was not created.");
-						        		}
-
-	        		        		} catch (Exception oEx) {
-	        		        			Utils.debugLog("Deployprocessor.executeOperation: " + oEx);
-	        		        		}
-	        		            }
+	            					oEngine.refreshPackagesInfo(oParameter);
+	            				}
 	            			}
 	            		}
 	            	}

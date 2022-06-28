@@ -8,6 +8,7 @@ import java.io.IOException;
 import com.google.common.io.Files;
 
 import wasdi.LauncherMain;
+import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 
 public class OctaveProcessorEngine extends DockerProcessorEngine {
@@ -25,6 +26,11 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += "octave";
 		
+	}
+
+	@Override
+	protected IPackageManager getPackageManager(String sIp, int iPort) {
+		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 	}
 		
 	@Override

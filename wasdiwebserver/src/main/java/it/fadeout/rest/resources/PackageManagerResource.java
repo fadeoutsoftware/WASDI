@@ -10,14 +10,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.apiclients.pip.PipApiClient;
-import wasdi.shared.business.Package;
-import wasdi.shared.business.PackageManager;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
+import wasdi.shared.viewmodels.processors.PackageViewModel;
 
 @Path("/packageManager")
 public class PackageManagerResource {
@@ -68,22 +70,19 @@ public class PackageManagerResource {
 
 	@GET
 	@Path("/listPackages")
-	public List<Package> getListPackages(@HeaderParam("x-session-token") String sSessionId,
+	public List<PackageViewModel> getListPackages(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("flag") String sFlag) throws Exception {
 		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + "Flag: " + sFlag + " )");
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 
-		String sIp = "127.0.0.1";
-		int sPort = oProcessorToRun.getPort();
-
-		List<Package> aoPackages = Collections.emptyList();
+		List<PackageViewModel> aoPackages = Collections.emptyList();
 
 		try {
-			PipApiClient pipApiClient = new PipApiClient(sIp, sPort);
+			IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
 
-			aoPackages = pipApiClient.listPackages(sFlag);
+			aoPackages = oPackageManager.listPackages(sFlag);
 		} catch (Exception oEx) {
 			Utils.debugLog("PackageManagerResource.getListPackages: " + oEx);
 		}
@@ -93,24 +92,38 @@ public class PackageManagerResource {
 
 	@GET
 	@Path("/managerVersion")
-	public PackageManager getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
+	public PackageManagerViewModel getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName) throws Exception {
 		Utils.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 
-		String sIp = "127.0.0.1";
-		int iPort = oProcessorToRun.getPort();
-
-		PackageManager oPackageManager = null;
+		PackageManagerViewModel oPackageManagerVM = null;
 
 		try {
-			PipApiClient pipApiClient = new PipApiClient(sIp, iPort);
+			IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
 
-			oPackageManager = pipApiClient.getManagerVersion();
+			oPackageManagerVM = oPackageManager.getManagerVersion();
 		} catch (Exception oEx) {
 			Utils.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+		}
+
+		return oPackageManagerVM;
+	}
+
+	private IPackageManager getPackageManager(Processor oProcessor) {
+		IPackageManager oPackageManager = null;
+
+		String sType = oProcessor.getType();
+
+		String sIp = "127.0.0.1";
+		int iPort = oProcessor.getPort();
+
+		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
+			oPackageManager = new PipPackageManagerImpl(sIp, iPort);
+		} else {
+			throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 		}
 
 		return oPackageManager;

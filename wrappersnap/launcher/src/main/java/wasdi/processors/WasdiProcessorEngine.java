@@ -118,7 +118,14 @@ public abstract class WasdiProcessorEngine {
 	 * @return
 	 */
 	public abstract boolean environmentUpdate(ProcessorParameter oParameter);
-	
+
+	/**
+	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
+	 * @param oParameter the processor parameter
+	 * * @return
+	 */
+	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
+
 	/**
 	 * Execute a system task
 	 * @param sCommand
