@@ -13,6 +13,7 @@ from os.path import sys
 
 app = Flask(__name__)
 
+
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
 	
@@ -226,10 +227,12 @@ def run(processId):
 	
 	return jsonify({'processId': processId, 'processorEngineVersion':'2'})
 
+
 @app.route('/hello', methods=['GET'])
 def hello():
 	print("wasdiProcessoServer Hello request")
 	return jsonify({'hello': 'hello waspi'})
+
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=False, use_reloader=False)
