@@ -35,15 +35,6 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 	 */
 	String m_sProcessorId;
 
-//	/**
-//	 * Processor Name
-//	 */
-//	String m_sProcessorName;
-//	/**
-//	 * Processor Type
-//	 */
-//	String m_sProcessorType;
-
 	/**
 	 * Update Command
 	 */
@@ -55,17 +46,13 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 	 * @param sSessionId session id 
 	 * @param sWorkspaceId workspace id
 	 * @param sProcessorId processor id
-//	 * @param sProcessorName Processor Name
-//	 * @param sProcessorType Processor Type
 	 * @param sUpdateCommand update command
 	 */
-	public void init(List<Node> aoNodes, String sSessionId, String sWorkspaceId, String sProcessorId, /*String sProcessorName, String sProcessorType,*/ String sUpdateCommand) {
+	public void init(List<Node> aoNodes, String sSessionId, String sWorkspaceId, String sProcessorId, String sUpdateCommand) {
 		m_aoNodes = aoNodes;
 		m_sSessionId = sSessionId;
 		m_sWorkspaceId = sWorkspaceId;
 		m_sProcessorId = sProcessorId;
-//		m_sProcessorName = sProcessorName;
-//		m_sProcessorType = sProcessorType;
 		m_sUpdateCommand = sUpdateCommand;
 	}
 
@@ -97,8 +84,6 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 
 				// Compose the API string
 				sUrl += "processors/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId
-//						+"&processorName=" + m_sProcessorName
-//						+"&processorType=" + m_sProcessorType
 						+"&updateCommand=" + m_sUpdateCommand;
 
 				// Add the auth header

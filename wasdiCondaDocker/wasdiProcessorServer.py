@@ -268,7 +268,7 @@ def pm_get_package(name: str):
 	return json.dumps({'error': 'Not found'}), 404, {'Content-Type': 'application/json'}
 
 
-@app.route('/packageManager/addPackage<name>/', defaults={'version': ''})
+@app.route('/packageManager/addPackage/<name>/', defaults={'version': ''})
 @app.route('/packageManager/addPackage/<name>/<version>/')
 def pm_add_package(name: str, version: str):
 	print('/packageManager/addPackage/' + name + '/' + version)
@@ -287,7 +287,7 @@ def pm_add_package(name: str, version: str):
 	return json.dumps({'output': output}), 200, {'Content-Type': 'application/json'}
 
 
-@app.route('/packageManager/upgradePackage<name>/', defaults={'version': ''})
+@app.route('/packageManager/upgradePackage/<name>/', defaults={'version': ''})
 @app.route('/packageManager/upgradePackage/<name>/<version>/')
 def pm_upgrade_package(name: str, version: str):
 	print('/packageManager/upgradePackage/' + name + '/' + version)
