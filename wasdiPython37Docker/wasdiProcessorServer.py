@@ -483,15 +483,17 @@ def __parse_list_command_output(output: str) -> list:
 		asColumns = sLine.split()
 
 		if len(asHeaders) == 2:
-			aoDependencies.append({"manager": "pip",
-									asHeaders[0]: asColumns[0],
-									asHeaders[1]: asColumns[1]})
+			aoDependencies.append({
+				"manager": "pip",
+				asHeaders[0]: asColumns[0],
+				asHeaders[1]: asColumns[1]})
 		elif len(asHeaders) == 4:
-			aoDependencies.append({"manager": "pip",
-									asHeaders[0]: asColumns[0],
-									asHeaders[1]: asColumns[1],
-									asHeaders[2]: asColumns[2],
-									asHeaders[3]: asColumns[3]})
+			aoDependencies.append({
+				"manager": "pip",
+				asHeaders[0]: asColumns[0],
+				asHeaders[1]: asColumns[1],
+				asHeaders[2]: asColumns[2],
+				asHeaders[3]: asColumns[3]})
 
 	return aoDependencies
 

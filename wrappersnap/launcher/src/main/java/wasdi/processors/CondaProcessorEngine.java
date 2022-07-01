@@ -14,6 +14,7 @@ import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.LauncherMain;
 import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.managers.CondaPackageManagerImpl;
 
 public class CondaProcessorEngine extends DockerProcessorEngine {
 	
@@ -32,7 +33,9 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
-		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
+		IPackageManager oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
+
+		return oPackageManager;
 	}
 
 	@Override

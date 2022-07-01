@@ -16,7 +16,9 @@ public class PackageViewModel {
 	private String managerName;
 	private String packageName;
 	private String currentVersion;
+	private String currentBuild;
 	private String latestVersion;
 	private String type;
+	private String channel;
 
 }

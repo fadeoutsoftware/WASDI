@@ -14,6 +14,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.utils.Utils;
@@ -122,6 +123,8 @@ public class PackageManagerResource {
 
 		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
 			oPackageManager = new PipPackageManagerImpl(sIp, iPort);
+		} else if (sType.equals(ProcessorTypes.CONDA)) {
+			oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
 		} else {
 			throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 		}

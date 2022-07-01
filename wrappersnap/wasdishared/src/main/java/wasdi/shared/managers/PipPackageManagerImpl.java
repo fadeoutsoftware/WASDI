@@ -65,11 +65,13 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 				String sManagerName = oJsonItem.optString("manager", "pip");
 				String sPackageName = oJsonItem.optString("package", null);
+				String sCurrentBuild = oJsonItem.optString("build", null);
 				String sCurrentVersion = oJsonItem.optString("version", null);
 				String sLatestVersion = oJsonItem.optString("latest", null);
 				String sType = oJsonItem.optString("type", null);
+				String sChannel = oJsonItem.optString("channel", null);
 
-				aoPackages.add(new PackageViewModel(sManagerName, sPackageName, sCurrentVersion, sLatestVersion, sType));
+				aoPackages.add(new PackageViewModel(sManagerName, sPackageName, sCurrentVersion, sCurrentBuild, sLatestVersion, sType, sChannel));
 			}
 		}
 
