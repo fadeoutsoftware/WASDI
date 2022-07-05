@@ -300,7 +300,11 @@ public class WorkspaceResource {
 				String sNodeCode = oWorkspace.getNodeCode(); 
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
-					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+					if (oWorkspaceNode.getActive()) {
+						oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+					} else {
+						oVM.setApiUrl(WasdiConfig.Current.baseUrl);
+					}
 										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
