@@ -3,7 +3,7 @@ package wasdi.shared.business;
 /**
  * Represent a row of the log of a custom processor.
  * Each log has a rowNumber obtained with a Counter 
- * that uses the ProcessWorspaceId as sequence.
+ * that uses the ProcessWorkspaceId as sequence.
  * 
  * @author p.campanella
  *

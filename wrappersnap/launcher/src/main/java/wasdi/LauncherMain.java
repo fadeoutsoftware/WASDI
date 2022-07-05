@@ -216,7 +216,7 @@ public class LauncherMain  {
             s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 
-            // Set the ProcessWorspace STATUS as running
+            // Set the ProcessWorkspace STATUS as running
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
             s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());

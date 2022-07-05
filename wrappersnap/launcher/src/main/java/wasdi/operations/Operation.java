@@ -22,6 +22,7 @@ import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -279,6 +280,10 @@ public abstract class Operation {
         // Check if the file is really to Add
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         DownloadedFile oCheckAlreadyExists = oDownloadedRepo.getDownloadedFileByPath(sFullPathFileName);
+
+        if (oCheckAlreadyExists == null) {
+        	oCheckAlreadyExists = oDownloadedRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sFullPathFileName));
+        }
 
         File oFile = new File(sFullPathFileName);
 

@@ -39,6 +39,7 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -925,6 +926,9 @@ public class ProductResource {
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sDownloadPath + sProductName);
 
+            if (oDownloadedFile == null) {
+            	oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sDownloadPath) + sProductName);
+            }
 
             // Get the list of published bands
             if (bDeleteFile || bDeleteLayer) {
@@ -1021,7 +1025,7 @@ public class ProductResource {
             // delete the product-workspace related records on db and the Downloaded File Entry
             try {
                 ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-                oProductWorkspaceRepository.deleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspaceId);
+                oProductWorkspaceRepository.deleteByProductNameWorkspace(oDownloadedFile.getFilePath(), sWorkspaceId);
                 oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
             } catch (Exception oEx) {
                 Utils.debugLog("ProductResource.DeleteProduct: error deleting product-workspace related records on db and the Downloaded File Entry " + oEx);
