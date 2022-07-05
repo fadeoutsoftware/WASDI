@@ -122,7 +122,14 @@ var WorkspaceController = (function () {
     };
 
 
-    WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
+    WorkspaceController.prototype.openWorkspace = function (sWorkspaceId, bActiveNode) {
+        if (bActiveNode === false) {
+            var sNodeInactiveMessage = this.m_oTranslate.instant("MSG_MKT_WS_OPEN_NODE_INACTIVE");
+            utilsVexDialogAlertTop(sNodeInactiveMessage);
+
+            return false;
+        }
+
         // Stop loading new workspaces.. we are leaving!
         this.m_bOpeningWorkspace = true;
         var oController = this;
