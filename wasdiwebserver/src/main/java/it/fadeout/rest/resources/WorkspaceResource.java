@@ -326,6 +326,8 @@ public class WorkspaceResource {
 					} else {
 						oVM.setApiUrl(WasdiConfig.Current.baseUrl);
 					}
+
+					oVM.setActiveNode(oWorkspaceNode.getActive());
 										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
@@ -346,6 +348,8 @@ public class WorkspaceResource {
 			}
 			else {
 				oVM.setCloudProvider("wasdi");
+
+				oVM.setActiveNode(true);
 			}
 
 			// Get Sharings

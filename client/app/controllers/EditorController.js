@@ -815,7 +815,7 @@ var EditorController = (function () {
             if (data.data != null) {
                 if (data.data != undefined) {
                     // new condition: check that the viewmodel received is non empty 
-                    if (data.data.workspaceId == null){
+                    if (data.data.workspaceId == null || data.data.activeNode === false){
                         oController.m_oState.go("home");
                         var sMessage = this.m_oTranslate.instant("MSG_FORBIDDEN")
                         var oDialog = utilsVexDialogAlertTop(sMessage);
