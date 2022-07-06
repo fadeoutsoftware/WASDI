@@ -42,7 +42,7 @@ angular.module('wasdi.ProductService', ['wasdi.ProductService']).
             }
 
             // the list is passed in the body request
-            return this.m_oHttp.post(sUrl + '/product/deletelist?workspace=' + sWorkspaceId + '&deletefile=' + bDeleteFile + '&bdeletelayer=' + bDeleteLayer, sProductNameList);
+            return this.m_oHttp.post(sUrl + '/product/deletelist?workspace=' + sWorkspaceId + '&deletefile=' + bDeleteFile + '&deletelayer=' + bDeleteLayer, sProductNameList);
         };
 
         this.updateProduct = function (oProductViewModel, workspaceId) {

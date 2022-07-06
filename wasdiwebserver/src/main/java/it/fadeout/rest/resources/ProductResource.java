@@ -933,7 +933,7 @@ public class ProductResource {
             // Get the list of published bands
             if (bDeleteFile || bDeleteLayer) {
                 // Get all bands files
-                aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oDownloadedFile.getProductViewModel().getName());
+                aoPublishedBands = oPublishedBandsRepository.getPublishedBandsByProductName(oDownloadedFile.getFilePath());
             }
 
             // get files that begin with the product name

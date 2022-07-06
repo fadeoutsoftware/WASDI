@@ -188,6 +188,10 @@ public class FileBufferResource {
 			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullProductPath+sFileUrl);
+
+            if (oDownloadedFile == null) {
+            	oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sFullProductPath) + sFileUrl);
+            }
 			
 			if (oDownloadedFile == null) {
 				Utils.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");

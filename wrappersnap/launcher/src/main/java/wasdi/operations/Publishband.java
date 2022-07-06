@@ -88,6 +88,10 @@ public class Publishband extends Operation {
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sInputFile);
 
             if (oDownloadedFile == null) {
+            	oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sInputFile));
+            }
+
+            if (oDownloadedFile == null) {
                 m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sInputFile + "]");
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Cannot find product to publish", oParameter.getExchange());
                 return false;
