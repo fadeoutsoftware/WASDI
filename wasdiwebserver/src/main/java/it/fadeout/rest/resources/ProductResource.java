@@ -1007,7 +1007,7 @@ public class ProductResource {
 
                             try {
                                 // delete published band on data base
-                                oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
+                                oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getFilePath(), oPublishedBand.getLayerId());
                             } catch (Exception oEx) {
                                 Utils.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
                             }
