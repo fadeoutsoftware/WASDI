@@ -38,8 +38,14 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 
 		String sResult = null;
 		try {
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | m_sAppConfigPath: ( " + m_sAppConfigPath + " )");
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf + " )");
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf.toString() + " )");
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | m_sParserConfigPath: ( " + m_sParserConfigPath + " )");
 			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | oParseConf: ( " + oParseConf + " )");
+			Utils.debugLog("QueryTranslatorCREODIAS.translate | oParseConf: ( " + oParseConf.toString() + " )");
 			
 			//from:
 			//( footprint:"intersects(POLYGON((91.76001774389503 9.461419178814332,91.76001774389503 29.23273110342357,100.90070010891878 29.23273110342357,100.90070010891878 9.461419178814332,91.76001774389503 9.461419178814332)))" ) AND ( beginPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] AND endPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:99)
@@ -128,7 +134,8 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			}
 			else {
 				Utils.debugLog("QueryTranslatorCREODIAS.translate | else");
-				
+
+				Utils.debugLog("QueryTranslatorCREODIAS.translate | sQuery: ( " + sQuery + " )");
 				String sCloud = "cloudcoverpercentage:[";
 				int iCloudStart = sQuery.indexOf(sCloud);
 				if(iCloudStart > 0) {
@@ -142,9 +149,12 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 						sQuery = oBuilder.toString();
 					}
 				}
-				
+
+				Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf + " )");
+				Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf.has(\"missions\"): ( " + oAppConf.has("missions") + " )");
 				if(!oAppConf.has("missions")) {
 					//infer collection from free text
+					Utils.debugLog("QueryTranslatorCREODIAS.translate | oQueryViewModel.platformName: ( " + oQueryViewModel.platformName + " )");
 					if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
 						throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
 					} else {
