@@ -38,23 +38,15 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 
 		String sResult = null;
 		try {
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | m_sAppConfigPath: ( " + m_sAppConfigPath + " )");
 			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sAppConfigPath);
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf + " )");
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf.toString() + " )");
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | m_sParserConfigPath: ( " + m_sParserConfigPath + " )");
 			JSONObject oParseConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | oParseConf: ( " + oParseConf + " )");
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | oParseConf: ( " + oParseConf.toString() + " )");
 			
 			//from:
 			//( footprint:"intersects(POLYGON((91.76001774389503 9.461419178814332,91.76001774389503 29.23273110342357,100.90070010891878 29.23273110342357,100.90070010891878 9.461419178814332,91.76001774389503 9.461419178814332)))" ) AND ( beginPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] AND endPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:99)
 			//to:
 			//https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?maxRecords=10&startDate=2020-07-01T00%3A00%3A00Z&completionDate=2020-07-31T23%3A59%3A59Z&productType=GRD&relativeOrbitNumber=9&sortParam=startDate&sortOrder=descending&status=all&geometry=POLYGON((92.65416040497227+26.088955768777822%2C99.6675662125083+26.233334945401936%2C99.79625057598854+16.91245056850053%2C93.04021840440677+16.881668352246322%2C92.65416040497227+26.088955768777822))&dataset=ESA-DATASET
 
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | sQueryFromClient: ( " + sQueryFromClient + " )");
 			String sQuery = this.prepareQuery(sQueryFromClient);
-			Utils.debugLog("QueryTranslatorCREODIAS.translate | sQuery: ( " + sQuery + " )");
 			
 			sResult = "";
 			
@@ -62,7 +54,6 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			
 			// P.Campanella: add support to Sentinel5P, using the new Query View Model
 			if (oQueryViewModel.platformName==Platforms.SENTINEL5P) {
-				Utils.debugLog("QueryTranslatorCREODIAS.translate | if");
 				
 				// Set start and end date
 				String sTimeStart = oQueryViewModel.startFromDate.substring(0, 10);
@@ -73,13 +64,11 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				String sTimePeriod = "&startDate=" + sTimeStart + "&completionDate="+ sTimeEnd;
 				
 				sResult = "Sentinel5P/search.json?" + sTimePeriod;
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 11| sResult: ( " + sResult + " )");
 				
 				if (oQueryViewModel.limit>0) {
 					String sCount = "&maxRecords=" + oQueryViewModel.limit;
 					sResult = sCount + sTimePeriod;
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 12| sResult: ( " + sResult + " )");
 				
 				// Set the start index:
 				if (oQueryViewModel.offset>=0) {
@@ -87,7 +76,6 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 					String sOffset= "&startIndex="+	iOffset;
 					sResult = sOffset + sResult;
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 13| sResult: ( " + sResult + " )");
 				
 				// Set the Bbox
 				String sBbox="";
@@ -97,13 +85,11 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				}
 				
 				sResult += sBbox;
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 14| sResult: ( " + sResult + " )");
 				
 				// Set Product Level if present
 				if (!Utils.isNullOrEmpty(oQueryViewModel.productLevel)) {
 					sResult += "&processingLevel=" + oQueryViewModel.productLevel;
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 15| sResult: ( " + sResult + " )");
 				
 				// Set Product Type if present
 				if (!Utils.isNullOrEmpty(oQueryViewModel.productType)) {
@@ -118,24 +104,19 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 						}
 					}
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 16| sResult: ( " + sResult + " )");
 				
 				// Set Timeliness if present
 				if (!Utils.isNullOrEmpty(oQueryViewModel.timeliness)) {
 					sResult += "&timeliness=" + oQueryViewModel.timeliness.replace(" ", "+");
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 17| sResult: ( " + sResult + " )");
 				
 				if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
 					sResult += "&productIdentifier=%25" +oQueryViewModel.productName+"%25";
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 18| sResult: ( " + sResult + " )");
 				
 			}
 			else {
-				Utils.debugLog("QueryTranslatorCREODIAS.translate | else");
 
-				Utils.debugLog("QueryTranslatorCREODIAS.translate | sQuery: ( " + sQuery + " )");
 				String sCloud = "cloudcoverpercentage:[";
 				int iCloudStart = sQuery.indexOf(sCloud);
 				if(iCloudStart > 0) {
@@ -150,11 +131,8 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 					}
 				}
 
-				Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf: ( " + oAppConf + " )");
-				Utils.debugLog("QueryTranslatorCREODIAS.translate | oAppConf.has(\"missions\"): ( " + oAppConf.has("missions") + " )");
 				if(!oAppConf.has("missions")) {
 					//infer collection from free text
-					Utils.debugLog("QueryTranslatorCREODIAS.translate | oQueryViewModel.platformName: ( " + oQueryViewModel.platformName + " )");
 					if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
 						throw new NoSuchElementException("No free text and could not find \"mission\" array in json configuration, aborting");
 					} else {
@@ -162,7 +140,6 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 						sResult += oQueryViewModel.platformName.replace("-", "") + "/search.json?";
 					}
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 21| sResult: ( " + sResult + " )");
 				
 				//first things first: append mission name + /search.json? 
 				for (Object oMissionObject : oAppConf.optJSONArray("missions")) {
@@ -190,39 +167,25 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 
 					}
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 22| sResult: ( " + sResult + " )");
 				if(Utils.isNullOrEmpty(sResult)) {
 					sResult = oQueryViewModel.platformName.replace("-", "")+ "/search.json?";
 				}
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 23| sResult: ( " + sResult + " )");
 				sResult += parseFootPrint(sQuery);
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 24| sResult: ( " + sResult + " )");
 				sResult += parseTimeFrame(sQuery);
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 25| sResult: ( " + sResult + " )");
 				sResult += "&status=all";
 
 //				if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 //					sResult += "&timeliness=Fast-24h";
 //				}
 
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 26| sResult: ( " + sResult + " )");
-				
 				String sFree = parseProductName(sQueryFromClient);
 				if(!Utils.isNullOrEmpty(sFree)) {
 					sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
 				}
 
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 27| sResult: ( " + sResult + " )");
-
 				if (oQueryViewModel.cloudCoverageFrom != null && oQueryViewModel.cloudCoverageTo != null) {
-					Utils.debugLog("QueryTranslatorCREODIAS.translate | cloudCoverageFrom: ( " + oQueryViewModel.cloudCoverageFrom + " )");
-					Utils.debugLog("QueryTranslatorCREODIAS.translate | cloudCoverageFrom: ( " + oQueryViewModel.cloudCoverageFrom.intValue() + " )");
-					Utils.debugLog("QueryTranslatorCREODIAS.translate | cloudCoverageTo: ( " + oQueryViewModel.cloudCoverageTo + " )");
-					Utils.debugLog("QueryTranslatorCREODIAS.translate | cloudCoverageTo: ( " + oQueryViewModel.cloudCoverageTo.intValue() + " )");
 					sResult += "&cloudCover=[" + oQueryViewModel.cloudCoverageFrom.intValue() + "," + oQueryViewModel.cloudCoverageTo.intValue() + "]";
 				}
-
-				Utils.debugLog("QueryTranslatorCREODIAS.translate 28| sResult: ( " + sResult + " )");
 			}
 
 		} catch (Exception oE) {
