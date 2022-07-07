@@ -975,7 +975,13 @@ public abstract class QueryTranslator {
 							// the types can be of three or four letters
 							iEnd = iStart + 4;
 						}
-						String sType = sQuery.substring(iStart, iEnd);
+						String sType;
+						if (iEnd > sQuery.length()) {
+							sType = sQuery.substring(iStart);
+						} else {
+							sType = sQuery.substring(iStart, iEnd);
+						}
+
 						sType = sType.trim();
 
 						oResult.productType = sType;
