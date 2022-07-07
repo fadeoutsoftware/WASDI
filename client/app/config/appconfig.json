@@ -352,9 +352,9 @@
                     "regex": ".*"
                 },
                 {
-                    "indexname": "cloudCoverPercentage",
+                    "indexname": "cloudcoverpercentage",
                     "indexlabel": "Cloud Coverage (%)",
-                    "indexhint" : "e.g. [0 TO 9.4]",
+                    "indexhint" : "e.g. [0 TO 94]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",

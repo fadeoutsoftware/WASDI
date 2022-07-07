@@ -182,6 +182,10 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				if(!Utils.isNullOrEmpty(sFree)) {
 					sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
 				}
+
+				if (oQueryViewModel.cloudCoverageFrom != null && oQueryViewModel.cloudCoverageTo != null) {
+					sResult += "&cloudCover=[" + oQueryViewModel.cloudCoverageFrom.intValue() + "," + oQueryViewModel.cloudCoverageTo.intValue() + "]";
+				}
 			}
 
 		} catch (Exception oE) {
