@@ -37,12 +37,13 @@ function ViewElementFactory() {
             if (oControl.default) {
                 oViewElement.m_sText = parseFloat(oControl.default);
             }
-
-            if (oControl.min) {
+            // check if the field can be parsed as number
+            // this will solve the ignored constraints when the value is set to 0
+            if (!isNaN(parseFloat(oControl.min))) {
                 oViewElement.m_fMin = oControl.min;
             }
-
-            if (oControl.max) {
+            // same for the max
+            if (!isNaN(parseFloat(oControl.max))) {
                 oViewElement.m_fMax = oControl.max;
             }
         }
@@ -396,7 +397,11 @@ class NumericBox extends UIComponent {
         this.isValid = function(asMessages) {
             try {
                 let fValue = parseFloat(this.m_sText)
-
+                // if we can't parse the value as a number
+                if (isNaN(fValue)) {
+                    asMessages.push(this.label + " - Please check parameters ");
+                    return false;
+                }
                 if (utilsIsObjectNullOrUndefined(this.m_fMin)==false) {
                     if (fValue<this.m_fMin) {
                         asMessages.push(this.label + " - Value must be greater than " + this.m_fMin);
