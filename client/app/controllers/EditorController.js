@@ -1442,6 +1442,114 @@ var EditorController = (function () {
         return true;
     };
 
+    /**
+     * When user right click on a product and choose 'Share' a dialog
+     * will be opened to allow the sharing of the product with other workspaces
+     * @param oProductInput
+     * @returns {boolean}
+     */
+    EditorController.prototype.openProductShareDialog = function (oProduct) {
+        console.log("EditorController.openProductShareDialog | oProduct: ", oProduct);
+        console.log("EditorController.openProductShareDialog | this.m_oActiveWorkspace.workspaceId: ", this.m_oActiveWorkspace.workspaceId);
+
+
+        if(utilsIsObjectNullOrUndefined(oProduct) === true)
+        {
+            return false;
+        }
+
+        var oController = this;
+
+        console.log("EditorController.openProductShareDialog | oController.m_oActiveWorkspace.workspaceId: ", oController.m_oActiveWorkspace.workspaceId);
+
+        var sMessage = this.m_oTranslate.instant("MSG_SHARE_WITH_WS");
+        var sErrorMessage = this.m_oTranslate.instant("MSG_ERROR_SHARING");
+
+        var oOptions = {
+            titleModal: sMessage,
+            buttonName: sMessage,
+            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId
+        };
+
+        var oThat = this;
+        var oCallback = function(result)
+        {
+            if(utilsIsObjectNullOrUndefined(result) === true)
+            {
+                return false;
+            }
+
+            var aoWorkSpaces = result;
+            var iNumberOfWorkspaces = aoWorkSpaces.length;
+            if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
+            {
+                console.log("Error there aren't Workspaces");
+                return false;
+            }
+
+            console.log("EditorController.openProductShareDialog | aoWorkSpaces: ", aoWorkSpaces);
+            console.log("EditorController.openProductShareDialog | aoWorkSpaces.length: ", aoWorkSpaces.length);
+
+            // download product in all workspaces
+            for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
+            {
+                
+            console.log("EditorController.openProductShareDialog | aoWorkSpaces[" + iIndexWorkspace + "].workspaceId: ", aoWorkSpaces[iIndexWorkspace].workspaceId);
+
+                oProduct.isDisabledToDoDownload = true;
+                var sUrl = oProduct.link;
+                var oError = function (data,status) {
+                            utilsVexDialogAlertTop(sErrorMessage);
+                            oProduct.isDisabledToDoDownload = false;
+                        };
+
+                var sBound = "";
+
+                if (utilsIsObjectNullOrUndefined(oProduct.bounds) == false) {
+                    sBound = oProduct.bounds.toString();
+                }
+//                oThat.shareProduct(sUrl,oProduct.title, aoWorkSpaces[iIndexWorkspace].workspaceId,sBound,oProduct.provider,null,oError);
+                let sOriginWorkspaceId = oController.m_oActiveWorkspace.workspaceId;
+                let sDestinationWorkspaceId = aoWorkSpaces[iIndexWorkspace].workspaceId;
+                let sProductName = oProduct.fileName; 
+                oThat.shareProduct(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName, null, oError);
+
+            }
+
+            oThat.deselectAllProducts();
+
+            return true;
+        };
+
+        utilsProjectOpenGetListOfWorkspacesSelectedModal(oCallback,oOptions,this.m_oModalService);
+    
+    };
+
+    EditorController.prototype.shareProduct = function(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName, oCallback, oError)
+    {
+        console.log("EditorController.prototype.shareProduct | sOriginWorkspaceId: ", sOriginWorkspaceId);
+        console.log("EditorController.prototype.shareProduct | sDestinationWorkspaceId: ", sDestinationWorkspaceId);
+        console.log("EditorController.prototype.shareProduct | sProductName: ", sProductName);
+
+        if(utilsIsObjectNullOrUndefined(oCallback) === true)
+        {
+            var sMessage = this.m_oTranslate.instant("MSG_SHARING");
+            oCallback = function (data, status) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+                utilsVexCloseDialogAfter("3000",oDialog);
+            }
+        }
+        if(utilsIsObjectNullOrUndefined(oError) === true)
+        {
+            var sMessage = this.m_oTranslate.instant("MSG_ERROR_SHARING");
+            oError = function (data,status) {
+                utilsVexDialogAlertTop(sMessage);
+                // oProduct.isDisabledToDoDownload = false;
+            };
+        }
+        this.m_oFileBufferService.share(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName).then(oCallback, oError);
+    };
+
     EditorController.prototype.openTransferToFtpDialog = function (oSelectedProduct, oWindow) {
 
         var oController;
@@ -1688,6 +1796,7 @@ var EditorController = (function () {
                     var sSendToFtp = oController.m_oTranslate.instant("MENU_SEND_FTP");
                     var sDelete = oController.m_oTranslate.instant("MENU_DELETE");
                     var sProperties = oController.m_oTranslate.instant("MENU_PROPERTIES");
+                    var sShare = oController.m_oTranslate.instant("MENU_SHARE");
                     var sDeleteConfirm = oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
                     var sDeleteError = oController.m_oTranslate.instant("MSG_DELETE_ERROR");
                     var sDeleteManyConfirm1 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_1");
@@ -1794,6 +1903,26 @@ var EditorController = (function () {
                                         oController.findProductByName($node.original.fileName);
 
                                         oController.downloadProductByName($node.original.fileName);
+                                    }
+                                }
+                            },
+                            "Share": {
+                                "label": sShare,
+                                "icon": "share-icon-context-menu-jstree",
+                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
+                                "separator_before": true,
+                                "action": function (obj) {
+                                    //$node.original.fileName;
+                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
+                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
+                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
+                                                oController.openProductShareDialog(oController.m_aoProducts[iIndexProducts]);
+                                                break;
+                                            }
+
+                                        }
+
                                     }
                                 }
                             },

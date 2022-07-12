@@ -100,6 +100,9 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.DOWNLOAD.name())) {
 			oParam = new DownloadFileParameter();
 		}
+		else if (sOperationType.equals(LauncherOperations.SHARE.name())) {
+			oParam = new ShareFileParameter();
+		}
 		else if (sOperationType.equals(LauncherOperations.FTPUPLOAD.name())) {
 			oParam = new FtpUploadParameters();
 		}

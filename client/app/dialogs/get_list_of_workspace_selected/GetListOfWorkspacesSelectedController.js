@@ -11,6 +11,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_oExtras = oExtras
         this.m_sButtonName = oExtras.buttonName;
         this.m_sTitleModal = oExtras.titleModal;
+        this.m_sExcludedWorkspaceId = oExtras.excludedWorkspaceId;
         this.m_bSelectedAllWorkspaces = false;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_aoWorkspaceList = [];
@@ -23,7 +24,6 @@ var GetListOfWorkspacesController = (function() {
         this.m_oSelectedWorkflow = "";
         this.m_oModalService = oModalService;
         this.m_oClose = oClose;
-        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_aoWorkflows = [];
         this.m_bisLoadingWorkflows = false;
         this.m_bIsVisibleWorkFlowsOption = false;
@@ -65,6 +65,7 @@ var GetListOfWorkspacesController = (function() {
      */
     GetListOfWorkspacesController.prototype.getWorkspaces = function()
     {
+        console.log("GetListOfWorkspacesController.getWorkspaces | this.m_sExcludedWorkspaceId: ", this.m_sExcludedWorkspaceId);
         var oController = this;
         this.m_bisLoadingWorkspacesList = true;
         this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
@@ -73,10 +74,17 @@ var GetListOfWorkspacesController = (function() {
                 if (data.data != undefined)
                 {
                     oController.m_aoWorkspaceList = data.data;
-                    var oDefaultWorkspace = oController.getDefaultWorkspace(oController.m_oActiveWorkspace,oController.m_aoWorkspaceList);
-                    if( utilsIsObjectNullOrUndefined(oDefaultWorkspace) === false)
-                    {
-                        oController.selectWorkspace(oDefaultWorkspace);
+
+                    if (utilsIsObjectNullOrUndefined(oController.m_sExcludedWorkspaceId) === false) {
+                        oController.m_aoWorkspaceList = oController.m_aoWorkspaceList.filter(function (el) {
+                            return el.workspaceId !== oController.m_sExcludedWorkspaceId;
+                        });
+                    } else {
+                        var oDefaultWorkspace = oController.getDefaultWorkspace(oController.m_oActiveWorkspace,oController.m_aoWorkspaceList);
+                        if( utilsIsObjectNullOrUndefined(oDefaultWorkspace) === false)
+                        {
+                            oController.selectWorkspace(oDefaultWorkspace);
+                        }
                     }
                 }
             }

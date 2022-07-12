@@ -35,6 +35,10 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
 
         return this.m_oHttp.get(this.APIURL + '/filebuffer/download?fileUrl='+sEncodedUri+"&name="+sFileName+"&workspace="+sWorkspaceId+"&bbox="+sBounds+'&provider='+sProvider);
     }
+
+    this.share = function(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName) {
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/share?originWorkspaceId='+sOriginWorkspaceId+"&destinationWorkspaceId="+sDestinationWorkspaceId+"&productName="+sProductName);
+    }
     
     this.publishBand = function(sUrl, sWorkspaceId, sBand) {
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publishband?fileUrl='+encodeURIComponent(sUrl)+"&workspace="+sWorkspaceId+'&band='+sBand);
