@@ -87,6 +87,58 @@ public class BoundingBoxUtils {
 		return null;
 	}
 
+	public static List<Integer> expandBoundingBoxUpToADegree(List<Double> boundingBox) {
+		if (boundingBox == null || boundingBox.size() != 4) {
+			return null;
+		}
+
+		Double north = boundingBox.get(0);
+		Double west = boundingBox.get(1);
+		Double south = boundingBox.get(2);
+		Double east = boundingBox.get(3);
+
+		if (north == null || west == null || south == null || east == null) {
+			return null;
+		}
+
+		Integer expandedNorth;
+		Integer expandedWest;
+		Integer expandedSouth;
+		Integer expandedEast;
+
+		if (north == 0) {
+			expandedNorth = 0;
+		} else {
+			expandedNorth = roundUpAsInt.apply(north);
+		}
+
+		if (west == 0) {
+			expandedWest = 0;
+		} else {
+			expandedWest = roundDownAsInt.apply(west);
+		}
+
+		if (south == 0) {
+			expandedSouth = 0;
+		} else {
+			expandedSouth = roundDownAsInt.apply(south);
+		}
+
+		if (east == 0) {
+			expandedEast = 0;
+		} else {
+			expandedEast = roundUpAsInt.apply(east);
+		}
+
+		List<Integer> expandedBoundingBox = new ArrayList<>();
+		expandedBoundingBox.add(expandedNorth);
+		expandedBoundingBox.add(expandedWest);
+		expandedBoundingBox.add(expandedSouth);
+		expandedBoundingBox.add(expandedEast);
+
+		return expandedBoundingBox;
+	}
+
 	public static List<Double> expandBoundingBoxUpToAQuarterDegree(List<Double> boundingBox) {
 		if (boundingBox == null || boundingBox.size() != 4) {
 			return null;
@@ -147,6 +199,9 @@ public class BoundingBoxUtils {
 
 	private static Function<Double, Double> roundUp = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_CEILING).doubleValue();
 	private static Function<Double, Double> roundDown = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_FLOOR).doubleValue();
+
+	private static Function<Double, Integer> roundUpAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_CEILING).intValue();
+	private static Function<Double, Integer> roundDownAsInt = (a) -> BigDecimal.valueOf(a).setScale(0, BigDecimal.ROUND_FLOOR).intValue();
 
 	public static Function<Double, Double> roundToQuarterUp = (a) -> multiplyBy4.andThen(roundUp).andThen(divideBy4).apply(a);
 	public static Function<Double, Double> roundToQuarterDown = (a) -> multiplyBy4.andThen(roundDown).andThen(divideBy4).apply(a);

@@ -45,7 +45,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			//( footprint:"intersects(POLYGON((91.76001774389503 9.461419178814332,91.76001774389503 29.23273110342357,100.90070010891878 29.23273110342357,100.90070010891878 9.461419178814332,91.76001774389503 9.461419178814332)))" ) AND ( beginPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] AND endPosition:[2020-07-24T00:00:00.000Z TO 2020-07-31T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:GRD AND relativeorbitnumber:99)
 			//to:
 			//https://finder.creodias.eu/resto/api/collections/Sentinel1/search.json?maxRecords=10&startDate=2020-07-01T00%3A00%3A00Z&completionDate=2020-07-31T23%3A59%3A59Z&productType=GRD&relativeOrbitNumber=9&sortParam=startDate&sortOrder=descending&status=all&geometry=POLYGON((92.65416040497227+26.088955768777822%2C99.6675662125083+26.233334945401936%2C99.79625057598854+16.91245056850053%2C93.04021840440677+16.881668352246322%2C92.65416040497227+26.088955768777822))&dataset=ESA-DATASET
-			
+
 			String sQuery = this.prepareQuery(sQueryFromClient);
 			
 			sResult = "";
@@ -116,7 +116,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				
 			}
 			else {
-				
+
 				String sCloud = "cloudcoverpercentage:[";
 				int iCloudStart = sQuery.indexOf(sCloud);
 				if(iCloudStart > 0) {
@@ -130,7 +130,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 						sQuery = oBuilder.toString();
 					}
 				}
-				
+
 				if(!oAppConf.has("missions")) {
 					//infer collection from free text
 					if(Utils.isNullOrEmpty(oQueryViewModel.platformName)) {
@@ -177,10 +177,14 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 //				if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 //					sResult += "&timeliness=Fast-24h";
 //				}
-				
+
 				String sFree = parseProductName(sQueryFromClient);
 				if(!Utils.isNullOrEmpty(sFree)) {
 					sResult = sResult + "&productIdentifier=%25" + sFree + "%25";
+				}
+
+				if (oQueryViewModel.cloudCoverageFrom != null && oQueryViewModel.cloudCoverageTo != null) {
+					sResult += "&cloudCover=[" + oQueryViewModel.cloudCoverageFrom.intValue() + "," + oQueryViewModel.cloudCoverageTo.intValue() + "]";
 				}
 			}
 

@@ -215,9 +215,9 @@ public class QueryTranslatorONDA extends QueryTranslator {
 			}
 			sResult += " )";
 
-			if(sQuery.substring(iStart).contains("cloudCoverPercentage")) {
-				//cloudCoverPercentage:[16.33 TO 95.6]
-				iStart = sQuery.indexOf("cloudCoverPercentage:");
+			if(sQuery.substring(iStart).contains("cloudcoverpercentage")) {
+				//cloudcoverpercentage:[16.33 TO 95.6]
+				iStart = sQuery.indexOf("cloudcoverpercentage:");
 				iStart = sQuery.indexOf("[", iStart);
 				int iStop = sQuery.indexOf("]", iStart);
 				sResult += " AND cloudCoverPercentage:";
@@ -317,7 +317,7 @@ public class QueryTranslatorONDA extends QueryTranslator {
 			}
 
 
-			//cloudCoverPercentage make sure to read the query for s2 and not for landsat
+			//cloudcoverpercentage make sure to read the query for s2 and not for landsat
 			int iFrom = sQuery.indexOf("platformname:Sentinel-2");
 			int iTo = sQuery.length();
 			int iLand = sQuery.indexOf("platformname:Landsat");

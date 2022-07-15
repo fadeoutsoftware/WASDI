@@ -63,7 +63,8 @@
 
                         <td class="over-color" data-toggle="tooltip" data-placement="top"
                             title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
-                            ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">
+                            ng-class="{'disabled': oWSListItem.activeNode === false}" ng-disabled="oWSListItem.activeNode === false"
+                            ng-click="m_oController.openWorkspace(oWSListItem.workspaceId, oWSListItem.activeNode)">
                             <div>
                                 <!--OLD VERSION COMMENTED-->
                                 <i>

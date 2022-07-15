@@ -352,9 +352,9 @@
                     "regex": ".*"
                 },
                 {
-                    "indexname": "cloudCoverPercentage",
+                    "indexname": "cloudcoverpercentage",
                     "indexlabel": "Cloud Coverage (%)",
-                    "indexhint" : "e.g. [0 TO 9.4]",
+                    "indexhint" : "e.g. [0 TO 94]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",
@@ -424,6 +424,43 @@
                     "indexvalues":"grib|netcdf",
                     "regex": ".*",
                     "indexvalue":"netcdf"
+                }
+            ]
+        },
+        {
+            "name": "CAMS",
+            "indexname": "platformname",
+            "indexvalue": "CAMS",
+            "filters": [
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "cams-global-atmospheric-composition-forecasts",
+                    "regex": ".*",
+                    "indexvalue":"cams-global-atmospheric-composition-forecasts"
+                },
+                {
+                    "indexname": "type",
+                    "indexlabel": "Type",
+                    "indexvalues": "forecast",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cams-global-atmospheric-composition-forecasts",
+                    "indexvalue":"forecast"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "dust_aerosol_optical_depth_550nm",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cams-global-atmospheric-composition-forecasts",
+                    "indexvalue":"dust_aerosol_optical_depth_550nm"
+                },
+                {
+                    "indexname": "format",
+                    "indexlabel": "Format",
+                    "indexvalues":"grib|netcdf_zip",
+                    "regex": ".*",
+                    "indexvalue":"netcdf_zip"
                 }
             ]
         },
@@ -691,9 +728,16 @@
                     "regex": "[1-9]|[1-9][0-9]||[1-9][0-9][0-9]||[1-9][0-9][0-9][0-9]||[1][0-9][0-9][0-9][0-9]"
                 },
                 {
+                    "indexname": "parameterName",
+                    "indexlabel": "Parameter",
+                    "indexvalues": "Day|Night",
+                    "regex": ".*",
+                    "indexvalue":""
+                },
+                {
                     "indexname": "dayNightFlag",
                     "indexlabel": "DayNightFlag",
-                    "indexvalues": "Day|Night",
+                    "indexvalues": "L1B_RAD|Night",
                     "regex": ".*",
                     "indexvalue":""
                 }

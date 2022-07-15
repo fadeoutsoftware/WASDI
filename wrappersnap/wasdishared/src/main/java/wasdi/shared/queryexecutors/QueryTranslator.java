@@ -91,6 +91,11 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_ERA5 = "platformname:ERA5";
 
 	/**
+	 * Token of CAMS platform
+	 */
+	private static final String s_sPLATFORMNAME_CAMS = "platformname:CAMS";
+
+	/**
 	 * Token of DEM platform
 	 */
 	private static final String s_sPLATFORMNAME_DEM = "platformname:DEM";
@@ -488,7 +493,10 @@ public abstract class QueryTranslator {
 			
 			// Try get Info about ERA5
 			parseERA5(sQuery, oResult);
-			
+
+			// Try get Info about CAMS
+			parseCAMS(sQuery, oResult);
+
 			// Try to get info about Landsat
 			parseLandsat(sQuery, oResult);
 			
@@ -798,6 +806,26 @@ public abstract class QueryTranslator {
 	}
 
 	/**
+	 * Fills the Query View Model with ERA5 info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseCAMS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CAMS)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CAMS);
+
+			oResult.platformName = Platforms.CAMS;
+
+			oResult.productName = extractValue(sQuery, "dataset");
+			oResult.productType = extractValue(sQuery, "type");
+			oResult.sensorMode = extractValue(sQuery, "variables");
+//			oResult.productLevel = extractValue(sQuery, "pressureLevels");
+			oResult.timeliness = extractValue(sQuery, "format");
+		}
+	}
+
+	/**
 	 * Fills the Query View Model with DEM info
 	 * 
 	 * @param sQuery the query
@@ -975,7 +1003,13 @@ public abstract class QueryTranslator {
 							// the types can be of three or four letters
 							iEnd = iStart + 4;
 						}
-						String sType = sQuery.substring(iStart, iEnd);
+						String sType;
+						if (iEnd > sQuery.length()) {
+							sType = sQuery.substring(iStart);
+						} else {
+							sType = sQuery.substring(iStart, iEnd);
+						}
+
 						sType = sType.trim();
 
 						oResult.productType = sType;

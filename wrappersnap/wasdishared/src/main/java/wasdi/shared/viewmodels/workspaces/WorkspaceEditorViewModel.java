@@ -19,6 +19,7 @@ public class WorkspaceEditorViewModel {
     private Date lastEditDate;
     private List<String> sharedUsers = new ArrayList<>();
     private String nodeCode;
+    private boolean activeNode;
     private long processesCount;
     private String cloudProvider;
     private String slaLink;
@@ -102,6 +103,14 @@ public class WorkspaceEditorViewModel {
 
 	public void setNodeCode(String nodeCode) {
 		this.nodeCode = nodeCode;
+	}
+
+	public boolean getActiveNode() {
+		return activeNode;
+	}
+
+	public void setActiveNode(boolean bActiveNode) {
+		this.activeNode = bActiveNode;
 	}
 	
 	public String getSlaLink() {

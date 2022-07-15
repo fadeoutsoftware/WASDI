@@ -33,6 +33,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("EODC", EODCProviderAdapter::new);
 		aoDownloaders.put("LSA", LSAProviderAdapter::new);
 		aoDownloaders.put("VIIRS", VIIRSProviderAdapter::new);
+		aoDownloaders.put("ADS", ADSProviderAdapter::new);
 		aoDownloaders.put("CDS", CDSProviderAdapter::new);
 		aoDownloaders.put("PLANET", PLANETProviderAdapter::new);
 		aoDownloaders.put("TERRASCOPE", TerrascopeProviderAdapter::new);

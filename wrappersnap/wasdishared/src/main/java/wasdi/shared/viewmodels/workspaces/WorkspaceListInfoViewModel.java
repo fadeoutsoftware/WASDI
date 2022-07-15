@@ -13,6 +13,7 @@ public class WorkspaceListInfoViewModel {
     private String workspaceName;
     private String ownerUserId;
     private List<String> sharedUsers = new ArrayList<>();
+    private boolean activeNode;
 
     public String getWorkspaceId() {
         return workspaceId;
@@ -45,4 +46,12 @@ public class WorkspaceListInfoViewModel {
     public void setSharedUsers(List<String> sharedUsers) {
         this.sharedUsers = sharedUsers;
     }
+
+	public boolean getActiveNode() {
+		return activeNode;
+	}
+
+	public void setActiveNode(boolean bActiveNode) {
+		this.activeNode = bActiveNode;
+	}
 }

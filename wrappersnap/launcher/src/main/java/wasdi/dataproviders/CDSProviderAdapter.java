@@ -213,7 +213,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				sResult = downloadViaHttp(sUrl, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				Utils.debugLog("CDSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
 			iAttemp ++;
@@ -243,7 +243,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sBoundingBox = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
 
-		List<String> oaVariables = Arrays.stream(sVariables.split(" "))
+		List<String> asVariables = Arrays.stream(sVariables.split(" "))
 				.map(CDSProviderAdapter::inflateVariable)
 				.collect(Collectors.toList());
 
@@ -253,16 +253,16 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		List<String> oaTimeHours = Arrays.asList("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00");
 
-		List<Double> grid = Arrays.asList(0.25, 0.25);
+		List<Double> adGrid = Arrays.asList(0.25, 0.25);
 
 		Map<String, Object> root = new HashMap<>();
 		root.put("product_type", sProductType);
-		root.put("variable", oaVariables);
+		root.put("variable", asVariables);
 		root.put("year", sYear);
 		root.put("month", sMonth);
 		root.put("day", sDay);
 		root.put("time", oaTimeHours);
-		root.put("grid", grid);
+		root.put("grid", adGrid);
 		root.put("format", sFormat);
 
 		if (sBoundingBox != null && !sBoundingBox.contains("null")) {

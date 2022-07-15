@@ -1,7 +1,5 @@
 package wasdi.shared.queryexecutors.cds;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -189,7 +187,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		aoPayload.put("variables", sVariables); // U+V
 		aoPayload.put("presureLevels", sPresureLevels); // 1 hPa
 		aoPayload.put("date", sDate); // 20211201
-		aoPayload.put("boundingBox", sBoundingBox); // North 10°, West 5°, South 5°, East 7
+		aoPayload.put("boundingBox", sBoundingBox); // North 10ï¿½, West 5ï¿½, South 5ï¿½, East 7
 		aoPayload.put("format", sFormat); // grib | netcdf
 
 		String sPayload = null;
