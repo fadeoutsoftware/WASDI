@@ -216,7 +216,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(Filters.eq("filePath", sFilePath));
+            DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteMany(Filters.eq("filePath", sFilePath));
 
             if (oDeleteResult != null)
             {

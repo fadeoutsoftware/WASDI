@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.DELETE;
@@ -151,6 +154,12 @@ public class WorkspaceResource {
 
 			Utils.debugLog("WorkspaceResource.GetListByUser: workspaces for " + oUser.getUserId());
 
+			NodeRepository oNodeRepository = new NodeRepository();
+			List<Node> aoNodeList = oNodeRepository.getNodesList();
+
+			Map<String, Node> aoNodeMap = aoNodeList.stream()
+					.collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
+
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
 			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
@@ -167,6 +176,18 @@ public class WorkspaceResource {
 				oWSViewModel.setOwnerUserId(oUser.getUserId());
 				oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
 				oWSViewModel.setWorkspaceName(oWorkspace.getName());
+
+				if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+					if (oWorkspace.getNodeCode().equals("wasdi")) {
+						oWSViewModel.setActiveNode(true);
+					} else {
+						Node oNode = aoNodeMap.get(oWorkspace.getNodeCode());
+
+						if (oNode != null) {
+							oWSViewModel.setActiveNode(oNode.getActive());
+						}
+					}
+				}
 
 				// Get Sharings
 				List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
@@ -300,7 +321,13 @@ public class WorkspaceResource {
 				String sNodeCode = oWorkspace.getNodeCode(); 
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
-					oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+					if (oWorkspaceNode.getActive()) {
+						oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+					} else {
+						oVM.setApiUrl(WasdiConfig.Current.baseUrl);
+					}
+
+					oVM.setActiveNode(oWorkspaceNode.getActive());
 										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
 						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
@@ -321,6 +348,8 @@ public class WorkspaceResource {
 			}
 			else {
 				oVM.setCloudProvider("wasdi");
+
+				oVM.setActiveNode(true);
 			}
 
 			// Get Sharings

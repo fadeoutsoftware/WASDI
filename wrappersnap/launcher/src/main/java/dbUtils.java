@@ -1131,8 +1131,8 @@ public class dbUtils {
 
             System.out.println("\t1 - Clean shared ws errors");
             System.out.println("\t2 - Move Workpsace to new node");
-            System.out.println("\t3 - Delete Wokspace");
-            System.out.println("\t4 - Reconstruct Wokspace");
+            System.out.println("\t3 - Delete Workspace");
+            System.out.println("\t4 - Reconstruct Workspace");
             System.out.println("\t5 - Clean Workspaces not existing in node");
             System.out.println("\tx - back");
             System.out.println("");

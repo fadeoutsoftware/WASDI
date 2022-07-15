@@ -46,7 +46,7 @@
                                     </tr>
                                     </thead>
                                     <tbody ng-show="m_oController.m_aoWorkspaceList.length > 0 || m_oController.m_bIsCreatingWorskapce===false">
-                                    <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList" ng-hide="m_oController.m_aoWorkspaceList.length === 0">
+                                    <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList" ng-hide="workspace.activeNode === false">
 
                                         <td>{{workspace.workspaceName}}</td>
                                         <td>{{workspace.ownerUserId}}</td>

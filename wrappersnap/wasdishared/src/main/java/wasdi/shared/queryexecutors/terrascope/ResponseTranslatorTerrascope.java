@@ -434,6 +434,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
 		if (!Utils.isNullOrEmpty(sUrl)) {
 			oResult.getProperties().put(ResponseTranslatorTerrascope.SURL, sUrl);
+			oResult.getProperties().put("format", sUrl.substring(sUrl.lastIndexOf(".") + 1));
 			oResult.setLink(sUrl);
 		} else {
 			Utils.debugLog("ResponseTranslatorTerrascope.parseServices: download link not found! dumping json:\n"
