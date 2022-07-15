@@ -551,6 +551,9 @@ public class WasdiFileUtils {
 			else if (sFileName.toUpperCase().startsWith("ERA5_")) {
 				return Platforms.ERA5;
 			}
+			else if (sFileName.toUpperCase().startsWith("CAMS_")) {
+				return Platforms.CAMS;
+			}
 			else if (sFileName.toUpperCase().startsWith("PLANET_")) {
 				return Platforms.PLANET;
 			}

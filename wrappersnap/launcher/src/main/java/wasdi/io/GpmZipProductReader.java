@@ -68,7 +68,7 @@ public class GpmZipProductReader extends WasdiProductReader {
 		NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
 		oNodeGroupViewModel.setNodeName("Bands");
 
-		List<BandViewModel> oBands = new ArrayList<>();
+		List<BandViewModel> aoBands = new ArrayList<>();
 		
     	// Create the single band representing the shape
     	BandViewModel oBandViewModel = new BandViewModel();
@@ -79,9 +79,9 @@ public class GpmZipProductReader extends WasdiProductReader {
     	oBandViewModel.setPublished(false);
     	oBandViewModel.setName(Utils.getFileNameWithoutLastExtension(oRetViewModel.getName()));
 		
-		oBands.add(oBandViewModel);
+		aoBands.add(oBandViewModel);
 
-		oNodeGroupViewModel.setBands(oBands);
+		oNodeGroupViewModel.setBands(aoBands);
 		oRetViewModel.setBandsGroups(oNodeGroupViewModel);
 		
 		return oRetViewModel;
