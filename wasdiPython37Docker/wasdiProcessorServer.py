@@ -305,7 +305,7 @@ def pm_get_package(name: str):
 
 
 @app.route('/packageManager/executeCommand/<command>')
-def pm_add_package(command: str):
+def pm_execute_command(command: str):
 	print('/packageManager/executeCommand/' + command)
 
 	output: str = __execute_pip_command_and_get_output(command)
