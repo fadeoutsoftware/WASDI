@@ -16,4 +16,6 @@ public interface IPackageManager {
 
 	void operatePackageChange(String sUpdateCommand);
 
+	String executeCommand(String sCommand);
+
 }

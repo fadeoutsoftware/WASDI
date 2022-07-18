@@ -268,6 +268,15 @@ def pm_get_package(name: str):
 	return json.dumps({'error': 'Not found'}), 404, {'Content-Type': 'application/json'}
 
 
+@app.route('/packageManager/executeCommand/<command>')
+def pm_execute_command(command: str):
+	print('/packageManager/executeCommand/' + command)
+
+	output: str = __execute_conda_command_and_get_output(command)
+
+	return json.dumps({'output': output}), 200, {'Content-Type': 'application/json'}
+
+
 @app.route('/packageManager/addPackage/<name>/', defaults={'version': ''})
 @app.route('/packageManager/addPackage/<name>/<version>/')
 def pm_add_package(name: str, version: str):

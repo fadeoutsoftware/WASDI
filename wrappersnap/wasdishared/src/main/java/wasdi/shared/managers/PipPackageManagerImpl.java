@@ -154,4 +154,34 @@ public class PipPackageManagerImpl implements IPackageManager {
 		}
 	}
 
+	@Override
+	public String executeCommand(String sCommand) {
+		// Call localhost:port
+		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand/" + sCommand;
+		s_oLogger.debug("PipPackageManagerImpl.executeCommand: sUrl: " + sUrl);
+
+		Map<String, String> asHeaders = Collections.emptyMap();
+
+		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		Integer iResult = oHttpCallResponse.getResponseCode();
+		String sResponse = oHttpCallResponse.getResponseBody();
+
+		s_oLogger.debug("PipPackageManagerImpl.executeCommand: iResult: " + iResult);
+		s_oLogger.debug("PipPackageManagerImpl.executeCommand: " + sResponse);
+
+		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
+			s_oLogger.info("PipPackageManagerImpl.executeCommand: Output from Server .... \n");
+			s_oLogger.info("PipPackageManagerImpl.executeCommand: " + sResponse);
+			s_oLogger.debug("PipPackageManagerImpl.executeCommand: command executed");
+
+			JSONObject oJsonItem = new JSONObject(sResponse);
+
+			String sContent = oJsonItem.optString("output", "No content");
+
+			return sContent;
+		} else {
+			throw new RuntimeException(sResponse);
+		}
+	}
+
 }

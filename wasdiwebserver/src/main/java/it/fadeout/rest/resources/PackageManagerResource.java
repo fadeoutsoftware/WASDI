@@ -113,6 +113,29 @@ public class PackageManagerResource {
 		return oPackageManagerVM;
 	}
 
+	@GET
+	@Path("/executeCommand")
+	public String executeCommand(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName,
+			@QueryParam("command") String sCommand) throws Exception {
+		Utils.debugLog("PackageManagerResource.executeCommand( " + "Name: " + sName + "; " + "Command: " + sCommand + " )");
+
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
+
+		String sCommandExecutionOutput = null;
+
+		try {
+			IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
+
+			sCommandExecutionOutput = oPackageManager.executeCommand(sCommand);
+		} catch (Exception oEx) {
+			Utils.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+		}
+
+		return sCommandExecutionOutput;
+	}
+
 	private IPackageManager getPackageManager(Processor oProcessor) {
 		IPackageManager oPackageManager = null;
 
