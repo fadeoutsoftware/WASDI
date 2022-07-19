@@ -268,9 +268,10 @@ def pm_get_package(name: str):
 	return json.dumps({'error': 'Not found'}), 404, {'Content-Type': 'application/json'}
 
 
-@app.route('/packageManager/executeCommand/<command>')
+@app.route('/packageManager/executeCommand', methods=['POST'])
 def pm_execute_command(command: str):
-	print('/packageManager/executeCommand/' + command)
+	command: str = request.form.get('command')
+	print('/packageManager/executeCommand | command: ' + command)
 
 	output: str = __execute_conda_command_and_get_output(command)
 

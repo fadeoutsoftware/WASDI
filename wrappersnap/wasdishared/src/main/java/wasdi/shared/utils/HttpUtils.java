@@ -446,6 +446,73 @@ public final class HttpUtils {
 		return sResult;
 	}
 
+	public static HttpCallResponse newStandardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+
+		String sResult = null;
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Accept", "*/*");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			oConnection.setDoOutput(true);
+			byte[] ayBytes = sPayload.getBytes();
+			oConnection.setFixedLengthStreamingMode(ayBytes.length);
+//			oConnection.setRequestProperty("Content-Type", "application/xml");
+			oConnection.connect();
+			try (OutputStream os = oConnection.getOutputStream()) {
+				os.write(ayBytes);
+			}
+
+			Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: Response Code : " + iResponseCode);
+				
+				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+				if (200 == iResponseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpCallResponse.setResponseBody(sResult);
+					}
+				} else {
+					Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: provider did not return 200 but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+					sResult = oBytearrayOutputStream.toString();
+					oHttpCallResponse.setResponseBody(sResult);
+				}
+			} catch (Exception oEint) {
+				Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+
+		} catch (Exception oE) {
+			Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oE);
+		}
+
+		return oHttpCallResponse;
+	}
+
 	/**
 	 * Standard http post utility function
 	 * @param sUrl url to call

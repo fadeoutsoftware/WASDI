@@ -157,12 +157,16 @@ public class PipPackageManagerImpl implements IPackageManager {
 	@Override
 	public String executeCommand(String sCommand) {
 		// Call localhost:port
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand/" + sCommand;
+		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand";
 		s_oLogger.debug("PipPackageManagerImpl.executeCommand: sUrl: " + sUrl);
+		s_oLogger.debug("PipPackageManagerImpl.executeCommand: sCommand: " + sCommand);
 
-		Map<String, String> asHeaders = Collections.emptyMap();
+		Map<String, String> asHeaders = new HashMap<>();
+		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		String sPayload = "command=" + sCommand;
+
+		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpPOSTQuery(sUrl, asHeaders, sPayload);
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sResponse = oHttpCallResponse.getResponseBody();
 

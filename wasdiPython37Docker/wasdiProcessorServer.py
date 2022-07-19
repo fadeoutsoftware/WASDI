@@ -304,9 +304,10 @@ def pm_get_package(name: str):
 		return json.dumps(info), 404, {'Content-Type': 'application/json'}
 
 
-@app.route('/packageManager/executeCommand/<command>')
-def pm_execute_command(command: str):
-	print('/packageManager/executeCommand/' + command)
+@app.route('/packageManager/executeCommand', methods=['POST'])
+def pm_execute_command():
+	command: str = request.form.get('command')
+	print('/packageManager/executeCommand | command: ' + command)
 
 	output: str = __execute_pip_command_and_get_output(command)
 

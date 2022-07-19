@@ -130,7 +130,7 @@ public class PackageManagerResource {
 
 			sCommandExecutionOutput = oPackageManager.executeCommand(sCommand);
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+			Utils.debugLog("PackageManagerResource.executeCommand: " + oEx);
 		}
 
 		return sCommandExecutionOutput;
