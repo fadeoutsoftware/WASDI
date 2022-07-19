@@ -269,7 +269,7 @@ def pm_get_package(name: str):
 
 
 @app.route('/packageManager/executeCommand', methods=['POST'])
-def pm_execute_command(command: str):
+def pm_execute_command():
 	command: str = request.form.get('command')
 	print('/packageManager/executeCommand | command: ' + command)
 

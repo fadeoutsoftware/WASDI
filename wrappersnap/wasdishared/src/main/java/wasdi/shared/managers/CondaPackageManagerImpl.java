@@ -154,8 +154,9 @@ public class CondaPackageManagerImpl implements IPackageManager {
 	@Override
 	public String executeCommand(String sCommand) {
 		// Call localhost:port
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand/" + sCommand + "/";
+		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand";
 		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: sUrl: " + sUrl);
+		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: sCommand: " + sCommand);
 
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
