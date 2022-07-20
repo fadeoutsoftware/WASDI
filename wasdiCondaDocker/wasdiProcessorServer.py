@@ -283,18 +283,16 @@ def pm_execute_command():
 def pm_add_package(name: str, version: str):
 	print('/packageManager/addPackage/' + name + '/' + version)
 
-	command: str = 'conda install ' + name
+	command: str = 'conda install -y ' + name
 	if version != '':
 		command = command + '=' + version
 
 	output: str = __execute_conda_command_and_get_output(command)
 
-#	if 'Successfully' in output:
-#		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
-#	else:
-#		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'})
-
-	return json.dumps({'output': output}), 200, {'Content-Type': 'application/json'}
+	if 'added / updated specs:' in output:
+		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+	else:
+		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
 
 
 @app.route('/packageManager/upgradePackage/<name>/', defaults={'version': ''})
@@ -302,18 +300,16 @@ def pm_add_package(name: str, version: str):
 def pm_upgrade_package(name: str, version: str):
 	print('/packageManager/upgradePackage/' + name + '/' + version)
 
-	command: str = 'conda install ' + name
+	command: str = 'conda install -y ' + name
 	if version != '':
 		command = command + '=' + version
 
 	output: str = __execute_conda_command_and_get_output(command)
 
-#	if 'Successfully' in output:
-#		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
-#	else:
-#		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'})
-
-	return json.dumps({'output': output}), 200, {'Content-Type': 'application/json'}
+	if 'added / updated specs:' in output:
+		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+	else:
+		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
 
 
 @app.route('/packageManager/removePackage/<name>/')
@@ -324,12 +320,10 @@ def pm_remove_package(name: str):
 
 	output: str = __execute_conda_command_and_get_output(command)
 
-#	if 'Successfully' in output:
-#		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
-#	else:
-#		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'})
-
-	return json.dumps({'output': output}), 200, {'Content-Type': 'application/json'}
+	if 'removed specs:' in output:
+		return json.dumps({'success': output}), 200, {'Content-Type': 'application/json'}
+	else:
+		return json.dumps({'error': output}), 409, {'Content-Type': 'application/json'}
 
 
 @app.route('/packageManager/packageVersions/<name>/')
