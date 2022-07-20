@@ -34,7 +34,7 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.4",
-        "angular": "~1.5",
+        "angular": "~1.8",
         "angular-animate": "~1.5",
         "angular-bootstrap": "",
         "angular-bootstrap-multiselect": "1.1.11",
