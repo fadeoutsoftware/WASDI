@@ -316,7 +316,7 @@ def pm_upgrade_package(name: str, version: str):
 def pm_remove_package(name: str):
 	print('/packageManager/removePackage/' + name)
 
-	command: str = 'conda remove ' + name
+	command: str = 'conda remove -y ' + name
 
 	output: str = __execute_conda_command_and_get_output(command)
 
