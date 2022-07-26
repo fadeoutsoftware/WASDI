@@ -146,6 +146,7 @@ For **parameters.json** file, for the moment, please just add the following cont
 
     {}
 
+
 The "{}" parenthesis represents an empty JSON object, a quick starting point for the tutorial. In the following we will edit this file adding the actual parameters.
 
 Please open main.js and start editing the file.
