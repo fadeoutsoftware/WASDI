@@ -83,6 +83,6 @@ os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
 os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py")
 
-#os.system("echo --- FIX for npm version ---")
-#@os.system('cd ~ ;npm install -g npm@8.15.0; npm install -g typedoc@0.15.0;')
+os.system("echo --- FIX for npm version ---")
+os.system("cd ~ ;npm install -g npm; npm install -g typedoc;")
 
