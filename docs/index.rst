@@ -97,4 +97,13 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    AddAppUIControl.rst
 
 
+Terms and Conditions
+---------------------------
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Legal
+
+   EULA.rst
+
 
