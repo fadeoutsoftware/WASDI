@@ -3,6 +3,9 @@ package wasdi.operations;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -57,6 +60,33 @@ public class Deployprocessor extends Operation {
 	            
 	            if (!bRet) {
 	            	sInfo = "GURU MEDITATION<br>There was an error deploying " + sName + " :(";
+	            } else {
+	            	
+	            	String sOriginalWorkspaceId = oParam.getExchange();
+	            	if (!Utils.isNullOrEmpty(sOriginalWorkspaceId)) {
+	            		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+	            		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sOriginalWorkspaceId);
+
+	            		if (oWorkspace != null) {
+	            			String sNodeCode = "wasdi";
+
+	            			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+	            				sNodeCode = oWorkspace.getNodeCode();
+	            			}
+
+	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | sNodeCode: " + sNodeCode);
+	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | WasdiConfig.Current.nodeCode: " + WasdiConfig.Current.nodeCode);
+
+	            			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
+	            				if (sNodeCode.equals("wasdi")) {
+	            					Thread.sleep(2000);
+
+	            					oEngine.refreshPackagesInfo(oParameter);
+	            				}
+	            			}
+	            		}
+	            	}
+
 	            }
 	            
 	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        	

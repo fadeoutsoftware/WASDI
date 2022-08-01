@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -32,6 +34,11 @@ import wasdi.shared.queryexecutors.Platforms;
  *
  */
 public class WasdiFileUtils {
+
+	/**
+	 * Static logger reference
+	 */
+	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(WasdiFileUtils.class));
 	
 	static List<String> asShapeFileExtensions;
 	static{
@@ -101,9 +108,9 @@ public class WasdiFileUtils {
 			JSONTokener oTokener = new JSONTokener(oReader);
 			oJson = new JSONObject(oTokener);
 		} catch (FileNotFoundException oFnf) {
-			Utils.log("ERROR", "WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
+			s_oLogger.error("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
 		} catch (Exception oE) {
-			Utils.log("ERROR", "WasdiFileUtils.loadJsonFromFile: " + oE);
+			s_oLogger.error("WasdiFileUtils.loadJsonFromFile: " + oE);
 		}
 		return oJson;
 	}
@@ -138,30 +145,30 @@ public class WasdiFileUtils {
 
 	/**
 	 * Check if the file exists.
-	 * @param file the file
+	 * @param oFile the file
 	 * @return true if the file exists, false otherwise.
 	 */
-	public static boolean fileExists(File file) {
-		if (file == null) {
-			Utils.log("ERROR", "WasdiFileUtils.doesFileExist: file is null");
+	public static boolean fileExists(File oFile) {
+		if (oFile == null) {
+			s_oLogger.error("WasdiFileUtils.doesFileExist: file is null");
 			return false;
 		}
 
-		return file != null && file.exists();
+		return oFile != null && oFile.exists();
 	}
 
 	/**
 	 * Check if the filePath corresponds to an existing file.
-	 * @param filePath the path of the file
+	 * @param sFileFullPath the path of the file
 	 * @return true if the file exists, false otherwise
 	 */
-	public static boolean fileExists(String filePath) {
-		if (filePath == null) {
-			Utils.log("ERROR", "WasdiFileUtils.doesFileExist: filePath is null");
+	public static boolean fileExists(String sFileFullPath) {
+		if (sFileFullPath == null) {
+			s_oLogger.error("WasdiFileUtils.doesFileExist: filePath is null");
 			return false;
 		}
 
-		File file = new File(filePath);
+		File file = new File(sFileFullPath);
 
 		return fileExists(file);
 	}
@@ -197,6 +204,83 @@ public class WasdiFileUtils {
 		}
 	}
 
+	public static boolean writeFile(String sContent, File oFile) throws FileNotFoundException, IOException {
+		s_oLogger.debug("WasdiFileUtils.writeFile");
+
+		if (sContent == null) {
+			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
+
+			return false;
+		}
+
+		File oParentDirectory = oFile.getParentFile();
+
+		if (fileExists(oFile)) {
+			s_oLogger.debug("WasdiFileUtils.writeFile | file already exists. deleting it.");
+
+			deleteFile(oFile.getAbsolutePath());
+		} else if (!oParentDirectory.exists()) {
+			s_oLogger.debug("WasdiFileUtils.writeFile | file and parent directory do not exists.");
+
+			oParentDirectory.mkdirs();
+		}
+
+		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
+			byte[] ayBytes = sContent.getBytes();
+			oOutStream.write(ayBytes);
+		}
+
+		if (fileExists(oFile)) {
+			s_oLogger.debug("WasdiFileUtils.writeFile | file succesfully created: " + oFile.getAbsolutePath());
+
+			return true;
+		} else {
+			s_oLogger.debug("WasdiFileUtils.writeFile | file was not created: " + oFile.getAbsolutePath());
+
+			return false;
+		}
+	}
+
+	public static boolean writeFile(String sContent, String sFileFullPath) throws FileNotFoundException, IOException {
+		s_oLogger.debug("WasdiFileUtils.writeFile | sFileFullPath: " + sFileFullPath);
+
+		if (sContent == null) {
+			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
+
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFileFullPath)) {
+			s_oLogger.error("WasdiFileUtils.writeFile: sFileFullPath is null");
+
+			return false;
+		}
+
+		File oFile = new File(sFileFullPath);
+
+		return writeFile(sContent, oFile);
+	}
+
+	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
+		s_oLogger.debug("WasdiFileUtils.writeMapAsJsonFile | sFileFullPath: " + sFileFullPath);
+
+		if (aoJSONMap == null) {
+			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
+
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFileFullPath)) {
+			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
+
+			return false;
+		}
+
+		String sJson = JsonUtils.stringify(aoJSONMap);
+
+		return writeFile(sJson, sFileFullPath);
+	}
+
 	/**
 	 * Move a file to a destination directory.
 	 * @param sourcePath the path of the file to be moved
@@ -205,18 +289,18 @@ public class WasdiFileUtils {
 	 */
 	public static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
 		if (sourcePath == null) {
-			Utils.log("ERROR", "WasdiFileUtils.moveFile: sourcePath is null");
+			s_oLogger.error("WasdiFileUtils.moveFile: sourcePath is null");
 			return false;
 		}
 
 		if (destinationDirectoryPath == null) {
-			Utils.log("ERROR", "WasdiFileUtils.moveFile: destinationDirectoryPath is null");
+			s_oLogger.error("WasdiFileUtils.moveFile: destinationDirectoryPath is null");
 			return false;
 		}
 
 		File sourceFile = new File(sourcePath);
 		if (!fileExists(sourceFile)) {
-			Utils.log("ERROR", "WasdiFileUtils.moveFile: sourceFile does not exist");
+			s_oLogger.error("WasdiFileUtils.moveFile: sourceFile does not exist");
 			return false;
 		}
 
@@ -241,87 +325,87 @@ public class WasdiFileUtils {
 
 	public static String renameFile(String sOldFileFullName, String sNewFileSimpleName) {
 		if (sOldFileFullName == null) {
-			Utils.log("ERROR", "WasdiFileUtils.renameFile: sSourceAbsoluteFullName is null");
+			s_oLogger.error("WasdiFileUtils.renameFile: sSourceAbsoluteFullName is null");
 			return null;
 		}
 
 		if (sNewFileSimpleName == null) {
-			Utils.log("ERROR", "WasdiFileUtils.renameFile: sNewFileName is null");
+			s_oLogger.error("WasdiFileUtils.renameFile: sNewFileName is null");
 			return null;
 		}
 
-		File sourceFile = new File(sOldFileFullName);
-		if (!fileExists(sourceFile)) {
-			Utils.log("ERROR", "WasdiFileUtils.renameFile: sourceFile does not exist");
+		File oSourceFile = new File(sOldFileFullName);
+		if (!fileExists(oSourceFile)) {
+			s_oLogger.error("WasdiFileUtils.renameFile: sourceFile does not exist");
 			return null;
 		}
 
-		File newFile = new File(sourceFile.getParent(), sNewFileSimpleName);
-		sourceFile.renameTo(newFile);
+		File oNewFile = new File(oSourceFile.getParent(), sNewFileSimpleName);
+		oSourceFile.renameTo(oNewFile);
 
-		return newFile.getAbsolutePath();
+		return oNewFile.getAbsolutePath();
 	}
 
 	/**
 	 * Delete a file from the filesystem. If the file is a directory, also delete the child directories and files.
-	 * @param filePath the absolute path of the file
+	 * @param sFileFullPath the absolute path of the file
 	 * @return true if the file was deleted, false otherwise
 	 */
-	public static boolean deleteFile(String filePath) {
-		if (filePath == null) {
-			Utils.log("ERROR", "WasdiFileUtils.deleteFile: filePath is null");
+	public static boolean deleteFile(String sFileFullPath) {
+		if (sFileFullPath == null) {
+			s_oLogger.error("WasdiFileUtils.deleteFile: filePath is null");
 			return false;
-		} else if (!fileExists(filePath)) {
-			Utils.log("ERROR", "WasdiFileUtils.deleteFile: file does not exist: " + filePath);
+		} else if (!fileExists(sFileFullPath)) {
+			s_oLogger.error("WasdiFileUtils.deleteFile: file does not exist: " + sFileFullPath);
 			return false;
 		}
 
-		File file = new File(filePath);
+		File oFile = new File(sFileFullPath);
 
-		if (file.isDirectory()) {
-			for (File child : file.listFiles()) {
+		if (oFile.isDirectory()) {
+			for (File child : oFile.listFiles()) {
 				deleteFile(child.getPath());
 			}
 		}
 
-		return file.delete();
+		return oFile.delete();
 	}
 
 	/**
 	 * Get the complete directory path. Basically, add a trailing slash if it is missing.
 	 * 
-	 * @param dirPath the directory path
+	 * @param sDirPath the directory path
 	 * @return the complete path of the directory, or null if the dirPath is null
 	 */
-	public static String completeDirPath(String dirPath) {
-		if (dirPath == null || dirPath.endsWith("/")) {
-			return dirPath;
+	public static String completeDirPath(String sDirPath) {
+		if (sDirPath == null || sDirPath.endsWith("/")) {
+			return sDirPath;
 		}
 
-		return dirPath + "/";
+		return sDirPath + "/";
 	}
 
 	/**
 	 * Read the content of a text file.
-	 * @param filePath the file to be read
+	 * @param sFilePath the file to be read
 	 * @return the text content of the file
 	 */
-	public static String fileToText(String filePath) {
-		if (filePath == null) {
-			Utils.log("ERROR", "WasdiFileUtils.fileToText: filePath is null");
+	public static String fileToText(String sFilePath) {
+		if (sFilePath == null) {
+			s_oLogger.error("WasdiFileUtils.fileToText: filePath is null");
 			return null;
 		}
 
-		File file = new File(filePath);
+		File file = new File(sFilePath);
 		if (!fileExists(file)) {
-			Utils.log("ERROR", "WasdiFileUtils.fileToText: file does not exist");
+			s_oLogger.error("WasdiFileUtils.fileToText: file does not exist");
 			return null;
 		}
 
 		try {
-			return new String(Files.readAllBytes(Paths.get(filePath)));
+			return new String(Files.readAllBytes(Paths.get(sFilePath)));
 		} catch (IOException e) {
-			Utils.log("ERROR", "WasdiFileUtils.fileToText: cannot read file");
+			s_oLogger.error("WasdiFileUtils.fileToText: cannot read file");
 			return null;
 		}
 	}
@@ -329,41 +413,81 @@ public class WasdiFileUtils {
 	/**
 	 * Check if a file is a help-file.
 	 * More exactly, checks if the file-name is "readme" or "help" and if the extension is "md" or "txt".
-	 * @param file the file
+	 * @param oFile the file
 	 * @return true if the file is a help file, false otherwise
 	 */
-	public static boolean isHelpFile(File file) {
-		if (!fileExists(file)) {
-			Utils.log("ERROR", "WasdiFileUtils.isHelpFile: file is null");
+	public static boolean isHelpFile(File oFile) {
+		if (!fileExists(oFile)) {
+			s_oLogger.error("WasdiFileUtils.isHelpFile: file is null");
 			return false;
 		}
 
-		return isHelpFile(file.getName());
+		return isHelpFile(oFile.getName());
 	}
 
 	/**
 	 * Check if a file is a help-file.
 	 * More exactly, checks if the file-name is "readme" or "help" and if the extension is "md" or "txt".
-	 * @param fileName the name of the file
+	 * @param sFileName the name of the file
 	 * @return true if the file is a help file, false otherwise
 	 */
-	public static boolean isHelpFile(String fileName) {
-		if (fileName == null) {
-			Utils.log("ERROR", "WasdiFileUtils.isHelpFile: fileName is null");
+	public static boolean isHelpFile(String sFileName) {
+		if (sFileName == null) {
+			s_oLogger.error("WasdiFileUtils.isHelpFile: fileName is null");
 			return false;
 		}
 
-		String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
-		if (tokens.length != 2) {
-			Utils.log("ERROR", "WasdiFileUtils.isHelpFile: " + fileName + " is not a help file-name");
+		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
+		if (asTokens.length != 2) {
+			s_oLogger.error("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
 			return false;
 		}
 
-		String name = tokens[0];
-		String extension = tokens[1];
+		String sName = asTokens[0];
+		String sExtension = asTokens[1];
 
-		return (name.equalsIgnoreCase("readme") || name.equalsIgnoreCase("help"))
-				&& (extension.equalsIgnoreCase("md") || extension.equalsIgnoreCase("txt"));
+		return (sName.equalsIgnoreCase("readme") || sName.equalsIgnoreCase("help"))
+				&& (sExtension.equalsIgnoreCase("md") || sExtension.equalsIgnoreCase("txt"));
+	}
+
+	/**
+	 * Check if a file is a PackagesInfo-file.
+	 * More exactly, checks if the file-name is "packagesInfo" and if the extension is "json".
+	 * @param oFile the file
+	 * @return true if the file is a PackagesInfo file, false otherwise
+	 */
+	public static boolean isPackagesInfoFile(File oFile) {
+		if (!fileExists(oFile)) {
+			s_oLogger.error("WasdiFileUtils.isPackagesInfoFile: file is null");
+			return false;
+		}
+
+		return isPackagesInfoFile(oFile.getName());
+	}
+
+	/**
+	 * Check if a file is a PackagesInfo-file.
+	 * More exactly, checks if the file-name is "packagesInfo" and if the extension is "json".
+	 * @param sFileName the name of the file
+	 * @return true if the file is a PackagesInfo file, false otherwise
+	 */
+	public static boolean isPackagesInfoFile(String sFileName) {
+		if (sFileName == null) {
+			s_oLogger.error("WasdiFileUtils.isPackagesInfoFile: fileName is null");
+			return false;
+		}
+
+		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
+		if (asTokens.length != 2) {
+			s_oLogger.debug("WasdiFileUtils.isPackagesInfoFile: " + sFileName + " is not a packagesInfo file-name");
+			return false;
+		}
+
+		String sName = asTokens[0];
+		String sExtension = asTokens[1];
+
+		return (sName.equalsIgnoreCase("packagesInfo"))
+				&& (sExtension.equalsIgnoreCase("json"));
 	}
 	
 	public static List<String> getShapefileExtensions(){

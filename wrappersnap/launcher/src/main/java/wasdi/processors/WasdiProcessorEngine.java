@@ -113,6 +113,20 @@ public abstract class WasdiProcessorEngine {
 	public abstract boolean libraryUpdate(ProcessorParameter oParameter);
 	
 	/**
+	 * Force the environment update
+	 * @param oParameter
+	 * @return
+	 */
+	public abstract boolean environmentUpdate(ProcessorParameter oParameter);
+
+	/**
+	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
+	 * @param oParameter the processor parameter
+	 * * @return
+	 */
+	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
+
+	/**
 	 * Execute a system task
 	 * @param sCommand
 	 * @param asArgs
@@ -165,11 +179,7 @@ public abstract class WasdiProcessorEngine {
 		// First Check if processor exists
 		String sProcessorName = oProcessorParameter.getName();
 		
-		// Set the processor path
-		String sDownloadRootPath = m_sWorkingRootPath;
-		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-		
-		String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
+		String sProcessorFolder = getProcessorFolder(sProcessorName);
 		
 		File oProcessorFolderFile = new File(sProcessorFolder);
 		
@@ -289,6 +299,21 @@ public abstract class WasdiProcessorEngine {
 	public void setSendToRabbit(Send m_oSendToRabbit) {
 		this.m_oSendToRabbit = m_oSendToRabbit;
 	}
-	
-	
+
+	/**
+	 * Get the processor folder by processor name
+	 * @param sProcessorName the name of the processor
+	 * @return the folder of the processor
+	 */
+	public String getProcessorFolder(String sProcessorName) {
+		// Set the processor path
+		String sDownloadRootPath = m_sWorkingRootPath;
+
+		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+
+		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
+
+		return sProcessorFolder;
+	}
+
 }

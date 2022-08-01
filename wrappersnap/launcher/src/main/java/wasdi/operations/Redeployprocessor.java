@@ -53,7 +53,7 @@ public class Redeployprocessor extends Operation {
             String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
             if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 
-            String sProcessorFolder = sDownloadRootPath + "/processors/" + sProcessorName + "/";            
+            String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
             File oProcessorFolder = new File(sProcessorFolder);
             
             // Is the processor installed in this node?
@@ -88,7 +88,7 @@ public class Redeployprocessor extends Operation {
 	        			if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 	        				sNodeCode = oWorkspace.getNodeCode();
 	        			}
-	        			
+
 	        			// This is the computing node where the request came from?
 	        			if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
 	        				
@@ -101,6 +101,13 @@ public class Redeployprocessor extends Operation {
 				            
 				            if (!bRet) {
 				            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
+				            } else {
+
+				            	if (sNodeCode.equals("wasdi")) {
+				            		Thread.sleep(2000);
+
+				            		oEngine.refreshPackagesInfo(oParameter);
+				            	}
 				            }
 				            
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
@@ -110,7 +117,7 @@ public class Redeployprocessor extends Operation {
 	        	
 	        }
 	        catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Deployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
+				m_oLocalLogger.error("Redeployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
             
             return bRet;	        

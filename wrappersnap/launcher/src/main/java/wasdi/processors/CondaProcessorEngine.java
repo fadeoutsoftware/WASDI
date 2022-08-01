@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.LauncherMain;
+import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.managers.CondaPackageManagerImpl;
 
 public class CondaProcessorEngine extends DockerProcessorEngine {
 	
@@ -28,7 +30,14 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
 		m_sDockerTemplatePath += "conda";			
 	}
-	
+
+	@Override
+	protected IPackageManager getPackageManager(String sIp, int iPort) {
+		IPackageManager oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
+
+		return oPackageManager;
+	}
+
 	@Override
 	protected void onAfterUnzipProcessor(String sProcessorFolder) {
 		super.onAfterUnzipProcessor(sProcessorFolder);

@@ -290,6 +290,24 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
             return this.m_oHttp.get(this.APIURL + '/processors/libupdate?processorId=' + sProcessorId + "&workspace=" + sWorkspaceId);
         };
 
+        /**
+         * Force environment Update
+         * @param sProcessorId
+         * @param sEnvUpdCommand
+         * @returns {*}
+         */
+        this.forceEnvUpdate = function(sProcessorId, sEnvUpdCommand) {
+
+                var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+                var sWorkspaceId = "-";
+
+                if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+                    sWorkspaceId = oWorkspace.workspaceId;
+                }
+
+                return this.m_oHttp.get(this.APIURL + '/processors/environmentupdate?processorId=' + sProcessorId + "&workspace=" + sWorkspaceId + "&updateCommand=" + sEnvUpdCommand);
+            };
+
     /**
      * Download a processor
      * @param sProcessorId
