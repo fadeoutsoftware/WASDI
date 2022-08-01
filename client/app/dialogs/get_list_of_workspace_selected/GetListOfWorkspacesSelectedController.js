@@ -12,6 +12,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_sButtonName = oExtras.buttonName;
         this.m_sTitleModal = oExtras.titleModal;
         this.m_sExcludedWorkspaceId = oExtras.excludedWorkspaceId;
+        this.m_sCurrentNodeCode = oExtras.currentNodeCode;
         this.m_bSelectedAllWorkspaces = false;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_aoWorkspaceList = [];
@@ -65,7 +66,6 @@ var GetListOfWorkspacesController = (function() {
      */
     GetListOfWorkspacesController.prototype.getWorkspaces = function()
     {
-        console.log("GetListOfWorkspacesController.getWorkspaces | this.m_sExcludedWorkspaceId: ", this.m_sExcludedWorkspaceId);
         var oController = this;
         this.m_bisLoadingWorkspacesList = true;
         this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
@@ -79,6 +79,12 @@ var GetListOfWorkspacesController = (function() {
                         oController.m_aoWorkspaceList = oController.m_aoWorkspaceList.filter(function (el) {
                             return el.workspaceId !== oController.m_sExcludedWorkspaceId;
                         });
+
+                        if (utilsIsObjectNullOrUndefined(oController.m_sCurrentNodeCode) === false) {
+                            oController.m_aoWorkspaceList = oController.m_aoWorkspaceList.filter(function (el) {
+                                return el.nodeCode === oController.m_sCurrentNodeCode;
+                            });
+                        }
                     } else {
                         var oDefaultWorkspace = oController.getDefaultWorkspace(oController.m_oActiveWorkspace,oController.m_aoWorkspaceList);
                         if( utilsIsObjectNullOrUndefined(oDefaultWorkspace) === false)

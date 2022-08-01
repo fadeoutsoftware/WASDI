@@ -1449,9 +1449,6 @@ var EditorController = (function () {
      * @returns {boolean}
      */
     EditorController.prototype.openProductShareDialog = function (oProduct) {
-        console.log("EditorController.openProductShareDialog | oProduct: ", oProduct);
-        console.log("EditorController.openProductShareDialog | this.m_oActiveWorkspace.workspaceId: ", this.m_oActiveWorkspace.workspaceId);
-
 
         if(utilsIsObjectNullOrUndefined(oProduct) === true)
         {
@@ -1460,15 +1457,14 @@ var EditorController = (function () {
 
         var oController = this;
 
-        console.log("EditorController.openProductShareDialog | oController.m_oActiveWorkspace.workspaceId: ", oController.m_oActiveWorkspace.workspaceId);
-
         var sMessage = this.m_oTranslate.instant("MSG_SHARE_WITH_WS");
         var sErrorMessage = this.m_oTranslate.instant("MSG_ERROR_SHARING");
 
         var oOptions = {
             titleModal: sMessage,
             buttonName: sMessage,
-            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId
+            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId,
+            currentNodeCode: this.m_oActiveWorkspace.nodeCode
         };
 
         var oThat = this;
@@ -1487,14 +1483,9 @@ var EditorController = (function () {
                 return false;
             }
 
-            console.log("EditorController.openProductShareDialog | aoWorkSpaces: ", aoWorkSpaces);
-            console.log("EditorController.openProductShareDialog | aoWorkSpaces.length: ", aoWorkSpaces.length);
-
             // download product in all workspaces
             for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
             {
-                
-            console.log("EditorController.openProductShareDialog | aoWorkSpaces[" + iIndexWorkspace + "].workspaceId: ", aoWorkSpaces[iIndexWorkspace].workspaceId);
 
                 oProduct.isDisabledToDoDownload = true;
                 var sUrl = oProduct.link;
@@ -1527,9 +1518,6 @@ var EditorController = (function () {
 
     EditorController.prototype.shareProduct = function(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName, oCallback, oError)
     {
-        console.log("EditorController.prototype.shareProduct | sOriginWorkspaceId: ", sOriginWorkspaceId);
-        console.log("EditorController.prototype.shareProduct | sDestinationWorkspaceId: ", sDestinationWorkspaceId);
-        console.log("EditorController.prototype.shareProduct | sProductName: ", sProductName);
 
         if(utilsIsObjectNullOrUndefined(oCallback) === true)
         {
