@@ -228,6 +228,19 @@ public class WorkspaceResource {
 					oWSViewModel.setOwnerUserId(oWorkspace.getUserId());
 					oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
 					oWSViewModel.setWorkspaceName(oWorkspace.getName());
+					oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
+
+					if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
+						if (oWorkspace.getNodeCode().equals("wasdi")) {
+							oWSViewModel.setActiveNode(true);
+						} else {
+							Node oNode = aoNodeMap.get(oWorkspace.getNodeCode());
+
+							if (oNode != null) {
+								oWSViewModel.setActiveNode(oNode.getActive());
+							}
+						}
+					}
 
 					// Get Sharings
 					List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
