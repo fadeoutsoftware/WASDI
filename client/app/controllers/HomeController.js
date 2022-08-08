@@ -209,12 +209,17 @@ var HomeController = (function () {
      */
 
     HomeController.prototype.keycloakLogin = function () {
-        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.login();
     }
     HomeController.prototype.keycloakRegister = function () {
-        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.register();
+    }
+
+    /**
+     * Util method used to disable registration under planned maintenance 
+     * */
+    HomeController.prototype.disabledRegistration = function () {
+        utilsVexDialogAlertTop("GURU MEDITATION<br>USER REGISTRATION IS TEMPORARY DISABLED, PLAESE TRY AGAIN LATER");
     }
 
     /**
