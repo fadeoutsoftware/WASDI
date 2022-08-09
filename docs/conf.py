@@ -75,16 +75,18 @@ sys.path.insert(0, os.path.abspath('../libraries/waspy'))
 # Import Octave/Matlab library
 matlab_src_dir = os.path.abspath('../libraries/')
 
-print("Python source folders " + sys.path[0] +"\n")
-print("Matlab/Octave source folder " + matlab_src_dir +"\n")
+print("Python source folders " + sys.path[0] +"\n", flush=True)
+print("Matlab/Octave source folder " + matlab_src_dir +"\n", flush=True)
 
 
 os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
 os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.8/site-packages/javasphinx/domain.py")
 
+os.system("npm list -g;")
+
 os.system("echo --- FIX for npm version ---")
-os.system("cd ~ ;npm install -g typedoc;")
+os.system("cd ~ ;npm install -g typedoc@0.22.11;")
 
 os.system("echo --- Python version ---")
 os.system("python --version")
