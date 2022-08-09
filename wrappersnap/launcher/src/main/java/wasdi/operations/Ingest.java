@@ -131,6 +131,8 @@ public class Ingest extends Operation {
 	                        deleteZipFile(oFileToIngestPath);
 	                        //point the file to be ingested to the .shp extracted shapefile
 	                        oFileToIngestPath = new File(oShapeFileIngestPath.getAbsolutePath());
+
+	                        bUnzipAfterCopy = oShapeFileIngestPath.getAbsolutePath().toLowerCase().endsWith(".zip");
                         }
                     }
                 }

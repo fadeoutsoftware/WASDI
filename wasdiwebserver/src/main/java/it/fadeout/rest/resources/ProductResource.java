@@ -930,6 +930,22 @@ public class ProductResource {
             	oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sDownloadPath) + sProductName);
             }
 
+            if (oDownloadedFile == null) {
+            	List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepository.getDownloadedFileListByName(sProductName);
+
+            	if (aoDownloadedFiles != null && !aoDownloadedFiles.isEmpty()) {
+            		oDownloadedFile = aoDownloadedFiles.get(0);
+            	}
+            }
+
+            if (oDownloadedFile == null) {
+                String sMessage = "ProductResource.deleteProduct: invalid product";
+                Utils.debugLog(sMessage);
+                oReturn.setStringValue(sMessage);
+                oReturn.setIntValue(403);
+                return oReturn;
+            }
+
             // Get the list of published bands
             if (bDeleteFile || bDeleteLayer) {
                 // Get all bands files
