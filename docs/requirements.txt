@@ -1,4 +1,4 @@
-sphinx==3.5.4
+sphinx==5.1.1
 javasphinx==0.9.15
 sphinxemoji==0.1.8
 sphinxcontrib-matlabdomain==0.11.8
