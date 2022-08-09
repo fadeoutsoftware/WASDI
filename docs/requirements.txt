@@ -2,6 +2,6 @@ sphinx==3.5.4
 javasphinx==0.9.15
 sphinxemoji==0.1.8
 sphinxcontrib-matlabdomain==0.11.8
-myst_parser==0.18.0
+myst_parser==0.15.2
 sphinx-js==3.1.1
 MarkupSafe==2.0.1
