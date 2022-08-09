@@ -31,7 +31,8 @@ extensions = ['javasphinx',
 'sphinxemoji.sphinxemoji',
 'sphinx.ext.autodoc',
 'sphinxcontrib.matlab',
-'myst_parser']
+'myst_parser',
+'sphinx_js']
 
 js_language = 'typescript'
 js_source_path = '../libraries/jswasdilib/src/lib/TS-index.ts'
