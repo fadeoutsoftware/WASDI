@@ -22,7 +22,6 @@ import wasdi.shared.utils.Utils;
 public class CMHttpUtils {
 
 	public static final String s_sCmemsCasUrl = "https://cmems-cas.cls.fr/cas/login";
-	public static final String s_sCmemsMotuWebUrl = "https://nrt.cmems-du.eu/motu-web/Motu";
 
 	private static final String DIV_START_CONTENT = "<div id=\"content\">";
 	private static final String DIV_END = "</div>";
@@ -30,9 +29,9 @@ public class CMHttpUtils {
 	private CMHttpUtils() {
 	}
 
-	public static String getProductSize(String sService, String sProduct, String sQuery, String sUsername, String sPassword) {
+	public static String getProductSize(String sService, String sProduct, String sQuery, String sUrl, String sUsername, String sPassword) {
 
-		String sUrlGetSize = prepareUrlGetSize(sService, sProduct, sQuery);
+		String sUrlGetSize = prepareUrlGetSize(sUrl, sService, sProduct, sQuery);
 
 		Map<String, String> asCookies = acquireCookies(sUrlGetSize, sUsername, sPassword);
 
@@ -60,10 +59,10 @@ public class CMHttpUtils {
 		return "0";
 	}
 
-	public static String downloadProduct(String sService, String sProduct, String sQuery, String sUsername, String sPassword, String sSaveDirOnServer) {
-		String sUrlGetSize = prepareUrlGetSize(sService, sProduct, sQuery);
-		String sUrlProductDownload = prepareUrlProductDownload(sService, sProduct, sQuery);
-		String sUrlGetReqStatus = prepareUrlGetRequestStatus(sService, sProduct, sQuery);
+	public static String downloadProduct(String sService, String sProduct, String sQuery, String sUrl, String sUsername, String sPassword, String sSaveDirOnServer) {
+		String sUrlGetSize = prepareUrlGetSize(sUrl, sService, sProduct, sQuery);
+		String sUrlProductDownload = prepareUrlProductDownload(sUrl, sService, sProduct, sQuery);
+		String sUrlGetReqStatus = prepareUrlGetRequestStatus(sUrl, sService, sProduct, sQuery);
 
 		Map<String, String> asCookies = acquireCookies(sUrlGetSize, sUsername, sPassword);
 
@@ -142,16 +141,16 @@ public class CMHttpUtils {
 		return null;
 	}
 
-	public static String prepareUrlGetSize(String sService, String sProduct, String sQuery) {
-		return s_sCmemsMotuWebUrl + "?action=" + "getsize" + "&service=" + sService + "&product=" + sProduct + sQuery;
+	public static String prepareUrlGetSize(String sUrl, String sService, String sProduct, String sQuery) {
+		return sUrl + "?action=" + "getsize" + "&service=" + sService + "&product=" + sProduct + sQuery;
 	}
 
-	private static String prepareUrlProductDownload(String sService, String sProduct, String sQuery) {
-		return s_sCmemsMotuWebUrl + "?action=" + "productdownload" + "&service=" + sService + "&product=" + sProduct + sQuery + "&output=netcdf&mode=status";
+	private static String prepareUrlProductDownload(String sUrl, String sService, String sProduct, String sQuery) {
+		return sUrl + "?action=" + "productdownload" + "&service=" + sService + "&product=" + sProduct + sQuery + "&output=netcdf&mode=status";
 	}
 
-	private static String prepareUrlGetRequestStatus(String sService, String sProduct, String sQuery) {
-		return s_sCmemsMotuWebUrl + "?action=" + "getreqstatus" + "&service=" + sService + "&product=" + sProduct + "&requestid=";
+	private static String prepareUrlGetRequestStatus(String sUrl, String sService, String sProduct, String sQuery) {
+		return sUrl + "?action=" + "getreqstatus" + "&service=" + sService + "&product=" + sProduct + "&requestid=";
 	}
 
 	private static Map<String, String> acquireCookies(String sUrl, String sUsername, String sPassword) {

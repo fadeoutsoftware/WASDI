@@ -38,7 +38,6 @@ public class CMProviderAdapter extends ProviderAdapter {
 
 		if (sFileURL.contains("&size=")) {
 			String sSize = sFileURL.substring(sFileURL.indexOf("&size=") + 6);
-			System.out.println("sSize :" + sSize);
 
 			return Long.valueOf(sSize);
 		}
@@ -56,6 +55,11 @@ public class CMProviderAdapter extends ProviderAdapter {
 			return null;
 		}
 
+		if (Utils.isNullOrEmpty(m_oDataProviderConfig.link)) {
+			m_oLogger.error("CPMProviderAdapter.executeDownloadFile: provider URL is null or Empty");
+			return null;
+		}
+
 		if (!sFileURL.contains("&size=") || !sFileURL.contains("&size=") || !sFileURL.contains("&size=")) {
 			return null;
 		}
@@ -64,9 +68,19 @@ public class CMProviderAdapter extends ProviderAdapter {
 		String sProduct = sFileURL.substring(sFileURL.indexOf("&product=") + 9, sFileURL.indexOf("&query", sFileURL.indexOf("&product=")));
 		String sQuery = sFileURL.substring(sFileURL.indexOf("&query=") + 7, sFileURL.indexOf("&size", sFileURL.indexOf("&query=")));
 
-		String sResult = CMHttpUtils.downloadProduct(sService, sProduct, sQuery, m_sProviderUser, m_sProviderPassword, sSaveDirOnServer);
+		String sLinks = m_oDataProviderConfig.link;
+		String[] asLinks = sLinks.split(" ");
 
-		return sResult;
+		for (String sDomainUrl : asLinks) {
+			String sDownloadProductResult = CMHttpUtils.downloadProduct(sService, sProduct, sQuery, sDomainUrl, m_sProviderUser, m_sProviderPassword, sSaveDirOnServer);
+
+			if (sDownloadProductResult != null) {
+				return sDownloadProductResult;
+			}
+			
+		}
+
+		return null;
 	}
 
 	@Override

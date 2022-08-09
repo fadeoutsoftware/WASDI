@@ -574,7 +574,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
                     "regex": ".*",
                     "indexvalue":"OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS"
                 },
@@ -583,7 +583,7 @@
                     "indexlabel": "Protocol",
                     "indexvalues": "SUBS|FTP",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
                     "indexvalue":"SUBS"
                 },
                 {
@@ -601,6 +601,14 @@
                     "regex": ".*",
                     "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS",
                     "indexvalue":"dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS",
+                    "indexvalue":"c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
                 },
                 {
                     "indexname": "dataset",
@@ -665,6 +673,14 @@
                     "regex": ".*",
                     "visibilityConditions": "dataset:dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02&protocol:SUBS",
                     "indexvalue":"CHL"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL+CHL_count+CHL_error+grid_mapping|CHL|CHL_count|CHL_error|grid_mapping",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M&protocol:SUBS",
+                    "indexvalue":"CHL+CHL_count+CHL_error+grid_mapping"
                 },
                 {
                     "indexname": "variables",

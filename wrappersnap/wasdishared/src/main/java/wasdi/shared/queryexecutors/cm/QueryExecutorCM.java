@@ -57,6 +57,10 @@ public class QueryExecutorCM extends QueryExecutor {
 
 		int iCount = 0;
 
+		if (Utils.isNullOrEmpty(s_oDataProviderConfig.link)) {
+			return iCount;
+		}
+
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 
@@ -82,6 +86,10 @@ public class QueryExecutorCM extends QueryExecutor {
 		Utils.debugLog("QueryExecutorCM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(s_oDataProviderConfig.link)) {
+			return aoResults;
+		}
 
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
@@ -156,21 +164,41 @@ public class QueryExecutorCM extends QueryExecutor {
 
 			String sQuery = oSBQuery.toString();
 
-			String sProductSize = CMHttpUtils.getProductSize(sService, sProduct, sQuery, s_oDataProviderConfig.user, s_oDataProviderConfig.password);
+			String sLinks = s_oDataProviderConfig.link;
+			String[] asLinks = sLinks.split(" ");
 
-			if (sProductSize.startsWith("Error: ")) {
-				String sErrorMessage = sProductSize.replace("Error: ", "");
+			for (String sDomainUrl : asLinks) {
+				// discard the result of an eventual previous request (made to an alternative URL)
+				aoResults.clear();
+				oResult.setSummary(null);
+				oResult.getProperties().remove("error");
 
-				if (sErrorMessage.contains("Exception: ")) {
-					sErrorMessage = sErrorMessage.substring(sErrorMessage.indexOf("Exception: ") + "Exception: ".length());
+				String sProductSize = CMHttpUtils.getProductSize(sService, sProduct, sQuery, sDomainUrl, s_oDataProviderConfig.user, s_oDataProviderConfig.password);
+
+				if (sProductSize.startsWith("Error: ")) {
+					String sErrorMessage = sProductSize.replace("Error: ", "");
+
+					if (sErrorMessage.contains("Exception: ")) {
+						sErrorMessage = sErrorMessage.substring(sErrorMessage.indexOf("Exception: ") + "Exception: ".length());
+					}
+
+					oResult.getProperties().put("error", sErrorMessage);
+
+					String sSummary = sProductSize;
+
+					oResult.setSummary(sSummary);
+
+					aoResults.add(oResult);
+
+					// if the error is of type dataset-unknown, a new attempt should/could be done on an alternative URL.
+					// else, use/show the current error message
+					if (sProductSize.contains("005-29") || sProductSize.contains("product/dataset is unknown")) {
+						continue;
+					} else {
+						break;
+					}
 				}
 
-				oResult.getProperties().put("error", sErrorMessage);
-
-				String sSummary = sProductSize;
-
-				oResult.setSummary(sSummary);
-			} else {
 				String sNormalizedSize;
 				if (NumberUtils.isCreatable(sProductSize)) {
 					double dSizeinKB = Double.parseDouble(sProductSize);
@@ -231,23 +259,27 @@ public class QueryExecutorCM extends QueryExecutor {
 				sSummary = sSummary + "Size: " + sNormalizedSize;
 
 				oResult.setSummary(sSummary);
+
+
+				oResult.setProvider(m_sProvider);
+
+				String sSizeInBytes = oResult.getProperties().get("sizeInBytes");
+
+				String sLink = "http://" + "&service=" + sService + "&product=" + sProduct + "&query=" + sQuery;
+
+				if (!Utils.isNullOrEmpty(sSizeInBytes)) {
+					sLink = sLink + "&size=" + sSizeInBytes;
+				}
+
+				oResult.setLink(sLink);
+
+				oResult.getProperties().put("link", sLink);
+
+				aoResults.add(oResult);
+
+				return aoResults;
 			}
 
-			oResult.setProvider(m_sProvider);
-
-			String sSizeInBytes = oResult.getProperties().get("sizeInBytes");
-
-			String sLink = "http://" + "&service=" + sService + "&product=" + sProduct + "&query=" + sQuery;
-
-			if (!Utils.isNullOrEmpty(sSizeInBytes)) {
-				sLink = sLink + "&size=" + sSizeInBytes;
-			}
-
-			oResult.setLink(sLink);
-
-			oResult.getProperties().put("link", sLink);
-
-			aoResults.add(oResult);
 		} else if (sProtocol.equalsIgnoreCase("FTP")) {
 			//TODO
 		}
