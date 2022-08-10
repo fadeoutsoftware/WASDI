@@ -5,7 +5,7 @@
 .. _AddAppUIControl:
 
 Add Application User Interface controls
-===========================
+======================================================
 
 Introduction
 ---------------------------
