@@ -1585,6 +1585,33 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
+
+
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				
+				// In the main node: start a thread to update all the computing nodes
+				
+				try {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: this is the main node, starting Worker to update computing nodes");
+					
+					//This is the main node: forward the request to other nodes
+					ForceLibraryUpdateWorker oUpdateWorker = new ForceLibraryUpdateWorker();
+					
+					NodeRepository oNodeRepo = new NodeRepository();
+					List<Node> aoNodes = oNodeRepo.getNodesList();
+					
+					oUpdateWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId);
+					oUpdateWorker.start();
+					
+					Utils.debugLog("ProcessorsResource.libraryUpdate: Worker started");						
+				}
+				catch (Exception oEx) {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: error starting ForceLibraryUpdateWorker " + oEx.toString());
+				}
+			}
+
+
+
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
 			
@@ -1608,30 +1635,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);
-			
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
-				
-				// In the main node: start a thread to update all the computing nodes
-				
-				try {
-					Utils.debugLog("ProcessorsResource.libraryUpdate: this is the main node, starting Worker to update computing nodes");
-					
-					//This is the main node: forward the request to other nodes
-					ForceLibraryUpdateWorker oUpdateWorker = new ForceLibraryUpdateWorker();
-					
-					NodeRepository oNodeRepo = new NodeRepository();
-					List<Node> aoNodes = oNodeRepo.getNodesList();
-					
-					oUpdateWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId);
-					oUpdateWorker.start();
-					
-					Utils.debugLog("ProcessorsResource.libraryUpdate: Worker started");						
-				}
-				catch (Exception oEx) {
-					Utils.debugLog("ProcessorsResource.libraryUpdate: error starting ForceLibraryUpdateWorker " + oEx.toString());
-				}
-			}			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();

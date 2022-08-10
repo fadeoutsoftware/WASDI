@@ -49,6 +49,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.CONDA)) {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+		else if (sType.equals(ProcessorTypes.JUPYTER_NOTEBOOK)) {
+			return new JupyterNotebookProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
 			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}		
@@ -314,6 +317,22 @@ public abstract class WasdiProcessorEngine {
 		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
 
 		return sProcessorFolder;
+	}
+
+	/**
+	 * Get the template folder of the processor by processor name
+	 * @param sProcessorName the name of the processor
+	 * @return the folder of the template of the processor
+	 */
+	public String getProcessorTemplateFolder(String sProcessorName) {
+		// Set the processor path
+		String sDownloadRootPath = m_sWorkingRootPath;
+
+		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+
+		String sProcessorTemplateFolder = sDownloadRootPath + "dockertemplate" + File.separator + sProcessorName + File.separator;
+
+		return sProcessorTemplateFolder;
 	}
 
 }

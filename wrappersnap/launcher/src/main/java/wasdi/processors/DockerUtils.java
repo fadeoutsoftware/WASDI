@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
@@ -48,6 +49,7 @@ public class DockerUtils {
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
      * @param sWorkingRootPath WASDI Working path
+     * @param sTomcatUser      User
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath, String sTomcatUser) {
         m_oProcessor = oProcessor;
@@ -323,4 +325,36 @@ public class DockerUtils {
 
         return true;
     }
+
+    /**
+     * Run Linux command
+     * @param sCommand the command to run
+     * @return boolean in case of success, false otherwise
+     */
+    public boolean runCommand(String sCommand) {
+
+        try {
+
+            // Generate Docker Name
+            String sProcessorName = m_oProcessor.getName();
+
+            String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+
+            // Generate shell command
+            LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
+            LauncherMain.s_oLogger.debug(sCommand);
+
+
+            // Run the script
+            WasdiProcessorEngine.shellExec(sCommand, Collections.emptyList());
+
+            LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
+        } catch (Exception oEx) {
+            Utils.debugLog("DockerUtils.runCommand: " + oEx.toString());
+            return false;
+        }
+
+        return true;
+    }
+
 }
