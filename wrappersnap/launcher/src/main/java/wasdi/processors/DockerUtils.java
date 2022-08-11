@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.apache.commons.io.FileUtils;
+
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
@@ -340,16 +342,45 @@ public class DockerUtils {
 
             String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
 
-            // Generate shell command
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
-            LauncherMain.s_oLogger.debug(sCommand);
 
+
+            // Generate shell script file
+            String sBuildScriptFile = m_sProcessorFolder + "temporary_script_file.sh";
+
+            File oBuildScriptFile = new File(sBuildScriptFile);
+
+            try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
+            	// Fill the script file
+            	if (oBuildScriptWriter != null) {
+            		LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Creating " + sBuildScriptFile + " file");
+            		oBuildScriptWriter.write(sCommand);
+
+            		oBuildScriptWriter.flush();
+            		oBuildScriptWriter.close();
+            	}
+            }
+
+            // Wait a little bit to let the file be written
+            Thread.sleep(1000);
+
+            // Make it executable
+            Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
+
+            // And wait a little bit to make the chmod done
+            Thread.sleep(1000);
 
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
 
             // Run the script
-            WasdiProcessorEngine.shellExec(sCommand, asArgs);
+            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
+
+            FileUtils.forceDelete(oBuildScriptFile);
+
+
+            // Generate shell command
+            LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
+            LauncherMain.s_oLogger.debug(sCommand);
 
             LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
         } catch (Exception oEx) {
