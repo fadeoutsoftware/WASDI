@@ -345,8 +345,11 @@ public class DockerUtils {
             LauncherMain.s_oLogger.debug(sCommand);
 
 
+            // Initialize Args
+            ArrayList<String> asArgs = new ArrayList<>();
+
             // Run the script
-            WasdiProcessorEngine.shellExec(sCommand, Collections.emptyList());
+            WasdiProcessorEngine.shellExec(sCommand, asArgs);
 
             LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
         } catch (Exception oEx) {
