@@ -135,6 +135,10 @@ public abstract class WasdiProcessorEngine {
 	 * @param asArgs
 	 */
 	public static void shellExec(String sCommand, List<String> asArgs) {
+		LauncherMain.s_oLogger.debug("ShellExec2 sCommand: " + sCommand);
+		System.out.println();
+		System.out.println("ShellExec2 sCommand: " + sCommand);
+		System.out.println();
 		shellExec(sCommand,asArgs,true);
 	}
 	
@@ -145,6 +149,10 @@ public abstract class WasdiProcessorEngine {
 	 * @param bWait
 	 */	
 	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+		LauncherMain.s_oLogger.debug("ShellExec3 sCommand: " + sCommand);
+		System.out.println();
+		System.out.println("ShellExec3 sCommand: " + sCommand);
+		System.out.println();
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
@@ -154,18 +162,33 @@ public abstract class WasdiProcessorEngine {
 			for (String sArg : asArgs) {
 				sCommandLine += sArg + " ";
 			}
-			
-			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+
+			LauncherMain.s_oLogger.debug("ShellExec3 CommandLine: " + sCommandLine);
+			System.out.println();
+			System.out.println("ShellExec CommandLine3: " + sCommandLine);
+			System.out.println();
+
+			LauncherMain.s_oLogger.debug("ShellExec3 asArgs: " + asArgs);
+			System.out.println();
+			System.out.println("ShellExec asArgs: " + asArgs);
+			System.out.println();
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
 				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
+				LauncherMain.s_oLogger.debug("ShellExec3 CommandLine RETURNED: " + iProcOuptut);
+				System.out.println();
+				System.out.println("ShellExec CommandLine3 RETURNED: " + iProcOuptut);
+				System.out.println();
 			}
 		}
-		catch (Exception e) {
+		catch (Exception e) {			
+			LauncherMain.s_oLogger.debug("ShellExec3 exception: " + e.getMessage());
+			System.out.println();
+			System.out.println("ShellExec3 exception: " + e.getMessage());
+			System.out.println();
 			e.printStackTrace();
 		}
 	}
