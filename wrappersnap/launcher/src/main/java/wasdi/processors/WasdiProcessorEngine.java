@@ -174,6 +174,13 @@ public abstract class WasdiProcessorEngine {
 			System.out.println();
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+
+			// Merge System.err and System.out
+			oProcessBuilder.redirectErrorStream(true);
+
+			// Inherit System.out as redirect output stream
+			oProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
