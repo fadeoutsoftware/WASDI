@@ -1,21 +1,80 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-		  http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
-	<!-- parent pom -->
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+          http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- parent pom -->
     <groupId>fadeout.software.wasdi</groupId>
     <artifactId>wasdi-parent</artifactId>
     <packaging>pom</packaging>
-	<version>1.0</version>
+    <version>${revision}</version>
 
-	<!-- sub modules -->
-	<modules>
+    <!-- sub modules -->
+    <modules>
         <module>wrappersnap/wasdishared</module>
-		<module>wrappersnap/launcher</module>
-		<module>scheduler</module>
-		<module>wasdiwebserver</module>		
+        <module>wrappersnap/launcher</module>
+        <module>scheduler</module>
+        <module>wasdiwebserver</module>
+        <module>libraries/jwasdilib/jwasdilib</module>
+        <module>wasditrigger</module>
     </modules>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>0.0.1-SNAPSHOT</revision>
+    </properties>
+
+    <!--
+        HERE WE CONFIGURE OUR OWN NEXUS REPOSITORY
+        TO DOWNLOAD LIBRARIES NOT AVAILABLE ON INTERNET
+    -->
+    <repositories>
+        <repository>
+            <id>wasdi-library</id>
+            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
+        </repository>
+    </repositories>
+
+    <!--
+        HERE WE ADD PLUGINS NEEDED TO DEPLOY AUTOMATICALLY IN NEXUS
+    -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+        HERE WE CONFIGURE TO UPLOAD AUTOMATICALLY IN OUR NEXUS
+        REPOSITORIES WHEN mvn ... deploy IS EXECUTED SUCCESFULLY
+    -->
+    <distributionManagement>
+        <repository>
+            <id>wasdi-release</id>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>wasdi-snapshot</id>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

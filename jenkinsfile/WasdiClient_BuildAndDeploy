@@ -1,0 +1,79 @@
+pipeline {
+  agent any
+
+  environment {
+    currentRevision = "0.0.${env.BUILD_ID}"
+    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    nodejs "WASDI_NODEJS"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        sh script: "pwd", label: "Current location"
+
+        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.targetedEnvironment = " + env.targetedEnvironment
+        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
+        echo "env.WORKSPACE = " + env.WORKSPACE
+
+        sh script: "node --version", label: "Tool > node > current version"
+        sh script: "npm --version", label: "Tool > npm > current version"
+        sh script: "sass --version", label: "Tool > sass > current version"
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.description = "WASDI - BUILD OF THE CLIENT"
+        }
+      }
+    }
+
+    stage('NPM - INSTALL MODULES') {
+      steps {
+        sh script: '''
+          cd client
+          npm install
+        ''', label: "Install NodeJS modules from package.json"
+      }
+    }
+
+    stage('NPM - COMPILE SCSS FILES') {
+      steps {
+        sh script: "bash /data/tool/continuousDelivery/compileScss.sh ${env.WORKSPACE}", label: "Compile SCSS files in CSS"
+      }
+    }
+
+    stage('NPM - BUILD') {
+      steps {
+        sh script: '''
+          cd client
+          npm run build
+        ''', label: "Build WASDI client"
+      }
+    }
+
+    stage('DEPLOYMENT') {
+      steps {
+        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'excludeConfig=${env.excludeConfig.toBoolean()} sourceDirectory=${WORKSPACE}/client/dist currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Execute ansible-playbook"
+      }
+    }
+  }
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
