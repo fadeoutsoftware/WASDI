@@ -534,4 +534,9 @@ public class Utils {
 
 		return newName;
 	}
+
+	public static String generateJupyterNotebookCode(String sUserId, String sWorkspaceId) {
+		return StringUtils.generateSha224(sUserId + "_" + sWorkspaceId);
+	}
+
 }

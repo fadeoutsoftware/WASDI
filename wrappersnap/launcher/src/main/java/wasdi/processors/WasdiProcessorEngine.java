@@ -49,6 +49,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.CONDA)) {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
+		else if (sType.equals(ProcessorTypes.JUPYTER_NOTEBOOK)) {
+			return new JupyterNotebookProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
 			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}		
@@ -132,6 +135,10 @@ public abstract class WasdiProcessorEngine {
 	 * @param asArgs
 	 */
 	public static void shellExec(String sCommand, List<String> asArgs) {
+		LauncherMain.s_oLogger.debug("ShellExec2 sCommand: " + sCommand);
+		System.out.println();
+		System.out.println("ShellExec2 sCommand: " + sCommand);
+		System.out.println();
 		shellExec(sCommand,asArgs,true);
 	}
 	
@@ -142,6 +149,10 @@ public abstract class WasdiProcessorEngine {
 	 * @param bWait
 	 */	
 	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+		LauncherMain.s_oLogger.debug("ShellExec3 sCommand: " + sCommand);
+		System.out.println();
+		System.out.println("ShellExec3 sCommand: " + sCommand);
+		System.out.println();
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
@@ -151,18 +162,40 @@ public abstract class WasdiProcessorEngine {
 			for (String sArg : asArgs) {
 				sCommandLine += sArg + " ";
 			}
-			
-			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+
+			LauncherMain.s_oLogger.debug("ShellExec3 CommandLine: " + sCommandLine);
+			System.out.println();
+			System.out.println("ShellExec CommandLine3: " + sCommandLine);
+			System.out.println();
+
+			LauncherMain.s_oLogger.debug("ShellExec3 asArgs: " + asArgs);
+			System.out.println();
+			System.out.println("ShellExec asArgs: " + asArgs);
+			System.out.println();
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+
+			// Merge System.err and System.out
+			oProcessBuilder.redirectErrorStream(true);
+
+			// Inherit System.out as redirect output stream
+			oProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
 				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
+				LauncherMain.s_oLogger.debug("ShellExec3 CommandLine RETURNED: " + iProcOuptut);
+				System.out.println();
+				System.out.println("ShellExec CommandLine3 RETURNED: " + iProcOuptut);
+				System.out.println();
 			}
 		}
-		catch (Exception e) {
+		catch (Exception e) {			
+			LauncherMain.s_oLogger.debug("ShellExec3 exception: " + e.getMessage());
+			System.out.println();
+			System.out.println("ShellExec3 exception: " + e.getMessage());
+			System.out.println();
 			e.printStackTrace();
 		}
 	}
@@ -314,6 +347,22 @@ public abstract class WasdiProcessorEngine {
 		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
 
 		return sProcessorFolder;
+	}
+
+	/**
+	 * Get the template folder of the processor by processor name
+	 * @param sProcessorName the name of the processor
+	 * @return the folder of the template of the processor
+	 */
+	public String getProcessorTemplateFolder(String sProcessorName) {
+		// Set the processor path
+		String sDownloadRootPath = m_sWorkingRootPath;
+
+		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+
+		String sProcessorTemplateFolder = sDownloadRootPath + "dockertemplate" + File.separator + sProcessorName + File.separator;
+
+		return sProcessorTemplateFolder;
 	}
 
 }
