@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    id="WebApp_ID" version="3.1">
+
+    <display-name>Wasdi</display-name>
+
+    <listener>  
+        <listener-class>
+            it.fadeout.WasdiLifeCycleListener
+        </listener-class>
+    </listener>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.htm</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>default.html</welcome-file>
+        <welcome-file>default.htm</welcome-file>
+        <welcome-file>default.jsp</welcome-file>
+    </welcome-file-list>
+
+    <servlet>
+        <servlet-name>wasdiwebserver</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>it.fadeout.rest</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>it.fadeout.Wasdi</param-value>
+        </init-param>   
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>it.fadeout.business</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>it.fadeout.viewmodels</param-value>
+        </init-param>
+        <!-- CONFIG FILE -->
+        <init-param>
+            <param-name>ConfigFilePath</param-name>
+            <param-value>C:\<path to the local file>\wasdiConfig.json</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>wasdiwebserver</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>WasdiFilter</filter-name>
+        <filter-class>it.fadeout.rest.resources.CORSFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>WasdiFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>   
+</web-app>
