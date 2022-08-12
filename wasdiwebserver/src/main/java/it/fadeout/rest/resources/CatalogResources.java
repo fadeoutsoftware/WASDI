@@ -788,6 +788,10 @@ public class CatalogResources {
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
 
+		if (oDownloadedFile == null) {
+			oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+		}
+
 		if (oDownloadedFile == null) 
 		{
 			Utils.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
