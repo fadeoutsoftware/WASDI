@@ -218,12 +218,14 @@ public abstract class WasdiProcessorEngine {
 	}
 	
 	private static void inheritIO(final InputStream src, final PrintStream dest) {
-		LauncherMain.s_oLogger.debug("inheritIO: ");
+		LauncherMain.s_oLogger.debug("inheritIO");
 	    new Thread(new Runnable() {
 	        public void run() {
 	            Scanner sc = new Scanner(src);
 	            while (sc.hasNextLine()) {
-	                dest.println(sc.nextLine());
+	            	String sNextLine = sc.nextLine();
+	                dest.println(sNextLine);
+	        		LauncherMain.s_oLogger.debug("inheritIO: " + sNextLine);
 	            }
 	            
 	            sc.close();
