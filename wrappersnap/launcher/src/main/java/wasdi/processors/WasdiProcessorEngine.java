@@ -194,7 +194,7 @@ public abstract class WasdiProcessorEngine {
 				System.out.println("ShellExec CommandLine3 RETURNED: " + iProcOuptut);
 				System.out.println();
 
-				if (iProcOuptut != 0) {
+//				if (iProcOuptut != 0) {
 //					InputStream src = oProcess.getOutputStream();
 //					PrintStream dest = System.out;
 //		            Scanner sc = new Scanner(src);
@@ -205,7 +205,7 @@ public abstract class WasdiProcessorEngine {
 					inheritIO(oProcess.getInputStream(), System.out);
 				    inheritIO(oProcess.getErrorStream(), System.err);
 					
-				}
+//				}
 			}
 		}
 		catch (Exception e) {			
@@ -218,6 +218,7 @@ public abstract class WasdiProcessorEngine {
 	}
 	
 	private static void inheritIO(final InputStream src, final PrintStream dest) {
+		LauncherMain.s_oLogger.debug("inheritIO: ");
 	    new Thread(new Runnable() {
 	        public void run() {
 	            Scanner sc = new Scanner(src);
