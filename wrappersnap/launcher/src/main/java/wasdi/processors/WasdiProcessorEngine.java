@@ -1,9 +1,12 @@
 package wasdi.processors;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
@@ -174,12 +177,13 @@ public abstract class WasdiProcessorEngine {
 			System.out.println();
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			oProcessBuilder.inheritIO();
 
 			// Merge System.err and System.out
 			oProcessBuilder.redirectErrorStream(true);
 
-			// Inherit System.out as redirect output stream
-			oProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+//			// Inherit System.out as redirect output stream
+//			oProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 
 			Process oProcess = oProcessBuilder.start();
 			
@@ -189,6 +193,19 @@ public abstract class WasdiProcessorEngine {
 				System.out.println();
 				System.out.println("ShellExec CommandLine3 RETURNED: " + iProcOuptut);
 				System.out.println();
+
+				if (iProcOuptut != 0) {
+//					InputStream src = oProcess.getOutputStream();
+//					PrintStream dest = System.out;
+//		            Scanner sc = new Scanner(src);
+//		            while (sc.hasNextLine()) {
+//		                dest.println(sc.nextLine());
+//		            }
+					
+					inheritIO(oProcess.getInputStream(), System.out);
+				    inheritIO(oProcess.getErrorStream(), System.err);
+					
+				}
 			}
 		}
 		catch (Exception e) {			
@@ -198,6 +215,19 @@ public abstract class WasdiProcessorEngine {
 			System.out.println();
 			e.printStackTrace();
 		}
+	}
+	
+	private static void inheritIO(final InputStream src, final PrintStream dest) {
+	    new Thread(new Runnable() {
+	        public void run() {
+	            Scanner sc = new Scanner(src);
+	            while (sc.hasNextLine()) {
+	                dest.println(sc.nextLine());
+	            }
+	            
+	            sc.close();
+	        }
+	    }).start();
 	}
 	
 	/**
