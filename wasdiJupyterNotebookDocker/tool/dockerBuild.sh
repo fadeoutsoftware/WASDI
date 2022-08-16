@@ -1,7 +1,8 @@
 #!/bin/bash
 
 ## LOG MANAGEMENT ##
-exec 1> >(logger --stderr --tag docker-build) 2>&1
+iCurrentPid=${$}
+exec 1> >(logger --id=${iCurrentPid} --stderr --tag docker-build) 2>&1
 ## /LOG MANAGEMENT ##
 
 
