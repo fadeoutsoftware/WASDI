@@ -9,6 +9,7 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
@@ -190,7 +191,27 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (bFirstDeploy)
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
-			
+
+
+
+			processWorkspaceLog("execute command: chown");
+
+			// Create chown command
+			String sChangeOwnerNotebookFolderCommand = buidCommandChangeOwnerNotebookFolder(oParameter.getUserId(), oParameter.getWorkspace());;
+			boolean bChangeOwnerNotebookFolderResult = oDockerUtils.runCommand(sChangeOwnerNotebookFolderCommand);
+
+			if (!bChangeOwnerNotebookFolderResult) {
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the chown command failed:" + LINE_SEPARATOR + sChangeOwnerNotebookFolderCommand);
+
+                if (bFirstDeploy) {
+                    oProcessorRepository.deleteProcessor(sProcessorId);
+                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                }
+			}
+
+			if (bFirstDeploy)
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+
 
 
 			processWorkspaceLog("execute command: docker-compose");
@@ -278,6 +299,16 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
         oSB.append("  --json-inline '{\"wasdiNotebookId\": \"" + sJupyterNotebookCode + "\"}' \\");
         oSB.append(LINE_SEPARATOR);
         oSB.append("  --strict");
+
+        return oSB.toString();
+	}
+
+	private static String buidCommandChangeOwnerNotebookFolder(String sUserId, String sWorkspaceId) {
+        StringBuilder oSB = new StringBuilder();
+
+        String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + sUserId + FILE_SEPARATOR + sWorkspaceId;
+
+        oSB.append("sudo chown tomcat:tomcat ").append(sWorkspacePath).append(FILE_SEPARATOR).append("notebook");
 
         return oSB.toString();
 	}
