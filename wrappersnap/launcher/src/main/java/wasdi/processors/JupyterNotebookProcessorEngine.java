@@ -194,7 +194,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 
 
-			processWorkspaceLog("execute command: chown");
+			processWorkspaceLog("execute command: chown folder");
 
 			// Create chown command
 			String sChangeOwnerNotebookFolderCommand = buidCommandChangeOwnerNotebookFolder(oParameter.getUserId(), oParameter.getWorkspace());;
@@ -214,7 +214,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 
 
-			processWorkspaceLog("execute command: docker-compose");
+			processWorkspaceLog("execute command: create traefik configuration");
 
 			// Create Docker Util and launch docker-compose command
 			String sBuildTraefikConfigurationFileCommand = buidCommandTraefikConfigurationFile(sProcessorFolder, sJupyterNotebookCode);
