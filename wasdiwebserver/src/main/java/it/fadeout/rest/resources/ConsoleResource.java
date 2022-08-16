@@ -143,7 +143,6 @@ public class ConsoleResource {
 				if (bIsActive) {
 					Utils.debugLog("ConsoleResource.createConsole: JupyterNotebook started");
 
-//					oResult.setStringValue("https://test2.wasdi.net/notebook/67a5d87e4553a44345fe233ba6240e1a5912c4640e77d8020e6e6534/tree?");
 					oResult.setStringValue(sUrl);
 					oResult.setBoolValue(true);
 
