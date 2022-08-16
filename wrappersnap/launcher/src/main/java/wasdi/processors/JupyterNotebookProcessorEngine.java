@@ -88,7 +88,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
                 }
 			}
 
-
 			processWorkspaceLog("copy template directory");
 
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
@@ -108,6 +107,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Create Docker Util and launch docker-compose command
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 
+			processWorkspaceLog("+++++++++++++++++++++++++++++++");
+			oDockerUtils.runCommand("pwd");
+			processWorkspaceLog("*******************************");
+			oDockerUtils.runCommand("ll");
+			processWorkspaceLog("===============================");
 
 
 			processWorkspaceLog("execute command: docker build");
