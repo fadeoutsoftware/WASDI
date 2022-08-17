@@ -372,16 +372,16 @@ public class DockerUtils {
             // Initialize Args
             List<String> asArgs = new ArrayList<>();
 
+
+            // Generate shell command
+            LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
+            LauncherMain.s_oLogger.debug(sCommand);
+
             // Run the script
 //            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
             WasdiProcessorEngine.shellExecWithLogs(sBuildScriptFile, asArgs, true);
 
             FileUtils.forceDelete(oBuildScriptFile);
-
-
-            // Generate shell command
-            LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
-            LauncherMain.s_oLogger.debug(sCommand);
 
             LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
         } catch (Exception oEx) {

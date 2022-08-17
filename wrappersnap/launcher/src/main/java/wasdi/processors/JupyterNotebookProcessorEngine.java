@@ -107,12 +107,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Create Docker Util and launch docker-compose command
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 
-//			processWorkspaceLog("+++++++++++++++++++++++++++++++");
-			oDockerUtils.runCommand("pwd");
-//			processWorkspaceLog("*******************************");
-			oDockerUtils.runCommand("ll");
-//			processWorkspaceLog("===============================");
-
 
 			processWorkspaceLog("execute command: docker build");
 
@@ -176,6 +170,20 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			if (bFirstDeploy)
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
+			//mkdir **notebook**
+
+
+	        String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + oParameter.getUserId() + FILE_SEPARATOR + oParameter.getWorkspace();
+
+	        String sNotebookPath = sWorkspacePath + FILE_SEPARATOR + "notebook";
+	        File oNotebookFolder = new File(sNotebookPath);
+
+	        if (!WasdiFileUtils.fileExists(oNotebookFolder)) {
+	        	FileUtils.forceMkdir(oNotebookFolder);
+	        }
+
+	        LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
+
 
 
 			processWorkspaceLog("execute command: docker-compose");
@@ -198,23 +206,23 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 
 
-			processWorkspaceLog("execute command: chown folder");
-
-			// Create chown command
-			String sChangeOwnerNotebookFolderCommand = buidCommandChangeOwnerNotebookFolder(oParameter.getUserId(), oParameter.getWorkspace());;
-			boolean bChangeOwnerNotebookFolderResult = oDockerUtils.runCommand(sChangeOwnerNotebookFolderCommand);
-
-			if (!bChangeOwnerNotebookFolderResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the chown command failed:" + LINE_SEPARATOR + sChangeOwnerNotebookFolderCommand);
-
-                if (bFirstDeploy) {
-                    oProcessorRepository.deleteProcessor(sProcessorId);
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                }
-			}
-
-			if (bFirstDeploy)
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+//			processWorkspaceLog("execute command: chown folder");
+//
+//			// Create chown command
+//			String sChangeOwnerNotebookFolderCommand = buidCommandChangeOwnerNotebookFolder(oParameter.getUserId(), oParameter.getWorkspace());;
+//			boolean bChangeOwnerNotebookFolderResult = oDockerUtils.runCommand(sChangeOwnerNotebookFolderCommand);
+//
+//			if (!bChangeOwnerNotebookFolderResult) {
+//				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the chown command failed:" + LINE_SEPARATOR + sChangeOwnerNotebookFolderCommand);
+//
+//                if (bFirstDeploy) {
+//                    oProcessorRepository.deleteProcessor(sProcessorId);
+//                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+//                }
+//			}
+//
+//			if (bFirstDeploy)
+//				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
 
 
@@ -307,14 +315,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
         return oSB.toString();
 	}
 
-	private static String buidCommandChangeOwnerNotebookFolder(String sUserId, String sWorkspaceId) {
-        StringBuilder oSB = new StringBuilder();
-
-        String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + sUserId + FILE_SEPARATOR + sWorkspaceId;
-
-        oSB.append("sudo chown tomcat:tomcat ").append(sWorkspacePath).append(FILE_SEPARATOR).append("notebook");
-
-        return oSB.toString();
-	}
+//	private static String buidCommandChangeOwnerNotebookFolder(String sUserId, String sWorkspaceId) {
+//        StringBuilder oSB = new StringBuilder();
+//
+//        String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + sUserId + FILE_SEPARATOR + sWorkspaceId;
+//
+//        oSB.append("sudo chown tomcat:tomcat ").append(sWorkspacePath).append(FILE_SEPARATOR).append("notebook");
+//
+//        return oSB.toString();
+//	}
 
 }
