@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -369,10 +370,11 @@ public class DockerUtils {
             Thread.sleep(1000);
 
             // Initialize Args
-            ArrayList<String> asArgs = new ArrayList<>();
+            List<String> asArgs = new ArrayList<>();
 
             // Run the script
-            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
+//            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
+            WasdiProcessorEngine.shellExecWithLogs(sBuildScriptFile, asArgs, true);
 
             FileUtils.forceDelete(oBuildScriptFile);
 

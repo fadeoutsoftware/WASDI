@@ -107,11 +107,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Create Docker Util and launch docker-compose command
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 
-			processWorkspaceLog("+++++++++++++++++++++++++++++++");
+//			processWorkspaceLog("+++++++++++++++++++++++++++++++");
 			oDockerUtils.runCommand("pwd");
-			processWorkspaceLog("*******************************");
+//			processWorkspaceLog("*******************************");
 			oDockerUtils.runCommand("ll");
-			processWorkspaceLog("===============================");
+//			processWorkspaceLog("===============================");
 
 
 			processWorkspaceLog("execute command: docker build");
