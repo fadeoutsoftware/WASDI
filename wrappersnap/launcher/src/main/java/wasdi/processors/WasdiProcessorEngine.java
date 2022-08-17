@@ -1,12 +1,12 @@
 package wasdi.processors;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+
+import org.apache.commons.io.FileUtils;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
@@ -138,10 +138,7 @@ public abstract class WasdiProcessorEngine {
 	 * @param asArgs
 	 */
 	public static void shellExec(String sCommand, List<String> asArgs) {
-		LauncherMain.s_oLogger.debug("ShellExec2 sCommand: " + sCommand);
-		System.out.println();
-		System.out.println("ShellExec2 sCommand: " + sCommand);
-		System.out.println();
+		LauncherMain.s_oLogger.debug("ShellExec sCommand: " + sCommand);
 		shellExec(sCommand,asArgs,true);
 	}
 	
@@ -152,10 +149,7 @@ public abstract class WasdiProcessorEngine {
 	 * @param bWait
 	 */	
 	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		LauncherMain.s_oLogger.debug("ShellExec3 sCommand: " + sCommand);
-		System.out.println();
-		System.out.println("ShellExec3 sCommand: " + sCommand);
-		System.out.println();
+		LauncherMain.s_oLogger.debug("ShellExec sCommand: " + sCommand);
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
@@ -165,72 +159,90 @@ public abstract class WasdiProcessorEngine {
 			for (String sArg : asArgs) {
 				sCommandLine += sArg + " ";
 			}
-
-			LauncherMain.s_oLogger.debug("ShellExec3 CommandLine: " + sCommandLine);
-			System.out.println();
-			System.out.println("ShellExec CommandLine3: " + sCommandLine);
-			System.out.println();
-
-			LauncherMain.s_oLogger.debug("ShellExec3 asArgs: " + asArgs);
-			System.out.println();
-			System.out.println("ShellExec asArgs: " + asArgs);
-			System.out.println();
+			
+			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+			LauncherMain.s_oLogger.debug("ShellExec asArgs: " + asArgs);
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-			oProcessBuilder.inheritIO();
+			Process oProcess = oProcessBuilder.start();
+			
+			if (bWait) {
+				int iProcOuptut = oProcess.waitFor();				
+				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
+			}
+		}
+		catch (Exception e) {			
+			LauncherMain.s_oLogger.debug("ShellExec exception: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 
-			// Merge System.err and System.out
+	public static void shellExecWithLogs(String sCommand, List<String> asArgs, boolean bWait) {
+		LauncherMain.s_oLogger.debug("shellExecWithLogs sCommand: " + sCommand);
+		try {
+			if (asArgs==null) asArgs = new ArrayList<String>();
+			asArgs.add(0, sCommand);
+			
+			String sCommandLine = "";
+			
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}
+			
+			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine: " + sCommandLine);
+			LauncherMain.s_oLogger.debug("shellExecWithLogs asArgs: " + asArgs);
+
+
+			File logFile = createLogFile();
+			
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+
 			oProcessBuilder.redirectErrorStream(true);
-
-//			// Inherit System.out as redirect output stream
-//			oProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			oProcessBuilder.redirectOutput(logFile);
 
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
 				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("ShellExec3 CommandLine RETURNED: " + iProcOuptut);
-				System.out.println();
-				System.out.println("ShellExec CommandLine3 RETURNED: " + iProcOuptut);
-				System.out.println();
+				LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
 
-//				if (iProcOuptut != 0) {
-//					InputStream src = oProcess.getOutputStream();
-//					PrintStream dest = System.out;
-//		            Scanner sc = new Scanner(src);
-//		            while (sc.hasNextLine()) {
-//		                dest.println(sc.nextLine());
-//		            }
-					
-					inheritIO(oProcess.getInputStream(), System.out);
-				    inheritIO(oProcess.getErrorStream(), System.err);
-					
-//				}
+				String sOutputFileContent = readLogFile(logFile);
+				LauncherMain.s_oLogger.debug("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
+
+				deleteLogFile(logFile);
 			}
 		}
 		catch (Exception e) {			
-			LauncherMain.s_oLogger.debug("ShellExec3 exception: " + e.getMessage());
-			System.out.println();
-			System.out.println("ShellExec3 exception: " + e.getMessage());
-			System.out.println();
+			LauncherMain.s_oLogger.debug("shellExecWithLogs exception: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
-	
-	private static void inheritIO(final InputStream src, final PrintStream dest) {
-		LauncherMain.s_oLogger.debug("inheritIO");
-	    new Thread(new Runnable() {
-	        public void run() {
-	            Scanner sc = new Scanner(src);
-	            while (sc.hasNextLine()) {
-	            	String sNextLine = sc.nextLine();
-	                dest.println(sNextLine);
-	        		LauncherMain.s_oLogger.debug("inheritIO: " + sNextLine);
-	            }
-	            
-	            sc.close();
-	        }
-	    }).start();
+
+	private static File createLogFile() {
+		LauncherMain.s_oLogger.debug("createLogFile Working Directory = " + System.getProperty("user.dir"));
+
+		File currentDir = new File(System.getProperty("user.dir"));
+		File logFile = new File(currentDir + "\\" + "temporary_log_file.log");
+
+		return logFile;
+	}
+
+	private static String readLogFile(File logFile) {
+		try {
+			return FileUtils.readFileToString(logFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private static void deleteLogFile(File logFile) {
+		try {
+			FileUtils.forceDelete(logFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
