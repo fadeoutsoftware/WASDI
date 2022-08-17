@@ -138,7 +138,6 @@ public abstract class WasdiProcessorEngine {
 	 * @param asArgs
 	 */
 	public static void shellExec(String sCommand, List<String> asArgs) {
-		LauncherMain.s_oLogger.debug("ShellExec sCommand: " + sCommand);
 		shellExec(sCommand,asArgs,true);
 	}
 	
@@ -149,7 +148,6 @@ public abstract class WasdiProcessorEngine {
 	 * @param bWait
 	 */	
 	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		LauncherMain.s_oLogger.debug("ShellExec sCommand: " + sCommand);
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
@@ -161,7 +159,6 @@ public abstract class WasdiProcessorEngine {
 			}
 			
 			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
-			LauncherMain.s_oLogger.debug("ShellExec asArgs: " + asArgs);
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 			Process oProcess = oProcessBuilder.start();
@@ -171,16 +168,19 @@ public abstract class WasdiProcessorEngine {
 				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 		}
-		catch (Exception e) {			
-			LauncherMain.s_oLogger.debug("ShellExec exception: " + e.getMessage());
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void shellExecWithLogs(String sCommand, List<String> asArgs, boolean bWait) {
+	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
 		LauncherMain.s_oLogger.debug("shellExecWithLogs sCommand: " + sCommand);
+
 		try {
-			if (asArgs==null) asArgs = new ArrayList<String>();
+			if (asArgs == null) {
+				asArgs = new ArrayList<>();
+			}
+
 			asArgs.add(0, sCommand);
 			
 			String sCommandLine = "";
@@ -202,19 +202,27 @@ public abstract class WasdiProcessorEngine {
 
 			Process oProcess = oProcessBuilder.start();
 			
-			if (bWait) {
-				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
 
+			int iProcOuptut = oProcess.waitFor();				
+			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
+
+			if (iProcOuptut == 0) {
+				deleteLogFile(logFile);
+
+				return true;
+			} else {
 				String sOutputFileContent = readLogFile(logFile);
 				LauncherMain.s_oLogger.debug("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
 
 				deleteLogFile(logFile);
+
+				return false;
 			}
-		}
-		catch (Exception e) {			
+		} catch (Exception e) {			
 			LauncherMain.s_oLogger.debug("shellExecWithLogs exception: " + e.getMessage());
 			e.printStackTrace();
+
+			return false;
 		}
 	}
 
@@ -222,7 +230,7 @@ public abstract class WasdiProcessorEngine {
 		LauncherMain.s_oLogger.debug("createLogFile Working Directory = " + System.getProperty("user.dir"));
 
 		File currentDir = new File(System.getProperty("user.dir"));
-		File logFile = new File(currentDir + "\\" + "temporary_log_file.log");
+		File logFile = new File(currentDir.getAbsolutePath() + System.getProperty("file.separator") + "temporary_log_file.log");
 
 		return logFile;
 	}
@@ -231,7 +239,7 @@ public abstract class WasdiProcessorEngine {
 		try {
 			return FileUtils.readFileToString(logFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LauncherMain.s_oLogger.debug("readLogFile exception: " + e.getMessage());
 		}
 
 		return null;
@@ -241,7 +249,7 @@ public abstract class WasdiProcessorEngine {
 		try {
 			FileUtils.forceDelete(logFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LauncherMain.s_oLogger.debug("deleteLogFile exception: " + e.getMessage());
 		}
 	}
 	

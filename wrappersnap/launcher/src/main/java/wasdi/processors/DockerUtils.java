@@ -378,18 +378,21 @@ public class DockerUtils {
             LauncherMain.s_oLogger.debug(sCommand);
 
             // Run the script
-//            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
-            WasdiProcessorEngine.shellExecWithLogs(sBuildScriptFile, asArgs, true);
+            boolean bResult = WasdiProcessorEngine.shellExecWithLogs(sBuildScriptFile, asArgs);
 
             FileUtils.forceDelete(oBuildScriptFile);
 
-            LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
+            if (bResult) {
+            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
+            } else {
+            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command did not run successfully: " + sDockerName);
+            }
+
+            return bResult;
         } catch (Exception oEx) {
             Utils.debugLog("DockerUtils.runCommand: " + oEx.toString());
             return false;
         }
-
-        return true;
     }
 
 }
