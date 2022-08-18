@@ -20,5 +20,6 @@ services:
     stdin_open: true
     tty: true
     volumes:
+      - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}:/data/wasdi"
       - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}/notebook:/home/wasdi/notebook"
       - "./sysadmin/etc_supervisor_supervisord.conf:/etc/supervisor/supervisord.conf:ro"
