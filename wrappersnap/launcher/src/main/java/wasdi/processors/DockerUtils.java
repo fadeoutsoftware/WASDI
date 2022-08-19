@@ -354,13 +354,13 @@ public class DockerUtils {
             }
 
             // Wait a little bit to let the file be written
-            Thread.sleep(1000);
+            Thread.sleep(100);
 
             // Make it executable
             Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
 
             // And wait a little bit to make the chmod done
-            Thread.sleep(1000);
+            Thread.sleep(100);
 
             // Initialize Args
             List<String> asArgs = new ArrayList<>();
