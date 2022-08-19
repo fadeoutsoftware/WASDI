@@ -10,7 +10,7 @@ networks:
       name: "wasdi-network"
 
 services:
-  notebook:
+  nb_{{ wasdiNotebookId }}:
     environment:
       - WASDI_NOTEBOOK_ID={{ wasdiNotebookId }}
     image: "${sContainerName:?err}:${sContainerVersion:?err}"
