@@ -40,7 +40,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 	 */
 	public JupyterNotebook getJupyterNotebook(String sJupyterNotebookId) {
 		try {
-			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("jupyterNotebookId", sJupyterNotebookId)).first();
+			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("code", sJupyterNotebookId)).first();
 
 			if (oWSDocument != null) {
 				String sJSON = oWSDocument.toJson();
@@ -104,7 +104,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 		if (Utils.isNullOrEmpty(sJupyterNotebookId)) return false;
 
 		try {
-			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("jupyterNotebookId", sJupyterNotebookId));
+			DeleteResult oDeleteResult = getCollection(m_sThisCollection).deleteOne(new Document("code", sJupyterNotebookId));
 
 			if (oDeleteResult != null) {
 				if (oDeleteResult.getDeletedCount() == 1) {
