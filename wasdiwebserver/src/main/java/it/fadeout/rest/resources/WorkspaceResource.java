@@ -735,6 +735,11 @@ public class WorkspaceResource {
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
 
+
+				ConsoleResource oConsoleResource = new ConsoleResource();
+				oConsoleResource.terminate(sSessionId, sWorkspaceId);
+
+
 				return Response.ok().build();
 			} else
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting workspace on data base");

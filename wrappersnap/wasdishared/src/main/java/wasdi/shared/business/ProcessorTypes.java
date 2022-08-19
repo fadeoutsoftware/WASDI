@@ -18,6 +18,7 @@ public class ProcessorTypes {
 	public static String OCTAVE = "octave";
 	public static String CONDA = "conda";
 	public static String JUPYTER_NOTEBOOK = "jupyter_notebook";
+	public static String TRAEFIK_NOTEBOOK = "traefik-notebook";
 	public static String CSHARP = "csharp";
 	
 	/**
@@ -30,7 +31,8 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(UBUNTU_PYTHON37_SNAP)) return "python37";
 		else if (sProcessorType.equals(OCTAVE)) return "octave";
 		else if (sProcessorType.equals(CONDA)) return "conda";
-		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) return "python37-jupyter";
+		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) return "jupyter_notebook";
+		else if (sProcessorType.equals(TRAEFIK_NOTEBOOK)) return "traefik-notebook";
 		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		return "";
 	}
@@ -55,6 +57,9 @@ public class ProcessorTypes {
 			
 		}
 		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {
+			
+		}
+		else if (sProcessorType.equals(TRAEFIK_NOTEBOOK)) {
 
 		}
 		else if (sProcessorType.equals(CSHARP)) {

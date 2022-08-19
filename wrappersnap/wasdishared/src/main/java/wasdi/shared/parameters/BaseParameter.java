@@ -154,6 +154,9 @@ public class BaseParameter {
 		else if (sOperationType.equals(LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name())) {
 			oParam = new ProcessorParameter();
 		}
+		else if (sOperationType.equals(LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name())) {
+			oParam = new ProcessorParameter();
+		}
 		else if (sOperationType.equals(LauncherOperations.KILLPROCESSTREE.name())) {
 			oParam = new KillProcessTreeParameter();
 		}

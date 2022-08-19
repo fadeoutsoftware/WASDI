@@ -337,13 +337,6 @@ public class DockerUtils {
 
         try {
 
-            // Generate Docker Name
-            String sProcessorName = m_oProcessor.getName();
-
-            String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
-
-
-
             // Generate shell script file
             String sBuildScriptFile = m_sProcessorFolder + "temporary_script_file.sh";
 
@@ -383,9 +376,9 @@ public class DockerUtils {
             FileUtils.forceDelete(oBuildScriptFile);
 
             if (bResult) {
-            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully: " + sDockerName);
+            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully.");
             } else {
-            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command did not run successfully: " + sDockerName);
+            	LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command did not run successfully.");
             }
 
             return bResult;
