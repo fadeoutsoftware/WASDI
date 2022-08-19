@@ -216,7 +216,7 @@ public class ConsoleResource {
 			Utils.debugLog("ConsoleResource.create: create local operation");
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-			oProcessorParameter.setName(sJupyterNotebookCode);
+			oProcessorParameter.setName("jupyter-notebook");
 //			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
 			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
@@ -370,7 +370,7 @@ public class ConsoleResource {
 			Utils.debugLog("ConsoleResource.create: create local operation");
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-			oProcessorParameter.setName(sJupyterNotebookCode);
+			oProcessorParameter.setName("jupyter-notebook");
 //			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
 			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
