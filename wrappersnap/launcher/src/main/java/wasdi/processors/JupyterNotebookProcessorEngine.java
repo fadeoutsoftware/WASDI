@@ -87,11 +87,28 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 
+			if (bProcessorFolderExists) {
+				File oGeneralCommonEnvTemplate = new File(sProcessorTemplateFolder + FILE_SEPARATOR + "general_common.env");
+				File oGeneralCommonEnvProcessor = new File(sProcessorFolder + FILE_SEPARATOR + "general_common.env");
+
+				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
+					if (!WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)
+							|| FileUtils.checksumCRC32(oGeneralCommonEnvTemplate) != FileUtils.checksumCRC32(oGeneralCommonEnvProcessor)) {
+						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: deleting the ProcessorFolder: " + sProcessorFolder);
+
+						WasdiFileUtils.deleteFile(sProcessorFolder);
+						bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
+					}
+				}
+
+			}
+
 			if (!bProcessorFolderExists) {
 	            // Copy Docker template files in the processor folder
 	            File oDockerTemplateFolder = new File(sProcessorTemplateFolder);
 	            File oProcessorFolder = new File(sProcessorFolder);
 
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating the ProcessorFolder: " + sProcessorFolder);
 	            FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 			}
 
@@ -177,7 +194,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	        	FileUtils.forceMkdir(oNotebookFolder);
 	        }
 
-	        LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
+	        LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
 
 
 
@@ -425,7 +442,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
         oSB.append(LINE_SEPARATOR);
         oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
         oSB.append(LINE_SEPARATOR);
-        oSB.append("    rm");
+        oSB.append("    rm \\");
+        oSB.append(LINE_SEPARATOR);
+        oSB.append("    --stop \\");
+        oSB.append(LINE_SEPARATOR);
+        oSB.append("    --force");
 
         return oSB.toString();
 	}
