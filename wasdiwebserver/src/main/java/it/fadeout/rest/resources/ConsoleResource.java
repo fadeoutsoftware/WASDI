@@ -216,10 +216,9 @@ public class ConsoleResource {
 			Utils.debugLog("ConsoleResource.create: create local operation");
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-//			oProcessorParameter.setName(oProcessor.getName());
-//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
-//			oProcessorParameter.setProcessorType(oProcessor.getType());
 			oProcessorParameter.setName(sJupyterNotebookCode);
+//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
+			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
@@ -229,7 +228,6 @@ public class ConsoleResource {
 
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 
-//			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), oProcessor.getName(), sPath, oProcessorParameter);
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, sPath, oProcessorParameter);
 
 			if (oRes.getBoolValue()) {
@@ -372,10 +370,9 @@ public class ConsoleResource {
 			Utils.debugLog("ConsoleResource.create: create local operation");
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
-//			oProcessorParameter.setName(oProcessor.getName());
-//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
-//			oProcessorParameter.setProcessorType(oProcessor.getType());
 			oProcessorParameter.setName(sJupyterNotebookCode);
+//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
+			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
@@ -385,7 +382,6 @@ public class ConsoleResource {
 
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 
-//			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), oProcessor.getName(), sPath, oProcessorParameter);
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, sPath, oProcessorParameter);
 
 			if (oRes.getBoolValue()) {
