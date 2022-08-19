@@ -402,6 +402,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
         oSB.append(LINE_SEPARATOR);
         oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
         oSB.append(LINE_SEPARATOR);
+        oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
+        oSB.append(LINE_SEPARATOR);
         oSB.append("    stop");
 
         return oSB.toString();
@@ -414,6 +416,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
         oSB.append("docker-compose \\");
         oSB.append(LINE_SEPARATOR);
         oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
+        oSB.append(LINE_SEPARATOR);
+        oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
         oSB.append(LINE_SEPARATOR);
         oSB.append("    rm");
 
