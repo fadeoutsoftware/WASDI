@@ -219,6 +219,7 @@ public class ConsoleResource {
 //			oProcessorParameter.setName(oProcessor.getName());
 //			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
 //			oProcessorParameter.setProcessorType(oProcessor.getType());
+			oProcessorParameter.setName(sJupyterNotebookCode);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
 			oProcessorParameter.setExchange(sWorkspaceId);
