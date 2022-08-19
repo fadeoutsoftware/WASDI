@@ -88,12 +88,17 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 
 			if (bProcessorFolderExists) {
-				File oGeneralCommonEnvTemplate = new File(sProcessorTemplateFolder + FILE_SEPARATOR + "general_common.env");
-				File oGeneralCommonEnvProcessor = new File(sProcessorFolder + FILE_SEPARATOR + "general_common.env");
+				File oGeneralCommonEnvTemplate = new File(sProcessorTemplateFolder + FILE_SEPARATOR + "var" + FILE_SEPARATOR + "general_common.env");
+				File oGeneralCommonEnvProcessor = new File(sProcessorFolder + FILE_SEPARATOR + "var" + FILE_SEPARATOR + "general_common.env");
+
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvTemplate: " + oGeneralCommonEnvTemplate.getAbsolutePath());
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvProcessor: " + oGeneralCommonEnvProcessor.getAbsolutePath());
 
 				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
+					LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvTemplate));
 					if (!WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)
 							|| FileUtils.checksumCRC32(oGeneralCommonEnvTemplate) != FileUtils.checksumCRC32(oGeneralCommonEnvProcessor)) {
+						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvProcessor));
 						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: deleting the ProcessorFolder: " + sProcessorFolder);
 
 						WasdiFileUtils.deleteFile(sProcessorFolder);
@@ -300,15 +305,31 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// delete the Traefik configuration file
 			// rm -f /data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_<notebook ID>
 			
-			String sCommandTraefikConfigurationFilePath = "/data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_" + sJupyterNotebookCode + ".yml";
-			File oCommandTraefikConfigurationFile = new File(sCommandTraefikConfigurationFilePath);
+			String sTraefikConfigurationFilePath = "/data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_" + sJupyterNotebookCode + ".yml";
+			File oTraefikConfigurationFile = new File(sTraefikConfigurationFilePath);
 
-	        if (WasdiFileUtils.fileExists(oCommandTraefikConfigurationFile)) {
-	        	FileUtils.deleteQuietly(oCommandTraefikConfigurationFile);
+	        if (WasdiFileUtils.fileExists(oTraefikConfigurationFile)) {
+	        	FileUtils.deleteQuietly(oTraefikConfigurationFile);
 	        }
 
 			if (bFirstDeploy)
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+
+
+
+			// Delete the Jupyter Notebook docker-compose file
+			// rm -f /data/wasdi/processors/jupyter-notebook/docker-compose_<notebook ID>.yml
+			
+			String sDockerComposeFilePath = "/data/wasdi/processors/jupyter-notebook/docker-compose_" + sJupyterNotebookCode + ".yml";
+			File oDockerComposeFile = new File(sDockerComposeFilePath);
+
+	        if (WasdiFileUtils.fileExists(oDockerComposeFile)) {
+	        	FileUtils.deleteQuietly(oDockerComposeFile);
+	        }
+
+			if (bFirstDeploy)
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+
 
 	        
 
@@ -335,7 +356,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			}
 
 			if (bFirstDeploy)
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
 
 
 			// delete the container instance
