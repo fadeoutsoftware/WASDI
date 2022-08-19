@@ -321,7 +321,7 @@ public class ConsoleResource {
 						Utils.debugLog("ConsoleResource.terminate: Worker started");
 					}
 				} catch (Exception oEx) {
-					Utils.debugLog("ConsoleResource.create: error starting TerminateJupyterNotebookWorker " + oEx.toString());
+					Utils.debugLog("ConsoleResource.terminate: error starting TerminateJupyterNotebookWorker " + oEx.toString());
 				}
 			}
 
@@ -360,14 +360,18 @@ public class ConsoleResource {
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
 
 			if (oJupyterNotebook != null) {
+				Utils.debugLog("ConsoleResource.terminate: found JupyterNotebook record: " + sJupyterNotebookCode + ". Trying to delete it!");
+
 				oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+			} else {
+				Utils.debugLog("ConsoleResource.terminate: did not find JupyterNotebook record: " + sJupyterNotebookCode + "!!!");
 			}
 
 
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
 
-			Utils.debugLog("ConsoleResource.create: create local operation");
+			Utils.debugLog("ConsoleResource.terminate: create local operation");
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName("jupyter-notebook");
