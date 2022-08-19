@@ -4,10 +4,10 @@ import wasdi.processors.JupyterNotebookProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
+//import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.ProcessorRepository;
+//import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -32,17 +32,17 @@ public class Terminatejupyternotebook extends Operation {
 		try {
 			ProcessorParameter oParameter = (ProcessorParameter) oParam;
 
-			// First Check if processor exists
-			String sProcessorId = oParameter.getProcessorID();
+//			// First Check if processor exists
+//			String sProcessorId = oParameter.getProcessorID();
 
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+//			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+//			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-			// Check processor
-			if (oProcessor == null) {
-				m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: oProcessor is null [" + sProcessorId + "]");
-				return false;
-			}
+//			// Check processor
+//			if (oProcessor == null) {
+//				m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: oProcessor is null [" + sProcessorId + "]");
+//				return false;
+//			}
 
 			JupyterNotebookProcessorEngine oEngine = (JupyterNotebookProcessorEngine) WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 			oEngine.setSendToRabbit(m_oSendToRabbit);
