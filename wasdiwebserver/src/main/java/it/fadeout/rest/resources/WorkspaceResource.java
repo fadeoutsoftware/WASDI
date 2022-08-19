@@ -576,6 +576,11 @@ public class WorkspaceResource {
 			return Response.status(500).build();
 		}
 
+
+		ConsoleResource oConsoleResource = new ConsoleResource();
+		oConsoleResource.terminate(sSessionId, sWorkspaceId);
+
+
 		try {
 			// workspace repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -734,10 +739,6 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
 				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
 				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
-
-
-				ConsoleResource oConsoleResource = new ConsoleResource();
-				oConsoleResource.terminate(sSessionId, sWorkspaceId);
 
 
 				return Response.ok().build();
