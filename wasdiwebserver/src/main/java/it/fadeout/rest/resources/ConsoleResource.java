@@ -2,9 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -18,14 +16,12 @@ import it.fadeout.threads.TerminateJupyterNotebookWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.Node;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
-import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
@@ -124,56 +120,6 @@ public class ConsoleResource {
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
 
-
-//			Utils.debugLog("ConsoleResource.create: get Processor");
-//
-//			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-//
-//			String sJNProcessorName = sJupyterNotebookCode;
-//			Processor oProcessor = oProcessorRepository.getProcessorByName(sJNProcessorName);
-//
-//			if (oProcessor == null) {
-//				Utils.debugLog("ConsoleResource.create: unable to find processor " + sJNProcessorName + ". Creating it.");
-//
-//				// Create processor entity
-//				String sProcessorId =  UUID.randomUUID().toString();
-//				Date oDate = new Date();
-//				int iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
-//				int iProcessorPort = oProcessorRepository.getNextProcessorPort();
-//
-//				oProcessor = new Processor();
-//				oProcessor.setName(sJupyterNotebookCode);
-//				oProcessor.setFriendlyName("Jupyter Notebook " + sJupyterNotebookCode);
-//				oProcessor.setDescription("Jupyter Notebook " + sJupyterNotebookCode);
-//				oProcessor.setLongDescription("Jupyter Notebook " + sJupyterNotebookCode);
-//				oProcessor.setUserId(sUserId);
-//				oProcessor.setProcessorId(sProcessorId);
-//				oProcessor.setVersion("1");
-//				oProcessor.setPort(iProcessorPort);
-//				oProcessor.setType(ProcessorTypes.JUPYTER_NOTEBOOK);
-//				oProcessor.setIsPublic(0);
-//				oProcessor.setUpdateDate((double)oDate.getTime());
-//				oProcessor.setUploadDate((double)oDate.getTime());
-//				oProcessor.setTimeoutMs(0L);
-//				oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
-//				oProcessor.setShowInStore(false);
-//
-//				// Add info about the deploy node
-//				Node oNode = Wasdi.getActualNode();
-//				if (oNode != null) {
-//					oProcessor.setNodeCode(oNode.getNodeCode());
-//					oProcessor.setNodeUrl(oNode.getNodeBaseAddress());
-//				}
-//
-//				oProcessor.setParameterSample(null);
-//
-//				// Store in the db
-//				oProcessorRepository.insertProcessor(oProcessor);
-//			}
-
-
-
-
 			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
 
@@ -217,7 +163,6 @@ public class ConsoleResource {
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName("jupyter-notebook");
-//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
 			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
@@ -336,25 +281,7 @@ public class ConsoleResource {
 			}
 
 
-
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
-
-
-			// clean MongoDB documents from collections (jupyternotebook)
-
-//			Utils.debugLog("ConsoleResource.terminate: get Processor");
-//
-//			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-//
-//			String sJNProcessorName = sJupyterNotebookCode;
-//			Processor oProcessor = oProcessorRepository.getProcessorByName(sJNProcessorName);
-//
-//			if (oProcessor != null) {
-//				oProcessorRepository.deleteProcessor(oProcessor.getProcessorId());
-//			}
-
-
-
 
 			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
@@ -375,7 +302,6 @@ public class ConsoleResource {
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName("jupyter-notebook");
-//			oProcessorParameter.setProcessorID(oProcessor.getProcessorId());
 			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
 			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
 			oProcessorParameter.setUserId(sUserId);
@@ -399,7 +325,7 @@ public class ConsoleResource {
 
 				return oResult;
 			}
-			
+
 		} catch (Exception oEx) {
 			Utils.debugLog("ConsoleResource.terminate: " + oEx);
 
