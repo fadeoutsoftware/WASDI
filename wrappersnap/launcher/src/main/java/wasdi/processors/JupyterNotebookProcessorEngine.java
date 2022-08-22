@@ -95,7 +95,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvProcessor: " + oGeneralCommonEnvProcessor.getAbsolutePath());
 
 				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
-					LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvTemplate));
+					LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvTemplate.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvTemplate));
+					
+					if (WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)) {
+						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvProcessor));
+					} else {
+						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: file " + oGeneralCommonEnvProcessor.getAbsolutePath() + " does not exist");
+					}
+					
 					if (!WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)
 							|| FileUtils.checksumCRC32(oGeneralCommonEnvTemplate) != FileUtils.checksumCRC32(oGeneralCommonEnvProcessor)) {
 						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvProcessor));
