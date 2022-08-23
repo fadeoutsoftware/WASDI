@@ -192,7 +192,20 @@ public class WasdiFileUtils {
 		}
 
 		try {
-			return FileUtils.checksumCRC32(oFile1) == FileUtils.checksumCRC32(oFile2);
+			s_oLogger.error("WasdiFileUtils.filesAreTheSame | oFile1: " + oFile1.getAbsolutePath());
+
+			s_oLogger.error("WasdiFileUtils.filesAreTheSame | oFile2: " + oFile2.getAbsolutePath());
+
+			long lFile1Checksum = FileUtils.checksumCRC32(oFile1);
+			s_oLogger.error("WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile1): " + lFile1Checksum);
+
+			long lFile2Checksum = FileUtils.checksumCRC32(oFile2);
+			s_oLogger.error("WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile2): " + lFile2Checksum);
+
+			s_oLogger.error("WasdiFileUtils.filesAreTheSame | checksumCRC32 values are equal: " + (lFile1Checksum == lFile2Checksum));
+
+			return lFile1Checksum == lFile2Checksum;
+//			return FileUtils.checksumCRC32(oFile1) == FileUtils.checksumCRC32(oFile2);
 		} catch (IOException e) {
 			s_oLogger.error("WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
 
