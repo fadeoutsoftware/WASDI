@@ -130,9 +130,11 @@ public class ConsoleResource {
 				String sUrl = oJupyterNotebook.getUrl();
 
 				boolean bIsActive = isJupyterNotebookActive(sUrl);
+				Utils.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
 
 				PrimitiveResult oIsUpToDateResult = isJupyterNotebookUpToDate(sSessionId, sWorkspaceId);
 				boolean bIsUpToDate = oIsUpToDateResult.getBoolValue();
+				Utils.debugLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
 
 				if (bIsActive && bIsUpToDate) {
 					Utils.debugLog("ConsoleResource.create: JupyterNotebook started");
@@ -358,9 +360,13 @@ public class ConsoleResource {
 		String sProcessorName = "jupyter-notebook";
 
 		String sProcessorTemplateGeneralCommonEnvFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
+		Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate | sProcessorTemplateGeneralCommonEnvFilePath: " + sProcessorTemplateGeneralCommonEnvFilePath);
+
 		String sProcessorGeneralCommonEnvFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
+		Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate | sProcessorGeneralCommonEnvFilePath: " + sProcessorGeneralCommonEnvFilePath);
 
 		boolean bFilesAreTheSame = WasdiFileUtils.filesAreTheSame(sProcessorTemplateGeneralCommonEnvFilePath, sProcessorGeneralCommonEnvFilePath);
+		Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate | bFilesAreTheSame: " + bFilesAreTheSame);
 
 		oResult.setBoolValue(bFilesAreTheSame);
 
