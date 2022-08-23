@@ -18,7 +18,6 @@ import wasdi.shared.utils.WasdiFileUtils;
 
 public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
-	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	public JupyterNotebookProcessorEngine() {
@@ -86,26 +85,17 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 
 			if (bProcessorFolderExists) {
-				File oGeneralCommonEnvTemplate = new File(sProcessorTemplateFolder + FILE_SEPARATOR + "var" + FILE_SEPARATOR + "general_common.env");
-				File oGeneralCommonEnvProcessor = new File(sProcessorFolder + FILE_SEPARATOR + "var" + FILE_SEPARATOR + "general_common.env");
+				String sGeneralCommonEnvTemplateFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvTemplate: " + sGeneralCommonEnvTemplateFilePath);
+				File oGeneralCommonEnvTemplate = new File(sGeneralCommonEnvTemplateFilePath);
 
-				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvTemplate: " + oGeneralCommonEnvTemplate.getAbsolutePath());
-				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvProcessor: " + oGeneralCommonEnvProcessor.getAbsolutePath());
+				String sGeneralCommonEnvProcessorFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvProcessor: " + sGeneralCommonEnvProcessorFilePath);
+				File oGeneralCommonEnvProcessor = new File(sGeneralCommonEnvProcessorFilePath);
+
 
 				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
-					LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvTemplate.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvTemplate));
-
-					if (WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)) {
-						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvProcessor));
-					} else {
-						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: file " + oGeneralCommonEnvProcessor.getAbsolutePath() + " does not exist");
-					}
-
-					if (!WasdiFileUtils.fileExists(oGeneralCommonEnvProcessor)
-							|| FileUtils.checksumCRC32(oGeneralCommonEnvTemplate) != FileUtils.checksumCRC32(oGeneralCommonEnvProcessor)) {
-						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: checksum of " + oGeneralCommonEnvProcessor.getAbsolutePath() + ": " + FileUtils.checksumCRC32(oGeneralCommonEnvProcessor));
-						LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: deleting the ProcessorFolder: " + sProcessorFolder);
-
+					if (!WasdiFileUtils.filesAreTheSame(oGeneralCommonEnvTemplate, oGeneralCommonEnvProcessor)) {
 						WasdiFileUtils.deleteFile(sProcessorFolder);
 						bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 					}

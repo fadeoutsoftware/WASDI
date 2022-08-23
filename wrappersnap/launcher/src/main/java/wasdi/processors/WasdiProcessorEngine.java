@@ -20,6 +20,8 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 public abstract class WasdiProcessorEngine {
+
+	protected static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
@@ -408,14 +410,22 @@ public abstract class WasdiProcessorEngine {
 	 * @return the folder of the template of the processor
 	 */
 	public String getProcessorTemplateFolder(String sProcessorName) {
-		// Set the processor path
-		String sDownloadRootPath = m_sWorkingRootPath;
+		// Set the processor template path
+		String sDockerTemplatePath = m_sDockerTemplatePath;
 
-		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+		if (!sDockerTemplatePath.endsWith(File.separator)) sDockerTemplatePath = sDockerTemplatePath + File.separator;
 
-		String sProcessorTemplateFolder = sDownloadRootPath + "dockertemplate" + File.separator + sProcessorName + File.separator;
+		String sProcessorTemplateFolder = sDockerTemplatePath + sProcessorName + File.separator;
 
 		return sProcessorTemplateFolder;
+	}
+
+	public String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
+		return getProcessorFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
+	}
+
+	public String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
+		return getProcessorTemplateFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
 	}
 
 }

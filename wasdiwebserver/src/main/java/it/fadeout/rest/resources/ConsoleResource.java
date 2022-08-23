@@ -1,9 +1,11 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,17 +29,20 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 @Path("/console")
 public class ConsoleResource {
 
+	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+
 	@POST
 	@Path("/create")
 	public PrimitiveResult create(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
-		Utils.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ConsoleResource.create( WS: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -91,9 +96,7 @@ public class ConsoleResource {
 					//This is the main node: forward the request to other nodes
 					LaunchJupyterNotebookWorker oWorker = new LaunchJupyterNotebookWorker();
 
-					NodeRepository oNodeRepo = new NodeRepository();
-
-					Node oNode = oNodeRepo.getNodeByCode(oWorkspace.getNodeCode());
+					Node oNode = getWorkspaceNode(oWorkspace);
 
 					if (oNode != null) {
 						oWorker.init(oNode, sSessionId, sWorkspaceId);
@@ -128,7 +131,10 @@ public class ConsoleResource {
 
 				boolean bIsActive = isJupyterNotebookActive(sUrl);
 
-				if (bIsActive) {
+				PrimitiveResult oIsUpToDateResult = isJupyterNotebookUpToDate(sSessionId, sWorkspaceId);
+				boolean bIsUpToDate = oIsUpToDateResult.getBoolValue();
+
+				if (bIsActive && bIsUpToDate) {
 					Utils.debugLog("ConsoleResource.create: JupyterNotebook started");
 
 					oResult.setStringValue(sUrl);
@@ -137,7 +143,12 @@ public class ConsoleResource {
 					return oResult;
 				} else {
 					// the JupyterNotebook is already registered on MongoDB
-					Utils.debugLog("ConsoleResource.create: JupyterNotebook exists but it is not started");
+					Utils.debugLog("ConsoleResource.create: JupyterNotebook exists but it is not started or is out-of-date");
+
+					// restart JN instance
+					// update JN instance
+					oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+					return create(sSessionId, sWorkspaceId);
 				}
 
 			} else {
@@ -146,7 +157,7 @@ public class ConsoleResource {
 				oJupyterNotebook.setWorkspaceId(sWorkspaceId);
 				oJupyterNotebook.setCode(sJupyterNotebookCode);
 
-				String sUrl = getNodeJupyterNotebookBasePath(getNodeBaseAddress(oWorkspace.getNodeCode()));
+				String sUrl = getNodeJupyterNotebookBasePath(getNodeBaseAddress(oWorkspace));
 				sUrl += "notebook/";
 				sUrl += sJupyterNotebookCode;
 
@@ -201,7 +212,7 @@ public class ConsoleResource {
 	@Path("/terminate")
 	public PrimitiveResult terminate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
-		Utils.debugLog("ConsoleResource.terminate( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		Utils.debugLog("ConsoleResource.terminate( WS: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -255,9 +266,7 @@ public class ConsoleResource {
 					//This is the main node: forward the request to other nodes
 					TerminateJupyterNotebookWorker oWorker = new TerminateJupyterNotebookWorker();
 
-					NodeRepository oNodeRepo = new NodeRepository();
-
-					Node oNode = oNodeRepo.getNodeByCode(oWorkspace.getNodeCode());
+					Node oNode = getWorkspaceNode(oWorkspace);
 
 					if (oNode != null) {
 						oWorker.init(oNode, sSessionId, sWorkspaceId);
@@ -337,6 +346,27 @@ public class ConsoleResource {
 
 	}
 
+	@GET
+	@Path("/isJupyterNotebookUpToDate")
+	public PrimitiveResult isJupyterNotebookUpToDate(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate( WS: " + sWorkspaceId + " )");
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		String sProcessorName = "jupyter-notebook";
+
+		String sProcessorTemplateGeneralCommonEnvFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
+		String sProcessorGeneralCommonEnvFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
+
+		boolean bFilesAreTheSame = WasdiFileUtils.filesAreTheSame(sProcessorTemplateGeneralCommonEnvFilePath, sProcessorGeneralCommonEnvFilePath);
+
+		oResult.setBoolValue(bFilesAreTheSame);
+
+		return oResult;
+	}
+
 	private boolean isJupyterNotebookActive(String sUrl) {
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -345,9 +375,17 @@ public class ConsoleResource {
 		return oHttpCallResponse.getResponseCode().intValue() == 200;
 	}
 
-	private String getNodeBaseAddress(String sNodeCode) {
-		NodeRepository oNodeRepository = new NodeRepository();
-		Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
+	private Node getWorkspaceNode(Workspace oWorkspace) {
+		NodeRepository oNodeRepo = new NodeRepository();
+
+		String sNodeCode = oWorkspace.getNodeCode();
+		Node oNode = oNodeRepo.getNodeByCode(sNodeCode);
+
+		return oNode;
+	}
+
+	private String getNodeBaseAddress(Workspace oWorkspace) {
+		Node oNode = getWorkspaceNode(oWorkspace);
 
 		if (oNode == null) {
 			return WasdiConfig.Current.baseUrl + "/wasdiwebserver/rest";
@@ -372,6 +410,28 @@ public class ConsoleResource {
 		String sNodeNormalizedDomain = URI.create(sNodeDomain).normalize().toString();
 
 		return sNodeNormalizedDomain;
+	}
+
+	private String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
+		// Set the processor path
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
+
+		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
+
+		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
+
+		return sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env";
+	}
+
+	private String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
+		// Set the processor template path
+		String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
+
+		if (!sDockerTemplatePath.endsWith(File.separator)) sDockerTemplatePath = sDockerTemplatePath + File.separator;
+
+		String sProcessorTemplateFolder = sDockerTemplatePath + sProcessorName + File.separator;
+
+		return sProcessorTemplateFolder + "var" + FILE_SEPARATOR + "general_common.env";
 	}
 
 }
