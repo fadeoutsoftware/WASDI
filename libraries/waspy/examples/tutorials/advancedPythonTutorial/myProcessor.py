@@ -210,7 +210,10 @@ def run():
         return
 
     # Take the first image
-    sImageToProcess = asAvailableImages[0]
+    for sGoodProduct in asAvailableImages:
+        if(sGoodProduct.startswith("S2")):
+            sImageToProcess= sGoodProduct
+            break
 
     # Get the local path of the image: this is one of the key-feature of WASDI
     # The system checks if the image is available locally and, if it is not, it will download it

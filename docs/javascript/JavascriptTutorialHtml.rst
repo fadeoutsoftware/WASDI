@@ -140,6 +140,15 @@ The two fields used in the JSON above represent a sub-set of the available confi
 
 Check `configuration chapter in Library Concepts <https://wasdi.readthedocs.io/en/latest/LibsConcepts.html#configuration>`_ section for more details.
 
+For **parameters.json** file, for the moment, please just add the following content:
+
+.. code-block:: json
+
+    {}
+
+
+The "{}" parenthesis represents an empty JSON object, a quick starting point for the tutorial. In the following we will edit this file adding the actual parameters.
+
 Please open main.js and start editing the file.
 Wasdi library is exposed as a global singleton, a common practice for Javascript libraries.
 
