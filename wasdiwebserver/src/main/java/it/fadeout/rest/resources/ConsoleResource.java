@@ -127,9 +127,9 @@ public class ConsoleResource {
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
 
 			if (oJupyterNotebook != null) {
-				String sUrl = oJupyterNotebook.getUrl();
 
-				boolean bIsActive = isJupyterNotebookActive(sUrl);
+				PrimitiveResult oIsActiveResult = isJupyterNotebookActive(sSessionId, sWorkspaceId);
+				boolean bIsActive = oIsActiveResult.getBoolValue();
 				Utils.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
 
 				PrimitiveResult oIsUpToDateResult = isJupyterNotebookUpToDate(sSessionId, sWorkspaceId);
@@ -139,18 +139,27 @@ public class ConsoleResource {
 				if (bIsActive && bIsUpToDate) {
 					Utils.debugLog("ConsoleResource.create: JupyterNotebook started");
 
+					String sUrl = oIsActiveResult.getStringValue();
+
 					oResult.setStringValue(sUrl);
 					oResult.setBoolValue(true);
 
 					return oResult;
 				} else {
-					// the JupyterNotebook is already registered on MongoDB
 					Utils.debugLog("ConsoleResource.create: JupyterNotebook exists but it is not started or is out-of-date");
+					Utils.debugLog("ConsoleResource.create: " + oIsActiveResult.getStringValue());
 
-					// restart JN instance
-					// update JN instance
-					oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
-					return create(sSessionId, sWorkspaceId);
+					int iIsActiveResponseCode = oIsActiveResult.getIntValue();
+
+					if (bIsUpToDate && iIsActiveResponseCode == 502) {
+						// it's a Traefik issue, the JN instance will not be updated/restarted
+						return oIsActiveResult;
+					} else {
+						// restart JN instance
+						// update JN instance
+						oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+						return create(sSessionId, sWorkspaceId);
+					}
 				}
 
 			} else {
@@ -356,6 +365,42 @@ public class ConsoleResource {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
+
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+
+			return oResult;
+		}
+
+		String sUserId = oUser.getUserId();
+
+
+		//check the user can access the workspace
+		if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate: user cannot access workspace info, aborting");
+			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+
+			return oResult;
+		}
+
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+
+		if (oWorkspace == null) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookUpToDate: " + sWorkspaceId + " is not a valid workspace, aborting");
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+
+			return oResult;
+		}
+
 
 		String sProcessorName = "jupyter-notebook";
 
@@ -373,12 +418,81 @@ public class ConsoleResource {
 		return oResult;
 	}
 
-	private boolean isJupyterNotebookActive(String sUrl) {
+	@GET
+	@Path("/isJupyterNotebookActive")
+	private PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Utils.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookActive( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
+
+			return oResult;
+		}
+
+		if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+
+			return oResult;
+		}
+
+		String sUserId = oUser.getUserId();
+
+
+		//check the user can access the workspace
+		if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace info, aborting");
+			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+
+			return oResult;
+		}
+
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+
+		if (oWorkspace == null) {
+			Utils.debugLog("ConsoleResource.isJupyterNotebookActive: " + sWorkspaceId + " is not a valid workspace, aborting");
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+
+			return oResult;
+		}
+
+
 		Map<String, String> asHeaders = Collections.emptyMap();
+
+		String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
+
+		JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
+		JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
+		String sUrl = oJupyterNotebook.getUrl();
 
 		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
 
-		return oHttpCallResponse.getResponseCode().intValue() == 200;
+		int iResponseCode = oHttpCallResponse.getResponseCode().intValue();
+
+		if (iResponseCode == 200) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(sUrl);
+		} else if (iResponseCode == 404) {
+			oResult.setBoolValue(false);
+			oResult.setStringValue("There was a technical issue (Jupyter Notebook). Trying to recover the Jupyter Notebook instance.");
+		} else if (iResponseCode == 502) {
+			oResult.setBoolValue(false);
+			oResult.setStringValue("There was a technical issue (Traefik is down). The Jupyter Notebook instance remains unavailable.");
+		} else {
+			oResult.setBoolValue(false);
+			oResult.setStringValue("There was a technical issue (unknown). Trying to recover the Jupyter Notebook instance.");
+		}
+
+		oResult.setIntValue(iResponseCode);
+
+		return oResult;
 	}
 
 	private Node getWorkspaceNode(Workspace oWorkspace) {
