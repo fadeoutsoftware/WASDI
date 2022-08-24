@@ -187,7 +187,7 @@ public class WasdiFileUtils {
 			return false;
 		}
 
-		if (fileExists(oFile2)) {
+		if (!fileExists(oFile2)) {
 			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame: file2 does not exist");
 			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file2 does not exist");
 			return false;
