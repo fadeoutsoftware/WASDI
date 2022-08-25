@@ -979,3 +979,6 @@ client/dist/
 libraries/c#wasdilib/WasdiLib.Client/obj/
 libraries/c#wasdilib/WasdiLib.Test/obj/
 libraries/c#wasdilib/WasdiLib/obj/
+
+
+.DS_Store
