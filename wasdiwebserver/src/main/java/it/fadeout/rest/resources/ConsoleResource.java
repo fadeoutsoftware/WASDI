@@ -420,7 +420,7 @@ public class ConsoleResource {
 
 	@GET
 	@Path("/isJupyterNotebookActive")
-	private PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		Utils.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
 
