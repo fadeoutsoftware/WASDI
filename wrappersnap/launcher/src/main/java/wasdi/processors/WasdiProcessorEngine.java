@@ -209,9 +209,9 @@ public abstract class WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
 
 			if (iProcOuptut == 0) {
-				deleteLogFile(logFile);
 
 				String sOutputFileContent = readLogFile(logFile);
+				deleteLogFile(logFile);
 
 				if ("false".equalsIgnoreCase(sOutputFileContent)) {
 					return false;
@@ -228,7 +228,6 @@ public abstract class WasdiProcessorEngine {
 			}
 		} catch (Exception e) {			
 			LauncherMain.s_oLogger.debug("shellExecWithLogs exception: " + e.getMessage());
-			e.printStackTrace();
 
 			return false;
 		}
@@ -238,7 +237,7 @@ public abstract class WasdiProcessorEngine {
 		LauncherMain.s_oLogger.debug("createLogFile Working Directory = " + System.getProperty("user.dir"));
 
 		File currentDir = new File(System.getProperty("user.dir"));
-		File logFile = new File(currentDir.getAbsolutePath() + System.getProperty("file.separator") + "temporary_log_file.log");
+		File logFile = new File(currentDir.getAbsolutePath() + FILE_SEPARATOR + "temporary_log_file.log");
 
 		return logFile;
 	}
