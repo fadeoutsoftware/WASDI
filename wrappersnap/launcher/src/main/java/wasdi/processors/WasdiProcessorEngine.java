@@ -203,7 +203,6 @@ public abstract class WasdiProcessorEngine {
 			oProcessBuilder.redirectOutput(logFile);
 
 			Process oProcess = oProcessBuilder.start();
-			
 
 			int iProcOuptut = oProcess.waitFor();				
 			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
@@ -211,9 +210,6 @@ public abstract class WasdiProcessorEngine {
 			if (iProcOuptut == 0) {
 
 				String sOutputFileContent = readLogFile(logFile);
-				LauncherMain.s_oLogger.debug("shellExecWithLogs:");
-				LauncherMain.s_oLogger.debug("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
-				LauncherMain.s_oLogger.debug("shellExecWithLogs:");
 				deleteLogFile(logFile);
 
 				if (!Utils.isNullOrEmpty(sOutputFileContent)) {
