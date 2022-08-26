@@ -53,7 +53,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			oProcessWorkspace = m_oProcessWorkspace;
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			processWorkspaceLog("This is a first launch of the Jupyter Notebook");
+			processWorkspaceLog("This is an attempt to launch of the Jupyter Notebook");
 
 
 			String sProcessorFolder = getProcessorFolder(sProcessorName);
@@ -283,7 +283,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			oProcessWorkspace = m_oProcessWorkspace;
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			processWorkspaceLog("This is a first attempt to terminate the Jupyter Notebook");
+			processWorkspaceLog("This is an attempt to terminate the Jupyter Notebook");
 
 
 			String sProcessorFolder = getProcessorFolder(sProcessorName);
