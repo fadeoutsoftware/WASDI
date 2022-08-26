@@ -211,6 +211,12 @@ public abstract class WasdiProcessorEngine {
 			if (iProcOuptut == 0) {
 				deleteLogFile(logFile);
 
+				String sOutputFileContent = readLogFile(logFile);
+
+				if ("false".equalsIgnoreCase(sOutputFileContent)) {
+					return false;
+				}
+
 				return true;
 			} else {
 				String sOutputFileContent = readLogFile(logFile);

@@ -149,17 +149,10 @@ public class ConsoleResource {
 					Utils.debugLog("ConsoleResource.create: JupyterNotebook exists but it is not started or is out-of-date");
 					Utils.debugLog("ConsoleResource.create: " + oIsActiveResult.getStringValue());
 
-					int iIsActiveResponseCode = oIsActiveResult.getIntValue();
-
-					if (bIsUpToDate && iIsActiveResponseCode == 502) {
-						// it's a Traefik issue, the JN instance will not be updated/restarted
-						return oIsActiveResult;
-					} else {
-						// restart JN instance
-						// update JN instance
-						oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
-						return create(sSessionId, sWorkspaceId);
-					}
+					// restart JN instance
+					// update JN instance
+					oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+					return create(sSessionId, sWorkspaceId);
 				}
 
 			} else {
@@ -420,7 +413,7 @@ public class ConsoleResource {
 
 	@GET
 	@Path("/isJupyterNotebookActive")
-	private PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 		Utils.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
 
@@ -479,15 +472,9 @@ public class ConsoleResource {
 		if (iResponseCode == 200) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(sUrl);
-		} else if (iResponseCode == 404) {
-			oResult.setBoolValue(false);
-			oResult.setStringValue("There was a technical issue (Jupyter Notebook). Trying to recover the Jupyter Notebook instance.");
-		} else if (iResponseCode == 502) {
-			oResult.setBoolValue(false);
-			oResult.setStringValue("There was a technical issue (Traefik is down). The Jupyter Notebook instance remains unavailable.");
 		} else {
 			oResult.setBoolValue(false);
-			oResult.setStringValue("There was a technical issue (unknown). Trying to recover the Jupyter Notebook instance.");
+			oResult.setStringValue("The Jupyter Notebook instance is down.");
 		}
 
 		oResult.setIntValue(iResponseCode);
