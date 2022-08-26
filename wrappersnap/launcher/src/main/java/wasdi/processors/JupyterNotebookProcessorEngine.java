@@ -481,7 +481,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	private static String buildCommandDockerContainerInspect(String sContainerName) {
 		StringBuilder oSB = new StringBuilder();
 
-		oSB.append("docker container inspect -f '{{.State.Running}}' ");
+		oSB.append("docker container inspect --format '{{.State.Running}}' ");
 		oSB.append(sContainerName);
 
 		return oSB.toString();

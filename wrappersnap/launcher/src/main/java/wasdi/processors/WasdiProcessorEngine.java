@@ -211,13 +211,15 @@ public abstract class WasdiProcessorEngine {
 			if (iProcOuptut == 0) {
 
 				String sOutputFileContent = readLogFile(logFile);
+				LauncherMain.s_oLogger.debug("shellExecWithLogs:");
 				LauncherMain.s_oLogger.debug("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
-				LauncherMain.s_oLogger.debug("shellExecWithLogs oProcess: " + oProcess.toString());
-				LauncherMain.s_oLogger.debug("shellExecWithLogs oProcess.exitValue(): " + oProcess.exitValue());
-//				deleteLogFile(logFile);
+				LauncherMain.s_oLogger.debug("shellExecWithLogs:");
+				deleteLogFile(logFile);
 
-				if ("false".equalsIgnoreCase(sOutputFileContent)) {
-					return false;
+				if (!Utils.isNullOrEmpty(sOutputFileContent)) {
+					if (sOutputFileContent.trim().equalsIgnoreCase("false")) {
+						return false;
+					}
 				}
 
 				return true;
