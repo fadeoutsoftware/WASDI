@@ -67,7 +67,7 @@ public class TerminateJupyterNotebookWorker extends Thread {
 				Utils.debugLog("TerminateJupyterNotebookWorker.run: calling url: " + sUrl);
 
 				// It is a get call
-				HttpUtils.httpGet(sUrl, asHeaders);
+				HttpUtils.httpPost(sUrl, null, asHeaders);
 
 			} catch (Exception oEx) {
 				Utils.debugLog("TerminateJupyterNotebookWorker.run: Exception " + oEx.toString());

@@ -67,7 +67,7 @@ public class LaunchJupyterNotebookWorker extends Thread {
 				Utils.debugLog("LaunchJupyterNotebookWorker.run: calling url: " + sUrl);
 
 				// It is a get call
-				HttpUtils.httpGet(sUrl, asHeaders);
+				HttpUtils.httpPost(sUrl, null, asHeaders);
 
 			} catch (Exception oEx) {
 				Utils.debugLog("LaunchJupyterNotebookWorker.run: Exception " + oEx.toString());
