@@ -8,7 +8,7 @@
 
 Wasdi Web Platform access and basic usage
 =========================================
-The home page of WASDI is reachable at the address:
+The Home page of WASDI is reachable at the address:
 
 https://www.wasdi.net/
 
@@ -39,7 +39,7 @@ Workspace Management
 --------------------
 Each user in WASDI can work in one or more Workspaces. A Workspace is a set of files (original EO data or elaborated by some processor) that are grouped in the same “project”.
 
-The workspace concept is the same of many other development tools or languages: can be called workspace or project and is just a name given to a specific set of files.
+The workspace concept is the same of several other development tools or languages: the same concept can be either be named workspace or project and any other name designed to identify to a specific set of files.
 
 
 Once logged for the first time, the user is asked to create a new workspace.

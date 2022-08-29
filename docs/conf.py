@@ -81,8 +81,15 @@ print("Matlab/Octave source folder " + matlab_src_dir +"\n")
 
 os.system("echo --- HOT FIX for Javasphinx library ---")
 os.system("echo --- overwriting domain.py with the fixed version ---")
-os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.7/site-packages/javasphinx/domain.py")
+os.system("mv domain.py /home/docs/checkouts/readthedocs.org/user_builds/wasdi/envs/latest/lib/python3.8/site-packages/javasphinx/domain.py")
+
+os.system("npm list -g;")
 
 os.system("echo --- FIX for npm version ---")
-os.system('cd ~ ; npm install -g typedoc;')
+os.system("cd ~ ;npm install -g typedoc@0.22.18;")
 
+os.system("echo --- Python version ---")
+os.system("python --version")
+
+os.system("echo --- pip version ---")
+os.system("pip --version")
