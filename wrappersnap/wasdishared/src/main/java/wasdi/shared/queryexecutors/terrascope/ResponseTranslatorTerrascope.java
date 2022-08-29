@@ -101,6 +101,16 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			parseMainInfo(oInJson, oResult);		
 			parseFootPrint(oInJson, oResult);
 			parseProperties(oInJson, bFullViewModel, oResult);
+			
+			// P.Campanella 2022-08-29
+			if (!oResult.getTitle().contains(".")) {
+				if (oResult.getProperties().containsKey("format"))   {
+					Object oValue = oResult.getProperties().get("format");
+					if (oValue != null) {
+						oResult.setTitle(oResult.getTitle() + "." + oValue.toString());
+					}
+				}
+			}
 
 			buildLink(oResult);
 			buildSummary(oResult);
