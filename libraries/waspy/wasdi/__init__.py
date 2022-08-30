@@ -518,6 +518,12 @@ def init(sConfigFilePath=None):
     sWname = None
     sWId = None
     m_bValidSession = False
+    
+    #P.Campanella 2022/08/30: if there is no config file, try the default notebook one
+    if sConfigFilePath is None:
+        if os.path.exists("/home/wasdi/notebook_config.cfg"):
+            sConfigFilePath = "/home/wasdi/notebook_config.cfg"
+            
 
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
@@ -534,7 +540,8 @@ def init(sConfigFilePath=None):
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
         
-        sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        if sWId is None and sWname is None:
+            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
