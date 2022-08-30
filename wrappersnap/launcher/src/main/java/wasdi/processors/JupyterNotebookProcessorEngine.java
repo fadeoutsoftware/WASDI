@@ -233,7 +233,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
 			// create a temporary file on the host file-system
-			String sTemporaryFileFullPath = sProcessorFolder + FILE_SEPARATOR + sContainerName + "_config.cfg";
+			String sTemporaryFileFullPath = sProcessorFolder + FILE_SEPARATOR + sContainerName + "_notebook_config.cfg";
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sTemporaryFileFullPath: " + sTemporaryFileFullPath);
 
 			WasdiFileUtils.writeFile(sJsonContent, sTemporaryFileFullPath);
