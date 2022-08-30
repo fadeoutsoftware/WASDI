@@ -411,6 +411,7 @@ Add the following lines to the run method to search for EO images
    aoImages = wasdi.searchEOImages("S2", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider)
    for oImage in aoImages:
        wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
+	   wasdi.wasdiLog("Image Name WITH Extension:" + oImage['fileName'])
 
 The method searcheEOimages allows filtering for area of interest (bounding box), mission, product type, orbit number, sensor operational mode and cloud coverage (when applicable to the data type). A more advanced usage allows to specify the provider to use, but that’s beyond the scope of this tutorial.
 
@@ -443,7 +444,7 @@ Now we want to import selected images in the workspace.
    # For each found image
    for oImage in aoImages:
        # Get the file Name from the search result
-       sFileName = oImage["title"] + ".zip"
+       sFileName = oImage["fileName"]
        # If the file name is not yet in the workspace
        if sFileName not in asAlreadyExistingImages:
            # Add it to the list of images to import
@@ -527,8 +528,19 @@ Here in the following you can find the lines to add to the run method. Beware, t
        wasdi.wasdiLog("No images available, nothing to do.")
        wasdi.updateStatus("DONE", 100)
        return
-   # Take the first image
-   sImageToProcess = asAvailableImages[0]
+   sImageToProcess = None
+   
+   # Take the first S2 image
+   for sImg in asAvailableImages:
+	   if sImg.startswith("S2):
+		   sImageToProcess = sImg
+		   break
+		   
+   if sImageToProcess is None:
+       wasdi.wasdiLog("Cannot find our S2 image in the workspace")
+       wasdi.updateStatus("DONE", 100)
+       return
+	   
    # Get the local path of the image: this is one of the key-feature of WASDI
    # The system checks if the image is available locally and, if it is not, it will download it
    sLocalImagePath = wasdi.getPath(sImageToProcess)
