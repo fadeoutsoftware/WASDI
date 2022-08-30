@@ -3,6 +3,21 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.5.0] - 2022-08-30
+
+### Added
+- default configuration for Jupyter Notebooks
+
+## [0.7.4.4] - 2022-08-30
+
+### Fixed
+- asynchImportProductByFileUrl: encode file url before passing the same variable as query param
+- importProductByFileUrl: encode file url before passing the same variable as query param
+- asynchExecuteProcessor: use post version instead of get
+
+### Added
+- searchEOImages: added a better description of aoParams
+
 ## [0.7.4.3] - 2022-06-06
 
 ### Fixed
