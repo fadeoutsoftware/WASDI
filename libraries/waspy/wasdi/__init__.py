@@ -32,7 +32,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.4.3
+Version 0.7.4.4
 
 Last Update: 06/06/2022
 
@@ -44,6 +44,7 @@ Created on 11 Jun 2018
 """
 from time import sleep
 from telnetlib import AO
+import urllib
 from urllib.parse import urlencode
 from builtins import str
 
@@ -1768,7 +1769,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     
     :param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
     
-    :param aoParams: dictionary of search keys to add to the query. The system will add key=value to the query sent to WASDI. 
+    :param aoParams: dictionary of search keys to add to the query. The system will add key=value to the query sent to WASDI. The parameters for each collection can be found on the on line documentation
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
@@ -2150,7 +2151,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
-    sUrl += sFileUrl
+    sUrl += urllib.parse.quote(sFileUrl)
     sUrl += "&provider=" + sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
@@ -2158,10 +2159,10 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
 
     if sBoundingBox is not None:
         sUrl += "&bbox="
-        sUrl += sBoundingBox
+        sUrl += urllib.parse.quote(sBoundingBox)
         
     if sName is not None:
-        sUrl += "&name="+sName
+        sUrl += "&name="+urllib.parse.quote(sName)
     
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2213,7 +2214,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?fileUrl="
-    sUrl += sFileUrl
+    sUrl += urllib.parse.quote(sFileUrl)
     sUrl += "&provider="
     sUrl += sProvider
     sUrl += "&workspace="
@@ -2221,10 +2222,10 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     
     if sBoundingBox is not None:
         sUrl += "&bbox="
-        sUrl += sBoundingBox
+        sUrl += urllib.parse.quote(sBoundingBox)
         
     if sName is not None:
-        sUrl += "&name="+sName    
+        sUrl += "&name="+ urllib.parse.quote(sName)    
 
     if m_bIsOnServer:
         sUrl += "&parent="
@@ -2551,7 +2552,8 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     sUrl = getBaseUrl() + "/processors/run"
 
     try:
-        oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams, timeout=m_iRequestsTimeout)
+        #oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams, timeout=m_iRequestsTimeout)
+        oResponse = requests.post(sUrl, data=json.dumps(aoWasdiParams), headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
         wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
