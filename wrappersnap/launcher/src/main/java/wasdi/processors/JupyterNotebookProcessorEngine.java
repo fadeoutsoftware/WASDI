@@ -69,7 +69,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			if (!bProcessorTemplateFolderExists) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
 
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 5);
 			}
 
 			processWorkspaceLog("copy template directory");
@@ -109,8 +109,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			// Create Docker Util to be able to launch docker-compose commands
 			DockerUtils oDockerUtils = new DockerUtils(null, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-
-
 
 			processWorkspaceLog("verify that the Traefik container is up-and-running");
 
