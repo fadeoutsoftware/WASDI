@@ -64,10 +64,10 @@ public class Launchjupyternotebook extends Operation {
 							if (Utils.isNullOrEmpty(sName))
 								sName = "Your Jupyter Notebook";
 
-							String sInfo = "Jupyter Notebook Started<br>" + sName + " is now available";
+							String sInfo = "JUPYTER NOTEBOOK STARTED<br>" + sName + " IS NOW AVAILABLE";
 
 							if (!bRet)
-								sInfo = "GURU MEDITATION<br>There was an error starting Jupyter Notebook " + sName + " :(";
+								sInfo = "GURU MEDITATION<br>ERROR STARTING JUPYTER NOTEBOOK " + sName + " :(";
 
 							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
 									oParam.getExchange(), sInfo, oParam.getExchange());

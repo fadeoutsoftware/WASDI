@@ -113,12 +113,11 @@ public class ConsoleResource {
 
 			if (!Wasdi.s_sMyNodeCode.equals(oWorkspace.getNodeCode())) {
 
-				oResult.setStringValue("Delegating the work to the appropiate node");
+				oResult.setStringValue("ROUTING YOUR REQUEST TO DESTINATION NODE");
 				oResult.setBoolValue(true);
 
 				return oResult;
 			}
-
 
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
@@ -191,12 +190,12 @@ public class ConsoleResource {
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, sPath, oProcessorParameter);
 
 			if (oRes.getBoolValue()) {
-				oResult.setStringValue("Jupyter Notebook is starting");
+				oResult.setStringValue("PATIENCE IS THE VIRTUE OF THE STRONG");
 				oResult.setBoolValue(true);
 
 				return oResult;
 			} else {
-				oResult.setStringValue("Jupyter Notebook could not been started");
+				oResult.setStringValue("ERROR CREATING NOTEBOOK");
 				oResult.setBoolValue(false);
 
 				return oResult;

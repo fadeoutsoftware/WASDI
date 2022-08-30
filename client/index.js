@@ -32,6 +32,7 @@ require('./app/services/api/WorkspaceService.js');
 require('./app/services/api/ProcessingService');
 require('./app/services/api/ProcessorMediaService.js');
 require('./app/services/api/ProcessorService.js');
+require('./app/services/api/ConsoleService.js');
 require('./app/services/api/ProcessWorkspaceService.js');
 require('./app/services/api/ProductService.js');
 require('./app/services/api/WorkflowService.js');

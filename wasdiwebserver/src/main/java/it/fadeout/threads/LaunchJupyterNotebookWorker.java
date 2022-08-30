@@ -58,7 +58,7 @@ public class LaunchJupyterNotebookWorker extends Thread {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 
 				// Compose the API string
-				sUrl += "/console/create?" + "workspaceId=" + m_sWorkspaceId;
+				sUrl += "console/create?" + "workspace=" + m_sWorkspaceId;
 
 				// Add the auth header
 				Map<String, String> asHeaders = new HashMap<>();
