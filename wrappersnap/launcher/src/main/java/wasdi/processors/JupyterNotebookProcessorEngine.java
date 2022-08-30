@@ -222,6 +222,43 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 
 
+			processWorkspaceLog("adding file: notebook_config.cfg");
+
+			String sContainerName = "nb_" + sJupyterNotebookCode;
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sContainerName: " + sContainerName);
+
+
+			// create the JSON content of the temporary file
+			String sJsonContent = "{\"WORKSPACEID\":\"" + oParameter.getWorkspace() + "\"}";
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
+
+			// create a temporary file on the host file-system
+			String sTemporaryFileFullPath = sProcessorFolder + FILE_SEPARATOR + sContainerName + "_config.cfg";
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sTemporaryFileFullPath: " + sTemporaryFileFullPath);
+
+			WasdiFileUtils.writeFile(sJsonContent, sTemporaryFileFullPath);
+
+
+			// copy the temporary config file to the container
+			String sDockerCpFileCommand = buildCommandDockerCpFile(sContainerName);
+			boolean bDockerCpFileResult = oDockerUtils.runCommand(sDockerCpFileCommand);
+
+			if (!bDockerCpFileResult) {
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: unable to copy config file on the container:" + LINE_SEPARATOR + sDockerCpFileCommand);
+
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+			}
+
+			// remove the temporary file
+			if (WasdiFileUtils.fileExists(sTemporaryFileFullPath)) {
+				WasdiFileUtils.deleteFile(sTemporaryFileFullPath);
+			}
+
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+
+
+
 			processWorkspaceLog("execute command: create traefik configuration");
 
 			// Launch create traefik configuration command
@@ -481,6 +518,18 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 		oSB.append("docker container inspect --format '{{.State.Running}}' ");
 		oSB.append(sContainerName);
+
+		return oSB.toString();
+	}
+
+	private static String buildCommandDockerCpFile(String sContainerName) {
+		StringBuilder oSB = new StringBuilder();
+
+		oSB.append("docker cp ");
+		oSB.append(sContainerName);
+		oSB.append("_notebook_config.cfg ");
+		oSB.append(sContainerName);
+		oSB.append(":/home/wasdi/notebook/notebook_config.cfg");
 
 		return oSB.toString();
 	}
