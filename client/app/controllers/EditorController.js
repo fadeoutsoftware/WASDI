@@ -4,7 +4,7 @@
 var EditorController = (function () {
     function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
-        oModalService, oTranslate, oCatalogService, oProcessorService,
+        oModalService, oTranslate, oCatalogService, oProcessorService, oConsoleService, 
         $window) {
         // Reference to the needed Services
         this.m_oWindow = $window;
@@ -37,6 +37,11 @@ var EditorController = (function () {
          * Processors Service
          */
         this.m_oProcessorService = oProcessorService;
+
+        /**
+         * Console Service
+         */
+        this.m_oConsoleService = oConsoleService;
 
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
@@ -1244,7 +1249,7 @@ var EditorController = (function () {
             oController = oWindow;
         }
 
-        oController.m_oProcessorService.createConsole(oController.m_oActiveWorkspace.workspaceId)
+        oController.m_oConsoleService.createConsole(oController.m_oActiveWorkspace.workspaceId)
         .then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
@@ -1258,11 +1263,11 @@ var EditorController = (function () {
                     if (data.data.stringValue.includes("http")) {
                         oController.m_oWindow.open(data.data.stringValue, '_blank');
                     } else {
-                        sMessage = "GURU MEDITATION<br>THE JUPYTER NOTEBOOK IS BEING PREPARED"
+                        sMessage = "WASDI IS PREPARING YOUR NOTEBOOK"
         
                         if (utilsIsObjectNullOrUndefined(data.data) === false) {
                             if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
-                                sMessage = sMessage + ": " + data.data.stringValue;
+                                sMessage = sMessage + "<BR>" + data.data.stringValue;
                             }
                         }
         
@@ -2397,6 +2402,7 @@ var EditorController = (function () {
         '$translate',
         'CatalogService',
         'ProcessorService',
+        'ConsoleService',
         '$window'
 
     ];

@@ -58,7 +58,7 @@ public class TerminateJupyterNotebookWorker extends Thread {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 
 				// Compose the API string
-				sUrl += "/console/terminate?" + "workspace=" + m_sWorkspaceId;
+				sUrl += "/console/terminate?" + "workspaceId=" + m_sWorkspaceId;
 
 				// Add the auth header
 				Map<String, String> asHeaders = new HashMap<>();
