@@ -233,14 +233,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
 			// create a temporary file on the host file-system
-			String sTemporaryFileFullPath = sProcessorFolder + FILE_SEPARATOR + sContainerName + "_notebook_config.cfg";
+			String sTemporaryFileFullPath = sProcessorFolder + sContainerName + "_notebook_config.cfg";
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sTemporaryFileFullPath: " + sTemporaryFileFullPath);
 
 			WasdiFileUtils.writeFile(sJsonContent, sTemporaryFileFullPath);
 
 
 			// copy the temporary config file to the container
-			String sDockerCpFileCommand = buildCommandDockerCpFile(sContainerName);
+			String sDockerCpFileCommand = buildCommandDockerCpFile(sContainerName, sTemporaryFileFullPath);
 			boolean bDockerCpFileResult = oDockerUtils.runCommand(sDockerCpFileCommand);
 
 			if (!bDockerCpFileResult) {
@@ -522,12 +522,12 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		return oSB.toString();
 	}
 
-	private static String buildCommandDockerCpFile(String sContainerName) {
+	private static String buildCommandDockerCpFile(String sContainerName, String sTemporaryFileFullPath) {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("docker cp ");
-		oSB.append(sContainerName);
-		oSB.append("_notebook_config.cfg ");
+		oSB.append(sTemporaryFileFullPath);
+		oSB.append(" ");
 		oSB.append(sContainerName);
 		oSB.append(":/home/wasdi/notebook/notebook_config.cfg");
 
