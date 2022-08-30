@@ -3,6 +3,11 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.5.0] - 2022-08-30
+
+### Added
+- default configuration for Jupyter Notebooks
+
 ## [0.7.4.4] - 2022-08-30
 
 ### Fixed
