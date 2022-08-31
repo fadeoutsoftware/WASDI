@@ -444,8 +444,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		oSB.append(LINE_SEPARATOR);
 		oSB.append("    up \\");
 		oSB.append(LINE_SEPARATOR);
-		oSB.append("    --force");
-		oSB.append(LINE_SEPARATOR);
 		oSB.append("    --detach \\");
 
 		return oSB.toString();
