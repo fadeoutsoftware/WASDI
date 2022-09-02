@@ -36,9 +36,9 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
-import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
@@ -54,8 +54,8 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
 
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
@@ -1039,8 +1039,8 @@ public class dbUtils {
                 oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
 
                 // Delete also the sharings, it is deleted by the owner..
-                WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-                oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
 
             } else {
                 Utils.debugLog("Error deleting workspace on data base");
@@ -1148,18 +1148,18 @@ public class dbUtils {
                 System.out.println("Getting workspace sharings");
 
                 WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-                WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-                List<WorkspaceSharing> aoWorkspacesSharings = oWorkspaceSharingRepository.getWorkspaceSharings();
+                List<UserResourcePermission> aoUserResourcePermissions = oUserResourcePermissionRepository.getWorkspaceSharings();
 
-                for (WorkspaceSharing oWorkspaceSharing : aoWorkspacesSharings) {
+                for (UserResourcePermission oUserResourcePermission : aoUserResourcePermissions) {
 
-                    Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oWorkspaceSharing.getWorkspaceId());
+                    Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oUserResourcePermission.getResourceId());
 
                     if (oWorkspace == null) {
-                        Utils.debugLog("WorkspaceSharings: DELETE WS Shared not available " + oWorkspaceSharing.getWorkspaceId());
+                        Utils.debugLog("UserResourcePermissions: DELETE WS Shared not available " + oUserResourcePermission.getResourceId());
 
-                        oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oWorkspaceSharing.getUserId(), oWorkspaceSharing.getWorkspaceId());
+                        oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(oUserResourcePermission.getUserId(), oUserResourcePermission.getResourceId());
                         continue;
                     }
                 }
@@ -1356,8 +1356,8 @@ public class dbUtils {
 
                     // Delete also the sharings, it is deleted by the owner..
                     System.out.println("Delete Workspace sharings");
-                    WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-                    oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+                    UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                    oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
 
                     System.out.println("Workspace Deleted");
                 } else {
@@ -1692,8 +1692,8 @@ public class dbUtils {
 
 			                    // Delete also the sharings, it is deleted by the owner..
 			                    System.out.println("Delete Workspace sharings");
-			                    WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			                    oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+			                    UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			                    oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
 
 			                    System.out.println("Workspace Deleted");
 			                } else {

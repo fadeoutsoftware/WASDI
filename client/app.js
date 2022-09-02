@@ -16,6 +16,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MapService',
     'wasdi.GlobeService',
     'wasdi.WorkspaceService',
+    // 'wasdi.UserService',
     'wasdi.ProcessWorkspaceService',
     'wasdi.FileBufferService',
     'wasdi.ProductService',
@@ -133,6 +134,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvide
         }
     });
 
+    //USERS
+    $stateProvider.state('root.users', {
+        url: '/users',
+        views: {
+            'maincontent': {templateUrl: 'partials/users.html', controller: 'UserController'}
+        }
+    });
+
     //EDITOR
     $stateProvider.state('root.editor', {
         url: '/{workSpace}/editor',
@@ -205,6 +214,7 @@ wasdiApp.controller("HomeController", window.HomeController);
 wasdiApp.controller("MarketPlaceController", window.MarketPlaceController);
 //wasdiApp.controller("CatalogController", window.CatalogController);
 wasdiApp.controller("WorkspaceController", window.WorkspaceController);
+wasdiApp.controller("UserController", window.UserController);
 wasdiApp.controller("EditorController", window.EditorController);
 wasdiApp.controller("RootController", window.RootController);
 wasdiApp.controller("ImportController", window.ImportController);

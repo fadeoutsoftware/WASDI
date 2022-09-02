@@ -489,6 +489,12 @@ var RootController = (function() {
         this.m_oState.go("root.workspaces", { });
     };
 
+    RootController.prototype.openUsers = function()
+    {
+        this.m_oRootScope.title = null;
+        this.m_oState.go("root.users", { });
+    };
+
     RootController.prototype.openImportPage = function () {
         var oController = this;
         this.m_oRootScope.title = null;

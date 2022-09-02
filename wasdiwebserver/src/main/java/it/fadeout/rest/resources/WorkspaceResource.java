@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.*;
+
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -34,8 +36,9 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
-import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -44,8 +47,8 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -121,7 +124,6 @@ public class WorkspaceResource {
 		return aoResult;
 	}
 
-
 	/**
 	 * Get a list of workspaces of a user
 	 * @param sSessionId User Session Id
@@ -152,6 +154,12 @@ public class WorkspaceResource {
 				return aoWSList;
 			}
 
+
+			if (!UserApplicationRole.userHasRightsToAccessResource(oUser.getRole(), WORKSPACE_READ)) {
+				return aoWSList;
+			}
+
+
 			Utils.debugLog("WorkspaceResource.GetListByUser: workspaces for " + oUser.getUserId());
 
 			NodeRepository oNodeRepository = new NodeRepository();
@@ -162,7 +170,7 @@ public class WorkspaceResource {
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get Workspace List
 			List<Workspace> aoWorkspaces = oWSRepository.getWorkspaceByUser(oUser.getUserId());
@@ -191,17 +199,17 @@ public class WorkspaceResource {
 				}
 
 				// Get Sharings
-				List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
-						.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+                List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository
+                		.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 
 				// Add Sharings to View Model
-				if (aoSharings != null) {
-					for (int iSharings = 0; iSharings < aoSharings.size(); iSharings++) {
+				if (aoPermissions != null) {
+					for (int i = 0; i < aoPermissions.size(); i++) {
 						if (oWSViewModel.getSharedUsers() == null) {
 							oWSViewModel.setSharedUsers(new ArrayList<String>());
 						}
 
-						oWSViewModel.getSharedUsers().add(aoSharings.get(iSharings).getUserId());
+						oWSViewModel.getSharedUsers().add(aoPermissions.get(i).getUserId());
 					}
 				}
 
@@ -210,7 +218,7 @@ public class WorkspaceResource {
 			}
 
 			// Get the list of workspace shared with this user
-			List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository.getWorkspaceSharingByUser(oUser.getUserId());
+            List<UserResourcePermission> aoSharedWorkspaces = oUserResourcePermissionRepository.getWorkspaceSharingByUser(oUser.getUserId());
 
 			if (aoSharedWorkspaces.size() > 0) {
 				// For each
@@ -218,10 +226,10 @@ public class WorkspaceResource {
 
 					// Create View Model
 					WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
-					Workspace oWorkspace = oWSRepository.getWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+					Workspace oWorkspace = oWSRepository.getWorkspace(aoSharedWorkspaces.get(iWorkspaces).getResourceId());
 
 					if (oWorkspace == null) {
-						Utils.debugLog("WorkspaceResult.getListByUser: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+						Utils.debugLog("WorkspaceResult.getListByUser: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getResourceId());
 						continue;
 					}
 
@@ -243,7 +251,7 @@ public class WorkspaceResource {
 					}
 
 					// Get Sharings
-					List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+					List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 
 					// Add Sharings to View Model
 					if (aoSharings != null) {
@@ -315,7 +323,7 @@ public class WorkspaceResource {
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
 			
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
 			// Get requested workspace
 			Workspace oWorkspace = oWSRepository.getWorkspace(sWorkspaceId);
@@ -367,7 +375,7 @@ public class WorkspaceResource {
 			}
 
 			// Get Sharings
-			List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
 					.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
 			// Add Sharings to View Model
 			if (aoSharings != null) {
@@ -375,7 +383,7 @@ public class WorkspaceResource {
 					oVM.setSharedUsers(new ArrayList<String>());
 				}
 
-				for (WorkspaceSharing oSharing : aoSharings) {
+				for (UserResourcePermission oSharing : aoSharings) {
 					oVM.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
@@ -592,8 +600,8 @@ public class WorkspaceResource {
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
-				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-				oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
 
@@ -732,8 +740,8 @@ public class WorkspaceResource {
 				oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
 
 				// Delete also the sharings, it is deleted by the owner..
-				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-				oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
 
 				return Response.ok().build();
 			} else
@@ -802,9 +810,9 @@ public class WorkspaceResource {
 				return oResult;					
 			}			
 			
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			if (!oWorkspaceSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sWorkspaceId)) {
+			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oRequesterUser.getUserId(), sWorkspaceId)) {
 				//No. So it is neither the owner or a shared one
 				oResult.setStringValue("Unauthorized");
 				return oResult;
@@ -821,16 +829,19 @@ public class WorkspaceResource {
 		}
 
 		try {
-			WorkspaceSharing oWorkspaceSharing = new WorkspaceSharing();
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			UserResourcePermission oWorkspaceSharing = new UserResourcePermission();
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			if (!oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId)) {
+			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId)) {
 				Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
+				oWorkspaceSharing.setResourceType("workspace");
 				oWorkspaceSharing.setOwnerId(oRequesterUser.getUserId());
 				oWorkspaceSharing.setUserId(sUserId);
-				oWorkspaceSharing.setWorkspaceId(sWorkspaceId);
-				oWorkspaceSharing.setShareDate((double) oTimestamp.getTime());
-				oWorkspaceSharingRepository.insertWorkspaceSharing(oWorkspaceSharing);				
+				oWorkspaceSharing.setResourceId(sWorkspaceId);
+				oWorkspaceSharing.setCreatedBy(oRequesterUser.getUserId());
+				oWorkspaceSharing.setCreatedDate((double) oTimestamp.getTime());
+				oWorkspaceSharing.setPermissions("write");
+				oUserResourcePermissionRepository.insertUserResourcePermission(oWorkspaceSharing);				
 			}
 			else {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: already shared!");
@@ -910,7 +921,7 @@ public class WorkspaceResource {
 		Utils.debugLog("WorkspaceResource.getEnableUsersSharedWorksace( WS: " + sWorkspaceId + " )");
 
 	
-		List<WorkspaceSharing> aoWorkspaceSharing = null;
+		List<UserResourcePermission> aoWorkspaceSharing = null;
 		List<WorkspaceSharingViewModel> aoWorkspaceSharingViewModels = new ArrayList<WorkspaceSharingViewModel>();
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
@@ -924,15 +935,15 @@ public class WorkspaceResource {
 		}
 
 		try {
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			aoWorkspaceSharing = oWorkspaceSharingRepository.getWorkspaceSharingByWorkspace(sWorkspaceId);
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            aoWorkspaceSharing = oUserResourcePermissionRepository.getWorkspaceSharingByWorkspace(sWorkspaceId);
 
 			if (aoWorkspaceSharing != null) {
-				for (WorkspaceSharing oWorkspaceSharing : aoWorkspaceSharing) {
+				for (UserResourcePermission oWorkspaceSharing : aoWorkspaceSharing) {
 					WorkspaceSharingViewModel oWorkspaceSharingViewModel = new WorkspaceSharingViewModel();
 					oWorkspaceSharingViewModel.setOwnerId(oWorkspaceSharing.getUserId());
 					oWorkspaceSharingViewModel.setUserId(oWorkspaceSharing.getUserId());
-					oWorkspaceSharingViewModel.setWorkspaceId(oWorkspaceSharing.getWorkspaceId());
+					oWorkspaceSharingViewModel.setWorkspaceId(oWorkspaceSharing.getResourceId());
 
 					aoWorkspaceSharingViewModels.add(oWorkspaceSharingViewModel);
 				}
@@ -980,8 +991,8 @@ public class WorkspaceResource {
 				return oResult;
 			}
 
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(sUserId, sWorkspaceId);
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
 			oResult.setStringValue("Error in delete proccess");
