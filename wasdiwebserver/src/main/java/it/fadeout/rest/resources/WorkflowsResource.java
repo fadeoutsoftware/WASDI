@@ -44,11 +44,11 @@ import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
-import wasdi.shared.business.WorkflowSharing;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
-import wasdi.shared.data.WorkflowSharingRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.settings.GraphSetting;
@@ -231,9 +231,9 @@ public class WorkflowsResource {
             }
             
             // Checks that user can modify the workflow
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
             
-            if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oWorkflowSharingRepository.isSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
+            if (!oUser.getUserId().equals(oWorkflow.getUserId()) && !oUserResourcePermissionRepository.isWorkflowSharedWithUser(oUser.getUserId(), oWorkflow.getWorkflowId())) {
                 Utils.debugLog("WorkflowsResource.updateFile: User " + oUser.getUserId() + " doesn't have rights on workflow " + oWorkflow.getName());
                 return Response.status(Status.UNAUTHORIZED).build();
             }
@@ -484,13 +484,13 @@ public class WorkflowsResource {
             }
 
             // find sharings by userId
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            List<WorkflowSharing> aoWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUser(sUserId);
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            List<UserResourcePermission> aoWorkflowSharing = oUserResourcePermissionRepository.getWorkflowSharingsByUserId(sUserId);
 
             // For all the shared workflows
-            for (WorkflowSharing oSharing : aoWorkflowSharing) {
+            for (UserResourcePermission oSharing : aoWorkflowSharing) {
                 // Create the VM
-                SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getWorkflowId());
+                SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getResourceId());
                 SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
 
                 if (oVM.isPublic() == false) {
@@ -553,10 +553,10 @@ public class WorkflowsResource {
             if (oWorkflow.getUserId().equals(sUserId) == false) {
 
                 // check if the current user has a sharing of the workflow
-                WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-                if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
-                    oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
+                if (oUserResourcePermissionRepository.isWorkflowSharedWithUser(sUserId, sWorkflowId)) {
+                    oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkflowId(sUserId, sWorkflowId);
                     Utils.debugLog("WorkflowsResource.delete: Deleted sharing between user " + sUserId + " and workflow " + oWorkflow.getName() + " Workflow files kept in place");
                     return Response.ok().build();
                 }
@@ -580,8 +580,8 @@ public class WorkflowsResource {
             }
 
             // Delete sharings
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            oWorkflowSharingRepository.deleteByWorkflowId(sWorkflowId);
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            oUserResourcePermissionRepository.deletePermissionsByWorkflowId(sWorkflowId);
 
             // Delete the workflow
             oSnapWorkflowRepository.deleteSnapWorkflow(sWorkflowId);
@@ -609,7 +609,7 @@ public class WorkflowsResource {
         Utils.debugLog("WorkflowsResource.shareWorkflow(  Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
 
         //init repositories
-        WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+        UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
         SnapWorkflowRepository oWorkflowRepository = new SnapWorkflowRepository();
         // Validate Session
         User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
@@ -666,7 +666,7 @@ public class WorkflowsResource {
                     return oResult;
                 }
                 // the requester has the share?
-                if (!oWorkflowSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sWorkflowId)) {
+                if (!oUserResourcePermissionRepository.isWorkflowSharedWithUser(oRequesterUser.getUserId(), sWorkflowId)) {
                     oResult.setStringValue("Unauthorized");
                     return oResult;
                 }
@@ -674,19 +674,22 @@ public class WorkflowsResource {
             }
 
             // Check if has been already shared
-            if (oWorkflowSharingRepository.isSharedWithUser(sUserId, sWorkflowId)) {
+            if (oUserResourcePermissionRepository.isWorkflowSharedWithUser(sUserId, sWorkflowId)) {
                 oResult.setStringValue("Already shared");
                 return oResult;
             }
 
             // Create and insert the sharing
-            WorkflowSharing oWorkflowSharing = new WorkflowSharing();
+            UserResourcePermission oWorkflowSharing = new UserResourcePermission();
+            oWorkflowSharing.setResourceType("workflow");
             Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
             oWorkflowSharing.setOwnerId(oWorkflow.getUserId());
             oWorkflowSharing.setUserId(sUserId);
-            oWorkflowSharing.setWorkflowId(sWorkflowId);
-            oWorkflowSharing.setShareDate((double) oTimestamp.getTime());
-            oWorkflowSharingRepository.insertWorkflowSharing(oWorkflowSharing);
+            oWorkflowSharing.setResourceId(sWorkflowId);
+            oWorkflowSharing.setCreatedBy(oRequesterUser.getUserId());
+            oWorkflowSharing.setCreatedDate((double) oTimestamp.getTime());
+            oWorkflowSharing.setPermissions("write");
+            oUserResourcePermissionRepository.insertPermission(oWorkflowSharing);
 
             Utils.debugLog("WorkflowsResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
@@ -778,9 +781,9 @@ public class WorkflowsResource {
             }
 
             try {
-                WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-                WorkflowSharing oWorkflowShare = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, sWorkflowId);
+                UserResourcePermission oWorkflowShare = oUserResourcePermissionRepository.getWorkflowSharingByUserIdAndWorkflowId(sUserId, sWorkflowId);
 
                 if (oWorkflowShare != null) {
                     // if the user making the call is the one on the sharing OR
@@ -788,7 +791,7 @@ public class WorkflowsResource {
                             // if the user making the call is the owner of the workflow
                             oWorkflowShare.getOwnerId().equals(oOwnerUser.getUserId())) {
                         // Delete the sharing
-                        oWorkflowSharingRepository.deleteByUserIdWorkflowId(sUserId, sWorkflowId);
+                        oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkflowId(sUserId, sWorkflowId);
                     } else {
                         oResult.setStringValue("Unauthorized");
                         return oResult;
@@ -854,8 +857,8 @@ public class WorkflowsResource {
             }
 
             //Retrieve and returns the sharings
-            WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
-            oWorkflowSharingRepository.getWorkflowSharingByWorkflow(sWorkflowId).forEach(element -> {
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            oUserResourcePermissionRepository.getWorkflowSharingsByWorkflowId(sWorkflowId).forEach(element -> {
                 oResult.add(new WorkflowSharingViewModel(element));
             });
             return oResult;
@@ -922,9 +925,9 @@ public class WorkflowsResource {
             }
             if (oWF.getUserId().equals(sUserId) == false && oWF.getIsPublic() == false) {
 
-                WorkflowSharingRepository oWorkflowSharingRepository = new WorkflowSharingRepository();
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-                WorkflowSharing oWorkflowSharing = oWorkflowSharingRepository.getWorkflowSharingByUserIdWorkflowId(sUserId, oSnapWorkflowViewModel.getWorkflowId());
+                UserResourcePermission oWorkflowSharing = oUserResourcePermissionRepository.getWorkflowSharingByUserIdAndWorkflowId(sUserId, oSnapWorkflowViewModel.getWorkflowId());
 
                 if (oWorkflowSharing == null) {
 

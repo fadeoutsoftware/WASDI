@@ -1,5 +1,6 @@
 package wasdi.shared.data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		m_sThisCollection = "userresourcepermissions";
 	}
 
-	public boolean insertUserResourcePermission(UserResourcePermission oUserResourcePermission) {
+	public boolean insertPermission(UserResourcePermission oUserResourcePermission) {
 		try {
 			String sJSON = s_oMapper.writeValueAsString(oUserResourcePermission);
 			getCollection(m_sThisCollection).insertOne(Document.parse(sJSON));
@@ -33,7 +34,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 
 
-	public List<UserResourcePermission> getUserResourcePermissionByOwner(String sUserId) {
+	public List<UserResourcePermission> getPermissionsByOwnerId(String sUserId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -48,7 +49,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getUserResourcePermissionByTypeAndOwner(String sType, String sUserId) {
+	public List<UserResourcePermission> getPermissionsByTypeAndOwnerId(String sType, String sUserId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -63,13 +64,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getWorkspaceSharingByOwner(String sUserId) {
-		return getUserResourcePermissionByTypeAndOwner("workspace", sUserId);
+	public List<UserResourcePermission> getWorkspaceSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("workspace", sUserId);
+	}
+
+	public List<UserResourcePermission> getStyleSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("style", sUserId);
+	}
+
+	public List<UserResourcePermission> getWorkflowSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("workflow", sUserId);
+	}
+
+	public List<UserResourcePermission> getProcessorSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("processor", sUserId);
 	}
 
 
 
-	public List<UserResourcePermission> getUserResourcePermissionByUser(String sUserId) {
+	public List<UserResourcePermission> getPermissionsByUserId(String sUserId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -85,7 +98,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getUserResourcePermissionByTypeAndUser(String sType, String sUserId) {
+	public List<UserResourcePermission> getPermissionsByTypeAndUserId(String sType, String sUserId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -101,13 +114,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getWorkspaceSharingByUser(String sUserId) {
-		return getUserResourcePermissionByTypeAndUser("workspace", sUserId);
+	public List<UserResourcePermission> getWorkspaceSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("workspace", sUserId);
+	}
+
+	public List<UserResourcePermission> getStyleSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("style", sUserId);
+	}
+
+	public List<UserResourcePermission> getWorkflowSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("workflow", sUserId);
+	}
+
+	public List<UserResourcePermission> getProcessorSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("processor", sUserId);
 	}
 
 
 
-	public List<UserResourcePermission> getUserResourcePermissionByResourceId(String sResourceId) {
+	public List<UserResourcePermission> getPermissionsByResourceId(String sResourceId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -122,7 +147,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getUserResourcePermissionByTypeAndResourceId(String sType, String sResourceId) {
+	public List<UserResourcePermission> getPermissionsByTypeAndResourceId(String sType, String sResourceId) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -137,13 +162,94 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getWorkspaceSharingByWorkspace(String sWorkspaceId) {
-		return getUserResourcePermissionByTypeAndResourceId("workspace", sWorkspaceId);
+	public List<UserResourcePermission> getWorkspaceSharingsByWorkspaceId(String sWorkspaceId) {
+		return getPermissionsByTypeAndResourceId("workspace", sWorkspaceId);
+	}
+
+	public List<UserResourcePermission> getStyleSharingsByStyleId(String sStyleId) {
+		return getPermissionsByTypeAndResourceId("style", sStyleId);
+	}
+
+	public List<UserResourcePermission> getWorkflowSharingsByWorkflowId(String sWorkflowId) {
+		return getPermissionsByTypeAndResourceId("workflow", sWorkflowId);
+	}
+
+	public List<UserResourcePermission> getProcessorSharingsByProcessorId(String sProcessorId) {
+		return getPermissionsByTypeAndResourceId("processor", sProcessorId);
 	}
 
 
 
-	public List<UserResourcePermission> getUserResourcePermissions() {
+	public UserResourcePermission getPermissionByUserIdAndResourceId(String sUserId, String sResourceId) {
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.and(Filters.eq("userId", sUserId), Filters.eq("resourceId", sResourceId)))
+					.first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+				UserResourcePermission oStyleSharing;
+
+				try {
+					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
+					return oStyleSharing;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("UserResourcePermissionRepository.getPermissionByUserIdAndResourceId( " + sUserId + ", "
+					+ sResourceId + "): error: " + oE);
+		}
+
+		return null;
+	}
+
+	public UserResourcePermission getPermissionByTypeAndUserIdAndResourceId(String sType, String sUserId, String sResourceId) {
+
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sUserId), Filters.eq("resourceId", sResourceId)))
+					.first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+				UserResourcePermission oStyleSharing;
+
+				try {
+					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
+					return oStyleSharing;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId( " + sUserId
+					+ ", " + sResourceId + "): error: " + oE);
+		}
+
+		return null;
+	}
+
+	public UserResourcePermission getWorkspaceSharingByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
+		return getPermissionByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
+	}
+
+	public UserResourcePermission getStyleSharingByUserIdAndStyleId(String sUserId, String sStyleId) {
+		return getPermissionByTypeAndUserIdAndResourceId("style", sUserId, sStyleId);
+	}
+
+	public UserResourcePermission getWorkflowSharingByUserIdAndWorkflowId(String sUserId, String sWorkflowId) {
+		return getPermissionByTypeAndUserIdAndResourceId("workflow", sUserId, sWorkflowId);
+	}
+
+	public UserResourcePermission getProcessorSharingByUserIdAndProcessorId(String sUserId, String sProcessorId) {
+		return getPermissionByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
+	}
+
+
+
+	public List<UserResourcePermission> getPermissions() {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -157,7 +263,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<UserResourcePermission> getUserResourcePermissionsByType(String sType) {
+	public List<UserResourcePermission> getPermissionsByType(String sType) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
 		try {
@@ -173,12 +279,24 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharings() {
-		return getUserResourcePermissionsByType("workspace");
+		return getPermissionsByType("workspace");
+	}
+
+	public List<UserResourcePermission> getStyleSharings() {
+		return getPermissionsByType("style");
+	}
+
+	public List<UserResourcePermission> getWorkflowSharings() {
+		return getPermissionsByType("workflow");
+	}
+
+	public List<UserResourcePermission> getProcessorSharings() {
+		return getPermissionsByType("processor");
 	}
 
 
 
-	public int deleteUserResourcePermissionByResourceId(String sResourceId) {
+	public int deletePermissionsByResourceId(String sResourceId) {
 		if (Utils.isNullOrEmpty(sResourceId)) {
 			return 0;
 		}
@@ -197,7 +315,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteUserResourcePermissionByTypeAndResourceId(String sType, String sResourceId) {
+	public int deletePermissionsByTypeAndResourceId(String sType, String sResourceId) {
 		if (Utils.isNullOrEmpty(sType)) {
 			return 0;
 		}
@@ -220,13 +338,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteByWorkspaceId(String sWorkspaceId) {
-		return deleteUserResourcePermissionByTypeAndResourceId("workspace", sWorkspaceId);
+	public int deletePermissionsByWorkspaceId(String sWorkspaceId) {
+		return deletePermissionsByTypeAndResourceId("workspace", sWorkspaceId);
+	}
+
+	public int deletePermissionsByStyleId(String sStyleId) {
+		return deletePermissionsByTypeAndResourceId("style", sStyleId);
+	}
+
+	public int deletePermissionsByWorkflowId(String sWorkflowId) {
+		return deletePermissionsByTypeAndResourceId("workflow", sWorkflowId);
+	}
+
+	public int deletePermissionsByProcessorId(String sProcessorId) {
+		return deletePermissionsByTypeAndResourceId("processor", sProcessorId);
 	}
 
 
 
-	public int deleteUserResourcePermissionByUserId(String sUserId) {
+	public int deletePermissionsByUserId(String sUserId) {
 		if (Utils.isNullOrEmpty(sUserId)) {
 			return 0;
 		}
@@ -245,7 +375,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteUserResourcePermissionByTypeAndUserId(String sType, String sUserId) {
+	public int deletePermissionsByTypeAndUserId(String sType, String sUserId) {
 		if (Utils.isNullOrEmpty(sType)) {
 			return 0;
 		}
@@ -268,13 +398,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteByUserId(String sUserId) {
-		return deleteUserResourcePermissionByTypeAndResourceId("workspace", sUserId);
+	public int deleteWorkspacePermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("workspace", sUserId);
+	}
+
+	public int deleteStylePermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("style", sUserId);
+	}
+
+	public int deleteWorkflowPermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("workflow", sUserId);
+	}
+
+	public int deleteProcessorPermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("processor", sUserId);
 	}
 
 
 
-	public int deleteUserResourcePermissionByUserIdAndResourceId(String sUserId, String sResourceId) {
+	public int deletePermissionsByUserIdAndResourceId(String sUserId, String sResourceId) {
 		if (Utils.isNullOrEmpty(sUserId)) {
 			return 0;
 		}
@@ -297,7 +439,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteUserResourcePermissionByTypeAndUserIdAndResourceId(String sType, String sUserId, String sResourceId) {
+	public int deletePermissionsByTypeAndUserIdAndResourceId(String sType, String sUserId, String sResourceId) {
 		if (Utils.isNullOrEmpty(sType)) {
 			return 0;
 		}
@@ -324,13 +466,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
-	public int deleteByUserIdWorkspaceId(String sUserId, String sWorkspaceId) {
-		return deleteUserResourcePermissionByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
+	public int deletePermissionsByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
+	}
+
+	public int deletePermissionsByUserIdAndStyleId(String sUserId, String sStyleId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("style", sUserId, sStyleId);
+	}
+
+	public int deletePermissionsByUserIdAndWorkflowId(String sUserId, String sWorkflowId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("workflow", sUserId, sWorkflowId);
+	}
+
+	public int deletePermissionsByUserIdAndProcessorId(String sUserId, String sProcessorId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
 	}
 
 
 
-	public boolean isUserResourcePermissionSharedWithUser(String sUserId, String sResourceId) {
+	public boolean isResourceSharedWithUser(String sUserId, String sResourceId) {
 		try {
 			Document oWSDocument = getCollection(m_sThisCollection)
 					.find(Filters.and(Filters.eq("userId", sUserId), Filters.eq("resourceId", sResourceId))).first();
@@ -340,24 +494,25 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.isUserResourcePermissionSharedWithUser( " + sUserId + ", "
+			Utils.debugLog("UserResourcePermissionRepository.isResourceSharedWithUser( " + sUserId + ", "
 					+ sResourceId + "): error: " + oE);
 		}
 
 		return false;
 	}
 
-	public boolean isUserResourcePermissionSharedWithUserByType(String sType, String sUserId, String sResourceId) {
+	public boolean isResourceOfTypeSharedWithUser(String sType, String sUserId, String sResourceId) {
 		try {
 			Document oWSDocument = getCollection(m_sThisCollection)
-					.find(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sUserId), Filters.eq("resourceId", sResourceId))).first();
+					.find(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sUserId), Filters.eq("resourceId", sResourceId)))
+					.first();
 
 			if (null != oWSDocument) {
 				return true;
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.isUserResourcePermissionSharedWithUserByType( " + sType
+			Utils.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType
 					+ ", " + sUserId + ", " + sResourceId + "): error: " + oE);
 		}
 
@@ -365,7 +520,19 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public boolean isWorkspaceSharedWithUser(String sUserId, String sWorkspaceId) {
-		return isUserResourcePermissionSharedWithUserByType("workspace", sUserId, sWorkspaceId);
+		return isResourceOfTypeSharedWithUser("workspace", sUserId, sWorkspaceId);
+	}
+
+	public boolean isStyleSharedWithUser(String sUserId, String sStyleId) {
+		return isResourceOfTypeSharedWithUser("style", sUserId, sStyleId);
+	}
+
+	public boolean isWorkflowSharedWithUser(String sUserId, String sWorkflowId) {
+		return isResourceOfTypeSharedWithUser("workflow", sUserId, sWorkflowId);
+	}
+
+	public boolean isProcessorSharedWithUser(String sUserId, String sProcessorId) {
+		return isResourceOfTypeSharedWithUser("processor", sUserId, sProcessorId);
 	}
 
 }
