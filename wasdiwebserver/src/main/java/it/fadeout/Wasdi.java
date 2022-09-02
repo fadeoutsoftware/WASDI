@@ -57,7 +57,6 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
@@ -381,7 +380,6 @@ public class Wasdi extends ResourceConfig {
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
-				return oUser;
 			} else {
 				//check session against DB
 				

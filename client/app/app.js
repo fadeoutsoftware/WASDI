@@ -192,6 +192,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
 wasdiApp.controller("HomeController", HomeController);
 wasdiApp.controller("WorkspaceController", WorkspaceController);
+wasdiApp.controller("UserController", UserController);
 wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
