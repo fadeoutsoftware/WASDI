@@ -13,7 +13,13 @@
                                                                                dropdown-name="'Select Your Programming Language'"></dropdownmenudirective></div>
             <input id="typeread" ng-readonly="m_oController.m_bEditMode" ng-show="m_oController.m_bEditMode" type="text" class="form-control" placeholder='{{"DIALOG_PROCESSOR_BASE_TYPE"|translate}}' ng-model="m_oController.m_sTypeNameOnly">
         </div>
-
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-center align-bottom">
+            <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
+                    ng-click="m_oController.packageManagerClick()">
+                <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
+                <span class="ng-binding">{{"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER"|translate}}</span>
+            </button>
+        </div>
         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-bottom">
             <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
                     ng-click="m_oController.forceLibUpdate(m_oController.m_sProcessorId)">
