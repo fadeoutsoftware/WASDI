@@ -137,23 +137,16 @@ public class WorkspaceResource {
 		Utils.debugLog("WorkspaceResource.GetListByUser()");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-
+		
 		ArrayList<WorkspaceListInfoViewModel> aoWSList = new ArrayList<>();
+		
+		// Domain Check
+		if (oUser == null) {
+			Utils.debugLog("WorkspaceResource.GetListByUser: invalid session: " + sSessionId);
+			return aoWSList;
+		}
 
 		try {
-			if(Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("WorkspaceResource.GetListByUser: null session");
-				return aoWSList;
-			}
-			// Domain Check
-			if (oUser == null) {
-				Utils.debugLog("WorkspaceResource.GetListByUser: invalid session: " + sSessionId);
-				return aoWSList;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return aoWSList;
-			}
-
 
 			if (!UserApplicationRole.userHasRightsToAccessResource(oUser.getRole(), WORKSPACE_READ)) {
 				return aoWSList;
@@ -301,14 +294,9 @@ public class WorkspaceResource {
 			Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: invalid session");
 			return null;
 		}
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
-
+		
 		try {
 			// Domain Check
-			if (sWorkspaceId == null) {
-				return oVM;
-			}
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
 				return oVM;
 			}
@@ -759,34 +747,34 @@ public class WorkspaceResource {
 	 *
 	 * @param sSessionId User Session Id
 	 * @param sWorkspaceId Workspace Id
-	 * @param sUserId User id that will receive the workspace in sharing.
+	 * @param sDestinationUserId User id that will receive the workspace in sharing.
 	 * @return Primitive Result with boolValue = true and stringValue = Done if ok. False and error description otherwise
 	 */
 	@PUT
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sUserId) {
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("userId") String sDestinationUserId) {
 
-		Utils.debugLog("WorkspaceResource.ShareWorkspace( WS: " + sWorkspaceId + ", User: " + sUserId + " )");
-
-		// Validate Session
+		Utils.debugLog("WorkspaceResource.ShareWorkspace( WS: " + sWorkspaceId + ", User: " + sDestinationUserId + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
 
+		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid session");
-			return oResult;
-		}
-
-		if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid user");
-			oResult.setStringValue("Invalid user.");
+			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
 			return oResult;
 		}
 		
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessResource(oRequesterUser.getRole(), WORKSPACE_READ)) {
+			return oResult;
+		}
+		
+		// Check if the workspace exists
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 		
@@ -794,33 +782,29 @@ public class WorkspaceResource {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid workspace");
 			oResult.setStringValue("Invalid workspace.");
 			return oResult;			
-		}
+		}		
 		
-		if (oRequesterUser.getUserId().equals(sUserId)) {
+		// Can the user access this resource?
+		if(!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)) {
+			Utils.debugLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
+			return oResult;
+		}		
+		
+		// Cannot Autoshare
+		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
 			oResult.setStringValue("Impossible to autoshare.");
 			return oResult;				
-		}		
-		
-		if (!oWorkspace.getUserId().equals(oRequesterUser.getUserId())) {
-			
-			// Is he trying to share with the owner?
-			if (oWorkspace.getUserId().equals(sUserId)) {
-				oResult.setStringValue("Cannot Share with owner");
-				return oResult;					
-			}			
-			
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			
-			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(oRequesterUser.getUserId(), sWorkspaceId)) {
-				//No. So it is neither the owner or a shared one
-				oResult.setStringValue("Unauthorized");
-				return oResult;
-			}
 		}
+		
+		// Cannot share with the owner
+		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
+			oResult.setStringValue("Cannot Share with owner");
+			return oResult;					
+		}			
 
 		UserRepository oUserRepository = new UserRepository();
-		User oDestinationUser = oUserRepository.getUser(sUserId);
+		User oDestinationUser = oUserRepository.getUser(sDestinationUserId);
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
@@ -832,11 +816,11 @@ public class WorkspaceResource {
 			UserResourcePermission oWorkspaceSharing = new UserResourcePermission();
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId)) {
+			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sDestinationUserId, sWorkspaceId)) {
 				Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
 				oWorkspaceSharing.setResourceType("workspace");
 				oWorkspaceSharing.setOwnerId(oRequesterUser.getUserId());
-				oWorkspaceSharing.setUserId(sUserId);
+				oWorkspaceSharing.setUserId(sDestinationUserId);
 				oWorkspaceSharing.setResourceId(sWorkspaceId);
 				oWorkspaceSharing.setCreatedBy(oRequesterUser.getUserId());
 				oWorkspaceSharing.setCreatedDate((double) oTimestamp.getTime());
@@ -892,7 +876,7 @@ public class WorkspaceResource {
 		
 				Integer iPositiveSucceded = 0;
 								
-				iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
+				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
 				
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: notification sent with result " + iPositiveSucceded);
 			}
