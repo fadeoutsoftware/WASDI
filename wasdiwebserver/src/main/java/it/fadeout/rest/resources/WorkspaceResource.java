@@ -193,7 +193,7 @@ public class WorkspaceResource {
 
 				// Get Sharings
                 List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository
-                		.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+                		.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
 
 				// Add Sharings to View Model
 				if (aoPermissions != null) {
@@ -211,7 +211,7 @@ public class WorkspaceResource {
 			}
 
 			// Get the list of workspace shared with this user
-            List<UserResourcePermission> aoSharedWorkspaces = oUserResourcePermissionRepository.getWorkspaceSharingByUser(oUser.getUserId());
+            List<UserResourcePermission> aoSharedWorkspaces = oUserResourcePermissionRepository.getWorkspaceSharingsByUserId(oUser.getUserId());
 
 			if (aoSharedWorkspaces.size() > 0) {
 				// For each
@@ -244,7 +244,7 @@ public class WorkspaceResource {
 					}
 
 					// Get Sharings
-					List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+					List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
 
 					// Add Sharings to View Model
 					if (aoSharings != null) {
@@ -364,7 +364,7 @@ public class WorkspaceResource {
 
 			// Get Sharings
 			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-					.getWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+					.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
 			// Add Sharings to View Model
 			if (aoSharings != null) {
 				if (oVM.getSharedUsers() == null) {
@@ -589,7 +589,7 @@ public class WorkspaceResource {
 				// This is not the owner of the workspace
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-                oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
+                oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
 
@@ -729,7 +729,7 @@ public class WorkspaceResource {
 
 				// Delete also the sharings, it is deleted by the owner..
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-                oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
+                oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
 				return Response.ok().build();
 			} else
@@ -825,7 +825,7 @@ public class WorkspaceResource {
 				oWorkspaceSharing.setCreatedBy(oRequesterUser.getUserId());
 				oWorkspaceSharing.setCreatedDate((double) oTimestamp.getTime());
 				oWorkspaceSharing.setPermissions("write");
-				oUserResourcePermissionRepository.insertUserResourcePermission(oWorkspaceSharing);				
+				oUserResourcePermissionRepository.insertPermission(oWorkspaceSharing);				
 			}
 			else {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: already shared!");
@@ -920,7 +920,7 @@ public class WorkspaceResource {
 
 		try {
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            aoWorkspaceSharing = oUserResourcePermissionRepository.getWorkspaceSharingByWorkspace(sWorkspaceId);
+            aoWorkspaceSharing = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(sWorkspaceId);
 
 			if (aoWorkspaceSharing != null) {
 				for (UserResourcePermission oWorkspaceSharing : aoWorkspaceSharing) {
@@ -976,7 +976,7 @@ public class WorkspaceResource {
 			}
 
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(sUserId, sWorkspaceId);
+            oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
 			oResult.setStringValue("Error in delete proccess");

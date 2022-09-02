@@ -1040,7 +1040,7 @@ public class dbUtils {
 
                 // Delete also the sharings, it is deleted by the owner..
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-                oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
+                oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
             } else {
                 Utils.debugLog("Error deleting workspace on data base");
@@ -1159,7 +1159,7 @@ public class dbUtils {
                     if (oWorkspace == null) {
                         Utils.debugLog("UserResourcePermissions: DELETE WS Shared not available " + oUserResourcePermission.getResourceId());
 
-                        oUserResourcePermissionRepository.deleteByUserIdWorkspaceId(oUserResourcePermission.getUserId(), oUserResourcePermission.getResourceId());
+                        oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUserResourcePermission.getUserId(), oUserResourcePermission.getResourceId());
                         continue;
                     }
                 }
@@ -1357,7 +1357,7 @@ public class dbUtils {
                     // Delete also the sharings, it is deleted by the owner..
                     System.out.println("Delete Workspace sharings");
                     UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-                    oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
+                    oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
                     System.out.println("Workspace Deleted");
                 } else {
@@ -1693,7 +1693,7 @@ public class dbUtils {
 			                    // Delete also the sharings, it is deleted by the owner..
 			                    System.out.println("Delete Workspace sharings");
 			                    UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			                    oUserResourcePermissionRepository.deleteByWorkspaceId(sWorkspaceId);
+			                    oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
 			                    System.out.println("Workspace Deleted");
 			                } else {

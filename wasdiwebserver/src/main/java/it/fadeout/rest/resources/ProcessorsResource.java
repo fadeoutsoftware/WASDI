@@ -55,11 +55,11 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
-import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
@@ -69,10 +69,10 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -347,14 +347,14 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			List<Processor> aoDeployed = oProcessorRepository.getDeployedProcessors();
 			
 			for (int i=0; i<aoDeployed.size(); i++) {
 				DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel();
 				Processor oProcessor = aoDeployed.get(i);
 
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 
 				if (oProcessor.getIsPublic() != 1) {
 					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
@@ -410,10 +410,10 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oDeployedProcessorViewModel;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 
 			if (oProcessor.getIsPublic() != 1) {
 				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
@@ -467,7 +467,7 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return aoRet;
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
 			String sOrderBy = "friendlyName";
 			
@@ -502,7 +502,7 @@ public class ProcessorsResource  {
 				
 				if (!oProcessor.getShowInStore()) continue;
 
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
 				// See if this is a processor the user can access to
 				if (oProcessor.getIsPublic() != 1) {
@@ -655,7 +655,7 @@ public class ProcessorsResource  {
 			AppDetailViewModel oAppDetailViewModel = new AppDetailViewModel();
 						
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 			
 			if (oProcessor==null) {
@@ -669,7 +669,7 @@ public class ProcessorsResource  {
 //				return Response.status(400).build();				
 //			}
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 
 			if (oProcessor.getIsPublic() != 1) {
 				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
@@ -1356,14 +1356,14 @@ public class ProcessorsResource  {
 				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oUser.getUserId());
 				
 				// Is this a sharing?				
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing != null) {
 					
 					// Delete the share
 					Utils.debugLog("ProcessorsResource.deleteProcessor: the processor wasd shared with " + oUser.getUserId() + ", delete the sharing");
-					oProcessorSharingRepository.deleteByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+					oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 					
 					return Response.ok().build();
 				}
@@ -1470,9 +1470,9 @@ public class ProcessorsResource  {
 			
 			if (!oProcessorToReDeploy.getUserId().equals(oUser.getUserId())) {
 				
-				ProcessorSharingRepository oSharingRepo = new ProcessorSharingRepository();
+				UserResourcePermissionRepository oSharingRepo = new UserResourcePermissionRepository();
 				
-				ProcessorSharing oSharing = oSharingRepo.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				UserResourcePermission oSharing = oSharingRepo.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
 					Utils.debugLog("ProcessorsResource.redeployProcessor: processor not of user " + oProcessorToReDeploy.getUserId());
@@ -1796,8 +1796,8 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();				
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();				
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
 					Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oUser.getUserId());
@@ -1884,8 +1884,8 @@ public class ProcessorsResource  {
 			
 			//not the owner?
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
 					Utils.debugLog("ProcessorsResource.updateProcessorFiles: processor not of user " + oUser.getUserId() + ", aborting");
@@ -2075,9 +2075,9 @@ public class ProcessorsResource  {
 			
 			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
 				
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 				
-				ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 				
 				if (oSharing == null) {
 					Utils.debugLog("ProcessorsResource.updateProcessorDetails: processor not of user " + oUser.getUserId());
@@ -2418,8 +2418,8 @@ public class ProcessorsResource  {
 			}
 			
 			// Check if has been already shared
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			ProcessorSharing oAlreadyExists = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oAlreadyExists = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(sUserId, sProcessorId);
 			
 			if (oAlreadyExists != null) {
 				oResult.setStringValue("Already shared");
@@ -2436,7 +2436,7 @@ public class ProcessorsResource  {
 				}
 				
 				// No: the requestr has a sharing on this processor?
-				ProcessorSharing oHasSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oRequesterUser.getUserId(), sProcessorId);
+				UserResourcePermission oHasSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oRequesterUser.getUserId(), sProcessorId);
 				
 				if (oHasSharing==null) {
 					
@@ -2447,13 +2447,16 @@ public class ProcessorsResource  {
 			}			
 			
 			// Create and insert the sharing
-			ProcessorSharing oProcessorSharing = new ProcessorSharing();
+			UserResourcePermission oProcessorSharing = new UserResourcePermission();
+			oProcessorSharing.setResourceType("processor");
 			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
 			oProcessorSharing.setOwnerId(oRequesterUser.getUserId());
 			oProcessorSharing.setUserId(sUserId);
-			oProcessorSharing.setProcessorId(sProcessorId);
-			oProcessorSharing.setShareDate((double) oTimestamp.getTime());
-			oProcessorSharingRepository.insertProcessorSharing(oProcessorSharing);
+			oProcessorSharing.setResourceId(sProcessorId);
+			oProcessorSharing.setCreatedBy(oRequesterUser.getUserId());
+			oProcessorSharing.setCreatedDate((double) oTimestamp.getTime());
+			oProcessorSharing.setPermissions("write");
+			oUserResourcePermissionRepository.insertPermission(oProcessorSharing);
 			
 			Utils.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 			
@@ -2548,11 +2551,11 @@ public class ProcessorsResource  {
 		ArrayList<ProcessorSharingViewModel> aoReturnList = new ArrayList<ProcessorSharingViewModel>();
 
 		try {
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			List<ProcessorSharing> aoProcessorSharing = oProcessorSharingRepository.getProcessorSharingByProcessorId(sProcessorId);
+			List<UserResourcePermission> aoProcessorSharing = oUserResourcePermissionRepository.getProcessorSharingsByProcessorId(sProcessorId);
 			
-			for (ProcessorSharing oSharing : aoProcessorSharing) {
+			for (UserResourcePermission oSharing : aoProcessorSharing) {
 				ProcessorSharingViewModel oVM = new ProcessorSharingViewModel();
 				oVM.setUserId(oSharing.getUserId());
 				aoReturnList.add(oVM);
@@ -2605,13 +2608,13 @@ public class ProcessorsResource  {
 			}
 
 			try {
-				ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-				ProcessorSharing oProcShare = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(sUserId, sProcessorId);
+				UserResourcePermission oProcShare = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(sUserId, sProcessorId);
 
 				if (oProcShare!= null) {
 					if (oProcShare.getUserId().equals(oOwnerUser.getUserId()) || oProcShare.getOwnerId().equals(oOwnerUser.getUserId())) {
-						oProcessorSharingRepository.deleteByUserIdProcessorId(sUserId, sProcessorId);
+						oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorId(sUserId, sProcessorId);
 					}
 					else {
 						oResult.setStringValue("Unauthorized");

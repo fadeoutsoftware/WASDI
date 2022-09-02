@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import wasdi.shared.business.StyleSharing;
+import wasdi.shared.business.UserResourcePermission;
 
 /**
  * Represents the sharing of a style with a user
@@ -20,7 +20,7 @@ public class StyleSharingViewModel {
 
 	private String userId;
 
-	public StyleSharingViewModel(StyleSharing oSharing) {
+	public StyleSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.userId = oSharing.getUserId();
 	}
