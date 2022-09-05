@@ -4,6 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
@@ -48,6 +51,7 @@ public class DockerUtils {
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
      * @param sWorkingRootPath WASDI Working path
+     * @param sTomcatUser      User
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath, String sTomcatUser) {
         m_oProcessor = oProcessor;
@@ -323,4 +327,65 @@ public class DockerUtils {
 
         return true;
     }
+
+	/**
+	 * Run Linux command
+	 * @param sCommand the command to run
+	 * @return boolean in case of success, false otherwise
+	 */
+	public boolean runCommand(String sCommand) {
+
+		try {
+
+			// Generate shell script file
+			String sBuildScriptFile = m_sProcessorFolder + "temporary_script_file.sh";
+
+			File oBuildScriptFile = new File(sBuildScriptFile);
+
+			try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
+				// Fill the script file
+				if (oBuildScriptWriter != null) {
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Creating " + sBuildScriptFile + " file");
+					oBuildScriptWriter.write(sCommand);
+
+					oBuildScriptWriter.flush();
+					oBuildScriptWriter.close();
+				}
+			}
+
+			// Wait a little bit to let the file be written
+			Thread.sleep(100);
+
+			// Make it executable
+			Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
+
+			// And wait a little bit to make the chmod done
+			Thread.sleep(100);
+
+			// Initialize Args
+			List<String> asArgs = new ArrayList<>();
+
+
+			// Generate shell command
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.runCommand: Running the shell command");
+			LauncherMain.s_oLogger.debug(sCommand);
+
+			// Run the script
+			boolean bResult = WasdiProcessorEngine.shellExecWithLogs(sBuildScriptFile, asArgs);
+
+			FileUtils.forceDelete(oBuildScriptFile);
+
+			if (bResult) {
+				LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command ran successfully.");
+			} else {
+				LauncherMain.s_oLogger.debug("DockerUtils.runCommand: The shell command did not run successfully.");
+			}
+
+			return bResult;
+		} catch (Exception oEx) {
+			Utils.debugLog("DockerUtils.runCommand: " + oEx.toString());
+			return false;
+		}
+	}
+
 }

@@ -27,6 +27,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.ProcessorService', 
+    'wasdi.ConsoleService', 
     'wasdi.WorkflowService', 
     'wasdi.StyleService', 
     'wasdi.FeedbackService', 

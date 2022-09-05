@@ -572,6 +572,7 @@ public class WorkspaceResource {
 			return Response.status(500).build();
 		}
 
+
 		try {
 			// workspace repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -582,6 +583,12 @@ public class WorkspaceResource {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
 				return Response.status(400).build();
 			}
+
+
+			ConsoleResource oConsoleResource = new ConsoleResource();
+			oConsoleResource.terminate(sSessionId, sWorkspaceId);
+			Thread.sleep(2000);
+
 
 			//delete sharing if the user is not the owner
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
@@ -730,6 +737,7 @@ public class WorkspaceResource {
 				// Delete also the sharings, it is deleted by the owner..
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
                 oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
+
 
 				return Response.ok().build();
 			} else

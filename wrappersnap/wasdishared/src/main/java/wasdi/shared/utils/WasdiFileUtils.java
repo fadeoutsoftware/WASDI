@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -168,9 +169,81 @@ public class WasdiFileUtils {
 			return false;
 		}
 
-		File file = new File(sFileFullPath);
+		File oFile = new File(sFileFullPath);
 
-		return fileExists(file);
+		return fileExists(oFile);
+	}
+
+	/**
+	 * Compare two files to see if they are the same.
+	 * @param oFile1 the first file
+	 * @param oFile2 the second file
+	 * @return true if the files are the same, false otherwise
+	 */
+	public static boolean filesAreTheSame(File oFile1, File oFile2) {
+		if (!fileExists(oFile1)) {
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame: file1 does not exist");
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file1 does not exist");
+			return false;
+		}
+
+		if (!fileExists(oFile2)) {
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame: file2 does not exist");
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file2 does not exist");
+			return false;
+		}
+
+		try {
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame | oFile1: " + oFile1.getAbsolutePath());
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame | oFile1: " + oFile1.getAbsolutePath());
+
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame | oFile2: " + oFile2.getAbsolutePath());
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame | oFile2: " + oFile2.getAbsolutePath());
+
+			long lFile1Checksum = FileUtils.checksumCRC32(oFile1);
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile1): " + lFile1Checksum);
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile1): " + lFile1Checksum);
+
+			long lFile2Checksum = FileUtils.checksumCRC32(oFile2);
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile2): " + lFile2Checksum);
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame | checksumCRC32(oFile2): " + lFile2Checksum);
+
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame | checksumCRC32 values are equal: " + (lFile1Checksum == lFile2Checksum));
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame | checksumCRC32 values are equal: " + (lFile1Checksum == lFile2Checksum));
+
+			return lFile1Checksum == lFile2Checksum;
+//			return FileUtils.checksumCRC32(oFile1) == FileUtils.checksumCRC32(oFile2);
+		} catch (IOException e) {
+			s_oLogger.error("s_oLogger.error | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
+
+			return false;
+		}
+	}
+
+	/**
+	 * Compare two files to see if they are the same.
+	 * @param sFile1FullPath the path of the first file
+	 * @param sFile2FullPath the path of the second file
+	 * @return true if the files are the same, false otherwise
+	 */
+	public static boolean filesAreTheSame(String sFile1FullPath, String sFile2FullPath) {
+		if (Utils.isNullOrEmpty(sFile1FullPath)) {
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame: sFile1FullPath is null or empty: " + sFile1FullPath);
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: sFile1FullPath is null or empty: " + sFile1FullPath);
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFile2FullPath)) {
+			s_oLogger.debug("s_oLogger.debug | WasdiFileUtils.filesAreTheSame: sFile2FullPath is null or empty: " + sFile2FullPath);
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: sFile2FullPath is null or empty: " + sFile2FullPath);
+			return false;
+		}
+
+		File oFile1 = new File(sFile1FullPath);
+		File oFile2 = new File(sFile2FullPath);
+
+		return filesAreTheSame(oFile1, oFile2);
 	}
 
 	/**
