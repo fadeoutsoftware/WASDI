@@ -47,7 +47,7 @@ public enum UserApplicationRole {
 		return ENUM_MAP.get(name.toUpperCase());
 	}
 
-	public static boolean userHasRightsToAccessResource(String sUserRole, UserApplicationPermission ePermission) {
+	public static boolean userHasRightsToAccessApplicationResource(String sUserRole, UserApplicationPermission ePermission) {
 		boolean bResult = false;
 
 		if (Utils.isNullOrEmpty(sUserRole)) {
