@@ -73,6 +73,23 @@ import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
 @Path("/ws")
 public class WorkspaceResource {
 
+	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
+
+	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE";
+	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE";
+
+	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
+	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
+	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
+
+	private static final String MSG_ERROR_EMPTY_PRODUCT_NAME = "MSG_ERROR_EMPTY_PRODUCT_NAME";
+	private static final String MSG_ERROR_WORKSPACE_LIST_NULL = "MSG_ERROR_WORKSPACE_LIST_NULL";
+	private static final String MSG_ERROR_INVALID_WORKSPACE = "MSG_ERROR_INVALID_WORKSPACE";
+	private static final String MSG_ERROR_EMPTY_WORKSPACE_ID = "MSG_ERROR_EMPTY_WORKSPACE_ID";
+	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
+	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
+	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
+	private static final String MSG_ERROR_IN_UPDATE_PROCESS = "MSG_ERROR_IN_UPDATE_PROCESS";
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -87,14 +104,14 @@ public class WorkspaceResource {
 		// input validation
 		if (Utils.isNullOrEmpty(sProductName)) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: sProductName null or empty");
-			return Response.status(Status.BAD_REQUEST).entity("sProductName null or empty").build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_EMPTY_PRODUCT_NAME)).build();
 		}
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName( Product: " + sProductName + " ): invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 		
 		// get list of workspaces ID by product name
@@ -103,7 +120,7 @@ public class WorkspaceResource {
 
 		if (asWorkspaces == null) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceListByProductName: Workspaces list is null");
-			return Response.status(Status.BAD_REQUEST).entity("Workspaces list is null").build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_WORKSPACE_LIST_NULL)).build();
 		}
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -123,7 +140,9 @@ public class WorkspaceResource {
 			}
 		}
 
-		return Response.ok(aoViewModel).build();
+		GenericEntity<List<WorkspaceListInfoViewModel>> oGenericEntity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoViewModel, List.class);
+
+		return Response.ok(oGenericEntity).build();
 	}
 
 	/**
@@ -145,13 +164,13 @@ public class WorkspaceResource {
 		// Domain Check
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.GetListByUser: invalid session: " + sSessionId);
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
 
-			if (!UserApplicationRole.userHasRightsToAccessResource(oUser.getRole(), WORKSPACE_READ)) {
-				return Response.status(Status.FORBIDDEN).entity("user cannot access workspace section").build();
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), WORKSPACE_READ)) {
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE)).build();
 			}
 
 
@@ -268,7 +287,8 @@ public class WorkspaceResource {
 			oEx.toString();
 		}
 
-		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWSList) {};
+		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWSList, List.class);
+
 		return Response.ok(entity).build();
 	}
 
@@ -295,18 +315,18 @@ public class WorkspaceResource {
 
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 		
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				return Response.status(Status.BAD_REQUEST).entity("Invalid workspace: " + sWorkspaceId).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_WORKSPACE)).build();
 			}
 
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: user cannot access workspace info, aborting");
-				return Response.status(Status.FORBIDDEN).entity("user cannot access workspace info, aborting").build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE)).build();
 			}
 
 			Utils.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel: read workspaces " + sWorkspaceId);
@@ -381,7 +401,10 @@ public class WorkspaceResource {
 		} catch (Exception oEx) {
 			Utils.debugLog( "WorkspaceResource.getWorkspaceEditorViewModel: " + oEx);
 		}
-		return Response.ok(oVM).build();
+
+		GenericEntity<WorkspaceEditorViewModel> oGenericEntity = new GenericEntity<WorkspaceEditorViewModel>(oVM, WorkspaceEditorViewModel.class);
+
+		return Response.ok(oGenericEntity).build();
 	}
 
 	/**
@@ -405,7 +428,7 @@ public class WorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.CreateWorkspace: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		// Create New Workspace
@@ -444,7 +467,7 @@ public class WorkspaceResource {
 			return Response.ok(oWorkspace.getWorkspaceId(), MediaType.TEXT_PLAIN).build();
 		} else {
 			Utils.debugLog("WorkspaceResource.CreateWorkspace( " + sName + ", " + sNodeCode + " ): insertion FAILED");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
 	}
@@ -468,7 +491,7 @@ public class WorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			Utils.debugLog("WorkspaceResource.UpdateWorkspace: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -501,11 +524,11 @@ public class WorkspaceResource {
 			if (oWorkspaceRepository.updateWorkspaceName(oWorkspace)) {
 				return Response.ok(oWorkspaceEditorViewModel).build();
 			} else {
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_UPDATE_PROCESS)).build();
 			}
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.UpdateWorkspace: Error update workspace: " + oEx);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_UPDATE_PROCESS)).build();
 		}
 	}
 
@@ -535,24 +558,24 @@ public class WorkspaceResource {
 			oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
-				return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+				return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 			}
 			
 			// before any operation check that this is not an injection attempt from the user
 			if ( sWorkspaceId.contains("/") || sWorkspaceId.contains("\\") || sWorkspaceId.contains(File.separator)) {
 				Utils.debugLog("WorkspaceResource.deleteWorkspace: Injection attempt by user: " + oUser.getUserId() + " on path: " + sWorkspaceId);
-				return Response.status(Status.BAD_REQUEST).entity("Invalid workspace: " + sWorkspaceId).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_WORKSPACE)).build();
 			}
 
 			//check user can access given workspace
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting");
-				return Response.status(Status.FORBIDDEN).entity(sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting").build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE)).build();
 			}
 			
 		} catch (Exception oE) {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + " ): cannot complete checks due to " + oE);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
 		}
 
 
@@ -564,7 +587,7 @@ public class WorkspaceResource {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			if(null==oWorkspace) {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
-				return Response.status(Status.BAD_REQUEST).entity("Invalid workspace: " + sWorkspaceId).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_WORKSPACE)).build();
 			}
 
 
@@ -754,7 +777,7 @@ public class WorkspaceResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("invalid session").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 		
 		// Check if the workspace exists
@@ -763,33 +786,33 @@ public class WorkspaceResource {
 		
 		if (oWorkspace == null) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: invalid workspace");
-			return Response.status(Status.BAD_REQUEST).entity("Invalid workspace.").build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_WORKSPACE)).build();
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessResource(oRequesterUser.getRole(), WORKSPACE_READ)) {
-			return Response.status(Status.FORBIDDEN).entity("user cannot access workspace section").build();
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), WORKSPACE_READ)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE)).build();
 		}
 		
 		// Can the user access this resource?
 		if(!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)) {
 			Utils.debugLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
-			return Response.status(Status.FORBIDDEN).entity(sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting").build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE)).build();
 		}		
 		
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_ONESELF")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_ONESELF)).build();
 		}
 		
 		// Cannot share with the owner
 		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_OWNER")).build();
-		}			
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_OWNER)).build();
+		}
 
 		UserRepository oUserRepository = new UserRepository();
 		User oDestinationUser = oUserRepository.getUser(sDestinationUserId);
@@ -798,7 +821,7 @@ public class WorkspaceResource {
 			//No. So it is neither the owner or a shared one
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: Destination user does not exists");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER)).build();
 		}
 
 		try {
@@ -824,7 +847,7 @@ public class WorkspaceResource {
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: " + oEx);
 
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
 		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oWorkspace.getName());
@@ -896,7 +919,7 @@ public class WorkspaceResource {
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
 			Utils.debugLog("WorkspaceResource.getEnableUsersSharedWorksace: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -920,7 +943,9 @@ public class WorkspaceResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
-		return Response.ok(aoWorkspaceSharingViewModels).build();
+		GenericEntity<List<WorkspaceSharingViewModel>> oGenericEntity = new GenericEntity<List<WorkspaceSharingViewModel>>(aoWorkspaceSharingViewModels, List.class);
+
+		return Response.ok(oGenericEntity).build();
 
 	}
 
@@ -937,7 +962,7 @@ public class WorkspaceResource {
 
 		if (oRequestingUser == null) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -947,14 +972,14 @@ public class WorkspaceResource {
 
 			if (oDestinationUser == null) {
 				Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: invalid destination user");
-				return Response.status(Status.BAD_REQUEST).entity("Invalid destination user").build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_DESTINATION_USER)).build();
 			}
 
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
             oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error in delete proccess").build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
 		}
 
 		return Response.ok().build();
@@ -974,19 +999,19 @@ public class WorkspaceResource {
 
 		if (Utils.isNullOrEmpty(sWorkspaceId)) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: workspace is null or empty, aborting");
-			return Response.status(Status.BAD_REQUEST).entity("workspaceId is null or empty").build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_EMPTY_WORKSPACE_ID)).build();
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (null == oUser) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: session is invalid, aborting");
-			return Response.status(Status.UNAUTHORIZED).entity("session invalid").build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 		
 		//check the user can access the workspace
 		if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: user cannot access workspace info, aborting");
-			return Response.status(Status.FORBIDDEN).entity("user cannot access workspace info, aborting").build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE)).build();
 		}
 		
 		try {
@@ -997,11 +1022,11 @@ public class WorkspaceResource {
 				String sName = oWorkspace.getName();
 
 				if (!Utils.isNullOrEmpty(sName)) {
-					return Response.status(Status.OK).entity(sName).build();
+					return Response.ok(sName, MediaType.TEXT_PLAIN).build();
 				}
 			}
 
-			return Response.status(Status.BAD_REQUEST).entity("Invalid workspace: " + sWorkspaceId).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_WORKSPACE)).build();
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.getWorkspaceNameById: " + oEx);
