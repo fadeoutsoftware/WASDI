@@ -21,6 +21,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -53,6 +54,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
@@ -266,7 +268,8 @@ public class WorkspaceResource {
 			oEx.toString();
 		}
 
-		return Response.ok(aoWSList).build();
+		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWSList) {};
+		return Response.ok(entity).build();
 	}
 
 	/**
@@ -777,13 +780,15 @@ public class WorkspaceResource {
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
-			return Response.status(Status.BAD_REQUEST).entity("Impossible to autoshare.").build();
+
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_ONESELF")).build();
 		}
 		
 		// Cannot share with the owner
 		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
-			return Response.status(Status.BAD_REQUEST).entity("Cannot Share with owner.").build();
+
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_OWNER")).build();
 		}			
 
 		UserRepository oUserRepository = new UserRepository();
@@ -791,7 +796,9 @@ public class WorkspaceResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			return Response.status(Status.BAD_REQUEST).entity("Destination user does not exists").build();
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: Destination user does not exists");
+
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER")).build();
 		}
 
 		try {
@@ -811,7 +818,7 @@ public class WorkspaceResource {
 			}
 			else {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: already shared!");
-				return Response.ok().entity("Already Shared.").build();
+				return Response.ok().build();
 			}
 			
 		} catch (Exception oEx) {
