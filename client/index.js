@@ -38,7 +38,7 @@ require('./app/services/api/WorkflowService.js');
 require('./app/services/api/StyleService.js');
 require('./app/services/api/FeedbackService.js');
 require('./app/services/api/WorkspaceService.js');
-
+require("./app/services/api/PackageManagerService");
 
 
 

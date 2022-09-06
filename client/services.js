@@ -43,7 +43,7 @@ require('./app/services/api/WorkflowService.js');
 require('./app/services/api/StyleService.js');
 require('./app/services/api/WorkspaceService.js');
 require('./app/services/api/ProcessorParametersTemplateService.js');
-
+require('./app/services/api/PackageManagerService');
 
 
 

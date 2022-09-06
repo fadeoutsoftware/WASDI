@@ -1,0 +1,55 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <h4>Viewing Packages For: {{m_oController.sWorkspaceName}}</h4>
+            <h5>
+                Package Manager:
+                {{m_oController.oExtras.processor.packageManager}}
+            </h5>
+            <form action="">
+                <input type="text" placeholder="Package Information" />
+                <input type="submit" value="Add Package" />
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <table class="table table-hover">
+                <description>Description Placeholder</description>
+                <tbody>
+                    <tr
+                        ng-repeat="package in m_oController.m_aoPackages"
+                        style="cursor: pointer"
+                    >
+                        <td class="over-icon">
+                            <button class="btn btn-primary btn-wasdi">
+                                <i
+                                    class="fa fa-trash fa-lg"
+                                    aria-hidden="true"
+                                    style="margin-right: 0px"
+                                ></i>
+                                <span>Remove Placeholder</span>
+                            </button>
+                            <button
+                                ng-if="package.latestVersion !== null"
+                                class="btn btn-success btn-wasdi"
+                            >
+                                <i
+                                    class="fa fa-trash fa-lg"
+                                    aria-hidden="true"
+                                    style="margin-right: 0px"
+                                ></i>
+                                <span>Update Placeholder</span>
+                            </button>
+                        </td>
+                        <td>{{package.packageName}}</td>
+                        <td>Current Version: {{package.currentVersion}}</td>
+                        <td ng-if="package.latestVersion !== null">
+                            Latest Version: {{package.latestVersion}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

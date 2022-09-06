@@ -1014,16 +1014,24 @@ var ProcessorController = (function () {
         this.m_oRootScope.$broadcast("add", sTextToInsert);
     };
     ProcessorController.prototype.packageManagerClick = function () {
-
-        this.m_oModalService
+        let oController = this
+        oController.m_oProcessorService.getDeployedProcessor(oController.m_sProcessorId).then(function (data) {
+           oController.m_oModalService
             .showModal({
                 templateUrl: "dialogs/package_manager/PackageManagerView.html",
-                controller: "PackageManagerController"
+                controller: "PackageManagerController",
+                inputs: {
+                    extras: {
+                        processor: data.data
+                    }
+                }
             })
             .then(function (modal) {
                 modal.element.modal();
                 modal.close;
-            });
+            }); 
+        })
+        
     };
     ProcessorController.$inject = [
         "$scope",
