@@ -75,7 +75,7 @@ var ShareWorkspaceController = (function() {
         var oController = this;
         this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail)
             .then(function (data) {
-            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
+            if(utilsIsObjectNullOrUndefined(data.data) === false)
             {
                 //TODO USER SAVED
             }else
@@ -103,7 +103,7 @@ var ShareWorkspaceController = (function() {
         var oController = this;
         this.m_oWorkspaceService.deleteUserSharedWorkspace(sWorkspaceId,sEmail)
             .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
+                if(utilsIsObjectNullOrUndefined(data.data) === false)
                 {
                     //TODO USER SAVED
                 }
@@ -111,6 +111,7 @@ var ShareWorkspaceController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
                 }
+
                 oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
             },function (error) {
