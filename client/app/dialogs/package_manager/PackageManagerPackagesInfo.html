@@ -2,33 +2,49 @@
     <div class="row">
         <div class="col-xs-12">
             <h4>Viewing Packages For: {{m_oController.sWorkspaceName}}</h4>
-            <h5>
-                Package Manager:
-                {{m_oController.oExtras.processor.packageManager}}
-            </h5>
+            <h4>
+                Package Manager: {{m_oController.m_sPackageManagerName}}
+                {{m_oController.m_sPackageManagerVersion}}
+            </h4>
             <form action="">
-                <input type="text" placeholder="Package Information" />
-                <input type="submit" value="Add Package" />
+                <input type="text" placeholder="Package Name" />
+                <input type="text" placeholder="Package Version">
+                <input type="submit" value="Add Package" class="btn btn-primary btn-wasdi"/>
             </form>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
             <table class="table table-hover">
-                <description>Description Placeholder</description>
+                <description></description>
                 <tbody>
+                    <tr>
+                        <th>Package Name</th>
+                        <th>Current Version</th>
+                        <th>Latest Version</th>
+                        <th>Actions</th>
+                    </tr>
                     <tr
                         ng-repeat="package in m_oController.m_aoPackages"
-                        style="cursor: pointer"
+                        
                     >
+                        <td>{{package.packageName}}</td>
+                        <td>{{package.currentVersion}}</td>
+                        <td>
+                            <span ng-if="package.latestVersion !== null">
+                               {{package.latestVersion}}
+                            </span>
+                        </td>
                         <td class="over-icon">
-                            <button class="btn btn-primary btn-wasdi">
+                            <button
+                                class="btn btn-primary btn-wasdi"
+                                ng-click="m_oController.removeLibrary('/removePackage/{{package.packageName}})"
+                            >
                                 <i
                                     class="fa fa-trash fa-lg"
                                     aria-hidden="true"
                                     style="margin-right: 0px"
                                 ></i>
-                                <span>Remove Placeholder</span>
                             </button>
                             <button
                                 ng-if="package.latestVersion !== null"
@@ -39,13 +55,7 @@
                                     aria-hidden="true"
                                     style="margin-right: 0px"
                                 ></i>
-                                <span>Update Placeholder</span>
                             </button>
-                        </td>
-                        <td>{{package.packageName}}</td>
-                        <td>Current Version: {{package.currentVersion}}</td>
-                        <td ng-if="package.latestVersion !== null">
-                            Latest Version: {{package.latestVersion}}
                         </td>
                     </tr>
                 </tbody>
