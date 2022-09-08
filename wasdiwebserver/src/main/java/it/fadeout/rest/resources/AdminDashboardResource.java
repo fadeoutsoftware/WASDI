@@ -23,11 +23,14 @@ import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.users.UserViewModel;
+import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
 @Path("/admin")
 public class AdminDashboardResource {
@@ -62,7 +65,7 @@ public class AdminDashboardResource {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 
-		if (Utils.isNullOrEmpty(sPartialName)) {
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
 		}
@@ -73,12 +76,53 @@ public class AdminDashboardResource {
 		List<UserViewModel> aoUserVMs = new ArrayList<>();
 
 		if (aoUsers != null) {
-			aoUserVMs = aoUsers.parallelStream()
+			aoUserVMs = aoUsers.stream()
 					.map(AdminDashboardResource::convert)
 					.collect(Collectors.toList());
 		}
 
 		GenericEntity<List<UserViewModel>> entity = new GenericEntity<List<UserViewModel>>(aoUserVMs, List.class);
+
+		return Response.ok(entity).build();
+	}
+
+	@GET
+	@Path("/workspacesByPartialName")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response findWorkspacesByPartialName(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("partialName") String sPartialName) {
+
+		Utils.debugLog("AdminDashboardResource.findWorkspacesByPartialName(" + " Partial name: " + sPartialName + " )");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
+		}
+
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		List<Workspace> aoWorkspaces = oWorkspaceRepository.findWorkspacesByPartialName(sPartialName);
+
+		List<WorkspaceListInfoViewModel> aoWorkspaceVMs = new ArrayList<>();
+
+		if (aoWorkspaces != null) {
+			aoWorkspaceVMs = aoWorkspaces.stream()
+					.map(AdminDashboardResource::convert)
+					.collect(Collectors.toList());
+		}
+
+		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
 
 		return Response.ok(entity).build();
 	}
@@ -144,6 +188,17 @@ public class AdminDashboardResource {
 		}
 
 		return oUserVM;
+	}
+
+	public static WorkspaceListInfoViewModel convert(Workspace oWorkspace) {
+		WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
+
+		oWSViewModel.setOwnerUserId(oWorkspace.getUserId());
+		oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
+		oWSViewModel.setWorkspaceName(oWorkspace.getName());
+		oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
+
+		return oWSViewModel;
 	}
 
 }

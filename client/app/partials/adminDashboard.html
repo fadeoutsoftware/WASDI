@@ -6,6 +6,7 @@
     <div class="spacer"></div>
 
     <div class="container-fluid">
+
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div class="container-fluid">
@@ -20,8 +21,8 @@
                                     {{"DIALOG_MANAGE_USERS_USER_PARTIAL_NAME" | translate}}
                                 </label>
 
-                                <input type="text" name="userEmail" id="userEmail" class="form-control wasdi-input" value="" title=""
-                                    ng-model="m_oController.m_sPartialName" required="required">
+                                <input type="text" name="userPartialName" id="userPartialName" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sUserPartialName" required="required">
 
                                     <span class="highlight filter-highlight"></span>
                                     <span class="bar filter-bar"></span>
@@ -30,7 +31,7 @@
 
                         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                             <div class="group">
-                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findUsersByPartialName()">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">
                                     <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
                                     <span class="ng-binding">{{"DIALOG_MANAGE_USERS_SEARCH" | translate}}</span>
                                 </button>
@@ -43,7 +44,7 @@
             </div>
         </div>
 
-        <div class="row" ng-show="m_oController.m_aoUserList.length > 0">
+        <div class="row" ng-show="m_oController.m_aoUsersList.length > 0">
             <div class="spacer"></div>
 
             <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -57,7 +58,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="oUser in m_oController.m_aoUserList">
+                        <tr ng-repeat="oUser in m_oController.m_aoUsersList">
                             <td>
                                 {{oUser.userId}}
                             </td>
@@ -69,6 +70,79 @@
                             </td>
                             <td>
                                 {{oUser.role}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_WORKSPACES_TITLE" | translate}}</h3>
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_WORKSPACES_WORKSPACE_PARTIAL_NAME" | translate}}
+                                </label>
+
+                                <input type="text" name="workspacePartialName" id="workspacePartialName" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sWorkspacePartialName" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findWorkspacesByPartialName(m_oController.m_sWorkspacePartialName)">
+                                    <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_USERS_SEARCH" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="m_oController.m_aoWorkspacesList.length > 0">
+            <div class="spacer"></div>
+
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>WorkspaceId</th>
+                            <th>Node</th>
+                            <th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="oWorkspace in m_oController.m_aoWorkspacesList">
+                            <td>
+                                {{oWorkspace.workspaceName}}
+                            </td>
+                            <td>
+                                {{oWorkspace.workspaceId}}
+                            </td>
+                            <td>
+                                {{oWorkspace.nodeCode}}
+                            </td>
+                            <td>
+                                {{oWorkspace.ownerUserId}}
                             </td>
                         </tr>
                     </tbody>
@@ -144,7 +218,7 @@
 
                         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                             <div class="group">
-                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.addResourcePermission()">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.addResourcePermission(m_oController.m_sResourceType, m_oController.m_sResourceId, m_oController.m_sUserEmail)">
                                     <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
                                     <span class="ng-binding">{{"DIALOG_MANAGE_RESOURCE_PERMISSION_ADD" | translate}}</span>
                                 </button>
@@ -153,7 +227,7 @@
 
                         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                             <div class="group">
-                                <button class="btn btn-danger btn-wasdi btn-lg" ng-click="m_oController.removeResourcePermission()">
+                                <button class="btn btn-danger btn-wasdi btn-lg" ng-click="m_oController.removeResourcePermission(m_oController.m_sResourceType, m_oController.m_sResourceId, m_oController.m_sUserEmail)">
                                     <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
                                     <span class="ng-binding">{{"DIALOG_MANAGE_RESOURCE_PERMISSION_REMOVE" | translate}}</span>
                                 </button>
