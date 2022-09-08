@@ -13,8 +13,8 @@ import wasdi.shared.utils.Utils;
 
 public enum UserApplicationRole {
 
-	ADMIN(new HashSet<UserApplicationPermission>(Arrays.asList(NODE_READ, NODE_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
-	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(NODE_READ, NODE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
+	ADMIN(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
+	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
 	USER(new HashSet<UserApplicationPermission>(Arrays.asList(WORKSPACE_READ, WORKSPACE_WRITE)));
 
 	private static final Map<String, UserApplicationRole> ENUM_MAP;

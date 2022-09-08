@@ -2,6 +2,7 @@ package wasdi.shared.business;
 
 public enum UserApplicationPermission {
 
+	ADMIN_DASHBOARD("admin:dashboard"),
 	NODE_READ("node:read"),
 	NODE_WRITE("node:write"),
 	USER_READ("user:read"),

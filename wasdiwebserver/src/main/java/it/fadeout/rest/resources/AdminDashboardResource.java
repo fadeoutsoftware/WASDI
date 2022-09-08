@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,14 +19,22 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringUtils;
+
+import it.fadeout.Wasdi;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.users.UserViewModel;
 
 @Path("/admin")
 public class AdminDashboardResource {
+
+	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
+
+	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD = "MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD";
 
 	private static final String MSG_ERROR_INVALID_RESOURCE_TYPE = "MSG_ERROR_INVALID_RESOURCE_TYPE";
 	private static final String MSG_ERROR_INVALID_PARTIAL_NAME = "MSG_ERROR_INVALID_PARTIAL_NAME";
@@ -40,6 +50,18 @@ public class AdminDashboardResource {
 
 		Utils.debugLog("AdminDashboardResource.findUsersByPartialName(" + " Partial name: " + sPartialName + " )");
 
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
 		if (Utils.isNullOrEmpty(sPartialName)) {
 			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
@@ -52,7 +74,7 @@ public class AdminDashboardResource {
 
 		if (aoUsers != null) {
 			aoUserVMs = aoUsers.parallelStream()
-					.map(AdminDashboardResource::converToBasic)
+					.map(AdminDashboardResource::convert)
 					.collect(Collectors.toList());
 		}
 
@@ -111,11 +133,15 @@ public class AdminDashboardResource {
 		}
 	}
 
-	public static UserViewModel converToBasic(User oUser) {
+	public static UserViewModel convert(User oUser) {
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
+
+		if (oUser.getRole() != null) {
+			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));
+		}
 
 		return oUserVM;
 	}
