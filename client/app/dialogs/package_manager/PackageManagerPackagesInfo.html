@@ -7,9 +7,21 @@
                 {{m_oController.m_sPackageManagerVersion}}
             </h4>
             <form action="">
-                <input type="text" placeholder="Package Name" />
-                <input type="text" placeholder="Package Version">
-                <input type="submit" value="Add Package" class="btn btn-primary btn-wasdi"/>
+                <input
+                    type="text"
+                    placeholder="Package Name"
+                    ng-model="m_oController.m_oPackageInfo.name"
+                />
+                <input
+                    type="text"
+                    placeholder="Package Version"
+                    ng-model="m_oController.m_oPackageInfo.currentVersion"
+                />
+                <button
+                    type="button"
+                    class="btn btn-primary btn-wasdi"
+                    ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
+                >{{m_oController.m_oPackageInfo.name ? "Update Package" : "Add Package"}}</button>
             </form>
         </div>
     </div>
@@ -24,21 +36,18 @@
                         <th>Latest Version</th>
                         <th>Actions</th>
                     </tr>
-                    <tr
-                        ng-repeat="package in m_oController.m_aoPackages"
-                        
-                    >
+                    <tr ng-repeat="package in m_oController.m_aoPackages">
                         <td>{{package.packageName}}</td>
                         <td>{{package.currentVersion}}</td>
                         <td>
                             <span ng-if="package.latestVersion !== null">
-                               {{package.latestVersion}}
+                                {{package.latestVersion}}
                             </span>
                         </td>
                         <td class="over-icon">
                             <button
                                 class="btn btn-primary btn-wasdi"
-                                ng-click="m_oController.removeLibrary('/removePackage/{{package.packageName}})"
+                                ng-click="m_oController.removeLibrary(m_oController.sProcessorId, package.packageName)"
                             >
                                 <i
                                     class="fa fa-trash fa-lg"
@@ -47,11 +56,11 @@
                                 ></i>
                             </button>
                             <button
-                                ng-if="package.latestVersion !== null"
                                 class="btn btn-success btn-wasdi"
+                                ng-click="m_oController.editPackage(package)"
                             >
                                 <i
-                                    class="fa fa-trash fa-lg"
+                                    class="far fa-plus"
                                     aria-hidden="true"
                                     style="margin-right: 0px"
                                 ></i>

@@ -41,7 +41,6 @@ require('./app/services/api/ProcessWorkspaceService.js');
 require('./app/services/api/ProductService.js');
 require('./app/services/api/WorkflowService.js');
 require('./app/services/api/StyleService.js');
-require('./app/services/api/WorkspaceService.js');
 require('./app/services/api/ProcessorParametersTemplateService.js');
 require('./app/services/api/PackageManagerService');
 

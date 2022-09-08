@@ -13,9 +13,20 @@ angular
             this.m_sResource = "/packageManager";
 
             /* 
-           Return Package Manager Version 
+            Return Package Manager Version 
             */
-
+            this.getPackageInfo = function (sWorkspaceName) {
+                return this.m_oHttp
+                    .get(
+                        this.APIURL +
+                            this.m_sResource +
+                            "/managerVersion?name=" +
+                            sWorkspaceName
+                    )
+                    .then((response) => {
+                        return response.data;
+                    });
+            };
             /*
             Return list of packages
             */
@@ -30,6 +41,27 @@ angular
                     .then((response) => {
                         return response.data;
                     });
+            };
+            /*
+            Remove a package
+            */
+            this.updateLibrary = function (sProcessorId, sUpdateCommand) {
+                let oWorkspace = this.m_oConstantService.getActiveWorkspace();
+                let sWorkspaceId = "-";
+               
+
+                if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+                    sWorkspaceId = oWorkspace.workspaceId;
+                }
+                return this.m_oHttp.get(
+                    this.APIURL +
+                        "/processors/environmentupdate?processorId=" +
+                        sProcessorId +
+                        "&workspace=" +
+                        sWorkspaceId +
+                        "&updateCommand=" +
+                        sUpdateCommand
+                );
             };
         },
     ]);
