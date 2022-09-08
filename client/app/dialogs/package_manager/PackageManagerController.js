@@ -9,6 +9,7 @@ let PackageManagerController = (function () {
         this.sWorkspaceName = oExtras.processor.processorName;
         this.sProcessorId = oExtras.processor.processorId;
 
+        this.bIsEditing = false;
         /**
          * Library information for selected package
          * @type {*[]}
@@ -43,8 +44,11 @@ let PackageManagerController = (function () {
         /*
         Enter package info into input fields
         */
+
         this.m_oPackageInfo = {};
         this.editPackage = function (oPackage) {
+            console.log(this.m_oPackageInfo);
+            this.bIsEditing = true;
             this.m_oPackageInfo.name = oPackage.packageName;
             this.m_oPackageInfo.currentVersion = oPackage.currentVersion;
         };
@@ -59,18 +63,45 @@ let PackageManagerController = (function () {
             this.sDeleteCommand
         );
         console.log("Package Removed");
-        return true;
     };
+
     PackageManagerController.prototype.addLibrary = function (
-        sProcessorId, 
+        sProcessorId,
         oPackageInfo
     ) {
         this.oPackage = angular.copy(oPackageInfo);
-        this.sUpdateCommand = "addPackage/" + this.oPackage.name + "/" + this.oPackage.currentVersion + "/"; 
+        this.sUpdateCommand =
+            "addPackage/" +
+            this.oPackage.name +
+            "/" +
+            this.oPackage.currentVersion +
+            "/";
 
-        this.m_oPackageManagerService.updateLibrary(sProcessorId, this.sUpdateCommand); 
-        console.log("Package Added"); 
-        return true; 
+        this.m_oPackageManagerService.updateLibrary(
+            sProcessorId,
+            this.sUpdateCommand
+        );
+        console.log("Package Added");
+    };
+
+    PackageManagerController.prototype.updatePackage = function (
+        sProcessorId,
+        oPackageInfo
+    ) {
+        this.oPackage = angular.copy(oPackageInfo);
+        this.sUpdateCommand =
+            "upgradePackage/" +
+            this.oPackage.name +
+            "/" +
+            this.oPackage.currentVersion +
+            "/";
+
+        this.m_oPackageManagerService.updateLibrary(
+            sProcessorId,
+            this.sUpdateCommand
+        );
+        console.log("Package Updated");
+        this.bIsEditing = false;
     };
     PackageManagerController.$inject = [
         "PackageManagerService",

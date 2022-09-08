@@ -17,11 +17,30 @@
                     placeholder="Package Version"
                     ng-model="m_oController.m_oPackageInfo.currentVersion"
                 />
-                <button
-                    type="button"
-                    class="btn btn-primary btn-wasdi"
-                    ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
-                >{{m_oController.m_oPackageInfo.name ? "Update Package" : "Add Package"}}</button>
+                <div ng-if="!m_oController.bIsEditing">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
+                    >
+                        Add Package
+                    </button>
+                </div>
+                <div ng-if="m_oController.bIsEditing">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.updatePackage(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
+                    >
+                        Update Package
+                    </button>
+                    <button
+                        type="button"
+                        ng-click="m_oController.bIsEditing = false"
+                    >
+                        Clear Selection
+                    </button>
+                </div>
             </form>
         </div>
     </div>
