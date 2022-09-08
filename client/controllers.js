@@ -2,7 +2,7 @@
 require('./app/controllers/RootController.js');
 require('./app/controllers/HomeController.js');
 require('./app/controllers/WorkspaceController.js');
-require('./app/controllers/UserController.js');
+require('./app/controllers/AdminDashboardController.js');
 require('./app/controllers/EditorController.js');
 require('./app/controllers/ImportController.js');
 require('./app/controllers/SearchOrbitController.js');

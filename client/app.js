@@ -16,7 +16,6 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MapService',
     'wasdi.GlobeService',
     'wasdi.WorkspaceService',
-    // 'wasdi.UserService',
     'wasdi.ProcessWorkspaceService',
     'wasdi.FileBufferService',
     'wasdi.ProductService',
@@ -37,6 +36,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
     'wasdi.NodeService',
+    'wasdi.AdminDashboardService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -135,11 +135,11 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvide
         }
     });
 
-    //USERS
-    $stateProvider.state('root.users', {
-        url: '/users',
+    //AdminDashboard
+    $stateProvider.state('root.adminDashboard', {
+        url: '/adminDashboard',
         views: {
-            'maincontent': {templateUrl: 'partials/users.html', controller: 'UserController'}
+            'maincontent': {templateUrl: 'partials/adminDashboard.html', controller: 'AdminDashboardController'}
         }
     });
 
@@ -215,7 +215,7 @@ wasdiApp.controller("HomeController", window.HomeController);
 wasdiApp.controller("MarketPlaceController", window.MarketPlaceController);
 //wasdiApp.controller("CatalogController", window.CatalogController);
 wasdiApp.controller("WorkspaceController", window.WorkspaceController);
-wasdiApp.controller("UserController", window.UserController);
+wasdiApp.controller("AdminDashboardController", window.AdminDashboardController);
 wasdiApp.controller("EditorController", window.EditorController);
 wasdiApp.controller("RootController", window.RootController);
 wasdiApp.controller("ImportController", window.ImportController);
