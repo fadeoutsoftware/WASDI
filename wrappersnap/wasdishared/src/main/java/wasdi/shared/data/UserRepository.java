@@ -208,10 +208,15 @@ public class UserRepository extends  MongoRepository{
 
 		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname);
 
-		FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-				.sort(new Document("userId", 1));
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("userId", 1));
 
-		fillList(aoReturnList, oWSDocuments, User.class);
+			fillList(aoReturnList, oWSDocuments, User.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
 
 		return aoReturnList;
     }

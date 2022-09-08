@@ -13,6 +13,10 @@ service('AdminDashboardService', ['$http',  'ConstantsService', function ($http,
         return this.m_oHttp.get(this.APIURL + '/admin/usersByPartialName?partialName=' + sPartialName );
     };
 
+    this.findWorkspacesByPartialName = function(sPartialName) {
+        return this.m_oHttp.get(this.APIURL + '/admin/workspacesByPartialName?partialName=' + sPartialName );
+    };
+
     this.addResourcePermission = function(sResourceType, sResourceId, sUserId) {
         return this.m_oHttp.post(this.APIURL + '/admin/resourcePermission?resourceType=' + sResourceType + "&resourceId="+ sResourceId + "&userId=" + sUserId);
     };

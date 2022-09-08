@@ -11,8 +11,11 @@ var AdminDashboardController = (function () {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oConstantsService = oConstantsService;
 
-        this.m_sPartialName = "";
-        this.m_aoUserList = [];
+        this.m_sUserPartialName = "";
+        this.m_aoUsersList = [];
+
+        this.m_sWorkspacePartialName = "";
+        this.m_aoWorkspacesList = [];
 
 
         this.m_aoResourceTypeList = ['NODE', 'PROCESSORPARAMETERSTEMPLATE', 'PROCESSOR', 'STYLE', 'WORKFLOW', 'WORKSPACE'];
@@ -45,20 +48,20 @@ var AdminDashboardController = (function () {
     }
 
 
-    AdminDashboardController.prototype.findUsersByPartialName = function () {
-        console.log("AdminDashboardController.findUsersByPartialName | this.m_sPartialName:", this.m_sPartialName);
+    AdminDashboardController.prototype.findUsersByPartialName = function (sUserPartialName) {
+        console.log("AdminDashboardController.findUsersByPartialName | sUserPartialName:", sUserPartialName);
 
-        this.m_aoUserList = [];
+        this.m_aoUsersList = [];
 
-        if (utilsIsObjectNullOrUndefined(this.m_sPartialName) === true) {
+        if (utilsIsObjectNullOrUndefined(sUserPartialName) === true) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
             return false;
         }
 
-        utilsRemoveSpaces(this.m_sPartialName);
+        utilsRemoveSpaces(sUserPartialName);
 
-        if (this.m_sPartialName.length < 3) {
+        if (sUserPartialName.length < 3) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
             return false;
@@ -66,12 +69,12 @@ var AdminDashboardController = (function () {
 
         var oController = this;
 
-        this.m_oAdminDashboardService.findUsersByPartialName(this.m_sPartialName)
+        this.m_oAdminDashboardService.findUsersByPartialName(sUserPartialName)
             .then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                oController.m_aoUserList = data.data;
+                oController.m_aoUsersList = data.data;
             } else {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN ADDING RESOURCE PERMISSION");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
             }
 
             oController.clearForm();
@@ -87,8 +90,49 @@ var AdminDashboardController = (function () {
 
     }
 
+    AdminDashboardController.prototype.findWorkspacesByPartialName = function (sWorkspacePartialName) {
+        console.log("AdminDashboardController.findWorkspacesByPartialName | sWorkspacePartialName:", sWorkspacePartialName);
+
+        this.m_aoWorkspacesList = [];
+
+        if (utilsIsObjectNullOrUndefined(sWorkspacePartialName) === true) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
+
+            return false;
+        }
+
+        utilsRemoveSpaces(sWorkspacePartialName);
+
+        if (sWorkspacePartialName.length < 3) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
+
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oAdminDashboardService.findWorkspacesByPartialName(sWorkspacePartialName)
+            .then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                oController.m_aoWorkspacesList = data.data;
+            } else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING WORKSPACES");
+            }
+
+            oController.clearForm();
+
+            return true;
+        },function (error) {
+            console.log("AdminDashboardController.findWorkspacesByPartialName | error.data.message: ", error.data.message);
+
+            let errorMessage = oController.m_oTranslate.instant(error.data.message);
+
+            utilsVexDialogAlertTop(errorMessage);
+        });
+
+    }
+
     AdminDashboardController.prototype.getResourceTypeList = function () {
-        // console.log("AdminDashboardController.getResourceTypeList | this.m_aoResourceTypeList: ", this.m_aoResourceTypeList);
         return this.m_aoResourceTypeList;
     }
 
@@ -97,7 +141,8 @@ var AdminDashboardController = (function () {
     }
 
     AdminDashboardController.prototype.clearForm = function () {
-        this.m_sPartialName = "";
+        this.m_sUserPartialName = "";
+        this.m_sWorkspacePartialName = "";
 
         this.m_sResourceType = "";
         this.m_sResourceId = "";
@@ -105,22 +150,22 @@ var AdminDashboardController = (function () {
     }
 
 
-    AdminDashboardController.prototype.addResourcePermission = function () {
-        console.log("AdminDashboardController.addResourcePermission | this.m_sResourceType:", this.m_sResourceType);
-        console.log("AdminDashboardController.addResourcePermission | this.m_sResourceId:", this.m_sResourceId);
-        console.log("AdminDashboardController.addResourcePermission | this.m_sUserEmail:", this.m_sUserEmail);
+    AdminDashboardController.prototype.addResourcePermission = function (sResourceType, sResourceId, sUserEmail) {
+        console.log("AdminDashboardController.addResourcePermission | sResourceType:", sResourceType);
+        console.log("AdminDashboardController.addResourcePermission | sResourceId:", sResourceId);
+        console.log("AdminDashboardController.addResourcePermission | sUserEmail:", sUserEmail);
 
-        if (utilsIsObjectNullOrUndefined(this.m_sResourceType) === true
-                || utilsIsStrNullOrEmpty(this.m_sResourceId) === true
-                || utilsIsStrNullOrEmpty(this.m_sUserEmail) === true) {
+        if (utilsIsObjectNullOrUndefined(sResourceType) === true
+                || utilsIsStrNullOrEmpty(sResourceId) === true
+                || utilsIsStrNullOrEmpty(sUserEmail) === true) {
             return false;
         }
 
-        utilsRemoveSpaces(this.m_sUserEmail);
+        utilsRemoveSpaces(sUserEmail);
 
         var oController = this;
 
-        this.m_oAdminDashboardService.addResourcePermission(this.m_sResourceType, this.m_sResourceId, this.m_sUserEmail)
+        this.m_oAdminDashboardService.addResourcePermission(sResourceType, sResourceId, sUserEmail)
             .then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant("MSG_SUCCESS_RESOURCE_PERMISSION_ADDED"));
@@ -141,22 +186,22 @@ var AdminDashboardController = (function () {
         });
     };
 
-    AdminDashboardController.prototype.removeResourcePermission = function() {
-        console.log("AdminDashboardController.removeResourcePermission | this.m_sResourceType:", this.m_sResourceType);
-        console.log("AdminDashboardController.removeResourcePermission | this.m_sResourceId:", this.m_sResourceId);
-        console.log("AdminDashboardController.removeResourcePermission | this.m_sUserEmail:", this.m_sUserEmail);
+    AdminDashboardController.prototype.removeResourcePermission = function(sResourceType, sResourceId, sUserEmail) {
+        console.log("AdminDashboardController.removeResourcePermission | sResourceType:", sResourceType);
+        console.log("AdminDashboardController.removeResourcePermission | sResourceId:", sResourceId);
+        console.log("AdminDashboardController.removeResourcePermission | sUserEmail:", sUserEmail);
 
-        if (utilsIsObjectNullOrUndefined(this.m_sResourceType) === true
-                || utilsIsStrNullOrEmpty(this.m_sResourceId) === true
-                || utilsIsStrNullOrEmpty(this.m_sUserEmail) === true) {
+        if (utilsIsObjectNullOrUndefined(sResourceType) === true
+                || utilsIsStrNullOrEmpty(sResourceId) === true
+                || utilsIsStrNullOrEmpty(sUserEmail) === true) {
             return false;
         }
 
-        utilsRemoveSpaces(this.m_sUserEmail);
+        utilsRemoveSpaces(sUserEmail);
 
         var oController = this;
 
-        this.m_oAdminDashboardService.removeResourcePermission(this.m_sResourceType, this.m_sResourceId, this.m_sUserEmail)
+        this.m_oAdminDashboardService.removeResourcePermission(sResourceType, sResourceId, sUserEmail)
             .then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant("MSG_SUCCESS_RESOURCE_PERMISSION_REMOVED"));

@@ -5,6 +5,7 @@ import static com.mongodb.client.model.Filters.eq;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -321,5 +322,33 @@ public class WorkspaceRepository extends  MongoRepository {
         }
 
         return aoReturnList;
-    }    
+    }
+
+	public List<Workspace> findWorkspacesByPartialName(String sPartialName) {
+		List<Workspace> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			return aoReturnList;
+		}
+
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+
+		Bson oFilterLikeWorkspaceId = Filters.eq("workspaceId", regex);
+		Bson oFilterLikeName = Filters.eq("name", regex);
+
+		Bson oFilter = Filters.or(oFilterLikeWorkspaceId, oFilterLikeName);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("name", 1));
+
+			fillList(aoReturnList, oWSDocuments, Workspace.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+    }
+
 }
