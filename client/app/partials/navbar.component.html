@@ -244,12 +244,12 @@
                             </a>
                         </li>
 
-                        <!-- MANAGE USERS BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.users')}"
+                        <!-- ADMIN DASHBOARD BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
                                 ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('user:write') > 0">
-                            <a ng-click="m_oController.openUsers();" href="">
-                                <i class="fa fa-users fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_USERS"|translate}}
+                            <a ng-click="m_oController.openAdminDashboard();" href="">
+                                <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}
                             </a>
                         </li>
 

@@ -853,7 +853,6 @@ public class WorkspaceResource {
 		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oWorkspace.getName());
 
 		return Response.ok().build();
-
 	}
 
 	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sWorkspaceName) {

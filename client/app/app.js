@@ -37,6 +37,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.WorkflowService',
     'wasdi.StyleService',
     'wasdi.FeedbackService',
+    'wasdi.AdminDashboardService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -192,7 +193,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
 wasdiApp.controller("HomeController", HomeController);
 wasdiApp.controller("WorkspaceController", WorkspaceController);
-wasdiApp.controller("UserController", UserController);
+wasdiApp.controller("AdminDashboardController", AdminDashboardController);
 wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
