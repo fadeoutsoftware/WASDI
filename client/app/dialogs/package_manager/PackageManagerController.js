@@ -10,11 +10,10 @@ let PackageManagerController = (function () {
         this.sProcessorId = oExtras.processor.processorId;
 
         this.bIsEditing = false;
-        /**
-         * Library information for selected package
-         * @type {*[]}
-         */
-
+        this.sort = {
+            column: "",
+            descending: false,
+        };
         /* 
         Get list of packages
         */
@@ -103,6 +102,18 @@ let PackageManagerController = (function () {
         console.log("Package Updated");
         this.bIsEditing = false;
     };
+
+    PackageManagerController.prototype.changeSorting = function (column) {
+        var sort = this.sort;
+        this.column = column;
+
+        if (sort.column == column) {
+            sort.descending = !sort.descending;
+        } else {
+            sort.column = column;
+        }
+    };
+
     PackageManagerController.$inject = [
         "PackageManagerService",
         "$scope",

@@ -36,6 +36,7 @@
                     </button>
                     <button
                         type="button"
+                        class="btn btn-danger btn-wasdi"
                         ng-click="m_oController.bIsEditing = false"
                     >
                         Clear Selection
@@ -50,12 +51,27 @@
                 <description></description>
                 <tbody>
                     <tr>
-                        <th>Package Name</th>
-                        <th>Current Version</th>
-                        <th>Latest Version</th>
+                        <th
+                            style="cursor: pointer"
+                            ng-click="m_oController.changeSorting('packageName')"
+                        >
+                            Package Name
+                        </th>
+                        <th
+                            style="cursor: pointer"
+                            ng-click="m_oController.changeSorting('currentVersion')"
+                        >
+                            Current Version
+                        </th>
+                        <th
+                            style="cursor: pointer"
+                            ng-click="m_oController.changeSorting('latestVersion')"
+                        >
+                            Latest Version
+                        </th>
                         <th>Actions</th>
                     </tr>
-                    <tr ng-repeat="package in m_oController.m_aoPackages">
+                    <tr ng-repeat="package in m_oController.m_aoPackages | orderBy:m_oController.sort.column:m_oController.sort.descending">
                         <td>{{package.packageName}}</td>
                         <td>{{package.currentVersion}}</td>
                         <td>
