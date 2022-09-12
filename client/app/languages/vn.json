@@ -630,5 +630,17 @@
     "MARKET_OWNER": "Bạn đã thành thạo!",
     "MARKET_FREE": "Miễn phí",
     "MARKET_START_PRICE": "Từ € ",
-    "MARKET_LOAD_MORE": "TẢI THÊM ỨNG DỤNG KHÔNG GIAN"
+    "MARKET_LOAD_MORE": "TẢI THÊM ỨNG DỤNG KHÔNG GIAN",
+
+    "DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER": "Trình quản lý gói",
+	"DIALOG_PACKAGE_MANAGER_VIEWING": "Xem các gói cho:",
+	"DIALOG_PACKAGE_MANAGER_HEADER": "Trình quản lý gói", 
+	"DIALOG_PACKAGE_MANAGER_NAME": "Tên gói hàng", 
+	"DIALOG_PACKAGE_MANAGER_VERSION": "Phiên bản gói",
+	"DIALOG_PACKAGE_MANAGER_ADD": "Thêm gói", 
+	"DIALOG_PACKAGE_MANAGER_UPDATE": "Cập nhật gói",
+	"DIALOG_PACKAGE_MANAGER_CLEAR": "Xóa lựa chọn", 
+	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Phiên bản hiện tại",  
+	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Phiên bản mới nhất",
+	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Hành động"
 }
