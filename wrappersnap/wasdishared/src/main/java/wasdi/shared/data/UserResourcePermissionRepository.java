@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
@@ -229,6 +230,41 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return null;
+	}
+
+	public List<UserResourcePermission> getPermissionsByTypeAndUserIdAndResourceId(String sType, String sUserId, String sResourceId) {
+		List<UserResourcePermission> aoReturnList = new ArrayList<>();
+
+		try {
+			List<Bson> aoFilters = new ArrayList<>();
+
+			if (!Utils.isNullOrEmpty(sType)) {
+				Bson oFilterResourceType = Filters.eq("resourceType", sType.toLowerCase());
+				aoFilters.add(oFilterResourceType);
+			}
+
+			if (!Utils.isNullOrEmpty(sResourceId)) {
+				Bson oFilterResourceId = Filters.eq("resourceId", sResourceId.toLowerCase());
+				aoFilters.add(oFilterResourceId);
+			}
+
+			if (!Utils.isNullOrEmpty(sUserId)) {
+				Bson oFilterUserId = Filters.eq("userId", sUserId.toLowerCase());
+				aoFilters.add(oFilterUserId);
+			}
+
+			Bson oFilter = Filters.and(aoFilters);
+
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter);
+
+			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
+		} catch (Exception oE) {
+			Utils.debugLog("UserResourcePermissionRepository.getPermissionsByTypeAndUserIdAndResourceId( " + sUserId
+					+ ", " + sResourceId + "): error: " + oE);
+		}
+
+		return aoReturnList;
 	}
 
 	public UserResourcePermission getWorkspaceSharingByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
