@@ -623,5 +623,17 @@
 	"MARKET_OWNER": "Vous êtes le maître!",
 	"MARKET_FREE": "Gratuit",
 	"MARKET_START_PRICE": "à partir de € ",
-	"MARKET_LOAD_MORE": "CHARGER PLUS D'APPLICATIONS"
+	"MARKET_LOAD_MORE": "CHARGER PLUS D'APPLICATIONS",
+
+	"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER": "Directeur chargé d'emballage",
+	"DIALOG_PACKAGE_MANAGER_VIEWING": "Affichage des forfaits pour :",
+	"DIALOG_PACKAGE_MANAGER_HEADER": "Directeur chargé d'emballage", 
+	"DIALOG_PACKAGE_MANAGER_NAME": "Nom du paquet", 
+	"DIALOG_PACKAGE_MANAGER_VERSION": "Version du package",
+	"DIALOG_PACKAGE_MANAGER_ADD": "Ajouter le forfait", 
+	"DIALOG_PACKAGE_MANAGER_UPDATE": "Mise à jour",
+	"DIALOG_PACKAGE_MANAGER_CLEAR": "Effacer la sélection", 
+	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Version actuelle",  
+	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Dernière version",
+	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Actions"
 }

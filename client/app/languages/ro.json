@@ -675,5 +675,17 @@
 	"MARKET_OWNER": "You are the Master!",
 	"MARKET_FREE": "Gratuit",
 	"MARKET_START_PRICE": "de la € ",
-	"MARKET_LOAD_MORE": "Încarcă mai mult APLICAȚII SPATIALE"
+	"MARKET_LOAD_MORE": "Încarcă mai mult APLICAȚII SPATIALE",
+
+	"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER": "Manager de pachete",
+	"DIALOG_PACKAGE_MANAGER_VIEWING": "Vizualizarea pachetelor pentru:",
+	"DIALOG_PACKAGE_MANAGER_HEADER": "Manager de pachete", 
+	"DIALOG_PACKAGE_MANAGER_NAME": "Numele pachetului", 
+	"DIALOG_PACKAGE_MANAGER_VERSION": "Versiunea pachetului",
+	"DIALOG_PACKAGE_MANAGER_ADD": "Adăugați pachet", 
+	"DIALOG_PACKAGE_MANAGER_UPDATE": "Actualizați pachetul",
+	"DIALOG_PACKAGE_MANAGER_CLEAR": "Selecție clară", 
+	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Versiune curentă",  
+	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Ultima versiune",
+	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Acțiuni"
 }

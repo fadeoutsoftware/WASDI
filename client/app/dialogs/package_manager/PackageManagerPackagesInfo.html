@@ -1,20 +1,24 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12">
-            <h4>Viewing Packages For: {{m_oController.sWorkspaceName}}</h4>
             <h4>
-                Package Manager: {{m_oController.m_sPackageManagerName}}
+                {{"DIALOG_PACKAGE_MANAGER_VIEWING" | translate }}
+                {{m_oController.sWorkspaceName}}
+            </h4>
+            <h4>
+                {{"DIALOG_PACKAGE_MANAGER_HEADER" | translate }}
+                {{m_oController.m_sPackageManagerName}}
                 {{m_oController.m_sPackageManagerVersion}}
             </h4>
             <form action="">
                 <input
                     type="text"
-                    placeholder="Package Name"
+                    placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
                     ng-model="m_oController.m_oPackageInfo.name"
                 />
                 <input
                     type="text"
-                    placeholder="Package Version"
+                    placeholder='{{"DIALOG_PACKAGE_MANAGER_VERSION" | translate }}'
                     ng-model="m_oController.m_oPackageInfo.currentVersion"
                 />
                 <div ng-if="!m_oController.bIsEditing">
@@ -23,7 +27,7 @@
                         class="btn btn-primary btn-wasdi"
                         ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
                     >
-                        Add Package
+                         {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
                     </button>
                 </div>
                 <div ng-if="m_oController.bIsEditing">
@@ -71,7 +75,9 @@
                         </th>
                         <th>Actions</th>
                     </tr>
-                    <tr ng-repeat="package in m_oController.m_aoPackages | orderBy:m_oController.sort.column:m_oController.sort.descending">
+                    <tr
+                        ng-repeat="package in m_oController.m_aoPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                    >
                         <td>{{package.packageName}}</td>
                         <td>{{package.currentVersion}}</td>
                         <td>
