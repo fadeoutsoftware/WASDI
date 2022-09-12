@@ -219,8 +219,8 @@ public class UserRepository extends  MongoRepository{
 		}
 
 		return aoReturnList;
-    }
-    
+	}
+
     /**
      * Update a list of users
      * @param aoUsers

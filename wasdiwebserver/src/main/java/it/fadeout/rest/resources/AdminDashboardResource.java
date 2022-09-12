@@ -23,12 +23,15 @@ import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
+import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
@@ -41,6 +44,7 @@ public class AdminDashboardResource {
 
 	private static final String MSG_ERROR_INVALID_RESOURCE_TYPE = "MSG_ERROR_INVALID_RESOURCE_TYPE";
 	private static final String MSG_ERROR_INVALID_PARTIAL_NAME = "MSG_ERROR_INVALID_PARTIAL_NAME";
+	private static final String MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA = "MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA";
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -56,7 +60,7 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
+			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -127,8 +131,53 @@ public class AdminDashboardResource {
 		return Response.ok(entity).build();
 	}
 
+	@GET
+	@Path("/resourcePermissions")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response findResourcePermissions(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("resourceType") String sResourceType,
+			@QueryParam("resourceId") String sResourceId,
+			@QueryParam("userId") String sUserId) {
+
+		Utils.debugLog("AdminDashboardResource.findResourcePermissions(" + " ResourceType: " + sResourceType
+				+ ", ResourceId: " + sResourceId + ", User: " + sUserId + " )");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			Utils.debugLog("WorkspaceResource.findResourcePermissions: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
+		if (Utils.isNullOrEmpty(sResourceType) && Utils.isNullOrEmpty(sResourceId) && Utils.isNullOrEmpty(sUserId)) {
+			Utils.debugLog("AdminDashboardResource.findResourcePermissions: insufficient search criteria");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA)).build();
+		}
+
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+		List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository
+				.getPermissionsByTypeAndUserIdAndResourceId(sResourceType, sUserId, sResourceId);
+
+		List<UserResourcePermissionViewModel> aoPermissionVMs = new ArrayList<>();
+
+		if (aoPermissions != null) {
+			aoPermissionVMs = aoPermissions.stream()
+					.map(AdminDashboardResource::convert)
+					.collect(Collectors.toList());
+		}
+
+		GenericEntity<List<UserResourcePermissionViewModel>> entity = new GenericEntity<List<UserResourcePermissionViewModel>>(aoPermissionVMs, List.class);
+
+		return Response.ok(entity).build();
+	}
+
 	@POST
-	@Path("/resourcePermission")
+	@Path("/resourcePermissions")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response addResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
@@ -153,7 +202,7 @@ public class AdminDashboardResource {
 	}
 
 	@DELETE
-	@Path("/resourcePermission")
+	@Path("/resourcePermissions")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response removeResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
@@ -199,6 +248,20 @@ public class AdminDashboardResource {
 		oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 
 		return oWSViewModel;
+	}
+
+	public static UserResourcePermissionViewModel convert(UserResourcePermission oPermission) {
+		UserResourcePermissionViewModel oPermissionViewModel = new UserResourcePermissionViewModel();
+
+		oPermissionViewModel.setResourceId(oPermission.getResourceId());
+		oPermissionViewModel.setResourceType(oPermission.getResourceType());
+		oPermissionViewModel.setUserId(oPermission.getUserId());
+		oPermissionViewModel.setOwnerId(oPermission.getOwnerId());
+		oPermissionViewModel.setPermissions(oPermission.getPermissions());
+		oPermissionViewModel.setCreatedBy(oPermission.getCreatedBy());
+		oPermissionViewModel.setCreatedDate(oPermission.getCreatedDate());
+
+		return oPermissionViewModel;
 	}
 
 }

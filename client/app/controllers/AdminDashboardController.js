@@ -20,9 +20,15 @@ var AdminDashboardController = (function () {
 
         this.m_aoResourceTypeList = ['NODE', 'PROCESSORPARAMETERSTEMPLATE', 'PROCESSOR', 'STYLE', 'WORKFLOW', 'WORKSPACE'];
 
-        this.m_sResourceType = "";
-        this.m_sResourceId = null;
-        this.m_sUserEmail = null;
+        this.m_sResourceType_add_remove = "";
+        this.m_sResourceId_add_remove = null;
+        this.m_sUserEmail_add_remove = null;
+
+        this.m_sResourceType_search = "";
+        this.m_sResourceId_search = null;
+        this.m_sUserEmail_search = null;
+
+        this.m_aoResourcePermissionsList = [];
 
 
         this.m_bIsLoading = true;
@@ -32,7 +38,7 @@ var AdminDashboardController = (function () {
 
         this.m_oTranslate = oTranslate;   
 
-        if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
+        if (utilsIsObjectNullOrUndefined(oConstantsService.getUser())) {
             this.m_oState.go("home");
         }
 
@@ -53,7 +59,7 @@ var AdminDashboardController = (function () {
 
         this.m_aoUsersList = [];
 
-        if (utilsIsObjectNullOrUndefined(sUserPartialName) === true) {
+        if (utilsIsStrNullOrEmpty(sUserPartialName) === true) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
             return false;
@@ -77,7 +83,7 @@ var AdminDashboardController = (function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
             }
 
-            oController.clearForm();
+            // oController.clearForm();
 
             return true;
         },function (error) {
@@ -95,7 +101,7 @@ var AdminDashboardController = (function () {
 
         this.m_aoWorkspacesList = [];
 
-        if (utilsIsObjectNullOrUndefined(sWorkspacePartialName) === true) {
+        if (utilsIsStrNullOrEmpty(sWorkspacePartialName) === true) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
             return false;
@@ -119,11 +125,63 @@ var AdminDashboardController = (function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING WORKSPACES");
             }
 
-            oController.clearForm();
+            // oController.clearForm();
 
             return true;
         },function (error) {
             console.log("AdminDashboardController.findWorkspacesByPartialName | error.data.message: ", error.data.message);
+
+            let errorMessage = oController.m_oTranslate.instant(error.data.message);
+
+            utilsVexDialogAlertTop(errorMessage);
+        });
+
+    }
+
+    AdminDashboardController.prototype.findResourcePermissions = function (sResourceType, sResourceId, sUserEmail) {
+        console.log("AdminDashboardController.findResourcePermissions | sResourceType:", sResourceType);
+        console.log("AdminDashboardController.findResourcePermissions | sResourceId:", sResourceId);
+        console.log("AdminDashboardController.findResourcePermissions | sUserEmail:", sUserEmail);
+
+        this.m_aoResourcePermissionsList = [];
+
+        let iValidSearchParameters = 0;
+
+        if (utilsIsStrNullOrEmpty(sResourceType) === false) {
+            iValidSearchParameters++;
+        }
+
+        if (utilsIsStrNullOrEmpty(sResourceId) === false) {
+            utilsRemoveSpaces(sResourceId);
+            iValidSearchParameters++;
+        }
+
+        if (utilsIsStrNullOrEmpty(sUserEmail) === false) {
+            utilsRemoveSpaces(sUserEmail);
+            iValidSearchParameters++;
+        }
+
+        if (iValidSearchParameters < 2) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST TWO PARAMETERS MUST BE PROVIDED");
+
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oAdminDashboardService.findResourcePermissions(sResourceType, sResourceId, sUserEmail)
+            .then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                oController.m_aoResourcePermissionsList = data.data;
+            } else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING RESOURCE PERMISSIONS");
+            }
+
+            // oController.clearForm();
+
+            return true;
+        },function (error) {
+            console.log("AdminDashboardController.findResourcePermissions | error.data.message: ", error.data.message);
 
             let errorMessage = oController.m_oTranslate.instant(error.data.message);
 
@@ -137,16 +195,21 @@ var AdminDashboardController = (function () {
     }
 
     AdminDashboardController.prototype.clearInput = function () {
-        this.m_sResourceType = "";
+        this.m_sResourceType_add_remove = "";
+        this.m_sResourceType_search = "";
     }
 
     AdminDashboardController.prototype.clearForm = function () {
-        this.m_sUserPartialName = "";
-        this.m_sWorkspacePartialName = "";
+        // this.m_sUserPartialName = "";
+        // this.m_sWorkspacePartialName = "";
 
-        this.m_sResourceType = "";
-        this.m_sResourceId = "";
-        this.m_sUserEmail = "";
+        this.m_sResourceType_add_remove = "";
+        this.m_sResourceId_add_remove = "";
+        this.m_sUserEmail_add_remove = "";
+
+        this.m_sResourceType_search = "";
+        this.m_sResourceId_search = "";
+        this.m_sUserEmail_search = "";
     }
 
 
@@ -155,7 +218,7 @@ var AdminDashboardController = (function () {
         console.log("AdminDashboardController.addResourcePermission | sResourceId:", sResourceId);
         console.log("AdminDashboardController.addResourcePermission | sUserEmail:", sUserEmail);
 
-        if (utilsIsObjectNullOrUndefined(sResourceType) === true
+        if (utilsIsStrNullOrEmpty(sResourceType) === true
                 || utilsIsStrNullOrEmpty(sResourceId) === true
                 || utilsIsStrNullOrEmpty(sUserEmail) === true) {
             return false;
@@ -191,7 +254,7 @@ var AdminDashboardController = (function () {
         console.log("AdminDashboardController.removeResourcePermission | sResourceId:", sResourceId);
         console.log("AdminDashboardController.removeResourcePermission | sUserEmail:", sUserEmail);
 
-        if (utilsIsObjectNullOrUndefined(sResourceType) === true
+        if (utilsIsStrNullOrEmpty(sResourceType) === true
                 || utilsIsStrNullOrEmpty(sResourceId) === true
                 || utilsIsStrNullOrEmpty(sUserEmail) === true) {
             return false;
