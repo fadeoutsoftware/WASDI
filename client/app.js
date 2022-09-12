@@ -37,6 +37,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ProcessorMediaService',
     'wasdi.NodeService',
     'wasdi.AdminDashboardService',
+    'wasdi.PackageManagerService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -266,6 +267,8 @@ wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 
 //wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
+
+wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {

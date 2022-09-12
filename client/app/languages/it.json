@@ -630,5 +630,17 @@
 	"MARKET_OWNER": "You are the Master!",
 	"MARKET_FREE": "Free",
 	"MARKET_START_PRICE": "da € ",
-	"MARKET_LOAD_MORE": "CARICA ALTRE APPS"
+	"MARKET_LOAD_MORE": "CARICA ALTRE APPS",
+
+	"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER": "Gestore di pacchetti",
+	"DIALOG_PACKAGE_MANAGER_VIEWING": "Visualizzazione dei pacchetti per:",
+	"DIALOG_PACKAGE_MANAGER_HEADER": "Gestore di pacchetti", 
+	"DIALOG_PACKAGE_MANAGER_NAME": "Nome del pacchetto", 
+	"DIALOG_PACKAGE_MANAGER_VERSION": "Versione del pacchetto",
+	"DIALOG_PACKAGE_MANAGER_ADD": "Aggiungi pacchetto", 
+	"DIALOG_PACKAGE_MANAGER_UPDATE": "Aggiorna il pacchetto",
+	"DIALOG_PACKAGE_MANAGER_CLEAR": "Cancella selezione", 
+	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Versione attuale",  
+	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Ultima versione",
+	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Azioni"
 }
