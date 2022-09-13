@@ -447,8 +447,8 @@ public class WorkspaceResource {
 		}
 
 		// Default values
-		oWorkspace.setCreationDate((double) new Date().getTime());
-		oWorkspace.setLastEditDate((double) new Date().getTime());
+		oWorkspace.setCreationDate(Utils.nowInMillis());
+		oWorkspace.setLastEditDate(Utils.nowInMillis());
 		oWorkspace.setName(sName);
 		oWorkspace.setUserId(oUser.getUserId());
 		oWorkspace.setWorkspaceId(Utils.getRandomName());

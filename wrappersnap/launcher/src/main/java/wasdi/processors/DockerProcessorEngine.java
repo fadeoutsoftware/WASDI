@@ -599,8 +599,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Check and set the operation end-date
-            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                 // P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
                 //LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
             }
@@ -697,8 +697,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Check and set the operation end-date
-            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
             }
 
             try {
@@ -726,8 +726,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -818,8 +818,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             try {
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -903,8 +903,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -978,8 +978,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 				if (oProcessWorkspace != null) {
 					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 					}
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);

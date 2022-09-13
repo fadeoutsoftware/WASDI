@@ -50,6 +50,10 @@ public class Utils {
 		return sString == null || sString.isEmpty();
 	}
 
+	public static boolean isNullOrEmpty(Double oDoube) {
+		return oDoube == null || oDoube.longValue() == 0;
+	}
+
 	//adapted from:
 	//4. Generate Random Alphanumeric String With Java 8 
 	//https://www.baeldung.com/java-random-string
@@ -160,6 +164,11 @@ public class Utils {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
 
+	public static String getFormatDate(Double oDouble) {
+
+		return getFormatDate(new Date(oDouble.longValue()));
+	}
+
 	public static String formatToYyyyDashMMDashdd(Date oDate) {
 		return new SimpleDateFormat("yyyy-MM-dd").format(oDate);
 	}
@@ -216,13 +225,13 @@ public class Utils {
 	
 	public static long getProcessWorkspaceSecondsDuration(ProcessWorkspace oProcessWorkspace) {
 		try {
-			Date oStart = Utils.getWasdiDate(oProcessWorkspace.getOperationStartDate());
-			Date oEnd = Utils.getWasdiDate(oProcessWorkspace.getOperationEndDate());
+			Double oStart = oProcessWorkspace.getOperationStartTimestamp();
+			Double oEnd = oProcessWorkspace.getOperationEndTimestamp();
 			
 			if (oStart==null) return 0l;
 			if (oEnd==null) return 0l;
 			
-			long lDiff = oEnd.getTime() - oStart.getTime();
+			long lDiff = oEnd.longValue() - oStart.longValue();
 			lDiff /= 1000l;
 			return lDiff;
 		}
@@ -537,6 +546,14 @@ public class Utils {
 
 	public static String generateJupyterNotebookCode(String sUserId, String sWorkspaceId) {
 		return StringUtils.generateSha224(sUserId + "_" + sWorkspaceId);
+	}
+
+	/**
+	 * Get the current time in millis as a Double.
+	 * @return a Double object
+	 */
+	public static Double nowInMillis() {
+		return (double) new Date().getTime();
 	}
 
 }
