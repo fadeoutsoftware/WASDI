@@ -19,7 +19,7 @@
                         ng-model="m_oController.m_oPackageInfo.name"
                     />
                 </div>
-               
+
                 <div class="form-group">
                     <div ng-if="!m_oController.bIsEditing">
                         <button
@@ -52,15 +52,24 @@
     </div>
     <div class="row">
         <div class="col-xs-3 my-3">
-            <input type="text" class="form-control" placeholder="Search Packages"
-            ng-model="searchPackages"
+            <input
+                type="text"
+                class="form-control"
+                placeholder="Search Packages"
+                ng-model="searchPackages"
             />
         </div>
     </div>
+    <div class="loadIcon" ng-hide="!m_oController.m_bIsLoading">
+        <invader></invader>
+    </div>
     <div class="row">
-        <div class="col-xs-12">
-            <table class="table table-hover table-condensed">
-                <thead class="thead-light">
+        <div class="col-xs-12" style="max-height: 400px; overflow-y:auto">
+            <table
+                class="table table-hover table-condensed"
+                ng-hide="m_oController.m_bIsLoading"
+            >
+                <thead style="background-color: white; position: sticky; top: 0; z-index: 1; ">
                     <tr>
                         <th
                             style="cursor: pointer"

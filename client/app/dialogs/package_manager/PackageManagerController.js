@@ -1,36 +1,31 @@
 let PackageManagerController = (function () {
     function PackageManagerController(oPackageManagerService, $scope, oExtras) {
         this.m_oScope = $scope;
-
-        this.m_oScope.m_oController = this;
         this.m_oPackageManagerService = oPackageManagerService;
-
+        this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
+        this.m_aoPackages = [];
+        this.m_bIsLoading = true;
         this.sWorkspaceName = oExtras.processor.processorName;
         this.sProcessorId = oExtras.processor.processorId;
 
+        this.m_sPackageManagerName = "";
+        this.m_sPackageManagerVersion = "";
         this.bIsEditing = false;
+        this.m_oPackageInfo = {};
         this.sort = {
             column: "",
             descending: false,
         };
+
         /* 
         Get list of packages
         */
-        this.m_aoPackages = [];
-        this.m_oPackageManagerService
-            .getPackages(this.sWorkspaceName)
-            .then((response) => {
-                console.log(response);
-                this.m_aoPackages = response;
-            });
-
+        this.fetchPackageList(); 
         /* 
         Get package manager information (name and version)
         */
 
-        this.m_sPackageManagerName = "";
-        this.m_sPackageManagerVersion = "";
         this.m_oPackageManagerService
             .getPackageInfo(this.sWorkspaceName)
             .then((response) => {
@@ -44,7 +39,6 @@ let PackageManagerController = (function () {
         Enter package info into input fields
         */
 
-        this.m_oPackageInfo = {};
         this.editPackage = function (oPackage) {
             console.log(this.m_oPackageInfo);
             this.bIsEditing = true;
@@ -112,6 +106,19 @@ let PackageManagerController = (function () {
         } else {
             sort.column = column;
         }
+    };
+
+    PackageManagerController.prototype.fetchPackageList = function () {
+        let oController = this; 
+
+        this.m_oPackageManagerService
+            .getPackages(this.sWorkspaceName)
+            .then(function (data, status) {
+                if (data != null) {
+                    oController.m_aoPackages = data;
+                    oController.m_bIsLoading = false;
+                }
+            });
     };
 
     PackageManagerController.$inject = [
