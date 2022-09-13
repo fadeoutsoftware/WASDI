@@ -52,7 +52,9 @@
     </div>
     <div class="row">
         <div class="col-xs-3 my-3">
-            <input type="text" class="form-control" placeholder="Search Packages" />
+            <input type="text" class="form-control" placeholder="Search Packages"
+            ng-model="searchPackages"
+            />
         </div>
     </div>
     <div class="row">
@@ -89,7 +91,7 @@
                 </thead>
                 <tbody>
                     <tr
-                        ng-repeat="package in m_oController.m_aoPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                        ng-repeat="package in m_oController.m_aoPackages | filter:searchPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
                     >
                         <td class="">{{package.packageName}}</td>
                         <td class="">{{package.currentVersion}}</td>
