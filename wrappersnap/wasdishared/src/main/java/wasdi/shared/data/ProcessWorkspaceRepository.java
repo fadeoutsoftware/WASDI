@@ -55,7 +55,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
         	
         	// Initialize the Last State Change Date
-        	oProcessWorkspace.setLastStateChangeDate(Utils.getFormatDate(new Date()));
+        	oProcessWorkspace.setLastStateChangeTimestamp(Utils.nowInMillis());
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document oDocument = Document.parse(sJSON);
@@ -82,7 +82,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	List<Document> aoDocs = new ArrayList<>();
         	for (ProcessWorkspace oProcessWorkspace : aoProcessWorkspace) {
         		// Initialize the Last State Change Date
-        		oProcessWorkspace.setLastStateChangeDate(Utils.getFormatDate(new Date()));
+        		oProcessWorkspace.setLastStateChangeTimestamp(Utils.nowInMillis());
         		String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
                 Document oDocument = Document.parse(sJSON);
                 aoDocs.add(oDocument);
@@ -1301,7 +1301,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	ProcessWorkspace oOriginal = getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
         	
         	if (oOriginal.getStatus().equals(oProcessWorkspace.getStatus()) == false) {
-        		oProcessWorkspace.setLastStateChangeDate(Utils.getFormatDate(new Date()));
+        		oProcessWorkspace.setLastStateChangeTimestamp(Utils.nowInMillis());
         	}
         	
         	//Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());

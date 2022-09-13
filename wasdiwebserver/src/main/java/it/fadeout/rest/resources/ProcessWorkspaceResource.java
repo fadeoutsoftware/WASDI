@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -277,18 +276,18 @@ public class ProcessWorkspaceResource {
 				ProcessHistoryViewModel oRun = new ProcessHistoryViewModel();
 				
 				try {
-					oRun.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					oRun.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 					
 					// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
-					if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-						oRun.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
+					if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
+						oRun.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
 					}
 					else {
-						oRun.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+						oRun.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 					}
 					
 					
-					oRun.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					oRun.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
 					
 					oRun.setProcessorName(sProcessorName);
 					oRun.setStatus(oProcess.getStatus());
@@ -532,19 +531,19 @@ public class ProcessWorkspaceResource {
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
-			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationStartDate()));
+			if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
 			}
 			else {
-				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 			}
 			
-			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
-				oViewModel.setLastChangeDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getLastStateChangeDate()));
+			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeTimestamp())) {
+				oViewModel.setLastChangeDate(Utils.getFormatDate(oProcess.getLastStateChangeTimestamp()));
 			}
 			
-			oViewModel.setOperationDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
-			oViewModel.setOperationEndDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationEndDate()));
+			oViewModel.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
+			oViewModel.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
 			oViewModel.setOperationType(oProcess.getOperationType());
 			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
 				oViewModel.setOperationSubType(oProcess.getOperationSubType());
@@ -958,10 +957,10 @@ public class ProcessWorkspaceResource {
 					&& 
 					(sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
-				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
 					Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
 					// No end-date set: put it here
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 				}
 			}
 			

@@ -1,7 +1,6 @@
 package wasdi.trigger;
 
 import java.io.File;
-import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -145,8 +144,8 @@ public class Trigger {
 		UserSession oUserSession = new UserSession();
 		oUserSession.setSessionId(Utils.getRandomName());
 		oUserSession.setUserId(oSchedule.getUserId());
-		oUserSession.setLoginDate((double) new Date().getTime());
-		oUserSession.setLastTouch((double) new Date().getTime());
+		oUserSession.setLoginDate(Utils.nowInMillis());
+		oUserSession.setLastTouch(Utils.nowInMillis());
 		
 		oSessionRepository.insertSession(oUserSession);
 		

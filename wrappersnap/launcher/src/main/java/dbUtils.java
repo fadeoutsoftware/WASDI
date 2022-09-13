@@ -61,7 +61,6 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
-
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -1492,8 +1491,8 @@ public class dbUtils {
                             UserSession oNewSession = new UserSession();
                             oNewSession.setSessionId(sSessionId);
                             oNewSession.setUserId(sUser);
-                            oNewSession.setLoginDate((double) new Date().getTime());
-                            oNewSession.setLastTouch((double) new Date().getTime());
+                            oNewSession.setLoginDate(Utils.nowInMillis());
+                            oNewSession.setLastTouch(Utils.nowInMillis());
 
                             oSessionRepository.insertSession(oNewSession);
                         }

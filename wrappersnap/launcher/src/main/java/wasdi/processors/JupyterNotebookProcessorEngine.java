@@ -284,8 +284,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			try {
 				if (oProcessWorkspace != null) {
 					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 					}
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -408,8 +408,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			try {
 				if (oProcessWorkspace != null) {
 					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 					}
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);

@@ -13,7 +13,7 @@ public class ProcessWorkspaceStartDateComparator implements Comparator<ProcessWo
 
 	@Override
 	public int compare(ProcessWorkspace oProcWs1, ProcessWorkspace oProcWs2) {
-		return oProcWs1.getOperationStartDate().compareTo(oProcWs2.getOperationStartDate());
+		return oProcWs1.getOperationStartTimestamp().compareTo(oProcWs2.getOperationStartTimestamp());
 	}
 
 }
