@@ -166,6 +166,10 @@ public class Utils {
 
 	public static String getFormatDate(Double oDouble) {
 
+		if (oDouble == null) {
+			return null;
+		}
+
 		return getFormatDate(new Date(oDouble.longValue()));
 	}
 
