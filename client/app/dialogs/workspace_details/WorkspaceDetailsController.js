@@ -104,9 +104,6 @@ var WorkspaceDetailsController = (function () {
                 var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR UPDATING WORKSPACE NODE');
                 utilsVexCloseDialogAfter(10000, oDialog);
             }
-        },function (error) {
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR UPDATING WORKSPACE NODE');
-            utilsVexCloseDialogAfter(10000, oDialog);
         });
 
     }

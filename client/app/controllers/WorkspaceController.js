@@ -107,14 +107,16 @@ var WorkspaceController = (function () {
         var oController = this;
         var sError = this.m_oTranslate.instant("MSG_MKT_WS_CREATE_ERROR");
 
-        this.m_oWorkspaceService.createWorkspace().then(function (data) {
+        this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
             if (data.data != null) {
                 if (data.data != undefined) {
-                    var sWorkspaceId = data.data;
+                    var sWorkspaceId = data.data.stringValue;
                     oController.openWorkspace(sWorkspaceId);
+
                 }
             }
-        },(function (data) {
+        },(function (data, status) {
+            //alert('error');
             utilsVexDialogAlertTop(sError);
         }));
     };
