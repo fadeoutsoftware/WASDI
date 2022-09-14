@@ -79,13 +79,14 @@ angular
             /*
             Update a Package
             */
-            this.updateLibrary = function (sProcessorId, sLibraryName) {
+            this.upgradeLibrary = function (sProcessorId, sLibraryName, sLatestVersion) {
                 let oWorkspace = this.m_oConstantService.getActiveWorkspace();
                 let sWorkspaceId = "-";
 
                 if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
                     sWorkspaceId = oWorkspace.workspaceId;
                 }
+                
                 return this.m_oHttp.get(
                     this.APIURL +
                         "/processors/environmentupdate?processorId=" +
@@ -94,7 +95,8 @@ angular
                         sWorkspaceId +
                         "&updateCommand=upgradePackage/" +
                         sLibraryName +
-                        "/"
+                        "/" +
+                        sLatestVersion + "/"
                 );
             };
         },

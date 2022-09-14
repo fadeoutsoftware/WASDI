@@ -28,6 +28,7 @@ let PackageManagerController = (function () {
         Get list of packages
         */
         this.fetchPackageList();
+        console.log(this.sProcessorId);
         /* 
         Get package manager information (name and version)
         */
@@ -99,24 +100,32 @@ let PackageManagerController = (function () {
         );
     };
 
-    PackageManagerController.prototype.updatePackage = function (
+    PackageManagerController.prototype.ugradeLibrary = function (
         sProcessorId,
-        oPackageInfo
+        sPackageName,
+        sPackageCurrentVersion
     ) {
-        this.oPackage = angular.copy(oPackageInfo);
-        this.sUpdateCommand =
-            "upgradePackage/" +
-            this.oPackage.name +
-            "/" +
-            this.oPackage.currentVersion +
-            "/";
+        let oController = this;
 
-        this.m_oPackageManagerService.updateLibrary(
-            sProcessorId,
-            this.sUpdateCommand
+        utilsVexDialogConfirm(
+            "Are you sure you want to upgrade " + sPackageName + "?",
+            function (value) {
+                if (value) {
+                    oController.m_oPackageManagerService
+                        .upgradeLibrary(
+                            sProcessorId,
+                            sPackageName,
+                            sPackageCurrentVersion
+                        )
+                        .then(function () {
+                            oController.m_bIsLoading = true;
+                            oController.m_oTimeout(function () {
+                                oController.fetchPackageList();
+                            }, 4000);
+                        });
+                }
+            }
         );
-        console.log("Package Updated");
-        this.bIsEditing = false;
     };
 
     PackageManagerController.prototype.changeSorting = function (column) {

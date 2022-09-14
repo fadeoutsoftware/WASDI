@@ -1,15 +1,10 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12">
-            <h4>
-                {{"DIALOG_PACKAGE_MANAGER_VIEWING" | translate }}
-                {{m_oController.sWorkspaceName}}
-            </h4>
-            <h4>
-                {{"DIALOG_PACKAGE_MANAGER_HEADER" | translate }}:
-                {{m_oController.m_sPackageManagerName}}
-                {{m_oController.m_sPackageManagerVersion}}
-            </h4>
+            <h3>
+                {{m_oController.sWorkspaceName}} Packages - <span class="text-success">{{m_oController.m_sPackageManagerName}}   {{m_oController.m_sPackageManagerVersion}}</span>
+            </h3>
+           
             <form class="form-inline" action="">
                 <div class="form-group">
                     <input
@@ -28,22 +23,6 @@
                             ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.sPackageName)"
                         >
                             {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
-                        </button>
-                    </div>
-                    <div ng-if="m_oController.bIsEditing">
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-wasdi"
-                            ng-click="m_oController.updatePackage(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
-                        >
-                            Update Package
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-danger btn-wasdi"
-                            ng-click="m_oController.bIsEditing = false"
-                        >
-                            Clear Selection
                         </button>
                     </div>
                 </div>
@@ -123,7 +102,7 @@
                             <button
                                 class="btn btn-success btn-wasdi btn-xs"
                                 ng-disabled="package.latestVersion == null"
-                                ng-click="m_oController.editPackage(package)"
+                                ng-click="m_oController.upgradeLibrary(m_oController.sProcessorId, package.packageName, package.latestVersion)"
                             >
                                 <i
                                     class="fa fa-plus"
