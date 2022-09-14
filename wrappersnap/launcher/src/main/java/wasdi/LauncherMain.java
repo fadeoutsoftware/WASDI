@@ -218,7 +218,7 @@ public class LauncherMain  {
 
             // Set the ProcessWorkspace STATUS as running
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-            s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
+            s_oProcessWorkspace.setOperationStartTimestamp(Utils.nowInMillis());
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
             s_oProcessWorkspace.setProgressPerc(0);
             s_oProcessWorkspace.setPid(getProcessId());
@@ -247,7 +247,7 @@ public class LauncherMain  {
                 if (s_oProcessWorkspace != null) {
 
                     s_oProcessWorkspace.setProgressPerc(100);
-                    s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    s_oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
                     ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -628,7 +628,7 @@ public class LauncherMain  {
 
                 // Set Progress Perc and Operation End Date
             	s_oProcessWorkspace.setProgressPerc(100);
-            	s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            	s_oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 
                 ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 

@@ -1,0 +1,373 @@
+<div class="workspaces-view apps-wrapper">
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_USERS_TITLE" | translate}}</h3>
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_USERS_USER_PARTIAL_NAME" | translate}}
+                                </label>
+
+                                <input type="text" name="userPartialName" id="userPartialName" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sUserPartialName" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">
+                                    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_USERS_SEARCH" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="m_oController.m_aoUsersList.length > 0">
+            <div class="spacer"></div>
+
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>UserId</th>
+                            <th>Name</th>
+                            <th>Surname</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="oUser in m_oController.m_aoUsersList">
+                            <td>
+                                {{oUser.userId}}
+                            </td>
+                            <td>
+                                {{oUser.name}}
+                            </td>
+                            <td>
+                                {{oUser.surname}}
+                            </td>
+                            <td>
+                                {{oUser.role}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_WORKSPACES_TITLE" | translate}}</h3>
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_WORKSPACES_WORKSPACE_PARTIAL_NAME" | translate}}
+                                </label>
+
+                                <input type="text" name="workspacePartialName" id="workspacePartialName" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sWorkspacePartialName" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findWorkspacesByPartialName(m_oController.m_sWorkspacePartialName)">
+                                    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_USERS_SEARCH" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="m_oController.m_aoWorkspacesList.length > 0">
+            <div class="spacer"></div>
+
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>WorkspaceId</th>
+                            <th>Node</th>
+                            <th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="oWorkspace in m_oController.m_aoWorkspacesList">
+                            <td>
+                                {{oWorkspace.workspaceName}}
+                            </td>
+                            <td>
+                                {{oWorkspace.workspaceId}}
+                            </td>
+                            <td>
+                                {{oWorkspace.nodeCode}}
+                            </td>
+                            <td>
+                                {{oWorkspace.ownerUserId}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div>
+                        <div class="row give-permission-row">
+                            <h3>{{"DIALOG_MANAGE_RESOURCE_PERMISSION_TITLE" | translate}}</h3>
+                            <div class="spacer"></div>
+
+                            <div class="row give-permission-row">
+                                <h4>{{"DIALOG_MANAGE_RESOURCE_PERMISSION_ADD_REMOVE_TITLE" | translate}}</h4>
+                                <div class="spacer"></div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_TYPE" | translate}}
+                                        </label>
+
+                                        <input type="text" ng-model="m_oController.m_sResourceType_add_remove" ng-value="m_oController.m_sResourceType_add_remove"
+                                                class="form-control wasdi-input"
+                                                ng-click="m_oController.clearInput()"
+                                                list="resourceType"
+                                                required="required"
+                                                >
+
+                                        <div class="adv-selectfield">
+                                            <datalist id="resourceType"
+                                                        class="browser-default" ng-model="m_oController.m_sResourceType_add_remove">
+
+                                                <option selected value=""></option>
+
+                                                <option ng-repeat="option in m_oController.getResourceTypeList()"
+                                                        value="{{option}}">{{option}}
+                                                </option>
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_ID" | translate}}
+                                        </label>
+
+                                        <input type="text" name="resourceId" id="resourceId" class="form-control wasdi-input" value="" title=""
+                                            ng-model="m_oController.m_sResourceId_add_remove" required="required">
+
+                                            <span class="highlight filter-highlight"></span>
+                                            <span class="bar filter-bar"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_USER_MAIL" | translate}}
+                                        </label>
+
+                                        <input type="text" name="userEmail" id="userEmail" class="form-control wasdi-input" value="" title=""
+                                            ng-model="m_oController.m_sUserEmail_add_remove" required="required">
+
+                                            <span class="highlight filter-highlight"></span>
+                                            <span class="bar filter-bar"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <div class="group">
+                                        <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.addResourcePermission(m_oController.m_sResourceType_add_remove, m_oController.m_sResourceId_add_remove, m_oController.m_sUserEmail_add_remove)">
+                                            <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
+                                            <span class="ng-binding">{{"DIALOG_MANAGE_RESOURCE_PERMISSION_ADD" | translate}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <div class="group">
+                                        <button class="btn btn-danger btn-wasdi btn-lg" ng-click="m_oController.removeResourcePermission(m_oController.m_sResourceType_add_remove, m_oController.m_sResourceId_add_remove, m_oController.m_sUserEmail_add_remove)">
+                                            <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
+                                            <span class="ng-binding">{{"DIALOG_MANAGE_RESOURCE_PERMISSION_REMOVE" | translate}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="spacer"></div>
+
+                            <div class="row">
+                                <h4>{{"DIALOG_MANAGE_RESOURCE_PERMISSION_SEARCH_TITLE" | translate}}</h4>
+                                <div class="spacer"></div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_TYPE" | translate}}
+                                        </label>
+
+                                        <input type="text" ng-model="m_oController.m_sResourceType_search" ng-value="m_oController.m_sResourceType_search"
+                                                class="form-control wasdi-input"
+                                                ng-click="m_oController.clearInput()"
+                                                list="resourceType"
+                                                required="required"
+                                                >
+
+                                        <div class="adv-selectfield">
+                                            <datalist id="resourceType"
+                                                        class="browser-default" ng-model="m_oController.m_sResourceType_search">
+
+                                                <option selected value=""></option>
+
+                                                <option ng-repeat="option in m_oController.getResourceTypeList()"
+                                                        value="{{option}}">{{option}}
+                                                </option>
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_ID" | translate}}
+                                        </label>
+
+                                        <input type="text" name="resourceId" id="resourceId" class="form-control wasdi-input" value="" title=""
+                                            ng-model="m_oController.m_sResourceId_search" required="required">
+
+                                            <span class="highlight filter-highlight"></span>
+                                            <span class="bar filter-bar"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <div class="group">
+                                        <label class="filter-label">
+                                            {{"DIALOG_MANAGE_RESOURCE_PERMISSION_RESOURCE_USER_MAIL" | translate}}
+                                        </label>
+
+                                        <input type="text" name="userEmail" id="userEmail" class="form-control wasdi-input" value="" title=""
+                                            ng-model="m_oController.m_sUserEmail_search" required="required">
+
+                                            <span class="highlight filter-highlight"></span>
+                                            <span class="bar filter-bar"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <div class="group">
+                                        <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.findResourcePermissions(m_oController.m_sResourceType_search, m_oController.m_sResourceId_search, m_oController.m_sUserEmail_search)">
+                                            <em class="fa fa-search fa-lg" ng-class="button.icon"></em>
+                                            <span class="ng-binding">{{"DIALOG_MANAGE_RESOURCE_PERMISSION_SEARCH" | translate}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row" ng-show="m_oController.m_aoResourcePermissionsList.length > 0">
+                                <div class="spacer"></div>
+                    
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Resource Id</th>
+                                                <th>Resource Type</th>
+                                                <th>UserId</th>
+                                                <th>OwnerId</th>
+                                                <th>Permissions</th>
+                                                <th>Created By</th>
+                                                <th>Created Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="oResourcePermission in m_oController.m_aoResourcePermissionsList">
+                                                <td>
+                                                    {{oResourcePermission.resourceId}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.resourceType}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.userId}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.ownerId}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.permissions}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.createdBy}}
+                                                </td>
+                                                <td>
+                                                    {{oResourcePermission.createdDate | date:"dd/MM/yyyy hh:mma"}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    
+                            <div class="spacer"></div>
+                            <div class="spacer"></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

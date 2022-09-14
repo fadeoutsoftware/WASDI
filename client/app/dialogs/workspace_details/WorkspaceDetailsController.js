@@ -90,17 +90,17 @@ var WorkspaceDetailsController = (function () {
         this.m_oWorkspaceViewModel.nodeCode = this.m_sCurrentNode;
         let oWorkspaceViewModel;
         let oController = this;
-        this.m_oWorkspaceService.UpdateWorkspace(this.m_oWorkspaceViewModel).then(function(data){
-            oWorkspaceViewModel=data.data;
+        this.m_oWorkspaceService.UpdateWorkspace(this.m_oWorkspaceViewModel).then(function(data) {
+            oWorkspaceViewModel = data.data;
             if (null != oWorkspaceViewModel) {
                 // update on the current active workspaces
                 oController.m_oConstantService.getActiveWorkspace().nodeCode = this.m_sCurrentNode;
-               // oController.m_oConstantService.getActiveWorkspace().apiUrl = oWorkspaceViewModel.apiUrl;
-               oController.m_oConstantService.setActiveWorkspace(oWorkspaceViewModel);
+                // oController.m_oConstantService.getActiveWorkspace().apiUrl = oWorkspaceViewModel.apiUrl;
+                oController.m_oConstantService.setActiveWorkspace(oWorkspaceViewModel);
                 var oDialog = utilsVexDialogAlertBottomRightCorner('WORKSPACE NODE UPDATED<br>READY');
                 utilsVexCloseDialogAfter(4000, oDialog);
             }
-            else{
+            else {
                 var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR UPDATING WORKSPACE NODE');
                 utilsVexCloseDialogAfter(10000, oDialog);
             }

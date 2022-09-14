@@ -57,7 +57,6 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
@@ -284,8 +283,8 @@ public class Wasdi extends ResourceConfig {
 				
 				oWorkspace = new Workspace();
 				// Default values
-				oWorkspace.setCreationDate((double) new Date().getTime());
-				oWorkspace.setLastEditDate((double) new Date().getTime());
+				oWorkspace.setCreationDate(Utils.nowInMillis());
+				oWorkspace.setLastEditDate(Utils.nowInMillis());
 				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
 				// Leave this at "no user"
 				oWorkspace.setWorkspaceId(Utils.getRandomName());
@@ -381,7 +380,6 @@ public class Wasdi extends ResourceConfig {
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
-				return oUser;
 			} else {
 				//check session against DB
 				
@@ -673,8 +671,8 @@ public class Wasdi extends ResourceConfig {
 					bNew = true;
 				}
 				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate((double) new Date().getTime());
-				oSession.setLastTouch((double) new Date().getTime());
+				oSession.setLoginDate(Utils.nowInMillis());
+				oSession.setLastTouch(Utils.nowInMillis());
 				
 				SessionRepository oSessionRepo = new SessionRepository();
 				Boolean bRet = false;
@@ -697,7 +695,7 @@ public class Wasdi extends ResourceConfig {
 
 				try {
 					
-					oProcess.setOperationDate(Utils.getFormatDate(new Date()));
+					oProcess.setOperationTimestamp(Utils.nowInMillis());
 					oProcess.setOperationType(sOperationType);
 					oProcess.setOperationSubType(sOperationSubId);
 					oProcess.setProductName(sProductName);

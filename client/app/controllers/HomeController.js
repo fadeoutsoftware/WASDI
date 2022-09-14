@@ -126,6 +126,8 @@ var HomeController = (function () {
         var sMessage = this.m_oTranslate.instant("MSG_LOGIN_ERROR");
         this.m_oAuthService.legacyLogin(oLoginInfo).then(
             function (data, status) {
+                console.log("HomeController.login | data.data: ", data.data);
+                console.log("HomeController.login | oController: ", oController);
                 oController.callbackLogin(data.data, status, oController)
             }, function (data, status) {
                 //alert('error');
@@ -155,6 +157,8 @@ var HomeController = (function () {
             oUser.name = data.name;
             oUser.surname = data.surname;
             oUser.sessionId = data.sessionId;
+            oUser.role = data.role;
+            oUser.grantedAuthorities = data.grantedAuthorities;
             oController.m_oConstantsService.setUser(oUser);//set user
             oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
 

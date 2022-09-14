@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.workflows;
 
-import wasdi.shared.business.WorkflowSharing;
+import wasdi.shared.business.UserResourcePermission;
 
 /**
  * Represents the sharing of a workflow with a user
@@ -22,12 +22,9 @@ public class WorkflowSharingViewModel {
 		super();
 	}
 
-	public WorkflowSharingViewModel(WorkflowSharing oSharing) {
+	public WorkflowSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.userId = oSharing.getUserId();
 	}
-	
-	
-	
-	
+
 }

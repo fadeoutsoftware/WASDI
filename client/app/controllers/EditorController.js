@@ -4,9 +4,10 @@
 var EditorController = (function () {
     function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
-        oModalService, oTranslate, oCatalogService,
+        oModalService, oTranslate, oCatalogService, oProcessorService, oConsoleService, 
         $window) {
         // Reference to the needed Services
+        this.m_oWindow = $window;
         this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -31,6 +32,17 @@ var EditorController = (function () {
         
         this.m_oTranslate = oTranslate;
         this.m_oCatalogService = oCatalogService;
+        
+        /**
+         * Processors Service
+         */
+        this.m_oProcessorService = oProcessorService;
+
+        /**
+         * Console Service
+         */
+        this.m_oConsoleService = oConsoleService;
+
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
         // Flag to know if the first zoom on band has been done
@@ -192,6 +204,14 @@ var EditorController = (function () {
                 subMenu: [],
                 onClick: this.openProcessorDialog,
                 icon: "fa fa-lg fa-plus-square"
+            },
+            // --- Jupyter Notebook ---
+            {
+                name: "Jupyter Notebook",// Jupyter Notebook
+                caption_i18n: "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK",
+                subMenu: [],
+                onClick: this.openJupyterNotebookPage,
+                icon: "fa fa-laptop"
             },
             // --- Style ---
             {
@@ -1213,6 +1233,63 @@ var EditorController = (function () {
                 oController.m_oProcessWorkspaceService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
+
+        return true;
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    EditorController.prototype.openJupyterNotebookPage = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        oController.m_oConsoleService.createConsole(oController.m_oActiveWorkspace.workspaceId)
+        .then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    // Request accepted
+                    console.log("EditorController.openJupyterNotebookPage | oWindow: ", oWindow);
+                    console.log("EditorController.openJupyterNotebookPage | oController.m_oWindow: ", oController.m_oWindow);
+
+                    console.log("EditorController.openJupyterNotebookPage | data.data: ", data.data);
+                    console.log("EditorController.openJupyterNotebookPage | data.data.stringValue: ", data.data.stringValue);
+
+                    if (data.data.stringValue.includes("http")) {
+                        oController.m_oWindow.open(data.data.stringValue, '_blank');
+                    } else {
+                        sMessage = "WASDI IS PREPARING YOUR NOTEBOOK"
+        
+                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                            if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                                sMessage = sMessage + "<BR>" + data.data.stringValue;
+                            }
+                        }
+        
+                        utilsVexDialogAlertTop(sMessage);
+                    }
+                } else {
+                    sMessage = "GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK"
+
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                            sMessage = sMessage + ": " + data.data.stringValue;
+                        }
+                    }
+
+                    utilsVexDialogAlertTop(sMessage);
+                }
+
+            },
+            function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK");
+            }
+        );
 
         return true;
     };
@@ -2324,6 +2401,8 @@ var EditorController = (function () {
         'ModalService',
         '$translate',
         'CatalogService',
+        'ProcessorService',
+        'ConsoleService',
         '$window'
 
     ];

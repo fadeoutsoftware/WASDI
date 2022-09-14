@@ -8,8 +8,8 @@ package wasdi.shared.utils;
 
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
 
 /**
  * @author c.nattero
@@ -37,8 +37,8 @@ public class PermissionsUtils {
 				return true;
 			}
 
-			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			return oWorkspaceSharingRepository.isSharedWithUser(sUserId, sWorkspaceId);
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
 		}

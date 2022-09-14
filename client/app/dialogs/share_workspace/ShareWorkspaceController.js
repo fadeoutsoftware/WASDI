@@ -6,7 +6,7 @@
 
 var ShareWorkspaceController = (function() {
 
-    function ShareWorkspaceController($scope, oClose,oExtras,oConstantsService,oWorkspaceService) {
+    function ShareWorkspaceController($scope, oClose,oExtras,oConstantsService, oTranslate ,oWorkspaceService) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
@@ -22,6 +22,7 @@ var ShareWorkspaceController = (function() {
         this.m_sUserEmail = "";
         this.m_aoEnableUsers=[];
         this.m_oConstantsService = oConstantsService;
+        this.m_oTranslate = oTranslate;
 
         if(utilsIsObjectNullOrUndefined(this.m_sWorkspace) === true){
             this.m_sWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -75,7 +76,7 @@ var ShareWorkspaceController = (function() {
         var oController = this;
         this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail)
             .then(function (data) {
-            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
             {
                 //TODO USER SAVED
             }else
@@ -111,6 +112,7 @@ var ShareWorkspaceController = (function() {
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
                 }
+
                 oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
             },function (error) {
@@ -127,6 +129,7 @@ var ShareWorkspaceController = (function() {
         'close',
         'extras',
         'ConstantsService',
+        '$translate',
         'WorkspaceService'
 
     ];

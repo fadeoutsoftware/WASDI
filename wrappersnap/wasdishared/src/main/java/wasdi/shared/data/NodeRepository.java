@@ -2,11 +2,14 @@ package wasdi.shared.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
@@ -87,7 +90,31 @@ public class NodeRepository extends MongoRepository {
 
 		return  null;
 	}
-	
+
+	public List<Node> findNodeByPartialName(String sPartialName) {
+		List<Node> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			return aoReturnList;
+		}
+
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+
+		Bson oFilterLikeNodeCode = Filters.eq("nodeCode", regex);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilterLikeNodeCode)
+					.sort(new Document("nodeCode", 1));
+
+			fillList(aoReturnList, oWSDocuments, Node.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
 	/**
 	 * Get the full nodes list
 	 * @return List of all the nodes
