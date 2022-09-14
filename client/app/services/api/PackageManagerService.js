@@ -12,10 +12,8 @@ angular
             this.m_oConstantService = oConstantsService;
             this.m_sResource = "/packageManager";
 
-            /* 
-            Return Package Manager Version 
-            */
-            this.getPackageInfo = function (sWorkspaceName) {
+            //fetch package manager info
+            this.getPackageManagerInfo = function (sWorkspaceName) {
                 return this.m_oHttp
                     .get(
                         this.APIURL +
@@ -23,32 +21,67 @@ angular
                             "/managerVersion?name=" +
                             sWorkspaceName
                     )
-                    .then((response) => {
-                        return response.data;
-                    });
+                   
             };
             /*
             Return list of packages
             */
-            this.getPackages = function (sWorkspaceName) {
-                return this.m_oHttp
-                    .get(
-                        this.APIURL +
-                            this.m_sResource +
-                            "/listPackages?name=" +
-                            sWorkspaceName
-                    )
-                    .then((response) => {
-                        return response.data;
-                    });
+            this.getPackagesList = function (sWorkspaceName) {
+                return this.m_oHttp.get(
+                    this.APIURL +
+                        this.m_sResource +
+                        "/listPackages?name=" +
+                        sWorkspaceName
+                );
             };
             /*
-            Remove a package
+            Remove a library
             */
-            this.updateLibrary = function (sProcessorId, sUpdateCommand) {
+            this.deleteLibrary = function (sProcessorId, sLibraryName) {
                 let oWorkspace = this.m_oConstantService.getActiveWorkspace();
                 let sWorkspaceId = "-";
-               
+
+                if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+                    sWorkspaceId = oWorkspace.workspaceId;
+                }
+
+                return this.m_oHttp.get(
+                    this.APIURL +
+                        "/processors/environmentupdate?processorId=" +
+                        sProcessorId +
+                        "&workspace=" +
+                        sWorkspaceId +
+                        "&updateCommand=removePackage/" +
+                        sLibraryName +
+                        "/"
+                );
+            };
+            /*
+            Add a Package
+            */
+            this.addLibrary = function (sProcessorId, sLibraryName) {
+                let oWorkspace = this.m_oConstantService.getActiveWorkspace();
+                let sWorkspaceId = "-";
+                if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
+                    sWorkspaceId = oWorkspace.workspaceId;
+                }
+                return this.m_oHttp.get(
+                    this.APIURL +
+                        "/processors/environmentupdate?processorId=" +
+                        sProcessorId +
+                        "&workspace=" +
+                        sWorkspaceId +
+                        "&updateCommand=addPackage/" +
+                        sLibraryName +
+                        "/"
+                );
+            };
+            /*
+            Update a Package
+            */
+            this.updateLibrary = function (sProcessorId, sLibraryName) {
+                let oWorkspace = this.m_oConstantService.getActiveWorkspace();
+                let sWorkspaceId = "-";
 
                 if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
                     sWorkspaceId = oWorkspace.workspaceId;
@@ -59,8 +92,9 @@ angular
                         sProcessorId +
                         "&workspace=" +
                         sWorkspaceId +
-                        "&updateCommand=" +
-                        sUpdateCommand
+                        "&updateCommand=upgradePackage/" +
+                        sLibraryName +
+                        "/"
                 );
             };
         },
