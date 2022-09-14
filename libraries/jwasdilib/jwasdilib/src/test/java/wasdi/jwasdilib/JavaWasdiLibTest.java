@@ -33,7 +33,7 @@ import wasdi.jwasdilib.utils.FileUtils;
 import wasdi.jwasdilib.utils.StringUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-//@Ignore
+@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class JavaWasdiLibTest {
 
