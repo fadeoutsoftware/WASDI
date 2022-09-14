@@ -1302,6 +1302,14 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	
         	if (oOriginal.getStatus().equals(oProcessWorkspace.getStatus()) == false) {
         		oProcessWorkspace.setLastStateChangeTimestamp(Utils.nowInMillis());
+
+            	if (oOriginal.getStatus().equalsIgnoreCase("RUNNING")) {
+            		double dNowInMillis = Utils.nowInMillis();
+            		double dLastChange = oOriginal.getLastStateChangeTimestamp();
+            		long lDelta = (long) (dNowInMillis - dLastChange);
+
+            		oProcessWorkspace.setRunningTime(oOriginal.getRunningTime() + lDelta);
+            	}
         	}
         	
         	//Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
