@@ -54,6 +54,12 @@ public class ProcessWorkspace {
      * Date and time when the process status was modified
      */
     private Double lastStateChangeTimestamp;
+
+    /**
+     * Running time of the process (in milliseconds)
+     */
+    private Long runningTime = 0L;
+
     /**
      * Unique identifier of the job
      */
@@ -211,6 +217,14 @@ public class ProcessWorkspace {
 
 	public void setLastStateChangeTimestamp(Double lastStateChangeTimestamp) {
 		this.lastStateChangeTimestamp = lastStateChangeTimestamp;
+	}
+
+	public Long getRunningTime() {
+		return runningTime;
+	}
+
+	public void setRunningTime(Long runningTime) {
+		this.runningTime = runningTime;
 	}
 	
    public String getParentId() {
