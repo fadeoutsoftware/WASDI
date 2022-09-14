@@ -76,7 +76,7 @@ var ShareWorkspaceController = (function() {
         var oController = this;
         this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail)
             .then(function (data) {
-            if(utilsIsObjectNullOrUndefined(data.data) === false)
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
             {
                 //TODO USER SAVED
             }else
@@ -86,11 +86,7 @@ var ShareWorkspaceController = (function() {
             oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
         },function (error) {
-            console.log("ShareWorkspaceController.shareWorkspaceByUserEmail | error.data.message: ", error.data.message);
-
-            let errorMessage = oController.m_oTranslate.instant(error.data.message);
-
-            utilsVexDialogAlertTop(errorMessage);
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
         });
 
         this.m_sUserEmail="";
@@ -108,7 +104,7 @@ var ShareWorkspaceController = (function() {
         var oController = this;
         this.m_oWorkspaceService.deleteUserSharedWorkspace(sWorkspaceId,sEmail)
             .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false)
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
                 {
                     //TODO USER SAVED
                 }

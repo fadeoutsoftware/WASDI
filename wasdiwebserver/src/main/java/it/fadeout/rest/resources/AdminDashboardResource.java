@@ -31,6 +31,7 @@ import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
@@ -194,9 +195,16 @@ public class AdminDashboardResource {
 
 		if (sResourceType.equalsIgnoreCase("workspace")) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			return oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
 		} else {
 			Utils.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
+
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 	}
@@ -219,7 +227,13 @@ public class AdminDashboardResource {
 
 		if (sResourceType.equalsIgnoreCase("workspace")) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			return oWorkspaceResource.deleteUserSharedWorkspace(sSessionId, sResourceId, sUserId);
+			PrimitiveResult oResult = oWorkspaceResource.deleteUserSharedWorkspace(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
 		} else {
 			Utils.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
