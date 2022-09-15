@@ -1,107 +1,160 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12">
-            <h4>
-                {{"DIALOG_PACKAGE_MANAGER_VIEWING" | translate }}
-                {{m_oController.sWorkspaceName}}
-            </h4>
-            <h4>
-                {{"DIALOG_PACKAGE_MANAGER_HEADER" | translate }}
-                {{m_oController.m_sPackageManagerName}}
-                {{m_oController.m_sPackageManagerVersion}}
-            </h4>
-            <form action="">
-                <input
-                    type="text"
-                    placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
-                    ng-model="m_oController.m_oPackageInfo.name"
-                />
-                <input
-                    type="text"
-                    placeholder='{{"DIALOG_PACKAGE_MANAGER_VERSION" | translate }}'
-                    ng-model="m_oController.m_oPackageInfo.currentVersion"
-                />
-                <div ng-if="!m_oController.bIsEditing">
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
-                    >
-                         {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
-                    </button>
+            <h3>
+                {{m_oController.sWorkspaceName}} Packages -
+                <span class="text-success"
+                    >{{m_oController.m_sPackageManagerName}}
+                    {{m_oController.m_sPackageManagerVersion}}</span
+                >
+            </h3>
+
+            <form class="form-inline" action="">
+                <div class="form-group">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
+                        ng-model="m_oController.sPackageName"
+                    />
                 </div>
-                <div ng-if="m_oController.bIsEditing">
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.updatePackage(m_oController.sProcessorId, m_oController.m_oPackageInfo)"
-                    >
-                        Update Package
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-danger btn-wasdi"
-                        ng-click="m_oController.bIsEditing = false"
-                    >
-                        Clear Selection
-                    </button>
+
+                <div class="form-group">
+                    <div ng-if="!m_oController.bIsEditing">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-wasdi"
+                            ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.sPackageName)"
+                        >
+                            {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12">
-            <table class="table table-hover">
-                <description></description>
-                <tbody>
+        <div class="col-xs-3 my-3">
+            <input
+                type="text"
+                class="form-control"
+                placeholder="Search Packages"
+                ng-model="searchPackages"
+            />
+        </div>
+    </div>
+    <div class="loadIcon" ng-hide="!m_oController.m_bIsLoading">
+        <invader></invader>
+    </div>
+    <div class="row">
+        <div class="col-xs-12" style="max-height: 400px; overflow-y: auto">
+            <table
+                class="table table-hover table-condensed"
+                ng-hide="m_oController.m_bIsLoading"
+            >
+                <thead
+                    style="
+                        background-color: white;
+                        position: sticky;
+                        top: 0;
+                        z-index: 1;
+                    "
+                >
                     <tr>
                         <th
                             style="cursor: pointer"
+                            scope="col"
                             ng-click="m_oController.changeSorting('packageName')"
                         >
-                            Package Name
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && m_oController.sort.descending"
+                            ></i>
+
+                            {{"DIALOG_PACKAGE_MANAGER_NAME" | translate}}
+                            <span class="badge badge-secondary"
+                                >{{m_oController.m_aoPackages.length}}
+                            </span>
                         </th>
                         <th
                             style="cursor: pointer"
+                            scope="col"
                             ng-click="m_oController.changeSorting('currentVersion')"
                         >
-                            Current Version
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION" |
+                            translate }}
                         </th>
                         <th
                             style="cursor: pointer"
+                            scope="col"
                             ng-click="m_oController.changeSorting('latestVersion')"
                         >
-                            Latest Version
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_LATEST_VERSION" |
+                            translate}}
                         </th>
-                        <th>Actions</th>
+                        <th>
+                            {{"DIALOG_PACKAGE_MANAGER_ACTIONS" | translate}}
+                        </th>
                     </tr>
+                </thead>
+                <tbody>
                     <tr
-                        ng-repeat="package in m_oController.m_aoPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                        ng-repeat="package in m_oController.m_aoPackages | filter:searchPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
                     >
-                        <td>{{package.packageName}}</td>
-                        <td>{{package.currentVersion}}</td>
-                        <td>
-                            <span ng-if="package.latestVersion !== null">
-                                {{package.latestVersion}}
+                        <td class="">{{package.packageName}}</td>
+                        <td class="">{{package.currentVersion}}</td>
+                        <td class="">
+                            <span
+                                ng-class="{'text-success' : package.latestVersion == null, 'text-danger': package.latestVersion !== null}"
+                            >
+                                {{package.latestVersion !== null ?
+                                package.latestVersion : package.currentVersion}}
                             </span>
                         </td>
                         <td class="over-icon">
                             <button
-                                class="btn btn-primary btn-wasdi"
-                                ng-click="m_oController.removeLibrary(m_oController.sProcessorId, package.packageName)"
+                                class="btn btn-success btn-wasdi btn-xs"
+                                ng-disabled="package.latestVersion == null"
+                                ng-click="m_oController.upgradeLibrary(m_oController.sProcessorId, package.packageName, package.latestVersion)"
                             >
                                 <i
-                                    class="fa fa-trash fa-lg"
+                                    class="fa fa-plus"
                                     aria-hidden="true"
                                     style="margin-right: 0px"
                                 ></i>
                             </button>
                             <button
-                                class="btn btn-success btn-wasdi"
-                                ng-click="m_oController.editPackage(package)"
+                                class="btn btn-primary btn-wasdi btn-xs"
+                                ng-click="m_oController.removeLibrary(m_oController.sProcessorId, package.packageName)"
                             >
                                 <i
-                                    class="far fa-plus"
+                                    class="fa fa-trash"
                                     aria-hidden="true"
                                     style="margin-right: 0px"
                                 ></i>
