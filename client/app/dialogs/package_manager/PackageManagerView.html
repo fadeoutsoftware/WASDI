@@ -13,10 +13,13 @@
                     &times;
                 </button>
                 <h4 class="modal-title">
-                    <i class="" aria-hidden="true"></i>&nbsp; Package Manager
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                    {{"DIALOG_PACKAGE_MANAGER_HEADER" | translate}}
                 </h4>
             </div>
-            <ng-include src="'dialogs/package_manager/PackageManagerPackagesInfo.html'"></ng-include>
+            <ng-include
+                src="'dialogs/package_manager/PackageManagerPackagesInfo.html'"
+            ></ng-include>
             <div class="modal-footer">
                 <button
                     type="button"

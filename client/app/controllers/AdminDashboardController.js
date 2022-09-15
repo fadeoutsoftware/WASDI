@@ -3,16 +3,22 @@
  */
 
 var AdminDashboardController = (function () {
-    function AdminDashboardController($scope, $location, oConstantsService, oTranslate, oAuthService, oAdminDashboardService, $state) {
+    function AdminDashboardController($scope, $location, oConstantsService, oTranslate, oAuthService, oAdminDashboardService, oProcessWorkspaceService, $state) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oLocation = $location;
         this.m_oAuthService = oAuthService;
         this.m_oAdminDashboardService = oAdminDashboardService;
+        this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oConstantsService = oConstantsService;
 
         this.m_sUserPartialName = "";
         this.m_aoUsersList = [];
+
+        this.m_sUserId = "";
+        this.m_sDateFrom = "";
+        this.m_sDateTo = "";
+        this.m_lTotalRunningTimeInMillis = null;
 
         this.m_sWorkspacePartialName = "";
         this.m_aoWorkspacesList = [];
@@ -95,6 +101,78 @@ var AdminDashboardController = (function () {
         });
 
     }
+
+
+    AdminDashboardController.prototype.getProcessWorkspaceTotalRunningTimeByUserAndInterval = function (sUserId, sDateFrom, sDateTo) {
+        console.log("AdminDashboardController.getProcessWorkspaceTotalRunningTimeByUserAndInterval | userId, dateFrom, dateTo:", sUserId, sDateFrom, sDateTo);
+
+        this.m_lTotalRunningTimeInMillis = null;
+
+        if (utilsIsStrNullOrEmpty(sUserId) === true) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>A VALID USER MUST BE PROVIDED");
+
+            return false;
+        }
+
+        utilsRemoveSpaces(sUserId);
+
+        if (utilsIsStrNullOrEmpty(sDateFrom) === true) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>A VALID START DATE MUST BE PROVIDED");
+
+            return false;
+        }
+
+        if (utilsIsStrNullOrEmpty(sDateTo) === true) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>A VALID END DATE MUST BE PROVIDED");
+
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oProcessWorkspaceService.getProcessWorkspaceTotalRunningTimeByUserAndInterval(sUserId, sDateFrom, sDateTo)
+            .then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                oController.m_lTotalRunningTimeInMillis = data.data;
+            } else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME");
+            }
+
+            // oController.clearForm();
+
+            return true;
+        },function (error) {
+            console.log("AdminDashboardController.getProcessWorkspaceTotalRunningTimeByUserAndInterval | error.data.message: ", error.data.message);
+
+            let errorMessage = oController.m_oTranslate.instant(error.data.message);
+
+            utilsVexDialogAlertTop(errorMessage);
+        });
+
+    }
+
+    AdminDashboardController.prototype.convertMsToTime = function (lMilliseconds) {
+        let lSeconds = Math.floor(lMilliseconds / 1000);
+        let lMinutes = Math.floor(lSeconds / 60);
+        let lHours = Math.floor(lMinutes / 60);
+
+        lMilliseconds = lMilliseconds % 1000;
+        lSeconds = lSeconds % 60;
+        lMinutes = lMinutes % 60;
+        lHours = lHours % 24;
+
+        return `${this.padTo2Digits(lHours)}:${this.padTo2Digits(lMinutes)}:${this.padTo2Digits(lSeconds)} ${this.padTo3Digits(lMilliseconds)}`
+    }
+
+    AdminDashboardController.prototype.padTo2Digits = function (lNum) {
+        return lNum.toString().padStart(2, '0');
+    }
+
+    AdminDashboardController.prototype.padTo3Digits = function (lNum) {
+        return lNum.toString().padStart(3, '0');
+    }
+
+
 
     AdminDashboardController.prototype.findWorkspacesByPartialName = function (sWorkspacePartialName) {
         console.log("AdminDashboardController.findWorkspacesByPartialName | sWorkspacePartialName:", sWorkspacePartialName);
@@ -295,6 +373,7 @@ var AdminDashboardController = (function () {
         '$translate',
         'AuthService',
         'AdminDashboardService',
+        'ProcessWorkspaceService',
         '$state',
         'ProductService',
         'RabbitStompService',

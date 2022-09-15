@@ -1,7 +1,7 @@
 <!-- APPLICATION DATA -->
 <div class="container-fluid">
     <div class="row d-flex">
-        <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+        <div class="col-xs-4">
             <label for="procname"
                 >{{"DIALOG_PROCESSOR_BASE_NAME"|translate}}</label
             >
@@ -14,7 +14,7 @@
                 ng-model="m_oController.m_sName"
             />
         </div>
-        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <div class="col-xs-4">
             <label>{{"DIALOG_PROCESSOR_BASE_TYPE"|translate}}</label>
             <div ng-show="!m_oController.m_bEditMode">
                 <dropdownmenudirective
@@ -34,85 +34,45 @@
                 ng-model="m_oController.m_sTypeNameOnly"
             />
         </div>
-        <div
-            class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-center align-bottom"
-        >
-            <button
-                class="btn btn-primary btn-wasdi"
-                ng-show="m_oController.m_bEditMode"
-                ng-click="m_oController.packageManagerClick()"
-            >
-                <em
-                    class="custom-icon fa fa-refresh fa-lg"
-                    ng-class="button.icon"
-                ></em>
-                <span class="ng-binding"
-                    >{{"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER"|translate}}</span
+        <div class="col-xs-4 my-auto">
+            <div class="row d-flex justify-content-around">
+                <button
+                    class="btn btn-primary btn-wasdi py-4 mx-lg-1"
+                    ng-show="m_oController.m_bEditMode"
+                    ng-click="m_oController.packageManagerClick()"
                 >
-            </button>
-        </div>
-        <div
-            class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-bottom"
-        >
-            <button
-                class="btn btn-primary btn-wasdi"
-                ng-show="m_oController.m_bEditMode"
-                ng-click="m_oController.forceLibUpdate(m_oController.m_sProcessorId)"
-            >
-                <em
-                    class="custom-icon fa fa-refresh fa-lg"
-                    ng-class="button.icon"
-                ></em>
-                <span class="ng-binding"
-                    >{{"DIALOG_PROCESSOR_BASE_UPDATE_LIB"|translate}}</span
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                    <span class="ng-binding"
+                        >{{"DIALOG_PROCESSOR_BASE_PACKAGE_MANAGER"|translate}}</span
+                    >
+                </button>
+
+                <button
+                    class="btn btn-primary btn-wasdi py-4 mx-lg-1"
+                    ng-show="m_oController.m_bEditMode"
+                    ng-click="m_oController.forceLibUpdate(m_oController.m_sProcessorId)"
                 >
-            </button>
-        </div>
-        <div
-            class="col-xs-1 col-sm-1 col-md-1 col-lg-1 d-flex justify-content-end align-bottom"
-        >
-            <button
-                class="btn btn-primary btn-wasdi"
-                ng-show="m_oController.m_bEditMode"
-                ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)"
-            >
-                <em
-                    class="custom-icon fa fa-refresh fa-lg"
-                    ng-class="button.icon"
-                ></em>
-                <span class="ng-binding"
-                    >{{"DIALOG_PROCESSOR_BASE_REDEPLOY"|translate}}</span
+                    <i class="fa fa-cog" aria-hidden="true"></i>
+                    <span class="ng-binding"
+                        >{{"DIALOG_PROCESSOR_BASE_UPDATE_LIB"|translate}}</span
+                    >
+                </button>
+
+                <button
+                    class="btn btn-primary btn-wasdi py-4 mx-lg-1"
+                    ng-show="m_oController.m_bEditMode"
+                    ng-click="m_oController.forceProcessorRefresh(m_oController.m_sProcessorId)"
                 >
-            </button>
+                    <i class="fa fa-retweet" aria-hidden="true"></i>
+                    <span class="ng-binding"
+                        >{{"DIALOG_PROCESSOR_BASE_REDEPLOY"|translate}}</span
+                    >
+                </button>
+            </div>
         </div>
     </div>
 
     <br />
-
-    
-    <div class="row d-flex">
-        <! --Environment Update Command-- >
-        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-            <label for="envUpdCommand">Environment Update Command</label>
-            <input id="envUpdCommand" type="text" class="form-control" placeholder='Environment Update Command' ng-model="m_oController.m_sEnvUpdCommand">
-        </div>
-
-        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 d-flex justify-content-end align-bottom">
-            <span>&nbsp;</span>
-        </div>
-
-        <! --Environment Update Button-- >
-        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 d-flex justify-content-end align-bottom">
-            <button class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bEditMode"
-                    ng-click="m_oController.forceEnvUpdate(m_oController.m_sProcessorId)">
-                <em class="custom-icon fa fa-refresh fa-lg" ng-class="button.icon"></em>
-                <span class="ng-binding">Environment Update</span>
-            </button>
-        </div>
-    </div>
-
-    <br>
-   
 
     <div class="row">
         <br />
