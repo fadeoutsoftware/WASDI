@@ -2,9 +2,13 @@
     <div class="row">
         <div class="col-xs-12">
             <h3>
-                {{m_oController.sWorkspaceName}} Packages - <span class="text-success">{{m_oController.m_sPackageManagerName}}   {{m_oController.m_sPackageManagerVersion}}</span>
+                {{m_oController.sWorkspaceName}} Packages -
+                <span class="text-success"
+                    >{{m_oController.m_sPackageManagerName}}
+                    {{m_oController.m_sPackageManagerVersion}}</span
+                >
             </h3>
-           
+
             <form class="form-inline" action="">
                 <div class="form-group">
                     <input
@@ -62,7 +66,18 @@
                             scope="col"
                             ng-click="m_oController.changeSorting('packageName')"
                         >
-                            Package Name
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && m_oController.sort.descending"
+                            ></i>
+
+                            {{"DIALOG_PACKAGE_MANAGER_NAME" | translate}}
                             <span class="badge badge-secondary"
                                 >{{m_oController.m_aoPackages.length}}
                             </span>
@@ -72,16 +87,40 @@
                             scope="col"
                             ng-click="m_oController.changeSorting('currentVersion')"
                         >
-                            Current Version
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION" |
+                            translate }}
                         </th>
                         <th
                             style="cursor: pointer"
                             scope="col"
                             ng-click="m_oController.changeSorting('latestVersion')"
                         >
-                            Latest Version
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_LATEST_VERSION" |
+                            translate}}
                         </th>
-                        <th>Actions</th>
+                        <th>
+                            {{"DIALOG_PACKAGE_MANAGER_ACTIONS" | translate}}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

@@ -596,6 +596,14 @@
     "MSG_MKT_PRODUCT_LIST_ERROR": "GURU MEDITATION<br>LỖI ĐỌC DANH SÁCH SẢN PHẨM",
     "MSG_DELETE_WS_1": "ĐANG XÓA KHÔNG GIAN LÀM VIỆC",
     "MSG_DELETE_WS_2": " <br>BẠN CHẮC CHẮN KHÔNG?",
+    "MSG_ADD_LIB_PM_1": "THÊM THƯ VIỆN ",
+    "MSG_ADD_LIB_PM_2": "<br>BẠN CHẮC CHẮN?",
+    "MSG_REMOVE_LIB_PM_1": "XÓA THƯ VIỆN ",
+    "MSG_REMOVE_LIB_PM_2": "<br>BẠN CHẮC CHẮN?",
+    "MSG_UPGRADE_LIB_PM_1": "THƯ VIỆN NÂNG CẤP ",
+    "MSG_UPGRADE_LIB_PM_2": "<br>BẠN CHẮC CHẮN?",
+
+
     "MENU_ZOOM_2D": "Phóng to/thu nhỏ Dải Bản đồ 2D",
     "MENU_ZOOM_3D": "Phóng to/thu nhỏ Dải Bản đồ 3D",
     "MENU_DOWNLOAD": "Tải xuống",

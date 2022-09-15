@@ -3,7 +3,8 @@ let PackageManagerController = (function () {
         oPackageManagerService,
         $scope,
         oExtras,
-        $timeout
+        $timeout,
+        oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oPackageManagerService = oPackageManagerService;
@@ -14,7 +15,7 @@ let PackageManagerController = (function () {
         this.m_bIsLoading = true;
         this.sWorkspaceName = oExtras.processor.processorName;
         this.sProcessorId = oExtras.processor.processorId;
-
+        this.m_oTranslate = oTranslate;
         this.m_sPackageManagerName = "";
         this.m_sPackageManagerVersion = "";
         this.bIsEditing = false;
@@ -59,10 +60,11 @@ let PackageManagerController = (function () {
         let oController = this;
         oController.m_bIsLoading = true;
 
+        let sConfirmMsg1 = this.m_oTranslate.instant("MSG_REMOVE_LIB_PM_1");
+        let sConfirmMsg2 = this.m_oTranslate.instant("MSG_REMOVE_LIB_PM_2");
+
         utilsVexDialogConfirm(
-            "Are you sure you wish to delete " +
-                sDeleteCommand +
-                " from this processor?",
+            sConfirmMsg1 + sDeleteCommand + sConfirmMsg2,
             function (value) {
                 if (value) {
                     oController.m_oPackageManagerService
@@ -73,6 +75,7 @@ let PackageManagerController = (function () {
                             }, 4000);
                         });
                 }
+                oController.m_bIsLoading = false;
             }
         );
     };
@@ -82,9 +85,10 @@ let PackageManagerController = (function () {
         sPackageName
     ) {
         let oController = this;
-
+        let sConfirmMsg1 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_1");
+        let sConfirmMsg2 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_2");
         utilsVexDialogConfirm(
-            "You wish to add " + sPackageName + " to this Processor?",
+            sConfirmMsg1 + sPackageName + sConfirmMsg2,
             function (value) {
                 if (value) {
                     oController.m_oPackageManagerService
@@ -96,6 +100,7 @@ let PackageManagerController = (function () {
                             }, 4000);
                         });
                 }
+                oController.m_bIsLoading = false;
             }
         );
     };
@@ -106,9 +111,10 @@ let PackageManagerController = (function () {
         sPackageCurrentVersion
     ) {
         let oController = this;
-
+        let sConfirmMsg1 = this.m_oTranslate.instant("MSG_UPGRADE_LIB_PM_1");
+        let sConfirmMsg2 = this.m_oTranslate.instant("MSG_UPGRADE_LIB_PM_2");
         utilsVexDialogConfirm(
-            "Are you sure you want to upgrade " + sPackageName + "?",
+            sConfirmMsg1 + sPackageName + sConfirmMsg2,
             function (value) {
                 if (value) {
                     oController.m_oPackageManagerService
@@ -159,6 +165,7 @@ let PackageManagerController = (function () {
         "$scope",
         "extras",
         "$timeout",
+        "$translate",
     ];
     return PackageManagerController;
 })();
