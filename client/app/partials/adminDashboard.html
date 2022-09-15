@@ -13,6 +13,7 @@
 
                     <div class="row give-permission-row">
                         <h3>{{"DIALOG_MANAGE_USERS_TITLE" | translate}}</h3>
+
                         <div class="spacer"></div>
 
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
@@ -75,6 +76,85 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_PROCESS_WORKSPACE_TIME_TITLE" | translate}}</h3>
+
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_PROCESS_WORKSPACE_USER_ID" | translate}}
+                                </label>
+
+                                <input type="text" name="userId" id="userId" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sUserId" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_PROCESS_WORKSPACE_DATE_FROM" | translate}}
+                                </label>
+
+                                <input type="text" name="dateFrom" id="dateFrom" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sDateFrom" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_PROCESS_WORKSPACE_DATE_TO" | translate}}
+                                </label>
+
+                                <input type="text" name="dateTo" id="dateTo" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sDateTo" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.getProcessWorkspaceTotalRunningTimeByUserAndInterval(m_oController.m_sUserId, m_oController.m_sDateFrom, m_oController.m_sDateTo)">
+                                    <i class="fa fa-clock-o fa-lg" aria-hidden="true"></i>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_PROCESS_WORKSPACE_RETRIEVE" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="row" ng-show="m_oController.m_lTotalRunningTimeInMillis">
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>{{"DIALOG_MANAGE_PROCESS_WORKSPACE_TOTAL_RUNNING_TIME_IN_MILLIS" | translate}}: {{m_oController.m_lTotalRunningTimeInMillis}}</span>
+            <br>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>{{"DIALOG_MANAGE_PROCESS_WORKSPACE_TOTAL_RUNNING_TIME_FORMATTED" | translate}}: {{m_oController.convertMsToTime(m_oController.m_lTotalRunningTimeInMillis)}}</span>
         </div>
 
         <div class="spacer"></div>

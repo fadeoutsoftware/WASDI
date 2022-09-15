@@ -301,4 +301,9 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             let sUrl = this.APIURL;
             return this.m_oHttp.get(sUrl + '/process/appstats?processorName='+sProcessorName);
         };
+
+        this.getProcessWorkspaceTotalRunningTimeByUserAndInterval = function(sUserId, sDateFrom, sDateTo) {
+            return this.m_oHttp.get(this.APIURL + '/process/runningTime?userId=' + sUserId +'&dateFrom=' + sDateFrom + '&dateTo=' + sDateTo);
+        };
+
 }]);

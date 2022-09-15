@@ -1,7 +1,10 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_READ;
+
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +26,14 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
@@ -1165,4 +1170,76 @@ public class ProcessWorkspaceResource {
 		
 		return null;
 	}
+
+	@GET
+	@Path("/runningTime")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Long getRunningTime(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("userId") String sTargetUserId,
+			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo) {
+
+		Utils.debugLog("ProcessWorkspaceResource.getRunningTime");
+
+		Long lRunningTime = null;
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: invalid session");
+			return lRunningTime;
+		}
+
+		try {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), WORKSPACE_READ)) {
+				return lRunningTime;
+			}
+
+			if (Utils.isNullOrEmpty(sTargetUserId)) {
+				return lRunningTime;
+			} else {
+				UserRepository oUserRepository = new UserRepository();
+				User oTargetUser = oUserRepository.getUser(sTargetUserId);
+
+				if (oTargetUser == null) {
+					return lRunningTime;
+				}
+			}
+
+			// 2022-09-07T00:00:00.000Z
+			long lDateFrom;
+			if (Utils.isNullOrEmpty(sDateFrom)) {
+				return lRunningTime;
+			} else {
+				Date oDateFrom = Utils.getYyyyMMddTZDate(sDateFrom);
+
+				if (oDateFrom == null) {
+					return lRunningTime;
+				} else {
+					lDateFrom = oDateFrom.getTime();
+				}
+			}
+
+			// 2022-09-14T23:59:59.999Z
+			long lDateTo;
+			if (Utils.isNullOrEmpty(sDateTo)) {
+				return lRunningTime;
+			} else {
+				Date oDateTo = Utils.getYyyyMMddTZDate(sDateTo);
+
+				if (oDateTo == null) {
+					return lRunningTime;
+				} else {
+					lDateTo = oDateTo.getTime();
+				}
+			}
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			lRunningTime = oProcessWorkspaceRepository.getRunningTime(sTargetUserId, lDateFrom, lDateTo);
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
+		}
+
+		return lRunningTime;
+	}
+
 }

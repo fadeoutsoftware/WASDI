@@ -4,12 +4,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.MongoDbSumResult;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
@@ -1301,12 +1303,12 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	ProcessWorkspace oOriginal = getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
         	
         	if (oOriginal.getStatus().equals(oProcessWorkspace.getStatus()) == false) {
-        		oProcessWorkspace.setLastStateChangeTimestamp(Utils.nowInMillis());
+        		double dNowInMillis = Utils.nowInMillis();
+        		oProcessWorkspace.setLastStateChangeTimestamp(dNowInMillis);
 
             	if (oOriginal.getStatus().equalsIgnoreCase("RUNNING")) {
-            		double dNowInMillis = Utils.nowInMillis();
             		double dLastChange = oOriginal.getLastStateChangeTimestamp();
-            		long lDelta = (long) (dNowInMillis - dLastChange);
+            		long lDelta = (long) dNowInMillis - (long) dLastChange;
 
             		oProcessWorkspace.setRunningTime(oOriginal.getRunningTime() + lDelta);
             	}
@@ -1559,6 +1561,43 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         }
 
         return aoReturnList;
-    }	
+    }
+
+    public Long getRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
+    	Long lTotalRunningTime = 0L;
+
+		try {
+			Document oDocument = getCollection(m_sThisCollection).aggregate(
+				    Arrays.asList(
+				        Aggregates.match(prepareFilterForTotalRunningTime(sUserId, lDateFrom, lDateTo)),
+				        Aggregates.group("$userId", Accumulators.sum("total", "$runningTime"))
+				    )
+				).first();
+
+			if (oDocument != null) {
+				String sJSON = oDocument.toJson();
+				MongoDbSumResult oMongoDbSumResult = s_oMapper.readValue(sJSON, MongoDbSumResult.class);
+
+				if (oMongoDbSumResult != null) {
+					lTotalRunningTime = oMongoDbSumResult.getTotal();
+				}
+			}
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+    	return lTotalRunningTime;
+    }
+
+    private static Bson prepareFilterForTotalRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
+    	Bson oFilterUserId = Filters.eq("userId", sUserId.toLowerCase());
+    	Bson oFilterDateFrom = Filters.gte("operationTimestamp", lDateFrom);
+    	Bson oFilterDateTo = Filters.lte("operationTimestamp", lDateTo);
+
+    	Bson oFilter = Filters.and(oFilterUserId, oFilterDateFrom, oFilterDateTo);
+
+    	return oFilter;
+    }
 
 }
