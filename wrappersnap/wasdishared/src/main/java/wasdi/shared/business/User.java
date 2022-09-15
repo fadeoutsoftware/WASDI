@@ -81,6 +81,8 @@ public class User {
 	 * Description
 	 */
 	private String description;
+
+	private String role;
 	
     static {
     	s_oInvalid = new User();
@@ -223,6 +225,14 @@ public class User {
 	 */
 	public void setDefaultNode(String defaultNode) {
 		this.m_sDefaultNode = defaultNode;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 }

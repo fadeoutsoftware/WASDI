@@ -306,8 +306,8 @@ public abstract class LauncherMainTest {
 		oSession.setUserId(sUserId);
 		String sSessionId = UUID.randomUUID().toString();
 		oSession.setSessionId(sSessionId);
-		oSession.setLoginDate((double) new Date().getTime());
-		oSession.setLastTouch((double) new Date().getTime());
+		oSession.setLoginDate(Utils.nowInMillis());
+		oSession.setLastTouch(Utils.nowInMillis());
 
 		SessionRepository oSessionRepo = new SessionRepository();
 		oSessionRepo.insertSession(oSession);

@@ -37,14 +37,14 @@ import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Comment;
 import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorSharing;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.ProcessorSharingRepository;
 import wasdi.shared.data.ReviewRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -128,9 +128,9 @@ public class ProcessorsMediaResource {
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
 			
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: processor not of user " + oUser.getUserId());
@@ -275,9 +275,9 @@ public class ProcessorsMediaResource {
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
 			
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
 				Utils.debugLog("ProcessorsResource.getProcessorLogo: processor not of user " + oUser.getUserId());
@@ -337,9 +337,9 @@ public class ProcessorsMediaResource {
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
 			
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
 				Utils.debugLog("ProcessorsResource.getAppImage: processor not of user " + oUser.getUserId());
@@ -395,8 +395,8 @@ public class ProcessorsMediaResource {
 		}
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
 				Utils.debugLog("ProcessorsResource.deleteProcessorImage: processor not of user " + oUser.getUserId());
@@ -490,9 +490,9 @@ public class ProcessorsMediaResource {
 		
 		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
 			
-			ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), sProcessorId);
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
 				Utils.debugLog("ProcessorsResource.uploadProcessorImage: processor not of user " + oUser.getUserId());
@@ -1124,7 +1124,7 @@ public class ProcessorsMediaResource {
 		
 		// Get all the processors
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		ProcessorSharingRepository oProcessorSharingRepository = new ProcessorSharingRepository();
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 		
 		List<Processor> aoProcessors = oProcessorRepository.getDeployedProcessors();
 		
@@ -1140,7 +1140,7 @@ public class ProcessorsMediaResource {
 			
 			if (!oProcessor.getShowInStore()) continue;
 			
-			ProcessorSharing oSharing = oProcessorSharingRepository.getProcessorSharingByUserIdProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 			
 			if (oProcessor.getIsPublic() != 1) {
 				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {

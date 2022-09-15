@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.4.4
+Version 0.7.5.0
 
-Last Update: 06/06/2022
+Last Update: 31/08/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -519,6 +519,12 @@ def init(sConfigFilePath=None):
     sWname = None
     sWId = None
     m_bValidSession = False
+    
+    #P.Campanella 2022/08/30: if there is no config file, try the default notebook one
+    if sConfigFilePath is None:
+        if os.path.exists("/home/wasdi/notebook/notebook_config.cfg"):
+            sConfigFilePath = "/home/wasdi/notebook/notebook_config.cfg"
+            
 
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
@@ -535,7 +541,8 @@ def init(sConfigFilePath=None):
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
         
-        sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        if sWId is None and sWname is None:
+            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +

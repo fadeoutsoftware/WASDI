@@ -17,18 +17,22 @@ public class ProcessorTypes {
 	public static String IDL = "ubuntu_idl372";
 	public static String OCTAVE = "octave";
 	public static String CONDA = "conda";
+	public static String JUPYTER_NOTEBOOK = "jupyter_notebook";
+	public static String TRAEFIK_NOTEBOOK = "traefik-notebook";
 	public static String CSHARP = "csharp";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
 	 * @param sProcessorType Processor Type
-	 * @return Folder Name (that has to be contatenated to the base processors path)
+	 * @return Folder Name (that has to be concatenated to the base processors path)
 	 */
 	public static String getTemplateFolder(String sProcessorType) {
 		if (sProcessorType.equals(IDL)) return "idl";
 		else if (sProcessorType.equals(UBUNTU_PYTHON37_SNAP)) return "python37";
 		else if (sProcessorType.equals(OCTAVE)) return "octave";
 		else if (sProcessorType.equals(CONDA)) return "conda";
+		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) return "jupyter_notebook";
+		else if (sProcessorType.equals(TRAEFIK_NOTEBOOK)) return "traefik-notebook";
 		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		return "";
 	}
@@ -51,6 +55,12 @@ public class ProcessorTypes {
 		}
 		else if (sProcessorType.equals(CONDA)) {
 			
+		}
+		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {
+			
+		}
+		else if (sProcessorType.equals(TRAEFIK_NOTEBOOK)) {
+
 		}
 		else if (sProcessorType.equals(CSHARP)) {
 			aoFiles.add("deploywasdidocker.sh");

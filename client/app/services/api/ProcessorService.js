@@ -228,6 +228,15 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     };
 
     /**
+     * Create a Console
+     * @param sWorkspaceId
+     * @returns {*}
+     */
+    this.createConsole = function(sWorkspaceId) {
+        return this.m_oHttp.post(this.APIURL + '/console/create?workspaceId=' + sWorkspaceId);
+    };
+
+    /**
      * Share a processor
      * @param sProcessorId
      * @param sUserId

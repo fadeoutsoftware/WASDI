@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -33,6 +32,7 @@ import it.fadeout.services.AuthProviderService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
@@ -187,6 +187,12 @@ public class AuthResource {
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(oSession.getSessionId());
+
+				if (oUser.getRole() != null) {
+					oUserVM.setRole(oUser.getRole());
+					UserApplicationRole oUserApplicationRole = UserApplicationRole.get(oUser.getRole());
+					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
+				}
 
 				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
@@ -791,6 +797,11 @@ public class AuthResource {
 			oUserId.setSurname(oInputUserVM.getSurname());
 			oUserId.setLink(oInputUserVM.getLink());
 			oUserId.setDescription(oInputUserVM.getDescription());
+
+			if (oInputUserVM.getRole() != null) {
+				oUserId.setRole(oInputUserVM.getRole());
+			}
+
 			UserRepository oUR = new UserRepository();
 			oUR.updateUser(oUserId);
 
