@@ -37,6 +37,10 @@ var AdminDashboardController = (function () {
         this.m_aoResourcePermissionsList = [];
 
 
+        this.m_sNodeCode = "";
+        this.m_oMetricsEntry = null;
+        this.m_oMetricsEntryFormatted = null;
+
         this.m_bIsLoading = true;
 
         this.m_oState = $state;
@@ -362,6 +366,54 @@ var AdminDashboardController = (function () {
             utilsVexDialogAlertTop(errorMessage);
         });
     };
+
+
+    AdminDashboardController.prototype.getLatestMetricsEntryByNode = function (sNodeCode) {
+        console.log("AdminDashboardController.getLatestMetricsEntryByNode | sNodeCode:", sNodeCode);
+
+        this.m_oMetricsEntry = null;
+
+        if (utilsIsStrNullOrEmpty(sNodeCode) === true) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>A VALID NODE NAME SHOULD BE PROVIDED");
+
+            return false;
+        }
+
+        utilsRemoveSpaces(sNodeCode);
+
+        if (sNodeCode.length < 3) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
+
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oAdminDashboardService.getLatestMetricsEntryByNode(sNodeCode)
+            .then(function (data) {
+            if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                oController.m_oMetricsEntry = data.data;
+
+                
+                try {
+                    oController.m_oMetricsEntryFormatted = JSON.stringify(oController.m_oMetricsEntry, null, 2);
+                } catch (oError) {}
+            } else {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING THE LATEST METRICS ENTRY");
+            }
+
+            // oController.clearForm();
+
+            return true;
+        },function (error) {
+            console.log("AdminDashboardController.getLatestMetricsEntryByNode | error.data.message: ", error.data.message);
+
+            let errorMessage = oController.m_oTranslate.instant(error.data.message);
+
+            utilsVexDialogAlertTop(errorMessage);
+        });
+
+    }
 
 
 

@@ -448,6 +448,73 @@
                 </div>
             </div>
         </div>
+
+
+
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_METRICS_ENTRIES_TITLE" | translate}}</h3>
+
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_METRICS_ENTRIES_NODE_CODE" | translate}}
+                                </label>
+
+                                <input type="text" name="nodeCode" id="nodeCode" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sNodeCode" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.getLatestMetricsEntryByNode(m_oController.m_sNodeCode)">
+                                    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_METRICS_ENTRIES_RETRIEVE" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="m_oController.m_oMetricsEntry != null">
+            <div class="spacer"></div>
+
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>{{"DIALOG_MANAGE_METRICS_ENTRIES_LATEST_ENTRY" | translate}}:
+
+            <br>
+
+            <textarea
+                class="form-control h-100"
+                style="font-family: 'Courier New', sans-serif; font-size: 16px"
+                rows="40"
+                id="metricsEntry"
+                ng-model="m_oController.m_oMetricsEntryFormatted"
+            ></textarea>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+
     </div>
 
 </div>

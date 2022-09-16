@@ -22,16 +22,18 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.data.UserRepository;
-import wasdi.shared.data.UserResourcePermissionRepository;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.data.MetricsEntryRepository;
+import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
@@ -46,6 +48,10 @@ public class AdminDashboardResource {
 	private static final String MSG_ERROR_INVALID_RESOURCE_TYPE = "MSG_ERROR_INVALID_RESOURCE_TYPE";
 	private static final String MSG_ERROR_INVALID_PARTIAL_NAME = "MSG_ERROR_INVALID_PARTIAL_NAME";
 	private static final String MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA = "MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA";
+
+	private static final String MSG_ERROR_INVALID_METRICS_ENTRY = "MSG_ERROR_INVALID_METRICS_ENTRY";
+	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
+	private static final String MSG_ERROR_IN_SEARCH_PROCESS = "MSG_ERROR_IN_SEARCH_PROCESS";
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -276,6 +282,81 @@ public class AdminDashboardResource {
 		oPermissionViewModel.setCreatedDate(oPermission.getCreatedDate());
 
 		return oPermissionViewModel;
+	}
+
+	@POST
+	@Path("/metrics")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response addMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
+
+		Utils.debugLog("AdminDashboardResource.addMetricsEntry()");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			Utils.debugLog("AdminDashboardResource.addMetricsEntry: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
+
+
+		if (oMetricsEntry == null) {
+			Utils.debugLog("AdminDashboardResource.addMetricsEntry: invalid payload");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_METRICS_ENTRY)).build();
+		}
+
+
+		Utils.debugLog(oMetricsEntry.toString());
+
+
+		try {
+			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+			oMetricsEntryRepository.insertMetricsEntry(oMetricsEntry);
+		} catch (Exception oEx) {
+			Utils.debugLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/metrics/latest")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response getLatestMetricsEntry(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("nodeCode") String sNodeCode) {
+
+		Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry()");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
+
+		try {
+			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+			MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
+
+			GenericEntity<MetricsEntry> oGenericEntity = new GenericEntity<MetricsEntry>(oMetricsEntry, MetricsEntry.class);
+
+			return Response.ok(oGenericEntity).build();
+		} catch (Exception oEx) {
+			Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_SEARCH_PROCESS)).build();
+		}
 	}
 
 }
