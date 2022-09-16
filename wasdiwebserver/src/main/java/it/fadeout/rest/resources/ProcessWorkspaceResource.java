@@ -1235,6 +1235,38 @@ public class ProcessWorkspaceResource {
 
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			lRunningTime = oProcessWorkspaceRepository.getRunningTime(sTargetUserId, lDateFrom, lDateTo);
+
+			// The main node needs to query also the others
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						sUrl += "process/runningTime?userId=" + sTargetUserId +"&dateFrom=" + sDateFrom + "&dateTo=" + sDateTo;
+
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+
+						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
+
+						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							Long lRunningTimeOnNode = Long.valueOf(sResponse);
+
+							lRunningTime += lRunningTimeOnNode;
+						}
+					} catch (Exception e) {
+						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: exception contacting computing node: " + e.toString());
+					}
+				}
+			}
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
 		}
