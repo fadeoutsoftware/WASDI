@@ -43,4 +43,8 @@ service('AdminDashboardService', ['$http',  'ConstantsService', function ($http,
         return this.m_oHttp.delete(this.APIURL + '/admin/resourcePermissions?resourceType=' + sResourceType + "&resourceId="+ sResourceId + "&userId=" + sUserId);
     };
 
+    this.getLatestMetricsEntryByNode = function(sNodeCode) {
+        return this.m_oHttp.get(this.APIURL + '/admin/metrics/latest?nodeCode=' + sNodeCode);
+    };
+
 }]);
