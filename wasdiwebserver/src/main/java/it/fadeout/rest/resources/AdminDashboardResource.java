@@ -340,9 +340,6 @@ public class AdminDashboardResource {
 		}
 
 
-		Utils.debugLog(oMetricsEntry.toString());
-
-
 		try {
 			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
 			oMetricsEntryRepository.insertMetricsEntry(oMetricsEntry);
