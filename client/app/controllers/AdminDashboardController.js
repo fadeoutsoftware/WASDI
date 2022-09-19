@@ -63,6 +63,13 @@ var AdminDashboardController = (function () {
 
         this.m_oTranslate = oTranslate;
 
+        this.m_sDateTo = new Date();
+        this.m_sDateFrom = new Date(
+            this.m_sDateTo.getFullYear(),
+            this.m_sDateTo.getMonth(),
+            this.m_sDateTo.getDate() - 7
+        );
+
         if (utilsIsObjectNullOrUndefined(oConstantsService.getUser())) {
             this.m_oState.go("home");
         }
@@ -176,8 +183,12 @@ var AdminDashboardController = (function () {
 
             var oController = this;
 
-            let sDateFromParse = new Date(Date.parse(sDateFrom)).toISOString();
-            let sDateToParse = new Date(Date.parse(sDateTo)).toISOString();
+            let sDateFromParse = new Date(
+                Date.parse(sDateFrom + ":00:00")
+            ).toISOString();
+            let sDateToParse = new Date(
+                Date.parse(sDateTo + ":00:00")
+            ).toISOString();
 
             console.log(sDateToParse);
 

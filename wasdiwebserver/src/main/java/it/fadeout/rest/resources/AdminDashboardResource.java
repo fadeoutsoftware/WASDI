@@ -201,7 +201,34 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("workspace")) {
+		if (sResourceType.equalsIgnoreCase("processor")) {
+			ProcessorsResource oProcessorResource = new ProcessorsResource();
+			PrimitiveResult oResult = oProcessorResource.shareProcessor(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("style")) {
+			StyleResource oStyleResource = new StyleResource();
+			PrimitiveResult oResult = oStyleResource.shareStyle(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("workflow")) {
+			WorkflowsResource oWorkflowResource = new WorkflowsResource();
+			PrimitiveResult oResult = oWorkflowResource.shareWorkflow(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("workspace")) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
 			PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId);
 
