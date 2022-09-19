@@ -202,7 +202,7 @@ public class AdminDashboardResource {
 		}
 
 
-		if (sResourceType.equalsIgnoreCase("processorparameterstemplates")) {
+		if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
 			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId);
 
