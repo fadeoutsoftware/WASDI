@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,6 +43,8 @@ import it.fadeout.threads.styles.StyleUpdateFileWorker;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationPermission;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
@@ -764,15 +765,9 @@ public class StyleResource {
 			}
 
 			// Create and insert the sharing
-			UserResourcePermission oStyleSharing = new UserResourcePermission();
-			oStyleSharing.setResourceType("style");
-			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-			oStyleSharing.setOwnerId(oStyle.getUserId());
-			oStyleSharing.setUserId(sUserId);
-			oStyleSharing.setResourceId(sStyleId);
-			oStyleSharing.setCreatedBy(oRequesterUser.getUserId());
-			oStyleSharing.setCreatedDate((double) oTimestamp.getTime());
-			oStyleSharing.setPermissions("write");
+			UserResourcePermission oStyleSharing =
+					new UserResourcePermission("style", sStyleId, sUserId, oStyle.getUserId(), oRequesterUser.getUserId(), "write");
+
 			oUserResourcePermissionRepository.insertPermission(oStyleSharing);
 
 			Utils.debugLog("StyleResource.shareStyle: Style" + sStyleId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
@@ -854,7 +849,9 @@ public class StyleResource {
 					// if the user making the call is the one on the sharing OR
 					if (oStyleShare.getUserId().equals(oOwnerUser.getUserId()) ||
 							// if the user making the call is the owner of the style
-							oStyleShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+							oStyleShare.getOwnerId().equals(oOwnerUser.getUserId())
+							// if the user has ADMIN rights
+							|| UserApplicationRole.userHasRightsToAccessApplicationResource(oOwnerUser.getRole(), UserApplicationPermission.ADMIN_DASHBOARD)) {
 						// Delete the sharing
 						oUserResourcePermissionRepository.deletePermissionsByUserIdAndStyleId(sUserId, sStyleId);
 					} else {

@@ -230,4 +230,27 @@ public class StyleRepository extends MongoRepository {
 		return 0;
 	}
 
+	/**
+	 * Check if the user is the owner of the style workspace
+	 * @param sUserId a valid user id
+	 * @param sStyleId a valid style id
+	 * @return true if the user launched the style, false otherwise
+	 */
+	public boolean isStyleOwnedByUser(String sUserId, String sStyleId) {
+		try {
+			Document oDoc = getCollection(m_sThisCollection).find(Filters.and(
+					Filters.eq("userId", sUserId),
+					Filters.eq("styleId", sStyleId)
+					)).first();
+
+			if (null != oDoc) {
+				return true;
+			}
+		} catch (Exception oE) {
+			Utils.debugLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): " + oE);
+		}
+
+		return false;
+	}
+
 }

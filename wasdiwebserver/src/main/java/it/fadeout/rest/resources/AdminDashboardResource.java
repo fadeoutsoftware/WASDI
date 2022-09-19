@@ -270,7 +270,43 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("workspace")) {
+		if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
+			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
+			PrimitiveResult oResult = oProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("processor")) {
+			ProcessorsResource oProcessorResource = new ProcessorsResource();
+			PrimitiveResult oResult = oProcessorResource.deleteUserSharingProcessor(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("style")) {
+			StyleResource oStyleResource = new StyleResource();
+			PrimitiveResult oResult = oStyleResource.deleteUserSharingStyle(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("workflow")) {
+			WorkflowsResource oWorkflowResource = new WorkflowsResource();
+			PrimitiveResult oResult = oWorkflowResource.deleteUserSharingWorkflow(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("workspace")) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
 			PrimitiveResult oResult = oWorkspaceResource.deleteUserSharedWorkspace(sSessionId, sResourceId, sUserId);
 

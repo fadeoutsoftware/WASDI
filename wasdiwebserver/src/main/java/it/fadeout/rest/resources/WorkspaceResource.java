@@ -854,7 +854,7 @@ public class WorkspaceResource {
 
 			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sDestinationUserId, sWorkspaceId)) {
 				UserResourcePermission oWorkspaceSharing =
-						new UserResourcePermission("workspace", sWorkspaceId, sDestinationUserId, oWorkspace.getUserId(), oRequesterUser.getUserId());
+						new UserResourcePermission("workspace", sWorkspaceId, sDestinationUserId, oWorkspace.getUserId(), oRequesterUser.getUserId(), "write");
 
 				oUserResourcePermissionRepository.insertPermission(oWorkspaceSharing);				
 			} else {

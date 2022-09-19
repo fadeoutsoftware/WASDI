@@ -8,6 +8,7 @@ package wasdi.shared.utils;
 
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
+import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 
@@ -41,6 +42,30 @@ public class PermissionsUtils {
             return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+		}
+		return false;
+	}
+
+	/**
+	 * @param sUserId a valid userId
+	 * @param sStyleId a valid StyleId
+	 * @return true if the user owns the Style, or if the owner shared the Style with the user, false otherwise
+	 */
+	public static boolean canUserAccessStyle(String sUserId, String sStyleId) {
+		try {
+			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sStyleId)) {
+				return false;
+			}
+
+			StyleRepository oStyleRepository = new StyleRepository();
+			if (oStyleRepository.isStyleOwnedByUser(sUserId, sStyleId)) {
+				return true;
+			}
+
+            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+            return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
+		} catch (Exception oE) {
+			Utils.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
 		}
 		return false;
 	}
