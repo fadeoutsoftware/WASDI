@@ -179,6 +179,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return getPermissionsByTypeAndResourceId("processor", sProcessorId);
 	}
 
+	public List<UserResourcePermission> getProcessorParametersTemplateSharingsByProcessorParametersTemplateId(String sProcessorParametersTemplateId) {
+		return getPermissionsByTypeAndResourceId("processorparameterstemplate", sProcessorParametersTemplateId);
+	}
+
 
 
 	public UserResourcePermission getPermissionByUserIdAndResourceId(String sUserId, String sResourceId) {
@@ -281,6 +285,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public UserResourcePermission getProcessorSharingByUserIdAndProcessorId(String sUserId, String sProcessorId) {
 		return getPermissionByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
+	}
+
+	public UserResourcePermission getProcessorParametersTemplateSharingByUserIdAndProcessorParametersTemplateId(String sUserId, String sProcessorParametersTemplateId) {
+		return getPermissionByTypeAndUserIdAndResourceId("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
 	}
 
 
@@ -518,6 +526,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return deletePermissionsByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
 	}
 
+	public int deletePermissionsByUserIdAndProcessorParametersTemplateId(String sUserId, String sProcessorParametersTemplateId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
+	}
+
 
 
 	public boolean isResourceSharedWithUser(String sUserId, String sResourceId) {
@@ -569,6 +581,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public boolean isProcessorSharedWithUser(String sUserId, String sProcessorId) {
 		return isResourceOfTypeSharedWithUser("processor", sUserId, sProcessorId);
+	}
+
+	public boolean isProcessorParametersTemplateSharedWithUser(String sUserId, String sProcessorParametersTemplateId) {
+		return isResourceOfTypeSharedWithUser("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
 	}
 
 }
