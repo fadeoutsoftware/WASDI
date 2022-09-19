@@ -318,7 +318,7 @@ public class AdminDashboardResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response addMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
-		Utils.debugLog("AdminDashboardResource.addMetricsEntry()");
+//		Utils.debugLog("AdminDashboardResource.addMetricsEntry()");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
