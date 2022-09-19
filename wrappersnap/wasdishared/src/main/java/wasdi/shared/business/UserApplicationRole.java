@@ -13,8 +13,13 @@ import wasdi.shared.utils.Utils;
 
 public enum UserApplicationRole {
 
-	ADMIN(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
-	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, WORKSPACE_READ, WORKSPACE_WRITE))),
+	ADMIN(new HashSet<UserApplicationPermission>(
+			Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ,
+					WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
+
+	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE,
+			WORKSPACE_READ, WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
+
 	USER(new HashSet<UserApplicationPermission>(Arrays.asList(WORKSPACE_READ, WORKSPACE_WRITE)));
 
 	private static final Map<String, UserApplicationRole> ENUM_MAP;
@@ -22,7 +27,8 @@ public enum UserApplicationRole {
 	private final Set<UserApplicationPermission> permissions;
 
 	static {
-		ENUM_MAP = Arrays.stream(UserApplicationRole.values()).collect(Collectors.toMap(UserApplicationRole::name, Function.identity()));
+		ENUM_MAP = Arrays.stream(UserApplicationRole.values())
+				.collect(Collectors.toMap(UserApplicationRole::name, Function.identity()));
 	}
 
 	UserApplicationRole(Set<UserApplicationPermission> permissions) {
@@ -34,8 +40,7 @@ public enum UserApplicationRole {
 	}
 
 	public Set<String> getGrantedAuthorities() {
-		Set<String> authorities = getPermissions().stream()
-				.map(UserApplicationPermission::getPermission)
+		Set<String> authorities = getPermissions().stream().map(UserApplicationPermission::getPermission)
 				.collect(Collectors.toSet());
 
 		authorities.add("ROLE_" + this.name());
@@ -43,17 +48,20 @@ public enum UserApplicationRole {
 		return authorities;
 	}
 
-	public static UserApplicationRole get (String name) {
+	public static UserApplicationRole get(String name) {
 		return ENUM_MAP.get(name.toUpperCase());
 	}
 
-	public static boolean userHasRightsToAccessApplicationResource(String sUserRole, UserApplicationPermission ePermission) {
+	public static boolean userHasRightsToAccessApplicationResource(String sUserRole,
+			UserApplicationPermission ePermission) {
 		boolean bResult = false;
 
 		if (Utils.isNullOrEmpty(sUserRole)) {
-			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole + "): is invalid");
+			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole
+					+ "): is invalid");
 		} else if (ePermission == null) {
-			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission + "): is invalid");
+			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission
+					+ "): is invalid");
 		} else {
 			UserApplicationRole oUserApplicationRole = UserApplicationRole.get(sUserRole);
 			Set<String> asGrantedAuthorities = oUserApplicationRole.getGrantedAuthorities();
