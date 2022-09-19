@@ -3,7 +3,6 @@ package it.fadeout.rest.resources;
 import static wasdi.shared.business.UserApplicationPermission.*;
 
 import java.io.File;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -851,21 +850,14 @@ public class WorkspaceResource {
 		}
 
 		try {
-			UserResourcePermission oWorkspaceSharing = new UserResourcePermission();
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			
+
 			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sDestinationUserId, sWorkspaceId)) {
-				Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-				oWorkspaceSharing.setResourceType("workspace");
-				oWorkspaceSharing.setOwnerId(oRequesterUser.getUserId());
-				oWorkspaceSharing.setUserId(sDestinationUserId);
-				oWorkspaceSharing.setResourceId(sWorkspaceId);
-				oWorkspaceSharing.setCreatedBy(oRequesterUser.getUserId());
-				oWorkspaceSharing.setCreatedDate((double) oTimestamp.getTime());
-				oWorkspaceSharing.setPermissions("write");
+				UserResourcePermission oWorkspaceSharing =
+						new UserResourcePermission("workspace", sWorkspaceId, sDestinationUserId, oWorkspace.getUserId(), oRequesterUser.getUserId());
+
 				oUserResourcePermissionRepository.insertPermission(oWorkspaceSharing);				
-			}
-			else {
+			} else {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: already shared!");
 				oResult.setStringValue("Already Shared.");
 				oResult.setBoolValue(true);
@@ -873,7 +865,6 @@ public class WorkspaceResource {
 
 				return oResult;
 			}
-			
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: " + oEx);
 

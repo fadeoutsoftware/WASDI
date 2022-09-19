@@ -201,7 +201,17 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("processor")) {
+
+		if (sResourceType.equalsIgnoreCase("processorparameterstemplates")) {
+			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
+			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("processor")) {
 			ProcessorsResource oProcessorResource = new ProcessorsResource();
 			PrimitiveResult oResult = oProcessorResource.shareProcessor(sSessionId, sResourceId, sDestinationUserId);
 
