@@ -483,7 +483,7 @@ public class ProcessorParametersTemplateResource {
 
 			if (!oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sDestinationUserId, sProcessorParametersTemplateId)) {
 				UserResourcePermission oProcessorParametersTemplateSharing =
-						new UserResourcePermission("processorParametersTemplate", sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId());
+						new UserResourcePermission("processorParametersTemplate", sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId(), "write");
 
 				oUserResourcePermissionRepository.insertPermission(oProcessorParametersTemplateSharing);				
 			} else {

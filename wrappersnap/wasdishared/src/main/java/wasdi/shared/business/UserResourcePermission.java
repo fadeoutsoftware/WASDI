@@ -21,7 +21,7 @@ public class UserResourcePermission {
 	private Double createdDate;
 
 
-	public UserResourcePermission(String sResourceType, String sResourceId, String sDestinationUserId, String sOwnerUserId, String sRequesterUserId) {
+	public UserResourcePermission(String sResourceType, String sResourceId, String sDestinationUserId, String sOwnerUserId, String sRequesterUserId, String sPermissions) {
 		this();
 
 		this.resourceType = sResourceType;
@@ -30,7 +30,7 @@ public class UserResourcePermission {
 		this.resourceId = sResourceId;
 		this.createdBy = sRequesterUserId;
 		this.createdDate = Utils.nowInMillis();
-		this.permissions = "write";
+		this.permissions = sPermissions;
 	}
 
 }

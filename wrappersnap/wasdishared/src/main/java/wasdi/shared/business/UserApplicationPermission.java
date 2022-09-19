@@ -5,6 +5,8 @@ public enum UserApplicationPermission {
 	ADMIN_DASHBOARD("admin:dashboard"),
 	NODE_READ("node:read"),
 	NODE_WRITE("node:write"),
+	STYLE_READ("style:read"),
+	STYLE_WRITE("style:write"),
 	USER_READ("user:read"),
 	USER_WRITE("user:write"),
 	WORKSPACE_READ("workspace:read"),
