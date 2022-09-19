@@ -33,6 +33,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
@@ -52,6 +53,7 @@ public class AdminDashboardResource {
 	private static final String MSG_ERROR_INVALID_METRICS_ENTRY = "MSG_ERROR_INVALID_METRICS_ENTRY";
 	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
 	private static final String MSG_ERROR_IN_SEARCH_PROCESS = "MSG_ERROR_IN_SEARCH_PROCESS";
+	private static final String MSG_SUCCESS_METRICS_ENTRY_INSERT = "MSG_SUCCESS_METRICS_ENTRY_INSERT";
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -322,7 +324,7 @@ public class AdminDashboardResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
-		return Response.ok().build();
+		return Response.ok(new SuccessResponse(MSG_SUCCESS_METRICS_ENTRY_INSERT)).build();
 	}
 
 	@GET
