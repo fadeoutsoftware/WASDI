@@ -770,7 +770,7 @@ public class WorkspaceResource {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		
+
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
@@ -805,17 +805,17 @@ public class WorkspaceResource {
 
 			return oResult;
 		}
-		
+
 		// Can the user access this resource?
-		if(!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)) {
+		if (!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)) {
 			Utils.debugLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE);
 
 			return oResult;
-		}		
-		
+		}
+
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
@@ -825,7 +825,7 @@ public class WorkspaceResource {
 
 			return oResult;
 		}
-		
+
 		// Cannot share with the owner
 		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
@@ -850,7 +850,7 @@ public class WorkspaceResource {
 		}
 
 		try {
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sDestinationUserId, sWorkspaceId)) {
 				UserResourcePermission oWorkspaceSharing =
@@ -885,39 +885,39 @@ public class WorkspaceResource {
 	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sWorkspaceName) {
 		try {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-			
+
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: sMercuriusAPIAddress is null");
 			}
 			else {
-				
+
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: send notification");
-				
+
 				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 				Message oMessage = new Message();
-				
+
 				String sTitle = "Workspace " + sWorkspaceName + " Shared";
-				
+
 				oMessage.setTilte(sTitle);
-				
+
 				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
 				if (sSender==null) {
 					sSender = "wasdi@wasdi.net";
 				}
-				
+
 				oMessage.setSender(sSender);
-				
+
 				String sMessage = "The user " + sRequesterUserId +  " shared with you the workspace: " + sWorkspaceName;
-								
+
 				oMessage.setMessage(sMessage);
-		
+
 				Integer iPositiveSucceded = 0;
-								
+
 				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
 				
 				Utils.debugLog("WorkspaceResource.ShareWorkspace: notification sent with result " + iPositiveSucceded);
 			}
-				
+
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: notification exception " + oEx.toString());
@@ -949,8 +949,8 @@ public class WorkspaceResource {
 		}
 
 		try {
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            aoWorkspaceSharing = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(sWorkspaceId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			aoWorkspaceSharing = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(sWorkspaceId);
 
 			if (aoWorkspaceSharing != null) {
 				for (UserResourcePermission oWorkspaceSharing : aoWorkspaceSharing) {
@@ -1008,8 +1008,8 @@ public class WorkspaceResource {
 				return oResult;
 			}
 
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
 

@@ -3,6 +3,7 @@ package wasdi.shared.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -91,7 +92,6 @@ public class UserResourcePermissionRepository extends MongoRepository {
 					.find(new Document("userId", sUserId));
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
-
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
@@ -107,7 +107,6 @@ public class UserResourcePermissionRepository extends MongoRepository {
 					.find(Filters.and(Filters.eq("resourceType", sType), Filters.eq("userId", sUserId)));
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
-
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
@@ -161,6 +160,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return aoReturnList;
+	}
+
+	public List<UserResourcePermission> getNodeSharingsByNodeCode(String sNodeCode) {
+		return getPermissionsByTypeAndResourceId("node", sNodeCode);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByWorkspaceId(String sWorkspaceId) {
@@ -248,7 +251,8 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 			if (!Utils.isNullOrEmpty(sResourceId)) {
-				Bson oFilterResourceId = Filters.eq("resourceId", sResourceId.toLowerCase());
+				Pattern regex = Pattern.compile(Pattern.quote(sResourceId), Pattern.CASE_INSENSITIVE);
+				Bson oFilterResourceId = Filters.eq("resourceId", regex);
 				aoFilters.add(oFilterResourceId);
 			}
 
@@ -322,6 +326,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public List<UserResourcePermission> getNodeSharings() {
+		return getPermissionsByType("node");
+	}
+
 	public List<UserResourcePermission> getWorkspaceSharings() {
 		return getPermissionsByType("workspace");
 	}
@@ -336,6 +344,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public List<UserResourcePermission> getProcessorSharings() {
 		return getPermissionsByType("processor");
+	}
+
+	public List<UserResourcePermission> getProcessorParametersTemplateSharings() {
+		return getPermissionsByType("processorparameterstemplate");
 	}
 
 
@@ -380,6 +392,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return 0;
+	}
+
+	public int deletePermissionsByNodeCode(String sNodeCode) {
+		return deletePermissionsByTypeAndResourceId("node", sNodeCode);
 	}
 
 	public int deletePermissionsByWorkspaceId(String sWorkspaceId) {
@@ -510,6 +526,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return 0;
 	}
 
+	public int deletePermissionsByUserIdAndNodeCode(String sUserId, String sNodeCode) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("node", sUserId, sNodeCode);
+	}
+
 	public int deletePermissionsByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
 		return deletePermissionsByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
 	}
@@ -565,6 +585,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return false;
+	}
+
+	public boolean isNodeSharedWithUser(String sUserId, String sNodeCode) {
+		return isResourceOfTypeSharedWithUser("node", sUserId, sNodeCode);
 	}
 
 	public boolean isWorkspaceSharedWithUser(String sUserId, String sWorkspaceId) {

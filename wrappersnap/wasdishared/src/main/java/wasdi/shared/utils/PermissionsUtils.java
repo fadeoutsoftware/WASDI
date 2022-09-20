@@ -24,25 +24,48 @@ public class PermissionsUtils {
 
 	/**
 	 * @param sUserId a valid userId
+	 * @param sNodeCode a valid nodeCode
+	 * @return true if the user has access the node, false otherwise
+	 */
+	public static boolean canUserAccessNode(String sUserId, String sNodeCode) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sNodeCode)) {
+				return false;
+			}
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sNodeCode);
+		} catch (Exception oE) {
+			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sNodeCode + " ): error: " + oE);
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param sUserId a valid userId
 	 * @param sWorkspaceId a valid workspaceId
 	 * @return true if the user owns the workspace, or if the owner shared the workspace with the user, false otherwise
 	 */
 	public static boolean canUserAccessWorkspace(String sUserId, String sWorkspaceId) {
 		try {
-			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
 				return false;
 			}
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			if(oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
+			if (oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
 				return true;
 			}
 
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
 		}
+
 		return false;
 	}
 
@@ -53,7 +76,7 @@ public class PermissionsUtils {
 	 */
 	public static boolean canUserAccessStyle(String sUserId, String sStyleId) {
 		try {
-			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sStyleId)) {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sStyleId)) {
 				return false;
 			}
 
@@ -62,11 +85,13 @@ public class PermissionsUtils {
 				return true;
 			}
 
-            UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
 		}
+
 		return false;
 	}
 
@@ -79,20 +104,23 @@ public class PermissionsUtils {
 	 */
 	public static boolean canUserAccessProcess(String sUserId, String sProcessObjId) {
 		try {
-			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessObjId)) {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessObjId)) {
 				return false;
 			}
+
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			if(oProcessWorkspaceRepository.isProcessOwnedByUser(sUserId, sProcessObjId)) {
+			if (oProcessWorkspaceRepository.isProcessOwnedByUser(sUserId, sProcessObjId)) {
 				return true;
 			}
+
 			String sWorkspaceId = oProcessWorkspaceRepository.getWorkspaceByProcessObjId(sProcessObjId);
-			if(!Utils.isNullOrEmpty(sWorkspaceId)) {
+			if (!Utils.isNullOrEmpty(sWorkspaceId)) {
 				return canUserAccessWorkspace(sUserId, sWorkspaceId);
 			}
-		}catch (Exception oE) {
+		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
 		}
+
 		return false;
 	}
 
@@ -103,7 +131,7 @@ public class PermissionsUtils {
 	 */
 	public static boolean canUserAccessProcessorParametersTemplate(String sUserId, String sTemplateId) {
 		try {
-			if(Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sTemplateId)) {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sTemplateId)) {
 				return false;
 			}
 
@@ -113,6 +141,7 @@ public class PermissionsUtils {
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
 		}
+
 		return false;
 	}
 
