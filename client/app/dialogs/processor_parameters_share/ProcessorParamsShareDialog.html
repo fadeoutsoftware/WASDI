@@ -1,0 +1,93 @@
+<div id="processor-params-share-dialog" class="modal fade wapps-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                    <h4 class="modal-title">Share Parameters</h4>
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    <button
+                        type="button"
+                        class="close"
+                        ng-click="close(null)"
+                        data-dismiss="modal"
+                        aria-hidden="true"
+                    >
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body d-flex flex-column">
+                <div class="row mx-3">
+                    <form class="">
+                        <div class="col-8 form-group">
+                            <label for="wasdiEmail">WASDI Email Address:</label>
+                            <input
+                                type="email"
+                                class="form-control"
+                                placeholder="Enter WASDI Email Address"
+                                ng-model="m_oController.m_sUserEmail"
+                                required
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-wasdi mb-4"
+                            ng-click="m_oController.addParametersPermission(m_oController.m_sTemplateId, m_oController.m_sUserEmail)"
+                        >
+                            <i class="fa fa-share-alt" aria-hidden="true"></i>
+                            Share
+                        </button>
+                    </form>
+                </div>
+                <div
+                    class="row m-3"
+                    ng-show="m_oController.m_aoParametersPermissionsList.length > 0"
+                >
+                    <h4 class="text-success">Actively Sharing With:</h4>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                ng-repeat="oParametersPermission in m_oController.m_aoParametersPermissionsList"
+                            >
+                                <td>
+                                    {{oParametersPermission.userId}}
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-wasdi"
+                                    ng-click="m_oController.removeParametersPermission(oParametersPermission.resourceId, oParametersPermission.userId)">
+                                        <i
+                                            class="fa fa-trash"
+                                            aria-hidden="true"
+                                        ></i>
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        ng-click="close(null)"
+                        class="my-button"
+                        data-dismiss="modal"
+                    >
+                        {{"DIALOG_CLOSE_BUTTON"|translate}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

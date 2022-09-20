@@ -234,6 +234,7 @@ wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("SendFeedbackController", SendFeedbackController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
+wasdiApp.controller("ProcessParamsShareController", ProcessParamsShareController)
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
