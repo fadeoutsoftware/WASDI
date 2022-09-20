@@ -202,7 +202,16 @@ public class AdminDashboardResource {
 		}
 
 
-		if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
+		if (sResourceType.equalsIgnoreCase("node")) {
+			NodeResource oNodeResource = new NodeResource();
+			PrimitiveResult oResult = oNodeResource.shareNode(sSessionId, sResourceId, sDestinationUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} else if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
 			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId);
 
@@ -270,7 +279,16 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
+		if (sResourceType.equalsIgnoreCase("node")) {
+			NodeResource oNodeResource = new NodeResource();
+			PrimitiveResult oResult = oNodeResource.deleteUserSharedNode(sSessionId, sResourceId, sUserId);
+
+			if (oResult.getBoolValue()) {
+				return Response.ok().build();
+			} else {
+				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
+			}
+		} if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
 			PrimitiveResult oResult = oProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate(sSessionId, sResourceId, sUserId);
 
