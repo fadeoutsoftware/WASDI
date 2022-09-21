@@ -481,7 +481,6 @@ public class ProductResource {
 
             // Create repo
             ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
             // Get Product List
             List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
@@ -582,9 +581,15 @@ public class ProductResource {
             
             String sNewName = oProductViewModel.getProductFriendlyName();
             if (sNewName == null) sNewName = "";
-            
-            
-            if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle))) {
+
+            String sOriginalDescription = oDownloaded.getProductViewModel().getDescription();
+            if (sOriginalDescription == null) sOriginalDescription = "";
+
+            String sNewDescription = oProductViewModel.getDescription();
+            if (sNewDescription == null) sNewDescription = "";
+
+
+            if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle)) || (!sOriginalDescription.equals(sNewDescription))) {
                 // Update the 2 fields that can be updated
                 oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
                 oDownloaded.setDefaultStyle(oProductViewModel.getStyle());
