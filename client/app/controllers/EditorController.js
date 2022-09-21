@@ -2071,6 +2071,12 @@ var EditorController = (function () {
             oNode.text = this.m_aoProducts[iIndexProduct].productFriendlyName;
             oNode.fileName = this.m_aoProducts[iIndexProduct].fileName;
             oNode.id = this.m_aoProducts[iIndexProduct].fileName;
+            oNode.description = this.m_aoProducts[iIndexProduct].description;
+            
+            oNode.a_attr = {
+                class: "no_checkbox",
+                title: oNode.description
+            }
 
             //oNode.product = this.m_aoProducts[iIndexProduct];
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
