@@ -1423,6 +1423,8 @@ var EditorController = (function () {
      */
     EditorController.prototype.openProductInfoDialog = function (oProductInput) {
 
+        var oController = this;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
             controller: "ProductEditorInfoController",
@@ -1437,6 +1439,8 @@ var EditorController = (function () {
                 if (utilsIsObjectNullOrUndefined(result) === true)
                     return false;
             });
+
+            oController.getProductListByWorkspace();
         });
 
         return true;
