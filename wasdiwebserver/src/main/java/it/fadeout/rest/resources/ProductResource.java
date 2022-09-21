@@ -565,6 +565,10 @@ public class ProductResource {
             DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
 
             if (oDownloaded == null) {
+            	oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sFullPath + oProductViewModel.getFileName()));
+            }
+
+            if (oDownloaded == null) {
                 Utils.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
                 return Response.status(500).build();
             }
@@ -582,7 +586,7 @@ public class ProductResource {
             String sNewName = oProductViewModel.getProductFriendlyName();
             if (sNewName == null) sNewName = "";
 
-            String sOriginalDescription = oDownloaded.getProductViewModel().getDescription();
+            String sOriginalDescription = oDownloaded.getDescription();
             if (sOriginalDescription == null) sOriginalDescription = "";
 
             String sNewDescription = oProductViewModel.getDescription();
