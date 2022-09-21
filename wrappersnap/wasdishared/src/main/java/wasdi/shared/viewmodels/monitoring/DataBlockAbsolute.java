@@ -11,9 +11,9 @@ import lombok.ToString;
 @ToString
 public class DataBlockAbsolute {
 
-	public DataEntryAbsolute available;
-	public DataEntryAbsolute total;
-	public DataEntryAbsolute used;
-	public DataEntryAbsolute free;
+	private DataEntryAbsolute available;
+	private DataEntryAbsolute total;
+	private DataEntryAbsolute used;
+	private DataEntryAbsolute free;
 
 }

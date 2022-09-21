@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class Disk {
 
-	public String mountpoint;
-	public DataBlockAbsolute absolute;
-	public DataBlockPercentage percentage;
+	private String mountpoint;
+	private DataBlockAbsolute absolute;
+	private DataBlockPercentage percentage;
 
 }

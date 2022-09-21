@@ -1,7 +1,5 @@
 package wasdi.shared.viewmodels.monitoring;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,12 +9,9 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class MetricsEntry {
+public class Timestamp {
 
-	private String node;
-	private Timestamp timestamp;
-	private Cpu cpu;
-	private List<Disk> disks;
-	private Memory memory;
+	private Double seconds;
+	private Double millis;
 
 }

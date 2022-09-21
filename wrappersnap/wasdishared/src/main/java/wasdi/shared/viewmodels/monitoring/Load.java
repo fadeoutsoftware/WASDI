@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class Load {
 
-	public LoadData absolute;
-	public LoadData percentage;
+	private LoadData absolute;
+	private LoadData percentage;
 
 }
