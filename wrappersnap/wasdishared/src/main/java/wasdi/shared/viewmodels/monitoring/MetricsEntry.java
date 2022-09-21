@@ -15,6 +15,7 @@ public class MetricsEntry {
 
 	public String node;
 	public Double timestamp;
+	public Double timestampInMillis;
 	public Cpu cpu;
 	public List<Disk> disks;
 	public Memory memory;

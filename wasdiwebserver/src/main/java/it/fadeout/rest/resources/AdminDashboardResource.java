@@ -11,6 +11,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -377,12 +378,12 @@ public class AdminDashboardResource {
 		return oPermissionViewModel;
 	}
 
-	@POST
+	@PUT
 	@Path("/metrics")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response addMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
+	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
-//		Utils.debugLog("AdminDashboardResource.addMetricsEntry()");
+//		Utils.debugLog("AdminDashboardResource.updateMetricsEntry()");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
@@ -406,7 +407,7 @@ public class AdminDashboardResource {
 
 		try {
 			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
-			oMetricsEntryRepository.insertMetricsEntry(oMetricsEntry);
+			oMetricsEntryRepository.updateMetricsEntry(oMetricsEntry);
 		} catch (Exception oEx) {
 			Utils.debugLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
