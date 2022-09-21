@@ -1995,7 +1995,13 @@ var EditorController = (function () {
             oNode.fileName = this.m_aoProducts[iIndexProduct].fileName;
             oNode.id = this.m_aoProducts[iIndexProduct].fileName;
             oNode.description = this.m_aoProducts[iIndexProduct].description;
-            
+
+            if (utilsIsStrNullOrEmpty(this.m_aoProducts[iIndexProduct].description) === true) {
+                oNode.description = "";
+            } else {
+                oNode.description = this.m_aoProducts[iIndexProduct].description;
+            }
+
             oNode.a_attr = {
                 class: "no_checkbox",
                 title: oNode.description
