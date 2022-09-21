@@ -7,9 +7,10 @@ sCommandDocker="docker"
 sCommandDockerCompose="docker-compose"
 sCommandEcho="echo"
 sCommandRealpath="realpath"
+sCommandRsync="rsync"
 sCommandTr="tr"
 
-${sCommandEcho} "[INFO] Searching the directory of the container..."
+${sCommandEcho} "[INFO] Searching the directory of the container"
 sContainerDirectory="$(${sCommandRealpath} -e $(dirname ${0})/..)"
 
 if [[ -n "${sContainerDirectory}" ]]
@@ -42,27 +43,58 @@ fi
 
 sScriptDockerBuild="${sContainerDirectory}/tool/dockerBuild.sh"
 sScriptDockerPush="${sContainerDirectory}/tool/dockerPush.sh"
+sDockerTemplateDirectory="$(${sCommandRealpath} -e ${sDockerTemplateDirectory})"
 ## /SET PARAMETER ##
 
 
 ## CONTROL ##
-echo "[INFO] Controling the variable '\${sContainerName}'"
+${sCommandEcho} "[INFO] Controling the variable '\${sContainerName}'"
 
 if [[ -n "${sContainerName}" ]]
 then
-    echo "[INFO] OK"
+    ${sCommandEcho} "[INFO] OK"
 else
-    echo "[ERROR] The variable doesn't exist"
+    ${sCommandEcho} "[ERROR] The variable doesn't exist or is empty"
     bErrorDetected=true
 fi
 
-echo "[INFO] Controling the variable '\${sContainerVersion}'"
+${sCommandEcho} "[INFO] Controling the variable '\${sContainerVersion}'"
 
 if [[ -n "${sContainerName}" ]]
 then
-    echo "[INFO] OK"
+    ${sCommandEcho} "[INFO] OK"
 else
-    echo "[ERROR] The variable doesn't exist"
+    ${sCommandEcho} "[ERROR] The variable doesn't exist or is empty"
+    bErrorDetected=true
+fi
+
+${sCommandEcho} "[INFO] Controling the variable '\${sDockerTemplateDirectory}'"
+
+if [[ -n "${sDockerTemplateDirectory}" ]]
+then
+    ${sCommandEcho} "[INFO] OK"
+else
+    ${sCommandEcho} "[ERROR] The variable doesn't exist or is empty"
+    bErrorDetected=true
+fi
+
+${sCommandEcho} "[INFO] Controling the variable '\${sContainerDirectory}'"
+
+if [[ -n "${sContainerDirectory}" ]]
+then
+    ${sCommandEcho} "[INFO] OK"
+else
+    ${sCommandEcho} "[ERROR] The variable doesn't exist or is empty"
+    bErrorDetected=true
+fi
+
+${sCommandEcho} "[INFO] Comparing the value of the variables '\${sDockerTemplateDirectory}' and '\${sContainerDirectory}'"
+
+if [[ "${sDockerTemplateDirectory}" != "${sContainerDirectory}" ]]
+then
+    ${sCommandEcho} "[INFO] OK: values are different"
+else
+    ${sCommandEcho} "[ERROR] Values are the same: you probably executed the script from the 'dockertemplate' directory when you must execute it from the 'processors' directory"
     bErrorDetected=true
 fi
 
@@ -74,7 +106,7 @@ fi
 
 
 ## SCRIPT ##
-${sCommandEcho} "[INFO] Searching if we have containers started..."
+${sCommandEcho} "[INFO] Searching if we have containers started"
 listRunningContainer="$(${sCommandDocker} ps | ${sCommandAwk} -v sContainerName="${sContainerName}:" '( $2 ~ sContainerName ) { print $NF }' | ${sCommandTr} "\n" " ")"
 
 if [[ -n "${listRunningContainer}" ]]
@@ -85,7 +117,18 @@ else
     exit 0
 fi
 
-${sCommandEcho} "[INFO] Building the new image '${sContainerName}:${sContainerVersion}'..."
+${sCommandEcho} "[INFO] '${sDockerTemplateDirectory}/' in '${sContainerDirectory}/'"
+${sCommandRsync} --archive --verbose ${sDockerTemplateDirectory}/ ${sContainerDirectory}/
+
+if [[ ${?} -eq 0 ]]
+then
+    ${sCommandEcho} "[INFO] OK"
+else
+    ${sCommandEcho} "[ERROR] Unable to synchronize these directories"
+    exit 1
+fi
+
+${sCommandEcho} "[INFO] Building the new image '${sContainerName}:${sContainerVersion}'"
 ${sCommandBash} ${sScriptDockerBuild}
 
 if [[ ${?} -eq 0 ]]
@@ -96,7 +139,7 @@ else
     exit 1
 fi
 
-${sCommandEcho} "[INFO] Publishing the new image '${sContainerName}:${sContainerVersion}'..."
+${sCommandEcho} "[INFO] Publishing the new image '${sContainerName}:${sContainerVersion}'"
 ${sCommandBash} ${sScriptDockerPush}
 
 if [[ ${?} -eq 0 ]]
@@ -109,7 +152,7 @@ fi
 
 for sCurrentRunningContainer in ${listRunningContainer}
 do
-    ${sCommandEcho} "[INFO] [${sCurrentRunningContainer}] Searching the notebook ID..."
+    ${sCommandEcho} "[INFO] [${sCurrentRunningContainer}] Searching the notebook ID"
     sCurrentNotebookId="$(${sCommandEcho} ${sCurrentRunningContainer} | sed 's/nb_//g')"
 
     if [[ -n "${sCurrentNotebookId}" ]]
@@ -120,7 +163,7 @@ do
         continue
     fi
 
-    ${sCommandEcho} "[INFO] [${sCurrentRunningContainer}] Updating the container..."
+    ${sCommandEcho} "[INFO] [${sCurrentRunningContainer}] Updating the container"
     ${sCommandDockerCompose} --file ${sContainerDirectory}/docker-compose_${sCurrentNotebookId}.yml --project-name \"${sCurrentNotebookId}\" --env-file ${sContainerDirectory}/var/general_common.env up --detach
 
     if [[ ${?} -eq 0 ]]

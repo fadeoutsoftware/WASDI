@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class Cpu {
 
-	public Count count;
-	public Frequency frequency;
-	public Load load;
+	private Count count;
+	private Frequency frequency;
+	private Load load;
 
 }

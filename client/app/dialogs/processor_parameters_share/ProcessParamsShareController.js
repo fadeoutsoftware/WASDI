@@ -7,6 +7,7 @@ let ProcessParamsShareController = (function () {
         oAdminDashboardService,
         oConstantsService,
         oExtras,
+        oTranslate,
         $scope,
         $timeout
     ) {
@@ -16,6 +17,7 @@ let ProcessParamsShareController = (function () {
 
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
+        this.m_oTranslate = oTranslate;
         this.m_oTimeout = $timeout;
 
         this.m_aoParametersPermissionsList = [];
@@ -65,14 +67,14 @@ let ProcessParamsShareController = (function () {
         //check that user has provided an email
         if (utilsIsStrNullOrEmpty(sUserEmail) === true) {
             utilsVexDialogAlertTop(
-                "GURU MEDITATION<br>A User Email must be provided"
+                this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_ADD_ERROR1")
             );
             return false;
         }
         //Check that user has not provided their own email
         if (sUserEmail === oController.m_sOwnerEmail) {
             utilsVexDialogAlertTop(
-                "IT IS NOT POSSIBLE TO SHARE A RESOURCE WITH YOURSELF."
+                this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_ADD_ERROR2")
             );
             return false;
         }
@@ -97,7 +99,7 @@ let ProcessParamsShareController = (function () {
                 return false;
             }
 
-            let sConfirmMsg1 = "REMOVE PERMISSIONS FROM ";
+            let sConfirmMsg1 = this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_REMOVE_CONFIRM");
             let sConfirmMsg2 = "?";
             let oController = this;
             utilsVexDialogConfirm(
@@ -125,6 +127,7 @@ let ProcessParamsShareController = (function () {
         "AdminDashboardService",
         "ConstantsService",
         "extras",
+        "$translate",
         "$scope",
         "$timeout",
     ];

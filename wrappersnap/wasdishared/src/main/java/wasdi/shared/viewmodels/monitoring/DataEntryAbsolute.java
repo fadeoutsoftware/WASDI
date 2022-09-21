@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class DataEntryAbsolute {
 
-	public String unit;
-	public Long value;
+	private String unit;
+	private Long value;
 
 }
