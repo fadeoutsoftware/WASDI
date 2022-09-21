@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class Count {
 
-	public Integer physical;
-	public Integer logical;
-	public Integer total;
+	private Integer physical;
+	private Integer logical;
+	private Integer total;
 
 }

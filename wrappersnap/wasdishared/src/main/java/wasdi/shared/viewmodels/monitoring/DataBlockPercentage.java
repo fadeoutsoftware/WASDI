@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class DataBlockPercentage {
 
-	public DataEntryPercentage available;
-	public DataEntryPercentage used;
+	private DataEntryPercentage available;
+	private DataEntryPercentage used;
 
 }

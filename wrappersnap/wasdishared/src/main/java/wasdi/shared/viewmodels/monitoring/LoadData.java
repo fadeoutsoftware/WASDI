@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class LoadData {
 
-	public Double load1;
-	public Double load5;
-	public Double load15;
+	private Double load1;
+	private Double load5;
+	private Double load15;
 
 }

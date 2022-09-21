@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class Frequency {
 
-	public Long hz;
-	public Integer mhz;
-	public Double ghz;
+	private Long hz;
+	private Integer mhz;
+	private Double ghz;
 
 }

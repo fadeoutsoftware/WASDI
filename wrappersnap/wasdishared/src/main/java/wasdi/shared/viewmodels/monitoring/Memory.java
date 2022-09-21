@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class Memory {
 
-	public DataBlockAbsolute absolute;
-	public DataBlockPercentage percentage;
+	private DataBlockAbsolute absolute;
+	private DataBlockPercentage percentage;
 
 }

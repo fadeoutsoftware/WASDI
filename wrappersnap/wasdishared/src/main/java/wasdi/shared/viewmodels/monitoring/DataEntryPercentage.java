@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class DataEntryPercentage {
 
-	public Double value;
+	private Double value;
 
 }
