@@ -470,6 +470,8 @@ public class WasdiGraph {
             oOutputProduct.setBoundingBox(sBBox);
             oOutputProduct.getProductViewModel().setMetadataFileReference(null);
                         
+            oOutputProduct.setDescription(oProduct.getDescription());
+
             if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
