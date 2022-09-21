@@ -262,6 +262,7 @@ wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxControl
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
+wasdiApp.controller("ProcessParamsShareController", window.ProcessParamsShareController);
 
 wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 

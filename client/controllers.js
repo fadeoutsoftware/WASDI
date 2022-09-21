@@ -42,3 +42,4 @@ require('./app/dialogs/payload_dialog/PayloadDialogController.js');
 require('./app/dialogs/processor_parameters_template/ProcessorParametersTemplateController.js');
 require('./app/dialogs/send_feedback/SendFeedbackController.js');
 require('./app/dialogs/package_manager/PackageManagerController.js')
+require('./app/dialogs/processor_parameters_share/ProcessParamsShareController.js')
