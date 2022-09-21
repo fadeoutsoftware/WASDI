@@ -328,6 +328,10 @@ public abstract class Operation {
             oDownloadedProduct.setDefaultStyle(sStyle);
             oDownloadedProduct.setCategory(DownloadedFileCategory.COMPUTED.name());
 
+            if (oProductViewModel != null) {
+                oDownloadedProduct.setDescription(oProductViewModel.getDescription());
+            }
+
             // Insert in the Db
             if (!oDownloadedRepo.insertDownloadedFile(oDownloadedProduct)) {
                 m_oLocalLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database.");

@@ -43,6 +43,10 @@ public class DownloadedFile {
      * Default style to use for the bands of this file
      */
     private String defaultStyle;
+	/**
+	 * Description
+	 */
+    private String description;
     
 	/**
      * Product View Model
@@ -112,5 +116,13 @@ public class DownloadedFile {
 	public void setDefaultStyle(String defaultStyle) {
 		this.defaultStyle = defaultStyle;
 	}
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
 }

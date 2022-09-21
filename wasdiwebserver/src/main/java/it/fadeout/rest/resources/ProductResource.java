@@ -587,6 +587,7 @@ public class ProductResource {
                 // Update the 2 fields that can be updated
                 oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
                 oDownloaded.setDefaultStyle(oProductViewModel.getStyle());
+                oDownloaded.setDescription(oProductViewModel.getDescription());
                 
                 try {
                     if (!sOriginalStyle.equals(sNewStyle)) {

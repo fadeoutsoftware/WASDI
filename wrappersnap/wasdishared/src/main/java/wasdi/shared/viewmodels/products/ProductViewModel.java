@@ -32,6 +32,8 @@ public class ProductViewModel {
     private boolean metadataFileCreated = false;
     
     private String style;
+
+    private String description;
     
 	public ProductViewModel() {
 	}
@@ -42,6 +44,8 @@ public class ProductViewModel {
 		setMetadata(base.getMetadata());
 		setName(base.getName());
 		setProductFriendlyName(base.getProductFriendlyName());
+		setStyle(base.getStyle());
+		setDescription(base.getDescription());
     }
 
 
@@ -108,5 +112,13 @@ public class ProductViewModel {
 	public void setStyle(String style) {
 		this.style = style;
 	}
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
 }
