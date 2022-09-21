@@ -1438,10 +1438,12 @@ var EditorController = (function () {
             modal.close.then(function (result) {
                 if (utilsIsObjectNullOrUndefined(result) === true)
                     return false;
+
+                oController.getProductListByWorkspace();
             });
 
-            oController.getProductListByWorkspace();
         });
+
 
         return true;
     };
@@ -2007,7 +2009,6 @@ var EditorController = (function () {
             }
 
             oNode.a_attr = {
-                class: "no_checkbox",
                 title: oNode.description
             }
 
