@@ -359,6 +359,7 @@ public class ProductResource {
                         oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
                         
                         oGeoRefProductViewModel.setStyle(oDownloaded.getDefaultStyle());
+                        oGeoRefProductViewModel.setDescription(oDownloaded.getDescription());
 
                         oGeoRefProductViewModel.setMetadata(null);
                         aoProductList.add(oGeoRefProductViewModel);
