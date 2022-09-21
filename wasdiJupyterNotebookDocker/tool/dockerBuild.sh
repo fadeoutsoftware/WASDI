@@ -55,7 +55,7 @@ if [[ -n "${sContainerName}" ]]
 then
     echo "[INFO] OK"
 else
-    echo "[ERROR] The variable doesn't exist"
+    echo "[ERROR] The variable doesn't exist or is empty"
     bErrorDetected=true
 fi
 
@@ -65,7 +65,7 @@ if [[ -n "${sContainerName}" ]]
 then
     echo "[INFO] OK"
 else
-    echo "[ERROR] The variable doesn't exist"
+    echo "[ERROR] The variable doesn't exist or is empty"
     bErrorDetected=true
 fi
 
