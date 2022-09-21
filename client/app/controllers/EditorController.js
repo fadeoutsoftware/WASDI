@@ -317,7 +317,7 @@ var EditorController = (function () {
                 if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) == false) {
                     oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
                     oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
-                } else {
+                 } else {
                     // Zoom on the workspace
                     oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
                     oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
@@ -668,8 +668,9 @@ var EditorController = (function () {
                     this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                     this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                 } else {
-                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+
+                    // this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    // this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                 }
             }
         }

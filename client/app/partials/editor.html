@@ -213,12 +213,12 @@
                                     </button>
 
                                 </div>                                
-                                <div class="col-xs-4">
+                                <div class="col-xs-4" ng-show="m_oController.m_b2DMapModeOn">
                                     <label class="color-value">
                                         {{oBand.opacity}} %
                                     </label>
                                     <!-- Index is zero based and the [0] layer is the map-->
-                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class=""
+                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class="opacitySlider"
                                         ng-change="m_oController.setLayerOpacity(oBand.opacity,oBand.layerId)">
                                 </div>
                             </div>
