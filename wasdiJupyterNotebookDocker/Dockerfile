@@ -54,6 +54,7 @@ RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
         libxslt1-dev \
         locate \
         nano \
+        nodejs \
         openjdk-8-jre \
         python3 \
         python3-dev \

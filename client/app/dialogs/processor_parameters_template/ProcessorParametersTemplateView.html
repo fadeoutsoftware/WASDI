@@ -291,6 +291,15 @@
                                         {{"DIALOG_APPLY_BUTTON" | translate}}
                                     </button>
                                 </div>
+                                <div ng-hide="m_oController.m_bEditMode">
+                                    <button
+                                        class="my-button my-align-right"
+                                        ng-click="m_oController.openShareDialog(m_oController.m_oProcessorParametersTemplate.templateId)"
+                                    >
+                                       Share
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
