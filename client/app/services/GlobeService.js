@@ -544,12 +544,12 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
                 label : "S1A",
                 description : "ESA Sentinel 1 A "
             },
-            {
+/*            {
                 name : "SENTINEL1B",
                 icon : "assets/icons/S1B.svg",
                 label : "S1B",
                 description : "ESA Sentinel 1 B"
-            },
+            },*/
             {
                 name : "COSMOSKY1",
                 icon : "assets/icons/sat_02.svg",
