@@ -2077,8 +2077,8 @@ var EditorController = (function () {
             oNode.productIndex = iIndexProduct;
 
             // var oThat = this;
-            var sMetadata = oController.m_oTranslate.instant("");
-            var sBands = oController.m_oTranslate.instant("");
+            var sMetadata = oController.m_oTranslate.instant("MENU_METADATA");
+            var sBands = oController.m_oTranslate.instant("MENU_BANDS");
 
             oNode.children = [
                 {
