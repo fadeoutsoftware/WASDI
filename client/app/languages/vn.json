@@ -386,6 +386,17 @@
     "DIALOG_PARAMS_CREATE_DATE": "Tạo ngày",
     "DIALOG_PARAMS_UPDATE_DATE": "Cập nhật ngày",
     "DIALOG_PARAMS_PARAMS": "Các thông số",
+    "DIALOG_PARAMS_SHARE": "Chia sẻ",
+
+    "DIALOG_PARAMS_SHARE_HEADER": "Chia sẻ thông số",
+    "DIALOG_PARAMS_SHARE_EMAIL": "Địa chỉ email WASDI",
+    "DIALOG_PARAMS_SHARE_ENTER_EMAIL": "Nhập Địa chỉ Email WASDI",
+    "DIALOG_PARAMS_SHARE_ACTIVE": "Chủ động chia sẻ với",
+    "DIALOG_PARAMS_SHARE_REMOVE": "Xóa",
+    "DIALOG_PARAMS_SHARE_ERROR1": "GURU MEDITATION <br> Phải cung cấp Email Người dùng",
+    "DIALOG_PARAMS_SHARE_ADD_ERROR2": "KHÔNG THỂ CHIA SẺ NGUỒN LỰC VỚI CHÍNH MÌNH.",
+    "DIALOG_PARAMS_SHARE_REMOVE_CONFIRM": "XÓA CÁC PHÉP THUẬT TỪ",
+
     "DIALOG_STYLE_TAB_BASE": "Phong cách",
     "DIALOG_STYLE_TAB_SHARE": "Chia sẻ",
     "DIALOG_STYLE_EDIT_XML": "Biên tập XML",

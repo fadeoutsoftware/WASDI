@@ -7,7 +7,9 @@ let ProcessParamsShareController = (function () {
         oAdminDashboardService,
         oConstantsService,
         oExtras,
-        $scope
+        oTranslate,
+        $scope,
+        $timeout
     ) {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oConstantsService = oConstantsService;
@@ -15,6 +17,8 @@ let ProcessParamsShareController = (function () {
 
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
+        this.m_oTranslate = oTranslate;
+        this.m_oTimeout = $timeout;
 
         this.m_aoParametersPermissionsList = [];
         this.sResourceType = "PROCESSORPARAMETERSTEMPLATE";
@@ -63,14 +67,14 @@ let ProcessParamsShareController = (function () {
         //check that user has provided an email
         if (utilsIsStrNullOrEmpty(sUserEmail) === true) {
             utilsVexDialogAlertTop(
-                "GURU MEDITATION<br>A User Email must be provided"
+                this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_ADD_ERROR1")
             );
             return false;
         }
         //Check that user has not provided their own email
         if (sUserEmail === oController.m_sOwnerEmail) {
             utilsVexDialogAlertTop(
-                "IT IS NOT POSSIBLE TO SHARE A RESOURCE WITH YOURSELF."
+                this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_ADD_ERROR2")
             );
             return false;
         }
@@ -82,7 +86,11 @@ let ProcessParamsShareController = (function () {
                 sUserEmail
             )
             .then(function (data) {
-                console.log(data);
+                oController.m_oTimeout(function () {
+                    oController.findParametersPermissions(
+                        oController.m_sTemplateId
+                    );
+                }, 500);
             });
     };
     ProcessParamsShareController.prototype.removeParametersPermission =
@@ -90,22 +98,38 @@ let ProcessParamsShareController = (function () {
             if (utilsIsStrNullOrEmpty(sResourceId) === true) {
                 return false;
             }
+
+            let sConfirmMsg1 = this.m_oTranslate.instant("DIALOG_PARAMS_SHARE_REMOVE_CONFIRM");
+            let sConfirmMsg2 = "?";
             let oController = this;
-            this.m_oAdminDashboardService
-                .removeResourcePermission(
-                    oController.sResourceType,
-                    sResourceId,
-                    sUserId
-                )
-                .then(function (data) {
-                    console.log(data);
-                });
+            utilsVexDialogConfirm(
+                sConfirmMsg1 + sUserId + sConfirmMsg2,
+                function (value) {
+                    if (value) {
+                        oController.m_oAdminDashboardService
+                            .removeResourcePermission(
+                                oController.sResourceType,
+                                sResourceId,
+                                sUserId
+                            )
+                            .then(function (data) {
+                                oController.m_oTimeout(function () {
+                                    oController.findParametersPermissions(
+                                        oController.m_sTemplateId
+                                    );
+                                }, 500);
+                            });
+                    }
+                }
+            );
         };
     ProcessParamsShareController.$inject = [
         "AdminDashboardService",
         "ConstantsService",
         "extras",
+        "$translate",
         "$scope",
+        "$timeout",
     ];
 
     return ProcessParamsShareController;

@@ -4,7 +4,9 @@
             <!-- HEADER -->
             <div class="modal-header">
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
-                    <h4 class="modal-title">Share Parameters</h4>
+                    <h4 class="modal-title">
+                        {{"DIALOG_PARAMS_SHARE_HEADER" | translate}}
+                    </h4>
                 </div>
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                     <button
@@ -24,11 +26,14 @@
                 <div class="row mx-3">
                     <form class="">
                         <div class="col-8 form-group">
-                            <label for="wasdiEmail">WASDI Email Address:</label>
+                            <label for="wasdiEmail"
+                                >{{"DIALOG_PARAMS_SHARE_EMAIL" |
+                                translate}}</label
+                            >
                             <input
                                 type="email"
                                 class="form-control"
-                                placeholder="Enter WASDI Email Address"
+                                placeholder='{{"DIALOG_PARAMS_SHARE_ENTER_EMAIL" | translate}}'
                                 ng-model="m_oController.m_sUserEmail"
                                 required
                             />
@@ -39,7 +44,7 @@
                             ng-click="m_oController.addParametersPermission(m_oController.m_sTemplateId, m_oController.m_sUserEmail)"
                         >
                             <i class="fa fa-share-alt" aria-hidden="true"></i>
-                            Share
+                            {{"DIALOG_PARAMS_SHARE" | translate}}
                         </button>
                     </form>
                 </div>
@@ -47,7 +52,9 @@
                     class="row m-3"
                     ng-show="m_oController.m_aoParametersPermissionsList.length > 0"
                 >
-                    <h4 class="text-success">Actively Sharing With:</h4>
+                    <h4 class="text-success">
+                        {{"DIALOG_PARAMS_SHARE_ACTIVE" | translate}}:
+                    </h4>
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -59,17 +66,18 @@
                             <tr
                                 ng-repeat="oParametersPermission in m_oController.m_aoParametersPermissionsList"
                             >
+                                <td>{{oParametersPermission.userId}}</td>
                                 <td>
-                                    {{oParametersPermission.userId}}
-                                </td>
-                                <td>
-                                    <button class="btn btn-danger btn-wasdi"
-                                    ng-click="m_oController.removeParametersPermission(oParametersPermission.resourceId, oParametersPermission.userId)">
+                                    <button
+                                        class="btn btn-danger btn-wasdi"
+                                        ng-click="m_oController.removeParametersPermission(oParametersPermission.resourceId, oParametersPermission.userId)"
+                                    >
                                         <i
                                             class="fa fa-trash"
                                             aria-hidden="true"
                                         ></i>
-                                        Remove
+                                        {{"DIALOG_PARAMS_SHARE_REMOVE" |
+                                        translate}}
                                     </button>
                                 </td>
                             </tr>

@@ -698,5 +698,125 @@
         <div class="spacer"></div>
 
 
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+
+                    <div class="row give-permission-row">
+                        <h3>{{"DIALOG_MANAGE_QUEUES_STATUS_TITLE" | translate}}</h3>
+
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_QUEUES_STATUS_NODE_CODE" | translate}}
+                                </label>
+
+                                <input type="text" name="nodeCode" id="nodeCode" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.m_sNodeCodeForQueues" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_QUEUES_STATUS_STATUSES" | translate}}
+                                </label>
+
+                                <input type="text" name="nodeCode" id="nodeCode" class="form-control wasdi-input" value="" title=""
+                                    ng-model="m_oController.sStatusesForQueues" required="required">
+
+                                    <span class="highlight filter-highlight"></span>
+                                    <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button class="btn btn-primary btn-wasdi btn-lg" ng-click="m_oController.getQueuesStatus(m_oController.m_sNodeCodeForQueues, m_oController.sStatusesForQueues)">
+                                    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                    <span class="ng-binding">{{"DIALOG_MANAGE_QUEUES_STATUS_RETRIEVE" | translate}}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="row"
+            ng-show="m_oController.m_aoQueuesStatusList.length > 0"
+        >
+            <div class="spacer"></div>
+
+            <div
+                class="col-xs-12 col-sm-12 col-md-12 col-lg-12"
+            >
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Scheduler</th>
+                            <th>Operation Type</th>
+                            <th>Operation SubType</th>
+                            <th>Created</th>
+                            <th>Running</th>
+                            <th>Waiting</th>
+                            <th>Ready</th>
+                            <th>Done</th>
+                            <th>Stopped</th>
+                            <th>Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            ng-repeat="oQueueStatus in m_oController.m_aoQueuesStatusList"
+                        >
+                            <td>
+                                {{oQueueStatus.schedulerName}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.operationType}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.operationSubType}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procCreated}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procRunning}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procWaiting}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procReady}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procDone}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procStopped}}
+                            </td>
+                            <td>
+                                {{oQueueStatus.procError}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+
     </div>
 </div>

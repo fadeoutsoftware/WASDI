@@ -79,7 +79,7 @@
                                             </button>
                                             <button
                                                 class="wapps-button"
-                                                title="Share"
+                                                title='{{"DIALOG_PARAMS_SHARE" | translate}}'
                                                 ng-click="m_oController.openShareDialog(oProcessorParametersTemplate.templateId)"
                                             >
                                                 <i
@@ -291,6 +291,15 @@
                                         {{"DIALOG_APPLY_BUTTON" | translate}}
                                     </button>
                                 </div>
+                                <div ng-hide="m_oController.m_bEditMode">
+                                    <button
+                                        class="my-button my-align-right"
+                                        ng-click="m_oController.openShareDialog(m_oController.m_oProcessorParametersTemplate.templateId)"
+                                    >
+                                       {{"DIALOG_PARAMS_SHARE" | translate}}
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>

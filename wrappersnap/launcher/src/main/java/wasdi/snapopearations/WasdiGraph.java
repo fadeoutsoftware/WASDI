@@ -469,7 +469,7 @@ public class WasdiGraph {
             oOutputProduct.setProductViewModel(oVM);
             oOutputProduct.setBoundingBox(sBBox);
             oOutputProduct.getProductViewModel().setMetadataFileReference(null);
-                        
+
             oOutputProduct.setDescription(oProduct.getDescription());
 
             if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
