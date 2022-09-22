@@ -668,9 +668,8 @@ var EditorController = (function () {
                     this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                     this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                 } else {
-
-                    // this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
-                    // this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                    this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                 }
             }
         }
