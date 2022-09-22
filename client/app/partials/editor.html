@@ -137,7 +137,7 @@
                         </li>
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
                             ng-click="m_oController.setActiveTab(1)"
-                            ng-show="m_oController.m_b2DMapModeOn">
+                           >
                             <a href=""><i class="fa fa-list"></i>&nbsp;Layers</a>
                         </li>
                     </ul>
@@ -190,17 +190,18 @@
                                     <br>
                                 </div>
                                 <div class="col-xs-1">
-                                    <button class="btn btn-wasdi fa btn-outline-primary" title="Navigate to"
+                                    <button class="btn btn-wasdi btn-outline-primary" title="Navigate to"
                                         ng-click="m_oController.navigateTo($index)"
-                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
-                                        <em class="fa fa-expand" aria-hidden="true"></em>
+                                       style="padding-top: 7px;padding-left: 10px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        
+                                        <i class="fa fa-expand mr-0" aria-hidden="true"></i>
                                     </button>
                                 </div>
 
                                 <div class="col-xs-1">
                                     <button class="btn btn-wasdi fa btn-outline-primary" title="Remove layer from map"
                                         ng-click="m_oController.removeBandImage(oBand)"
-                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        style="padding-left: 10px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
                                         <em class="fa fa-times" aria-hidden="true"></em>
                                     </button>
 
@@ -213,12 +214,12 @@
                                     </button>
 
                                 </div>                                
-                                <div class="col-xs-4">
+                                <div class="col-xs-4" ng-show="m_oController.m_b2DMapModeOn">
                                     <label class="color-value">
                                         {{oBand.opacity}} %
                                     </label>
                                     <!-- Index is zero based and the [0] layer is the map-->
-                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class=""
+                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class="opacitySlider"
                                         ng-change="m_oController.setLayerOpacity(oBand.opacity,oBand.layerId)">
                                 </div>
                             </div>

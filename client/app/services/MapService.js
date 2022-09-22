@@ -765,7 +765,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
                 corner2 = L.latLng(oBounds.miny, oBounds.minx),
                 bounds = L.latLngBounds(corner1, corner2);
 
-            this.m_oWasdiMap.flyToBounds(bounds);
+            this.m_oWasdiMap.flyToBounds(bounds, {maxZoom: 5});
         }
         catch (e) {
             console.log(e);
