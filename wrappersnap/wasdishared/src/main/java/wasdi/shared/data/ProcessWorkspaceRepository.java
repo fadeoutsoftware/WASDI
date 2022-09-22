@@ -1,5 +1,9 @@
 package wasdi.shared.data;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -14,6 +18,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.MongoDbSumResult;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.utils.Utils;
 
 import java.io.IOException;
@@ -1529,6 +1534,48 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					.sort(new Document("operationDate", -1));
 			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	public List<ProcessWorkspace> getUnfinishedByNode(String sComputingNodeCode) {
+		List<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+
+		try {
+			Bson filter = and(eq("nodeCode", sComputingNodeCode), in("status", Arrays.asList("WAITING", "READY", "CREATED", "RUNNING")));
+			Bson sort = and(eq("status", 1L), eq("operationType", 1L), eq("operationSubType", 1L));
+
+			FindIterable<Document> oDocuments = getCollection(m_sThisCollection)
+					.find(filter)
+					.sort(sort);
+
+			fillList(aoReturnList, oDocuments, ProcessWorkspace.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	public List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... statuses) {
+		List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoReturnList = new ArrayList<>();
+
+		try {
+			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(Arrays.asList(
+					new Document("$match",
+							new Document("nodeCode", "wasdi").append("status",
+									new Document("$in", Arrays.asList(statuses)))),
+					new Document("$group",
+							new Document("_id", new Document("operationType", "$operationType")
+									.append("operationSubType", "$operationSubType").append("status", "$status"))
+											.append("count", new Document("$sum", 1L))),
+					new Document("$sort",
+							new Document("operationType", 1L).append("operationSubType", 1L).append("status", 1L))));
+
+			fillList(aoReturnList, oDocuments, ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult.class);
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}

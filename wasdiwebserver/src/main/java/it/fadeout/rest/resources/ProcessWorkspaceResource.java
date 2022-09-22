@@ -1,6 +1,6 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_READ;
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,9 +25,11 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
@@ -1190,7 +1192,7 @@ public class ProcessWorkspaceResource {
 		}
 
 		try {
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), WORKSPACE_READ)) {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
 				return lRunningTime;
 			}
 
@@ -1272,6 +1274,125 @@ public class ProcessWorkspaceResource {
 		}
 
 		return lRunningTime;
+	}
+
+	@GET
+	@Path("/queuesStatus")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("nodeCode") String sNodeCode,
+			@QueryParam("statuses") String sStatuses) {
+		Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus");
+
+		List<ProcessWorkspaceAggregatedViewModel> aoViewModel = new ArrayList<>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
+			return aoViewModel;
+		}
+
+		try {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
+				return aoViewModel;
+			}
+
+			if (Utils.isNullOrEmpty(sNodeCode)) {
+//				return aoViewModel;
+				sNodeCode = "wasdi";
+			}
+
+			if (Utils.isNullOrEmpty(sStatuses)) {
+//				return aoViewModel;
+				sStatuses = "WAITING,READY,CREATED,RUNNING,DONE,ERROR,STOPPED";
+			}
+
+			String[] asStatuses = sStatuses.split(",");
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+
+			List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoResultsList =
+					oProcessWorkspaceRepository.getQueuesByNodeAndStatuses(sNodeCode, asStatuses);
+
+			Map<String, Map<String, Map<String, Integer>>> aoPWAggregatedMap = new HashMap<>();
+
+			for (ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult oResult : aoResultsList) {
+				String sOperationType = oResult.getOperationType();
+
+				Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(sOperationType);
+
+				if (aoOperationTypeMap == null) {
+					aoOperationTypeMap = new HashMap<>();
+				}
+				aoPWAggregatedMap.put(sOperationType, aoOperationTypeMap);
+
+
+
+				String sOperationSubType = oResult.getOperationSubType();
+				if (sOperationSubType == null) {
+					sOperationSubType = "";
+				}
+
+				Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get(sOperationSubType);
+
+				if (aoOperationSubTypeMap == null) {
+					aoOperationSubTypeMap = new HashMap<>();
+					aoOperationTypeMap.put(sOperationSubType, aoOperationSubTypeMap);
+				}
+
+
+
+				String sStatus = oResult.getStatus();
+				Integer iCount = oResult.getCount();
+				aoOperationSubTypeMap.put(sStatus, iCount);
+			}
+
+			List<SchedulerQueueConfig> aoQueueConfigs = WasdiConfig.Current.scheduler.schedulers;
+
+			for (SchedulerQueueConfig oQueueConfig: aoQueueConfigs) {
+				ProcessWorkspaceAggregatedViewModel oViewModel = new ProcessWorkspaceAggregatedViewModel();
+
+				oViewModel.setSchedulerName(oQueueConfig.name);
+				oViewModel.setOperationType(oQueueConfig.opTypes);
+				oViewModel.setOperationSubType(oQueueConfig.opSubType);
+
+				Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(oQueueConfig.opTypes);
+				if (aoOperationTypeMap != null) {
+					Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get(oQueueConfig.opSubType);
+					if (aoOperationSubTypeMap != null) {
+						Integer iCreated = aoOperationSubTypeMap.get("CREATED");
+						oViewModel.setProcCreated(iCreated);
+
+						Integer iRunning = aoOperationSubTypeMap.get("RUNNING");
+						oViewModel.setProcRunning(iRunning);
+
+						Integer iWaiting = aoOperationSubTypeMap.get("WAITING");
+						oViewModel.setProcWaiting(iWaiting);
+
+						Integer iReady = aoOperationSubTypeMap.get("READY");
+						oViewModel.setProcReady(iReady);
+
+						Integer iDone = aoOperationSubTypeMap.get("DONE");
+						oViewModel.setProcDone(iDone);
+
+						Integer iStopped = aoOperationSubTypeMap.get("STOPPED");
+						oViewModel.setProcStopped(iStopped);
+
+						Integer iError = aoOperationSubTypeMap.get("ERROR");
+						oViewModel.setProcError(iError);
+
+					}
+				}
+
+				aoViewModel.add(oViewModel);
+			}
+
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
+		}
+
+		return aoViewModel;
 	}
 
 }

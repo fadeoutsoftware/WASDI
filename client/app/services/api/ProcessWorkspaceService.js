@@ -306,4 +306,18 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             return this.m_oHttp.get(this.APIURL + '/process/runningTime?userId=' + sUserId +'&dateFrom=' + sDateFrom + '&dateTo=' + sDateTo);
         };
 
+        this.getQueuesStatus = function(sNodeCode, sStatuses) {
+            let sUrl = this.APIURL + '/process/queuesStatus?';
+    
+            if (utilsIsStrNullOrEmpty(sNodeCode) === false) {
+                sUrl += '&nodeCode=' + sNodeCode;
+            }
+    
+            if (utilsIsStrNullOrEmpty(sStatuses) === false) {
+                sUrl += '&statuses=' + sStatuses;
+            }
+    
+            return this.m_oHttp.get(sUrl);
+        };
+
 }]);

@@ -56,6 +56,13 @@ var AdminDashboardController = (function () {
         this.m_oMetricsEntry = null;
         this.m_oMetricsEntryFormatted = null;
 
+        
+        this.m_aoQueuesStatusList = [];
+
+        this.m_sNodeCodeForQueues = "";
+        this.sStatusesForQueues = "";
+
+
         this.m_bIsLoading = true;
 
         this.m_oState = $state;
@@ -603,6 +610,56 @@ var AdminDashboardController = (function () {
                 function (error) {
                     console.log(
                         "AdminDashboardController.getLatestMetricsEntryByNode | error.data.message: ",
+                        error.data.message
+                    );
+
+                    let errorMessage = oController.m_oTranslate.instant(
+                        error.data.message
+                    );
+
+                    utilsVexDialogAlertTop(errorMessage);
+                }
+            );
+    };
+
+
+
+    AdminDashboardController.prototype.getQueuesStatus = function (
+        sNodeCode,
+        sStatuses
+    ) {
+        console.log(
+            "AdminDashboardController.getQueuesStatus | sNodeCode:",
+            sNodeCode
+        );
+        console.log(
+            "AdminDashboardController.getQueuesStatus | sStatuses:",
+            sStatuses
+        );
+
+        this.m_aoQueuesStatusList = [];
+
+        var oController = this;
+
+        this.m_oProcessWorkspaceService
+            .getQueuesStatus(sNodeCode, sStatuses)
+            .then(
+                function (data) {
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        oController.m_aoQueuesStatusList = data.data;
+                    } else {
+                        utilsVexDialogAlertTop(
+                            "GURU MEDITATION<br>ERROR IN FETCHING QUEUES STATUS"
+                        );
+                    }
+
+                    // oController.clearForm();
+
+                    return true;
+                },
+                function (error) {
+                    console.log(
+                        "AdminDashboardController.getQueuesStatus | error.data.message: ",
                         error.data.message
                     );
 
