@@ -193,7 +193,7 @@
                                     <button class="btn btn-wasdi btn-outline-primary" title="Navigate to"
                                         ng-click="m_oController.navigateTo($index)"
                                        style="padding-top: 7px;padding-left: 10px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
-                                        
+                                    
                                         <i class="fa fa-expand mr-0" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -209,6 +209,9 @@
                                 <div class="col-xs-1">
                                     <button class="btn btn-wasdi fa btn-outline-primary" title="Legend"
                                         ng-click="m_oController.showLayerLegend($index)"
+
+                                        ng-style="m_oController.m_aoVisibleBands[$index].showLegend === true ? {'background-color': '#43516A', 'color': 'white' } : {'background-color' : 'white'}"
+                                        
                                         style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
                                         <em class="fa fa-image" aria-hidden="true"></em>
                                     </button>
