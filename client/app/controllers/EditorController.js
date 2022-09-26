@@ -905,8 +905,12 @@ var EditorController = (function () {
 
             if (!bAlreadyPublished) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                utilsVexCloseDialogAfter(4000, oDialog);
+                utilsVexCloseDialogAfter(4000, oDialog);  
             }
+
+            if (oController.m_aoVisibleBands.length === 0) {
+                    oController.setActiveTab(1);
+            } 
 
             if (!utilsIsObjectNullOrUndefined(data.data) && data.data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.data.messageResult)) {
                 /*if the band was published*/
