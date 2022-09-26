@@ -5,7 +5,7 @@
 
 var WappsController = (function() {
 
-    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService) {
+    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService, $timeout) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -24,6 +24,7 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         this.m_oModalService = oModalService;
         this.m_oConstantsService = oConstantsService;
+        this.m_oTimeout = $timeout; 
         // this.m_sSearchTextApp = "";
 
         $scope.close = function(result) {
@@ -198,8 +199,16 @@ var WappsController = (function() {
         var oReturnFunctionValue = function(oValue){
             if (oValue === true)
             {
-                oController.m_oProcessorService.deleteProcessor(oProcessor.processorId);
-                oController.getProcessorsList();
+                oController.m_oProcessorService.deleteProcessor(oProcessor.processorId).then(function (data) {
+                    console.log(data.data)
+                    oController.m_oTimeout(function () {
+                        oController.getProcessorsList();
+                    }, 2000); 
+                    
+                }
+                    
+                );
+                
             }
         }
 
@@ -337,7 +346,8 @@ var WappsController = (function() {
         'ProductService',
         'ProcessorService',
         'ConstantsService',
-        'ModalService'
+        'ModalService',
+        '$timeout'
     ];
     return WappsController;
 })();
