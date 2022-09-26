@@ -769,9 +769,11 @@
                             <th>Running</th>
                             <th>Waiting</th>
                             <th>Ready</th>
+                            <!--
                             <th>Done</th>
                             <th>Stopped</th>
                             <th>Error</th>
+                            -->
                         </tr>
                     </thead>
                     <tbody>
@@ -788,26 +790,28 @@
                                 {{oQueueStatus.operationSubType}}
                             </td>
                             <td>
-                                {{oQueueStatus.procCreated}}
+                                {{oQueueStatus.procCreated == 0 ? "" : oQueueStatus.procCreated}}
                             </td>
                             <td>
-                                {{oQueueStatus.procRunning}}
+                                {{oQueueStatus.procRunning == 0 ? "" : oQueueStatus.procRunning}}
                             </td>
                             <td>
-                                {{oQueueStatus.procWaiting}}
+                                {{oQueueStatus.procWaiting == 0 ? "" : oQueueStatus.procWaiting}}
                             </td>
                             <td>
-                                {{oQueueStatus.procReady}}
+                                {{oQueueStatus.procReady == 0 ? "" : oQueueStatus.procReady}}
+                            </td>
+                            <!--
+                            <td>
+                                {{oQueueStatus.procDone == 0 ? "" : oQueueStatus.procDone}}
                             </td>
                             <td>
-                                {{oQueueStatus.procDone}}
+                                {{oQueueStatus.procStopped == 0 ? "" : oQueueStatus.procStopped}}
                             </td>
                             <td>
-                                {{oQueueStatus.procStopped}}
+                                {{oQueueStatus.procError == 0 ? "" : oQueueStatus.procError}}
                             </td>
-                            <td>
-                                {{oQueueStatus.procError}}
-                            </td>
+                            -->
                         </tr>
                     </tbody>
                 </table>
