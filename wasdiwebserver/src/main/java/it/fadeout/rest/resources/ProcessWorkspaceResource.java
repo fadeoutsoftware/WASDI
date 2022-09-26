@@ -1363,7 +1363,7 @@ public class ProcessWorkspaceResource {
 			for (SchedulerQueueConfig oQueueConfig: aoQueueConfigs) {
 				ProcessWorkspaceAggregatedViewModel oViewModel = new ProcessWorkspaceAggregatedViewModel();
 
-				asWasdiOperationTypes.remove(oQueueConfig.name);
+				asWasdiOperationTypes.remove(oQueueConfig.opTypes);
 
 				oViewModel.setSchedulerName(oQueueConfig.name);
 				oViewModel.setOperationType(oQueueConfig.opTypes);
