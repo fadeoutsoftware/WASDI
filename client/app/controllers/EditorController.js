@@ -288,7 +288,7 @@
 
         if (this.m_b2DMapModeOn == false) {
 
-            this.setActiveTab(0);
+            //this.setActiveTab(0);
 
             // We are going in 3D MAP
             this.m_oMapService.clearMap();
@@ -1505,6 +1505,8 @@
      */
     EditorController.prototype.openProductInfoDialog = function (oProductInput) {
 
+        var oController = this;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
             controller: "ProductEditorInfoController",
@@ -1518,6 +1520,8 @@
             modal.close.then(function (result) {
                 if (utilsIsObjectNullOrUndefined(result) === true)
                     return false;
+
+                oController.getProductListByWorkspace();
             });
         });
 
@@ -2181,7 +2185,24 @@
             oNode.fileName = this.m_aoProducts[iIndexProduct].fileName;
             oNode.id = this.m_aoProducts[iIndexProduct].fileName;
 
-            //oNode.product = this.m_aoProducts[iIndexProduct];
+            oNode.description = this.m_aoProducts[iIndexProduct].description;
+
+            if (
+                utilsIsStrNullOrEmpty(
+                    this.m_aoProducts[iIndexProduct].description
+                ) === true
+            ) {
+                oNode.description = "";
+            } else {
+                oNode.description =
+                    this.m_aoProducts[iIndexProduct].description;
+            }
+
+            oNode.a_attr = {
+                title: oNode.description,
+            };
+
+
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
             oNode.productIndex = iIndexProduct;
 
