@@ -1,7 +1,7 @@
 /**
  * Created by p.campanella on 24/10/2016.
  */
-var EditorController = (function () {
+ var EditorController = (function () {
     function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
         oModalService, oTranslate, oCatalogService, oProcessorService, oConsoleService, 
@@ -236,13 +236,13 @@ var EditorController = (function () {
 
     EditorController.prototype.isToolbarBtnDropdown = function (btn) {
         return btn.subMenu.length != 0;
-    }
+    };
 
     EditorController.prototype.translateToolbarMenu = function (menuItem) {
         this.m_oTranslate(menuItem.caption_i18n).then(function (text) {
             menuItem.name = text;
-        })
-    }
+        });
+    };
 
     EditorController.prototype.translateToolbarMenuList = function (menuList) {
         for (var i = 0; i < menuList.length; i++) {
@@ -252,7 +252,7 @@ var EditorController = (function () {
                 this.translateToolbarMenuList(menuItem.subMenu);
             }
         }
-    }
+    };
 
     /*********************************************************** VIEW METHODS**********************************************************/
 
@@ -263,7 +263,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.moveTo = function (sPath) {
         this.m_oLocation.path(sPath);
-    }
+    };
 
     /**
      * Set the active tab between Navigation, Colour manipulation, Preview
@@ -680,6 +680,7 @@ var EditorController = (function () {
         if (this.m_aoVisibleBands.length == 1) {
 
             if (!this.m_bFirstZoomOnBandDone) {
+                this.m_iActiveMapPanelTab = 1; 
                 // Make auto zoom only once
                 this.m_bFirstZoomOnBandDone = true;
 
@@ -2404,7 +2405,6 @@ var EditorController = (function () {
         'ProcessorService',
         'ConsoleService',
         '$window'
-
     ];
 
     return EditorController;

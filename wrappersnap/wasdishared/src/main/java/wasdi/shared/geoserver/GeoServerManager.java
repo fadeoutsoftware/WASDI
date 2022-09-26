@@ -415,6 +415,10 @@ public class GeoServerManager {
     	// We use anyhow publishShp for convenience creating the datastore (first step)
     	boolean bRes = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
     	
+    	if (!bRes) {
+    		bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
+    	}
+
 		return bRes;
 	}
     
