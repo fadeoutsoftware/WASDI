@@ -4,10 +4,12 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -1305,7 +1307,8 @@ public class ProcessWorkspaceResource {
 
 			if (Utils.isNullOrEmpty(sStatuses)) {
 //				return aoViewModel;
-				sStatuses = "WAITING,READY,CREATED,RUNNING,DONE,ERROR,STOPPED";
+//				sStatuses = "WAITING,READY,CREATED,RUNNING,DONE,ERROR,STOPPED";
+				sStatuses = "WAITING,READY,CREATED,RUNNING";
 			}
 
 			String[] asStatuses = sStatuses.split(",");
@@ -1350,8 +1353,17 @@ public class ProcessWorkspaceResource {
 
 			List<SchedulerQueueConfig> aoQueueConfigs = WasdiConfig.Current.scheduler.schedulers;
 
+
+			LauncherOperations [] aoOperations = LauncherOperations.class.getEnumConstants();
+			List<String> asWasdiOperationTypes = Arrays.stream(aoOperations)
+					.map(LauncherOperations::name)
+					.collect(Collectors.toList());
+
+
 			for (SchedulerQueueConfig oQueueConfig: aoQueueConfigs) {
 				ProcessWorkspaceAggregatedViewModel oViewModel = new ProcessWorkspaceAggregatedViewModel();
+
+				asWasdiOperationTypes.remove(oQueueConfig.opTypes);
 
 				oViewModel.setSchedulerName(oQueueConfig.name);
 				oViewModel.setOperationType(oQueueConfig.opTypes);
@@ -1373,20 +1385,71 @@ public class ProcessWorkspaceResource {
 						Integer iReady = aoOperationSubTypeMap.get("READY");
 						oViewModel.setProcReady(iReady);
 
-						Integer iDone = aoOperationSubTypeMap.get("DONE");
-						oViewModel.setProcDone(iDone);
-
-						Integer iStopped = aoOperationSubTypeMap.get("STOPPED");
-						oViewModel.setProcStopped(iStopped);
-
-						Integer iError = aoOperationSubTypeMap.get("ERROR");
-						oViewModel.setProcError(iError);
+//						Integer iDone = aoOperationSubTypeMap.get("DONE");
+//						oViewModel.setProcDone(iDone);
+//
+//						Integer iStopped = aoOperationSubTypeMap.get("STOPPED");
+//						oViewModel.setProcStopped(iStopped);
+//
+//						Integer iError = aoOperationSubTypeMap.get("ERROR");
+//						oViewModel.setProcError(iError);
 
 					}
 				}
 
 				aoViewModel.add(oViewModel);
 			}
+
+
+			// create the Default case
+			ProcessWorkspaceAggregatedViewModel oViewModelDefaultCase = new ProcessWorkspaceAggregatedViewModel();
+
+			oViewModelDefaultCase.setSchedulerName("DEFAULT");
+			oViewModelDefaultCase.setOperationType("OTHERS");
+			oViewModelDefaultCase.setOperationSubType("");
+
+			oViewModelDefaultCase.setProcCreated(0);
+			oViewModelDefaultCase.setProcRunning(0);
+			oViewModelDefaultCase.setProcWaiting(0);
+			oViewModelDefaultCase.setProcReady(0);
+//			oViewModelDefaultCase.setProcDone(0);
+//			oViewModelDefaultCase.setProcStopped(0);
+//			oViewModelDefaultCase.setProcError(0);
+
+			// loop through the remaining operation types
+			for (String sWasdiOperationType : asWasdiOperationTypes) {
+
+
+				Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(sWasdiOperationType);
+				if (aoOperationTypeMap != null) {
+					Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get("");
+					if (aoOperationSubTypeMap != null) {
+						Integer iCreated = aoOperationSubTypeMap.get("CREATED");
+						oViewModelDefaultCase.setProcCreated(oViewModelDefaultCase.getProcCreated() + iCreated);
+
+						Integer iRunning = aoOperationSubTypeMap.get("RUNNING");
+						oViewModelDefaultCase.setProcRunning(oViewModelDefaultCase.getProcRunning() + iRunning);
+
+						Integer iWaiting = aoOperationSubTypeMap.get("WAITING");
+						oViewModelDefaultCase.setProcWaiting(oViewModelDefaultCase.getProcWaiting() + iWaiting);
+
+						Integer iReady = aoOperationSubTypeMap.get("READY");
+						oViewModelDefaultCase.setProcReady(oViewModelDefaultCase.getProcReady() + iReady);
+
+//						Integer iDone = aoOperationSubTypeMap.get("DONE");
+//						oViewModelDefaultCase.setProcDone(oViewModelDefaultCase.getProcDone() + iDone);
+//
+//						Integer iStopped = aoOperationSubTypeMap.get("STOPPED");
+//						oViewModelDefaultCase.setProcStopped(oViewModelDefaultCase.getProcStopped() + iStopped);
+//
+//						Integer iError = aoOperationSubTypeMap.get("ERROR");
+//						oViewModelDefaultCase.setProcError(oViewModelDefaultCase.getProcError() + iError);
+
+					}
+				}
+			}
+
+			aoViewModel.add(oViewModelDefaultCase);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
