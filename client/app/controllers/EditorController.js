@@ -1960,104 +1960,208 @@ var EditorController = (function () {
                     // menu showed when a product is selected
                     if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
                         //***************************** PRODUCT ********************************************
-                        oReturnValue =
-                        {
-                            "Download": {
-                                "label": sDownload,
-                                "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
+                        oReturnValue = {
+                            Download: {
+                                label: sDownload,
+                                icon: "fa fa-download",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                        oController.findProductByName($node.original.fileName);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) == false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) == false
+                                    ) {
+                                        oController.findProductByName(
+                                            $node.original.fileName
+                                        );
 
-                                        oController.downloadProductByName($node.original.fileName);
+                                        oController.downloadProductByName(
+                                            $node.original.fileName
+                                        );
                                     }
-                                }
+                                },
                             },
-                            "Share": {
-                                "label": sShare,
-                                "icon": "share-icon-context-menu-jstree",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "separator_before": true,
-                                "action": function (obj) {
+                            Share: {
+                                label: sShare,
+                                icon: "fa fa-share-alt",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                separator_before: true,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                oController.openProductShareDialog(oController.m_aoProducts[iIndexProducts]);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) === false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) === false
+                                    ) {
+                                        var iNumberOfProdcuts =
+                                            oController.m_aoProducts.length;
+                                        for (
+                                            var iIndexProducts = 0;
+                                            iIndexProducts < iNumberOfProdcuts;
+                                            iIndexProducts++
+                                        ) {
+                                            if (
+                                                oController.m_aoProducts[
+                                                    iIndexProducts
+                                                ].fileName ===
+                                                $node.original.fileName
+                                            ) {
+                                                oController.openProductShareDialog(
+                                                    oController.m_aoProducts[
+                                                        iIndexProducts
+                                                    ]
+                                                );
                                                 break;
                                             }
-
                                         }
-
                                     }
-                                }
+                                },
                             },
-                            "SendToFtp": {
-                                "label": sSendToFtp,
-                                "icon": "fa fa-upload",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
-                                    var sSourceFileName = $node.original.fileName;
-                                    var oFound = oController.findProductByFileName(sSourceFileName);
+                            SendToFtp: {
+                                label: sSendToFtp,
+                                icon: "fa fa-upload",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
+                                    var sSourceFileName =
+                                        $node.original.fileName;
+                                    var oFound =
+                                        oController.findProductByFileName(
+                                            sSourceFileName
+                                        );
 
-                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
-                                }
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oFound) ==
+                                        false
+                                    )
+                                        oController.openTransferToFtpDialog(
+                                            oFound
+                                        );
+                                },
                             }, //openTransferToFtpDialog
-                            "DeleteSelectedProduct": {
-                                "label": oController.getDeleteLabel(),
-                                "icon": "delete-icon-context-menu-jstree",
+                            DeleteSelectedProduct: {
+                                label: oController.getDeleteLabel(),
+                                icon: "delete-icon-context-menu-jstree",
 
-                                "action": function (obj) {
-
-                                    let asSelectedProducts = oController.getSelectedNodesFromTree($node.original.fileName);
+                                action: function (obj) {
+                                    let asSelectedProducts =
+                                        oController.getSelectedNodesFromTree(
+                                            $node.original.fileName
+                                        );
                                     // first, check that something were selected
                                     if (asSelectedProducts.length > 0) {
-                                        utilsVexDialogConfirm(sDeleteManyConfirm1 + asSelectedProducts.length + sDeleteManyConfirm2, function (value) {
-                                            if (value) {
-                                                bDeleteFile = true;
-                                                bDeleteLayer = true;
-                                                this.temp = $node;
-                                                var that = this;
-                                                oController.m_oProductService.deleteProductListFromWorkspace(asSelectedProducts, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                    // for each in asSelectedProduct
-                                                    $.each(asSelectedProducts, function (i, val) {
-                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                                    });
-                                                    /// deselect all 
-                                                    $("#jstree").jstree().deselect_all(true);
-
-                                                }, (function (error) {
-                                                    utilsVexDialogAlertTop(sDeleteError);
-                                                }));
+                                        utilsVexDialogConfirm(
+                                            sDeleteManyConfirm1 +
+                                                asSelectedProducts.length +
+                                                sDeleteManyConfirm2,
+                                            function (value) {
+                                                if (value) {
+                                                    bDeleteFile = true;
+                                                    bDeleteLayer = true;
+                                                    this.temp = $node;
+                                                    var that = this;
+                                                    oController.m_oProductService
+                                                        .deleteProductListFromWorkspace(
+                                                            asSelectedProducts,
+                                                            oController
+                                                                .m_oActiveWorkspace
+                                                                .workspaceId,
+                                                            bDeleteFile,
+                                                            bDeleteLayer
+                                                        )
+                                                        .then(
+                                                            function (data) {
+                                                                // for each in asSelectedProduct
+                                                                $.each(
+                                                                    asSelectedProducts,
+                                                                    function (
+                                                                        i,
+                                                                        val
+                                                                    ) {
+                                                                        oController.deleteProductInNavigation(
+                                                                            oController.m_aoVisibleBands,
+                                                                            that
+                                                                                .temp
+                                                                                .children_d
+                                                                        );
+                                                                    }
+                                                                );
+                                                                /// deselect all
+                                                                $("#jstree")
+                                                                    .jstree()
+                                                                    .deselect_all(
+                                                                        true
+                                                                    );
+                                                            },
+                                                            function (error) {
+                                                                utilsVexDialogAlertTop(
+                                                                    sDeleteError
+                                                                );
+                                                            }
+                                                        );
+                                                }
                                             }
-                                        });
+                                        );
                                     }
-
-                                }
+                                },
                             },
-                            "Properties": {
-                                "label": sProperties,
-                                "icon": "info-icon-context-menu-jstree",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "separator_before": true,
-                                "action": function (obj) {
+                            Properties: {
+                                label: sProperties,
+                                icon: "info-icon-context-menu-jstree",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                separator_before: true,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) === false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) === false
+                                    ) {
+                                        var iNumberOfProdcuts =
+                                            oController.m_aoProducts.length;
+                                        for (
+                                            var iIndexProducts = 0;
+                                            iIndexProducts < iNumberOfProdcuts;
+                                            iIndexProducts++
+                                        ) {
+                                            if (
+                                                oController.m_aoProducts[
+                                                    iIndexProducts
+                                                ].fileName ===
+                                                $node.original.fileName
+                                            ) {
+                                                oController.openProductInfoDialog(
+                                                    oController.m_aoProducts[
+                                                        iIndexProducts
+                                                    ]
+                                                );
                                                 break;
                                             }
-
                                         }
-
                                     }
-                                }
-                            }
+                                },
+                            },
                         };
                     }
                     return oReturnValue;
