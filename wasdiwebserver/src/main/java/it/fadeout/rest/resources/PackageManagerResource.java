@@ -89,7 +89,7 @@ public class PackageManagerResource {
 			aoPackages.addAll(aoPackagesObsolete);
 		}
 
-		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName);
+		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
 		Collections.sort(aoPackages, oComparator);
 
 		return aoPackages;
