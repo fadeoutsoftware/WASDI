@@ -528,6 +528,8 @@ Here in the following you can find the lines to add to the run method. Beware, t
        wasdi.wasdiLog("No images available, nothing to do.")
        wasdi.updateStatus("DONE", 100)
        return
+	   
+   # Initialize the image to process as None
    sImageToProcess = None
    
    # Take the first S2 image
