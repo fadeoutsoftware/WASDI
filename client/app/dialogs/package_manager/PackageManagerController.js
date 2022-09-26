@@ -72,7 +72,7 @@ let PackageManagerController = (function () {
                         .then(function () {
                             oController.m_oTimeout(function () {
                                 oController.fetchPackageList();
-                            }, 4000);
+                            }, 2000);
                         });
                 }
                 oController.m_bIsLoading = false;
@@ -84,25 +84,67 @@ let PackageManagerController = (function () {
         sProcessorId,
         sPackageName
     ) {
+        let aPackageInfo = sPackageName.split("==");
+
+        console.log(aPackageInfo);
+
+        let aPackageInfoTrimmed = aPackageInfo.map((sElement) => {
+            return sElement.replace(/["]+/g, "");
+        });
+        let sPackageInfoName = aPackageInfoTrimmed[0];
+        let sPackageInfoVersion = "";
+        if (aPackageInfoTrimmed[1]) {
+            sPackageInfoVersion = aPackageInfoTrimmed[1];
+        }
+
+        console.log(sPackageInfoName);
+        console.log(sPackageInfoVersion);
+
         let oController = this;
         let sConfirmMsg1 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_1");
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_2");
-        utilsVexDialogConfirm(
-            sConfirmMsg1 + sPackageName + sConfirmMsg2,
-            function (value) {
-                if (value) {
-                    oController.m_oPackageManagerService
-                        .addLibrary(sProcessorId, sPackageName)
-                        .then(function () {
-                            oController.m_bIsLoading = true;
-                            oController.m_oTimeout(function () {
-                                oController.fetchPackageList();
-                            }, 4000);
-                        });
+
+        if (utilsIsStrNullOrEmpty(sPackageInfoVersion) === false) {
+            console.log("The version exists!");
+            sAddCommand = sPackageInfoName + "/" + sPackageInfoVersion;
+
+            utilsVexDialogConfirm(
+                sConfirmMsg1 +
+                    sPackageInfoName +
+                    sPackageInfoVersion +
+                    sConfirmMsg2,
+                function (value) {
+                    if (value) {
+                        oController.m_oPackageManagerService
+                            .addLibrary(sProcessorId, sAddCommand)
+                            .then(function () {
+                                oController.m_bIsLoading = true;
+                                oController.m_oTimeout(function () {
+                                    oController.fetchPackageList();
+                                }, 4000);
+                            });
+                    }
+                    oController.m_bIsLoading = false;
                 }
-                oController.m_bIsLoading = false;
-            }
-        );
+            );
+        } else {
+            utilsVexDialogConfirm(
+                sConfirmMsg1 + sPackageInfoName + sConfirmMsg2,
+                function (value) {
+                    if (value) {
+                        oController.m_oPackageManagerService
+                            .addLibrary(sProcessorId, sPackageName)
+                            .then(function () {
+                                oController.m_bIsLoading = true;
+                                oController.m_oTimeout(function () {
+                                    oController.fetchPackageList();
+                                }, 4000);
+                            });
+                    }
+                    oController.m_bIsLoading = false;
+                }
+            );
+        }
     };
 
     PackageManagerController.prototype.ugradeLibrary = function (

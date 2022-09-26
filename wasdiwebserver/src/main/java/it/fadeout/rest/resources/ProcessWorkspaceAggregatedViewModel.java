@@ -22,8 +22,8 @@ public class ProcessWorkspaceAggregatedViewModel {
 	private Integer procRunning;
 	private Integer procCreated;
 
-	private Integer procError;
-	private Integer procDone;
-	private Integer procStopped;
+//	private Integer procError;
+//	private Integer procDone;
+//	private Integer procStopped;
 
 }

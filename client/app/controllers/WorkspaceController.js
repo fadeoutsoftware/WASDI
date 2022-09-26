@@ -429,6 +429,7 @@ var WorkspaceController = (function () {
 
         var oController = this;
         let oWorkspaceViewModel = undefined;
+        let oActiveWorkspace = undefined; 
 
         var sConfirmMsg1 = this.m_oTranslate.instant("MSG_DELETE_WS_1");
         var sConfirmMsg2 = this.m_oTranslate.instant("MSG_DELETE_WS_2");
@@ -440,10 +441,22 @@ var WorkspaceController = (function () {
                     bDeleteFile = true;
                     bDeleteLayer = true;
     
-            
+                        
     
                         oController.m_oWorkspaceService.DeleteWorkspace(oWorkspaceViewModel , bDeleteFile, bDeleteLayer)
                             .then(function () {
+                                oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                                
+                                if (_.isEqual(oActiveWorkspace, oWorkspaceViewModel)) {
+                                //clear workspace data from View Model
+                                oWorkspaceViewModel = null;
+                                console.log(oWorkspaceViewModel)
+                                //set active workspace to null
+                                oController.m_oConstantsService.setActiveWorkspace(
+                                    oWorkspaceViewModel
+                                );
+                                }
+                            
                                 oController.deselectWorskpace();
                                 oController.fetchWorkspaceInfoList();
                             },(function () {
