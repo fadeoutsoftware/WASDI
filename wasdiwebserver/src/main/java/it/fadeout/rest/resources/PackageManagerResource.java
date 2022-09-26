@@ -1,7 +1,9 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -72,8 +74,32 @@ public class PackageManagerResource {
 	@GET
 	@Path("/listPackages")
 	public List<PackageViewModel> getListPackages(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
+
+		List<PackageViewModel> aoPackages = new ArrayList<>();
+
+		List<PackageViewModel> aoPackagesUpToDate = listPackagesWithFlag(sSessionId, sName, "u");
+		if (aoPackagesUpToDate != null) {
+			aoPackages.addAll(aoPackagesUpToDate);
+		}
+
+		List<PackageViewModel> aoPackagesObsolete = listPackagesWithFlag(sSessionId, sName, "o");
+		if (aoPackagesObsolete != null) {
+			aoPackages.addAll(aoPackagesObsolete);
+		}
+
+		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName);
+		Collections.sort(aoPackages, oComparator);
+
+		return aoPackages;
+	}
+
+	@GET
+	@Path("/listPackagesWithFlag")
+	public List<PackageViewModel> listPackagesWithFlag(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("flag") String sFlag) throws Exception {
-		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + "Flag: " + sFlag + " )");
+		Utils.debugLog("PackageManagerResource.listPackagesWithFlag( " + "Name: " + sName + ", " + "Flag: " + sFlag + " )");
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
@@ -85,7 +111,7 @@ public class PackageManagerResource {
 
 			aoPackages = oPackageManager.listPackages(sFlag);
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.getListPackages: " + oEx);
+			Utils.debugLog("PackageManagerResource.listPackagesWithFlag: " + oEx);
 		}
 
 		return aoPackages;
