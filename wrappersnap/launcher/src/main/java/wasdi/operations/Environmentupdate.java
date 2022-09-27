@@ -94,7 +94,7 @@ public class Environmentupdate extends Operation {
 									oParam.getExchange(), sInfo, oParam.getExchange());
 						}
 
-						if (sNodeCode.equals("wasdi")) {
+						if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
 							Thread.sleep(2000);
 
 							oEngine.refreshPackagesInfo(oParameter);
