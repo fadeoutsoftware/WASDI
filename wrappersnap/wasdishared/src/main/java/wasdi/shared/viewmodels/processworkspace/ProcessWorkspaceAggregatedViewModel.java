@@ -17,10 +17,10 @@ public class ProcessWorkspaceAggregatedViewModel {
 	private String operationType;
 	private String operationSubType;
 
-	private Integer procCreated;
-	private Integer procRunning;
-	private Integer procWaiting;
-	private Integer procReady;
+	private Integer procCreated = 0;
+	private Integer procRunning = 0;
+	private Integer procWaiting = 0;
+	private Integer procReady = 0;
 
 //	private Integer procError;
 //	private Integer procDone;
