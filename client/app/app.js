@@ -136,6 +136,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
+    //AdminDashboard
+    $stateProvider.state('root.adminDashboard', {
+        url: '/adminDashboard',
+        views: {
+            'maincontent': {templateUrl: 'partials/adminDashboard.html', controller: 'AdminDashboardController'}
+        }
+    });    
+
     //EDITOR
     $stateProvider.state('root.editor', {
         url: '/{workSpace}/editor',
