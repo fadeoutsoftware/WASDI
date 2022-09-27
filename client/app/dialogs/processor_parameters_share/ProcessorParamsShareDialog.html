@@ -24,9 +24,7 @@
             <!-- BODY -->
             <div class="modal-body d-flex flex-column">
                 <div class="row mx-3">
-                    <form
-                        class="d-flex flex-row align-items-center"
-                    >
+                    <form class="d-flex flex-row align-items-center">
                         <div class="col-8 form-group mr-3" style="width: 90%">
                             <label for="wasdiEmail" class="h4"
                                 >{{"DIALOG_PARAMS_SHARE_EMAIL" | translate}}
@@ -49,7 +47,9 @@
                         </button>
                     </form>
                 </div>
+
                 <hr class="divider-line-style1" />
+
                 <div
                     class="row m-3"
                     ng-show="m_oController.m_aoParametersPermissionsList.length > 0"
@@ -58,7 +58,9 @@
                         {{"DIALOG_PARAMS_SHARE_ACTIVE" | translate}}:
                     </h4>
                     <table class="table table-hover">
-                        <thead></thead>
+                        <caption style="caption-side: bottom">
+                            {{"DIALOG_PARAMS_SHARE_ACTIVE" | translate}}
+                        </caption>
                         <tbody>
                             <tr
                                 ng-repeat="oParametersPermission in m_oController.m_aoParametersPermissionsList"
