@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;

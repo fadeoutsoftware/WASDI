@@ -101,17 +101,16 @@ public class Redeployprocessor extends Operation {
 				            
 				            if (!bRet) {
 				            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
-				            } else {
-
-				            	if (sNodeCode.equals("wasdi")) {
-				            		Thread.sleep(2000);
-
-				            		oEngine.refreshPackagesInfo(oParameter);
-				            	}
 				            }
 				            
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
 	        			}
+
+		            	if (sNodeCode.equals("wasdi")) {
+		            		Thread.sleep(2000);
+
+		            		oEngine.refreshPackagesInfo(oParameter);
+		            	}
 	        		}	        		
 	        	}
 	        	
