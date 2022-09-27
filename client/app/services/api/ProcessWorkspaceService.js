@@ -308,15 +308,21 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
 
         this.getQueuesStatus = function(sNodeCode, sStatuses) {
             let sUrl = this.APIURL + '/process/queuesStatus?';
-    
+
             if (utilsIsStrNullOrEmpty(sNodeCode) === false) {
                 sUrl += '&nodeCode=' + sNodeCode;
             }
-    
+
             if (utilsIsStrNullOrEmpty(sStatuses) === false) {
                 sUrl += '&statuses=' + sStatuses;
             }
-    
+
+            return this.m_oHttp.get(sUrl);
+        };
+
+        this.getAvailableNodesSortedByScore = function() {
+            let sUrl = this.APIURL + '/process/nodesByScore?';
+
             return this.m_oHttp.get(sUrl);
         };
 

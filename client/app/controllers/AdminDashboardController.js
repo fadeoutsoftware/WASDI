@@ -56,11 +56,14 @@ var AdminDashboardController = (function () {
         this.m_oMetricsEntry = null;
         this.m_oMetricsEntryFormatted = null;
 
-        
+
         this.m_aoQueuesStatusList = [];
 
         this.m_sNodeCodeForQueues = "";
         this.sStatusesForQueues = "";
+
+
+        this.m_aoAvailableNodesSortedByScoreList = [];
 
 
         this.m_bIsLoading = true;
@@ -624,18 +627,7 @@ var AdminDashboardController = (function () {
 
 
 
-    AdminDashboardController.prototype.getQueuesStatus = function (
-        sNodeCode,
-        sStatuses
-    ) {
-        console.log(
-            "AdminDashboardController.getQueuesStatus | sNodeCode:",
-            sNodeCode
-        );
-        console.log(
-            "AdminDashboardController.getQueuesStatus | sStatuses:",
-            sStatuses
-        );
+    AdminDashboardController.prototype.getQueuesStatus = function (sNodeCode, sStatuses) {
 
         this.m_aoQueuesStatusList = [];
 
@@ -660,6 +652,42 @@ var AdminDashboardController = (function () {
                 function (error) {
                     console.log(
                         "AdminDashboardController.getQueuesStatus | error.data.message: ",
+                        error.data.message
+                    );
+
+                    let errorMessage = oController.m_oTranslate.instant(
+                        error.data.message
+                    );
+
+                    utilsVexDialogAlertTop(errorMessage);
+                }
+            );
+    };
+
+    AdminDashboardController.prototype.getAvailableNodesSortedByScore = function () {
+        console.log("AdminDashboardController.getAvailableNodesSortedByScore");
+
+        this.m_aoAvailableNodesSortedByScoreList = [];
+
+        var oController = this;
+
+        this.m_oProcessWorkspaceService
+            .getAvailableNodesSortedByScore()
+            .then(
+                function (data) {
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        oController.m_aoAvailableNodesSortedByScoreList = data.data;
+                    } else {
+                        utilsVexDialogAlertTop(
+                            "GURU MEDITATION<br>ERROR IN FETCHING AVAILABLE NODES SORTED BY SCORE"
+                        );
+                    }
+
+                    return true;
+                },
+                function (error) {
+                    console.log(
+                        "AdminDashboardController.getAvailableNodesSortedByScore | error.data.message: ",
                         error.data.message
                     );
 

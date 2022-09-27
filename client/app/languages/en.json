@@ -437,6 +437,9 @@
 	"DIALOG_MANAGE_QUEUES_STATUS_STATUSES": "Statuses",
 	"DIALOG_MANAGE_QUEUES_STATUS_RETRIEVE": "Retrieve",
 
+	"DIALOG_FETCH_NODES_TITLE": "Fetch Nodes Sorted by Score",
+	"DIALOG_FETCH_NODES_FETCH": "Fetch",
+
 	
 	"DIALOG_WS_INFO_TITLE": "Workspace Details - ",
 	"DIALOG_WS_INFO_OWNER": " Owner :",
