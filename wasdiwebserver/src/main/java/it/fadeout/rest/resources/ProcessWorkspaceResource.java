@@ -5,6 +5,8 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +35,7 @@ import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -44,8 +47,12 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.monitoring.Disk;
+import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
@@ -1470,6 +1477,94 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoViewModel;
+	}
+
+	@GET
+	@Path("/nodesByScore")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(@HeaderParam("x-session-token") String sSessionId) {
+		Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore");
+
+		List<NodeScoreByProcessWorkspaceViewModel> aoViewModels = new ArrayList<>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
+			return aoViewModels;
+		}
+
+		try {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
+				return aoViewModels;
+			}
+
+			NodeRepository oNodeRepository = new NodeRepository();
+			List<Node> aoNodes = oNodeRepository.getNodesList();
+
+			Node oNodeWasdi = new Node();
+			oNodeWasdi.setNodeCode("wasdi");
+
+			aoNodes.add(oNodeWasdi);
+
+			for (Node oNode:aoNodes) {
+				if (oNode.getActive()) {
+					String sNodeCode = oNode.getNodeCode();
+
+					MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+					MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
+
+					if (oMetricsEntry != null) {
+						List<Disk> aoDisks = oMetricsEntry.getDisks();
+
+						if (aoDisks != null) {
+							for (Disk oDisk : aoDisks) {
+								Double oPercentageUsed = oDisk.getPercentageUsed();
+
+								if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= 90) {
+									NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
+									oViewModel.setNodeCode(sNodeCode);
+									oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
+									oViewModel.setDiskPercentageUsed(oPercentageUsed);
+									oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
+									oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
+									oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());
+
+									aoViewModels.add(oViewModel);
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			for (NodeScoreByProcessWorkspaceViewModel oViewModel : aoViewModels) {
+				List<ProcessWorkspaceAggregatedViewModel> ao = getQueuesStatus(sSessionId, oViewModel.getNodeCode(), null);
+
+				int iTotalNumberOFUnfinishedProcesses = 0;
+
+				if (ao != null) {
+					for (ProcessWorkspaceAggregatedViewModel o : ao) {
+						iTotalNumberOFUnfinishedProcesses += o.getNumberOfUnfinishedProcesses();
+					}
+				}
+
+				oViewModel.setNumberOfProcesses(iTotalNumberOFUnfinishedProcesses);
+			}
+
+
+			Comparator<NodeScoreByProcessWorkspaceViewModel> oComparator = Comparator
+					.comparing(NodeScoreByProcessWorkspaceViewModel::getNumberOfProcesses)
+					.thenComparing(NodeScoreByProcessWorkspaceViewModel::getDiskAbsoluteAvailable, Comparator.reverseOrder());
+
+			Collections.sort(aoViewModels, oComparator);
+
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: " + oEx);
+		}
+
+		return aoViewModels;
 	}
 
 }
