@@ -77,7 +77,7 @@ public class Deployprocessor extends Operation {
 	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | sNodeCode: " + sNodeCode);
 	            			m_oLocalLogger.debug("Deployprocessor.executeOperation | WasdiConfig.Current.nodeCode: " + WasdiConfig.Current.nodeCode);
 
-            				if (sNodeCode.equals("wasdi")) {
+            				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
             					Thread.sleep(2000);
 
             					oEngine.refreshPackagesInfo(oParameter);

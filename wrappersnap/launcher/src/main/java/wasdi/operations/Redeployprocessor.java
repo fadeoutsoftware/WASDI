@@ -106,7 +106,7 @@ public class Redeployprocessor extends Operation {
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
 	        			}
 
-		            	if (sNodeCode.equals("wasdi")) {
+		            	if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
 		            		Thread.sleep(2000);
 
 		            		oEngine.refreshPackagesInfo(oParameter);
