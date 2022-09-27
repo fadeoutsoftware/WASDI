@@ -66,6 +66,7 @@ If you already know WASDI features and you are a Python developer check out the 
    LibWorkspaces.rst
    SynchAsynch.rst
    C#Tutorial.rst
+   SiteMap.rst
    UITutorial.rst
    javascript/JavascriptTutorialHtml.rst
    JavascriptTutorial.rst

@@ -1327,8 +1327,8 @@ public class ProcessWorkspaceResource {
 
 				if (aoOperationTypeMap == null) {
 					aoOperationTypeMap = new HashMap<>();
+					aoPWAggregatedMap.put(sOperationType, aoOperationTypeMap);
 				}
-				aoPWAggregatedMap.put(sOperationType, aoOperationTypeMap);
 
 
 
@@ -1425,25 +1425,39 @@ public class ProcessWorkspaceResource {
 					Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get("");
 					if (aoOperationSubTypeMap != null) {
 						Integer iCreated = aoOperationSubTypeMap.get("CREATED");
-						oViewModelDefaultCase.setProcCreated(oViewModelDefaultCase.getProcCreated() + iCreated);
+						if (iCreated != null) {
+							oViewModelDefaultCase.setProcCreated(oViewModelDefaultCase.getProcCreated() + iCreated);
+						}
 
 						Integer iRunning = aoOperationSubTypeMap.get("RUNNING");
-						oViewModelDefaultCase.setProcRunning(oViewModelDefaultCase.getProcRunning() + iRunning);
+						if (iRunning != null) {
+							oViewModelDefaultCase.setProcRunning(oViewModelDefaultCase.getProcRunning() + iRunning);
+						}
 
 						Integer iWaiting = aoOperationSubTypeMap.get("WAITING");
-						oViewModelDefaultCase.setProcWaiting(oViewModelDefaultCase.getProcWaiting() + iWaiting);
+						if (iWaiting != null) {
+							oViewModelDefaultCase.setProcWaiting(oViewModelDefaultCase.getProcWaiting() + iWaiting);
+						}
 
 						Integer iReady = aoOperationSubTypeMap.get("READY");
-						oViewModelDefaultCase.setProcReady(oViewModelDefaultCase.getProcReady() + iReady);
+						if (iReady != null) {
+							oViewModelDefaultCase.setProcReady(oViewModelDefaultCase.getProcReady() + iReady);
+						}
 
 //						Integer iDone = aoOperationSubTypeMap.get("DONE");
-//						oViewModelDefaultCase.setProcDone(oViewModelDefaultCase.getProcDone() + iDone);
+//						if (iDone != null) {
+//							oViewModelDefaultCase.setProcDone(oViewModelDefaultCase.getProcDone() + iDone);
+//						}
 //
 //						Integer iStopped = aoOperationSubTypeMap.get("STOPPED");
-//						oViewModelDefaultCase.setProcStopped(oViewModelDefaultCase.getProcStopped() + iStopped);
+//						if (iStopped != null) {
+//							oViewModelDefaultCase.setProcStopped(oViewModelDefaultCase.getProcStopped() + iStopped);
+//						}
 //
 //						Integer iError = aoOperationSubTypeMap.get("ERROR");
-//						oViewModelDefaultCase.setProcError(oViewModelDefaultCase.getProcError() + iError);
+//						if (iError != null) {
+//							oViewModelDefaultCase.setProcError(oViewModelDefaultCase.getProcError() + iError);
+//						}
 
 					}
 				}

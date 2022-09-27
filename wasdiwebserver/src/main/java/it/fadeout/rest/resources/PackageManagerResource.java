@@ -1,7 +1,9 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -9,16 +11,20 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
 
@@ -72,8 +78,72 @@ public class PackageManagerResource {
 	@GET
 	@Path("/listPackages")
 	public List<PackageViewModel> getListPackages(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
+
+		List<PackageViewModel> aoPackages = new ArrayList<>();
+
+		String sContentAsJson = readPackagesInfoFile(sSessionId, sName);
+
+		if (Utils.isNullOrEmpty(sContentAsJson)) {
+			Utils.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
+			return aoPackages;
+		}
+
+		PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
+
+		if (oPackageManagerFullInfoViewModel == null) {
+			Utils.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json content could not be parsed");
+			return aoPackages;
+		}
+
+		List<PackageViewModel> aoPackagesOutdated = oPackageManagerFullInfoViewModel.getOutdated();
+
+		if (aoPackagesOutdated != null) {
+			aoPackages.addAll(aoPackagesOutdated);
+		}
+
+		List<PackageViewModel> aoPackagesUptodate = oPackageManagerFullInfoViewModel.getUptodate();
+
+		if (aoPackagesUptodate != null) {
+			aoPackages.addAll(aoPackagesUptodate);
+		}
+
+		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
+		Collections.sort(aoPackages, oComparator);
+
+		return aoPackages;
+	}
+
+	@GET
+	@Path("/listPackagesLive")
+	public List<PackageViewModel> getListPackagesLive(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("PackageManagerResource.getListPackagesLive( " + "Name: " + sName + ", " + " )");
+
+		List<PackageViewModel> aoPackages = new ArrayList<>();
+
+		List<PackageViewModel> aoPackagesUptodate = listPackagesWithFlag(sSessionId, sName, "u");
+		if (aoPackagesUptodate != null) {
+			aoPackages.addAll(aoPackagesUptodate);
+		}
+
+		List<PackageViewModel> aoPackagesOutdated = listPackagesWithFlag(sSessionId, sName, "o");
+		if (aoPackagesOutdated != null) {
+			aoPackages.addAll(aoPackagesOutdated);
+		}
+
+		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
+		Collections.sort(aoPackages, oComparator);
+
+		return aoPackages;
+	}
+
+	@GET
+	@Path("/listPackagesWithFlag")
+	public List<PackageViewModel> listPackagesWithFlag(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("flag") String sFlag) throws Exception {
-		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + "Flag: " + sFlag + " )");
+		Utils.debugLog("PackageManagerResource.listPackagesWithFlag( " + "Name: " + sName + ", " + "Flag: " + sFlag + " )");
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
@@ -85,7 +155,7 @@ public class PackageManagerResource {
 
 			aoPackages = oPackageManager.listPackages(sFlag);
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.getListPackages: " + oEx);
+			Utils.debugLog("PackageManagerResource.listPackagesWithFlag: " + oEx);
 		}
 
 		return aoPackages;
