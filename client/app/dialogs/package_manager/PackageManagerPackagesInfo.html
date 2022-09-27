@@ -8,39 +8,36 @@
                     {{m_oController.m_sPackageManagerVersion}}</span
                 >
             </h3>
-
-            <form class="form-inline" action="">
-                <div class="form-group">
-                    <input
-                        type="text"
-                        class="form-control"
-                        placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
-                        ng-model="m_oController.sPackageName"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <div ng-if="!m_oController.bIsEditing">
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <form class="form-inline" action="">
+                    <div class="form-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
+                            ng-model="m_oController.sPackageName"
+                        />
+                    </div>
+                    <div class="form-group">
                         <button
                             type="button"
                             class="btn btn-primary btn-wasdi"
                             ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.sPackageName)"
+                            ng-if="!m_oController.bIsEditing"
                         >
                             {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
                         </button>
                     </div>
+                </form>
+                <div class="col-xs-3 my-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Search Packages"
+                        ng-model="searchPackages"
+                    />
                 </div>
-            </form>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-3 my-3">
-            <input
-                type="text"
-                class="form-control"
-                placeholder="Search Packages"
-                ng-model="searchPackages"
-            />
+            </div>
         </div>
     </div>
     <div class="loadIcon" ng-hide="!m_oController.m_bIsLoading">
@@ -141,22 +138,25 @@
                             <button
                                 class="btn btn-success btn-wasdi btn-xs"
                                 ng-disabled="package.latestVersion == null"
-                                ng-click="m_oController.upgradeLibrary(m_oController.sProcessorId, package.packageName, package.latestVersion)"
+                                ng-click="m_oController.upgradeLibrary(m_oController.sProcessorId, package.packageName, package.latestVersion)" title="Update"
                             >
+                            
                                 <i
-                                    class="fa fa-plus"
+                                    class="fa fa-arrow-up"
                                     aria-hidden="true"
-                                    style="margin-right: 0px"
+                                    style="margin-right: 0px"  
                                 ></i>
                             </button>
                             <button
                                 class="btn btn-primary btn-wasdi btn-xs"
                                 ng-click="m_oController.removeLibrary(m_oController.sProcessorId, package.packageName)"
+                                title="Remove"
                             >
                                 <i
                                     class="fa fa-trash"
                                     aria-hidden="true"
                                     style="margin-right: 0px"
+                                    
                                 ></i>
                             </button>
                         </td>

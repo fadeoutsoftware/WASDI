@@ -24,9 +24,10 @@
             <!-- BODY -->
             <div class="modal-body d-flex flex-column">
                 <div class="row mx-3">
-                    <form class="">
-                        <div class="col-8 form-group">
+                    <form class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="col-8 form-group" style="width: 90%">
                             <label for="wasdiEmail"
+                            class="h4"
                                 >{{"DIALOG_PARAMS_SHARE_EMAIL" |
                                 translate}}</label
                             >
@@ -40,7 +41,7 @@
                         </div>
                         <button
                             type="button"
-                            class="btn btn-primary btn-wasdi mb-4"
+                            class="btn btn-primary btn-wasdi mb-4 align-self-end"
                             ng-click="m_oController.addParametersPermission(m_oController.m_sTemplateId, m_oController.m_sUserEmail)"
                         >
                             <i class="fa fa-share-alt" aria-hidden="true"></i>
@@ -57,10 +58,6 @@
                     </h4>
                     <table class="table table-hover">
                         <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                            </tr>
                         </thead>
                         <tbody>
                             <tr
