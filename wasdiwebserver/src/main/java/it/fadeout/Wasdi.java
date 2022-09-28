@@ -1238,7 +1238,7 @@ public class Wasdi extends ResourceConfig {
 				
 				// Try to get the dedicated node/nodes: we read node permissions
 				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndOwnerId("node", oUser.getUserId());
+				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndUserId("node", oUser.getUserId());
 				
 				ArrayList<Node> aoDedicatedNodes = new ArrayList<>();
 				
