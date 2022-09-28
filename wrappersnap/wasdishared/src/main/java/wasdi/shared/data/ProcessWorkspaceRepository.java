@@ -1560,14 +1560,14 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... statuses) {
+	public List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... asStatuses) {
 		List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoReturnList = new ArrayList<>();
 
 		try {
 			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(Arrays.asList(
 					new Document("$match",
-							new Document("nodeCode", "wasdi").append("status",
-									new Document("$in", Arrays.asList(statuses)))),
+							new Document("nodeCode", sNodeCode).append("status",
+									new Document("$in", Arrays.asList(asStatuses)))),
 					new Document("$group",
 							new Document("_id", new Document("operationType", "$operationType")
 									.append("operationSubType", "$operationSubType").append("status", "$status"))

@@ -1,77 +1,110 @@
-<div class="modal fade workflow-manager-modal ">
+<div class="modal fade workflow-manager-modal">
     <div class="modal-dialog modal-wasdi">
-        <div class="modal-content ">
-
+        <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title ">
-                    <i class="fa fa-share-alt" aria-hidden="true"></i>&nbsp;{{"DIALOG_SHARE_WS_WORKSPACE"|translate}} {{m_oController.m_sWorkspace.name}} - {{m_oController.m_sWorkspace.workspaceId}}
+                <button
+                    type="button"
+                    class="close"
+                    ng-click="close()"
+                    data-dismiss="modal"
+                    aria-hidden="true"
+                >
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i
+                    >&nbsp;{{"DIALOG_SHARE_WS_WORKSPACE"|translate}}
+                    {{m_oController.m_sWorkspace.name}} -
+                    {{m_oController.m_sWorkspace.workspaceId}}
                 </h4>
-
             </div>
 
             <div class="modal-body">
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-
-                            <div class="container-fluid">
-                                <div class="row give-permission-row">
-                                    <h3>{{"DIALOG_SHARE_WS_SHARE_WS"|translate}}</h3>
-                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                        <input type="text" name="name" id="" class="form-control wasdi-input" value="" title=""
-                                            ng-model="m_oController.m_sUserEmail" required="required" placeholder='{{"DIALOG_SHARE_WS_MAIL"|translate}}'>
-                                    </div>
-
-                                    <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                                        <button class="btn btn-primary btn-wasdi"
-                                            ng-click="m_oController.shareWorkspaceByUserEmail(m_oController.m_sWorkspace.workspaceId,m_oController.m_sUserEmail)">
-                                            <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
-                                            <span class="ng-binding">{{"DIALOG_SHARE_WS_SHARE"|translate}}</span>
-                                        </button>
-                                    </div>
+                    <div class="container-fluid">
+                        <div class="row give-permission-row">
+                            <form class="d-flex flex-row">
+                                <div class="form-group mr-3" style="width: 90%">
+                                    <h4 class="text-success">
+                                        {{"DIALOG_SHARE_WS_SHARE_WS"|translate}}
+                                    </h4>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        id=""
+                                        class="form-control wasdi-input"
+                                        value=""
+                                        title=""
+                                        ng-model="m_oController.m_sUserEmail"
+                                        required="required"
+                                        placeholder='{{"DIALOG_SHARE_WS_MAIL"|translate}}'
+                                    />
                                 </div>
-                            </div>
-
+                                <button
+                                    class="btn btn-primary btn-wasdi mb-4 align-self-end"
+                                    ng-click="m_oController.shareWorkspaceByUserEmail(m_oController.m_sWorkspace.workspaceId,m_oController.m_sUserEmail)"
+                                >
+                                    <em
+                                        class="custom-icon fa fa-share-alt fa-lg"
+                                        ng-class="button.icon"
+                                    ></em>
+                                    <span class="ng-binding"
+                                        >{{"DIALOG_SHARE_WS_SHARE"|translate}}</span
+                                    >
+                                </button>
+                            </form>
                         </div>
                     </div>
 
-                    <hr class="divider-line-style1">
+                   <hr class="divider-line-style1" />
 
                     <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><h3>{{"DIALOG_SHARE_WS_ACTIVE"|translate}}</h3>
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <h4>{{"DIALOG_SHARE_WS_ACTIVE"|translate}}</h4>
                             <table class="table table-hover">
-                                <caption>{{"DIALOG_SHARE_WS_ACTIVE"|translate}}</caption>
+                                <thead></thead>
+                                <caption  style="caption-side: bottom">
+                                    {{"DIALOG_SHARE_WS_ACTIVE"|translate}}
+                                </caption>
                                 <tbody>
-                                <tr ng-repeat="oUser in m_oController.m_aoEnableUsers">
-                                    <td class="over-icon">
-                                        <button class="btn btn-primary btn-wasdi"
-                                                ng-click="m_oController.disablePermissionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser.userId)">
-                                            <!--Remove Sharing-->
-                                            <i class="fa fa-trash fa-lg" aria-hidden="true" style="margin-right: 0px;"></i>
-                                            <span class="ng-binding">{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        {{oUser.userId}}
-                                    </td>
-                                </tr>
+                                    <tr
+                                        ng-repeat="oUser in m_oController.m_aoEnableUsers"
+                                    >
+                                        <td>{{oUser.userId}}</td>
+                                        <td class="over-icon">
+                                            <button
+                                                class="btn btn-danger btn-wasdi"
+                                                ng-click="m_oController.disablePermissionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser.userId)"
+                                            >
+                                                <!--Remove Sharing-->
+                                                <i
+                                                    class="fa fa-trash fa-lg"
+                                                    aria-hidden="true"
+                                                    style="margin-right: 0px"
+                                                ></i>
+                                                <span class="ng-binding"
+                                                    >{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span
+                                                >
+                                            </button>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-
                 </div>
-
             </div>
 
             <div class="modal-footer">
-                <button type="button" ng-click="close()" class="my-button" data-dismiss="modal">
+                <button
+                    type="button"
+                    ng-click="close()"
+                    class="my-button"
+                    data-dismiss="modal"
+                >
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
             </div>
-
         </div>
     </div>
 </div>
