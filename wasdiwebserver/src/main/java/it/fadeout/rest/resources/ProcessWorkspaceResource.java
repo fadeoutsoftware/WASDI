@@ -1478,11 +1478,31 @@ public class ProcessWorkspaceResource {
 					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
 					
 					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
+
 					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | sNodeResponse: " + sNodeResponse);
+
 					Object oObject = MongoRepository.s_oMapper.readValue(sNodeResponse, aoViewModel.getClass());
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | oObject class: " + oObject.getClass());
-					aoViewModel = (List<ProcessWorkspaceAggregatedViewModel>) oObject;
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel class: " + aoViewModel.getClass());
+
+					if (oObject instanceof ArrayList) {
+						@SuppressWarnings("rawtypes")
+						List aoUntypedList = (ArrayList) oObject;
+
+						for (Object oUntypedObject : aoUntypedList) {
+							Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | oUntypedObject class: " + oUntypedObject.getClass());
+
+							if (oUntypedObject instanceof ProcessWorkspaceAggregatedViewModel) {
+								ProcessWorkspaceAggregatedViewModel oProcessWorkspaceAggregatedViewModel = (ProcessWorkspaceAggregatedViewModel) oUntypedObject;
+								aoViewModel.add(oProcessWorkspaceAggregatedViewModel);
+							} else {
+								Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | oUntypedObject class: " + oUntypedObject.getClass());
+							}
+						}
+					} else {
+						Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | oObject class: " + oObject.getClass());
+					}
+
+//					aoViewModel = (List<ProcessWorkspaceAggregatedViewModel>) oObject;
+//					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel class: " + aoViewModel.getClass());
 					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel: " + aoViewModel.toString());
 				}
 				catch (Exception oNodeEx) {
