@@ -630,7 +630,7 @@
 	"MENU_SEND_FTP": "Envoyer vers FTP",
 	"MENU_DELETE": "Supprimer le produit",
 	"MENU_PROPERTIES": "Propriétés ",
-    "MENU_SHARE":"Partager",
+    "MENU_SHARE":"Envoyer à l'espace de travail",
 	"MENU_METADATA": "Métadonnées",
 	"MENU_BANDS": "Bandes",
 	"MENU_DELETE_MANY_1": "Supprimer ",
