@@ -142,6 +142,11 @@ public class WasdiConfig {
 	public SchedulerConfig scheduler;
 	
 	/**
+	 * Multi Cloud Balancer Config
+	 */
+	public CloudBalancerConfig cloudBalancer = new CloudBalancerConfig();
+	
+	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest
 	 * @return Catalogue configuration for the specified platform

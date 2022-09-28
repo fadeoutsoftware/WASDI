@@ -62,7 +62,7 @@ public class User {
      */
     private String m_sLastLogin = null;
     
-    /*
+    /**
      * User default node
      */
     private String m_sDefaultNode = "wasdi";
@@ -82,9 +82,17 @@ public class User {
 	 */
 	private String description;
 
+	/**
+	 * User role
+	 */
 	private String role;
 	
-    static {
+	/**
+	 * User type: is it free, standard or professional?!?
+	 */
+	private String type = UserType.FREE.name();
+
+	static {
     	s_oInvalid = new User();
     	s_oInvalid.id = -1;
     	s_oInvalid.userId = null;
@@ -234,5 +242,20 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
+    public String getType() {
+		return type;
+	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	/**
+	 * Return true if the user is professional
+	 * False if is Free or Standard
+	 * @return
+	 */
+	public boolean isProfessionalUser() {
+		return type.equals(UserType.PROFESSIONAL.name());
+	}
 }

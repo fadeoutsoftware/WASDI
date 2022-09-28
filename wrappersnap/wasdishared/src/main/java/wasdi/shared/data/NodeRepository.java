@@ -134,5 +134,26 @@ public class NodeRepository extends MongoRepository {
 
 		return aoReturnList;
 	}
+	
+
+	/**
+	 * Get the list of shared nodes
+	 * @return List of all the nodes
+	 */
+	public List<Node> getSharedActiveNodesList() {
+
+		final ArrayList<Node> aoReturnList = new ArrayList<Node>();
+		try {
+			
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.and(Filters.eq("shared", true), Filters.eq("active", true)));
+			
+			fillList(aoReturnList, oWSDocuments, Node.class);
+			
+		} catch (Exception oEx) {
+			Utils.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
+		}
+
+		return aoReturnList;
+	}	
 
 }

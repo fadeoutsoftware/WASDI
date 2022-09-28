@@ -42,7 +42,11 @@ public class Node {
 	 */
 	private String cloudProvider;
 	
-	
+	/**
+	 * Flag to know if this is a shared node (true) or a dedicated one (false).
+	 * Nodes are considered shared by default
+	 */
+	private boolean shared = true;
 
 	public String getCloudProvider() {
 		return cloudProvider;
@@ -95,5 +99,10 @@ public class Node {
 	public void setActive(boolean bActive) {
 		this.active = bActive;
 	}
-
+	public boolean getShared() {
+		return shared;
+	}
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
 }

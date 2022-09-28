@@ -17,7 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,18 +47,22 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
 import it.fadeout.business.ImageResourceUtils;
+import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
@@ -66,6 +73,10 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.monitoring.Disk;
+import wasdi.shared.viewmodels.monitoring.MetricsEntry;
+import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 
 /**
  * Main Class of the WASDI Web Server.
@@ -1192,6 +1203,189 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Get the list of nodes in order of priority for a specific user and eventually a specific application
+	 * @param sSessionId
+	 * @param sApplication
+	 * @return
+	 */
+	public static List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(String sSessionId, String sApplication)  {
+		
+		// Return variable ready
+		List<NodeScoreByProcessWorkspaceViewModel> aoOrderedNodeList = new ArrayList<>();
+		// Backup option list, if at the end we do not have any valid node
+		List<NodeScoreByProcessWorkspaceViewModel> aoExcludedNodeList = new ArrayList<>();
+		
+		// Check the user
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
+			return aoOrderedNodeList;
+		}
+		
+		
+		try {
+			
+			// We need to get the list of Nodes involved
+			NodeRepository oNodeRepository = new NodeRepository();
+			List<Node> aoNodes = null;
+			
+			// Is this a professional user?
+			if (oUser.isProfessionalUser())  {
+				
+				// Try to get the dedicated node/nodes: we read node permissions
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndOwnerId("node", oUser.getUserId());
+				
+				ArrayList<Node> aoDedicatedNodes = new ArrayList<>();
+				
+				// For each node-permission, we double check the node exists and is Active
+				if (aoUserNodePermissions != null) {
+					for (UserResourcePermission oPermission : aoUserNodePermissions) {
+						String sNodeCode = oPermission.getResourceId();
+						Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
+						
+						if (oNode!=null)   {
+							if (oNode.getActive()) {
+								aoDedicatedNodes.add(oNode);
+							}
+						}
+					}
+				}
+				
+				// If we found at least one node, lets use it
+				if (aoDedicatedNodes.size()>0) {
+					aoNodes = aoDedicatedNodes;
+				}
+			}
+			
+			// If we do not have the list, take the list of shared nodes. This works for free and standard users
+			// This is also a fallback option for Professional users: what if also the professional does not has any node?
+			if (aoNodes == null) {
+				aoNodes = oNodeRepository.getSharedActiveNodesList();
+				
+				// By config we can decide to use also the main node as computing node, or not
+				if (WasdiConfig.Current.cloudBalancer.includeMainClusterAsNode) {
+					Node oNodeWasdi = new Node();
+					oNodeWasdi.setNodeCode("wasdi");
+					aoNodes.add(oNodeWasdi);				
+				}				
+			}
+			
+			// This is the list of Nodes that the user can access
+			for (Node oNode:aoNodes) {
+				
+				// This should not be needed: all here should be active. But just to be more sure
+				if (!oNode.getActive()) continue;
+				
+				// Read the metrics of the node
+				String sNodeCode = oNode.getNodeCode();
+				MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
+				MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
+
+				if (oMetricsEntry == null) {
+					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Jump.");
+					continue;
+				}
+				
+				//oMetricsEntry.getTimestamp()
+					
+				// Get the list of disks to estimate space
+				List<Disk> aoDisks = oMetricsEntry.getDisks();
+
+				if (aoDisks != null) {
+
+					NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
+					oViewModel.setNodeCode(sNodeCode);
+					
+					Disk oDisk = null;
+					Double oPercentageUsed = null;
+					
+					if (aoDisks.size()<=0) {
+						oViewModel.setDiskPercentageAvailable(0.0);
+						oViewModel.setDiskPercentageUsed(0.0);
+						oViewModel.setDiskAbsoluteAvailable(0l);
+						oViewModel.setDiskAbsoluteUsed(0l);
+						oViewModel.setDiskAbsoluteTotal(0l);
+					}
+					else {
+						oDisk= aoDisks.get(0);
+						
+						oPercentageUsed = oDisk.getPercentageUsed();
+						oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
+						oViewModel.setDiskPercentageUsed(oPercentageUsed);
+						oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
+						oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
+						oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
+					}
+					
+					
+					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.cloudBalancer.diskOccupiedSpaceMaxPercentage) {
+						aoOrderedNodeList.add(oViewModel);
+					}
+					else {
+						aoExcludedNodeList.add(oViewModel);
+					}
+				}
+			}
+			
+			// Lets verify if we have at least one node, otherwise we relax the first filter
+			if (aoOrderedNodeList.size()<=0)  {
+				Utils.debugLog("Wasdi.getNodesSortedByScore: Impossible to find any node with given rules: try to recover excluded one");
+				aoOrderedNodeList = aoExcludedNodeList;
+			}
+			
+			// Here we should have a list of node accessable by the user and not excluded. 
+			// Now get for all the picture of the actual load situation of the schedulers
+			for (NodeScoreByProcessWorkspaceViewModel oCandidateNodeViewModel : aoOrderedNodeList) {
+				
+				// Get the actual status of the queue
+				List<ProcessWorkspaceAggregatedViewModel> aoSchedulerStatusList = ProcessWorkspaceResource.getNodeQueuesStatus(sSessionId, oCandidateNodeViewModel.getNodeCode(), null);
+
+				int iTotalNumberOfOngoingProcesses = 0;
+
+				if (aoSchedulerStatusList != null) {
+					for (ProcessWorkspaceAggregatedViewModel o : aoSchedulerStatusList) {
+						iTotalNumberOfOngoingProcesses += o.getNumberOfUnfinishedProcesses();
+					}
+				}
+
+				oCandidateNodeViewModel.setNumberOfProcesses(iTotalNumberOfOngoingProcesses);
+			}
+			
+			// We order givin priority to "free" nodes and then the ones with more space
+			Comparator<NodeScoreByProcessWorkspaceViewModel> oComparator = Comparator
+					.comparing(NodeScoreByProcessWorkspaceViewModel::getNumberOfProcesses)
+					.thenComparing(NodeScoreByProcessWorkspaceViewModel::getDiskAbsoluteAvailable, Comparator.reverseOrder());
+
+			Collections.sort(aoOrderedNodeList, oComparator);
+			
+			// Ok we should have finished. But did we found at least one node?
+			if (aoOrderedNodeList.size()<=0) {
+				// No. We do not like this. Try to recover the old WASDI rules: user default node or generic WASDI default node
+				Utils.debugLog("Wasdi.getNodesSortedByScore: the list of nodes is empty!! fallback to defaults");
+				
+				String sDefaultNode = WasdiConfig.Current.usersDefaultNode;
+				
+				if (!Utils.isNullOrEmpty(oUser.getDefaultNode())) {
+					sDefaultNode = oUser.getDefaultNode();
+				}
+				
+				NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
+				oViewModel.setNodeCode(sDefaultNode);
+				aoOrderedNodeList.add(oViewModel);
+				
+			}			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
+		}
+		
+		return aoOrderedNodeList;
+
 	}
 
 
