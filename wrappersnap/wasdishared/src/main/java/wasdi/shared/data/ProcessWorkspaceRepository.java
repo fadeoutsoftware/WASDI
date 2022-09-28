@@ -338,7 +338,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	Bson oInFilter = Filters.in("status", asDesiredStatuses);
         	Bson oFilter = Filters.and(Filters.eq("workspaceId", sWorkspaceId), oInFilter);
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
 
 			return fillList(oWSDocuments);
         } catch (Exception oEx) {
@@ -366,7 +366,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     		Bson oFilter = Filters.eq("workspaceId", sWorkspaceId);
     		List<Document> oWSDocuments = getCollection(m_sThisCollection)
     				.find(oFilter)
-    				.sort(new Document("operationDate", -1))
+    				.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1))
     				.projection(new Document("processObjId",1))
     				.into(new ArrayList<Document>());
     		List<String> asProcessObjIds = new ArrayList<String>(oWSDocuments.size());
@@ -417,7 +417,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-            		.sort(new Document("operationDate", -1));
+        			.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -458,7 +458,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	Bson oFilter = buildFilter(sWorkspaceId, eStatus, eOperation, sProductNameSubstring, oDateFRom, oDateTo);
         	
         	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oFilter)
-            		.sort(new Document("operationDate", -1))
+        			.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1))
             		.skip(iStartIndex)
             		.limit(iEndIndex-iStartIndex);
         	
@@ -502,6 +502,14 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		}
 		if(null!=oDateTo) {
 			Bson oCond = Filters.lte("operationDate", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateFRom) {
+			Bson oCond = Filters.gte("operationTimestamp", oDateFRom);
+			oFilter = Filters.and(oFilter, oCond);
+		}
+		if(null!=oDateTo) {
+			Bson oCond = Filters.lte("operationTimestamp", oDateFRom);
 			oFilter = Filters.and(oFilter, oCond);
 		}
 		return oFilter;
@@ -568,7 +576,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new Document("operationDate", -1));
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -595,7 +603,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name()))
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -623,7 +631,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNodeCode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -651,7 +659,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNodeCode)
             				)
             		)
-            		.sort(new Document("lastStateChangeDate", -1));
+            		.sort(new BasicDBObject("lastStateChangeTimestamp", -1).append("lastStateChangeDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -677,7 +685,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name()))
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -705,7 +713,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNodeCode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -730,7 +738,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -757,7 +765,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNodeCode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -782,7 +790,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -809,7 +817,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -834,7 +842,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -861,7 +869,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -886,7 +894,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
             				)
             		)
-            		.sort(new Document("lastStateChangeDate", -1));
+            		.sort(new BasicDBObject("lastStateChangeTimestamp", -1).append("lastStateChangeDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -913,7 +921,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
-            		.sort(new Document("lastStateChangeDate", -1));
+            		.sort(new BasicDBObject("lastStateChangeTimestamp", -1).append("lastStateChangeDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -939,7 +947,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -966,7 +974,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -991,7 +999,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
             				)
             		)
-            		.sort(new Document("lastStateChangeDate", -1));
+            		.sort(new BasicDBObject("lastStateChangeTimestamp", -1).append("lastStateChangeDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1018,7 +1026,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
-            		.sort(new Document("lastStateChangeDate", -1));
+            		.sort(new BasicDBObject("lastStateChangeTimestamp", -1).append("lastStateChangeDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1036,7 +1044,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @return
      */    
     public List<ProcessWorkspace> getProcessesByStateNode(String sProcessStatus, String sComputingNodeCode) {
-    	return getProcessesByStateNode(sProcessStatus, sComputingNodeCode, "operationDate");
+    	return getProcessesByStateNode(sProcessStatus, sComputingNodeCode, "operationTimestamp", "operationDate");
     }
     
     
@@ -1047,10 +1055,17 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      * @param sComputingNodeCode computing node
      * @return
      */        
-    public List<ProcessWorkspace> getProcessesByStateNode(String sProcessStatus, String sComputingNodeCode, String sOrderBy) {
+    public List<ProcessWorkspace> getProcessesByStateNode(String sProcessStatus, String sComputingNodeCode, String sOrderByTimestamp, String sOrderByDate) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
+
+        	Bson oSortBy;
+        	if (sOrderByDate == null) {
+        		oSortBy = new Document(sOrderByTimestamp, -1);
+        	} else {
+        		oSortBy = new BasicDBObject(sOrderByTimestamp, -1).append(sOrderByDate, -1);
+        	}
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             		Filters.and(
@@ -1058,7 +1073,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("nodeCode", sComputingNodeCode)
             				)
             		)
-            		.sort(new Document(sOrderBy, -1));
+            		.sort(oSortBy);
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1128,7 +1143,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
-        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("workspaceId", sWorkspaceId)).sort(new Document("operationDate", -1)).limit(5);
+        	FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("workspaceId", sWorkspaceId)).sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1)).limit(5);
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1151,7 +1166,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new Document("operationDate", -1)).limit(5);
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1)).limit(5);
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1174,7 +1189,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Filters.eq("productName", sProductName))
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1201,7 +1216,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("workspaceId", sWorkspace)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1228,7 +1243,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("userId", sUserId)
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1297,7 +1312,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     }
     
     /**
-     * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeDate 
+     * Update a process Workspace. If there is a state change, the system will update also update lastStateChangeTimestamp 
      * @param oProcessWorkspace Process Workspace to update
      * @return
      */
@@ -1399,7 +1414,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             				Filters.eq("status", ProcessStatus.READY.name())
             				)
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1421,7 +1436,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
             			Filters.eq("status", ProcessStatus.CREATED.name())
             		)
-            		.sort(new Document("operationDate", -1));
+            		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
@@ -1531,7 +1546,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
 					Filters.eq("nodeCode", sComputingNodeCode))
-					.sort(new Document("operationDate", -1));
+					.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
 			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
 		} catch (Exception oEx) {
@@ -1600,7 +1615,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(
 					Filters.eq("parentId", sParentId))
-					.sort(new Document("operationDate", -1));
+					.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
 			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
