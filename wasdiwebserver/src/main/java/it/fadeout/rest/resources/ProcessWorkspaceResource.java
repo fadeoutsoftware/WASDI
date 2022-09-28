@@ -21,6 +21,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import it.fadeout.Wasdi;
@@ -1285,15 +1288,16 @@ public class ProcessWorkspaceResource {
 
 		return lRunningTime;
 	}
-
-	@GET
-	@Path("/queuesStatus")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("nodeCode") String sNodeCode,
-			@QueryParam("statuses") String sStatuses) {
-		Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus");
-
+	
+	/**
+	 * Get a list of 
+	 * @param sSessionId
+	 * @param sNodeCode
+	 * @param sStatuses
+	 * @return
+	 */
+	public static List<ProcessWorkspaceAggregatedViewModel> getNodeQueuesStatus(String sSessionId, String sNodeCode, String sStatuses) {
+		
 		List<ProcessWorkspaceAggregatedViewModel> aoViewModel = new ArrayList<>();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -1304,10 +1308,19 @@ public class ProcessWorkspaceResource {
 		}
 
 		try {
-
-			if (Utils.isNullOrEmpty(sNodeCode)) {
-				sNodeCode = "wasdi";
+			
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (Utils.isNullOrEmpty(sNodeCode)) {
+					sNodeCode = "wasdi";
+				}				
 			}
+			else {
+				if (WasdiConfig.Current.nodeCode.equals(sNodeCode) == false) {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: distributed node answer only for itself");
+					return aoViewModel;					
+				}
+			}
+
 
 			NodeRepository oNodeRepo = new NodeRepository();
 			Node oNode = oNodeRepo.getNodeByCode(sNodeCode);
@@ -1325,11 +1338,13 @@ public class ProcessWorkspaceResource {
 			}
 			
 			if (Utils.isNullOrEmpty(sStatuses)) {
-				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: use default states");
 				sStatuses = "" + ProcessStatus.WAITING.name() + "," + ProcessStatus.READY.name() + "," + ProcessStatus.CREATED + "," + ProcessStatus.RUNNING; 
 			}			
 			
 			if (WasdiConfig.Current.nodeCode.equals(sNodeCode)) {
+				
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on my node, read proc status from db");
+				
 				// Split the states
 				String[] asStatuses = sStatuses.split(",");
 
@@ -1358,7 +1373,7 @@ public class ProcessWorkspaceResource {
 
 					// Get the operation subtype
 					String sOperationSubType = oResult.getOperationSubType();
-					if (sOperationSubType == null) {
+					if (Utils.isNullOrEmpty(sOperationSubType)) {
 						sOperationSubType = s_sNoneSubtype;
 					}
 
@@ -1463,6 +1478,9 @@ public class ProcessWorkspaceResource {
 				aoViewModel.add(oViewModelDefaultCase);				
 			}
 			else {
+				
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on remote node, call API to " + sNodeCode);
+				
 				// Ask to the node!!
 				try {
 					String sUrl = oNode.getNodeBaseAddress();
@@ -1471,7 +1489,17 @@ public class ProcessWorkspaceResource {
 					
 					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
 					
-					aoViewModel = (List<ProcessWorkspaceAggregatedViewModel>) MongoRepository.s_oMapper.readValue(sNodeResponse, aoViewModel.getClass());
+					// Create an array of answers
+					JSONArray oResults = new JSONArray(sNodeResponse);
+					
+					// Convert the View Models
+					for (int iViewModels = 0; iViewModels<oResults.length(); iViewModels++) {
+						Object oNodeQueueStatus = oResults.get(iViewModels);
+						
+						ProcessWorkspaceAggregatedViewModel oVM = (ProcessWorkspaceAggregatedViewModel) MongoRepository.s_oMapper.readValue(oNodeQueueStatus.toString(), ProcessWorkspaceAggregatedViewModel.class);
+						aoViewModel.add(oVM);
+					}
+					
 				}
 				catch (Exception oNodeEx) {
 					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Exception contacting the remote node: " + oNodeEx);
@@ -1483,7 +1511,18 @@ public class ProcessWorkspaceResource {
 			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
 		}
 
-		return aoViewModel;
+		return aoViewModel;		
+	}
+
+	@GET
+	@Path("/queuesStatus")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("nodeCode") String sNodeCode,
+			@QueryParam("statuses") String sStatuses) {
+		Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus");
+		
+		return ProcessWorkspaceResource.getNodeQueuesStatus(sSessionId, sNodeCode, sStatuses);
 	}
 
 	@GET
@@ -1505,67 +1544,9 @@ public class ProcessWorkspaceResource {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
 				return aoViewModels;
 			}
-
-			NodeRepository oNodeRepository = new NodeRepository();
-			List<Node> aoNodes = oNodeRepository.getNodesList();
-
-			Node oNodeWasdi = new Node();
-			oNodeWasdi.setNodeCode("wasdi");
-
-			aoNodes.add(oNodeWasdi);
-
-			for (Node oNode:aoNodes) {
-				if (oNode.getActive()) {
-					String sNodeCode = oNode.getNodeCode();
-
-					MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
-					MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
-
-					if (oMetricsEntry != null) {
-						List<Disk> aoDisks = oMetricsEntry.getDisks();
-
-						if (aoDisks != null) {
-							for (Disk oDisk : aoDisks) {
-								Double oPercentageUsed = oDisk.getPercentageUsed();
-
-								if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= 90) {
-									NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
-									oViewModel.setNodeCode(sNodeCode);
-									oViewModel.setDiskPercentageAvailable(oDisk.getPercentageAvailable());
-									oViewModel.setDiskPercentageUsed(oPercentageUsed);
-									oViewModel.setDiskAbsoluteAvailable(oDisk.getAbsoluteAvailable());
-									oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
-									oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());
-
-									aoViewModels.add(oViewModel);
-								}
-							}
-						}
-
-					}
-				}
-			}
-
-			for (NodeScoreByProcessWorkspaceViewModel oViewModel : aoViewModels) {
-				List<ProcessWorkspaceAggregatedViewModel> aoSchedulerStatusList = getQueuesStatus(sSessionId, oViewModel.getNodeCode(), null);
-
-				int iTotalNumberOFUnfinishedProcesses = 0;
-
-				if (aoSchedulerStatusList != null) {
-					for (ProcessWorkspaceAggregatedViewModel o : aoSchedulerStatusList) {
-						iTotalNumberOFUnfinishedProcesses += o.getNumberOfUnfinishedProcesses();
-					}
-				}
-
-				oViewModel.setNumberOfProcesses(iTotalNumberOFUnfinishedProcesses);
-			}
-
-
-			Comparator<NodeScoreByProcessWorkspaceViewModel> oComparator = Comparator
-					.comparing(NodeScoreByProcessWorkspaceViewModel::getNumberOfProcesses)
-					.thenComparing(NodeScoreByProcessWorkspaceViewModel::getDiskAbsoluteAvailable, Comparator.reverseOrder());
-
-			Collections.sort(aoViewModels, oComparator);
+			
+			return Wasdi.getNodesSortedByScore(sSessionId, null);
+			
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: " + oEx);
