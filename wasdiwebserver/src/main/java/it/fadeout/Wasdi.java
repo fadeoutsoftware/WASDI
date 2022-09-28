@@ -1236,6 +1236,8 @@ public class Wasdi extends ResourceConfig {
 			// Is this a professional user?
 			if (oUser.isProfessionalUser())  {
 				
+				Utils.debugLog("Wasdi.getNodesSortedByScore: Search dedicated nodes for Professional User");
+				
 				// Try to get the dedicated node/nodes: we read node permissions
 				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndUserId("node", oUser.getUserId());
