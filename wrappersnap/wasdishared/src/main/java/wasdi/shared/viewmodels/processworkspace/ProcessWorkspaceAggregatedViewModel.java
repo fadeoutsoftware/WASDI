@@ -22,10 +22,6 @@ public class ProcessWorkspaceAggregatedViewModel {
 	private Integer procWaiting = 0;
 	private Integer procReady = 0;
 
-//	private Integer procError;
-//	private Integer procDone;
-//	private Integer procStopped;
-
 	public int getNumberOfUnfinishedProcesses() {
 		int iTotal = 0;
 

@@ -2,7 +2,6 @@ package it.fadeout.rest.resources;
 
 import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 
-import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1305,34 +1304,29 @@ public class ProcessWorkspaceResource {
 		}
 
 		try {
-			
-			// P.Campanella 27/09/2022: if we put this limit, a non-admin user will never be able to create a workspace.
-//			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
-//				return aoViewModel;
-//			}
 
 			if (Utils.isNullOrEmpty(sNodeCode)) {
 				sNodeCode = "wasdi";
 			}
-			
+
 			NodeRepository oNodeRepo = new NodeRepository();
-			
 			Node oNode = oNodeRepo.getNodeByCode(sNodeCode);
-			
-			if (oNode == null) {
-				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Impossible to find node " + sNodeCode);
-				return aoViewModel;
-			}
-			
-			if (oNode.getActive() == false)  {
-				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: node " + sNodeCode + " is not active");
-				return aoViewModel;				
+
+			if (!sNodeCode.equals("wasdi")) {
+				if (oNode == null) {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Impossible to find node " + sNodeCode);
+					return aoViewModel;
+				}
+
+				if (!oNode.getActive())  {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: node " + sNodeCode + " is not active");
+					return aoViewModel;				
+				}
 			}
 			
 			if (Utils.isNullOrEmpty(sStatuses)) {
 				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: use default states");
 				sStatuses = "" + ProcessStatus.WAITING.name() + "," + ProcessStatus.READY.name() + "," + ProcessStatus.CREATED + "," + ProcessStatus.RUNNING; 
-				//sStatuses = "WAITING,READY,CREATED,RUNNING";
 			}			
 			
 			if (WasdiConfig.Current.nodeCode.equals(sNodeCode)) {
