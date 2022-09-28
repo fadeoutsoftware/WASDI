@@ -5,8 +5,6 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +20,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -38,7 +35,6 @@ import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -50,8 +46,6 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.monitoring.Disk;
-import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
