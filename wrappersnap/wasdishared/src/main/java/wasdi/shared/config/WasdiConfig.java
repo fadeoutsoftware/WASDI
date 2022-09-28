@@ -144,7 +144,7 @@ public class WasdiConfig {
 	/**
 	 * Multi Cloud Balancer Config
 	 */
-	public CloudBalancerConfig cloudBalancer = new CloudBalancerConfig();
+	public LoadBalancerConfig loadBalancer = new LoadBalancerConfig();
 	
 	/**
 	 * Get the Catalogue Config for the specified Platform Type

@@ -1260,6 +1260,9 @@ public class Wasdi extends ResourceConfig {
 				if (aoDedicatedNodes.size()>0) {
 					aoNodes = aoDedicatedNodes;
 				}
+				else {
+					Utils.debugLog("Wasdi.getNodesSortedByScore: Professional User " + oUser.getUserId() + " does not have any node associated! Will fallback with shared nodes");
+				}
 			}
 			
 			// If we do not have the list, take the list of shared nodes. This works for free and standard users
@@ -1268,7 +1271,7 @@ public class Wasdi extends ResourceConfig {
 				aoNodes = oNodeRepository.getSharedActiveNodesList();
 				
 				// By config we can decide to use also the main node as computing node, or not
-				if (WasdiConfig.Current.cloudBalancer.includeMainClusterAsNode) {
+				if (WasdiConfig.Current.loadBalancer.includeMainClusterAsNode) {
 					Node oNodeWasdi = new Node();
 					oNodeWasdi.setNodeCode("wasdi");
 					aoNodes.add(oNodeWasdi);				
@@ -1323,7 +1326,7 @@ public class Wasdi extends ResourceConfig {
 					}
 					
 					
-					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.cloudBalancer.diskOccupiedSpaceMaxPercentage) {
+					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
 						aoOrderedNodeList.add(oViewModel);
 					}
 					else {
@@ -1348,8 +1351,8 @@ public class Wasdi extends ResourceConfig {
 				int iTotalNumberOfOngoingProcesses = 0;
 
 				if (aoSchedulerStatusList != null) {
-					for (ProcessWorkspaceAggregatedViewModel o : aoSchedulerStatusList) {
-						iTotalNumberOfOngoingProcesses += o.getNumberOfUnfinishedProcesses();
+					for (ProcessWorkspaceAggregatedViewModel oNodeSchedulerStatus : aoSchedulerStatusList) {
+						iTotalNumberOfOngoingProcesses += oNodeSchedulerStatus.getNumberOfUnfinishedProcesses();
 					}
 				}
 
@@ -1387,6 +1390,4 @@ public class Wasdi extends ResourceConfig {
 		return aoOrderedNodeList;
 
 	}
-
-
 }

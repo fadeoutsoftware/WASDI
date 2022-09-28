@@ -52,6 +52,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
@@ -442,14 +443,33 @@ public class WorkspaceResource {
 		oWorkspace.setUserId(oUser.getUserId());
 		oWorkspace.setWorkspaceId(Utils.getRandomName());
 		
+		
 		if (Utils.isNullOrEmpty(sNodeCode)) {
+			
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: search the best node");
+			
+			List<NodeScoreByProcessWorkspaceViewModel> aoCandidates = Wasdi.getNodesSortedByScore(sSessionId, null);
+			
+			if (aoCandidates!=null) {
+				if (aoCandidates.size()>0) {
+					sNodeCode = aoCandidates.get(0).getNodeCode();
+				}
+			}
+		}
+		
+		if (Utils.isNullOrEmpty(sNodeCode)) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: it was impossible to associate a Node: try user default");
 			//get user's default nodeCode
 			sNodeCode = oUser.getDefaultNode();
 		}
+		
 		if (Utils.isNullOrEmpty(sNodeCode)) {
+			Utils.debugLog("WorkspaceResource.CreateWorkspace: it was impossible to associate a Node: use system default");
 			// default node code
 			sNodeCode = "wasdi";
 		}
+		
+		Utils.debugLog("WorkspaceResource.CreateWorkspace: selected node " + sNodeCode);
 		oWorkspace.setNodeCode(sNodeCode);
 
 		if (oWorkspaceRepository.insertWorkspace(oWorkspace)) {
