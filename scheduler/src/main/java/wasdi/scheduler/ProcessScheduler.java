@@ -606,7 +606,7 @@ public class ProcessScheduler {
 	
 	protected List<ProcessWorkspace> getReadyList() {
 		try {
-			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeTimestamp", "lastStateChangeDate");
 			return getReadyList(aoReady);
 		}
 		catch (Exception oE) {
@@ -633,7 +633,7 @@ public class ProcessScheduler {
 	
 	protected List<ProcessWorkspace> getWaitingList() {
 		try {
-			List<ProcessWorkspace> aoWaiting = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoWaiting = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeTimestamp", "lastStateChangeDate");
 			return getWaitingList(aoWaiting);
 		}
 		catch (Exception oE) {

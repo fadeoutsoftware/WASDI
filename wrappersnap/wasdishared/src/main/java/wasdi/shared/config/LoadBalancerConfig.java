@@ -6,7 +6,7 @@ package wasdi.shared.config;
  * @author p.campanella
  *
  */
-public class CloudBalancerConfig {
+public class LoadBalancerConfig {
 	
 	/**
 	 * Flag to decide if the main node should be included in the list of nodes to evaluate to decide where to create a workspace
