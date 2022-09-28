@@ -1359,7 +1359,13 @@ public class ProcessWorkspaceResource {
 					// Get the operation subtype
 					String sOperationSubType = oResult.getOperationSubType();
 					if (sOperationSubType == null) {
+						Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | sOperationType " + sOperationType + "; sOperationSubType: " + sOperationSubType);
+
 						sOperationSubType = s_sNoneSubtype;
+					}
+
+					if (sOperationSubType.isEmpty()) {
+						Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | sOperationType " + sOperationType + "; sOperationSubType: " + sOperationSubType);
 					}
 
 					// Check if we already have a map for this op-Sub-type, otherwise create it
@@ -1460,7 +1466,9 @@ public class ProcessWorkspaceResource {
 					}				
 				}
 				
-				aoViewModel.add(oViewModelDefaultCase);				
+				aoViewModel.add(oViewModelDefaultCase);
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel class: " + aoViewModel.getClass());
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel: " + aoViewModel.toString());
 			}
 			else {
 				// Ask to the node!!
@@ -1470,14 +1478,17 @@ public class ProcessWorkspaceResource {
 					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
 					
 					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
-					
-					aoViewModel = (List<ProcessWorkspaceAggregatedViewModel>) MongoRepository.s_oMapper.readValue(sNodeResponse, aoViewModel.getClass());
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | sNodeResponse: " + sNodeResponse);
+					Object oObject = MongoRepository.s_oMapper.readValue(sNodeResponse, aoViewModel.getClass());
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | oObject class: " + oObject.getClass());
+					aoViewModel = (List<ProcessWorkspaceAggregatedViewModel>) oObject;
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel class: " + aoViewModel.getClass());
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus | aoViewModel: " + aoViewModel.toString());
 				}
 				catch (Exception oNodeEx) {
 					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Exception contacting the remote node: " + oNodeEx);
 				}
 			}
-
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
@@ -1547,7 +1558,9 @@ public class ProcessWorkspaceResource {
 			}
 
 			for (NodeScoreByProcessWorkspaceViewModel oViewModel : aoViewModels) {
+				Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore | calling getQueuesStatus(" + oViewModel.getNodeCode() + ")");
 				List<ProcessWorkspaceAggregatedViewModel> aoSchedulerStatusList = getQueuesStatus(sSessionId, oViewModel.getNodeCode(), null);
+				Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore | aoSchedulerStatusList: " + aoSchedulerStatusList.toString());
 
 				int iTotalNumberOFUnfinishedProcesses = 0;
 
