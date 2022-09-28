@@ -58,7 +58,6 @@ let PackageManagerController = (function () {
         sDeleteCommand
     ) {
         let oController = this;
-        oController.m_bIsLoading = true;
 
         let sConfirmMsg1 = this.m_oTranslate.instant("MSG_REMOVE_LIB_PM_1");
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_REMOVE_LIB_PM_2");
@@ -69,10 +68,13 @@ let PackageManagerController = (function () {
                 if (value) {
                     oController.m_oPackageManagerService
                         .deleteLibrary(sProcessorId, sDeleteCommand)
-                        .then(function () {
-                            oController.m_oTimeout(function () {
+                        .then(function (response) {
+                            oController.m_bIsLoading = true;
+                            oController.m_oTimeout(function() {
                                 oController.fetchPackageList();
-                            }, 2000);
+                            }, 15000)
+                           
+                        
                         });
                 }
                 oController.m_bIsLoading = false;
@@ -93,6 +95,7 @@ let PackageManagerController = (function () {
         });
         let sPackageInfoName = aPackageInfoTrimmed[0];
         let sPackageInfoVersion = "";
+        let sAddCommand = ""; 
         if (aPackageInfoTrimmed[1]) {
             sPackageInfoVersion = aPackageInfoTrimmed[1];
         }
@@ -121,10 +124,9 @@ let PackageManagerController = (function () {
                                 oController.m_bIsLoading = true;
                                 oController.m_oTimeout(function () {
                                     oController.fetchPackageList();
-                                }, 4000);
+                                }, 15000);
                             });
                     }
-                    oController.m_bIsLoading = false;
                 }
             );
         } else {
@@ -138,7 +140,7 @@ let PackageManagerController = (function () {
                                 oController.m_bIsLoading = true;
                                 oController.m_oTimeout(function () {
                                     oController.fetchPackageList();
-                                }, 4000);
+                                }, 15000);
                             });
                     }
                     oController.m_bIsLoading = false;
@@ -147,7 +149,7 @@ let PackageManagerController = (function () {
         }
     };
 
-    PackageManagerController.prototype.ugradeLibrary = function (
+    PackageManagerController.prototype.upgradeLibrary = function (
         sProcessorId,
         sPackageName,
         sPackageCurrentVersion
@@ -169,7 +171,7 @@ let PackageManagerController = (function () {
                             oController.m_bIsLoading = true;
                             oController.m_oTimeout(function () {
                                 oController.fetchPackageList();
-                            }, 4000);
+                            }, 15000);
                         });
                 }
             }
@@ -177,7 +179,7 @@ let PackageManagerController = (function () {
     };
 
     PackageManagerController.prototype.changeSorting = function (column) {
-        var sort = this.sort;
+        let sort = this.sort;
         this.column = column;
 
         if (sort.column == column) {
@@ -194,6 +196,7 @@ let PackageManagerController = (function () {
             .getPackagesList(this.sWorkspaceName)
             .then(function (data, status) {
                 if (data.data != null) {
+                    oController.clearInput();
                     console.log(oController.m_aoPackages);
                     oController.m_aoPackages = data.data;
                     oController.m_bIsLoading = false;
@@ -201,6 +204,12 @@ let PackageManagerController = (function () {
                 }
             });
     };
+
+    PackageManagerController.prototype.clearInput = function () {
+        let oController = this;
+
+        oController.sPackageName = "";
+    }
 
     PackageManagerController.$inject = [
         "PackageManagerService",
