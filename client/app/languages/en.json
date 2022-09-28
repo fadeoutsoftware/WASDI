@@ -743,7 +743,7 @@
 	"MENU_SEND_FTP": "Send To Ftp",
 	"MENU_DELETE": "Delete Product",
 	"MENU_PROPERTIES": "Properties ",
-	"MENU_SHARE": "Share",
+	"MENU_SHARE": "Send to Workspace",
 	"MENU_METADATA": "Metadata",
 	"MENU_BANDS": "Bands",
 	"MENU_DELETE_MANY_1": "Delete ",

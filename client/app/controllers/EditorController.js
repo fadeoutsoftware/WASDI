@@ -2061,7 +2061,7 @@
                             }, //openTransferToFtpDialog
                             DeleteSelectedProduct: {
                                 label: oController.getDeleteLabel(),
-                                icon: "delete-icon-context-menu-jstree",
+                                icon: "fa fa-trash",
 
                                 action: function (obj) {
                                     let asSelectedProducts =
@@ -2127,7 +2127,7 @@
                             },
                             Properties: {
                                 label: sProperties,
-                                icon: "info-icon-context-menu-jstree",
+                                icon: "fa fa-info-circle",
                                 _disabled:
                                     oController.getSelectedNodesFromTree(
                                         $node.original.fileName
