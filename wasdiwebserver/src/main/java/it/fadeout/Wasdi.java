@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +75,7 @@ import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.monitoring.Disk;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
+import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 
@@ -1236,11 +1237,13 @@ public class Wasdi extends ResourceConfig {
 			// Is this a professional user?
 			if (oUser.isProfessionalUser())  {
 				
+				Utils.debugLog("Wasdi.getNodesSortedByScore: Search dedicated nodes for Professional User");
+				
 				// Try to get the dedicated node/nodes: we read node permissions
 				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndOwnerId("node", oUser.getUserId());
+				List<UserResourcePermission> aoUserNodePermissions = oUserResourcePermissionRepository.getPermissionsByTypeAndUserId("node", oUser.getUserId());
 				
-				ArrayList<Node> aoDedicatedNodes = new ArrayList<>();
+				List<Node> aoDedicatedNodes = new ArrayList<>();
 				
 				// For each node-permission, we double check the node exists and is Active
 				if (aoUserNodePermissions != null) {
@@ -1248,7 +1251,7 @@ public class Wasdi extends ResourceConfig {
 						String sNodeCode = oPermission.getResourceId();
 						Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
 						
-						if (oNode!=null)   {
+						if (oNode != null)   {
 							if (oNode.getActive()) {
 								aoDedicatedNodes.add(oNode);
 							}
@@ -1257,7 +1260,7 @@ public class Wasdi extends ResourceConfig {
 				}
 				
 				// If we found at least one node, lets use it
-				if (aoDedicatedNodes.size()>0) {
+				if (aoDedicatedNodes.size() > 0) {
 					aoNodes = aoDedicatedNodes;
 				}
 				else {
@@ -1279,7 +1282,7 @@ public class Wasdi extends ResourceConfig {
 			}
 			
 			// This is the list of Nodes that the user can access
-			for (Node oNode:aoNodes) {
+			for (Node oNode : aoNodes) {
 				
 				// This should not be needed: all here should be active. But just to be more sure
 				if (!oNode.getActive()) continue;
@@ -1290,12 +1293,43 @@ public class Wasdi extends ResourceConfig {
 				MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
 
 				if (oMetricsEntry == null) {
-					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Jump.");
+					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
 					continue;
 				}
-				
-				//oMetricsEntry.getTimestamp()
-					
+
+
+				// Check the metrics entry of the node. If the metrics are too old, the node is skipped.
+				Timestamp oTimestamp = oMetricsEntry.getTimestamp();
+
+				if (oTimestamp == null) {
+					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+					continue;
+				}
+
+				Double oTimestampInMillis = oTimestamp.getMillis();
+
+				if (oTimestampInMillis == null) {
+					Double oTimestampInSeconds = oTimestamp.getSeconds();
+
+					if (oTimestampInSeconds == null) {
+						Utils.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+						continue;
+					} else {
+						oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
+					}
+				}
+
+				long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
+				long lMaximumAllowedAgeOfInformation = WasdiConfig.Current.loadBalancer.metricsMaxAgeSencods * 1000;
+
+				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
+
+				if (bMetricsEntryTooOld) {
+					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
+					continue;
+				}
+
+
 				// Get the list of disks to estimate space
 				List<Disk> aoDisks = oMetricsEntry.getDisks();
 
@@ -1307,12 +1341,12 @@ public class Wasdi extends ResourceConfig {
 					Disk oDisk = null;
 					Double oPercentageUsed = null;
 					
-					if (aoDisks.size()<=0) {
+					if (aoDisks.size() <= 0) {
 						oViewModel.setDiskPercentageAvailable(0.0);
 						oViewModel.setDiskPercentageUsed(0.0);
-						oViewModel.setDiskAbsoluteAvailable(0l);
-						oViewModel.setDiskAbsoluteUsed(0l);
-						oViewModel.setDiskAbsoluteTotal(0l);
+						oViewModel.setDiskAbsoluteAvailable(0L);
+						oViewModel.setDiskAbsoluteUsed(0L);
+						oViewModel.setDiskAbsoluteTotal(0L);
 					}
 					else {
 						oDisk= aoDisks.get(0);
@@ -1336,7 +1370,7 @@ public class Wasdi extends ResourceConfig {
 			}
 			
 			// Lets verify if we have at least one node, otherwise we relax the first filter
-			if (aoOrderedNodeList.size()<=0)  {
+			if (aoOrderedNodeList.size() <= 0)  {
 				Utils.debugLog("Wasdi.getNodesSortedByScore: Impossible to find any node with given rules: try to recover excluded one");
 				aoOrderedNodeList = aoExcludedNodeList;
 			}
@@ -1359,15 +1393,15 @@ public class Wasdi extends ResourceConfig {
 				oCandidateNodeViewModel.setNumberOfProcesses(iTotalNumberOfOngoingProcesses);
 			}
 			
-			// We order givin priority to "free" nodes and then the ones with more space
+			// We order giving priority to "free" nodes and then the ones with more space
 			Comparator<NodeScoreByProcessWorkspaceViewModel> oComparator = Comparator
 					.comparing(NodeScoreByProcessWorkspaceViewModel::getNumberOfProcesses)
 					.thenComparing(NodeScoreByProcessWorkspaceViewModel::getDiskAbsoluteAvailable, Comparator.reverseOrder());
 
 			Collections.sort(aoOrderedNodeList, oComparator);
 			
-			// Ok we should have finished. But did we found at least one node?
-			if (aoOrderedNodeList.size()<=0) {
+			// Ok. we should have finished. But did we find at least one node?
+			if (aoOrderedNodeList.size() <= 0) {
 				// No. We do not like this. Try to recover the old WASDI rules: user default node or generic WASDI default node
 				Utils.debugLog("Wasdi.getNodesSortedByScore: the list of nodes is empty!! fallback to defaults");
 				
@@ -1380,7 +1414,6 @@ public class Wasdi extends ResourceConfig {
 				NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 				oViewModel.setNodeCode(sDefaultNode);
 				aoOrderedNodeList.add(oViewModel);
-				
 			}			
 		}
 		catch (Exception oEx) {
