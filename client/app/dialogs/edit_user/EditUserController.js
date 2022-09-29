@@ -159,6 +159,7 @@ var EditUserController = (function() {
         {
             this.m_oEditUser.name = this.m_oUser.name;
             this.m_oEditUser.surname = this.m_oUser.surname;
+            console.log(this.m_oUser.type)
         }
     };
 
