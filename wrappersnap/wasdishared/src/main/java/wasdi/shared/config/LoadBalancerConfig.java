@@ -23,6 +23,6 @@ public class LoadBalancerConfig {
 	 * Each node sends metrics. Here we define how many seconds are the "age" limit of the metrics.
 	 * It means that if a node has metrics older than this parameters in seconds, it is considered down
 	 */
-	public int metricsMaxAgeSencods = 600;
+	public int metricsMaxAgeSeconds = 600;
 
 }

@@ -1,47 +1,69 @@
 <div class="container-fluid">
     <!-- SHARING DATA -->
     <div class="container-fluid" ng-show="true">
-
         <div class="row give-permission-row">
-            <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                <label>{{"DIALOG_WORKFLOW_TAB_SHARE_WF"|translate}}</label>
-            </div>
-
-            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                <input type="text" name="name" id="" class="form-control wasdi-input" value="" title=""  ng-model="m_oController.m_sUserEmail" required="required" placeholder='{{"DIALOG_PROCESSOR_SHARE_MAIL"|translate}}'>
-            </div>
-
-            <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                <button class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.shareWorkflowByUserEmail(m_oController.m_sUserEmail)">
-                    <em class="custom-icon fa fa-share-alt fa-lg" ng-class="button.icon"></em>
-                    <span class="ng-binding">{{"DIALOG_PROCESSOR_SHARE_SHARE"|translate}}</span>
+            <form class="d-flex flex-row">
+                <div class="form-group mr-3" style="width: 45%">
+                    <h4 class="text-success">
+                        {{"DIALOG_WORKFLOW_TAB_SHARE_WF"|translate}}
+                    </h4>
+                    <input
+                        type="text"
+                        name="name"
+                        id=""
+                        class="form-control wasdi-input"
+                        value=""
+                        title=""
+                        ng-model="m_oController.m_sUserEmail"
+                        required="required"
+                        placeholder='{{"DIALOG_PROCESSOR_SHARE_MAIL"|translate}}'
+                    />
+                </div>
+                <button
+                    class="btn btn-danger btn-wasdi mb-4 align-self-end"
+                    ng-click="m_oController.shareWorkflowByUserEmail(m_oController.m_sUserEmail)"
+                >
+                    <em
+                        class="custom-icon fa fa-share-alt fa-lg"
+                        ng-class="button.icon"
+                    ></em>
+                    <span class="ng-binding"
+                        >{{"DIALOG_PROCESSOR_SHARE_SHARE"|translate}}</span
+                    >
                 </button>
-            </div>
+            </form>
         </div>
-
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <label>{{"DIALOG_PROCESSOR_SHARE_ACTIVE"|translate}}</label>
-                <table class="table table-hover">
-                    <description>{{"DIALOG_PROCESSOR_SHARE_ACTIVE"|translate}}</description>
-                    <tbody>
+    </div>
+    <hr class="divider-line-style1" />
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h4>{{"DIALOG_PROCESSOR_SHARE_ACTIVE"|translate}}</h4>
+            <table class="table table-hover">
+                <caption style="caption-side: bottom">
+                    {{"DIALOG_PROCESSOR_SHARE_ACTIVE"|translate}}
+                </caption>
+                <tbody>
                     <tr ng-repeat="oUser in m_oController.m_aoEnabledUsers">
+                        <td>{{oUser.userId}}</td>
                         <td class="over-icon">
-                            <button class="btn btn-primary btn-wasdi"
-                                    ng-click="m_oController.removeUserSharing(oUser.userId)">
+                            <button
+                                class="btn btn-primary btn-wasdi"
+                                ng-click="m_oController.removeUserSharing(oUser.userId)"
+                            >
                                 <!--Remove Sharing-->
-                                <i class="fa fa-trash fa-lg" aria-hidden="true" style="margin-right: 0px;"></i>
-                                <span class="ng-binding">{{"DIALOG_PROCESSOR_SHARE_REMOVE"|translate}}</span>
+                                <i
+                                    class="fa fa-trash fa-lg"
+                                    aria-hidden="true"
+                                    style="margin-right: 0px"
+                                ></i>
+                                <span class="ng-binding"
+                                    >{{"DIALOG_PROCESSOR_SHARE_REMOVE"|translate}}</span
+                                >
                             </button>
                         </td>
-                        <td>
-                            {{oUser.userId}}
-                        </td>
                     </tr>
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
