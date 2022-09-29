@@ -187,6 +187,7 @@ public class AuthResource {
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(oSession.getSessionId());
+				oUserVM.setType(oUser.getType());
 
 				if (oUser.getRole() != null) {
 					oUserVM.setRole(oUser.getRole());
@@ -238,6 +239,7 @@ public class AuthResource {
 			oUserVM.setName(oUser.getName());
 			oUserVM.setSurname(oUser.getSurname());
 			oUserVM.setUserId(oUser.getUserId());
+			oUserVM.setType(oUser.getType());
 			return oUserVM;
 		} catch (Exception oE) {
 			Utils.debugLog("AuthResource.CheckSession: " + oE);
@@ -811,6 +813,7 @@ public class AuthResource {
 			oOutputUserVM.setName(oUserId.getName());
 			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
+			oOutputUserVM.setType(oUserId.getType());
 			return oOutputUserVM;
 
 		} catch(Exception e) {
@@ -865,8 +868,6 @@ public class AuthResource {
 				//todo create new user in keycloak
 				//todo set the user without need for email confirmation
 				//todo set new password for newly created user in keycloak
-				
-				
 				
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();

@@ -345,6 +345,7 @@ public class AdminDashboardResource {
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
+		oUserVM.setType(oUser.getType());
 
 		if (oUser.getRole() != null) {
 			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));

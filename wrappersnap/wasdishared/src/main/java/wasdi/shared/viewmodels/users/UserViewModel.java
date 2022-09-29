@@ -3,6 +3,7 @@ package wasdi.shared.viewmodels.users;
 import java.util.Collections;
 import java.util.Set;
 
+import wasdi.shared.business.UserType;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -19,6 +20,8 @@ public class UserViewModel {
 	private String link;
 	private String description;
 	private String sessionId;
+	
+	private String type;
 
 	private String role;
 	private Set<String> grantedAuthorities;
@@ -33,6 +36,7 @@ public class UserViewModel {
     	oViewModel.surname = null;
     	oViewModel.sessionId = null;
     	oViewModel.authProvider = null;
+    	oViewModel.type = UserType.FREE.name();
 
     	oViewModel.role = null;
     	oViewModel.grantedAuthorities = Collections.emptySet();
@@ -152,4 +156,11 @@ public class UserViewModel {
 		this.grantedAuthorities = grantedAuthorities;
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 }
