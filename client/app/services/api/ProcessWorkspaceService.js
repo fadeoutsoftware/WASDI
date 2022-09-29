@@ -303,7 +303,17 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
         };
 
         this.getProcessWorkspaceTotalRunningTimeByUserAndInterval = function(sUserId, sDateFrom, sDateTo) {
-            return this.m_oHttp.get(this.APIURL + '/process/runningTime?userId=' + sUserId +'&dateFrom=' + sDateFrom + '&dateTo=' + sDateTo);
+            let sUrl = this.APIURL + '/process/runningTime?userId=' + sUserId;
+
+            if (utilsIsStrNullOrEmpty(sDateFrom) === false) {
+                sUrl += '&dateFrom=' + sDateFrom;
+            }
+
+            if (utilsIsStrNullOrEmpty(sDateTo) === false) {
+                sUrl += '&dateTo=' + sDateTo;
+            }
+
+            return this.m_oHttp.get(sUrl);
         };
 
         this.getQueuesStatus = function(sNodeCode, sStatuses) {

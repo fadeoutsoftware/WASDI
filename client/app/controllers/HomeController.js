@@ -158,6 +158,7 @@ var HomeController = (function () {
             oUser.surname = data.surname;
             oUser.sessionId = data.sessionId;
             oUser.role = data.role;
+            oUser.type = data.type; 
             oUser.grantedAuthorities = data.grantedAuthorities;
             oController.m_oConstantsService.setUser(oUser);//set user
             oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
@@ -174,6 +175,7 @@ var HomeController = (function () {
             oUser.userId = oDecodedToken.preferred_username;
             oUser.name = oDecodedToken.given_name;
             oUser.surname = oDecodedToken.family_name;
+            oUser.type = data.type; 
             oUser.authProvider = "wasdi";
             oUser.link;
             oUser.description;

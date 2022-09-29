@@ -175,32 +175,21 @@ var AdminDashboardController = (function () {
 
             utilsRemoveSpaces(sUserId);
 
-            if (utilsIsStrNullOrEmpty(sDateFrom) === true) {
-                utilsVexDialogAlertTop(
-                    "GURU MEDITATION<br>A VALID START DATE MUST BE PROVIDED"
-                );
-
-                return false;
-            }
-
-            if (utilsIsStrNullOrEmpty(sDateTo) === true) {
-                utilsVexDialogAlertTop(
-                    "GURU MEDITATION<br>A VALID END DATE MUST BE PROVIDED"
-                );
-
-                return false;
-            }
-
             var oController = this;
 
-            let sDateFromParse = new Date(
-                Date.parse(sDateFrom + ":00:00")
-            ).toISOString();
-            let sDateToParse = new Date(
-                Date.parse(sDateTo + ":00:00")
-            ).toISOString();
+            let sDateFromParse = null;
+            if (utilsIsStrNullOrEmpty(sDateFrom) === false) {
+                sDateFromParse = new Date(
+                    Date.parse(sDateFrom + ":00:00")
+                ).toISOString();
+            }
 
-            console.log(sDateToParse);
+            let sDateToParse = null;
+            if (utilsIsStrNullOrEmpty(sDateTo) === false) {
+                sDateToParse = new Date(
+                    Date.parse(sDateTo + ":00:00")
+                ).toISOString();
+            }
 
             this.m_oProcessWorkspaceService
                 .getProcessWorkspaceTotalRunningTimeByUserAndInterval(
