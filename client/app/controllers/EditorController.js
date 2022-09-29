@@ -1518,10 +1518,13 @@
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
-                if (utilsIsObjectNullOrUndefined(result) === true)
+                if (utilsIsObjectNullOrUndefined(result) === true) {
                     return false;
-
-                oController.getProductListByWorkspace();
+                }
+                //Only fetch list if Product was changed
+                if (result === true) {
+                    oController.getProductListByWorkspace();
+                }
             });
         });
 

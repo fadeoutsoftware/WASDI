@@ -13,27 +13,36 @@ var ProductEditorInfoController = (function () {
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
-        this.m_oProduct = oExtras.product;
+        this.m_oOriginalProduct = oExtras.product;
         this.m_oProductService = oProductService;
         this.m_oStyleService = oStyleService;
         this.m_oReturnProduct = oExtras.product;
         this.m_oOldFriendlyName = oExtras.product.productFriendlyName;
         this.m_oDescription = oExtras.product.description;
         this.workspaceId = oConstantsService.getActiveWorkspace().workspaceId;
+        this.m_oProduct = {
+            ...oExtras.product
+        }; 
         this.m_asStyles = [];
         this.m_aoStylesMap = {};
         this.m_oStyle = {};
         this.m_bLoadingStyle = true;
+        this.m_bProductChanged = false;
 
         var oController = this;
 
         $scope.close = function (result) {
-            oController.updateProduct(
-                oController.m_oProduct,
-                oController.workspaceId
-            );
+            //Check if product changed
+            if (!_.isEqual(oController.m_oProduct, oController.m_oOriginalProduct)) {
+                oController.m_bProductChanged = true;
+                oController.updateProduct(
+                    oController.m_oProduct,
+                    oController.workspaceId
+                );
+            }
+            
 
-            oClose(oController.m_oReturnProduct, 500); // close, but give 500ms for bootstrap to animate
+            oClose(oController.m_bProductChanged, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.m_oStyleService.getStylesByUser().then(
@@ -85,7 +94,7 @@ var ProductEditorInfoController = (function () {
         this.m_oProduct.style = sStyle;
 
         var oUpdatedViewModel = {};
-
+        
         oUpdatedViewModel["fileName"] = this.m_oProduct.fileName;
         oUpdatedViewModel["productFriendlyName"] =
             this.m_oProduct.productFriendlyName;
@@ -105,10 +114,11 @@ var ProductEditorInfoController = (function () {
                             _this.m_oReturnProduct.description
                         );
                         console.log("Product Updated");
-                    } else
+                    } else {
                         console.log(
                             "Error update product: there was an error to the server"
                         );
+                    }     
                 },
                 function (error) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner(
