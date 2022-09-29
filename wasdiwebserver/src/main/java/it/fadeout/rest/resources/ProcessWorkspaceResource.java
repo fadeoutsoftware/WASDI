@@ -1199,10 +1199,6 @@ public class ProcessWorkspaceResource {
 		}
 
 		try {
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
-				return lRunningTime;
-			}
-
 			if (Utils.isNullOrEmpty(sTargetUserId)) {
 				return lRunningTime;
 			} else {
@@ -1214,33 +1210,40 @@ public class ProcessWorkspaceResource {
 				}
 			}
 
-			// 2022-09-07T00:00:00.000Z
-			long lDateFrom;
+			// if the requesting-user is not super-user and if the requesting-user is not the target-user, then return null
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)
+					&& !sTargetUserId.equalsIgnoreCase(oUser.getUserId())) {
+				return lRunningTime;
+			}
+
+
+
 			if (Utils.isNullOrEmpty(sDateFrom)) {
-				return lRunningTime;
-			} else {
-				Date oDateFrom = Utils.getYyyyMMddTZDate(sDateFrom);
-
-				if (oDateFrom == null) {
-					return lRunningTime;
-				} else {
-					lDateFrom = oDateFrom.getTime();
-				}
+				sDateFrom = "2020-01-01T00:00:00.000Z";
 			}
 
-			// 2022-09-14T23:59:59.999Z
-			long lDateTo;
+			Date oDateFrom = Utils.getYyyyMMddTZDate(sDateFrom);
+
+			if (oDateFrom == null) {
+				return lRunningTime;
+			}
+
+			long lDateFrom = oDateFrom.getTime();
+
+
+
 			if (Utils.isNullOrEmpty(sDateTo)) {
-				return lRunningTime;
-			} else {
-				Date oDateTo = Utils.getYyyyMMddTZDate(sDateTo);
-
-				if (oDateTo == null) {
-					return lRunningTime;
-				} else {
-					lDateTo = oDateTo.getTime();
-				}
+				sDateTo = "2099-12-31T23:59:59.999Z";
 			}
+
+			Date oDateTo = Utils.getYyyyMMddTZDate(sDateTo);
+
+			if (oDateTo == null) {
+				return lRunningTime;
+			}
+
+			long lDateTo = oDateTo.getTime();
+
 
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			lRunningTime = oProcessWorkspaceRepository.getRunningTime(sTargetUserId, lDateFrom, lDateTo);
