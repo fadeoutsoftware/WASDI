@@ -111,7 +111,7 @@ public class PackageManagerResource {
 
 		List<PackageViewModel> aoPackagesAll = oPackageManagerFullInfoViewModel.getAll();
 
-		if (aoPackagesUptodate != null) {
+		if (aoPackagesAll != null) {
 			aoPackages.addAll(aoPackagesAll);
 		}
 
