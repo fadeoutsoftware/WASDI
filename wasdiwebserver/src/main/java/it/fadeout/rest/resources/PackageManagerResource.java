@@ -109,6 +109,12 @@ public class PackageManagerResource {
 			aoPackages.addAll(aoPackagesUptodate);
 		}
 
+		List<PackageViewModel> aoPackagesAll = oPackageManagerFullInfoViewModel.getAll();
+
+		if (aoPackagesUptodate != null) {
+			aoPackages.addAll(aoPackagesAll);
+		}
+
 		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
 		Collections.sort(aoPackages, oComparator);
 

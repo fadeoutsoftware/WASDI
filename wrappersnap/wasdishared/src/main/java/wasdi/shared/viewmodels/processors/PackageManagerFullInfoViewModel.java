@@ -18,5 +18,6 @@ public class PackageManagerFullInfoViewModel {
 	private PackageManagerViewModel packageManager;
 	private List<PackageViewModel> outdated;
 	private List<PackageViewModel> uptodate;
+	private List<PackageViewModel> all;
 
 }
