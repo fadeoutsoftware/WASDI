@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
+import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
@@ -74,6 +75,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.monitoring.Disk;
+import wasdi.shared.viewmodels.monitoring.License;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
@@ -1337,7 +1339,20 @@ public class Wasdi extends ResourceConfig {
 
 					NodeScoreByProcessWorkspaceViewModel oViewModel = new NodeScoreByProcessWorkspaceViewModel();
 					oViewModel.setNodeCode(sNodeCode);
-					
+
+					String sTimestampAsString = Utils.getFormatDate(oTimestampInMillis);
+					oViewModel.setTimestampAsString(sTimestampAsString);
+
+					List<License> asLicenses = oMetricsEntry.getLicenses();
+					if (asLicenses != null) {
+						String sLicenses = asLicenses.stream()
+								.filter(License::getStatus)
+								.map(License::getName)
+								.collect(Collectors.joining(", "));
+
+						oViewModel.setLicenses(sLicenses);
+					}
+
 					Disk oDisk = null;
 					Double oPercentageUsed = null;
 					
