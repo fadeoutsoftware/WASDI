@@ -86,10 +86,12 @@
 
             <!--**************** TREE PANEL *****************-->
             <div class="card flex-grow-1 mb-4">
-                <div class="card-header">
-                    {{"EDITOR_TITLE_PANEL_PRODUCTS" | translate}}
-                    <span class="badge">{{m_oController.m_aoProducts.length}}</span>
-
+                <div class="card-header d-flex flex-row align-items-center">
+                   
+                    <p class="mb-0 mr-1" style="cursor: pointer;" ng-click="m_oController.setSortType()">{{"EDITOR_TITLE_PANEL_PRODUCTS" | translate}}</p>
+                    <span class="badge mr-1">{{m_oController.m_aoProducts.length}}</span>
+                    <i class="fa fa-arrow-up" aria-hidden="true" ng-show="m_oController.sSortType === 'asc'"></i>
+                    <i class="fa fa-arrow-down" aria-hidden="true" ng-show="m_oController.sSortType === 'desc'"></i>
                     <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip"
                         data-placement="top" title="{{'EDITOR_TOOLTIP_OPEN_BAND'|translate}}">
                         <em class="fa fa-folder-open-o" aria-hidden="true"></em>

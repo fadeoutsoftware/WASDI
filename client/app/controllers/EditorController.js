@@ -99,6 +99,8 @@
         this.m_oUser = this.m_oConstantsService.getUser();
         //{}
         this.m_aoProductsLayersIn3DMapArentGeoreferenced = [];
+        //default sort by value
+        this.sSortType = 'default'; 
 
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
@@ -1847,126 +1849,214 @@
      */
     EditorController.prototype.generateTree = function () {
         var oController = this;
-        var oTree =
-        {
-            'core': { 'data': [], "check_callback": true },
-            "state": { "key": "state_tree" },
-            "plugins": ["checkbox", "contextmenu", "search"], // plugins in use
-            "search": {
-                "show_only_matches": true,
-                "show_only_matches_children": true
+        var oTree = {
+            core: { data: [], check_callback: true },
+            state: { key: "state_tree" },
+            plugins: ["checkbox", "contextmenu", "search", "sort"], // plugins in use
+            search: {
+                show_only_matches: true,
+                show_only_matches_children: true,
             },
-            "contextmenu": { // my right click menu
-                // this method deselect all the other nodes so the node selection will be triggered by open menu 
-                "select_node": false, 
-                "items": function ($node) {
-                    // select the current node 
-                  //  $node.state.selected = trues
-                    oController.selectClickedNode($node)
+            contextmenu: {
+                // my right click menu
+                // this method deselect all the other nodes so the node selection will be triggered by open menu
+                select_node: false,
+                items: function ($node) {
+                    // select the current node
+                    //  $node.state.selected = trues
+                    oController.selectClickedNode($node);
                     //only the band has property $node.original.band
                     // menu showed when a band is selecte
                     var oReturnValue = null;
 
-                    var sZoom2D = oController.m_oTranslate.instant("MENU_ZOOM_2D");
-                    var sZoom3D = oController.m_oTranslate.instant("MENU_ZOOM_3D");
-                    var sDownload = oController.m_oTranslate.instant("MENU_DOWNLOAD");
-                    var sSendToFtp = oController.m_oTranslate.instant("MENU_SEND_FTP");
-                    var sDelete = oController.m_oTranslate.instant("MENU_DELETE");
-                    var sProperties = oController.m_oTranslate.instant("MENU_PROPERTIES");
+                    var sZoom2D =
+                        oController.m_oTranslate.instant("MENU_ZOOM_2D");
+                    var sZoom3D =
+                        oController.m_oTranslate.instant("MENU_ZOOM_3D");
+                    var sDownload =
+                        oController.m_oTranslate.instant("MENU_DOWNLOAD");
+                    var sSendToFtp =
+                        oController.m_oTranslate.instant("MENU_SEND_FTP");
+                    var sDelete =
+                        oController.m_oTranslate.instant("MENU_DELETE");
+                    var sProperties =
+                        oController.m_oTranslate.instant("MENU_PROPERTIES");
                     var sShare = oController.m_oTranslate.instant("MENU_SHARE");
-                    var sDeleteConfirm = oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
-                    var sDeleteError = oController.m_oTranslate.instant("MSG_DELETE_ERROR");
-                    var sDeleteManyConfirm1 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_1");
-                    var sDeleteManyConfirm2 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_2");
+                    var sDeleteConfirm =
+                        oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
+                    var sDeleteError =
+                        oController.m_oTranslate.instant("MSG_DELETE_ERROR");
+                    var sDeleteManyConfirm1 = oController.m_oTranslate.instant(
+                        "MSG_DELETE_MANY_CONFIRM_1"
+                    );
+                    var sDeleteManyConfirm2 = oController.m_oTranslate.instant(
+                        "MSG_DELETE_MANY_CONFIRM_2"
+                    );
 
-                    if (utilsIsObjectNullOrUndefined($node.original.band) == false) { 
+                    if (
+                        utilsIsObjectNullOrUndefined($node.original.band) ==
+                        false
+                    ) {
                         //******************************** BAND *************************************
                         var oBand = $node.original.band;
 
-                        oReturnValue =
-                        {
-                            "Zoom2D": {
-                                "label": sZoom2D,
-                                "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                        oReturnValue = {
+                            Zoom2D: {
+                                label: sZoom2D,
+                                action: function (obj) {
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oBand) ==
+                                        false
+                                    ) {
+                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(
+                                            oBand.geoserverBoundingBox
+                                        );
                                     }
                                 },
-                                "_disabled": false
+                                _disabled: false,
                             },
-                            "Zoom3D": {
-                                "label": sZoom3D,
-                                "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                            Zoom3D: {
+                                label: sZoom3D,
+                                action: function (obj) {
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oBand) ==
+                                        false
+                                    ) {
+                                        oController.m_oGlobeService.zoomBandImageOnBBOX(
+                                            oBand.bbox
+                                        );
                                     }
                                 },
-                                "_disabled": false
+                                _disabled: false,
                             },
-                            "Download": {
-                                "label": sDownload,
-                                "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
+                            Download: {
+                                label: sDownload,
+                                icon: "fa fa-download",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                        oController.findProductByName($node.original.fileName);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) == false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) == false
+                                    ) {
+                                        oController.findProductByName(
+                                            $node.original.fileName
+                                        );
 
-                                        oController.downloadProductByName($node.original.fileName);
+                                        oController.downloadProductByName(
+                                            $node.original.fileName
+                                        );
                                     }
-                                }
+                                },
                             },
-                            "SendToFtp": {
-                                "label": sSendToFtp,
-                                "icon": "fa fa-upload",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
-                                    var sSourceFileName = $node.original.fileName;
-                                    var oFound = oController.findProductByFileName(sSourceFileName);
+                            SendToFtp: {
+                                label: sSendToFtp,
+                                icon: "fa fa-upload",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
+                                    var sSourceFileName =
+                                        $node.original.fileName;
+                                    var oFound =
+                                        oController.findProductByFileName(
+                                            sSourceFileName
+                                        );
 
-                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
-                                }
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oFound) ==
+                                        false
+                                    )
+                                        oController.openTransferToFtpDialog(
+                                            oFound
+                                        );
+                                },
                             },
 
-                            "DeleteProduct": {
-                                "label": sDelete,
-                                "icon": "delete-icon-context-menu-jstree",
+                            DeleteProduct: {
+                                label: sDelete,
+                                icon: "delete-icon-context-menu-jstree",
 
-                                "action": function (obj) {
+                                action: function (obj) {
+                                    utilsVexDialogConfirm(
+                                        sDeleteConfirm,
+                                        function (value) {
+                                            if (value) {
+                                                bDeleteFile = true;
+                                                bDeleteLayer = true;
+                                                this.temp = $node.parents[1];
+                                                var that = this;
 
-                                    utilsVexDialogConfirm(sDeleteConfirm, function (value) {
-                                        if (value) {
-                                            bDeleteFile = true;
-                                            bDeleteLayer = true;
-                                            this.temp = $node.parents[1];
-                                            var that = this;
+                                                var oFoundProduct =
+                                                    oController.m_aoProducts[
+                                                        $node.original.band
+                                                            .productIndex
+                                                    ];
 
-                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-
-                                            oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                            }, (function (error) {
-                                                utilsVexDialogAlertTop(sDeleteError);
-                                            }));
+                                                oController.m_oProductService
+                                                    .deleteProductFromWorkspace(
+                                                        oFoundProduct.fileName,
+                                                        oController
+                                                            .m_oActiveWorkspace
+                                                            .workspaceId,
+                                                        bDeleteFile,
+                                                        bDeleteLayer
+                                                    )
+                                                    .then(
+                                                        function (data) {
+                                                            oController.deleteProductInNavigation(
+                                                                oController.m_aoVisibleBands,
+                                                                that.temp
+                                                                    .children_d
+                                                            );
+                                                        },
+                                                        function (error) {
+                                                            utilsVexDialogAlertTop(
+                                                                sDeleteError
+                                                            );
+                                                        }
+                                                    );
+                                            }
                                         }
-                                    });
-                                }
+                                    );
+                                },
                             },
-                            "Properties": {
-                                "label": sProperties,
-                                "icon": "info-icon-context-menu-jstree",
-                                "separator_before": true,
-                                "action": function (obj) {
-                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
-                                }
-                            }
+                            Properties: {
+                                label: sProperties,
+                                icon: "info-icon-context-menu-jstree",
+                                separator_before: true,
+                                action: function (obj) {
+                                    var oFoundProduct =
+                                        oController.m_aoProducts[
+                                            $node.original.band.productIndex
+                                        ];
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            oFoundProduct
+                                        ) == false
+                                    )
+                                        oController.openProductInfoDialog(
+                                            oFoundProduct
+                                        );
+                                },
+                            },
                         }; // menu entries
                     }
 
                     // only products has $node.original.fileName
                     // menu showed when a product is selected
-                    if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
+                    if (
+                        utilsIsObjectNullOrUndefined($node.original.fileName) ==
+                        false
+                    ) {
                         //***************************** PRODUCT ********************************************
                         oReturnValue = {
                             Download: {
@@ -2172,9 +2262,23 @@
                             },
                         };
                     }
+
                     return oReturnValue;
+                },
+            },
+            sort: function (a, b) {
+
+                let a1 = this.get_node(a);
+                let b1 = this.get_node(b);
+                console.log(a1)
+                if (oController.sSortType === 'asc') {
+                    return a1.text.toUpperCase() > b1.text.toUpperCase() ? 1 : -1;
+                } else if (oController.sSortType === 'desc') {
+                    return a1.text.toUpperCase() > b1.text.toUpperCase() ? -1 : 1;
+                } else {
+                    return null
                 }
-            }
+            },
         };
 
 
@@ -2514,6 +2618,19 @@
         //reload product list
         this.getProductListByWorkspace();
     };
+
+    EditorController.prototype.setSortType = function () {
+        let oController = this;
+        if (oController.sSortType === 'default') {
+            oController.sSortType = 'asc';
+        } else if (oController.sSortType === 'asc') {
+            oController.sSortType = 'desc';
+        } else {
+            oController.sSortType = 'default'
+        }
+        console.log(oController.sSortType)
+        oController.getProductListByWorkspace();
+    }
 
     EditorController.$inject = [
         '$rootScope',
