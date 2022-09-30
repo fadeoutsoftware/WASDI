@@ -112,7 +112,7 @@
 	"IMPORT_TOOLTIP_UNCHECK": "Unchecked",
 	"IMPORT_SEARCH_BUTTON": "Ricerca",
 	"IMPORT_SEARCHLIST_BUTTON": "Ricerca lista",
-	"IMPORT_DOWNLOAD_SELECTED": "Scarica i selezionati",
+	"IMPORT_DOWNLOAD_SELECTED": "Aggiungi selezionati all'area di lavoro",
 	"IMPORT_CRONTAB": "CronTab",
 	"IMPORT_PROVIDERS": "Providers",
 	"IMPORT_DATE_FROM": "Da:",

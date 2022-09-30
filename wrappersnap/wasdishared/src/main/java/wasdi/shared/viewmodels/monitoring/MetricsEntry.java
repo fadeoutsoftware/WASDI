@@ -18,5 +18,6 @@ public class MetricsEntry {
 	private Cpu cpu;
 	private List<Disk> disks;
 	private Memory memory;
+	private List<License> licenses;
 
 }

@@ -119,7 +119,7 @@
     "IMPORT_TOOLTIP_UNCHECK": "Unchecked",
     "IMPORT_SEARCH_BUTTON":"Cari",
     "IMPORT_SEARCHLIST_BUTTON":"Daftar Pencarian",
-	"IMPORT_DOWNLOAD_SELECTED": "Pilihan Diunduh",
+	"IMPORT_DOWNLOAD_SELECTED": "Tambahkan yang Dipilih ke Ruang Kerja",
 	"IMPORT_CRONTAB": "CronTab",
 	"IMPORT_PROVIDERS": "Penyedia",
 	"IMPORT_DATE_FROM": "Dari:",

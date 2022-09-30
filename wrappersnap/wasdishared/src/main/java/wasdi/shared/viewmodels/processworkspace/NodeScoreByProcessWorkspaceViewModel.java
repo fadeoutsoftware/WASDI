@@ -23,4 +23,8 @@ public class NodeScoreByProcessWorkspaceViewModel {
 	private Long diskAbsoluteUsed;
 	private Long diskAbsoluteAvailable;
 
+	private String licenses;
+
+	private String timestampAsString;
+
 }

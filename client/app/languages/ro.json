@@ -119,7 +119,7 @@
     "IMPORT_TOOLTIP_UNCHECK": "Deselectat",
     "IMPORT_SEARCH_BUTTON":"Căutare",
     "IMPORT_SEARCHLIST_BUTTON":"Listă de căutare",
-	"IMPORT_DOWNLOAD_SELECTED": "Descărcă elementul selectat",
+	"IMPORT_DOWNLOAD_SELECTED": "Adăugați selecția în spațiul de lucru",
 	"IMPORT_CRONTAB": "CronTab",
 	"IMPORT_PROVIDERS": "Furnizori",
 	"IMPORT_DATE_FROM": "De la:",

@@ -112,7 +112,7 @@
     "IMPORT_TOOLTIP_UNCHECK": "Décoché",
     "IMPORT_SEARCH_BUTTON":"Rechercher",
     "IMPORT_SEARCHLIST_BUTTON":"Liste de recherche",
-	"IMPORT_DOWNLOAD_SELECTED": "Télécharger la sélection",
+	"IMPORT_DOWNLOAD_SELECTED": "Ajouter la sélection à l'espace de travail",
 	"IMPORT_CRONTAB": "Tâche planifiée",
 	"IMPORT_PROVIDERS": "Fournisseurs",
 	"IMPORT_DATE_FROM": "Date de début:",
