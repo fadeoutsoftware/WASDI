@@ -119,7 +119,7 @@
     "IMPORT_TOOLTIP_UNCHECK": "Unkontrolliert",
     "IMPORT_SEARCH_BUTTON":"Suchen",
     "IMPORT_SEARCHLIST_BUTTON":"Liste durchsuchen",
-	"IMPORT_DOWNLOAD_SELECTED": "Ausgewählte Downloads",
+	"IMPORT_DOWNLOAD_SELECTED": "Ausgewählte zum Arbeitsbereich hinzufügen",
 	"IMPORT_CRONTAB": "CronTab",
 	"IMPORT_PROVIDERS": "Providers",
 	"IMPORT_DATE_FROM": "Von:",

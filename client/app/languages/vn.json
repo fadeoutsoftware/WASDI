@@ -112,7 +112,7 @@
     "IMPORT_TOOLTIP_UNCHECK": "Chưa kiểm tra",
     "IMPORT_SEARCH_BUTTON": "Tìm kiếm",
     "IMPORT_SEARCHLIST_BUTTON": "Danh sách tìm kiếm",
-    "IMPORT_DOWNLOAD_SELECTED": "Tải xuống được chọn",
+    "IMPORT_DOWNLOAD_SELECTED": "Thêm đã chọn vào không gian làm việc",
     "IMPORT_CRONTAB": "CronTab",
     "IMPORT_PROVIDERS": "Nhà cung cấp",
     "IMPORT_DATE_FROM": "Từ:",
