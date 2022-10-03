@@ -69,6 +69,28 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get the list of ProcessorParametersTemplates by user and processor.
+	 * 
+	 * @param sProcessorId the id of the processor
+	 * @return the list of processorParameterTemplates
+	 */
+	public List<ProcessorParametersTemplate> getProcessorParametersTemplatesByProcessor(String sProcessorId) {
+		final List<ProcessorParametersTemplate> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.eq("processorId", sProcessorId))
+					.sort(new Document("name", 1));
+			fillList(aoReturnList, oWSDocuments, ProcessorParametersTemplate.class);
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	/**
 	 * Get a ProcessorParametersTemplate by templateId.
 	 * 
 	 * @param sTemplateId the id of the template

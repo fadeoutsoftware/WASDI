@@ -130,6 +130,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return getPermissionsByTypeAndUserId("processor", sUserId);
 	}
 
+	public List<UserResourcePermission> getProcessorParametersTemplateSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("processorparameterstemplate", sUserId);
+	}
+
 
 
 	public List<UserResourcePermission> getPermissionsByResourceId(String sResourceId) {
