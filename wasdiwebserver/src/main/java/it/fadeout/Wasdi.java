@@ -1348,6 +1348,7 @@ public class Wasdi extends ResourceConfig {
 						String sLicenses = asLicenses.stream()
 								.filter(License::getStatus)
 								.map(License::getName)
+								.sorted()
 								.collect(Collectors.joining(", "));
 
 						oViewModel.setLicenses(sLicenses);
