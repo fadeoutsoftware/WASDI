@@ -647,3 +647,339 @@ The same work can be done in an asynch way:
 Note that, while you are importing images, if you open the workspace on WASDI, you will see your operations on going.
 
 Welcome to space.
+
+Search Parameter Documentation
+-----------------------------------------
+
+Sentinel-1 Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.filename:** This is the Satellite Platform. It can be of type “S1A” or “S1B”. 
+
+**.producttype:** This is the Product Type. It can be of type “SLC”, “GRD” or “OCN”. 
+
+**.polarisationmode:** This is the Polarisation. It can be of type “HH”, “VV”, “HV”, “VH”, “HH+HV”, “VV+HH”. 
+
+**.sensoroperationalmode:** This is the Sensor Mode. It can be of type “SM”, “IW”, “EW”, or “WV”. 
+
+**.relativeorbitnumber:** This is the Relative Orbit Number. It can be an integer from 1 to 175. 
+
+**.swathidentifier: ** This is the Swath.
+
+Sentinel-2 Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.filename:** this is the Satellite Platform. It can be of type “S2A” or “S2B”. 
+
+**.producttype:** this is the product type. It can be of type “S2MSI1C”, “S2MSI2Ap” or “S2MSI2A”. 
+
+**.cloudcoverpercentage:** this is the Cloud Coverage Percentage. It can be an integer range from 0 to 100 - including float numbers (e.g., 0 to  9.4).
+
+Sentinel-3 Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**.productlevel:** this is the product level. It can be of type “L1” or “L2”. 
+
+**.insturment:** This is the Insturment. It can only be of type “SRAL”. 
+
+**.producttype:** This is the Product Type. Its value is determined by the following conditions: 
+
+* If .productlevel is set to “L1” it can be of type "SR_1_SRA___”, "SR_1_SRA_A_" or “SR_1_SRA_BS”.
+
+* If .productlevel is set to “L2” it can be of type “SR_2_LAN___”
+
+**.timeliness:** This is the Timeliness. It can be of value “Near Real Time”, “Short Time Critical”, or “Non Time Critical”. 
+
+**.realtiveorbitstart:** this is the Relative Orbit Start. The value can be an integer from 1 to 385.
+
+Sentinel-5P Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.productlevel:** This is the product level. It can be of value “LEVEL1B” or “LEVEL2”. 
+
+**.producttype:** This is the Product Type. Its value is determined by the following conditions: 
+
+* If .productlevel is set to “LEVEL1B, the value can be “L1B_IR_SIR”, “L1B_IR_UVN”, “L1B_RA_BD1”, “L1B_RA_BD2”, “L1B_RA_BD3”, “L1B_RA_BD4”, “L1B_RA_BD5”, “L1B_RA_BD6”, “L1B_RA_BD7”, “L1B_RA_BD8”, or “AUX_CTMFCT”, “AUX_CTMANA”
+
+* If .productlevel is set to “LEVEL2”, then the value of .producttype can be: “L2__AER_AI”, “L2__AER_LH”, “L2__CH4___”, “L2__CLOUD_”, “L2__CO____”, “L2__HCHO__”, “L2__NO2___”, “L2__NP_BD3”, “L2__NP_BD6”, “L2__NP_BD7”, “L2__O3_TCL”, “L2__O3____”, “L2__SO2___”, “AUX_CTMFCT”, or “AUX_CTMANA”
+
+**.timeliness:** This is the Timeliness. It can be of value “Offline”, “Near real time”, or “Reprocessing”. 
+
+**.absoluteorbit:** This is the Absolute Orbit Number.
+
+PROBA-V Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.collection:** This is the Collection. The value can be "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001", "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001", or "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001"
+
+**.cloudcoverpercentage:** This is the Cloud Coverage Percentage. It can be set to a range of 0 to 100 (e.g., 0 to 9.4). 
+
+**.snowcoverpercentage:** This is the snowcoverpercentage. It can be set to a range of 0 to 100 (e.g., 0 to 9.4). 
+
+**.productref:** This is the product ref. 
+
+**.cameraId:** This is the Camera Id. 
+
+**.productID:** This is the Product ID. 
+
+**.year:** This is the year. 
+
+**.Insturment:** This is the Insturment. It can be of value “VG1” or “VG2”.
+
+Envisat Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.name:** This is the Type. It can be of value “ASA_IM__0P”, or “ASA_WS__0P”. 
+
+**.orbitDirection:** This is the Orbit Direction. It can be of value “ASCENDING” or “DESCENDING”
+
+Landsat8 Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.name:** This is the Type. It can be of value “L1T”, “L1G”, “L1GT”, “L1GS”, “L1TP”. 
+
+**.cloudcoverpercentage:** This is the Cloud Cover Percentage. It can be set to a range of 0 to 100 (e.g., 0 to 94).
+
+VIIRS Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.producttype:** This is the Product. It can be of value “VIIRS_1d_composite” or “VIIRS_5d_composite”. 
+
+ERA5 Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.dataset:** This is the Dataset. It can be of value “reanalysis-era5-pressure-levels” or “reanalysis-era5-single-levels”. 
+
+**.productType:** This is the Product Type. 
+
+* If .dataset is set to “reanalysis-era5-pressure-levels” then the .producttype can be of value “reanalysis”, “ensemble_mean”, “ensemble_members”, or “ensemble_spread”.
+
+* If .dataset is set to “reanalysis-era5-single-levels” then the .producttype can be of value “reanalysis”, “ensemble_mean”, “ensemble_members”, or “ensemble_spread”.
+
+**.pressureLevels:** This is the Pressure Levels in hPa. If .dataset is set to “reanalysis-era5-pressure-levels” then the value of .pressureLevels can be “1”, “2”, “1+2”, or “1000”. 
+
+**.variables:** This is the Variables. 
+
+* If .dataset is set to “reanalysis-era5-pressure-levels” then the value of .variables can be “RH”, “U”, “V”, or “RH+U+V”.
+
+* If .dataset is set to “reanalysis-era5-single-levels” then the value of .variables can be “SST+SP+ST” or “10U+10V+2DT+2T+SP”.
+
+**.format:** This is the Format. It can be of value “grib” or “netcdf”.
+
+CAMS Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.dataset:** This is the Dataset and can be of value “cams-global-atmospheric-composition-forecasts”.
+
+**.type:** This is the Type. If the .dataset is set to “cams-global-atmospheric-composition-forecasts” then the value can be “forecast”. 
+
+**.variables:** This is the Variables. If the .dataset is set to “cams-global-atmospheric-composition-forecasts” then the value will be set to “dust_aerosol_optical_depth_550nm”.
+
+**.format:** This is the Format. It can be of value “grib” or “netcdf_zip”.
+
+PLANET Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.producttype:** This is the Planet Item Type. It can be of value “PSScene”, “PSScene3Band”, “PSScene4Band”, “PSOrthoTile”, “REOrthoTile”, “REScene”, “SkySatScene”, “SkySatCollect”, or “SkySatVideo”. 
+
+DEM Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.dataset:** This is the Dataset. It can be of value “DEM_30M” or “DEM_90M”. 
+
+WorldCover Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.dataset:** This is the Dataset. It can be of value “10m_2020_V1”.
+
+StaticFiles Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.producttype:** This is the Product Type. It can be of either value “ESA_CCI_LAND_COVER_2015” or “ESACCI-Ocean-Land-Map-150m-P13Y-2000”.
+
+IMERG Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.latency:** This is the Latency. It can be of value “Early” or “Late”. 
+
+**.duration:** This is the Duration. Its value is based on the following conditions:
+
+* If .latency is set to “Early” .duration can have a of value “HHR”.
+
+* If .latency is set to “Late” .duration can have a value of “HHR”, “DAY”, or “MO”
+
+**.accumulation:** This is the Accumulation. Its value is based on the following conditions: 
+
+* If .latency is set to “Early” and .duration is set to “HHR” then .accumulation can have a value of “30min”, “1day”, “3hr”, or “All”.
+
+* If .latency is set to “Late” and .duration is set to “HHR” then .accumulation can have a value of “30min”, “1day”, “3day”, “7day”, “3hr” or “All”.
+
+CM Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.producttype:** This is the Product Type. It can have a value of 
+
+* “OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS”, 
+
+* “OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS”,
+
+* “SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS”,
+
+* “SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS”,
+
+* “GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS”,
+
+* “INSITU_MED_NRT_OBSERVATIONS_013_035”, or
+
+* “OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS”
+
+**.protocol:** This is the Protocol. If .producttype has a value matching any from the list below, then .protocol can have a value of either "SUBS" or "FTP".
+
+* OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS
+
+* OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS
+
+* SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS
+
+* SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS
+
+* GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS
+
+* OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS
+
+If .product type is set to the value “INSITU_MED_NRT_OBSERVATIONS_013_035” then .protocol can have a value of “FTP”. 
+
+**.dataset:** This is the Dataset. Its possible value is determined by these following conditions: 
+
+* If the .producttype has a value of “OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS” then .dataset can have a value of one of the following:
+	
+	* “dataset-oc-med-chl-multi-l4-chl_1km_monthly-rt-v02”
+	 
+	* “dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02”
+
+	* "dataset-oc-med-chl-olci_a-l4-chl_1km_monthly-rt-v02” or
+
+	* “dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt"
+
+* If the .producttype has a value of “SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS” then .dataset can have a value of either:
+
+    * “SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a” or
+
+    * “SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b”
+
+* If .producttype is set to “SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS” then .dataset can have a value of:
+
+    * "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"
+
+    * "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2"
+
+    * "SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b" or
+
+    * "SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d"
+
+* If the .producttype has a value of “GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS” and .protocol is set to “SUBS” then .dataset can havea value of “global-analysis-forecast-wav-001-027”.
+
+* If the .producttype is set to “GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS” and .protocol is set to “FTP” then .dataset can have a value of:
+
+    * “global-analysis-forecast-wav-001-027” or
+
+    * “global-analysis-forecast-wav-001-027-statics”
+
+* If the .producttype is “INSITU_MED_NRT_OBSERVATIONS_013_035” and the .protocol is “FTP” then the value of .dataset can be “med_multiparameter_nrt”.
+
+* If .producttype is set to “OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TD” then the value of .datset can be “dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt”.
+
+**.variables:** This is the Variables. The possible values of .variabls is determined by the following conditions: 
+
+* If .protocol is set to “SUBS” AND .dataset is set to one of the following, then the value of variables can be “CHL+CHL_count+CHL_error”, “CHL”, “CHL_count” or “CHL_error”.
+
+* If .dataset is set to “dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02” and .protocol is set to “SUBS” then the value of .variables can be “CHL”.
+
+* If .dataset is set to “c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M” and .protocol is set to “SUBS” then the value of .variables can be “CHL+CHL_count+CHL_error+grid_mapping”, “CHL”, “CHL_count”, “CHL_error”, or “grid_mapping”.
+
+* If .protocol is set to “SUBS” and .dataset is set either "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a" or "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b" then variables can have a value of one of the following: 
+
+	* “adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst”, 
+	
+	* “adjusted_sea_surface_temperature|quality_level”
+	
+	* “sea_surface_temperature”, or 
+	
+	* “source_of_salt”
+
+* If .protocol is set to "SUBS" and .dataset is set to either "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2" or "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2" then .variables can have a value of one of the following: 
+
+	* “analysed_sst+analysis_error”
+	
+	* “analysed_sst”, or 
+	
+	* “analysis_error”:
+
+* If .protocol is set to "SUBS" and .dataset is set to either "SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b" or "SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d" then .variables can have a value of "sst_anomaly". 
+
+* If .dataset is set to “global-analysis-forecast-wav-001-027” and .protocol is set to “SUBS” then .varaibles can have a value of one of the following: 
+	
+	* VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+
+		VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK
+	* VHM0
+
+	* VHM0_SW1
+
+	* VHM0_SW2
+
+	* VHM0_WW
+
+	* VHDR
+
+	* VMDR_SW1
+
+	* VMDR_SW2
+
+	* VMDR_WW
+
+	* VPED
+
+	* VSDX
+
+	* VSDY
+
+	* VTM01_SW1
+
+	* VTM01_SW2
+
+	* VTM01_WW
+
+	* VTM02
+
+	* VTM10
+
+	* VTPK
+
+* If .dataset has a value of “dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt” and .protocol is set to “SUBS” then .variables can have a value of one of the following: 
+
+	* HL+CHL_error+CHL_flags
+	* CHL
+	* CHL_error
+	* CHL_flags
+
+ECOSTRESS Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**.dataset:** This is the Dataset. It can have a value of one of the following:
+
+* EEHCM
+
+* EEHSEBS 
+
+* EEHSTIC
+
+* EEHSW
+
+* EEHTES
+
+* EEHTSEB
+
+**.relativeorbitnumber:** This is the Orbit Range. It can have a value of an integer from 1 to 19999. 
+
+**.parameteName:** This is the Parameter. It can have a value of either “Day” or “Night”. 
+
+**.dayNightFlag:** This is the DayNightFlag. It can have a value of either “L1B_RAD” or “Night”.
