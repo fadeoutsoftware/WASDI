@@ -395,6 +395,15 @@ var ProcessorParametersTemplateController = (function () {
     
             
         };
+    ProcessorParametersTemplateController.prototype.formatJson = function () {
+        let oController = this;
+        //let asProcessorParamsArr = oController.m_oProcessorParametersTemplate.jsonParameters.replace(/[{}]/g, "").replaceAll("=", ":").split(",")
+
+        
+        let oProcessorParamsObj = JSON.parse(oController.m_oProcessorParametersTemplate.jsonParameters.replaceAll("'", '"'))
+        oController.m_oProcessorParametersTemplate.jsonParameters = JSON.stringify(oProcessorParamsObj, null, 4)
+              
+    }
 
     ProcessorParametersTemplateController.$inject = [
         "$scope",
