@@ -83,7 +83,7 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 
 				// Compose the API string
-				sUrl += "processors/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId
+				sUrl += "packageManager/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId
 						+"&updateCommand=" + m_sUpdateCommand;
 
 				// Add the auth header
