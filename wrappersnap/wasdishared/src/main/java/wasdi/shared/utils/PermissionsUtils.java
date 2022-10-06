@@ -137,7 +137,13 @@ public class PermissionsUtils {
 
 			ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
 
-			return oProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate(sTemplateId, sUserId);
+			if (oProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate(sTemplateId, sUserId)) {
+				return true;
+			}
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sUserId, sTemplateId);
 		} catch (Exception oE) {
 			Utils.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
 		}

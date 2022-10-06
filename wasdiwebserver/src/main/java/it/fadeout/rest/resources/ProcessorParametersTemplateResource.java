@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
@@ -277,8 +279,23 @@ public class ProcessorParametersTemplateResource {
 
 		// Get all the ProcessorParametersTemplates
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-		List<ProcessorParametersTemplate> aoTemplates = oProcessorParametersTemplateRepository
-				.getProcessorParametersTemplatesByUserAndProcessor(sUserId, sProcessorId);
+
+		List<ProcessorParametersTemplate> aoUnfilteredTemplates = oProcessorParametersTemplateRepository
+				.getProcessorParametersTemplatesByProcessor(sProcessorId);
+
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+		List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getProcessorParametersTemplateSharingsByUserId(sUserId);
+
+		Map<String, UserResourcePermission> aoSharingsMap = aoSharings.stream()
+				.collect(Collectors.toMap(UserResourcePermission::getResourceId, Function.identity()));
+
+		List<ProcessorParametersTemplate> aoTemplates = new ArrayList<>();
+
+		for (ProcessorParametersTemplate oTemplate : aoUnfilteredTemplates) {
+			if (oTemplate.getUserId().equals(sUserId) || aoSharingsMap.containsKey(oTemplate.getTemplateId())) {
+				aoTemplates.add(oTemplate);
+			}
+		}
 
 		// Cast in a list
 		List<ProcessorParametersTemplateListViewModel> aoListViewModel = getListViewModels(aoTemplates);

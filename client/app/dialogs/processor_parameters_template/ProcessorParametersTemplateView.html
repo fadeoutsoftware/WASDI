@@ -262,8 +262,12 @@
                             </div>
 
                             <br />
-
                             <div ng-show="m_oController.m_bEditMode">
+                                <button
+                                class="my-button my-align-left"
+                                ng-click="m_oController.formatJson()">
+                                    Format JSON
+                                </button>
                                 <button
                                     class="my-button my-align-right"
                                     ng-click="m_oController.save()"

@@ -296,6 +296,13 @@
     "DIALOG_EDIT_USER_INFO_SURNAME":"Nume de familie",
     "DIALOG_EDIT_USER_INFO_GOOGLE_ACCOUNT":"Utilizator conectat cu Contul Google:",
     "DIALOG_EDIT_USER_EDIT_USER_INFO":"Editați informațiile despre utilizator",
+	"DIALOG_EDIT_USER_ACCOUNT_INFO": "Informatii despre cont",
+	"DIALOG_EDIT_USER_USER_ID": "Numele de utilizator", 
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE": "Tip de cont",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_1": "Esti un",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_2": "utilizator", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_1": "Ai folosit", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_2": "a timpului de procesare WASDI",
 
     "DIALOG_FTP_TITLE":"Transfer prin FTP",
     "DIALOG_FTP_INPUT_SERVER":"Adresa serverului FTP",
