@@ -146,8 +146,10 @@ public class CondaPackageManagerImpl implements IPackageManager {
 			s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
 			s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
 			s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: env updated");
+			
+			return true;
 		} else {
-			throw new RuntimeException(sResponse);
+			return false;
 		}
 	}
 }
