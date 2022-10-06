@@ -396,7 +396,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Decoded JSON Parameter " + sJson);
 
             // Call localhost:port
-            String sUrl = "http://localhost:" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
+            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
 
             sUrl += "?user=" + oParameter.getUserId();
             sUrl += "&sessionid=" + oParameter.getSessionID();
@@ -865,7 +865,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
 
             // Call localhost:port
-            String sUrl = "http://localhost:" + oProcessor.getPort() + "/run/--wasdiupdate";
+            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/--wasdiupdate";
 
             // CREI CONNESSIONE AL
             URL oProcessorUrl = new URL(sUrl);
@@ -962,7 +962,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			String sUpdateCommand = (String) oJsonItem.get("updateCommand");
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
-			String sIp = "127.0.0.1";
+			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 			int iPort = oProcessor.getPort();
 
 			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
@@ -1019,7 +1019,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			return true;
 		}
 
-		String sIp = "127.0.0.1";
+		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 		int iPort = oProcessor.getPort();
 
 		try {

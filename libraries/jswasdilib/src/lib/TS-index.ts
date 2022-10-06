@@ -181,12 +181,12 @@ export class Wasdi {
   }
 
   /**
-   * Loads configuration and parameters. If no filename is specified, it
-   * loads the file config.json and parameters.json from the same level directory of the calling
-   * URL.
-   * The config file can be hosted on an external URL.
-   * @param configFile a JSON containing all the required information to login to WASDI, please check repository for example
-   * @param parametersFile a JSON containing the parameters that can be used in case of a launch of an appliciation
+   * Loads configuration and parameters. If no filename is specified,
+   * the method attempts to load config.json and parameters.json files from the root level 
+   * URL of the developed application.
+   * The config file can be also hosted on an external URL.
+   * @param configFile a JSON containing all the required information to login to WASDI, please check repository for a complete example
+   * @param parametersFile a JSON containing the parameters that can be used during the launch of the application
    */
   loadConfig(configFile: string, parametersFile: string) {
     let sUrl = configFile;

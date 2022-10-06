@@ -244,6 +244,13 @@ wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
 wasdiApp.controller("ProcessParamsShareController", ProcessParamsShareController)
 
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
+
+//wasdiApp.controller("UploadFileController", window.UploadFileController);
+//wasdiApp.controller("ImageEditorController", window.ImageEditorController);
+
+wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
+
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){

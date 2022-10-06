@@ -31,11 +31,24 @@ public abstract class WasdiProcessorEngine {
 	protected ProcessWorkspace m_oProcessWorkspace= null;
 	protected Send m_oSendToRabbit = new Send(null);
 
+	/**
+	 * Create an instance of a Processor Engine
+	 * @param sType Type of Processor
+	 * @return
+	 */
 	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
 		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 	}
 	
 	
+	/**
+	 * Create an instance of a Processor Engine
+	 * @param sType Type of Processor
+	 * @param sWorkingRootPath WASDI Working Path
+	 * @param sDockerTemplatePath Docker Template Path
+	 * @param sTomcatUser Tomcat user to impersonate
+	 * @return
+	 */
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
@@ -266,7 +279,7 @@ public abstract class WasdiProcessorEngine {
 	 * @param oProcessorParameter
 	 * @return True if the processor exists
 	 */
-	protected boolean isProcessorOnNode(ProcessorParameter oProcessorParameter) {
+	public boolean isProcessorOnNode(ProcessorParameter oProcessorParameter) {
 		
 		if (oProcessorParameter == null) return false;
 		

@@ -48,6 +48,12 @@ public class Environmentupdate extends Operation {
 			}
 
 			WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        
+	        if (!oEngine.isProcessorOnNode(oParameter)) {
+                LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
+                return true;	        	
+	        }
+	        
 			oEngine.setSendToRabbit(m_oSendToRabbit);
 			oEngine.setParameter(oParameter);
 			oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
@@ -84,10 +90,10 @@ public class Environmentupdate extends Operation {
 							if (Utils.isNullOrEmpty(sName))
 								sName = "Your Processor";
 
-							String sInfo = "Re Deploy Done<br>" + sName + " is now available";
+							String sInfo = sName + " application<br>Environment Updated";
 
 							if (!bRet) {
-								sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
+								sInfo = "GURU MEDITATION<br>There an error in Env Update of " + sName + " :(";
 							}
 
 							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),

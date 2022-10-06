@@ -296,6 +296,13 @@
     "DIALOG_EDIT_USER_INFO_SURNAME":"Surname",
     "DIALOG_EDIT_USER_INFO_GOOGLE_ACCOUNT":"User Logged with Google Account:",
     "DIALOG_EDIT_USER_EDIT_USER_INFO":"Edit user info",
+	"DIALOG_EDIT_USER_ACCOUNT_INFO": "Account Information",
+	"DIALOG_EDIT_USER_USER_ID": "User Id", 
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE": "Account Type",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_1": "You are a",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_2": "user", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_1": "You have used", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_2": "of WASDI processing time",
 
     "DIALOG_FTP_TITLE":"Transfer to FTP",
     "DIALOG_FTP_INPUT_SERVER":"FTP Server address",

@@ -296,6 +296,13 @@
     "DIALOG_EDIT_USER_INFO_SURNAME":"Nama belakang",
     "DIALOG_EDIT_USER_INFO_GOOGLE_ACCOUNT":"Pengguna Masuk dengan Akun Google:",
     "DIALOG_EDIT_USER_EDIT_USER_INFO":"Edit informasi pengguna",
+	"DIALOG_EDIT_USER_ACCOUNT_INFO": "Informasi Akun",
+	"DIALOG_EDIT_USER_USER_ID": "Identitas pengguna", 
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE": "Jenis akun",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_1": "Anda adalah",
+	"DIALOG_EDIT_USER_ACCOUNT_TYPE_2": "pengguna", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_1": "Anda telah menggunakan", 
+	"DIALOG_EDIT_USER_PROCESS_TIME_2": "waktu pemrosesan WASDI",
 
     "DIALOG_FTP_TITLE":"Pindahkan ke FTP",
     "DIALOG_FTP_INPUT_SERVER":"Alamat Server FTP",

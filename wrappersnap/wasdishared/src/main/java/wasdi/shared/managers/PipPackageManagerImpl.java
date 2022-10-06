@@ -131,7 +131,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 	}
 
 	@Override
-	public void operatePackageChange(String sUpdateCommand) {
+	public boolean operatePackageChange(String sUpdateCommand) {
 		// Call localhost:port
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
 		s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
@@ -149,42 +149,9 @@ public class PipPackageManagerImpl implements IPackageManager {
 			s_oLogger.info("PipPackageManagerImpl.operatePackageChange: Output from Server .... \n");
 			s_oLogger.info("PipPackageManagerImpl.operatePackageChange: " + sResponse);
 			s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: env updated");
+			return true;
 		} else {
-			throw new RuntimeException(sResponse);
-		}
-	}
-
-	@Override
-	public String executeCommand(String sCommand) {
-		// Call localhost:port
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand";
-		s_oLogger.debug("PipPackageManagerImpl.executeCommand: sUrl: " + sUrl);
-		s_oLogger.debug("PipPackageManagerImpl.executeCommand: sCommand: " + sCommand);
-
-		Map<String, String> asHeaders = new HashMap<>();
-		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-
-		String sPayload = "command=" + sCommand;
-
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpPOSTQuery(sUrl, asHeaders, sPayload);
-		Integer iResult = oHttpCallResponse.getResponseCode();
-		String sResponse = oHttpCallResponse.getResponseBody();
-
-		s_oLogger.debug("PipPackageManagerImpl.executeCommand: iResult: " + iResult);
-		s_oLogger.debug("PipPackageManagerImpl.executeCommand: " + sResponse);
-
-		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-			s_oLogger.info("PipPackageManagerImpl.executeCommand: Output from Server .... \n");
-			s_oLogger.info("PipPackageManagerImpl.executeCommand: " + sResponse);
-			s_oLogger.debug("PipPackageManagerImpl.executeCommand: command executed");
-
-			JSONObject oJsonItem = new JSONObject(sResponse);
-
-			String sContent = oJsonItem.optString("output", "No content");
-
-			return sContent;
-		} else {
-			throw new RuntimeException(sResponse);
+			return false;
 		}
 	}
 
