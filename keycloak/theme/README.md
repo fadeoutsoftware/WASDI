@@ -9,7 +9,10 @@ The directory contains all the customized template files and static resources (.
 
 ## CREATE THE JAR 
 To create the jar launch the current command 
+ ```
 jar cf keycloak_theme_wasdi.jar META-INF theme
+ ```
+ (jdk installed is required)
 
 ## DEPLOY THE THEME 
-[TODO] add instructions
+[TODO] add deploy instructions
