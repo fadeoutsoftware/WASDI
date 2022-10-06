@@ -221,7 +221,7 @@ public class Killprocesstree extends Operation {
 			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
 
 			// Call localhost:port
-			String sUrl = "http://localhost:" + oProcessorToKill.getPort() + "/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
+			String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessorToKill.getPort() + "/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
 
 			URL oProcessorUrl = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();

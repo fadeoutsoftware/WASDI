@@ -46,8 +46,8 @@ angular
                 }
 
                 return this.m_oHttp.get(
-                    this.APIURL +
-                        "/processors/environmentupdate?processorId=" +
+                    this.APIURL + this.m_sResource +
+                        "/environmentupdate?processorId=" +
                         sProcessorId +
                         "&workspace=" +
                         sWorkspaceId +
@@ -66,8 +66,8 @@ angular
                     sWorkspaceId = oWorkspace.workspaceId;
                 }
                 return this.m_oHttp.get(
-                    this.APIURL +
-                        "/processors/environmentupdate?processorId=" +
+                    this.APIURL + this.m_sResource +
+                        "/environmentupdate?processorId=" +
                         sProcessorId +
                         "&workspace=" +
                         sWorkspaceId +
@@ -88,8 +88,8 @@ angular
                 }
                 
                 return this.m_oHttp.get(
-                    this.APIURL +
-                        "/processors/environmentupdate?processorId=" +
+                    this.APIURL + this.m_sResource +
+                        "/environmentupdate?processorId=" +
                         sProcessorId +
                         "&workspace=" +
                         sWorkspaceId +

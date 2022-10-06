@@ -175,15 +175,21 @@ public class DockerUtils {
                 // Port
                 asArgs.add("-p127.0.0.1:" + iProcessorPort + ":5000");
 
-                // Extra host mapping, useful for some instances when the server host can't be resolved
+                // Extra hosts mapping, useful for some instances when the server host can't be resolved
                 // The symptoms of such problem is that the POST call from the Docker container timeouts
-                String sExtra_Host = WasdiConfig.Current.dockers.extraHosts;
-                if (!Utils.isNullOrEmpty(sExtra_Host)) {
-                    LauncherMain.s_oLogger.debug("DockerUtils.run Found extra host in configuration file");
-                    LauncherMain.s_oLogger.debug("DockerUtils.run adding host mapping to the run arguments");
-                    asArgs.add("--add-host=" + sExtra_Host);
-                }
-
+                if (WasdiConfig.Current.dockers.extraHosts != null) {
+                	
+                	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
+                		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
+                    	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
+                    		
+                    		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
+                    		
+                    		asArgs.add("--add-host=" + sExtraHost);
+                    	}
+                		
+                	}
+                }                
 
                 // Docker name
                 asArgs.add(sDockerName);

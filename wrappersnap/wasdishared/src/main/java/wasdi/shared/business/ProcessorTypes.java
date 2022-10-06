@@ -48,12 +48,14 @@ public class ProcessorTypes {
 			aoFiles.add("call_idl.pro");
 		}
 		else if (sProcessorType.equals(UBUNTU_PYTHON37_SNAP)) {
+			aoFiles.add("packagesInfo.json");
 			
 		}
 		else if (sProcessorType.equals(OCTAVE)) {
 			
 		}
 		else if (sProcessorType.equals(CONDA)) {
+			aoFiles.add("packagesInfo.json");
 			
 		}
 		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {

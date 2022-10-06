@@ -128,7 +128,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 	}
 
 	@Override
-	public void operatePackageChange(String sUpdateCommand) {
+	public boolean operatePackageChange(String sUpdateCommand) {
 		// Call localhost:port
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
 		s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
@@ -150,40 +150,4 @@ public class CondaPackageManagerImpl implements IPackageManager {
 			throw new RuntimeException(sResponse);
 		}
 	}
-
-	@Override
-	public String executeCommand(String sCommand) {
-		// Call localhost:port
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/executeCommand";
-		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: sUrl: " + sUrl);
-		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: sCommand: " + sCommand);
-
-		Map<String, String> asHeaders = new HashMap<>();
-		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-
-		String sPayload = "command=" + sCommand;
-
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpPOSTQuery(sUrl, asHeaders, sPayload);
-
-		Integer iResult = oHttpCallResponse.getResponseCode();
-		String sResponse = oHttpCallResponse.getResponseBody();
-
-		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: iResult: " + iResult);
-		s_oLogger.debug("CondaPackageManagerImpl.executeCommand: " + sResponse);
-
-		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-			s_oLogger.info("CondaPackageManagerImpl.executeCommand: Output from Server .... \n");
-			s_oLogger.info("CondaPackageManagerImpl.executeCommand: " + sResponse);
-			s_oLogger.debug("CondaPackageManagerImpl.executeCommand: command executed");
-
-			JSONObject oJsonItem = new JSONObject(sResponse);
-
-			String sContent = oJsonItem.optString("output", "No content");
-
-			return sContent;
-		} else {
-			throw new RuntimeException(sResponse);
-		}
-	}
-
 }
