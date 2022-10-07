@@ -1,5 +1,9 @@
 package wasdi.operations;
 
+import java.io.File;
+
+import org.json.JSONObject;
+
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -12,6 +16,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 
 public class Environmentupdate extends Operation {
 
@@ -42,31 +47,74 @@ public class Environmentupdate extends Operation {
 
 			// Check processor
 			if (oProcessor == null) {
-				LauncherMain.s_oLogger
-						.error("Environmentupdate.executeOperation: oProcessor is null [" + sProcessorId + "]");
+				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: oProcessor is null [" + sProcessorId + "]");
 				return false;
 			}
-
+						
+			// Get the right Processor Engine
 			WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        
+			
+			// If we are not on node, nothing to do
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
                 LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
                 return true;	        	
 	        }
 	        
+			// Get the processor name
+			String sProcessorName = oProcessor.getName();
+
+			if (Utils.isNullOrEmpty(sProcessorName)) {
+				// Should really not happen. But we love safe programming
+				sProcessorName = oProcessor.getProcessorId();
+				
+				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: The processor does not have a name, we use Id " + sProcessorName);
+			}	        
+	        
 			oEngine.setSendToRabbit(m_oSendToRabbit);
 			oEngine.setParameter(oParameter);
 			oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 			oEngine.setProcessWorkspace(oProcessWorkspace);
+			
+			// Ok make the engine work
 			boolean bRet = oEngine.environmentUpdate(oParameter);
+			
+			if (bRet) {
+				LauncherMain.s_oLogger.info("Environmentupdate.executeOperation: update done with success");
+				
+				// We need to update the history of actions done in this environment
+				String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
+				sProcessorFolder = sProcessorFolder + "envActionsList.txt";
+				
+				File oActionsLogFile = new File(sProcessorFolder);
+				
+				if (!oActionsLogFile.exists()) {
+					oActionsLogFile.createNewFile();
+				}
+				
+				String sJson = oParameter.getJson();
+				JSONObject oJsonItem = new JSONObject(sJson);
+				String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+				
+				
+				WasdiFileUtils.writeFile(sUpdateCommand, oActionsLogFile);
+			}
+			else {
+				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: we got an error updating the environment");
+			}
 
 			try {
+				
+				// We need to refresh the package list if we are in the main node
+				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+					Thread.sleep(2000);
+					oEngine.refreshPackagesInfo(oParameter);
+				}
 
-				// In the exchange we should have the workspace from there the user requested
-				// the Redeploy
-				String sOriginalWorkspaceId = oParam.getExchange();
-
-				// Check if it is valid
+				// In the exchange we should have the workspace from there the user requested the environment update
+				String sOriginalWorkspaceId = oParam.getExchange();				
+				
+				// Check if it is a valid workspace
 				if (Utils.isNullOrEmpty(sOriginalWorkspaceId) == false) {
 
 					// Read the workspace
@@ -85,28 +133,17 @@ public class Environmentupdate extends Operation {
 						if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
 
 							// Notify the user
-							String sName = oParameter.getName();
-
-							if (Utils.isNullOrEmpty(sName))
-								sName = "Your Processor";
-
-							String sInfo = sName + " application<br>Environment Updated";
+							String sInfo = sProcessorName + " application<br>Environment Updated";
 
 							if (!bRet) {
-								sInfo = "GURU MEDITATION<br>There an error in Env Update of " + sName + " :(";
+								sInfo = "GURU MEDITATION<br>Error updating " + sProcessorName + " Environment";
 							}
 
 							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
 									oParam.getExchange(), sInfo, oParam.getExchange());
 						}
-
-						if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-							Thread.sleep(2000);
-
-							oEngine.refreshPackagesInfo(oParameter);
-						}
 					}
-				}
+				}				
 
 			} catch (Exception oRabbitException) {
 				m_oLocalLogger.error("Environmentupdate.executeOperation: exception sending Rabbit Message",

@@ -1005,11 +1005,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
 		// Set the processor path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-		if (!sDownloadRootPath.endsWith("/"))
-			sDownloadRootPath = sDownloadRootPath + "/";
-
-		String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
+		String sProcessorFolder = this.getProcessorFolder(sProcessorName);
 		File oProcessorFolder = new File(sProcessorFolder);
 
 		// Is the processor installed in this node?
