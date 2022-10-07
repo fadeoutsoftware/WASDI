@@ -1903,6 +1903,7 @@
                         oReturnValue = {
                             Zoom2D: {
                                 label: sZoom2D,
+                                icon: "fa fa-globe",
                                 action: function (obj) {
                                     if (
                                         utilsIsObjectNullOrUndefined(oBand) ==
@@ -1917,6 +1918,7 @@
                             },
                             Zoom3D: {
                                 label: sZoom3D,
+                                icon: "fa fa-globe",
                                 action: function (obj) {
                                     if (
                                         utilsIsObjectNullOrUndefined(oBand) ==
@@ -1929,35 +1931,35 @@
                                 },
                                 _disabled: false,
                             },
-                            Download: {
-                                label: sDownload,
-                                icon: "fa fa-download",
-                                _disabled:
-                                    oController.getSelectedNodesFromTree(
-                                        $node.original.fileName
-                                    ).length > 100,
-                                action: function (obj) {
-                                    //$node.original.fileName;
-                                    if (
-                                        utilsIsObjectNullOrUndefined(
-                                            $node.original.fileName
-                                        ) == false &&
-                                        utilsIsStrNullOrEmpty(
-                                            $node.original.fileName
-                                        ) == false
-                                    ) {
-                                        oController.findProductByName(
-                                            $node.original.fileName
-                                        );
+                            // Download: {
+                            //     label: sDownload,
+                            //     icon: "fa fa-download",
+                            //     _disabled:
+                            //         oController.getSelectedNodesFromTree(
+                            //             $node.original.fileName
+                            //        ).length > 1,
+                            //     action: function (obj) {
+                            //         //$node.original.fileName;
+                            //         if (
+                            //             utilsIsObjectNullOrUndefined(
+                            //                 $node.original.fileName
+                            //             ) == false &&
+                            //             utilsIsStrNullOrEmpty(
+                            //                 $node.original.fileName
+                            //             ) == false
+                            //         ) {
+                            //             oController.findProductByName(
+                            //                 $node.original.fileName
+                            //             );
 
-                                        let selectedNodesFromTree = oController.getSelectedNodesFromTree(
-                                            $node.original.fileName
-                                        );
+                            //            oController.downloadProductByName(
+                            //                 $node.original.fileName
+                            //             );
 
-                                        selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
-                                    }
-                                },
-                            },
+                            //            selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
+                            //         }
+                            //     },
+                            // },
                             SendToFtp: {
                                 label: sSendToFtp,
                                 icon: "fa fa-upload",
@@ -1985,7 +1987,7 @@
 
                             DeleteProduct: {
                                 label: sDelete,
-                                icon: "delete-icon-context-menu-jstree",
+                                icon: "fa fa-trash",
 
                                 action: function (obj) {
                                     utilsVexDialogConfirm(
@@ -2033,7 +2035,7 @@
                             },
                             Properties: {
                                 label: sProperties,
-                                icon: "info-icon-context-menu-jstree",
+                                icon: "fa fa-info-circle",
                                 separator_before: true,
                                 action: function (obj) {
                                     var oFoundProduct =
