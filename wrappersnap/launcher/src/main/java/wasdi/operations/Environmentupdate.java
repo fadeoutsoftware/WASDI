@@ -1,6 +1,8 @@
 package wasdi.operations;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import org.json.JSONObject;
 
@@ -86,18 +88,26 @@ public class Environmentupdate extends Operation {
 				String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
 				sProcessorFolder = sProcessorFolder + "envActionsList.txt";
 				
+				// Get the actions file
 				File oActionsLogFile = new File(sProcessorFolder);
 				
 				if (!oActionsLogFile.exists()) {
 					oActionsLogFile.createNewFile();
 				}
 				
+				// Extract the command we just executed
 				String sJson = oParameter.getJson();
 				JSONObject oJsonItem = new JSONObject(sJson);
 				String sUpdateCommand = (String) oJsonItem.get("updateCommand");
 				
+				// Add carriage return
+				sUpdateCommand += "\n";
 				
-				WasdiFileUtils.writeFile(sUpdateCommand + "\n", oActionsLogFile, true);
+				// Add this action to the list
+				try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
+					byte[] ayBytes = sUpdateCommand.getBytes();
+					oOutStream.write(ayBytes);
+				}				
 			}
 			else {
 				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: we got an error updating the environment");
