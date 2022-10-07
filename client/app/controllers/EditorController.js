@@ -1935,7 +1935,7 @@
                                 _disabled:
                                     oController.getSelectedNodesFromTree(
                                         $node.original.fileName
-                                    ).length > 1,
+                                    ).length > 100,
                                 action: function (obj) {
                                     //$node.original.fileName;
                                     if (
@@ -1950,9 +1950,11 @@
                                             $node.original.fileName
                                         );
 
-                                        oController.downloadProductByName(
+                                        let selectedNodesFromTree = oController.getSelectedNodesFromTree(
                                             $node.original.fileName
                                         );
+
+                                        selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
                                     }
                                 },
                             },
@@ -2065,7 +2067,7 @@
                                 _disabled:
                                     oController.getSelectedNodesFromTree(
                                         $node.original.fileName
-                                    ).length > 1,
+                                    ).length > 100,
                                 action: function (obj) {
                                     //$node.original.fileName;
                                     if (
@@ -2080,9 +2082,11 @@
                                             $node.original.fileName
                                         );
 
-                                        oController.downloadProductByName(
+                                        let selectedNodesFromTree = oController.getSelectedNodesFromTree(
                                             $node.original.fileName
                                         );
+
+                                        selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
                                     }
                                 },
                             },
@@ -2452,7 +2456,7 @@
      * all or nothing only of visible nodes
      * @param {*} sTextQuery
      */
-     EditorController.prototype.selectClickedNode = function (oNodeIn) {
+    EditorController.prototype.selectClickedNode = function (oNodeIn) {
         if (oNodeIn == null) return;
         // gather all nodes from tree
         var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
@@ -2488,6 +2492,49 @@
         this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl);
 
         return true;
+    };
+
+
+    EditorController.prototype.newDownloadProductByName = function (sFileName) {
+        console.log("EditorController.newDownloadProductByName | sFileName: ", sFileName);
+
+        if (utilsIsStrNullOrEmpty(sFileName) === true) {
+            return false;
+        }
+
+        var sUrl = null;
+        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+
+        var oController = this;
+
+        this.m_oCatalogService.newDownloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl)
+            .then(
+                function (response) {
+                    var _contentType = response.headers('Content-Type');
+
+                    var blob = new Blob([ response.data ], { type : _contentType });
+                    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+                    var anchor = angular.element('<a/>');
+                    anchor.attr({
+                        href : url,
+                        target : '_blank',
+                        download : sFileName
+                    })[0].click();
+                },
+                function (error) {
+                    console.log("EditorController.newDownloadProductByName | error.data.message: ", error.data.message);
+
+                    let errorMessage = oController.m_oTranslate.instant(
+                        error.data.message
+                    );
+
+                    utilsVexDialogAlertTop(errorMessage);
+                }
+            );
+
     };
 
     /**

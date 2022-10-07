@@ -24,6 +24,23 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
         window.location.href = sAPIUrl + "/catalog/downloadbyname" + urlParams;
     };
 
+    this.newDownloadByName = function(sFileName, sWorkspace, sUrl) {
+        var urlParams = "?" + "token=" + oConstantsService.getSessionId();
+        urlParams = urlParams + "&" + "filename=" + sFileName + "&workspace=" + sWorkspace;
+
+        var sAPIUrl = this.APIURL;
+
+        if(typeof sUrl !== "undefined") {
+            if ( sUrl !== null) {
+                if (sUrl !== "") {
+                    sAPIUrl = sUrl;
+                }
+            }
+        }
+
+        return this.m_oHttp.get(sAPIUrl + "/catalog/downloadbyname" + urlParams, { responseType: 'arraybuffer' });
+    };
+
     this.ingestFile = function(sSelectedFile,sWorkspace){
         return this.m_oHttp.put(this.APIURL + '/catalog/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);
     };
