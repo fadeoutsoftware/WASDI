@@ -1,9 +1,14 @@
 package wasdi.operations;
 
 import wasdi.processors.WasdiProcessorEngine;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.Utils;
 
 /**
  * Delete Processor Operation
@@ -34,6 +39,7 @@ public class Deleteprocessor extends Operation {
 			return false;
 		}
 
+		boolean bRet = false;
 		
 		try {		
 	        // Delete User Processor
@@ -43,13 +49,29 @@ public class Deleteprocessor extends Operation {
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
-	        return oEngine.delete(oParameter);
+	        bRet = oEngine.delete(oParameter);
+	                	
+        	// Check if it is valid
+        	if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				// Notify the user
+	        	String sName = oParameter.getName();
+	        	
+	        	if (Utils.isNullOrEmpty(sName)) sName = "Your Processor";
+	        	
+	            String sInfo = "Delete App<br>" + sName + " has been deleted";
+	            
+	            if (!bRet) {
+	            	sInfo = "GURU MEDITATION<br>There was an error deleting" + sName + " :(";
+	            }
+	            
+	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				        		
+        	}	        
 		}
 		catch (Exception oEx) {
 			m_oLocalLogger.error("Deleteprocessor.executeOperation: exception", oEx);
 		}
 		
-		return false;
+		return bRet;
 		
 	}
 
