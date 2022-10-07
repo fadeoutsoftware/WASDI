@@ -97,7 +97,7 @@ public class Environmentupdate extends Operation {
 				String sUpdateCommand = (String) oJsonItem.get("updateCommand");
 				
 				
-				WasdiFileUtils.writeFile(sUpdateCommand, oActionsLogFile);
+				WasdiFileUtils.writeFile(sUpdateCommand + "\n", oActionsLogFile, true);
 			}
 			else {
 				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: we got an error updating the environment");
