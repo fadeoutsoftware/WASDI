@@ -210,11 +210,11 @@ public class DockerUtils {
 
                         oRunWriter.write("#!/bin/bash");
                         oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Started >> " + m_sDockerLogFile);
+                        oRunWriter.write("echo Run Docker Started ");
                         oRunWriter.newLine();
-                        oRunWriter.write(sCommandLine + " $1 >> " + m_sDockerLogFile + " 2>&1");
+                        oRunWriter.write(sCommandLine);
                         oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Done >> " + m_sDockerLogFile);
+                        oRunWriter.write("echo Run Docker Done");
                         oRunWriter.flush();
                         oRunWriter.close();
                     }
