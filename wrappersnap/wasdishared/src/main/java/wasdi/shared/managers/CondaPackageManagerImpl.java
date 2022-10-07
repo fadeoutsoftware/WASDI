@@ -140,15 +140,16 @@ public class CondaPackageManagerImpl implements IPackageManager {
 		String sResponse = oHttpCallResponse.getResponseBody();
 
 		s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: iResult: " + iResult);
-		s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
+		//s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
 
 		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-			s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
-			s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
+			//s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
+			//
 			s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: env updated");
 			
 			return true;
 		} else {
+			s_oLogger.error("CondaPackageManagerImpl.error: " + iResult + " response "+ sResponse);
 			return false;
 		}
 	}

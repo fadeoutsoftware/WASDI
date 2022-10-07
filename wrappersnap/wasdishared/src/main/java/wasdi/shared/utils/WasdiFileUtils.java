@@ -276,8 +276,12 @@ public class WasdiFileUtils {
 			oOutStream.flush();
 		}
 	}
-
+	
 	public static boolean writeFile(String sContent, File oFile) throws FileNotFoundException, IOException {
+		return writeFile(sContent, oFile, false);
+	}
+
+	public static boolean writeFile(String sContent, File oFile, boolean bAppend) throws FileNotFoundException, IOException {
 		s_oLogger.debug("WasdiFileUtils.writeFile");
 
 		if (sContent == null) {
@@ -298,7 +302,7 @@ public class WasdiFileUtils {
 			oParentDirectory.mkdirs();
 		}
 
-		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
+		try (OutputStream oOutStream = new FileOutputStream(oFile, bAppend)) {
 			byte[] ayBytes = sContent.getBytes();
 			oOutStream.write(ayBytes);
 		}
