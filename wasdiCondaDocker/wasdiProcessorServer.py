@@ -347,12 +347,12 @@ def pm_manager_version():
 def __execute_conda_command_and_get_output(command: str) -> str:
 	print('__execute_conda_command_and_get_output: ' + command)
 
-	cpe = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+	oCondaProcess = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
 
 	sOutput = open('tmp', 'r').read()
 	os.remove('tmp')
 
-	stderr: str = cpe.stderr.decode("utf-8")
+	stderr: str = oCondaProcess.stderr.decode("utf-8")
 
 	if stderr != '':
 		if sOutput == '':

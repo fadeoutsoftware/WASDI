@@ -413,12 +413,12 @@ def pm_manager_version():
 def __execute_pip_command_and_get_output(command: str) -> str:
 	print('__execute_pip_command_and_get_output: ' + command)
 
-	cpe = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
+	oPipProcess = subprocess.run(command + ' > tmp', shell=True, capture_output=True)
 
 	sOutput = open('tmp', 'r').read()
 	os.remove('tmp')
 
-	stderr: str = cpe.stderr.decode("utf-8")
+	stderr: str = oPipProcess.stderr.decode("utf-8")
 
 	if stderr != '':
 		if sOutput == '':
