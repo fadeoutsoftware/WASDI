@@ -30,9 +30,11 @@ import showdow from './node_modules/showdown/dist/showdown.js';
 
 global.showdown = showdow;
 
+/*
+Removed due to ununsed old version generating errors on npm automation
 import Plotly from './node_modules/plotly.js/dist/plotly.min.js';
 
-global.Plotly = Plotly;
+global.Plotly = Plotly;*/
 
 import moment from './node_modules/moment/moment.js';
 
