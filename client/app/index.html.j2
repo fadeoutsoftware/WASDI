@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html lang="en" ng-app="wasdi" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="wasdi" class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Wasdi</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!---------------- KeyCloak Auth Client ---------------->
+
+    <script src="{{ dictWasdiClientConfiguration.index.urlJavascript }}"></script>
+    <script>
+        var oKeycloak = new Keycloak();
+        var bKeyCloakInitialized = false;
+
+        console.log('INDEX: start oKeycloak.init');
+
+        oKeycloak.init({
+                checkLoginIframe: false,
+                enableLogging: true
+            }
+        ).then(function () {
+            bKeyCloakInitialized = true;
+            console.log('Keycloak initialized');
+
+            console.log('Subject after init: ' + oKeycloak.subject);
+            console.log('Token  after init: ' + oKeycloak.token);
+        }).catch(function () {
+            bKeyCloakInitialized = true;
+            console.log('Keycloak init error');
+        });
+
+    </script>
+
+    <!---------------- GOOGLE LOGIN ---------------->
+    <!--    <meta name="google-signin-client_id"  content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">-->
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="fonts/astronaut/stylesheet.css">
+    <link rel="stylesheet" href="fonts/starlight/stylesheet.css">
+    <!--<link href="https://fonts.googleapis.com/css?family=Google+Sans:100,300,400,500,700,900,100i,300i,400i,500i,700i,900i" rel="stylesheet">-->
+
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="bower_components/fontawesome-free-5.15.4-web/css/all.css">
+    <!-- jQuery -->
+<!--    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-migrate-3.3.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/start/jquery-ui.css">
+    <!-- js tree css-->
+    <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
+    <!--Cesium css-->
+    <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
+    <link rel="stylesheet" href="lib/Cesium/Widgets/BaseLayerPicker/BaseLayerPicker.css">
+    <!-- Color picker-->
+    <link rel="stylesheet" type="text/css"
+          href="bower_components/angular-colorpicker-directive/css/color-picker.min.css"/>
+
+    <!--Bootstrap-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"/>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/bootstrap-4/customized_bootstrap_v4.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Google Maps Scripts -->
+    <script src="https://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.js"></script>
+
+    <!--SLIDERS-->
+    <link type="text/css" rel="stylesheet" href="assets/slider-appdetails/css/lightslider.css"/>
+    <script src="assets/slider-appdetails/js/lightslider.js"></script>
+
+    <!-- LEAFLET -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" integrity="sha384-mc6rNK5V0bzWGJ1EUEAR2o+a/oH6qaVl+NCF63Et+mVpGnlSnyVSBhSP/wp4ir+O" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM" crossorigin="anonymous">
+    <script src="https://code.createjs.com/createjs-2014.12.12.min.js"></script>
+
+    <!--LEAFLET MOUSE POSITION-->
+    <link rel="stylesheet"
+          href="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.css"/>
+    <script src="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
+
+    <!-- Better WMS leaflet-->
+    <script src="lib/leafletbetterWMS/L.TileLayer.BetterWMS.js"></script>
+
+    <!-- Leaflet Control Custom-->
+    <script src="lib/leafletControlCustomMaster/Leaflet.Control.Custom.js"></script>
+
+    <!------------ FACTORIES ------------>
+    <script src="lib/factories/ViewElementFactory.js"></script>
+
+    <!------------ ENUM ------------>
+    <script src="lib/enum/ProductsProviders.js"></script>
+
+    <!--Geocoder-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <!-- Leaflet Draw -->
+    <script src="bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
+    <link rel="stylesheet" href="bower_components/leaflet-draw/dist/leaflet.draw.css"/>
+
+    <!--Datetime picker-->
+    <link href="bower_components/moment-picker/src/angular-moment-picker.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script> <!--TODO REMOVE IT-->
+
+    <script src="bower_components/jwt-decode/build/jwt-decode.min.js"></script>
+    <!--Back Btn-->
+    <script>
+        function goBack() {
+            window.history.back()
+        }
+    </script>
+</head>
+
+
+<body>
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+<div id="screen-size-helper"></div>
+
+<div ui-view></div>
+
+<!-- In production use:
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+-->
+
+<!-- Original angular -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular-route.min.js"></script>-->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular-animate.min.js"></script>-->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.min.js"></script>-->
+<script src="//unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
+<script src="bower_components/angular-translate/angular-translate.min.js"></script>
+<script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<!--<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>-->
+<script src="bower_components/moment/moment.js"></script>
+<script src="bower_components/wms-capabilities/dist/wms-capabilities.min.js"></script> <!-- WMS CAPABILITIES-->
+<script src="bower_components/ng-file-upload/ng-file-upload.min.js"></script><!-- Upload file drang and drop-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"
+        integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
+
+<script src="bower_components/angular-colorpicker-directive/js/color-picker.min.js"></script>
+
+<!--Datetime picker-->
+<script type="text/javascript" src="bower_components/moment-picker/src/angular-moment-picker.js"></script>
+<script type="text/javascript" src="bower_components/plotly.js/dist/plotly.js"></script>
+
+<!-- Slider -->
+<link rel="stylesheet" type="text/css" href="bower_components/angularjs-slider/dist/rzslider.min.css"/>
+<script src="bower_components/angularjs-slider/dist/rzslider.min.js"></script>
+
+<!-- Showdown (MD Files)-->
+<script src="bower_components/showdown/dist/showdown.js"></script>
+
+<!-- Wasdi config -->
+<script src="environments/secrets.js"></script>
+<script src="environments/environment.js"></script>
+
+<!-- Wasdi models/classes -->
+<script src="models/RabbitConnectionState.js"></script>
+<script src="models/TabType.js"></script>
+<script src="models/MessageHelper.js"></script>
+
+<!-- Client Services -->
+<script src="services/ConstantsService.js"></script>
+<script src="services/SessionInjector.js"></script>
+<script src="services/MapService.js"></script>
+<script src="services/GlobeService.js"></script>
+<script src="services/ConfigurationService.js"></script>
+<script src="services/RabbitStompService.js"></script>
+<script src="services/ResultsOfSearchService.js"></script>
+<script src="services/PagesService.js"></script>
+<script src="services/TreeService.js"></script>
+
+<!-- API Services -->
+<script src="services/api/AuthService.js"></script>
+<script src="services/api/WorkspaceService.js"></script>
+<script src="services/api/NodeService.js"></script>
+<script src="services/api/FileBufferService.js"></script>
+<script src="services/api/ProductService.js"></script>
+<script src="services/api/OpenSearchService.js"></script>
+<script src="services/api/ProcessWorkspaceService.js"></script>
+<script src="services/api/OpportunitySearchService.js"></script>
+<script src="services/api/ProcessingService.js"></script>
+<script src="services/api/CatalogService.js"></script>
+<script src="services/api/ProcessorService.js"></script>
+<script src="services/api/ConsoleService.js"></script>
+<script src="services/api/ProcessorParametersTemplateService.js"></script>
+<script src="services/api/ProcessorMediaService.js"></script>
+<script src="services/api/WorkflowService.js"></script>
+<script src="services/api/StyleService.js"></script>
+<script src="services/api/FeedbackService.js"></script>
+<script src="services/api/AdminDashboardService.js"></script>
+<script src="services/api/PackageManagerService.js"></script>
+
+<!-- Wasdi Directives -->
+<script src="directives/SnakeDirective.js"></script>
+<script src="directives/tree_directive/TreeDirective.js"></script>
+<script src="directives/checklist-model/checklist-model.js"></script>
+<script src="directives/space_invaders/SpaceInvadersDirective.js"></script>
+<script src="directives/space_invaders_fixed/SpaceInvadersFixedDirective.js"></script>
+<script src="directives/multiselect/MultiselectDirective.js"></script>
+<script src="directives/space_invaders_fixed_small_version/SpaceInvaderFixedSmallVersionDirective.js"></script>
+<script src="directives/multiselect_dropdown_menu/MultiselectDropdownMenuDirective.js"></script>
+<script src="directives/DrawSquares/SquaresDirective.js"></script>
+<script src="directives/multiradiobutton_dropdown_menu/MultiRadioButtonDropdownMenuDirective.js"></script>
+<script src="directives/Toggle/ToggleSwitchDirective.js"></script>
+<script src="directives/DropDownMenu/DropDownMenuDirective.js"></script>
+<script src="directives/wasdiApps/wapTextBox/wapTextBox.js"></script>
+<script src="directives/wasdiApps/wapNumericBox/wapNumericBox.js"></script>
+<script src="directives/wasdiApps/wapSelectArea/wapSelectArea.js"></script>
+<script src="directives/wasdiApps/wapDateTimePicker/wapDateTimePicker.js"></script>
+<script src="directives/wasdiApps/wapProductList/wapProductList.js"></script>
+<script src="directives/wasdiApps/wapDropDown/wapDropDown.js"></script>
+<script src="directives/wasdiApps/wapProductsCombo/wapProductsCombo.js"></script>
+<script src="directives/wasdiApps/wapSearchEOImage/wapSearchEOImage.js"></script>
+<script src="directives/wasdiApps/wapCheckBox/wapCheckBox.js"></script>
+<script src="directives/wasdiApps/wapSlider/wapSlider.js"></script>
+<script src="directives/wasdiApps/wapListBox/wapListBox.js"></script>
+<script src="directives/chips-list/chips-list.directive.js"></script>
+<script src="directives/AngularLightSlider.js"></script>
+<script src="directives/insertableTextArea.js"></script>
+<script src="directives/wasdiApps/wapTooltip/wapTooltip.js"></script>
+
+<!-- Wasdi Filters-->
+<script src="filters/stringUtils/removeSpaces.js"></script>
+<script src="filters/stringUtils/formatFileSize.js"></script>
+
+<!-- Wadsi Controllers -->
+<script src="controllers/HomeController.js"></script>
+<script src="controllers/WorkspaceController.js"></script>
+<script src="controllers/AdminDashboardController.js"></script>
+<script src="controllers/EditorController.js"></script>
+<script src="controllers/RootController.js"></script>
+<script src="controllers/ImportController.js"></script>
+<script src="controllers/SearchOrbitController.js"></script>
+<script src="controllers/ValidateUserController.js"></script>
+<script src="controllers/WasdiApplicationUIController.js"></script>
+<script src="controllers/MarketPlaceController.js"></script>
+<script src="controllers/WasdiApplicationDetailsController.js"></script>
+
+<!--Dialogs controllers-->
+<script src="dialogs/orbit_info/OrbitInfoController.js"></script>
+<script src="dialogs/product_info/ProductInfoController.js"></script>
+<script src="dialogs/get_capabilities_dialog/GetCapabilitiesController.js"></script>
+<script src="dialogs/product_editor_info/ProductEditorInfoController.js"></script>
+<script src="dialogs/attributes_metadata_info/AttributesMetadataController.js"></script>
+<script src="dialogs/sftp_upload/SftpUploadController.js"></script>
+<script src="dialogs/delete_process/DeleteProcessController.js"></script>
+<script src="dialogs/workspace_processes_list/WorkspaceProcessesList.js"></script>
+<script src="dialogs/snake_dialog/SnakeController.js"></script>
+<script src="dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceController.js"></script>
+<script src="dialogs/import_advance_filters/ImportAdvanceFiltersController.js"></script>
+<script src="dialogs/workflow_manager/WorkFlowManagerController.js"></script>
+<script src="dialogs/style_manager/StyleManagerController.js"></script>
+<script src="dialogs/get_list_of_workspace_selected/GetListOfWorkspacesSelectedController.js"></script>
+<script src="dialogs/processor/ProcessorController.js"></script>
+<script src="dialogs/processor_parameters_template/ProcessorParametersTemplateController.js"></script>
+<script src="dialogs/workflow_edit/WorkflowController.js"></script>
+<script src="dialogs/style_edit/StyleController.js"></script>
+<script src="dialogs/workspace_details/WorkspaceDetailsController.js"></script>
+<script src="dialogs/wapps/WappsController.js"></script>
+<script src="dialogs/edit_user/EditUserController.js"></script>
+<script src="dialogs/ftp_service/FTPController.js"></script>
+<script src="dialogs/Import/UploadController.js"></script>
+<script src="dialogs/mosaic/MosaicController.js"></script>
+<script src="dialogs/processor_logs/ProcessorLogsController.js"></script>
+<script src="dialogs/share_workspace/ShareWorkspaceController.js"></script>
+<script src="dialogs/send_feedback/SendFeedbackController.js"></script>
+<script src="dialogs/manual_insert_bbox/ManualInsertBboxController.js"></script>
+<script src="dialogs/payload_dialog/PayloadDialogController.js"></script>
+<script src="dialogs/package_manager/PackageManagerController.js"></script>
+<script src="dialogs/processor_parameters_share/ProcessParamsShareController.js"></script>
+<!--APP JS-->
+<script src="app.js"></script>
+
+<!--Wasdi service search-->
+<script src="services/search/advanced-filter-service.js"></script>
+<script src="services/search/advanced-search-service.js"></script>
+<script src="services/search/search-service.js"></script>
+<script src="services/search/light-search-service.js"></script>
+
+
+<!-- Stomp js -->
+<!--<script src="lib/stomp/stomp.js"></script>-->
+<script src="bower_components/bower-sockjs-client/sockjs.js"></script><!--min.-->
+<script src="bower_components/stomp-websocket/lib/stomp.js"></script>
+
+<!-- utils js -->
+<script src="lib/utils/FadeoutJSUtils.js"></script>
+<script src="lib/utils/FadeOutVexDialogUtils.js"></script>
+<script src="lib/utils/WasdiJSUtils.js"></script>
+
+<!--Leaflet provider-->
+<script src="lib/leafletProvider/leaflet-providers.js"></script>
+
+<!-- JStree-->
+<script src="bower_components/jstree/dist/jstree.min.js"></script>
+<script src="bower_components/jstree/src/jstree.contextmenu.js"></script>
+<!-- cesium -->
+<script src="lib/Cesium/Cesium.js"></script>
+
+
+<!--VEX DIALOG-->
+
+<script type="text/javascript">
+    function vexTerminalPromptWriteIt(from, event) {
+        event = event || window.event;
+        var w = document.getElementById("writer");
+        var tw = from.value;
+        w.innerHTML = tw.replace(/\n/g, "<br />");
+    };
+
+    function vexTerminalPromptMoveIt(count, e) {
+
+        e = e || window.event;
+        var keycode = e.keyCode || e.which;
+
+        if (keycode == 37 && parseInt(cursor.style.left) >= (0 - ((count - 1) * 10))) {
+            cursor.style.left = parseInt(cursor.style.left) - 10 + "px";
+        } else if (keycode == 39 && (parseInt(cursor.style.left) + 10) <= 0) {
+            cursor.style.left = parseInt(cursor.style.left) + 10 + "px";
+        }
+    };
+
+    function SetCaretAtEnd(elem) {
+        var elemLen = elem.value.length;
+        // For IE Only
+        if (document.selection) {
+            // Set focus
+            elem.focus();
+            // Use IE Ranges
+            var oSel = document.selection.createRange();
+            // Reset position to 0 & then set at end
+            oSel.moveStart('character', -elemLen);
+            oSel.moveStart('character', elemLen);
+            oSel.moveEnd('character', 0);
+            oSel.select();
+        } else if (elem.selectionStart || elem.selectionStart == '0') {
+            // Firefox/Chrome
+            elem.selectionStart = elemLen;
+            elem.selectionEnd = elemLen;
+            elem.focus();
+        } // if
+    } // SetCaretAtEnd()
+
+    function vexTerminalPromptFocus() {
+        var w = document.getElementById("setter");
+        w.focus();
+        SetCaretAtEnd(w);
+    };
+</script>
+
+<script src="bower_components/vex/dist/js/vex.combined.js"></script>
+<link rel="stylesheet" href="bower_components/vex/dist/css/vex.css"/>
+<link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-default.css"/>
+<link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-bottom-right-corner.css"/>
+<link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-top.css"/>
+<script>vex.defaultOptions.className = 'vex-theme-default'</script>
+
+<!--Modal-->
+<script src="bower_components/angular-modal-service/dst/angular-modal-service.min.js"></script>
+
+
+<!-- include JSONedit files -->
+<script src="bower_components/json-edit/js/directives.js"></script>
+<link href="bower_components/json-edit/css/styles.css" rel="stylesheet" type="text/css"/>
+
+<!-- include the dependencies in this order (if you don't already have them) -->
+<!--<script src="bower_components/json-edit/bower_components/jquery-ui/jquery-ui.min.js"></script>-->
+<!--<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>-->
+<script src="bower_components/json-edit/bower_components/angular-ui-sortable/sortable.min.js"></script>
+<!--<script src="bower_components/angular-directive.g-signin/google-plus-signin.js"></script>-->
+
+<!-- WPS -->
+<script src="lib/wps-js/js/openlayers/OpenLayers-closure.js"></script>
+<script src="lib/wps-js/js/wps-js/wps-js.0.1.1.js"></script>
+<link type="text/css" rel="stylesheet" href="lib/wps-js/css/wps-js.css">
+
+</body>
+</html>

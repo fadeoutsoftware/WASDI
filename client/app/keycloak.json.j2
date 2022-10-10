@@ -1,0 +1,8 @@
+{
+  "realm": "{{ dictWasdiClientConfiguration.keycloak.realm }}",
+  "auth-server-url": "{{ dictWasdiClientConfiguration.keycloak.authServerUrl }}",
+  "ssl-required": "{{ dictWasdiClientConfiguration.keycloak.sslRequired }}",
+  "resource": "{{ dictWasdiClientConfiguration.keycloak.resource }}",
+  "public-client": {{ dictWasdiClientConfiguration.keycloak.publicClient | lower }},
+  "confidential-port": {{ dictWasdiClientConfiguration.keycloak.confidentialPort }}
+}
