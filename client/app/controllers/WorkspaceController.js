@@ -613,12 +613,15 @@ var WorkspaceController = (function () {
 
     };
     
-    WorkspaceController.prototype.changeSorting = function(column) {
+    WorkspaceController.prototype.changeSorting = function(column, sSortCmd) {
 
         var sort = this.sort;
 
-        if (sort.column == column) {
-            sort.descending = !sort.descending;
+
+        if (sort.column == column && sSortCmd === 'asc') {
+            sort.descending = false;
+        } else if (sort.column == column && sSortCmd === 'desc') {
+            sort.descending = true;
         } else {
             sort.column = column;
         }
