@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * WASDI User
  * Created by p.campanella on 21/10/2016.
@@ -255,6 +257,7 @@ public class User {
 	 * False if is Free or Standard
 	 * @return
 	 */
+	@JsonIgnore
 	public boolean isProfessionalUser() {
 		return type.equals(UserType.PROFESSIONAL.name());
 	}
