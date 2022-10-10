@@ -46,19 +46,27 @@ pipeline {
         sh script: '''
           cd client
           npm install
-        ''', label: "Install NodeJS modules from package.json"
+        ''',
+        label: "Install NodeJS modules from package.json"
       }
     }
 
-    stage('ANSIBLE - RENDER TEMPLATES') {
+    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, DELETE TEMPLATES)') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'excludeConfig=${env.excludeConfig.toBoolean()} sourceDirectory=${WORKSPACE}/client/app currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Execute ansible-playbook"
+        sh script: '''
+          cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/
+          ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars "excludeConfig=${env.excludeConfig.toBoolean()} sourceDirectory=${WORKSPACE}/client currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}"
+        ''',
+        label: "Prepare the client"
       }
     }
 
     stage('NPM - COMPILE SCSS FILES') {
       steps {
-        sh script: "bash /data/tool/continuousDelivery/compileScss.sh ${env.WORKSPACE}", label: "Compile SCSS files in CSS"
+        sh script: '''
+          bash /data/tool/continuousDelivery/compileScss.sh ${env.WORKSPACE}
+        ''',
+        label: "Compile SCSS files in CSS"
       }
     }
 
@@ -67,13 +75,18 @@ pipeline {
         sh script: '''
           cd client
           npm run build
-        ''', label: "Build WASDI client"
+        ''',
+        label: "Build WASDI client"
       }
     }
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'excludeConfig=${env.excludeConfig.toBoolean()} sourceDirectory=${WORKSPACE}/client/dist currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Execute ansible-playbook"
+        sh script: '''
+          cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/
+          ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars "excludeConfig=${env.excludeConfig.toBoolean()} sourceDirectory=${WORKSPACE}/client/dist currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}"
+        ''',
+        label: "Execute ansible-playbook"
       }
     }
   }
