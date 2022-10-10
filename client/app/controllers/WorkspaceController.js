@@ -622,9 +622,7 @@ var WorkspaceController = (function () {
             sort.descending = false;
         } else if (sort.column == column && sSortCmd === 'desc') {
             sort.descending = true;
-        } else {
-            sort.column = column;
-        }
+        } 
     };
         
     WorkspaceController.prototype.selectedCls = function(column) {
