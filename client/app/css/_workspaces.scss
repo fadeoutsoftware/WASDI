@@ -109,7 +109,7 @@
             }
             tr{
                 .ellipsis{
-                    max-width: 150px;
+                    max-width: 225px;
                 }
             }
             td{
@@ -223,4 +223,15 @@
         font-weight: bold;
     }
 
+    button.dropdown-list-item {
+        border: none;
+        background-color: transparent;
+        color: #333;
+        cursor: pointer;
+        padding-left: 8px;
+        text-decoration: none;
+    }
+    button.dropdown-list-item:hover {
+        color: #009036;
+    }
 }

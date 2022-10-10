@@ -613,15 +613,16 @@ var WorkspaceController = (function () {
 
     };
     
-    WorkspaceController.prototype.changeSorting = function(column) {
+    WorkspaceController.prototype.changeSorting = function(column, sSortCmd) {
 
         var sort = this.sort;
 
-        if (sort.column == column) {
-            sort.descending = !sort.descending;
-        } else {
-            sort.column = column;
-        }
+
+        if (sort.column == column && sSortCmd === 'asc') {
+            sort.descending = false;
+        } else if (sort.column == column && sSortCmd === 'desc') {
+            sort.descending = true;
+        } 
     };
         
     WorkspaceController.prototype.selectedCls = function(column) {

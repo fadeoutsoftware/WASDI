@@ -113,18 +113,20 @@
                             </td>
                             <td>
                                 <!--{{oProcess.progressPerc}} %-->
-                                <div class="progress">
+                                
+                                <div class="progress mb-0">
                                     <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }">
                                         <span class="">{{oProcess.progressPerc}} %</span><!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
                                     </div>
                                 </div>
+                               
                             </td>
                             <td>
                                 {{oProcess.timeRunning | date:'HH:mm:ss'}}
                             </td>
                             <td >
                                 <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'WAITING' || oProcess.status === 'READY'">
-                                    <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
+                                    <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom" ng-hide="m_oController.getOperationDescription(oProcess) === 'KILLPROCESSTREE'"></i>
                                 </div>
                             </td>
                             <td class="over-icon" ng-click="m_oController.openProcessorLogsDialog(oProcess)" >
