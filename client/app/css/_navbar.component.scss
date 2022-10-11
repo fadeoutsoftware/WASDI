@@ -183,7 +183,7 @@
                 width: 400px;
                 background: transparent;
                 //responsive
-                @media screen and (max-width: $screen-lg) {
+                @media screen and (max-width: 1500px) {
                     width: 200px;
                 }
                 @media screen and (max-width: 1024px) {
