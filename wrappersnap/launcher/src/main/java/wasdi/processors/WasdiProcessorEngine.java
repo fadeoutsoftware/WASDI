@@ -474,10 +474,16 @@ public abstract class WasdiProcessorEngine {
 	/**
 	 * Waits some time to let application start
 	 */
-	public void waitForApplicationToStart() {
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
 	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
-	        Thread.sleep(5000);				
+	        Thread.sleep(5000);
+
+//	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+//	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+//
+//	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
+//	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
