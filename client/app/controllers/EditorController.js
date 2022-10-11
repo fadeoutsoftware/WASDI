@@ -177,11 +177,19 @@
     EditorController.prototype.generateDefaultNavBarMenu = function () {
         this.m_aoNavBarMenu = [
             {
-                name: "",//WAPPS
+                name: "", //WAPPS
                 caption_i18n: "EDITOR_OPERATION_TITLE_WAPPS",
                 subMenu: [],
                 onClick: this.openWappsDialog,
-                icon: "fa fa-lg fa-rocket"
+                icon: "fa fa-lg fa-rocket",
+            },
+            // --- Processor ---
+            {
+                name: "", // New Processor
+                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                subMenu: [],
+                onClick: this.openProcessorDialog,
+                icon: "fa fa-lg fa-plus-square",
             },
             // --- Workflow ---
             {
@@ -189,7 +197,7 @@
                 icon: "fa fa-cogs",
                 caption_i18n: "EDITOR_OPERATION_TITLE_WORKFLOW",
                 subMenu: [],
-                onClick: this.openWorkflowManagerDialog
+                onClick: this.openWorkflowManagerDialog,
             },
             // --- Import ---
             {
@@ -197,23 +205,16 @@
                 icon: "fa fa-cloud-upload-alt",
                 caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
                 subMenu: [],
-                onClick: this.openImportsDialog
+                onClick: this.openImportsDialog,
             },
-            // --- Processor ---
-            {
-                name: "",// New Processor
-                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                subMenu: [],
-                onClick: this.openProcessorDialog,
-                icon: "fa fa-lg fa-plus-square"
-            },
+
             // --- Jupyter Notebook ---
             {
-                name: "Jupyter Notebook",// Jupyter Notebook
+                name: "Jupyter Notebook", // Jupyter Notebook
                 caption_i18n: "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK",
                 subMenu: [],
                 onClick: this.openJupyterNotebookPage,
-                icon: "fa fa-laptop"
+                icon: "fa fa-laptop",
             },
             // --- Style ---
             {
@@ -221,17 +222,16 @@
                 icon: "fa fa-paint-brush",
                 caption_i18n: "EDITOR_OPERATION_TITLE_STYLE",
                 subMenu: [],
-                onClick: this.openStyleManagerDialog
+                onClick: this.openStyleManagerDialog,
             },
             {
-                name: "",//Share
+                name: "", //Share
                 caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
                 subMenu: [],
                 onClick: this.openShareDialog,
-                icon: "fa fa-share-alt fa-lg"
-            }
-
-        ]
+                icon: "fa fa-share-alt fa-lg",
+            },
+        ];
 
         this.translateToolbarMenuList(this.m_aoNavBarMenu);
     };
