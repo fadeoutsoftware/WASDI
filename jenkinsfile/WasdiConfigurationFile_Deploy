@@ -19,11 +19,6 @@ pipeline {
   }
 
   stages {
-    blockOn('.*WasdiJavaComponent_BuildAndDeploy.*') {
-      blockLevel('GLOBAL')
-      scanQueueFor('DISABLED')
-    }
-
     stage('DEBUG') {
       steps {
         sh script: "pwd", label: "Current location"
