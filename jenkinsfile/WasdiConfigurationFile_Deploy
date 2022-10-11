@@ -22,7 +22,6 @@ pipeline {
     stage('DEBUG') {
       steps {
         sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
         echo "env.currentRevision = " + env.currentRevision
         echo "env.targetedEnvironment = " + env.targetedEnvironment
@@ -35,14 +34,14 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "WASDI ${currentRevision}"
-          currentBuild.description = "WASDI - DEPLOY JAVA PACKAGES (.jar, .war, etc)"
+          currentBuild.description = "WASDI - DEPLOY CONFIGURATION FILE"
         }
       }
     }
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiConfigurationFile.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
+        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiConfigurationFile.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
       }
     }
   }
