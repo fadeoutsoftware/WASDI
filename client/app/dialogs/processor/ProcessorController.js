@@ -1041,7 +1041,7 @@ var ProcessorController = (function () {
         let sStringParsed = ""
         
         if (oController.m_sSelectedTab === "Base") {
-            oController.m_sJSONSample = JSON.stringify(JSON.parse(oController.m_sJSONSample.replaceAll("'", '"')),null, 4);
+            oController.m_sJSONSample = JSON.stringify(JSON.parse(oController.m_sJSONSample.replaceAll("'", '"')),null, 2);
         } else if (oController.m_sSelectedTab === "UI") {
             
             sStringParsed = oController.m_sProcessorUI = JSON.stringify(
