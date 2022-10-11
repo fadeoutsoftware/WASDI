@@ -41,9 +41,9 @@ var WorkspaceController = (function () {
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
 
-        this.sort = {
-            column: '',
-            descending: false
+        this.m_oSort = {
+            sColumn: '',
+            bDescending: false
         };        
 
         if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
@@ -613,31 +613,29 @@ var WorkspaceController = (function () {
 
     };
     
-    WorkspaceController.prototype.changeSorting = function(column, sSortCmd) {
+    WorkspaceController.prototype.changeSorting = function(sColumn, sSortCmd) {
 
-        var sort = this.sort;
-
-
-        if (sort.column == column && sSortCmd === 'asc') {
-            sort.descending = false;
-        } else if (sort.column == column && sSortCmd === 'desc') {
-            sort.descending = true;
-        } 
+        if (this.m_oSort.sColumn === sColumn && sSortCmd === 'asc') {
+            this.m_oSort.bDescending = false;
+        } else if (this.m_oSort.sColumn === sColumn && sSortCmd === 'desc') {
+            this.m_oSort.bDescending = true;
+        } else {
+            this.m_oSort.sColumn = sColumn
+             if (this.m_oSort.sColumn === sColumn && sSortCmd === 'asc') {
+            this.m_oSort.bDescending = false;
+            } else if (this.m_oSort.sColumn === sColumn && sSortCmd === 'desc') {
+                this.m_oSort.bDescending = true;
+            }
+        }
     };
-        
-    WorkspaceController.prototype.selectedCls = function(column) {
-        return column == this.sort.column && 'sort-' + this.sort.descending;
-    };    
-
-
+    
     WorkspaceController.prototype.showArrow = function(sColumn, bDescending) {
         
-        if (sColumn == this.sort.column) {
-            if (bDescending == this.sort.descending) {
+        if (sColumn == this.m_oSort.sColumn) {
+            if (bDescending == this.m_oSort.bDescending) {
                 return true;
             }
         }
-        
         return false;
     };    
 
