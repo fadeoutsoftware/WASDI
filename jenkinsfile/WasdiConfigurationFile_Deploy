@@ -16,10 +16,11 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
     disableConcurrentBuilds()
-    blockOn('.*WasdiJavaComponent_BuildAndDeploy.*') {
-      blockLevel('GLOBAL')
-      scanQueueFor('DISABLED')
-    }
+  }
+
+  blockOn('.*WasdiJavaComponent_BuildAndDeploy.*') {
+    blockLevel('GLOBAL')
+    scanQueueFor('DISABLED')
   }
 
   stages {
