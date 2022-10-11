@@ -388,7 +388,6 @@ var ProcessorParametersTemplateController = (function () {
                 .then(function (modal) {
                     modal.element.modal();
                     modal.close.then(function (result) {
-                        console.log(result);
                     });
                 });
             })

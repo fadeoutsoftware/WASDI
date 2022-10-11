@@ -168,7 +168,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             int iProcessorPort = oProcessorRepository.getNextProcessorPort();
             if (!bFirstDeploy) {
                 iProcessorPort = oProcessor.getPort();
-                reconstructEnvironment(oParameter, iProcessorPort);
             }
 
             oDockerUtils.run(iProcessorPort);
@@ -179,6 +178,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
                 oProcessor.setPort(iProcessorPort);
                 oProcessorRepository.updateProcessor(oProcessor);
+            }
+            else {
+            	waitForDockerToStart();
+            	reconstructEnvironment(oParameter, iProcessorPort);
             }
 
             try {
@@ -441,15 +444,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
 
                 // Try to start Again the docker
-
                 String sProcessorFolder = getProcessorFolder(sProcessorName);
 
+                // Start it
                 DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-
                 oDockerUtils.run();
-
-                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: wait 5 sec to let docker start");
-                Thread.sleep(5000);
+                
+                // Wait a little bit
+                waitForDockerToStart();
 
                 // Try again the connection
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to connect again");
@@ -809,13 +811,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterDeploy(sProcessorFolder);
             
-            // Recreate the user environment
-            reconstructEnvironment(oParameter, oProcessor.getPort());
-
             // Run
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
             LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: run the container");
             oDockerUtils.run();
+            
+            
+            // Recreate the user environment
+            waitForDockerToStart();
+            reconstructEnvironment(oParameter, oProcessor.getPort());            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -1112,4 +1116,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		return bRet;
 	}
 
+	/**
+	 * Waits some time to let docker start
+	 */
+	protected void waitForDockerToStart() {
+		try {
+	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForDockerToStart: wait 5 sec to let docker start");
+	        Thread.sleep(5000);				
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForDockerToStart: exception " + oEx.toString());
+		}
+	}
 }

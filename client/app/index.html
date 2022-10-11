@@ -22,8 +22,6 @@
         var oKeycloak = new Keycloak();
         var bKeyCloakInitialized = false;
 
-        console.log('INDEX: start oKeycloak.init');
-
         oKeycloak.init({
                 checkLoginIframe: false,
                 enableLogging: true
@@ -31,9 +29,6 @@
         ).then(function () {
             bKeyCloakInitialized = true;
             console.log('Keycloak initialized');
-
-            console.log('Subject after init: ' + oKeycloak.subject);
-            console.log('Token  after init: ' + oKeycloak.token);
         }).catch(function () {
             bKeyCloakInitialized = true;
             console.log('Keycloak init error');

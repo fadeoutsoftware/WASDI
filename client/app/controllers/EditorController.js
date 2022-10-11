@@ -1261,12 +1261,6 @@
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     // Request accepted
-                    console.log("EditorController.openJupyterNotebookPage | oWindow: ", oWindow);
-                    console.log("EditorController.openJupyterNotebookPage | oController.m_oWindow: ", oController.m_oWindow);
-
-                    console.log("EditorController.openJupyterNotebookPage | data.data: ", data.data);
-                    console.log("EditorController.openJupyterNotebookPage | data.data.stringValue: ", data.data.stringValue);
-
                     if (data.data.stringValue.includes("http")) {
                         oController.m_oWindow.open(data.data.stringValue, '_blank');
                     } else {
@@ -1931,35 +1925,6 @@
                                 },
                                 _disabled: false,
                             },
-                            // Download: {
-                            //     label: sDownload,
-                            //     icon: "fa fa-download",
-                            //     _disabled:
-                            //         oController.getSelectedNodesFromTree(
-                            //             $node.original.fileName
-                            //        ).length > 1,
-                            //     action: function (obj) {
-                            //         //$node.original.fileName;
-                            //         if (
-                            //             utilsIsObjectNullOrUndefined(
-                            //                 $node.original.fileName
-                            //             ) == false &&
-                            //             utilsIsStrNullOrEmpty(
-                            //                 $node.original.fileName
-                            //             ) == false
-                            //         ) {
-                            //             oController.findProductByName(
-                            //                 $node.original.fileName
-                            //             );
-
-                            //            oController.downloadProductByName(
-                            //                 $node.original.fileName
-                            //             );
-
-                            //            selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
-                            //         }
-                            //     },
-                            // },
                             SendToFtp: {
                                 label: sSendToFtp,
                                 icon: "fa fa-upload",
@@ -2088,7 +2053,7 @@
                                             $node.original.fileName
                                         );
 
-                                        selectedNodesFromTree.forEach(element => oController.newDownloadProductByName(element));
+                                        selectedNodesFromTree.forEach(element => oController.downloadProductByName(element));
                                     }
                                 },
                             },
@@ -2276,7 +2241,6 @@
 
                 let a1 = this.get_node(a);
                 let b1 = this.get_node(b);
-                console.log(a1)
                 if (oController.sSortType === 'asc') {
                     return a1.text.toUpperCase() > b1.text.toUpperCase() ? 1 : -1;
                 } else if (oController.sSortType === 'desc') {
@@ -2481,24 +2445,6 @@
     }
 
     EditorController.prototype.downloadProductByName = function (sFileName) {
-        if (utilsIsStrNullOrEmpty(sFileName) === true) {
-            return false;
-        }
-
-        var sUrl = null;
-        // P.Campanella 17/03/2020: redirect of the download to the node that hosts the workspace
-        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false) {
-            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
-        }
-
-        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl);
-
-        return true;
-    };
-
-
-    EditorController.prototype.newDownloadProductByName = function (sFileName) {
-        console.log("EditorController.newDownloadProductByName | sFileName: ", sFileName);
 
         if (utilsIsStrNullOrEmpty(sFileName) === true) {
             return false;
@@ -2527,7 +2473,7 @@
                     })[0].click();
                 },
                 function (error) {
-                    console.log("EditorController.newDownloadProductByName | error.data.message: ", error.data.message);
+                    console.log("EditorController.downloadProductByName | error.data.message: ", error.data.message);
 
                     let errorMessage = oController.m_oTranslate.instant(
                         error.data.message
@@ -2677,7 +2623,7 @@
         } else {
             oController.sSortType = 'default'
         }
-        console.log(oController.sSortType)
+
         oController.getProductListByWorkspace();
     }
 

@@ -113,7 +113,6 @@ var ProductEditorInfoController = (function () {
                             _this.m_oReturnProduct.productFriendlyName,
                             _this.m_oReturnProduct.description
                         );
-                        console.log("Product Updated");
                     } else {
                         console.log(
                             "Error update product: there was an error to the server"
