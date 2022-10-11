@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -37,6 +38,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -157,7 +159,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
-            
 
             processWorkspaceLog("Image done, start the docker");
 
@@ -180,7 +181,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oProcessorRepository.updateProcessor(oProcessor);
             }
             else {
-            	waitForApplicationToStart();
+            	waitForApplicationToStart(oParameter);
             	reconstructEnvironment(oParameter, iProcessorPort);
             }
 
@@ -451,7 +452,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oDockerUtils.run();
                 
                 // Wait a little bit
-                waitForApplicationToStart();
+                waitForApplicationToStart(oParameter);
 
                 // Try again the connection
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to connect again");
@@ -818,7 +819,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             
             
             // Recreate the user environment
-            waitForApplicationToStart();
+            waitForApplicationToStart(oParameter);
             reconstructEnvironment(oParameter, oProcessor.getPort());            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -1054,7 +1055,60 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 		return false;
 	}
-	
+
+	/**
+	 * Waits some time to let application start
+	 */
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
+		try {
+	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+
+	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+
+	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
+	        	
+	        	if (isDockerServerUp(oParameter)) {
+	        		return;
+	        	}
+	        }
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		}
+	}
+
+	public boolean isDockerServerUp(ProcessorParameter oParameter) {
+		try {
+			String sProcessorId = oParameter.getProcessorID();
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+			int iPort = oProcessor.getPort();
+
+
+			String sUrl = "http://" + sIp + ":" + iPort + "/hello";
+			LauncherMain.s_oLogger.debug("CondaPackageManagerImpl.isDockerServerUp: sUrl: " + sUrl);
+
+			Map<String, String> asHeaders = Collections.emptyMap();
+
+			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			Integer iResult = oHttpCallResponse.getResponseCode();
+
+			LauncherMain.s_oLogger.debug("CondaPackageManagerImpl.isDockerServerUp: iResult: " + iResult);
+
+			return (iResult != null && iResult.intValue() == 200);
+		} catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.isDockerServerUp: exception " + oEx.toString());
+		}
+
+		return false;
+	}
+
 	@Override
 	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
 		

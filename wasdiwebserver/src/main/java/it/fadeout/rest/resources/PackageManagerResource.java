@@ -66,15 +66,12 @@ public class PackageManagerResource {
 			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
 				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
 				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
-			} else {
-				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " found");
-			}
+			} 
 			
 			// Read the file
 			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
 			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
 				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
 			}
 
 		} catch (Exception oEx) {
