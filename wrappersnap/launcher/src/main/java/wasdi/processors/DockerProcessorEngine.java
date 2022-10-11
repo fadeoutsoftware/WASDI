@@ -9,11 +9,15 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
@@ -23,6 +27,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
@@ -30,9 +35,11 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -164,7 +171,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             int iProcessorPort = oProcessorRepository.getNextProcessorPort();
             if (!bFirstDeploy) {
                 iProcessorPort = oProcessor.getPort();
-                reconstructEnvironment(oParameter);
+                reconstructEnvironment(oParameter, iProcessorPort);
             }
 
             oDockerUtils.run(iProcessorPort);
@@ -806,7 +813,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             onAfterDeploy(sProcessorFolder);
             
             // Recreate the user environment
-            reconstructEnvironment(oParameter);
+            reconstructEnvironment(oParameter, oProcessor.getPort());
 
             // Run
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
@@ -1048,10 +1055,64 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	}
 	
 	@Override
-	protected boolean reconstructEnvironment(ProcessorParameter oParameter) {
-		// TODO Call the API to get the lastest action list
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
+		
+		boolean bRet = true;
+		
+		try {
+			
+			// We need to reach the main server
+			String sBaseUrl = WasdiConfig.Current.baseUrl;
+			String sUrl = sBaseUrl + "/packageManager/environmentActions?name=" + oParameter.getName();
+			
+			// Create the headers
+			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(oParameter.getSessionID());
+			
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: calling url " + sUrl);
+			// Call the API to get the lastest action list
+			String sResult = HttpUtils.httpGet(sUrl, asHeaders);
+			
+			// Convert to an array of strings
+			ArrayList<String> asActions = MongoRepository.s_oMapper.readValue(sResult, new TypeReference<ArrayList<String>>(){});
+			
+			// Do we have actions?
+			if (asActions.size()>0) {
+				
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: got " + asActions.size() + " actions");
+				
+				// Yes! Lets re-do all
+				
+				// Take the ip
+				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+				
+				// Create package manager info
+				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+				
+				// For each command
+				for (String sUpdateCommand : asActions) {
+					
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: executing " + sUpdateCommand);
+					bRet &= oPackageManager.operatePackageChange(sUpdateCommand);
+					
+					if (!bRet) {
+						LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: error executing " + sUpdateCommand);
+						break;
+					}
+				}
+				
+			}
+			else {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: no actions to do");
+			}
+		} 
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.reconstructEnvironment: exception " + oEx.toString());
+		}
+		
 		// execute all the ops with the binded Package Manager for the app
-		return super.reconstructEnvironment(oParameter);
+		LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: done");
+		
+		return bRet;
 	}
 
 }

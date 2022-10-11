@@ -20,6 +20,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -2061,7 +2063,7 @@ public class dbUtils {
 
         try {
         	System.out.println("Wasdi DB Utils");
-        	
+        	        	
             // create the parser
             CommandLineParser oParser = new DefaultParser();
 

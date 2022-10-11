@@ -187,10 +187,15 @@ public class PackageManagerResource {
 
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
-			
 			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (WasdiConfig.Current.nodeCode.equals("wasdi") == false) {
+			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
+			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
 		String sContent = readEnvironmentActionsFile(sName);

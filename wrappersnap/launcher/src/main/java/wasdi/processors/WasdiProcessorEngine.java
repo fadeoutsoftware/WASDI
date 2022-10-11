@@ -143,6 +143,7 @@ public abstract class WasdiProcessorEngine {
 	/**
 	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
 	 * @param oParameter the processor parameter
+	 * @param iPort port of the processor server
 	 * * @return
 	 */
 	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
@@ -439,15 +440,34 @@ public abstract class WasdiProcessorEngine {
 		return sProcessorTemplateFolder;
 	}
 
+	/**
+	 * Get the path of the general common environment file path of the processor
+	 * @param sProcessorName
+	 * @return
+	 */
 	public String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
 		return getProcessorFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
 	}
 
+	/**
+	 * 
+	 * @param sProcessorName
+	 * @return
+	 */
 	public String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
 		return getProcessorTemplateFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
 	}
 	
-	protected boolean reconstructEnvironment(ProcessorParameter oParameter) {
+	/**
+	 * Re-executes all the actions that the user made in the environment of an application 
+	 * after the initial deploy. This is used when an application is deployed on a node or forced to 
+	 * be redeployed.
+	 * 
+	 * @param oParameter Processor Parameter with the command (run or redeploy)
+	 * @param iPort port of the processor
+	 * @return true if every thing is ok, false otherwise
+	 */
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
 		return true;
 	}
 
