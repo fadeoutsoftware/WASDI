@@ -1,10 +1,12 @@
 let PackageManagerController = (function () {
     function PackageManagerController(
-        oPackageManagerService,
         $scope,
+        oClose,
+        oPackageManagerService,
         oExtras,
         $timeout,
-        oTranslate
+        oTranslate,
+        oRabbitStompService
     ) {
         this.m_oScope = $scope;
         this.m_oPackageManagerService = oPackageManagerService;
@@ -19,21 +21,42 @@ let PackageManagerController = (function () {
         this.m_sPackageManagerName = "";
         this.m_sPackageManagerVersion = "";
         this.bIsEditing = false;
-        this.sPackageName = "";
-        this.sort = {
-            column: "",
-            descending: false,
+        this.m_sPackageName = "";
+        this.m_oSort = {
+            sColumn: "",
+            bDescending: false,
         };
+        this.m_oRabbitStompService = oRabbitStompService;
 
         /* 
         Get list of packages
         */
         this.fetchPackageList();
-        console.log(this.sProcessorId);
+
         /* 
         Get package manager information (name and version)
         */
         this.fetchPackageManagerInfo(this.sWorkspaceName);
+
+        /* 
+        RabbitStomp Service call
+        */
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "ENVIRONMENTUPDATE",
+            this,
+            this.rabbitMessageHook
+        );
+
+        var oController = this;
+
+        // Close this Dialog handler
+        $scope.close = function () {
+
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
+
+            // close, but give 500ms for bootstrap to animate
+            oClose(null, 300);
+        };        
     }
     PackageManagerController.prototype.fetchPackageManagerInfo = function (
         sWorkspaceName
@@ -69,12 +92,7 @@ let PackageManagerController = (function () {
                     oController.m_oPackageManagerService
                         .deleteLibrary(sProcessorId, sDeleteCommand)
                         .then(function (response) {
-                            oController.m_bIsLoading = true;
-                            oController.m_oTimeout(function() {
-                                oController.fetchPackageList();
-                            }, 15000)
-                           
-                        
+                            oController.m_bIsLoading = true;                           
                         });
                 }
                 oController.m_bIsLoading = false;
@@ -100,9 +118,6 @@ let PackageManagerController = (function () {
             sPackageInfoVersion = aPackageInfoTrimmed[1];
         }
 
-        console.log(sPackageInfoName);
-        console.log(sPackageInfoVersion);
-
         let oController = this;
         let sConfirmMsg1 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_1");
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_2");
@@ -122,9 +137,6 @@ let PackageManagerController = (function () {
                             .addLibrary(sProcessorId, sAddCommand)
                             .then(function () {
                                 oController.m_bIsLoading = true;
-                                oController.m_oTimeout(function () {
-                                    oController.fetchPackageList();
-                                }, 15000);
                             });
                     }
                 }
@@ -138,9 +150,6 @@ let PackageManagerController = (function () {
                             .addLibrary(sProcessorId, sPackageName)
                             .then(function () {
                                 oController.m_bIsLoading = true;
-                                oController.m_oTimeout(function () {
-                                    oController.fetchPackageList();
-                                }, 15000);
                             });
                     }
                     oController.m_bIsLoading = false;
@@ -169,23 +178,18 @@ let PackageManagerController = (function () {
                         )
                         .then(function () {
                             oController.m_bIsLoading = true;
-                            oController.m_oTimeout(function () {
-                                oController.fetchPackageList();
-                            }, 15000);
                         });
                 }
             }
         );
     };
 
-    PackageManagerController.prototype.changeSorting = function (column) {
-        let sort = this.sort;
-        this.column = column;
+    PackageManagerController.prototype.changeSorting = function (sColumn) {
 
-        if (sort.column == column) {
-            sort.descending = !sort.descending;
+        if (this.m_oSort.sColumn == sColumn) {
+            this.m_oSort.bDescending = !this.m_oSort.bDescending;
         } else {
-            sort.column = column;
+            this.m_oSort.sColumn = sColumn;
         }
     };
 
@@ -197,10 +201,8 @@ let PackageManagerController = (function () {
             .then(function (data, status) {
                 if (data.data != null) {
                     oController.clearInput();
-                    console.log(oController.m_aoPackages);
                     oController.m_aoPackages = data.data;
                     oController.m_bIsLoading = false;
-                    console.log(oController.m_aoPackages);
                 }
             });
     };
@@ -208,15 +210,24 @@ let PackageManagerController = (function () {
     PackageManagerController.prototype.clearInput = function () {
         let oController = this;
 
-        oController.sPackageName = "";
+        oController.m_sPackageName = "";
     }
 
+    PackageManagerController.prototype.rabbitMessageHook = function (
+        oRabbitMessage,
+        oController
+    ) {
+        oController.fetchPackageList()
+    };
+
     PackageManagerController.$inject = [
-        "PackageManagerService",
         "$scope",
+        'close',
+        "PackageManagerService",
         "extras",
         "$timeout",
         "$translate",
+        "RabbitStompService"
     ];
     return PackageManagerController;
 })();
