@@ -87,7 +87,7 @@ public class User {
 	/**
 	 * User role
 	 */
-	private String role;
+	private String role = UserApplicationRole.USER.name();
 	
 	/**
 	 * User type: is it free, standard or professional?!?
