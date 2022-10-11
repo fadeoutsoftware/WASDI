@@ -3,9 +3,7 @@ package wasdi.operations;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -53,7 +51,7 @@ public class Deployprocessor extends Operation {
 	        try {
 	        	
 				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-					oEngine.waitForApplicationToStart();
+					oEngine.waitForApplicationToStart(oParameter);
 					oEngine.refreshPackagesInfo(oParameter);
 				}	        	
 	        	
