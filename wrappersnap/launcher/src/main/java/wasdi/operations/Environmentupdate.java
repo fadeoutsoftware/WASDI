@@ -84,30 +84,33 @@ public class Environmentupdate extends Operation {
 			if (bRet) {
 				LauncherMain.s_oLogger.info("Environmentupdate.executeOperation: update done with success");
 				
-				// We need to update the history of actions done in this environment
-				String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
-				sProcessorFolder = sProcessorFolder + "envActionsList.txt";
+				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
 				
-				// Get the actions file
-				File oActionsLogFile = new File(sProcessorFolder);
-				
-				if (!oActionsLogFile.exists()) {
-					oActionsLogFile.createNewFile();
+					// We need to update the history of actions done in this environment
+					String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
+					sProcessorFolder = sProcessorFolder + "envActionsList.txt";
+					
+					// Get the actions file
+					File oActionsLogFile = new File(sProcessorFolder);
+					
+					if (!oActionsLogFile.exists()) {
+						oActionsLogFile.createNewFile();
+					}
+					
+					// Extract the command we just executed
+					String sJson = oParameter.getJson();
+					JSONObject oJsonItem = new JSONObject(sJson);
+					String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+					
+					// Add carriage return
+					sUpdateCommand += "\n";
+					
+					// Add this action to the list
+					try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
+						byte[] ayBytes = sUpdateCommand.getBytes();
+						oOutStream.write(ayBytes);
+					}		
 				}
-				
-				// Extract the command we just executed
-				String sJson = oParameter.getJson();
-				JSONObject oJsonItem = new JSONObject(sJson);
-				String sUpdateCommand = (String) oJsonItem.get("updateCommand");
-				
-				// Add carriage return
-				sUpdateCommand += "\n";
-				
-				// Add this action to the list
-				try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
-					byte[] ayBytes = sUpdateCommand.getBytes();
-					oOutStream.write(ayBytes);
-				}				
 			}
 			else {
 				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: we got an error updating the environment");

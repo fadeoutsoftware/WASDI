@@ -446,5 +446,9 @@ public abstract class WasdiProcessorEngine {
 	public String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
 		return getProcessorTemplateFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
 	}
+	
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter) {
+		return true;
+	}
 
 }

@@ -153,16 +153,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
+            
 
             processWorkspaceLog("Image done, start the docker");
 
             if (bFirstDeploy)
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
 
-            // Run the container: find the port
+            // Run the container: find the port and reconstruct the environment
             int iProcessorPort = oProcessorRepository.getNextProcessorPort();
             if (!bFirstDeploy) {
                 iProcessorPort = oProcessor.getPort();
+                reconstructEnvironment(oParameter);
             }
 
             oDockerUtils.run(iProcessorPort);
@@ -802,6 +804,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
+            
+            // Recreate the user environment
+            reconstructEnvironment(oParameter);
 
             // Run
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
@@ -1040,6 +1045,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 
 		return false;
+	}
+	
+	@Override
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter) {
+		// TODO Call the API to get the lastest action list
+		// execute all the ops with the binded Package Manager for the app
+		return super.reconstructEnvironment(oParameter);
 	}
 
 }
