@@ -28,11 +28,11 @@ public class DockersConfig {
 	/**
 	 * Number of attempt to try to ping the server before deciding that the server is down
 	 */
-	public Integer numberOfAttemptsToPingTheServer = 20;
+	public Integer numberOfAttemptsToPingTheServer = 4;
 
 	/**
 	 * The amount of time (in millis) to wait between the attempts
 	 */
-	public Integer millisBetweenAttmpts = 1000;
+	public Integer millisBetweenAttmpts = 5000;
 
 }

@@ -159,7 +159,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
-            
 
             processWorkspaceLog("Image done, start the docker");
 
@@ -1068,11 +1067,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
 
 	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
+	        	
 	        	if (isDockerServerUp(oParameter)) {
 	        		return;
 	        	}
-
-	        	Thread.sleep(iMillisBetweenAttmpts);
 	        }
 		}
 		catch (Exception oEx) {
