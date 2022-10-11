@@ -1038,10 +1038,18 @@ var ProcessorController = (function () {
     };
     ProcessorController.prototype.formatJson = function() {
         let oController = this; 
-        console.log(oController.m_sJSONSample); 
-        let sJsonParsed = JSON.parse(oController.m_sJSONSample.replaceAll("'", '"'))
-    
-        oController.m_sJSONSample = JSON.stringify(sJsonParsed, null, 4);
+        let sStringParsed = ""
+        
+        if (oController.m_sSelectedTab === "Base") {
+            oController.m_sJSONSample = JSON.stringify(JSON.parse(oController.m_sJSONSample.replaceAll("'", '"')),null, 4);
+        } else if (oController.m_sSelectedTab === "UI") {
+            
+            sStringParsed = oController.m_sProcessorUI = JSON.stringify(
+                JSON.parse(oController.m_sProcessorUI.replaceAll("'", '"')),
+                null,
+                4
+            );  
+        }  
     }
     ProcessorController.$inject = [
         "$scope",

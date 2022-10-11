@@ -335,7 +335,10 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };
-
+    WappsController.prototype.formatJson = function() {
+        
+        this.m_sMyJsonString = JSON.stringify(JSON.parse(oController.m_sMyJsonString.replaceAll("'", '"')), null, 4);
+    }
 
 
     WappsController.$inject = [
