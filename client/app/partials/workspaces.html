@@ -59,7 +59,6 @@
                     <thead>
                         <th>&nbsp;</th>
                         <th
-                            ng-click="m_oController.changeSorting('workspaceName')"
                             style="cursor: pointer"
                         >
                             <i
@@ -77,24 +76,7 @@
                                 >{{m_oController.getWorkspaceInfoList().length}}</span
                             >
                         </th>
-                        <!-- <th
-                            ng-click="m_oController.changeSorting('ownerUserId')"
-                            style="cursor: pointer"
-                        >
-                            <i
-                                class="fa fa-arrow-up"
-                                aria-hidden="true"
-                                ng-show="m_oController.showArrow('ownerUserId', false)"
-                            ></i>
-                            <i
-                                class="fa fa-arrow-down"
-                                aria-hidden="true"
-                                ng-show="m_oController.showArrow('ownerUserId', true)"
-                            ></i>
-                            {{"WORKSPACES_THEAD_OWNER" | translate}}&nbsp;
-                        </th> -->
-                        
-                        <th class="text-right">
+                        <th class="text-right" colspan="2">
                             <div class="dropdown">
                                 <p
                                     class="mb-0 dropdown-toggle"
@@ -135,7 +117,7 @@
                         </th>
                     </thead>
                     <tr
-                        ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                        ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace | orderBy:m_oController.m_oSort.sColumn:m_oController.m_oSort.bDescending"
                         class="workspaces-list-item"
                         ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}"
                         title="{{oWSListItem.workspaceName}} Owned by: {{oWSListItem.ownerUserId}}"
@@ -159,9 +141,9 @@
                         </td>
 
                         <td>
-                            <div class="d-flex flex-row justify-content-end">
+                            
                             <div
-                            class="over-color"
+                            class="over-color d-flex flex-row align-items-center"
                             data-toggle="tooltip"
                             data-placement="top"
                             title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
@@ -170,14 +152,15 @@
                             ng-click="m_oController.openWorkspace(oWSListItem.workspaceId, oWSListItem.activeNode)"
                             >
                                 <!--OLD VERSION COMMENTED-->
-                                <em style="font-size: 12px">Open</em>
-                                    <i
-                                        class="fa fa-sign-in-alt fa-lg"
-                                        style="margin-left: 8px"
-                                        aria-hidden="true"
-                                    ></i>
-                                </i>
+                                <p class="m-0" style="font-size: 12px">Open</p>
+                                <i
+                                    class="fa fa-sign-in-alt fa-lg"
+                                    style="margin-left: 8px"
+                                    aria-hidden="true"
+                                ></i>
                             </div>
+                        </td>
+                        <td>
                             <div
                             class="over-color"
                             data-toggle="tooltip"
@@ -188,7 +171,7 @@
                             >
                                 <i class="fa fa-trash fa-lg" aria-hidden="true"></i>
                             </div>
-                            </div>
+                            
                         </td>
                         <!--OLD VERSION COMMENTED-->
                     </tr>
