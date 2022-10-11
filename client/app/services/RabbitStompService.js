@@ -99,7 +99,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 oHook[this.m_sHookController] = oController;
                 oHook[this.m_sHookFunction] = fCallback;
 
-                this.m_afMessageHooks.append(oHook);
+                this.m_afMessageHooks.push(oHook);
             }
 
             this.isSubscrbed = function () {

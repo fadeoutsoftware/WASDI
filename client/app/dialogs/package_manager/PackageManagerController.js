@@ -4,7 +4,8 @@ let PackageManagerController = (function () {
         $scope,
         oExtras,
         $timeout,
-        oTranslate
+        oTranslate,
+        oRabbitStompService
     ) {
         this.m_oScope = $scope;
         this.m_oPackageManagerService = oPackageManagerService;
@@ -24,6 +25,7 @@ let PackageManagerController = (function () {
             column: "",
             descending: false,
         };
+        this.m_oRabbitStompService = oRabbitStompService;
 
         /* 
         Get list of packages
@@ -34,6 +36,15 @@ let PackageManagerController = (function () {
         Get package manager information (name and version)
         */
         this.fetchPackageManagerInfo(this.sWorkspaceName);
+
+        /* 
+        RabbitStomp Service call
+        */
+        this.m_oRabbitStompService.addMessageHook(
+            "INFO",
+            this,
+            this.rabbitMessageHook()
+        );
     }
     PackageManagerController.prototype.fetchPackageManagerInfo = function (
         sWorkspaceName
@@ -211,12 +222,20 @@ let PackageManagerController = (function () {
         oController.sPackageName = "";
     }
 
+    PackageManagerController.prototype.rabbitMessageHook = function (
+        oRabbitMessage,
+        oController
+    ) {
+        console.log(oRabbitMessage);
+    };
+
     PackageManagerController.$inject = [
         "PackageManagerService",
         "$scope",
         "extras",
         "$timeout",
         "$translate",
+        "RabbitStompService"
     ];
     return PackageManagerController;
 })();
