@@ -204,7 +204,9 @@
         ],
 {% endif %}
         "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
-        "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}"
+        "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}",
+        "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
+        "millisBetweenAttmpts": {{ dictWasdiConfiguration.dockers.millisBetweenAttmpts }}
     },
     "scheduler": {
         "processingThreadWaitStartMS": "{{ dictWasdiConfiguration.scheduler.processingThreadWaitStartMS }}",
