@@ -552,7 +552,6 @@ var RootController = (function() {
     RootController.prototype.openSnake = function()
     {
         var oController = this;
-        // console.log("miao");
         this.m_oModalService.showModal({
             templateUrl: "dialogs/snake_dialog/SnakeDialogV2.html",
             controller: "SnakeController"

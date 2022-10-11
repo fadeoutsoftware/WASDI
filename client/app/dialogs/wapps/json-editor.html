@@ -1,42 +1,84 @@
 <div class="well h-100 m-0 d-flex flex-column">
-
     <div class="row-v4">
         <div class="col-v4-auto">
-            <label class="m-0">{{m_oController.getProcessorNameAsTitle()}} {{"DIALOG_WAPPS_JSON_PARAMS"|translate}}</label>
+            <label class="m-0"
+                >{{m_oController.getProcessorNameAsTitle()}}
+                {{"DIALOG_WAPPS_JSON_PARAMS"|translate}}</label
+            >
         </div>
-        <div class="col-v4-auto ml-auto mr-2">{{"DIALOG_WAPPS_JSON_EDITOR"|translate}}</div>
+        <div class="col-v4-auto ml-auto mr-2">
+            {{"DIALOG_WAPPS_JSON_EDITOR"|translate}}
+        </div>
         <div class="col-v4-auto">
-            <div class="btn-switch-square" ng-class="{'btn-switch--on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
-                 ng-click="m_oController.m_bIsJsonEditModeActive = !m_oController.m_bIsJsonEditModeActive">
-                <div class="square" ng-class="{'btn-switch-circle--on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
-                     ng-click="m_oController.m_bIsJsonEditModeActive = m_oController.m_bIsJsonEditModeActive"></div>
+            <div
+                class="btn-switch-square"
+                ng-class="{'btn-switch--on':m_oController.m_bIsJsonEditModeActive}"
+                ng-model="m_oController.m_bIsJsonEditModeActive"
+                ng-click="m_oController.m_bIsJsonEditModeActive = !m_oController.m_bIsJsonEditModeActive"
+            >
+                <div
+                    class="square"
+                    ng-class="{'btn-switch-circle--on':m_oController.m_bIsJsonEditModeActive}"
+                    ng-model="m_oController.m_bIsJsonEditModeActive"
+                    ng-click="m_oController.m_bIsJsonEditModeActive = m_oController.m_bIsJsonEditModeActive"
+                ></div>
             </div>
         </div>
     </div>
     <div class="row-v4 d-flex flex-fill mt-3 mb-3">
         <div class="col-v4">
             <!--Editor json-->
-            <div class="jsonView" ng-show="m_oController.m_bIsJsonEditModeActive">
-                <json child="m_oController.m_sJson" default-collapsed="false" type="object"></json>
+            <div
+                class="jsonView"
+                ng-show="m_oController.m_bIsJsonEditModeActive"
+            >
+                <json
+                    child="m_oController.m_sJson"
+                    default-collapsed="false"
+                    type="object"
+                ></json>
             </div>
-            <div class="jsonContainer" ng-show="m_oController.m_bIsJsonEditModeActive">
+            <div
+                class="jsonContainer"
+                ng-show="m_oController.m_bIsJsonEditModeActive"
+            >
                 {{m_oController.m_sJson}}
             </div>
 
-            <textarea class="form-control h-100" rows="5" id="" style="font-family:'Courier New',sans-serif;font-size: 16px;" ng-model="m_oController.m_sMyJsonString" ng-hide="m_oController.m_bIsJsonEditModeActive"></textarea>
+            <textarea
+                class="form-control h-100"
+                rows="5"
+                id=""
+                style="font-family: 'Courier New', sans-serif; font-size: 16px"
+                ng-model="m_oController.m_sMyJsonString"
+                ng-hide="m_oController.m_bIsJsonEditModeActive"
+            ></textarea>
         </div>
     </div>
 
-    <div class="row-v4">
-        <div class="col-v4 text-right">
-            <button type="button" ng-click="m_oController.runProcessor()" class="my-button">
-                <i class="fa fa-play mr-3" aria-hidden="true"></i>{{"DIALOG_WAPPS_JSON_RUN"|translate}}
+    <div class="row-v4 d-flex flex-row">
+        <div class="col-v4 d-flex flex-row justify-content-between">
+            <button class="my-button"
+            ng-click="m_oController.formatJson()">Format JSON</button>
+            <div>
+            <button
+                type="button"
+                ng-click="m_oController.runProcessor()"
+                class="my-button"
+            >
+                <i class="fa fa-play mr-3" aria-hidden="true"></i
+                >{{"DIALOG_WAPPS_JSON_RUN"|translate}}
             </button>
-            <button type="button" ng-click="m_oController.getHelpFromProcessor()" class="my-button">
-                <i class="fa fa-question-circle mr-3" aria-hidden="true"></i>{{"DIALOG_WAPPS_JSON_HELP"|translate}}
-
+            <button
+                type="button"
+                ng-click="m_oController.getHelpFromProcessor()"
+                class="my-button"
+            >
+                <i class="fa fa-question-circle mr-3" aria-hidden="true"></i
+                >{{"DIALOG_WAPPS_JSON_HELP"|translate}}
+              
             </button>
+            </div>
         </div>
     </div>
-
 </div>

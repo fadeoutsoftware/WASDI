@@ -43,7 +43,6 @@ var HomeController = (function () {
 
         var oController = this;
 
-        console.log("HomeController: start waitForKeycloak")
         // define in any case the listener
         this.m_oScope.$on('KC_INIT_DONE', function (events, args) {
             oController.checkKeycloakAuthStatus(oController);
@@ -67,7 +66,6 @@ var HomeController = (function () {
     }
 
     HomeController.prototype.checkKeycloakAuthStatus = function (oController) {
-        console.log("HomeController KC_INIT_DONE")
 
         if (oKeycloak.authenticated) {
             console.log("HomeController: authenticated = true")
@@ -126,8 +124,6 @@ var HomeController = (function () {
         var sMessage = this.m_oTranslate.instant("MSG_LOGIN_ERROR");
         this.m_oAuthService.legacyLogin(oLoginInfo).then(
             function (data, status) {
-                console.log("HomeController.login | data.data: ", data.data);
-                console.log("HomeController.login | oController: ", oController);
                 oController.callbackLogin(data.data, status, oController)
             }, function (data, status) {
                 //alert('error');
@@ -142,8 +138,6 @@ var HomeController = (function () {
         * 1- set SessionId directly with response data (Legacy)
         * 2- Decode the token to obtain the fields (KC) <- Implemented down here
         * **/
-        /*console.log('AUTH: token obtained')
-        console.log(data)*/
 
         if (!oController) oController = this;
         if ((data.hasOwnProperty("sessionId")) && data.sessionId == null) {
@@ -170,7 +164,6 @@ var HomeController = (function () {
 
             var oDecodedToken = jwt_decode(data['access_token']);
 
-            //console.log(oDecodedToken)
             let oUser = {};
             oUser.userId = oDecodedToken.preferred_username;
             oUser.name = oDecodedToken.given_name;
@@ -215,11 +208,9 @@ var HomeController = (function () {
      */
 
     HomeController.prototype.keycloakLogin = function () {
-        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.login();
     }
     HomeController.prototype.keycloakRegister = function () {
-        /*console.log("Home Controller - OKEYCLOAK login invoked");*/
         oKeycloak.register();
     }
 

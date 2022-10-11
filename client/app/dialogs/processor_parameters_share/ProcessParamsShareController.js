@@ -40,8 +40,6 @@ let ProcessParamsShareController = (function () {
                 .then(function (data) {
                     if (utilsIsObjectNullOrUndefined(data.data) === false) {
                         oController.m_aoParametersPermissionsList = data.data;
-                        console.log(data);
-                        console.log(oController.m_aoParametersPermissionsList);
                     } else {
                         utilsVexDialogAlertTop(
                             "GURU MEDITATION<br>ERROR IN FINDING RESOURCE PERMISSIONS"
@@ -54,14 +52,6 @@ let ProcessParamsShareController = (function () {
         sResourceId,
         sUserEmail
     ) {
-        console.log(
-            "ProcessParamsShareController.findParametersPermissions | sResourceId: " +
-                sResourceId
-        );
-        console.log(
-            "ProcessParamsShareController.findParametersPermissions | sUserEmail: " +
-                sUserEmail
-        );
 
         let oController = this;
         //check that user has provided an email

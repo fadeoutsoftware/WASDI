@@ -66,7 +66,6 @@ let PackageManagerController = (function () {
         oController.m_oPackageManagerService
             .getPackageManagerInfo(sWorkspaceName)
             .then((data, status) => {
-                console.log(data);
                 if (data.data != null) {
                     if (data.data != undefined) {
                         oController.m_sPackageManagerName = data.data.name;

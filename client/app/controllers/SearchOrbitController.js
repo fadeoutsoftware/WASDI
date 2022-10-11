@@ -588,7 +588,6 @@ var SearchOrbitController = (function() {
         for (var iIndexBounds = 0; iIndexBounds < sFrame.length; iIndexBounds++)
         {
             var aBounds = sFrame[iIndexBounds];
-            // console.log(aBounds);
             var aNewBounds = aBounds.split(" ");
 
             var oLatLonArray = [];

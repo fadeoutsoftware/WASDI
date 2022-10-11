@@ -96,11 +96,6 @@ var AdminDashboardController = (function () {
     AdminDashboardController.prototype.findUsersByPartialName = function (
         sUserPartialName
     ) {
-        console.log(
-            "AdminDashboardController.findUsersByPartialName | sUserPartialName:",
-            sUserPartialName
-        );
-
         this.m_aoUsersList = [];
 
         if (utilsIsStrNullOrEmpty(sUserPartialName) === true) {
@@ -156,13 +151,6 @@ var AdminDashboardController = (function () {
 
     AdminDashboardController.prototype.getProcessWorkspaceTotalRunningTimeByUserAndInterval =
         function (sUserId, sDateFrom, sDateTo) {
-            console.log(
-                "AdminDashboardController.getProcessWorkspaceTotalRunningTimeByUserAndInterval | userId, dateFrom, dateTo:",
-                sUserId,
-                sDateFrom,
-                sDateTo
-            );
-
             this.m_lTotalRunningTimeInMillis = null;
 
             if (utilsIsStrNullOrEmpty(sUserId) === true) {
@@ -199,7 +187,6 @@ var AdminDashboardController = (function () {
                 )
                 .then(
                     function (data) {
-                        console.log(data);
                         if (utilsIsObjectNullOrUndefined(data.data) === false) {
                             oController.m_lTotalRunningTimeInMillis = data.data;
                         } else {
@@ -255,11 +242,6 @@ var AdminDashboardController = (function () {
     AdminDashboardController.prototype.findWorkspacesByPartialName = function (
         sWorkspacePartialName
     ) {
-        console.log(
-            "AdminDashboardController.findWorkspacesByPartialName | sWorkspacePartialName:",
-            sWorkspacePartialName
-        );
-
         this.m_aoWorkspacesList = [];
 
         if (utilsIsStrNullOrEmpty(sWorkspacePartialName) === true) {
@@ -318,19 +300,6 @@ var AdminDashboardController = (function () {
         sResourceId,
         sUserEmail
     ) {
-        console.log(
-            "AdminDashboardController.findResourcePermissions | sResourceType:",
-            sResourceType
-        );
-        console.log(
-            "AdminDashboardController.findResourcePermissions | sResourceId:",
-            sResourceId
-        );
-        console.log(
-            "AdminDashboardController.findResourcePermissions | sUserEmail:",
-            sUserEmail
-        );
-
         this.m_aoResourcePermissionsList = [];
 
         let iValidSearchParameters = 0;
@@ -417,19 +386,6 @@ var AdminDashboardController = (function () {
         sResourceId,
         sUserEmail
     ) {
-        console.log(
-            "AdminDashboardController.addResourcePermission | sResourceType:",
-            sResourceType
-        );
-        console.log(
-            "AdminDashboardController.addResourcePermission | sResourceId:",
-            sResourceId
-        );
-        console.log(
-            "AdminDashboardController.addResourcePermission | sUserEmail:",
-            sUserEmail
-        );
-
         if (
             utilsIsStrNullOrEmpty(sResourceType) === true ||
             utilsIsStrNullOrEmpty(sResourceId) === true ||
@@ -483,18 +439,6 @@ var AdminDashboardController = (function () {
         sResourceId,
         sUserEmail
     ) {
-        console.log(
-            "AdminDashboardController.removeResourcePermission | sResourceType:",
-            sResourceType
-        );
-        console.log(
-            "AdminDashboardController.removeResourcePermission | sResourceId:",
-            sResourceId
-        );
-        console.log(
-            "AdminDashboardController.removeResourcePermission | sUserEmail:",
-            sUserEmail
-        );
 
         if (
             utilsIsStrNullOrEmpty(sResourceType) === true ||
@@ -547,11 +491,6 @@ var AdminDashboardController = (function () {
     AdminDashboardController.prototype.getLatestMetricsEntryByNode = function (
         sNodeCode
     ) {
-        console.log(
-            "AdminDashboardController.getLatestMetricsEntryByNode | sNodeCode:",
-            sNodeCode
-        );
-
         this.m_oMetricsEntry = null;
 
         if (utilsIsStrNullOrEmpty(sNodeCode) === true) {
@@ -654,8 +593,6 @@ var AdminDashboardController = (function () {
     };
 
     AdminDashboardController.prototype.getAvailableNodesSortedByScore = function () {
-        console.log("AdminDashboardController.getAvailableNodesSortedByScore");
-
         this.m_aoAvailableNodesSortedByScoreList = [];
 
         var oController = this;
