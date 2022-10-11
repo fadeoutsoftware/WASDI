@@ -15,9 +15,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
@@ -39,7 +37,6 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
