@@ -84,6 +84,45 @@ public class PackageManagerResource {
 		return sOutput;
 	}
 
+	/**
+	 * Reads the envActions txt file of a processor
+	 * @param sProcessorName Name of the processor
+	 * @return String with the list of instructions/actions, or an error message
+	 */
+	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
+
+		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
+
+		try {
+
+			Utils.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
+
+			// Take path of the processor
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				Utils.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
+				return "error: directory " + oDirPath.toString() + " not found";
+			} else {
+				Utils.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
+			}
+			
+			// Read the file
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+				Utils.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+			}
+
+		} catch (Exception oEx) {
+			Utils.debugLog("PackageManagerResource.readEnvActionsFile: " + oEx);
+		}
+
+		return sOutput;
+	}
+
 	@GET
 	@Path("/listPackages")
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId,
@@ -136,6 +175,50 @@ public class PackageManagerResource {
 		Collections.sort(aoPackages, oComparator);
 
 		return Response.ok(aoPackages).build();
+	}
+
+	@GET
+	@Path("/environmentActions")
+	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
+
+		List<String> asEnvActions = new ArrayList<>();
+
+		// Check session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (oUser == null) {
+			
+			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		String sContent = readEnvironmentActionsFile(sName);
+
+		if (Utils.isNullOrEmpty(sContent)) {
+			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+		asEnvActions = parseEnvironmentActionsContent(sContent);
+
+		return Response.ok(asEnvActions).build();
+	}
+
+	private static List<String> parseEnvironmentActionsContent(String sContent) {
+		List<String> asEnvActions = new ArrayList<>();
+
+		if (!Utils.isNullOrEmpty(sContent)) {
+			String[] asRows = sContent.split("\n");
+
+			for (String sRow : asRows ) {
+				if (!sRow.trim().isEmpty()) {
+					asEnvActions.add(sRow.trim());
+				}
+			}
+		}
+
+		return asEnvActions;
 	}
 
 	@GET
