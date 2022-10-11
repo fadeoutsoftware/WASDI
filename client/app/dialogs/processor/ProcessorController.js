@@ -1033,6 +1033,13 @@ var ProcessorController = (function () {
         })
         
     };
+    ProcessorController.prototype.formatJson = function() {
+        let oController = this; 
+        console.log(oController.m_sJSONSample); 
+        let sJsonParsed = JSON.parse(oController.m_sJSONSample.replaceAll("'", '"'))
+    
+        oController.m_sJSONSample = JSON.stringify(sJsonParsed, null, 4);
+    }
     ProcessorController.$inject = [
         "$scope",
         "close",
