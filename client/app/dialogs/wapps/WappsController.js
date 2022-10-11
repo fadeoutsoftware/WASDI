@@ -336,8 +336,8 @@ var WappsController = (function() {
         utilsCollapseBootstrapPanels();
     };
     WappsController.prototype.formatJson = function() {
-        
-        this.m_sMyJsonString = JSON.stringify(JSON.parse(oController.m_sMyJsonString.replaceAll("'", '"')), null, 4);
+
+        this.m_sMyJsonString = JSON.stringify(JSON.parse(this.m_sMyJsonString.replaceAll("'", '"')), null, 2);
     }
 
 
