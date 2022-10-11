@@ -1027,7 +1027,10 @@ var ProcessorController = (function () {
                 }
             })
             .then(function (modal) {
-                modal.element.modal();
+                modal.element.modal( {
+                    backdrop: 'static',
+                    keyboard: false
+                });
                 modal.close;
             }); 
         })

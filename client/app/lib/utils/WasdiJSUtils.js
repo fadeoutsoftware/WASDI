@@ -188,6 +188,8 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage, oTranslate) {
             sUserMessage = oTranslate.instant("MSG_DELETEPROCESSOR");
             break;
         case "INFO":
+        case "ENVIRONMENTUPDATE":
+        case "DELETEPROCESSOR":
             sUserMessage =  oMessage.payload;
             break;
         case "REDEPLOYPROCESSOR":

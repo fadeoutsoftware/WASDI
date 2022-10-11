@@ -64,7 +64,7 @@ public class Deleteprocessor extends Operation {
 	            	sInfo = "GURU MEDITATION<br>There was an error deleting" + sName + " :(";
 	            }
 	            
-	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				        		
+	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.DELETEPROCESSOR.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				        		
         	}	        
 		}
 		catch (Exception oEx) {

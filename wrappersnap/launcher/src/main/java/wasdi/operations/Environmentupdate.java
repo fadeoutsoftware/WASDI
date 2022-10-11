@@ -152,7 +152,7 @@ public class Environmentupdate extends Operation {
 								sInfo = "GURU MEDITATION<br>Error updating " + sProcessorName + " Environment";
 							}
 
-							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
+							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(),
 									oParam.getExchange(), sInfo, oParam.getExchange());
 						}
 					}
