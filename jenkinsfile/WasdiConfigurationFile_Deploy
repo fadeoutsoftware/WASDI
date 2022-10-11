@@ -10,7 +10,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = env.currentRevision.toString().toUpperCase();
+    currentRevision = "0.0.${env.BUILD_ID}"
   }
 
   options {
