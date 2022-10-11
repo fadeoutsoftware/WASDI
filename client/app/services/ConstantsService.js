@@ -229,7 +229,7 @@ service('ConstantsService', [function () {
             else this.m_oUser=null;
         }
 
-        console.log("ConstantsService.getUser | this.m_oUser: ", this.m_oUser);
+        //console.log("ConstantsService.getUser | this.m_oUser: ", this.m_oUser);
 
         return this.m_oUser;
     };

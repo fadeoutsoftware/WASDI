@@ -100,6 +100,19 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 oHook[this.m_sHookFunction] = fCallback;
 
                 this.m_afMessageHooks.push(oHook);
+
+                // Return the index in the array where our hook has been stored
+                return this.m_afMessageHooks.length -1;
+            }
+
+            /**
+             * Removes a Message Hook from the service list
+             * @param {Integer} iHookIndex 
+             */
+            this.removeMessageHook = function(iHookIndex) {
+                if (iHookIndex<this.m_afMessageHooks.length) {
+                    this.m_afMessageHooks.splice(iHookIndex, 1);
+                }
             }
 
             this.isSubscrbed = function () {
@@ -164,7 +177,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                                         if (oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookMessageCode]===oMessageResult.messageCode) {
                                             var fCallbackFunction = oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookFunction]
                                             fCallbackFunction(oMessageResult, oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookController]);
-                                            oThisService.m_afMessageHooks.splice(iHooks);
+                                            oThisService.m_afMessageHooks.splice(iHooks, 1);
                                         }
                                     }
                                 }
