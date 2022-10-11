@@ -180,7 +180,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oProcessorRepository.updateProcessor(oProcessor);
             }
             else {
-            	waitForDockerToStart();
+            	waitForApplicationToStart();
             	reconstructEnvironment(oParameter, iProcessorPort);
             }
 
@@ -451,7 +451,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oDockerUtils.run();
                 
                 // Wait a little bit
-                waitForDockerToStart();
+                waitForApplicationToStart();
 
                 // Try again the connection
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to connect again");
@@ -818,7 +818,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             
             
             // Recreate the user environment
-            waitForDockerToStart();
+            waitForApplicationToStart();
             reconstructEnvironment(oParameter, oProcessor.getPort());            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -1114,18 +1114,5 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: done");
 		
 		return bRet;
-	}
-
-	/**
-	 * Waits some time to let docker start
-	 */
-	protected void waitForDockerToStart() {
-		try {
-	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForDockerToStart: wait 5 sec to let docker start");
-	        Thread.sleep(5000);				
-		}
-		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForDockerToStart: exception " + oEx.toString());
-		}
 	}
 }

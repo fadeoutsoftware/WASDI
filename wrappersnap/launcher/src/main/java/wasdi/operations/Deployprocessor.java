@@ -53,7 +53,7 @@ public class Deployprocessor extends Operation {
 	        try {
 	        	
 				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-					Thread.sleep(2000);
+					oEngine.waitForApplicationToStart();
 					oEngine.refreshPackagesInfo(oParameter);
 				}	        	
 	        	

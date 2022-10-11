@@ -234,7 +234,7 @@ public class DockerUtils {
             }
 
             // Execute the command to start the docker
-            WasdiProcessorEngine.shellExec(sRunFile, asArgs, false);
+            WasdiProcessorEngine.shellExec(sRunFile, asArgs, true);
 
             LauncherMain.s_oLogger.debug("DockerUtils.run " + sDockerName + " started");
         } catch (Exception oEx) {
