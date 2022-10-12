@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.5.1] - 2022-10-12
+### Fixed
+- asynchExecuteProcessor: use post version instead of get had an error, fixed
+
 ## [0.7.5.0] - 2022-08-31
 
 ### Added
