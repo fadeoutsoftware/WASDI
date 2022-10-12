@@ -1,0 +1,34 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        sh script: "pwd", label: "Current location"
+
+        echo "env.sPathForCheckout = " + env.sPathForCheckout
+        echo "env.sSourceRepositoryUrl = " + env.sSourceRepositoryUrl
+      }
+    }
+
+    stage('CLONE') {
+      steps {
+        dir("${sPathForCheckout}") {
+          checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'GITHUB_WASDI_CREDENTIALS', url: '${sSourceRepositoryUrl}']]])
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

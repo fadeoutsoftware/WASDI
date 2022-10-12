@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     currentRevision = "0.0.${env.BUILD_ID}"
-    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
   }
 
   options {
@@ -39,6 +38,7 @@ pipeline {
       }
     }
   }
+
   post {
     always {
       cleanWs()
