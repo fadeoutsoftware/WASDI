@@ -839,26 +839,26 @@ public class WorkspaceResource {
 
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
+			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				// A user that has Admin rights should be able to auto-share the resource.
+			} else {
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
 
-			return oResult;
+				return oResult;
+			}
 		}
 
 		// Cannot share with the owner
 		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-				// A user that has Admin rights should be able to auto-share the resource.
-			} else {
-				Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
+			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
 
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
 
-				return oResult;
-			}
+			return oResult;
 		}
 
 		UserRepository oUserRepository = new UserRepository();
