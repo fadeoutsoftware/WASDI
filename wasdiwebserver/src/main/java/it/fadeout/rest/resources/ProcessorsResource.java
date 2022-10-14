@@ -47,7 +47,6 @@ import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
-import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -2237,9 +2236,13 @@ public class ProcessorsResource  {
 		}
 		
 		if (oRequesterUser.getUserId().equals(sUserId)) {
-			Utils.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
-			oResult.setStringValue("Impossible to autoshare.");
-			return oResult;				
+			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				// A user that has Admin rights should be able to auto-share the resource.
+			} else {
+				Utils.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
+				oResult.setStringValue("Impossible to autoshare.");
+				return oResult;
+			}
 		}
 		
 		try {
