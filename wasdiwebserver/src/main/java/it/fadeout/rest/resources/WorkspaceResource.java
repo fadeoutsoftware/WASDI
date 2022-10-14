@@ -852,7 +852,7 @@ public class WorkspaceResource {
 		}
 
 		// Cannot share with the owner
-		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
+		if (sDestinationUserId.equals(oWorkspace.getUserId())) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
