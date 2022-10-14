@@ -1,7 +1,5 @@
 package wasdi.operations;
 
-import java.io.File;
-
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -98,12 +96,6 @@ public class Redeployprocessor extends Operation {
 				            
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				
 	        			}
-
-		            	if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-		            		Thread.sleep(2000);
-
-		            		oEngine.refreshPackagesInfo(oParameter);
-		            	}
 	        		}	        		
 	        	}
 	        	

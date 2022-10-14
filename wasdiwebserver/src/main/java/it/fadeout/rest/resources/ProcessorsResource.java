@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,6 +61,7 @@ import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
@@ -2280,7 +2283,8 @@ public class ProcessorsResource  {
 				// No: the requestr has a sharing on this processor?
 				UserResourcePermission oHasSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oRequesterUser.getUserId(), sProcessorId);
 				
-				if (oHasSharing==null) {
+				if (oHasSharing==null
+						&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 					
 					//No. So it is neither the owner or a shared one
 					oResult.setStringValue("Unauthorized");

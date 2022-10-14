@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
 import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
@@ -729,9 +730,13 @@ public class StyleResource {
 			}
 
 			if (oRequesterUser.getUserId().equals(sUserId)) {
-				Utils.debugLog("StyleResource.ShareStyle: auto sharing not so smart");
-				oResult.setStringValue("Impossible to autoshare.");
-				return oResult;
+				if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+					// A user that has Admin rights should be able to auto-share the resource.
+				} else {
+					Utils.debugLog("StyleResource.ShareStyle: auto sharing not so smart");
+					oResult.setStringValue("Impossible to autoshare.");
+					return oResult;
+				}
 			}
 
 			// Check the destination user
@@ -752,7 +757,8 @@ public class StyleResource {
 				}
 
 				// the requester has the share?
-				if (!oUserResourcePermissionRepository.isStyleSharedWithUser(oRequesterUser.getUserId(), sStyleId)) {
+				if (!oUserResourcePermissionRepository.isStyleSharedWithUser(oRequesterUser.getUserId(), sStyleId)
+						&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 					oResult.setStringValue("Unauthorized");
 					return oResult;
 				}

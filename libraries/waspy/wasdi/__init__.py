@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.5.0
+Version 0.7.5.1
 
-Last Update: 31/08/2022
+Last Update: 12/10/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -2522,67 +2522,15 @@ def importAndPreprocess(aoImages, sWorkflow, sPreProcSuffix="_proc.tif", sProvid
 
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
     """
-    Execute a WASDI processor asynchronously
+    Legacy: use executeProcessor
+    Executes a WASDI Processor asynchronously. The method try up to three time if there is any problem.
 
     :param sProcessorName: WASDI processor name
 
     :param aoParams: a dictionary of parameters for the processor
-    :return: processor ID
-    """
-
-    global m_sActiveWorkspace
-
-    _log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
-
-    if sProcessorName is None:
-        wasdiLog('[ERROR] waspy.asynchExecuteProcessor: processor name is None, aborting' +
-                 '  ******************************************************************************')
-        return ''
-    elif len(sProcessorName) <= 0:
-        wasdiLog('[ERROR] waspy.asynchExecuteProcessor: processor name empty, aborting' +
-                 '  ******************************************************************************')
-        return ''
-    if isinstance(aoParams, dict) is not True:
-        wasdiLog('[ERROR] waspy.asynchExecuteProcessor: parameters must be a dictionary but it is not, aborting' +
-                 '  ******************************************************************************')
-        return ''
-
-    sEncodedParams = json.dumps(aoParams)
-    asHeaders = _getStandardHeaders()
-    aoWasdiParams = {'workspace': m_sActiveWorkspace,
-                     'name': sProcessorName,
-                     'encodedJson': sEncodedParams}
-
-    if m_bIsOnServer:
-        aoWasdiParams['parent'] = getProcId()
-
-    sUrl = getBaseUrl() + "/processors/run"
-
-    try:
-        #oResponse = requests.get(sUrl, headers=asHeaders, params=aoWasdiParams, timeout=m_iRequestsTimeout)
-        oResponse = requests.post(sUrl, data=json.dumps(aoWasdiParams), headers=asHeaders, timeout=m_iRequestsTimeout)
-    except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
-
-    if oResponse is None:
-        wasdiLog('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting' +
-                 '  ******************************************************************************')
-        return ''
-    elif oResponse.ok is True:
-        _log('[INFO] waspy.asynchExecuteProcessor: API call OK')
-        aoJson = oResponse.json()
-        if "processingIdentifier" in aoJson:
-            sProcessID = aoJson['processingIdentifier']
-            return sProcessID
-        else:
-            wasdiLog(
-                '[ERROR] waspy.asynchExecuteProcessor: cannot extract processing identifier from response, aborting' +
-                '  ******************************************************************************')
-    else:
-        wasdiLog('[ERROR] waspy.asynchExecuteProcessor: server returned status ' + str(oResponse.status_code) +
-                 '  ******************************************************************************')
-
-    return ''
+    :return: the Process Id if every thing is ok, '' if there was any problem
+    """    
+    return executeProcessor(sProcessorName, aoParams)
 
 
 def executeProcessor(sProcessorName, aoProcessParams):
