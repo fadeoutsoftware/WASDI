@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_READ;
 
 import java.io.UnsupportedEncodingException;
@@ -453,7 +454,8 @@ public class ProcessorParametersTemplateResource {
 		}
 		
 		// Can the user access this resource?
-		if(!PermissionsUtils.canUserAccessProcessorParametersTemplate(oRequesterUser.getUserId(), sProcessorParametersTemplateId)) {
+		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oRequesterUser.getUserId(), sProcessorParametersTemplateId)
+				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 			Utils.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + sProcessorParametersTemplateId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
