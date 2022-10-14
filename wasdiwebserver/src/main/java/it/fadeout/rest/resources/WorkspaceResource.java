@@ -849,12 +849,16 @@ public class WorkspaceResource {
 
 		// Cannot share with the owner
 		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
+			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				// A user that has Admin rights should be able to auto-share the resource.
+			} else {
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
 
-			return oResult;
+				return oResult;
+			}
 		}
 
 		UserRepository oUserRepository = new UserRepository();
