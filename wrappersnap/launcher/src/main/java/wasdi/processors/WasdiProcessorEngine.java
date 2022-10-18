@@ -206,8 +206,6 @@ public abstract class WasdiProcessorEngine {
 			}
 			
 			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine: " + sCommandLine);
-			LauncherMain.s_oLogger.debug("shellExecWithLogs asArgs: " + asArgs);
-
 
 			File logFile = createLogFile();
 			

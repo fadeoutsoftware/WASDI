@@ -885,7 +885,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Call localhost:port
             String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/--wasdiupdate";
 
-            // CREI CONNESSIONE AL
+            // Connect to the docker
             URL oProcessorUrl = new URL(sUrl);
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
@@ -896,8 +896,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oOutputStream.flush();
 
             if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+                return false;
             }
+            
             BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
             String sOutputResult;
             String sOutputCumulativeResult = "";
@@ -916,6 +917,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             return true;
         } catch (Exception oEx) {
             LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", oEx);
+
+            return false;
+        }
+        finally {
             try {
 
                 if (oProcessWorkspace != null) {
@@ -929,8 +934,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             } catch (Exception e) {
                 LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", e);
             }
-
-            return false;
+        	
         }
     }
 
