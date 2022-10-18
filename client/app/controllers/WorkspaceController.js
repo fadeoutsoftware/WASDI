@@ -184,10 +184,8 @@ var WorkspaceController = (function () {
                             oController.m_aoWorkspaceList.forEach(oWorkspace => {
                                oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspace.workspaceId).then(function(data, status) {
                                 sDate = new Date(data.data.creationDate)
-                                console.log(sDate)
-                                oWorkspace.creationDate = sDate.getDate() + "/" + (sDate.getMonth()+1)+
-                                "/"+ sDate.getFullYear();
-                                console.log(oWorkspace)
+                                
+                                oWorkspace.creationDate = sDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(0, 10)
                                })
                             })
                           
