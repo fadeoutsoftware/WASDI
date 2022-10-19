@@ -1,24 +1,31 @@
 package wasdi.processors;
 
 import java.io.File;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
 import wasdi.LauncherMain;
+import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 
 public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
-	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	private static final String s_sLINE_SEPARATOR = System.getProperty("line.separator");
 
 	public JupyterNotebookProcessorEngine() {
 		super();
@@ -59,7 +66,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			String sProcessorFolder = getProcessorFolder(sProcessorName);
 			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
 
-			// check if the processors/jupyter-notebook exists
+			// check if the processors/jupyter-notebook template and processor exists
 			// make a copy of the template directory (in case it does not exist)
 			// from: /data/wasdi/dockertemplate/jupyter-notebook/
 			// to:   /data/wasdi/processors/jupyter-notebook
@@ -106,30 +113,26 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
-
-
-			// Create Docker Util to be able to launch docker-compose commands
-			DockerUtils oDockerUtils = new DockerUtils(null, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
 			
 			// Check if our load balancer is up and running
 			processWorkspaceLog("verify that the Traefik container is up-and-running");
 			
 			String sTraefikDockerContainerInspectCommand = buildCommandDockerContainerInspect("traefik-notebook");
-			boolean bTraefikDockerContainerInspectResult = oDockerUtils.runCommand(sTraefikDockerContainerInspectCommand);
+			boolean bTraefikDockerContainerInspectResult = RunTimeUtils.runCommand(sProcessorFolder, sTraefikDockerContainerInspectCommand);
 
 			if (!bTraefikDockerContainerInspectResult) {
 				
 				// No!! Time to wake-up it
 				
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the Traefik container is down or missing:" + LINE_SEPARATOR + sTraefikDockerContainerInspectCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the Traefik container is down or missing:" + s_sLINE_SEPARATOR + sTraefikDockerContainerInspectCommand);
 
 				processWorkspaceLog("starting the Traefik container");
 
 				String sDockerComposeUpTraefikCommand = buildCommandDockerComposeUpTraefik();
-				boolean bDockerComposeUpTraefikResult = oDockerUtils.runCommand(sDockerComposeUpTraefikCommand);
+				boolean bDockerComposeUpTraefikResult = RunTimeUtils.runCommand(sProcessorFolder, sDockerComposeUpTraefikCommand);
 
 				if (!bDockerComposeUpTraefikResult) {
-					LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: start Traefik command failed:" + LINE_SEPARATOR + sDockerComposeUpTraefikCommand);
+					LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: start Traefik command failed:" + s_sLINE_SEPARATOR + sDockerComposeUpTraefikCommand);
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 					return false;
@@ -142,10 +145,10 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("execute command: docker build");
 
 			String sDockerBuildCommand = buildCommandDockerBuild(sProcessorFolder);
-			boolean bDockerBuildResult = oDockerUtils.runCommand(sDockerBuildCommand);
+			boolean bDockerBuildResult = RunTimeUtils.runCommand(sProcessorFolder,sDockerBuildCommand);
 
 			if (!bDockerBuildResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed:" + LINE_SEPARATOR + sDockerBuildCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed:" + s_sLINE_SEPARATOR + sDockerBuildCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
@@ -157,10 +160,10 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("execute command: docker push");
 
 			String sDockerPushCommand = buildCommandDockerPush(sProcessorFolder);
-			boolean bDockerPushResult = oDockerUtils.runCommand(sDockerPushCommand);
+			boolean bDockerPushResult = RunTimeUtils.runCommand(sProcessorFolder,sDockerPushCommand);
 
 			if (!bDockerPushResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker push command failed:" + LINE_SEPARATOR + sDockerPushCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker push command failed:" + s_sLINE_SEPARATOR + sDockerPushCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
@@ -216,9 +219,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
-
-
-			// mkdir **notebook**
+			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
 
 			String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + oParameter.getUserId() + FILE_SEPARATOR + oParameter.getWorkspace();
 
@@ -231,23 +232,19 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: the " + sNotebookPath + " folder was" + (WasdiFileUtils.fileExists(oNotebookFolder) ? " " : " not ") + "created");
 
-
-
 			processWorkspaceLog("execute command: docker-compose up");
 
 			// Launch docker-compose up command
 			String sDockerComposeUpCommand = buildCommandDockerComposeUpJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
-			boolean bDockerComposeUpResult = oDockerUtils.runCommand(sDockerComposeUpCommand);
+			boolean bDockerComposeUpResult = RunTimeUtils.runCommand(sProcessorFolder,sDockerComposeUpCommand);
 
 			if (!bDockerComposeUpResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose up command failed:" + LINE_SEPARATOR + sDockerComposeUpCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose up command failed:" + s_sLINE_SEPARATOR + sDockerComposeUpCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
-
-
 
 			processWorkspaceLog("adding file: notebook_config.cfg");
 
@@ -255,71 +252,51 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sContainerName: " + sContainerName);
 
 
-			// create the JSON content of the temporary file
+			// create the JSON content of the waspy configuration file to let the lib know the workspace where it works
 			String sJsonContent = "{\"WORKSPACEID\":\"" + oParameter.getWorkspace() + "\"}";
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
-			// create a temporary file on the host file-system
-			String sTemporaryFileFullPath = sProcessorFolder + sContainerName + "_notebook_config.cfg";
-			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sTemporaryFileFullPath: " + sTemporaryFileFullPath);
-
-			WasdiFileUtils.writeFile(sJsonContent, sTemporaryFileFullPath);
-
-
-			// copy the temporary config file to the container
-			String sDockerCpFileCommand = buildCommandDockerCpFile(sContainerName, sTemporaryFileFullPath);
-			boolean bDockerCpFileResult = oDockerUtils.runCommand(sDockerCpFileCommand);
-
-			if (!bDockerCpFileResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: unable to copy config file on the container:" + LINE_SEPARATOR + sDockerCpFileCommand);
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-			}
-
-			// remove the temporary file
-			if (WasdiFileUtils.fileExists(sTemporaryFileFullPath)) {
-				WasdiFileUtils.deleteFile(sTemporaryFileFullPath);
-			}
-
-
+			// create the file on the workspace folder that will be mounted by docker
+			String sWaspyNotebookConfigFileFullPath = LauncherMain.getWorkspacePath(oParameter) + "notebook_config.cfg";
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sWaspyNotebookConfigFileFullPath: " + sWaspyNotebookConfigFileFullPath);
+			WasdiFileUtils.writeFile(sJsonContent, sWaspyNotebookConfigFileFullPath);
+			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
-
-
 			processWorkspaceLog("execute command: create traefik configuration");
-
-			// Launch create traefik configuration command
-			String sBuildTraefikConfigurationFileCommand = buildCommandTraefikConfigurationFile(sProcessorFolder, sJupyterNotebookCode);
-			boolean bBuildTraefikConfigurationFileResult = oDockerUtils.runCommand(sBuildTraefikConfigurationFileCommand);
-
-			if (!bBuildTraefikConfigurationFileResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the creation of the Traefik configuration-file failed:" + LINE_SEPARATOR + sBuildTraefikConfigurationFileCommand);
-				return false;
+			
+			JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
+			
+			String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
+			if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
+			
+			String sTemplateFile = sVolumeFolder + "template/conf.d_notebook.yml.j2";
+			String sOutputFile = sVolumeFolder + "conf.d/nb_" + sJupyterNotebookCode + ".yml";
+			
+			Map<String, Object> aoTraefikTemplateParams = new HashMap<>();
+			
+			aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
+			
+			
+			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
+			JupyterNotebook oNotebook = oJupyterNotebookRepository.getJupyterNotebook(sJupyterNotebookCode);
+			
+			if (oNotebook!=null) {
+				ArrayList<String> asWhiteIp = oNotebook.extractListOfWhiteIp();
+				aoTraefikTemplateParams.put("sourceRangeList", asWhiteIp);
 			}
-
-
-
+			
+			String sJSON = JsonUtils.stringify(aoTraefikTemplateParams);
+			
+			oJinjaTemplateRenderer.translate(sTemplateFile, sOutputFile, sJSON);
+			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
 
 			processWorkspaceLog(new EndMessageProvider().getGood());
 
 			return true;
 		} catch (Exception oEx) {
 			LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook Exception", oEx);
-
-			try {
-				if (oProcessWorkspace != null) {
-					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
-						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
-					}
-
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-				}
-			} catch (Exception e) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook Exception", e);
-			}
 
 			return false;
 		}
@@ -366,11 +343,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
 
-
-			// Create Docker Util to be able to launch docker-compose commands
-			DockerUtils oDockerUtils = new DockerUtils(null, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-
-
 			// stop the container instance
 			// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
 
@@ -379,10 +351,10 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			// Launch docker-compose stop command
 			String sDockerComposeStopCommand = buildCommandDockerComposeStopJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
-			boolean bDockerComposeStopResult = oDockerUtils.runCommand(sDockerComposeStopCommand);
+			boolean bDockerComposeStopResult = RunTimeUtils.runCommand(sProcessorFolder, sDockerComposeStopCommand);
 
 			if (!bDockerComposeStopResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose stop command failed:" + LINE_SEPARATOR + sDockerComposeStopCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose stop command failed:" + s_sLINE_SEPARATOR + sDockerComposeStopCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
@@ -399,10 +371,10 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			// Launch docker-compose rm command
 			String sDockerComposeRmCommand = buildCommandDockerComposeRmJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
-			boolean bDockerComposeRmResult = oDockerUtils.runCommand(sDockerComposeRmCommand);
+			boolean bDockerComposeRmResult = RunTimeUtils.runCommand(sProcessorFolder, sDockerComposeRmCommand);
 
 			if (!bDockerComposeRmResult) {
-				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose rm command failed:" + LINE_SEPARATOR + sDockerComposeRmCommand);
+				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose rm command failed:" + s_sLINE_SEPARATOR + sDockerComposeRmCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
@@ -462,15 +434,15 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("docker-compose \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    up \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --detach");
 
 		return oSB.toString();
@@ -481,13 +453,13 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("docker-compose \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    stop");
 
 		return oSB.toString();
@@ -498,17 +470,17 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("docker-compose \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    rm \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --stop \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --force");
 
 		return oSB.toString();
@@ -518,23 +490,23 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("/usr/bin/python3 \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  -B \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  /opt/companyExploitation/common/tool/toolbox/sysadmin/code/toolbox.py \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --configuration-directory /opt/companyExploitation/common/tool/toolbox/sysadmin/configuration/ \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --module jinja2 \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --submodule renderTemplate \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --template /data/wasdi/container/volume/traefik-notebook/etc_traefik/template/conf.d_notebook.yml.j2 \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --rendered-file /data/wasdi/container/volume/traefik-notebook/etc_traefik/conf.d/nb_" + sJupyterNotebookCode + ".yml \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --json-inline '{\"wasdiNotebookId\": \"" + sJupyterNotebookCode + "\"}' \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("  --strict");
 
 		return oSB.toString();
@@ -566,11 +538,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		StringBuilder oSB = new StringBuilder();
 
 		oSB.append("docker-compose \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file /data/wasdi/processors/traefik-notebook/docker-compose.yml \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    up \\");
-		oSB.append(LINE_SEPARATOR);
+		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --detach");
 
 		return oSB.toString();

@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 
 import wasdi.LauncherMain;
