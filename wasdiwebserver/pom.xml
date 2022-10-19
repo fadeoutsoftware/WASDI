@@ -17,7 +17,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jackson.version>2.12.6</jackson.version>
+        <jackson.version>2.13.4</jackson.version>
         <snap.version>8.0.8</snap.version>
         <s1tbx.version>8.0.4</s1tbx.version>
         <s2tbx.version>8.0.4</s2tbx.version>
