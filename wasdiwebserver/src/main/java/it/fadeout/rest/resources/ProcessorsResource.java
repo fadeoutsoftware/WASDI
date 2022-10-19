@@ -1,5 +1,7 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,7 +47,6 @@ import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
 import it.fadeout.threads.RedeployProcessorWorker;
-import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import it.fadeout.threads.UpdateProcessorFilesWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -59,6 +60,7 @@ import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
@@ -2234,9 +2236,13 @@ public class ProcessorsResource  {
 		}
 		
 		if (oRequesterUser.getUserId().equals(sUserId)) {
-			Utils.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
-			oResult.setStringValue("Impossible to autoshare.");
-			return oResult;				
+			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				// A user that has Admin rights should be able to auto-share the resource.
+			} else {
+				Utils.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
+				oResult.setStringValue("Impossible to autoshare.");
+				return oResult;
+			}
 		}
 		
 		try {
@@ -2280,7 +2286,8 @@ public class ProcessorsResource  {
 				// No: the requestr has a sharing on this processor?
 				UserResourcePermission oHasSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oRequesterUser.getUserId(), sProcessorId);
 				
-				if (oHasSharing==null) {
+				if (oHasSharing==null
+						&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 					
 					//No. So it is neither the owner or a shared one
 					oResult.setStringValue("Unauthorized");

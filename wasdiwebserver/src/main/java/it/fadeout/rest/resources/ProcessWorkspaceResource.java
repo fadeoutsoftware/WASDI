@@ -122,10 +122,6 @@ public class ProcessWorkspaceResource {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: invalid session");
 				return aoProcessList;
 			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user id from session is null, aborting");
-				return aoProcessList;
-			}
 			
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user " + oUser.getUserId() + " is not allowed to access workspace " + sWorkspaceId +", aborting" );

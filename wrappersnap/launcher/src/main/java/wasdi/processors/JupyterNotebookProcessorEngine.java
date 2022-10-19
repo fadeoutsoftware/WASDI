@@ -69,7 +69,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			if (!bProcessorTemplateFolderExists) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
 
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 5);
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;
 			}
 
 			processWorkspaceLog("copy template directory");
@@ -78,11 +79,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (bProcessorFolderExists) {
 				String sGeneralCommonEnvTemplateFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
-				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvTemplate: " + sGeneralCommonEnvTemplateFilePath);
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: GeneralCommonEnvTemplate: " + sGeneralCommonEnvTemplateFilePath);
 				File oGeneralCommonEnvTemplate = new File(sGeneralCommonEnvTemplateFilePath);
 
 				String sGeneralCommonEnvProcessorFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
-				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: oGeneralCommonEnvProcessor: " + sGeneralCommonEnvProcessorFilePath);
+				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: GeneralCommonEnvProcessor: " + sGeneralCommonEnvProcessorFilePath);
 				File oGeneralCommonEnvProcessor = new File(sGeneralCommonEnvProcessorFilePath);
 
 
@@ -109,18 +110,20 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			// Create Docker Util to be able to launch docker-compose commands
 			DockerUtils oDockerUtils = new DockerUtils(null, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-
+			
+			// Check if our load balancer is up and running
 			processWorkspaceLog("verify that the Traefik container is up-and-running");
-
+			
 			String sTraefikDockerContainerInspectCommand = buildCommandDockerContainerInspect("traefik-notebook");
 			boolean bTraefikDockerContainerInspectResult = oDockerUtils.runCommand(sTraefikDockerContainerInspectCommand);
 
 			if (!bTraefikDockerContainerInspectResult) {
+				
+				// No!! Time to wake-up it
+				
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the Traefik container is down or missing:" + LINE_SEPARATOR + sTraefikDockerContainerInspectCommand);
 
 				processWorkspaceLog("starting the Traefik container");
-
-
 
 				String sDockerComposeUpTraefikCommand = buildCommandDockerComposeUpTraefik();
 				boolean bDockerComposeUpTraefikResult = oDockerUtils.runCommand(sDockerComposeUpTraefikCommand);
@@ -129,13 +132,13 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 					LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: start Traefik command failed:" + LINE_SEPARATOR + sDockerComposeUpTraefikCommand);
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+					return false;
 				}
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 			}
 			
-
-
+			// We build our new docker
 			processWorkspaceLog("execute command: docker build");
 
 			String sDockerBuildCommand = buildCommandDockerBuild(sProcessorFolder);
@@ -145,12 +148,12 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker build command failed:" + LINE_SEPARATOR + sDockerBuildCommand);
 
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
-
-
-
+			
+			// This step will let WASDI push in a docker repository if (when) we will install one.
 			processWorkspaceLog("execute command: docker push");
 
 			String sDockerPushCommand = buildCommandDockerPush(sProcessorFolder);
@@ -165,12 +168,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
 
 
-
-			processWorkspaceLog("create docker-compose file");
-
 			// use the template to create a docker-compose file
 			// from: docker-compose.yml.j2
 			// to:   docker-compose.yml
+
+			processWorkspaceLog("create docker-compose file");
 
 			// Read the template file
 			String sDockerComposeYmlTemplateFileName = sProcessorFolder + "docker-compose.yml.j2";
@@ -182,6 +184,31 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiNotebookId }}", sJupyterNotebookCode);
 			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiUserName }}", oParameter.getUserId());
 			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiWorkspaceId }}", oParameter.getWorkspace());
+			
+			
+            // Extra hosts mapping, useful for some instances when the server host can't be resolved
+            // The symptoms of such problem is that the POST call from the Docker container timeouts
+			
+			String sExtraHosts = "";
+            if (WasdiConfig.Current.dockers.extraHosts != null) {
+            	
+            	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
+            		
+            		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
+            		
+            		sExtraHosts += "    extra_hosts:\n";
+            		
+                	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
+                		
+                		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
+                		sExtraHosts += "      - " + sExtraHost + "\n";
+                	}
+            	}
+            }
+            
+            if (!Utils.isNullOrEmpty(sDockerComposeYmlTemplateFileContent)) {
+            	sDockerComposeYmlTemplateFileContent += sExtraHosts;
+            }
 
 			String sDockerComposeYmlFileName = sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml";
 			File oDockerComposeYmlFile = new File(sDockerComposeYmlFileName);

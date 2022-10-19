@@ -820,7 +820,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             
             // Recreate the user environment
             waitForApplicationToStart(oParameter);
-            reconstructEnvironment(oParameter, oProcessor.getPort());            
+            reconstructEnvironment(oParameter, oProcessor.getPort());
+            
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				refreshPackagesInfo(oParameter);
+			}            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 

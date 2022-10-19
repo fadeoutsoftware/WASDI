@@ -218,6 +218,18 @@ var RootController = (function() {
             var oDate;
             if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING" || aoProcessesRunning[iIndexNewProcess].status === "WAITING" || aoProcessesRunning[iIndexNewProcess].status === "READY")
             {
+                if (!utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].operationStartDate)) {
+                    if (!aoProcessesRunning[iIndexNewProcess].operationStartDate.endsWith(" Z")) {
+                        aoProcessesRunning[iIndexNewProcess].operationStartDate += " Z";
+                    }
+                }
+
+                if (!utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].operationEndDate)) {
+                    if (!aoProcessesRunning[iIndexNewProcess].operationEndDate.endsWith(" Z")) {
+                        aoProcessesRunning[iIndexNewProcess].operationEndDate += " Z";
+                    }
+                }
+
                 if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
                     // add start time (useful if the page was reloaded)
 

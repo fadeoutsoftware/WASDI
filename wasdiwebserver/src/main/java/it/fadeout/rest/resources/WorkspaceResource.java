@@ -827,7 +827,8 @@ public class WorkspaceResource {
 		}
 
 		// Can the user access this resource?
-		if (!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)) {
+		if (!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)
+				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 			Utils.debugLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
@@ -838,16 +839,20 @@ public class WorkspaceResource {
 
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
+			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				// A user that has Admin rights should be able to auto-share the resource.
+			} else {
+				Utils.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
 
-			return oResult;
+				return oResult;
+			}
 		}
 
 		// Cannot share with the owner
-		if (oWorkspace.getUserId().equals(sDestinationUserId)) {
+		if (sDestinationUserId.equals(oWorkspace.getUserId())) {
 			Utils.debugLog("WorkspaceResource.ShareWorkspace: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());

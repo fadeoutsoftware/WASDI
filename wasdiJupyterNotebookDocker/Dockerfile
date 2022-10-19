@@ -97,10 +97,6 @@ RUN python3 -m venv $VIRTUAL_ENV && \
     pip3 install --no-cache-dir GDAL==`gdal-config --version`
 
 
-# Copy our files
-COPY --chown=$USR_NAME:$GRP_NAME ./processor/ $USR_HOME/.
-
-
 # From now, all commands executed are executed as root
 USER root
 

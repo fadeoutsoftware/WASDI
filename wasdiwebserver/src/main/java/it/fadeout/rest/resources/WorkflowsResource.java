@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.*;
 
 import java.io.ByteArrayInputStream;
@@ -44,6 +45,7 @@ import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SnapWorkflowRepository;
@@ -666,7 +668,8 @@ public class WorkflowsResource {
                     return oResult;
                 }
                 // the requester has the share?
-                if (!oUserResourcePermissionRepository.isWorkflowSharedWithUser(oRequesterUser.getUserId(), sWorkflowId)) {
+                if (!oUserResourcePermissionRepository.isWorkflowSharedWithUser(oRequesterUser.getUserId(), sWorkflowId)
+                		&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
                     oResult.setStringValue("Unauthorized");
                     return oResult;
                 }

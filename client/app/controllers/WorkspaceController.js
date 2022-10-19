@@ -146,6 +146,8 @@ var WorkspaceController = (function () {
                     // oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", {workSpace: sWorkspaceId});//use workSpace when reload editor page
                     oController.m_oConstantsService.setActiveWorkspace(data.data);
+                   
+                    
                 }
             }
         },(function (data, status) {
@@ -172,12 +174,21 @@ var WorkspaceController = (function () {
             if (this.m_oConstantsService.getUser() != undefined) {
 
                 var oController = this;
+                let sDate = ""
 
                 this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             //data.data = []; // DEBUG
                             oController.m_aoWorkspaceList = data.data;
+                            oController.m_aoWorkspaceList.forEach(oWorkspace => {
+                               oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspace.workspaceId).then(function(data, status) {
+                                sDate = new Date(data.data.creationDate)
+                                
+                                oWorkspace.creationDate = sDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(0, 10)
+                               })
+                            })
+                          
                             oController.m_bIsLoading = false;
                         }
                     }
@@ -238,6 +249,7 @@ var WorkspaceController = (function () {
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data.data;
+               
             }
         },(function (data, status) {
             utilsVexDialogAlertTop(sError);
@@ -456,7 +468,6 @@ var WorkspaceController = (function () {
                                     oWorkspaceViewModel
                                 );
                                 }
-                            
                                 oController.deselectWorskpace();
                                 oController.fetchWorkspaceInfoList();
                             },(function () {

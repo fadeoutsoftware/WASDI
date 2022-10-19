@@ -105,8 +105,6 @@ let PackageManagerController = (function () {
     ) {
         let aPackageInfo = sPackageName.split("==");
 
-        console.log(aPackageInfo);
-
         let aPackageInfoTrimmed = aPackageInfo.map((sElement) => {
             return sElement.replace(/["]+/g, "");
         });

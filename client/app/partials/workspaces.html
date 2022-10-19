@@ -49,17 +49,18 @@
                 >
                     <invader></invader>
                 </div>
-
+                
                 <table
                     class="table table-hover"
                     id="TableWorkspacesList"
                     aria-label="WS List table"
                     ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)"
+                    style="table-layout:fixed"
                 >
                     <thead>
-                        <th>&nbsp;</th>
+                        <th style="width:2.5%">&nbsp;</th>
                         <th
-                            style="cursor: pointer"
+                            style="cursor: pointer; width: 70%;"
                         >
                             <i
                                 class="fa fa-arrow-up"
@@ -111,7 +112,18 @@
                                         <i class="fa fa-arrow-down" aria-hidden="true"></i>
                                         Owner Desc
                                     </button>
-                                    
+                                    <hr class="my-1">
+                                    <button class="dropdown-list-item dropdown-item text-left" 
+                                    ng-click="m_oController.changeSorting('creationDate', 'desc')">
+                                       <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        Date Created Newest
+                                    </button>
+                                    <br>
+                                    <button class="dropdown-list-item dropdown-item text-left"
+                                     ng-click="m_oController.changeSorting('creationDate', 'asc')">
+                                        <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        Date Created Oldest
+                                    </button>
                                 </div>
                             </div>
                         </th>
@@ -129,14 +141,15 @@
                         </td>
                         <td
                             ng-click="m_oController.loadProductList(oWSListItem)"
-                            style="width: 275px;"
+                           
                         >
                             <span class="ellipsis">
                                 {{oWSListItem.workspaceName}}
                             </span>
                             <br>
                              <span class="ellipsis" style="font-size: 12px;">
-                                Owner: {{oWSListItem.ownerUserId}}
+                                {{oWSListItem.ownerUserId}}  - {{oWSListItem.creationDate}}
+
                             </span>
                         </td>
 
@@ -144,6 +157,7 @@
                             
                             <div
                             class="over-color d-flex flex-row align-items-center"
+                            style="padding-right: 10px"
                             data-toggle="tooltip"
                             data-placement="top"
                             title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
@@ -176,6 +190,7 @@
                         <!--OLD VERSION COMMENTED-->
                     </tr>
                 </table>
+          
             </div>
 
             <!---------------------- LIST OF FILES & WORKSPACE DETAILS---------------------->
