@@ -51,7 +51,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
 		ProcessWorkspace oProcessWorkspace = null;
 
-		String sProcessorName = oParameter.getName();
+		String sProcessorName = "jupyter-notebook";
 
 		try {
 			processWorkspaceLog("Start launch of " + sProcessorName + " Type " + oParameter.getProcessorType());
