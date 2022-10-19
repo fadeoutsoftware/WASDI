@@ -547,10 +547,10 @@ public class LauncherMain  {
     }
 
     /**
-     * Get the full workspace path for this parameter
+     * Get the full workspace path for this parameter (with last / included)
      *
-     * @param oParameter
-     * @param sRootPath
+     * @param oParameter Base Parameter of the launcher operation
+     * @param sRootPath Root path of WASDI node
      * @return full workspace path
      */
     public static String getWorkspacePath(BaseParameter oParameter, String sRootPath) {

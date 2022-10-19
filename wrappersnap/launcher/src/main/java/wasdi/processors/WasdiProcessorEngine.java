@@ -1,12 +1,7 @@
 package wasdi.processors;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
 
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
@@ -147,131 +142,6 @@ public abstract class WasdiProcessorEngine {
 	 * * @return
 	 */
 	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
-
-	/**
-	 * Execute a system task
-	 * @param sCommand
-	 * @param asArgs
-	 */
-	public static void shellExec(String sCommand, List<String> asArgs) {
-		shellExec(sCommand,asArgs,true);
-	}
-	
-	/**
-	 * Execute a system task
-	 * @param sCommand
-	 * @param asArgs
-	 * @param bWait
-	 */	
-	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		try {
-			if (asArgs==null) asArgs = new ArrayList<String>();
-			asArgs.add(0, sCommand);
-			
-			String sCommandLine = "";
-			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}
-			
-			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
-			
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess = oProcessBuilder.start();
-			
-			if (bWait) {
-				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
-		LauncherMain.s_oLogger.debug("shellExecWithLogs sCommand: " + sCommand);
-
-		try {
-			if (asArgs == null) {
-				asArgs = new ArrayList<>();
-			}
-
-			asArgs.add(0, sCommand);
-			
-			String sCommandLine = "";
-			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}
-			
-			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine: " + sCommandLine);
-
-			File logFile = createLogFile();
-			
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-
-			oProcessBuilder.redirectErrorStream(true);
-			oProcessBuilder.redirectOutput(logFile);
-
-			Process oProcess = oProcessBuilder.start();
-
-			int iProcOuptut = oProcess.waitFor();				
-			LauncherMain.s_oLogger.debug("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
-
-			if (iProcOuptut == 0) {
-
-				String sOutputFileContent = readLogFile(logFile);
-				deleteLogFile(logFile);
-
-				if (!Utils.isNullOrEmpty(sOutputFileContent)) {
-					if (sOutputFileContent.trim().equalsIgnoreCase("false")) {
-						return false;
-					}
-				}
-
-				return true;
-			} else {
-				String sOutputFileContent = readLogFile(logFile);
-				LauncherMain.s_oLogger.debug("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
-
-				deleteLogFile(logFile);
-
-				return false;
-			}
-		} catch (Exception e) {			
-			LauncherMain.s_oLogger.debug("shellExecWithLogs exception: " + e.getMessage());
-
-			return false;
-		}
-	}
-
-	private static File createLogFile() {
-		LauncherMain.s_oLogger.debug("createLogFile Working Directory = " + System.getProperty("user.dir"));
-
-		File currentDir = new File(System.getProperty("user.dir"));
-		File logFile = new File(currentDir.getAbsolutePath() + FILE_SEPARATOR + "temporary_log_file.log");
-
-		return logFile;
-	}
-
-	private static String readLogFile(File logFile) {
-		try {
-			return FileUtils.readFileToString(logFile);
-		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("readLogFile exception: " + e.getMessage());
-		}
-
-		return null;
-	}
-
-	private static void deleteLogFile(File logFile) {
-		try {
-			FileUtils.forceDelete(logFile);
-		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("deleteLogFile exception: " + e.getMessage());
-		}
-	}
 	
 	/**
 	 * Check if a processor exists on actual node

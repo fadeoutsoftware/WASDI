@@ -192,6 +192,7 @@ public class WorkspaceResource {
 				oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
 				oWSViewModel.setWorkspaceName(oWorkspace.getName());
 				oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
+				oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 
 				if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 					if (oWorkspace.getNodeCode().equals("wasdi")) {
@@ -508,6 +509,8 @@ public class WorkspaceResource {
 		}
 
 		try {
+			
+			
 			// Create New Workspace
 			Workspace oWorkspace = new Workspace();
 			// Initialize repository
@@ -531,6 +534,10 @@ public class WorkspaceResource {
 				// Set the base url on the returning view model
 				oWorkspaceEditorViewModel.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
 				// update on Db
+				oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
+			}
+			else if (oWorkspaceEditorViewModel.getNodeCode() != null && oWorkspaceEditorViewModel.getNodeCode().equals("wasdi")) {
+				oWorkspaceEditorViewModel.setApiUrl(WasdiConfig.Current.baseUrl);
 				oWorkspaceRepository.updateWorkspaceNodeCode(oWorkspace);
 			}
 

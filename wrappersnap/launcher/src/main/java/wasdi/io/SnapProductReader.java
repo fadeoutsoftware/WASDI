@@ -20,10 +20,8 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.Utils;
@@ -31,7 +29,11 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
-import wasdi.shared.viewmodels.products.*;
+import wasdi.shared.viewmodels.products.AttributeViewModel;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class SnapProductReader extends WasdiProductReader {
 

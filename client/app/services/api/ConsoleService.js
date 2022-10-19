@@ -28,5 +28,17 @@
          return this.m_oHttp.post(sUrl + this.m_sResource + '/create?workspaceId=' + sWorkspaceId);
      }; 
 
+     this.isConsoleReady = function(sWorkspaceId) {
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        var sUrl = this.APIURL;
+
+        if (oWorkspace != null && oWorkspace.apiUrl != null && !this.m_bIgnoreWorkspaceApiUrl) {
+            sUrl = oWorkspace.apiUrl;
+        }
+
+         return this.m_oHttp.get(sUrl + this.m_sResource + '/ready?workspaceId=' + sWorkspaceId);
+
+     }
+
  }]);
  
