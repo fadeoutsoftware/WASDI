@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 
 module.exports = {
@@ -103,7 +104,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js',
+        filename: '[name].[contenthash].js',
         clean: true
     },
     plugins: [
@@ -137,10 +138,23 @@ module.exports = {
     ],
     optimization: {
         runtimeChunk: 'single',
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+              parallel: true,
+              terserOptions: {
+                mangle: false,
+                output: {
+                  beautify: false
+                }
+              },
+              
+            }),
+          ],
         // minimization reduce the ./dist folder footprint to just 30 MB over 45MB
         // but generates some error for modules created using factory() from angular
         // so for production mode is now disabled
-        minimize: false
+        
     },
 }
 ;
