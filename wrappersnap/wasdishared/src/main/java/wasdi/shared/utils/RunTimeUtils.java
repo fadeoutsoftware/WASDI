@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import wasdi.shared.config.WasdiConfig;
+
 public class RunTimeUtils {
 	
 	protected static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -39,14 +41,14 @@ public class RunTimeUtils {
 				sCommandLine += sArg + " ";
 			}
 			
-			Utils.debugLog("ShellExec CommandLine: " + sCommandLine);
+			Utils.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
 				int iProcOuptut = oProcess.waitFor();				
-				Utils.debugLog("ShellExec CommandLine RETURNED: " + iProcOuptut);
+				Utils.debugLog("RunTimeUtils.ShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 		}
 		catch (Exception e) {
@@ -61,7 +63,7 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
-		Utils.debugLog("shellExecWithLogs sCommand: " + sCommand);
+		Utils.debugLog("RunTimeUtils.shellExecWithLogs sCommand: " + sCommand);
 
 		try {
 			if (asArgs == null) {
@@ -76,7 +78,7 @@ public class RunTimeUtils {
 				sCommandLine += sArg + " ";
 			}
 			
-			Utils.debugLog("shellExecWithLogs CommandLine: " + sCommandLine);
+			Utils.debugLog("RunTimeUtils.shellExecWithLogs CommandLine: " + sCommandLine);
 
 			File logFile = createLogFile();
 			
@@ -88,7 +90,7 @@ public class RunTimeUtils {
 			Process oProcess = oProcessBuilder.start();
 
 			int iProcOuptut = oProcess.waitFor();				
-			Utils.debugLog("shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
+			Utils.debugLog("RunTimeUtils.shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
 
 			if (iProcOuptut == 0) {
 
@@ -104,16 +106,34 @@ public class RunTimeUtils {
 				return true;
 			} else {
 				String sOutputFileContent = readLogFile(logFile);
-				Utils.debugLog("shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
+				Utils.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
 
 				deleteLogFile(logFile);
 
 				return false;
 			}
 		} catch (Exception e) {			
-			Utils.debugLog("shellExecWithLogs exception: " + e.getMessage());
+			Utils.debugLog("RunTimeUtils.shellExecWithLogs exception: " + e.getMessage());
 
 			return false;
+		}
+	}
+	
+	/**
+	 * Adds the run permission to a file.
+	 * 
+	 * @param sFile fill path of the file
+	 */
+	public static void addRunPermission(String sFile)  {
+		try {
+			// Make it executable
+			Runtime.getRuntime().exec("chmod u+x " + sFile);
+
+			// And wait a little bit to make the chmod done
+			Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
 		}
 	}
 	
@@ -137,7 +157,7 @@ public class RunTimeUtils {
 			try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
 				// Fill the script file
 				if (oBuildScriptWriter != null) {
-					Utils.debugLog("DockerProcessorEngine.runCommand: Creating " + sBuildScriptFile + " file");
+					Utils.debugLog("RunTimeUtils.runCommand: Creating " + sBuildScriptFile + " file");
 					oBuildScriptWriter.write(sCommand);
 
 					oBuildScriptWriter.flush();
@@ -149,17 +169,14 @@ public class RunTimeUtils {
 			Thread.sleep(100);
 
 			// Make it executable
-			Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
-
-			// And wait a little bit to make the chmod done
-			Thread.sleep(100);
+			addRunPermission(sBuildScriptFile);
 
 			// Initialize Args
 			List<String> asArgs = new ArrayList<>();
 
 
 			// Generate shell command
-			Utils.debugLog("DockerProcessorEngine.runCommand: Running the shell command");
+			Utils.debugLog("RunTimeUtils.runCommand: Running the shell command");
 			Utils.debugLog(sCommand);
 
 			// Run the script
@@ -168,14 +185,14 @@ public class RunTimeUtils {
 			FileUtils.forceDelete(oBuildScriptFile);
 
 			if (bResult) {
-				Utils.debugLog("DockerUtils.runCommand: The shell command ran successfully.");
+				Utils.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");
 			} else {
-				Utils.debugLog("DockerUtils.runCommand: The shell command did not run successfully.");
+				Utils.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully.");
 			}
 
 			return bResult;
 		} catch (Exception oEx) {
-			Utils.debugLog("DockerUtils.runCommand: " + oEx.toString());
+			Utils.debugLog("RunTimeUtils.runCommand: " + oEx.toString());
 			return false;
 		}
 	}	
@@ -185,7 +202,7 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	private static File createLogFile() {
-		Utils.debugLog("createLogFile Working Directory = " + System.getProperty("user.dir"));
+		Utils.debugLog("RunTimeUtils.createLogFile Working Directory = " + System.getProperty("user.dir"));
 
 		File oUserDir = new File(System.getProperty("user.dir"));
 		File oLogFile = new File(oUserDir.getAbsolutePath() + FILE_SEPARATOR + "temporary_log_file.log");
@@ -202,7 +219,7 @@ public class RunTimeUtils {
 		try {
 			return FileUtils.readFileToString(oLogFile);
 		} catch (IOException oEx) {
-			Utils.debugLog("readLogFile exception: " + oEx.getMessage());
+			Utils.debugLog("RunTimeUtils.readLogFile exception: " + oEx.getMessage());
 		}
 
 		return null;
@@ -212,7 +229,7 @@ public class RunTimeUtils {
 		try {
 			FileUtils.forceDelete(logFile);
 		} catch (IOException e) {
-			Utils.debugLog("deleteLogFile exception: " + e.getMessage());
+			Utils.debugLog("RunTimeUtils.deleteLogFile exception: " + e.getMessage());
 		}
 	}
 }

@@ -62,6 +62,11 @@ public class WasdiConfig {
 	public int readTimeout = 10000;
 	
 	/**
+	 * Number of Milliseconds to sleep after a chmod command to let it be applied
+	 */
+	public int msWaitAfterChmod = 1000;
+	
+	/**
 	 * Mongo db Configuration
 	 */
 	public MongoConfig mongoMain;
