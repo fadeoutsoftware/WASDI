@@ -40,37 +40,35 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 	}
 
+	/**
+	 * Creates and starts a new Jupyter notebook
+	 * @param oParameter
+	 * @return
+	 */
 	public boolean launchJupyterNotebook(ProcessorParameter oParameter) {
 		LauncherMain.s_oLogger.debug("JupyterNotebookProcessorEngine.launchJupyterNotebook: start");
 
+		// Check the domain
 		if (oParameter == null) {
 			LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: oParameter is null");
 			return false;
 		}
 
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
-		ProcessWorkspace oProcessWorkspace = null;
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
 		String sProcessorName = "jupyter-notebook";
 
 		try {
+						
 			processWorkspaceLog("Start launch of " + sProcessorName + " Type " + oParameter.getProcessorType());
-
-			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = m_oProcessWorkspace;
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			processWorkspaceLog("This is an attempt to launch of the Jupyter Notebook");
-
-
+			processWorkspaceLog("Creating JupyterLab on this workspace");
+			
+			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
 			String sProcessorFolder = getProcessorFolder(sProcessorName);
 			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
 
 			// check if the processors/jupyter-notebook template and processor exists
-			// make a copy of the template directory (in case it does not exist)
-			// from: /data/wasdi/dockertemplate/jupyter-notebook/
-			// to:   /data/wasdi/processors/jupyter-notebook
-
 			boolean bProcessorTemplateFolderExists = WasdiFileUtils.fileExists(sProcessorTemplateFolder);
 
 			if (!bProcessorTemplateFolderExists) {
@@ -85,6 +83,9 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 
 			if (bProcessorFolderExists) {
+				
+				// Check if nothing changed in the templates
+				
 				String sGeneralCommonEnvTemplateFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
 				LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: GeneralCommonEnvTemplate: " + sGeneralCommonEnvTemplateFilePath);
 				File oGeneralCommonEnvTemplate = new File(sGeneralCommonEnvTemplateFilePath);
@@ -96,6 +97,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 				if (WasdiFileUtils.fileExists(oGeneralCommonEnvTemplate)) {
 					if (!WasdiFileUtils.filesAreTheSame(oGeneralCommonEnvTemplate, oGeneralCommonEnvProcessor)) {
+						// Files are different: we will need to re-create
 						WasdiFileUtils.deleteFile(sProcessorFolder);
 						bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 					}
@@ -143,7 +145,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			
 			// We build our new docker
 			processWorkspaceLog("execute command: docker build");
-
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: starting docker build");
 			String sDockerBuildCommand = buildCommandDockerBuild(sProcessorFolder);
 			boolean bDockerBuildResult = RunTimeUtils.runCommand(sProcessorFolder,sDockerBuildCommand);
 
@@ -158,14 +160,13 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			
 			// This step will let WASDI push in a docker repository if (when) we will install one.
 			processWorkspaceLog("execute command: docker push");
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: docker push");
 
 			String sDockerPushCommand = buildCommandDockerPush(sProcessorFolder);
 			boolean bDockerPushResult = RunTimeUtils.runCommand(sProcessorFolder,sDockerPushCommand);
 
 			if (!bDockerPushResult) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker push command failed:" + s_sLINE_SEPARATOR + sDockerPushCommand);
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 40);
@@ -176,54 +177,47 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// to:   docker-compose.yml
 
 			processWorkspaceLog("create docker-compose file");
+			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating docker compose file");
 
-			// Read the template file
-			String sDockerComposeYmlTemplateFileName = sProcessorFolder + "docker-compose.yml.j2";
-			File oDockerComposeYmlTemplateFile = new File(sDockerComposeYmlTemplateFileName);
-			String sDockerComposeYmlTemplateFileContent = FileUtils.readFileToString(oDockerComposeYmlTemplateFile);
-
+			// Generate the Jupyter Code
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getUserId(), oParameter.getWorkspace());
+			
+			processWorkspaceLog("Notebook id: " + sJupyterNotebookCode);
+			
+			// Docker compose Template file
+			String sDockerComposeYmlTemplateFileName = sProcessorFolder + "docker-compose.yml.j2";
+			// Docker compose output file
+			String sDockerComposeYmlFileName = sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml";			
+			
+			// Utility to render Jinja templates
+			JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
 
-			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiNotebookId }}", sJupyterNotebookCode);
-			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiUserName }}", oParameter.getUserId());
-			sDockerComposeYmlTemplateFileContent = sDockerComposeYmlTemplateFileContent.replace("{{ wasdiWorkspaceId }}", oParameter.getWorkspace());
+			// Fill the template params to create the 
+			Map<String, Object> aoDockerComposeTemplateParams = new HashMap<String, Object>();
 			
+			// Add the paramters to the dictionary
+			aoDockerComposeTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
+			aoDockerComposeTemplateParams.put("wasdiUserName", oParameter.getUserId());
+			aoDockerComposeTemplateParams.put("wasdiWorkspaceId", sJupyterNotebookCode);
 			
-            // Extra hosts mapping, useful for some instances when the server host can't be resolved
-            // The symptoms of such problem is that the POST call from the Docker container timeouts
-			
-			String sExtraHosts = "";
-            if (WasdiConfig.Current.dockers.extraHosts != null) {
-            	
+            if (WasdiConfig.Current.dockers.extraHosts != null) {            	
             	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-            		
-            		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
-            		
-            		sExtraHosts += "    extra_hosts:\n";
-            		
-                	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
-                		
-                		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
-                		sExtraHosts += "      - " + sExtraHost + "\n";
-                	}
+            		aoDockerComposeTemplateParams.put("extraHosts", WasdiConfig.Current.dockers.extraHosts);
             	}
-            }
+            }            
             
-            if (!Utils.isNullOrEmpty(sDockerComposeYmlTemplateFileContent)) {
-            	sDockerComposeYmlTemplateFileContent += sExtraHosts;
-            }
-
-			String sDockerComposeYmlFileName = sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml";
-			File oDockerComposeYmlFile = new File(sDockerComposeYmlFileName);
-			FileUtils.writeStringToFile(oDockerComposeYmlFile, sDockerComposeYmlTemplateFileContent);
+            String sJsonParams = JsonUtils.stringify(aoDockerComposeTemplateParams);
+            
+            // Translate the template
+			oJinjaTemplateRenderer.translate(sDockerComposeYmlTemplateFileName, sDockerComposeYmlFileName, sJsonParams);
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
 			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
+			String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
 
-			String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + FILE_SEPARATOR + oParameter.getUserId() + FILE_SEPARATOR + oParameter.getWorkspace();
-
-			String sNotebookPath = sWorkspacePath + FILE_SEPARATOR + "notebook";
+			String sNotebookPath = sWorkspacePath + "notebook";
+			
 			File oNotebookFolder = new File(sNotebookPath);
 
 			if (!WasdiFileUtils.fileExists(oNotebookFolder)) {
@@ -240,8 +234,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (!bDockerComposeUpResult) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose up command failed:" + s_sLINE_SEPARATOR + sDockerComposeUpCommand);
-
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				return false;
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
@@ -264,8 +258,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
 			processWorkspaceLog("execute command: create traefik configuration");
-			
-			JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
 			
 			String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
 			if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
