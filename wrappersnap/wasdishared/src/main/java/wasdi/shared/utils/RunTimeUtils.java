@@ -202,10 +202,9 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	private static File createLogFile() {
-		Utils.debugLog("RunTimeUtils.createLogFile Working Directory = " + System.getProperty("user.dir"));
+		Utils.debugLog("RunTimeUtils.createLogFile Working Directory = " + WasdiConfig.Current.paths.wasdiTempFolder);
 
-		File oUserDir = new File(System.getProperty("user.dir"));
-		File oLogFile = new File(oUserDir.getAbsolutePath() + FILE_SEPARATOR + "temporary_log_file.log");
+		File oLogFile = new File(WasdiConfig.Current.paths.wasdiTempFolder + FILE_SEPARATOR + "temporary_log_file.log");
 
 		return oLogFile;
 	}
