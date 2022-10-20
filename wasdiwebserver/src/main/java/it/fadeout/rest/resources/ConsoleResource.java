@@ -139,6 +139,10 @@ public class ConsoleResource {
 						
 						ArrayList<String> asAllowedIps = oJupyterNotebook.extractListOfWhiteIp();
 						
+						if (WasdiConfig.Current.traefik.firewallWhiteList!=null) {
+							asAllowedIps.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
+						}
+						
 						aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
 						aoTraefikTemplateParams.put("sourceRangeList", asAllowedIps);
 						

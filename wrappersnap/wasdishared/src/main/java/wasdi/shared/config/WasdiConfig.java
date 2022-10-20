@@ -152,6 +152,11 @@ public class WasdiConfig {
 	public LoadBalancerConfig loadBalancer = new LoadBalancerConfig();
 	
 	/**
+	 * Configuration of the traefik proxy to reach notebooks inside the workspaces
+	 */
+	public TraefikConfig traefik = new TraefikConfig();
+	
+	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest
 	 * @return Catalogue configuration for the specified platform

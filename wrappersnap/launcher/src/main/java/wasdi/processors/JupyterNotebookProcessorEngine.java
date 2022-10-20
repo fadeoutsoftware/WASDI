@@ -275,6 +275,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			
 			if (oNotebook!=null) {
 				ArrayList<String> asWhiteIp = oNotebook.extractListOfWhiteIp();
+				
+				if (WasdiConfig.Current.traefik.firewallWhiteList!=null) {
+					asWhiteIp.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
+				}
+				
 				aoTraefikTemplateParams.put("sourceRangeList", asWhiteIp);
 			}
 			
