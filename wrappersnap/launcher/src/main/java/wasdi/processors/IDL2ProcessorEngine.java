@@ -9,6 +9,7 @@ import com.google.common.io.Files;
 import wasdi.LauncherMain;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.RunTimeUtils;
 
 public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	
@@ -176,8 +177,8 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 				}							
 			}
 						
-			Runtime.getRuntime().exec("chmod u+x "+sRunFile);
-			Runtime.getRuntime().exec("chmod u+x "+sGetPIDFile);
+			RunTimeUtils.addRunPermission(sRunFile);
+			RunTimeUtils.addRunPermission(sGetPIDFile);
 			
 		} catch (Exception e) {
 			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.deploy: Exception Creating Files :"+e.toString());

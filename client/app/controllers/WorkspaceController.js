@@ -180,15 +180,18 @@ var WorkspaceController = (function () {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             //data.data = []; // DEBUG
+                            if(utilsIsObjectNullOrUndefined(data.data.creationDate)) {
+                                console.log("no creation date")
+                            }
                             oController.m_aoWorkspaceList = data.data;
                             oController.m_aoWorkspaceList.forEach(oWorkspace => {
-                               oController.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspace.workspaceId).then(function(data, status) {
-                                sDate = new Date(data.data.creationDate)
-                                
-                                oWorkspace.creationDate = sDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(0, 10)
+                                if(utilsIsObjectNullOrUndefined(oWorkspace.creationDate)) {
+                                  oWorkspace.creationDate = "N/A"
+                               } else {
+                                   sDate = new Date(oWorkspace.creationDate)
+                                   oWorkspace.creationDate = sDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(0, 10)
+                               }
                                })
-                            })
-                          
                             oController.m_bIsLoading = false;
                         }
                     }
