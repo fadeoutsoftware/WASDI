@@ -107,10 +107,7 @@ public class DockerUtils {
             Thread.sleep(2000);
 
             // Make it executable
-            Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
-
-            // And wait a little bit to make the chmod done
-            Thread.sleep(2000);
+            RunTimeUtils.addRunPermission(sBuildScriptFile);
 
             // Run the script
             RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
@@ -218,17 +215,17 @@ public class DockerUtils {
                     }
                 }
 
-                Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+                RunTimeUtils.addRunPermission(sRunFile);
 
                 asArgs.clear();
             }
 
             try {
                 if (!oRunFile.canExecute()) {
-                    Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+                	RunTimeUtils.addRunPermission(sRunFile);
                 }
             } catch (Exception oInnerEx) {
-                Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+            	RunTimeUtils.addRunPermission(sRunFile);
             }
 
             // Execute the command to start the docker
@@ -297,14 +294,12 @@ public class DockerUtils {
                     }
                 }
 
-                Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                RunTimeUtils.addRunPermission(sDeleteScriptFile);
                 
                 
             } else {
-                Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                RunTimeUtils.addRunPermission(sDeleteScriptFile);
             }
-
-            Thread.sleep(1000);
 
             Runtime.getRuntime().exec(sDeleteScriptFile);
 
