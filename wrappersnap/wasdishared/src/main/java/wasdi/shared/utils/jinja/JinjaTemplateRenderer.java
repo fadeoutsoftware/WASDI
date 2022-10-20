@@ -37,7 +37,7 @@ public class JinjaTemplateRenderer {
 			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
 			
 			// Utility to execute the script
-			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.userHomePath, sRenderCommand);
+			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
 			
 			// Bye bye
 			return bRet;			
