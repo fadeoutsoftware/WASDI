@@ -97,7 +97,7 @@ public class ConsoleResource {
 				return oResult;
 			}
 			
-			String sClientIp = oRequest.getRemoteAddr();
+			String sClientIp = resolveClientIp(oRequest);
 			Utils.debugLog("ConsoleResource.create: client IP: " + sClientIp);
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
@@ -704,6 +704,19 @@ public class ConsoleResource {
 		}
 
 		return bIsAllowed;
+	}
+	
+	protected String resolveClientIp(HttpServletRequest oRequest) {
+		
+		String sXRealIp = oRequest.getHeader("X-Real-IP");
+		String sXForwardedFor = oRequest.getHeader("X-Forwarded-For");
+		String sRemoteAddr = oRequest.getRemoteAddr();
+		
+		if (sXRealIp != null)
+			return sXRealIp;
+		
+		if (!Utils.isNullOrEmpty(sXForwardedFor)) return sXForwardedFor;
+		else return sRemoteAddr;
 	}
 
 }
