@@ -63,6 +63,11 @@ public class PathsConfig {
 	public String gdalPath;
 	
 	/**
+	 * Folder used by WASDI to write temporary files
+	 */
+	public String wasdiTempFolder;
+	
+	/**
 	 * Path the python tool used to render jinja templates by java code.
 	 * We use external script because there was an incompatibility with the most know jar implementing it
 	 */
