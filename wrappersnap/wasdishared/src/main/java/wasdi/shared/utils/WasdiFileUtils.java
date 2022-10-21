@@ -261,23 +261,17 @@ public class WasdiFileUtils {
 	}
 
 	public static boolean writeFile(String sContent, File oFile, boolean bAppend) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeFile");
 
 		if (sContent == null) {
 			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
-
 			return false;
 		}
 
 		File oParentDirectory = oFile.getParentFile();
 
 		if (fileExists(oFile)) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file already exists. deleting it.");
-
 			deleteFile(oFile.getAbsolutePath());
 		} else if (!oParentDirectory.exists()) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file and parent directory do not exists.");
-
 			oParentDirectory.mkdirs();
 		}
 
@@ -287,18 +281,14 @@ public class WasdiFileUtils {
 		}
 
 		if (fileExists(oFile)) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file succesfully created: " + oFile.getAbsolutePath());
-
 			return true;
-		} else {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file was not created: " + oFile.getAbsolutePath());
-
+		} 
+		else {
 			return false;
 		}
 	}
 
 	public static boolean writeFile(String sContent, String sFileFullPath) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeFile | sFileFullPath: " + sFileFullPath);
 
 		if (sContent == null) {
 			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
@@ -318,7 +308,6 @@ public class WasdiFileUtils {
 	}
 
 	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeMapAsJsonFile | sFileFullPath: " + sFileFullPath);
 
 		if (aoJSONMap == null) {
 			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
