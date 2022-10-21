@@ -101,18 +101,31 @@ public class ProcessWorkspaceService {
 		}
 
 		List<ProcessWorkspace> aoProcesses = null;
+		List<ProcessWorkspace> aoFilteredProcesses = new ArrayList<ProcessWorkspace>();
 		try {
 			// Get all the process-workspaces of this workspace
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
 			// get list of processes that are not DONE / STOPPED / ERROR
-			ProcessStatus[] aeNotTerminalStatusesArray = { ProcessStatus.CREATED, ProcessStatus.READY,
-					ProcessStatus.RUNNING, ProcessStatus.WAITING };
-			aoProcesses = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId,
-					new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
+			ProcessStatus[] aeNotTerminalStatusesArray = { ProcessStatus.CREATED, ProcessStatus.READY, ProcessStatus.RUNNING, ProcessStatus.WAITING };
+			aoProcesses = oProcessWorkspaceRepository.getProcessByWorkspace(sWorkspaceId, new ArrayList<>(Arrays.asList(aeNotTerminalStatusesArray)));
+			
+			// Filter the list of process workspaces to kill:
+			for (ProcessWorkspace oProcessWorkspace : aoProcesses) {
+				
+				// Kill should not kill another kill or a terminate jupyter notebook operation
+				if (oProcessWorkspace.getOperationType().equals(LauncherOperations.KILLPROCESSTREE.name()) ||
+						oProcessWorkspace.getOperationType().equals(LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name())) {
+					continue;
+				}
+				
+				aoFilteredProcesses.add(oProcessWorkspace);
+			}
+			
 		} catch (Exception oE) {
 			Utils.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: " + oE);
 		}
-		return killProcesses(aoProcesses, true, true, sSessionId);
+		return killProcesses(aoFilteredProcesses, true, true, sSessionId);
 	}
 
 }
