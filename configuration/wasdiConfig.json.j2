@@ -235,5 +235,20 @@
 {% endfor %}
 
         ]
+    },
+    "traefik": {
+{% if dictWasdiConfiguration.traefik.firewallWhiteList == [] %}
+        "firewallWhiteList": [],
+{% else %}
+        "firewallWhiteList": [
+{% for sCurrentFirewallWhiteIp in dictWasdiConfiguration.traefik.firewallWhiteList %}
+{% if sCurrentFirewallWhiteIp != "" %}
+            "{{ sCurrentFirewallWhiteIp }}"{% if not loop.last %},
+{% endif %}
+{% endif %}
+{% endfor %}
+
+        ]
+{% endif %}
     }
 }
