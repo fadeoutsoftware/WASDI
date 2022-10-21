@@ -2,6 +2,12 @@ package wasdi.shared.config;
 
 import java.util.ArrayList;
 
+/**
+ * Represents the options we need for the traefik proxy used to access Jupyter Notebooks
+ * 
+ * @author p.campanella
+ *
+ */
 public class TraefikConfig {
 	
 	/**

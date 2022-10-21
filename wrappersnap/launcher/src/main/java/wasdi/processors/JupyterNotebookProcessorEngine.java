@@ -198,7 +198,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Add the paramters to the dictionary
 			aoDockerComposeTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
 			aoDockerComposeTemplateParams.put("wasdiUserName", oParameter.getUserId());
-			aoDockerComposeTemplateParams.put("wasdiWorkspaceId", sJupyterNotebookCode);
+			aoDockerComposeTemplateParams.put("wasdiWorkspaceId", oParameter.getWorkspace());
 			
             if (WasdiConfig.Current.dockers.extraHosts != null) {            	
             	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {

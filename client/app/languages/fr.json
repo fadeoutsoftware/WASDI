@@ -672,5 +672,7 @@
 	"DIALOG_PACKAGE_MANAGER_CLEAR": "Effacer la sélection", 
 	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Version actuelle",  
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Dernière version",
-	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Actions"
+	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Actions",
+
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Error contacting the JupyterLab service"
 }
