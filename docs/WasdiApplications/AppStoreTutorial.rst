@@ -21,15 +21,15 @@ Introduction
 
 The main app store view consist of a list of entries reporting various WASDI applications:
 
-.. image:: _static/appstore_images/1.png
+.. image:: ../_static/appstore_images/1.png
 
 It is possible to search the applications by using the following search field
 
-.. image:: _static/appstore_images/2Zoom.png
+.. image:: ../_static/appstore_images/2Zoom.png
 
 Also, an user can enable some filters related to categories, developer, ratings and price
 
-.. image:: _static/appstore_images/3Zoom.png
+.. image:: ../_static/appstore_images/3Zoom.png
 
 Launch an application
 ------------------------
@@ -44,11 +44,11 @@ obtain the final product map.
 
 Click on the **Automatic S1-S2 Floods** icon
 
-.. image:: _static/appstore_images/4.png
+.. image:: ../_static/appstore_images/4.png
 
 and then on *Open Application*
 
-.. image:: _static/appstore_images/5.png
+.. image:: ../_static/appstore_images/5.png
 
 The application UI it is shown. Several tabs are available to the user, allowing to customize the elaboration:
 
@@ -89,24 +89,24 @@ The single pixels in the result images uses the following value legend:
 
 Select the area of the event and then click on "run" to start the processing.
 
-.. image:: _static/appstore_images/6.png
+.. image:: ../_static/appstore_images/6.png
 
 After launching the elaboration the user will be redirected to the **edit view** of the newly generated workspace.
 
-.. image:: _static/appstore_images/7.png
+.. image:: ../_static/appstore_images/7.png
 
 Here, the user can open the lower information bar, by clicking on the arrow in the lower right angle of the current perspective.
 
-.. image:: _static/appstore_images/8.png
+.. image:: ../_static/appstore_images/8.png
 
 A panel with all the sub-operations is reported, showing the process status and the percentage of each single operation.
 In the following image there is reported the very early phases of the elaboration.
 
-.. image:: _static/appstore_images/9.png
+.. image:: ../_static/appstore_images/9.png
 
 After the initial setup WASDI starts to fetch the required images. Each image is then added to the current workspace.
 
-.. image:: _static/appstore_images/10.png
+.. image:: ../_static/appstore_images/10.png
 
 Selecting a result image from the product list it is possible to view the resulting GeoTiff image, geo-localized on the
 current map. In this case the image reports only permanent water belonging to the normal streams of rivers or from lake and sea.
@@ -114,7 +114,7 @@ current map. In this case the image reports only permanent water belonging to th
 Following the naming convention introduced beforehand, we can note that the current image is obtained from images
 acquired day before the flood event reported on the website.
 
-.. image:: _static/appstore_images/11.png
+.. image:: ../_static/appstore_images/11.png
 
 The geoTiff reported here above show in light blue the flooded areas and in dark blue the permanent waters(river streams).
 Congratulations for concluding your remote sensing analysis with WASDI! |:bottle_with_popping_cork:|
@@ -127,17 +127,17 @@ We have seen how a deployed application can be launched and how products can be 
 For create a new application open a workspace and click on the icon **New App** from the
 bar.
 
-.. image:: _static/appstore_images/NA1.png
+.. image:: ../_static/appstore_images/NA1.png
 
 A new dialog will be opened allowing the user to insert basic values like name and description of the
 new application
 
-.. image:: _static/appstore_images/NA2.png
+.. image:: ../_static/appstore_images/NA2.png
 
 The user, that from now on we refer as the developer, can use several programming languages for the applications
 reported in the following image.
 
-.. image:: _static/appstore_images/NA3.png
+.. image:: ../_static/appstore_images/NA3.png
 
 In order to upload the effective application a *.Zip* file, containing a set of files that must be prepared beforehand.
 Please refer to the particular WASDI libraries in order to acquire all the details about conventions and file format required.
@@ -151,6 +151,6 @@ A JSON descriptor of the required fields can be edited to allow users to interac
 Clicking on the User Interface(UI) tab it is possible to add such widgets by clicking to the corresponding buttons.
 The resulting JSON will be then parsed to check syntax coherence and, if the test is passed, used to generates UIs.
 
-.. image:: _static/appstore_images/NA4.png
+.. image:: ../_static/appstore_images/NA4.png
 
 

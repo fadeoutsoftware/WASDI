@@ -38,7 +38,7 @@ There are other operations that are more useful for the platform that for the de
 
 Each WASDI process has a state. The processes states are: 
 
-.. image:: _static/synch_asynch_images/states.png
+.. image:: ../_static/synch_asynch_images/states.png
 
 * **CREATED**: each process workspace, when is triggered, goes in the CREATED state waiting for the scheduler to run it
 * **RUNNING**: the process is up and running
@@ -176,11 +176,11 @@ Applications has two view in WASDI:
 * App Store: is the Space Market of WASDI, desinged for end users
 * Advanced App view: from the Edit section (just open a workspace), you can access the Apps view
 
-.. image:: _static/synch_asynch_images/apps_view.png
+.. image:: ../_static/synch_asynch_images/apps_view.png
 
 From the apps view usually, each developer declares the sample json input required:
 
-.. image:: _static/synch_asynch_images/json_sample.png
+.. image:: ../_static/synch_asynch_images/json_sample.png
 
 In the image, the hellowasdiworld app shows that takes a NAME parameter as input.
 
