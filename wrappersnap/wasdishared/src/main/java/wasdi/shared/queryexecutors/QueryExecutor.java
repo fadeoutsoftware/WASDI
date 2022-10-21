@@ -6,7 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
-import wasdi.shared.utils.AuthenticationCredentials;
+import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;

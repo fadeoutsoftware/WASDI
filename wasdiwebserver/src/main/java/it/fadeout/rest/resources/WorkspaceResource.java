@@ -613,12 +613,6 @@ public class WorkspaceResource {
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
-
-			ConsoleResource oConsoleResource = new ConsoleResource();
-			oConsoleResource.terminate(sSessionId, sWorkspaceId);
-			Thread.sleep(2000);
-
-
 			//delete sharing if the user is not the owner
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
@@ -628,6 +622,9 @@ public class WorkspaceResource {
                 oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
 			}
+			
+			ConsoleResource oConsoleResource = new ConsoleResource();
+			oConsoleResource.terminate(sSessionId, sWorkspaceId);
 
 			//kill active processes
 			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();

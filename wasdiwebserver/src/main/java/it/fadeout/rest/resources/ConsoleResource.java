@@ -18,7 +18,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.threads.TerminateJupyterNotebookWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.Node;
@@ -31,7 +30,6 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -303,33 +301,6 @@ public class ConsoleResource {
 				return oResult;
 			}
 
-
-
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
-
-				// In the main node: start a thread to engage the relevant computing node
-
-				try {
-					Utils.debugLog("ConsoleResource.terminate: this is the main node, starting Worker to engage the relevant computing node");
-
-					//This is the main node: forward the request to other nodes
-					TerminateJupyterNotebookWorker oWorker = new TerminateJupyterNotebookWorker();
-
-					Node oNode = getWorkspaceNode(oWorkspace);
-
-					if (oNode != null) {
-						oWorker.init(oNode, sSessionId, sWorkspaceId);
-						oWorker.start();
-
-						Utils.debugLog("ConsoleResource.terminate: Worker started");
-					}
-				} catch (Exception oEx) {
-					Utils.debugLog("ConsoleResource.terminate: error starting TerminateJupyterNotebookWorker " + oEx.toString());
-				}
-			}
-
-
-
 			if (!Wasdi.s_sMyNodeCode.equals(oWorkspace.getNodeCode())) {
 
 				oResult.setStringValue("Delegating the work to the appropiate node");
@@ -338,15 +309,13 @@ public class ConsoleResource {
 				return oResult;
 			}
 
-
-			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
+			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
 
 			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
 
 			if (oJupyterNotebook != null) {
 				Utils.debugLog("ConsoleResource.terminate: found JupyterNotebook record: " + sJupyterNotebookCode + ". Trying to delete it!");
-
 				oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
 			} else {
 				Utils.debugLog("ConsoleResource.terminate: did not find JupyterNotebook record: " + sJupyterNotebookCode + "!!!");

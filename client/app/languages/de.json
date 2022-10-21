@@ -721,5 +721,5 @@
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Letzte Version",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Aktionen",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Error contacting the JupyterLab service"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Fehler beim Kontaktieren des JupyterLab-Dienstes"
 }
