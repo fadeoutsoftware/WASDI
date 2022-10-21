@@ -30,7 +30,7 @@ The requirements for this tutorial are :
 Open VSCode, select open folder and select the parent directory for the project.
 The project folder will be created in the following steps.
 
-.. image:: _static/javascript_tutorial_image/VSCnewproject.png
+.. image:: ../_static/javascript_tutorial_image/VSCnewproject.png
 
 
 Assuming you have already installed npm globally in the system, open a terminal and install Angular Cli
@@ -48,7 +48,7 @@ The Angular Cli will add the ng command that we use to generate a new project on
 
 This command will take some time but, at the end, you'll end up with a new and complete Angular application, ready to go!
 
-.. image:: _static/javascript_tutorial_image/newSetup.png
+.. image:: ../_static/javascript_tutorial_image/newSetup.png
 
 
 For the sake of this tutorial we will not showcase all the framework functionalities.
@@ -62,7 +62,7 @@ Just to check that everything is up and running raise the following command :
 
 Open then a browser and navigate to http:localhost:4200, starter application will show up.
 
-.. image:: _static/javascript_tutorial_image/ngnew.png
+.. image:: ../_static/javascript_tutorial_image/ngnew.png
 
 This is only a filler provided by Angular team, we can remove it.
 Open src/app/app.component.html and delete its content.
@@ -95,7 +95,7 @@ Add
 * Set username and password to the library
 * Login use wasdi.login() to obtain a session
 
-.. image:: _static/javascript_tutorial_image/WasdiService.png
+.. image:: ../_static/javascript_tutorial_image/WasdiService.png
 
 Great ! now we have a service that can connect to WASDI and use functionalities exposed.
 
@@ -110,7 +110,7 @@ First create the component with :
 
 this will create a workspacelist folder, with all the files and a starter implementation of the component:
 
-.. image:: _static/javascript_tutorial_image/wslist.png
+.. image:: ../_static/javascript_tutorial_image/wslist.png
 
 Try to open again app.component.html and add the following line :
 
@@ -120,7 +120,7 @@ Try to open again app.component.html and add the following line :
 
 If you serve again the app and open localhost:4200 you will see the following:
 
-.. image:: _static/javascript_tutorial_image/starter.png
+.. image:: ../_static/javascript_tutorial_image/starter.png
 
 Now the objective is to briefly show the workspace coming from WASDI server: to do this open the
 ts file of our workspacelist component and add the following
@@ -128,15 +128,15 @@ ts file of our workspacelist component and add the following
 * Inject our WasdiService in the constructor of the component
 * Create the variable wsList which will hold the workspace list
 * Initialize the variable by using the lib, as follows
-.. image:: _static/javascript_tutorial_image/tscode.png
+.. image:: ../_static/javascript_tutorial_image/tscode.png
 
 Open now the html file and add the following code, which loop over element in wsList to render them as paragraph :
 
-.. image:: _static/javascript_tutorial_image/htmlcode.png
+.. image:: ../_static/javascript_tutorial_image/htmlcode.png
 
 Open now the webpage and you will se alist of the workspaces coming from your WASDI account!
 
-.. image:: _static/javascript_tutorial_image/final.png
+.. image:: ../_static/javascript_tutorial_image/final.png
 
 The tutorial ends here. We have briefly showed how can a JS/TS application can interact with
 WASDI. Please refer to the official documentation of the library for a complete
