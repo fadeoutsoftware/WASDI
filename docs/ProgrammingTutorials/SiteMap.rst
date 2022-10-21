@@ -12,7 +12,7 @@ Login Page
 
 To begin a session on WASDI, you must first log on to https://www.wasdi.net/. Here you will be welcomed with our homepage.
 
-.. image:: _static/site_map_images/01_homepage.png
+.. image:: ../_static/site_map_images/01_homepage.png
    :scale: 36%
    :align: center
    :alt: the Home page
@@ -21,7 +21,7 @@ To begin a session on WASDI, you must first log on to https://www.wasdi.net/. He
 
 In the top right-hand corner there is a toolbar. 
 
-.. image:: _static/site_map_images/02_login_toolbar.png
+.. image:: ../_static/site_map_images/02_login_toolbar.png
    :scale: 70%
    :align: center
    :alt: the Home page
@@ -40,7 +40,7 @@ This toolbar contains three options:
 Logging In 
 +++++++++++++++++++++++++++
 
-.. image:: _static/site_map_images/03_login_card.png
+.. image:: ../_static/site_map_images/03_login_card.png
    :scale: 70%
    :align: center
    :alt: the Home page
@@ -61,7 +61,7 @@ To Login, simply enter your account credentials (email and password) to the orig
 
 If you decide to use WASDI’s Login 2.0 system, you will be redirected to this page:
 
-.. image:: _static/site_map_images/04_login_new.png
+.. image:: ../_static/site_map_images/04_login_new.png
    :scale: 36%
    :align: center
    :alt: the Home page

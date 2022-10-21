@@ -26,7 +26,7 @@ Setup on Wasdi web-app side
 
 Open the Wasdi web-application in a browser by typing https://www.wasdi.net/.
 
-.. image:: _static/c#_tutorial_images/01_home_page.PNG
+.. image:: ../_static/c#_tutorial_images/01_home_page.PNG
    :scale: 36%
    :align: center
    :alt: the Home page
@@ -35,7 +35,7 @@ Open the Wasdi web-application in a browser by typing https://www.wasdi.net/.
 
 On the main page, the marketplace is shown (Space Market).
 
-.. image:: _static/c#_tutorial_images/02_marketplace_page.PNG
+.. image:: ../_static/c#_tutorial_images/02_marketplace_page.PNG
    :scale: 36%
    :align: center
    :alt: the Marketplace page
@@ -44,7 +44,7 @@ On the main page, the marketplace is shown (Space Market).
 
 Go to the Workspaces page by pressing the **Workspaces** button.
 
-.. image:: _static/c#_tutorial_images/03_workspaces_button.PNG
+.. image:: ../_static/c#_tutorial_images/03_workspaces_button.PNG
    :scale: 50%
    :align: center
    :alt: the Workspaces button
@@ -53,7 +53,7 @@ Go to the Workspaces page by pressing the **Workspaces** button.
 
 Create a new workspace by pressing the **New Workspace** button.
 
-.. image:: _static/c#_tutorial_images/04_new_workspace_button.PNG
+.. image:: ../_static/c#_tutorial_images/04_new_workspace_button.PNG
    :scale: 50%
    :align: center
    :alt: the New Workspace button
@@ -65,7 +65,7 @@ On the pop-up window, specify the name of the new workspace and press **OK**. Fo
 .. note::
 	Although it is not mandatory, it is strongly recommended to use the indicated name. This would allow the code to be copy/pasted without adjustments.
 
-.. image:: _static/c#_tutorial_images/05_insert_workspace_name.PNG
+.. image:: ../_static/c#_tutorial_images/05_insert_workspace_name.PNG
    :scale: 50%
    :align: center
    :alt: the Workspaces Name pop-up window
@@ -74,7 +74,7 @@ On the pop-up window, specify the name of the new workspace and press **OK**. Fo
 
 The newly created workspace is shown on the main page.
 
-.. image:: _static/c#_tutorial_images/06_newly_created_workspace.PNG
+.. image:: ../_static/c#_tutorial_images/06_newly_created_workspace.PNG
    :scale: 36%
    :align: center
    :alt: the newly created Workspace page
@@ -86,7 +86,7 @@ Setup on Microsoft's Visual Studio side
 
 Open Microsoft's Visual Studio
 
-.. image:: _static/c#_tutorial_images/11_open_visual_studio.PNG
+.. image:: ../_static/c#_tutorial_images/11_open_visual_studio.PNG
    :scale: 50%
    :align: center
    :alt: open MS Visual Studio
@@ -95,7 +95,7 @@ Open Microsoft's Visual Studio
 
 Create a new project (Console App).
 
-.. image:: _static/c#_tutorial_images/12_create_new_project.PNG
+.. image:: ../_static/c#_tutorial_images/12_create_new_project.PNG
    :scale: 50%
    :align: center
    :alt: create a new project
@@ -107,7 +107,7 @@ For this tutorial, choose **TutorialSeeSharpApp**.
 .. note::
 	Although it is not mandatory, it is strongly recommended to use the indicated name. This would allow the code to be copy/pasted without adjustments.
 
-.. image:: _static/c#_tutorial_images/13_configure_new_project.PNG
+.. image:: ../_static/c#_tutorial_images/13_configure_new_project.PNG
    :scale: 50%
    :align: center
    :alt: configure the new project
@@ -116,7 +116,7 @@ For this tutorial, choose **TutorialSeeSharpApp**.
 
 Choose the desired framework. I will accepted the default option (.NET 6.0).
 
-.. image:: _static/c#_tutorial_images/14_additional_information.PNG
+.. image:: ../_static/c#_tutorial_images/14_additional_information.PNG
    :scale: 50%
    :align: center
    :alt: additional information
@@ -125,7 +125,7 @@ Choose the desired framework. I will accepted the default option (.NET 6.0).
 
 Pressing the **Create** button, as the setup is complete, the MS Visual Studio will open the project.
 
-.. image:: _static/c#_tutorial_images/15_open_the_new_project.PNG
+.. image:: ../_static/c#_tutorial_images/15_open_the_new_project.PNG
    :scale: 36%
    :align: center
    :alt: open the new project in MS Visual Studio
@@ -134,7 +134,7 @@ Pressing the **Create** button, as the setup is complete, the MS Visual Studio w
 
 Create a full-fledged main class. Use the URL provided to obtain the code. Copy and paste it to replace the generated stub.
 
-.. image:: _static/c#_tutorial_images/16_full_fledged_main_class.PNG
+.. image:: ../_static/c#_tutorial_images/16_full_fledged_main_class.PNG
    :scale: 36%
    :align: center
    :alt: copy the code of a full-fledged main class from the Microsoft site
@@ -158,7 +158,7 @@ Change the name name of the namespace to match the name of the project (**Tutori
 
 Run the program to verify that everything is fine.
 
-.. image:: _static/c#_tutorial_images/17_run_application_console_window.PNG
+.. image:: ../_static/c#_tutorial_images/17_run_application_console_window.PNG
    :scale: 50%
    :align: center
    :alt: run the application and see a console window
@@ -181,7 +181,7 @@ Add the WasdiLib dependency to your application
 Find the WasdiLib on NuGet.
 Open a page in a browser and navigate to https://www.nuget.org/packages/WasdiLib.
 
-.. image:: _static/c#_tutorial_images/21_find_wasdilib_on_nuget.PNG
+.. image:: ../_static/c#_tutorial_images/21_find_wasdilib_on_nuget.PNG
    :scale: 36%
    :align: center
    :alt: find WasdiLib on NuGet
@@ -196,7 +196,7 @@ Copy the installation commad for the latest version (by pressing the orange butt
 
 Open the NuGet Package Manager console (Tools > NuGet Package Manager) and paste in the command just copied.
 
-.. image:: _static/c#_tutorial_images/22_open_nuget_package_manager_console.PNG
+.. image:: ../_static/c#_tutorial_images/22_open_nuget_package_manager_console.PNG
    :scale: 36%
    :align: center
    :alt: open NuGet Package Manager console
@@ -205,7 +205,7 @@ Open the NuGet Package Manager console (Tools > NuGet Package Manager) and paste
 
 Install the WasdiLib as a dependency of your console application.
 
-.. image:: _static/c#_tutorial_images/23_install_wasdilib_console.PNG
+.. image:: ../_static/c#_tutorial_images/23_install_wasdilib_console.PNG
    :scale: 36%
    :align: center
    :alt: install WasdiLib
@@ -214,7 +214,7 @@ Install the WasdiLib as a dependency of your console application.
 
 Alternatively, the WasdiLib can be installed through NuGet Package Manager (Tools > Manage NuGet Packages for Solution).
 
-.. image:: _static/c#_tutorial_images/24_install_wasdilib_manager.PNG
+.. image:: ../_static/c#_tutorial_images/24_install_wasdilib_manager.PNG
    :scale: 36%
    :align: center
    :alt: install WasdiLib
@@ -229,7 +229,7 @@ Create appsettings.json
 
 To add a file to the application, right click on the **TutorialSeeSharpApp**.
 
-.. image:: _static/c#_tutorial_images/51_create_new_file.PNG
+.. image:: ../_static/c#_tutorial_images/51_create_new_file.PNG
    :scale: 40%
    :align: center
    :alt: create new file
@@ -239,7 +239,7 @@ To add a file to the application, right click on the **TutorialSeeSharpApp**.
 Select **Add** and then **New Item**.
 
 
-.. image:: _static/c#_tutorial_images/52_create_new_file.PNG
+.. image:: ../_static/c#_tutorial_images/52_create_new_file.PNG
    :scale: 50%
    :align: center
    :alt: create new file
@@ -249,7 +249,7 @@ Select **Add** and then **New Item**.
 Select the type of file and input the name.
 
 
-.. image:: _static/c#_tutorial_images/53_create_new_file.PNG
+.. image:: ../_static/c#_tutorial_images/53_create_new_file.PNG
    :scale: 60%
    :align: center
    :alt: create new file
@@ -293,7 +293,7 @@ The **parameters.json** file contains the information related to the operation c
 	Repeat this procedure for both files (appsettings.json and parameters.json):
 	On the right side-bar, click on **Solution Explorer**. Select the file, right-click on it, Select the last option, **Properties**.
 
-	.. image:: _static/c#_tutorial_images/25_config_file_properties.PNG
+	.. image:: ../_static/c#_tutorial_images/25_config_file_properties.PNG
 		:scale: 36%
 		:align: center
 		:alt: config file properties
@@ -302,7 +302,7 @@ The **parameters.json** file contains the information related to the operation c
 
 	On the **Advanced** section, change the value of the property **Copy to output directory** to **Copy always**.
 
-	.. image:: _static/c#_tutorial_images/26_copy_to_output_directory.PNG
+	.. image:: ../_static/c#_tutorial_images/26_copy_to_output_directory.PNG
 		:scale: 36%
 		:align: center
 		:alt: copy to output directory
@@ -356,7 +356,7 @@ The actual call to the Wasdi object should be done either form inside the **Run*
 
 The outcome of running the program locally is a console window showing the Wasdi greeting.
 
-.. image:: _static/c#_tutorial_images/27_hello_wasdi.PNG
+.. image:: ../_static/c#_tutorial_images/27_hello_wasdi.PNG
    :scale: 36%
    :align: center
    :alt: hello wasdi
@@ -368,7 +368,7 @@ The outcome of running the program locally is a console window showing the Wasdi
 
 Running the same program on the Wasdi platform produces the following outcome.
 
-.. image:: _static/c#_tutorial_images/29_hello_wasdi_platform.PNG
+.. image:: ../_static/c#_tutorial_images/29_hello_wasdi_platform.PNG
    :scale: 36%
    :align: center
    :alt: hello wasdi on Wasdi
@@ -421,7 +421,7 @@ An user can access a workspace either if the workspace was created by the user o
 Runnig the program locally should show in the console the list of workspaces' names.
 At least **TutorialWorkspace** should be present.
 
-.. image:: _static/c#_tutorial_images/28_get_workspaces_names.PNG
+.. image:: ../_static/c#_tutorial_images/28_get_workspaces_names.PNG
    :scale: 36%
    :align: center
    :alt: get workspaces names
@@ -433,7 +433,7 @@ At least **TutorialWorkspace** should be present.
 
 Running the same program on the Wasdi platform produces the following outcome.
 
-.. image:: _static/c#_tutorial_images/30_get_workspaces_names.PNG
+.. image:: ../_static/c#_tutorial_images/30_get_workspaces_names.PNG
    :scale: 36%
    :align: center
    :alt: get workspaces names on Wasdi
@@ -548,7 +548,7 @@ Packaging the application
 To export the application, zip the content of the **\\bin\\Debug\\net6.0** directory, except for the configuration files (appsettings.json and parameters.json) and the **ref** directory.
 The zip archive should share the name of the application, in my case **TutorialSeeSharpApp.zip**.
 
-.. image:: _static/c#_tutorial_images/31_create_zip_archive.PNG
+.. image:: ../_static/c#_tutorial_images/31_create_zip_archive.PNG
    :scale: 50%
    :align: center
    :alt: create a zip archive with the content of the \bin\Debug\net6.0 directory
@@ -560,7 +560,7 @@ Deploying the application
 
 Back on the Wasdi web-application, create a new application by pressing the **New App** button.
 
-.. image:: _static/c#_tutorial_images/32_new_app_button.PNG
+.. image:: ../_static/c#_tutorial_images/32_new_app_button.PNG
    :scale: 50%
    :align: center
    :alt: the New App button
@@ -569,7 +569,7 @@ Back on the Wasdi web-application, create a new application by pressing the **Ne
 
 On the page that opens, fill in the details of the application, as shown in the image below.
 
-.. image:: _static/c#_tutorial_images/33_create_new_app_page.PNG
+.. image:: ../_static/c#_tutorial_images/33_create_new_app_page.PNG
    :scale: 36%
    :align: center
    :alt: the New App page
@@ -578,7 +578,7 @@ On the page that opens, fill in the details of the application, as shown in the 
 
 Until the application is ready to be exposed to the public, the **Make Application Public** checkbox could be unchecked. To find this checkbox, scroll down to the bottom of the page.
 
-.. image:: _static/c#_tutorial_images/61_select_private_app.PNG
+.. image:: ../_static/c#_tutorial_images/61_select_private_app.PNG
    :scale: 40%
    :align: center
    :alt: create a zip archive with the content of the \bin\Debug\net6.0 directory
@@ -587,7 +587,7 @@ Until the application is ready to be exposed to the public, the **Make Applicati
 
 A message will be shown to inform the user that the application (processor) will be deployed shortly.
 
-.. image:: _static/c#_tutorial_images/34_new_app_created.PNG
+.. image:: ../_static/c#_tutorial_images/34_new_app_created.PNG
    :scale: 36%
    :align: center
    :alt: New App created
@@ -600,7 +600,7 @@ Viewing the application
 Navigate to the applications page by pressing the **Apps** button.
 Search the newly created application by filtering the list.
 
-.. image:: _static/c#_tutorial_images/35_apps_button.PNG
+.. image:: ../_static/c#_tutorial_images/35_apps_button.PNG
    :scale: 50%
    :align: center
    :alt: the Apps button
@@ -609,7 +609,7 @@ Search the newly created application by filtering the list.
 
 Type **Tutorial** and click on the application's card.
 
-.. image:: _static/c#_tutorial_images/36_view_app_details_page.PNG
+.. image:: ../_static/c#_tutorial_images/36_view_app_details_page.PNG
    :scale: 36%
    :align: center
    :alt: view the application details page
@@ -621,7 +621,7 @@ Running the application
 
 Adjust the parameters of the application as needed and press the **Run** button. 
 
-.. image:: _static/c#_tutorial_images/37_run_button.PNG
+.. image:: ../_static/c#_tutorial_images/37_run_button.PNG
    :scale: 50%
    :align: center
    :alt: the Run button
@@ -630,7 +630,7 @@ Adjust the parameters of the application as needed and press the **Run** button.
 
 Depending on the load on the server, the deployed application starts executing in second or in minutes.
 
-.. image:: _static/c#_tutorial_images/38_application_running.PNG
+.. image:: ../_static/c#_tutorial_images/38_application_running.PNG
    :scale: 36%
    :align: center
    :alt: the Running the application.
@@ -639,7 +639,7 @@ Depending on the load on the server, the deployed application starts executing i
 
 Also, the duration of the execution may vary. The bar and the percentage show to the user the progress.
 
-.. image:: _static/c#_tutorial_images/40_application_running.PNG
+.. image:: ../_static/c#_tutorial_images/40_application_running.PNG
    :scale: 36%
    :align: center
    :alt: the Running the application.
@@ -648,7 +648,7 @@ Also, the duration of the execution may vary. The bar and the percentage show to
 
 As soon as the execution is completed, a message is shown to the user.
 
-.. image:: _static/c#_tutorial_images/41_application_completed.PNG
+.. image:: ../_static/c#_tutorial_images/41_application_completed.PNG
    :scale: 36%
    :align: center
    :alt: application completed running.
@@ -657,7 +657,7 @@ As soon as the execution is completed, a message is shown to the user.
 
 Minimizing the logging panel, the downloaded products become visible on the workspace.
 
-.. image:: _static/c#_tutorial_images/42_workspace_with_products.PNG
+.. image:: ../_static/c#_tutorial_images/42_workspace_with_products.PNG
    :scale: 36%
    :align: center
    :alt: workspace with products.
@@ -669,7 +669,7 @@ The GitHub repository
 
 The code showed in this tutorial can also be found on the dedicated public GitHub repository: https://github.com/wasdi-cloud/TutorialSeeSharpApp.
 
-.. image:: _static/c#_tutorial_images/71_github_repo.PNG
+.. image:: ../_static/c#_tutorial_images/71_github_repo.PNG
    :scale: 36%
    :align: center
    :alt: the GitHub repository
