@@ -741,7 +741,6 @@ public class WorkspaceResource {
 
 						// delete download file on database
 						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
-
 							try {
 
 								Utils.debugLog("WorkspaceResource.DeleteWorkspace: Deleting file " + oProductWorkspace.getProductName());
@@ -766,8 +765,11 @@ public class WorkspaceResource {
 
 
 				return Response.ok().build();
-			} else
+			} 
+			else {
 				Utils.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting workspace on data base");
+			}
+				
 
 		} catch (Exception oEx) {
 			Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);

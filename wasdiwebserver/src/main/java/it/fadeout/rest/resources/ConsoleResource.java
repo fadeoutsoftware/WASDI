@@ -308,6 +308,13 @@ public class ConsoleResource {
 
 				return oResult;
 			}
+			
+			if (oWorkspace.getUserId().equals(sUserId) == false) {
+				Utils.debugLog("ConsoleResource.terminate: " + sWorkspaceId + " is not owned by " + sUserId);
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+
+				return oResult;
+			}
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
 
@@ -317,15 +324,19 @@ public class ConsoleResource {
 			if (oJupyterNotebook != null) {
 				Utils.debugLog("ConsoleResource.terminate: found JupyterNotebook record: " + sJupyterNotebookCode + ". Trying to delete it!");
 				oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
-			} else {
+			} 
+			else {
 				Utils.debugLog("ConsoleResource.terminate: did not find JupyterNotebook record: " + sJupyterNotebookCode + "!!!");
+				
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				return oResult;				
 			}
 
 
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
 
-			Utils.debugLog("ConsoleResource.terminate: create local operation");
+			Utils.debugLog("ConsoleResource.terminate: create local operation " + sProcessObjId);
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName("jupyter-notebook");
