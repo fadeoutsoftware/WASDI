@@ -170,7 +170,23 @@
             $scope.$digest();
         });
 
-        this.m_oWorkspaceViewModel = null;
+        this.m_bNotebookIsReady = false;
+        
+        this.m_oConsoleService.then(function (data, status) {
+
+            if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                oThat.m_bNotebookIsReady = data.data.boolValue;
+                if (oThat.m_bNotebookIsReady) {
+                    console.log("Console Ready")
+                }
+                else {
+                    console.log("Console NOT Ready")
+                }
+            }
+        }, (function (data, status) {
+            var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
+            utilsVexDialogAlertBottomRightCorner(sMessage);
+        }));
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
