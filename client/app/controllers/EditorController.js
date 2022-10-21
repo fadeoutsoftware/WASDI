@@ -171,22 +171,24 @@
         });
 
         this.m_bNotebookIsReady = false;
-        
-        this.m_oConsoleService.then(function (data, status) {
 
-            if (utilsIsObjectNullOrUndefined(data.data) == false) {
-                oThat.m_bNotebookIsReady = data.data.boolValue;
-                if (oThat.m_bNotebookIsReady) {
-                    console.log("Console Ready")
+        if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
+
+            this.m_oConsoleService.isConsoleReady(this.m_oActiveWorkspace.workspaceId).then(function (data, status) {
+
+                if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                    oThat.m_bNotebookIsReady = data.data.boolValue;
+                    if (oThat.m_bNotebookIsReady) {
+                        console.log("Console Ready")
+                    }
+                    else {
+                        console.log("Console NOT Ready")
+                    }
                 }
-                else {
-                    console.log("Console NOT Ready")
-                }
-            }
-        }, (function (data, status) {
-            var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
-            utilsVexDialogAlertBottomRightCorner(sMessage);
-        }));
+            }, (function (data, status) {
+                var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
+                utilsVexDialogAlertBottomRightCorner(sMessage);
+            }));        
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
