@@ -40,6 +40,8 @@ public class Terminatejupyternotebook extends Operation {
 			
 			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: delete result " + bRet);
 			
+			return true;
+			
 		} catch (Exception oEx) {
 			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: exception", oEx);
 		}
