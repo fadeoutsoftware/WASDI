@@ -107,10 +107,6 @@ public class Wasdi extends ResourceConfig {
 	@Context
 	ServletConfig m_oServletConfig;
 
-	@Context
-	ServletContext m_oContext;
-
-
 	/**
 	 * User for debug mode auto login
 	 */
@@ -136,21 +132,12 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static Node s_oMyNode = null;
 	
-	/**
-	 * Credential Policy Utility class
-	 */
-	private static CredentialPolicy m_oCredentialPolicy;
-
 	public static String s_sKeyCloakIntrospectionUrl = "";
 	public static String s_sClientId = "";
 	public static String s_sClientSecret = "";
 	public static String s_KeyCloakUser = "";
 	public static String s_KeyCloakPw = "";
 	public static String s_KeyBearerSecret = "";
-
-	static {
-		m_oCredentialPolicy = new CredentialPolicy();
-	}
 	
 	/**
 	 * Contructor: bind the clasess and the resources classes
@@ -363,12 +350,7 @@ public class Wasdi extends ResourceConfig {
 		
 		User oUser = null;
 		
-		try {
-			// validate sSessionId
-			if (!m_oCredentialPolicy.validSessionId(sSessionId)) {
-				return null;
-			}
-			
+		try {			
 			// Check The Session with Keycloak
 			String sUserId = null;
 			

@@ -146,6 +146,8 @@ public class RunTimeUtils {
 
 		try {
 			
+			if (!sFolder.endsWith("/")) sFolder+="/";
+			
 			// Make a temp name
 			String sTempScriptFile = Utils.getRandomName();
 			
@@ -203,8 +205,11 @@ public class RunTimeUtils {
 	 */
 	private static File createLogFile() {
 		Utils.debugLog("RunTimeUtils.createLogFile Working Directory = " + WasdiConfig.Current.paths.wasdiTempFolder);
+		
+		String sTmpFolder = WasdiConfig.Current.paths.wasdiTempFolder;
+		if (!sTmpFolder.endsWith("/")) sTmpFolder += "/";
 
-		File oLogFile = new File(WasdiConfig.Current.paths.wasdiTempFolder + FILE_SEPARATOR + "temporary_log_file.log");
+		File oLogFile = new File(sTmpFolder + "temporary_log_file.log");
 
 		return oLogFile;
 	}
