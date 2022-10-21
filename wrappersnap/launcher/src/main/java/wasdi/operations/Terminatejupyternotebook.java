@@ -2,14 +2,9 @@ package wasdi.operations;
 
 import wasdi.processors.JupyterNotebookProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.Utils;
 
 public class Terminatejupyternotebook extends Operation {
 
@@ -18,7 +13,7 @@ public class Terminatejupyternotebook extends Operation {
 		m_oLocalLogger.debug("Terminatejupyternotebook.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			m_oLocalLogger.error("Parameter is null");	
 			return false;
 		}
 
