@@ -48,7 +48,7 @@ Setup
 
 Open PyCharm and start a new project.
 
-.. image:: _static/python_tutorial_images/openPyCharmAndStartANewProject.png
+.. image:: ../_static/python_tutorial_images/openPyCharmAndStartANewProject.png
 
 Name it “Landsat8Tutorial” (or however you wish, just remember to be coherent). You may wish to create a new virtual environment or use an existing one. Uncheck the option for creating a “main.py” welcome script (or, at least, remember to delete it later on).
 
@@ -60,7 +60,7 @@ Let's install the library we need. In the terminal write:
    
 and hit enter
 
-.. image:: _static/python_tutorial_images/pipInstallWasdi.png
+.. image:: ../_static/python_tutorial_images/pipInstallWasdi.png
 
 .. note::
 	Remember you need also to have gdal installed.
@@ -78,25 +78,25 @@ Now we need to create these three fundamental files (right click on the Projec I
 * config.json: create a file, then call it config.json (PyCharm will recognize automatically it is a JSON file)
 * params.json: create a file, then call it params.json (PyCharm will recognize automatically it is a JSON file)
 
-.. image:: _static/python_tutorial_images/createPythonFile.png
+.. image:: ../_static/python_tutorial_images/createPythonFile.png
 
 Create python file
 
-.. image:: _static/python_tutorial_images/createMyProcessor_py.png
+.. image:: ../_static/python_tutorial_images/createMyProcessor_py.png
 
 Call it myProcessor.py
 
-.. image:: _static/python_tutorial_images/createFile.png
+.. image:: ../_static/python_tutorial_images/createFile.png
 
 Create a json file
 
-.. image:: _static/python_tutorial_images/createConfig_json.png
+.. image:: ../_static/python_tutorial_images/createConfig_json.png
 
 Call it config.json
 
 Create a json file
 
-.. image:: _static/python_tutorial_images/helloWASDIWorldDebug1.png
+.. image:: ../_static/python_tutorial_images/helloWASDIWorldDebug1.png
 
 Call it params.json
 
@@ -104,15 +104,15 @@ Next, point your browser to wasdi.net, log in, go in the Workspaces Section and 
 
 Go to the search section and select L8 data type and a bounding box in Europe
 
-.. image:: _static/python_l8_tutorial_images/searchL8Image.jpg
+.. image:: ../_static/python_l8_tutorial_images/searchL8Image.jpg
 
 Select one image and click on the + button to add the image to the Landsat8Tutorial Wokspace
 
-.. image:: _static/python_l8_tutorial_images/addToWS.jpg
+.. image:: ../_static/python_l8_tutorial_images/addToWS.jpg
 
 Come back to the edit section, and check that WASDI has been able to fetch the image.
 
-.. image:: _static/python_l8_tutorial_images/imageInWorkspace.jpg
+.. image:: ../_static/python_l8_tutorial_images/imageInWorkspace.jpg
 
 Take note of the file you imported, we will need it later. For this tutorial we assume:
 
@@ -177,7 +177,7 @@ The main method will initiate the WASDI library and call the run method:
 	   
 As you can see, we call wasdi.init and pass the relative path of the config file to it.
 
-.. image:: _static/python_tutorial_images/wasdi_init.png
+.. image:: ../_static/python_tutorial_images/wasdi_init.png
 
 Let's debug to see the effects of this. 
 
@@ -185,7 +185,7 @@ Let's debug to see the effects of this.
 	If a file main.py was created automatically for you, remember to define another debug configuration. The easiest way to do so is by right clicking on your code and select Debug ‘myProcessor.py’.
 
 
-.. image:: _static/python_tutorial_images/helloWASDIWorldDebug0.png
+.. image:: ../_static/python_tutorial_images/helloWASDIWorldDebug0.png
 
 If the setup is correct so far, we should see the output from the wasdi library that shows the initialization has gone well. Something like this:
 

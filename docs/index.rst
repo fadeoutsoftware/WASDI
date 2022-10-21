@@ -23,8 +23,8 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
    :hidden:
    :caption: Getting started
 
-   WasdiTutorial.rst
-   LibsConcepts.rst
+   GettingStarted/WasdiTutorial.rst
+   GettingStarted/LibsConcepts.rst
 
 
 WASDI Marketplace
@@ -38,7 +38,7 @@ A good starting point to applications is the :doc:`App store overview </AppStore
    :hidden:
    :caption: Wasdi Applications
 
-   AppStoreTutorial.rst
+   WasdiApplications/AppStoreTutorial.rst
 
 
 Add your App to WASDI
@@ -60,16 +60,16 @@ If you already know WASDI features and you are a Python developer check out the 
    :hidden:
    :caption: Programming tutorials
 
-   PythonTutorial.rst
-   PythonLandsatTutorial.rst
-   SearchImport.rst
-   LibWorkspaces.rst
-   SynchAsynch.rst
-   C#Tutorial.rst
-   SiteMap.rst
-   UITutorial.rst
+   ProgrammingTutorials/PythonTutorial.rst
+   ProgrammingTutorials/PythonLandsatTutorial.rst
+   ProgrammingTutorials/SearchImport.rst
+   ProgrammingTutorials/LibWorkspaces.rst
+   ProgrammingTutorials/SynchAsynch.rst
+   ProgrammingTutorials/C#Tutorial.rst
+   ProgrammingTutorials/SiteMap.rst
+   ProgrammingTutorials/UITutorial.rst
    javascript/JavascriptTutorialHtml.rst
-   JavascriptTutorial.rst
+   ProgrammingTutorials/JavascriptTutorial.rst
 
 
 Reference center
@@ -83,19 +83,19 @@ WASDI allows users and developer to interact though **libraries** and **APIs**. 
    :hidden:
    :caption: Libraries references
 
-   python/waspy.rst
-   octave/octave.rst
-   java/WasdiLib.rst
-   c#/WasdiLib.rst
-   typescript/wasdi.rst
+   Libraries/c#/WasdiLib.rst
+   Libraries/java/WasdiLib.rst
+   Libraries/octave/octave.rst
+   Libraries/python/waspy.rst
+   Libraries/typescript/wasdi.rst
 
 .. toctree::
    :maxdepth: 2
    :hidden:
    :caption: Inside wasdi
 
-   AddDataProvider.rst
-   AddAppUIControl.rst
+   InsideWasdi/AddDataProvider.rst
+   InsideWasdi/AddAppUIControl.rst
 
 
 Terms and Conditions
@@ -108,5 +108,5 @@ Please, before start using WASDI, check our terms and condition.
    :hidden:
    :caption: Legal
 
-   EULA.rst
+   Legal/EULA.rst
 
