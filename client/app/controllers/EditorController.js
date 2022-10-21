@@ -189,6 +189,7 @@
                 var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
                 utilsVexDialogAlertBottomRightCorner(sMessage);
             }));        
+        }
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
