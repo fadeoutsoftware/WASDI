@@ -54,7 +54,7 @@ Create index.html file with the following content:
     </html>
 
 
-.. image:: img/1.png
+.. image:: ../_static/javascript_html_tutorial/1.png
 
 Include the library
 ---------------------
@@ -233,12 +233,12 @@ Then open our javascript file *main.js* and define the function createWorkspace(
 The function defined will be invoked when the user clicks on the "Create workspace" button.
 Open the index.html page on you browser and you will have a simple form like this: 
 
-.. image:: img/2.png
+.. image:: ../_static/javascript_html_tutorial/2.png
 
 When you click, the system will create a new workspace on WASDI.
 You can check it in the wasdi web application in the workspaces page:
 
-.. image:: img/3.png
+.. image:: ../_static/javascript_html_tutorial/3.png
 
 There it is !
 
@@ -365,11 +365,11 @@ Then, open the main.js file and add the definition to actual load the data for t
 
 Opening again the index.html and clicking on the first button the list will be populated:
 
-.. image:: img/4.png
+.. image:: ../_static/javascript_html_tutorial/4.png
 
 And, after selecting a processor, clicking on the second button the parameters are then showed:
 
-.. image:: img/5.png
+.. image:: ../_static/javascript_html_tutorial/5.png
 
 
 Execute a processor
@@ -511,9 +511,9 @@ We can then test the page by launching the application **hellowasdiworld**: afte
 *Get status of processor launched* a string with the status will showed :
 
 
-.. image:: img/6.png
+.. image:: ../_static/javascript_html_tutorial/6.png
 
 If you open WASDI on wasdi.net, login with your user credentials and open the workspace, you will see that the processor were executed:
 
-.. image:: img/7.png
+.. image:: ../_static/javascript_html_tutorial/7.png
     :scale: 50

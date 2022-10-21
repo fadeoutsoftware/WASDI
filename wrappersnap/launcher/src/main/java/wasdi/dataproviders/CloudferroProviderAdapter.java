@@ -1,10 +1,10 @@
 package wasdi.dataproviders;
 
-import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.LoggerWrapper;
+import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.Utils;
 
 public class CloudferroProviderAdapter extends ProviderAdapter {
@@ -44,7 +44,7 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 			String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
 			String sFilePath = sFileURL.substring(0, sFileURL.indexOf(",")).replace(sEndpoint + sBucketName + "/", "");
 
-			lSizeInBytes = S3BucketHelper.getFileSize(sBucketName, sFilePath);
+			lSizeInBytes = S3BucketUtils.getFileSize(sBucketName, sFilePath);
 		}
 
 		return lSizeInBytes;
@@ -63,7 +63,7 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 			String sBucketName = WasdiConfig.Current.s3Bucket.bucketName;
 			String sFilePath = sFileURL.substring(0, sFileURL.indexOf(",")).replace(sEndpoint + sBucketName + "/", "");
 
-			sResult = S3BucketHelper.downloadFile(sBucketName, sFilePath, sSaveDirOnServer);
+			sResult = S3BucketUtils.downloadFile(sBucketName, sFilePath, sSaveDirOnServer);
 		}
 
 		return sResult;

@@ -68,7 +68,7 @@ If you already know WASDI features and you are a Python developer check out the 
    ProgrammingTutorials/C#Tutorial.rst
    ProgrammingTutorials/SiteMap.rst
    ProgrammingTutorials/UITutorial.rst
-   javascript/JavascriptTutorialHtml.rst
+   ProgrammingTutorials/JavascriptTutorialHtml.rst
    ProgrammingTutorials/JavascriptTutorial.rst
 
 
