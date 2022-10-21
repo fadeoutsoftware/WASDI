@@ -58,13 +58,11 @@ public class ConsoleResource {
 			if (oUser == null) {
 				Utils.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-
 				return oResult;
 			}
 
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-
 				return oResult;
 			}
 
@@ -100,7 +98,7 @@ public class ConsoleResource {
 			String sClientIp = resolveClientIp(oRequest);
 			Utils.debugLog("ConsoleResource.create: client IP: " + sClientIp);
 
-			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(sUserId, sWorkspaceId);
+			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
 
 			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
 			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
@@ -109,57 +107,66 @@ public class ConsoleResource {
 				
 				Utils.debugLog("ConsoleResource.create: this is an existing notebook");
 				
+				// We want to be safe
+				if (Utils.isNullOrEmpty(oJupyterNotebook.getAllowedIpAddresses())) {
+					// If there is nothing, we just re-start
+					oJupyterNotebook.setAllowedIpAddresses("");
+				}
+				
 				// Check if the user is using the same IP
-				if (!Utils.isNullOrEmpty(oJupyterNotebook.getAllowedIpAddresses())) {
-					
-					boolean bIsAllowed = isClientIpAllowedForThisUser(oJupyterNotebook.getAllowedIpAddresses(), sUserId, sClientIp);
-					
-					if (bIsAllowed) {
-						Utils.debugLog("ConsoleResource.create: client ip allowed for the notebook");
-					}
-					else {
-						Utils.debugLog("ConsoleResource.create: client ip NOT allowed for the notebook");
-						
-						JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
-						
-						String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
-						if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
-						
-						String sTemplateFile = sVolumeFolder + "template/conf.d_notebook.yml.j2";
-						String sOutputFile = sVolumeFolder + "conf.d/nb_" + sJupyterNotebookCode + ".yml";
-						
-						Map<String, Object> aoTraefikTemplateParams = new HashMap<>();
-						oJupyterNotebook.removeUserFromAllowedIp(sUserId);
-						String sOldList = oJupyterNotebook.getAllowedIpAddresses();
-						if (Utils.isNullOrEmpty(sOldList)) sOldList = ";";
-						else sOldList += ";";
-						String sNewList =  sOldList + sUserId+":"+sClientIp;
-						oJupyterNotebook.setAllowedIpAddresses(sNewList);
-						oJupyterNotebookRepository.updateJupyterNotebook(oJupyterNotebook);
-						
-						ArrayList<String> asAllowedIps = oJupyterNotebook.extractListOfWhiteIp();
-						
-						if (WasdiConfig.Current.traefik.firewallWhiteList!=null) {
-							asAllowedIps.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
-						}
-						
-						aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
-						aoTraefikTemplateParams.put("sourceRangeList", asAllowedIps);
-						
-						String sJSON = JsonUtils.stringify(aoTraefikTemplateParams);
-						
-						oJinjaTemplateRenderer.translate(sTemplateFile, sOutputFile, sJSON);
-					}
+				boolean bIsAllowed = isClientIpAllowedForThisUser(oJupyterNotebook.getAllowedIpAddresses(), sUserId, sClientIp);
+				
+				if (bIsAllowed) {
+					Utils.debugLog("ConsoleResource.create: client ip allowed for the notebook");
 				}
 				else {
-					Utils.debugLog("ConsoleResource.create: notebook does not have a white list");
+					Utils.debugLog("ConsoleResource.create: client ip NOT allowed for the notebook: add it");
+					
+					// Take the paths of the template and the output file
+					String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
+					if (!sVolumeFolder.endsWith("/")) sVolumeFolder += "/";
+					
+					String sTemplateFile = sVolumeFolder + "template/conf.d_notebook.yml.j2";
+					String sOutputFile = sVolumeFolder + "conf.d/nb_" + sJupyterNotebookCode + ".yml";
+					
+					// We need to update the list of allowed users: start removing the actual one
+					oJupyterNotebook.removeUserFromAllowedIp(sUserId);
+					// Get the original list
+					String sOldList = oJupyterNotebook.getAllowedIpAddresses();
+					
+					if (Utils.isNullOrEmpty(sOldList)) sOldList = "";
+					else sOldList += ";";
+					
+					// Append this user with the new IP
+					String sNewList =  sOldList + sUserId+":"+sClientIp;
+					
+					// Update the list on the db
+					oJupyterNotebook.setAllowedIpAddresses(sNewList);
+					oJupyterNotebookRepository.updateJupyterNotebook(oJupyterNotebook);
+					
+					// Now extract the list of IP to enable in the firewall
+					ArrayList<String> asAllowedIps = oJupyterNotebook.extractListOfWhiteIp();
+					
+					// Add the white list from config
+					if (WasdiConfig.Current.traefik.firewallWhiteList!=null) {
+						asAllowedIps.addAll(WasdiConfig.Current.traefik.firewallWhiteList);
+					}
+					// Create the parameters Map
+					Map<String, Object> aoTraefikTemplateParams = new HashMap<>();
+					
+					aoTraefikTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
+					aoTraefikTemplateParams.put("sourceRangeList", asAllowedIps);
+					
+					// Render the template in the new config file
+					JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
+					oJinjaTemplateRenderer.translate(sTemplateFile, sOutputFile, aoTraefikTemplateParams);
 				}
 				
 				
 				Utils.debugLog("ConsoleResource.create: notebook already exists, check if it is up and running");
 				
 				// Here we know it is a db: so if it is null is for sure not active
-				JupyterNotebook oNotebook = internalIsJupyterActive(sUserId, sWorkspaceId); 
+				JupyterNotebook oNotebook = internalIsJupyterActive(oWorkspace.getUserId(), sWorkspaceId); 
 
 				boolean bIsActive = false;
 				
@@ -195,7 +202,7 @@ public class ConsoleResource {
 				
 				// This is a new notebook!
 				oJupyterNotebook = new JupyterNotebook();
-				oJupyterNotebook.setUserId(sUserId);
+				oJupyterNotebook.setUserId(oWorkspace.getUserId());
 				oJupyterNotebook.setWorkspaceId(sWorkspaceId);
 				oJupyterNotebook.setCode(sJupyterNotebookCode);
 				oJupyterNotebook.setAllowedIpAddresses(sUserId+":"+sClientIp);
@@ -233,7 +240,7 @@ public class ConsoleResource {
 
 					return oResult;
 				} else {
-					oResult.setStringValue("ERROR CREATING NOTEBOOK");
+					oResult.setStringValue("ERROR CREATING THE NOTEBOOK");
 					oResult.setBoolValue(false);
 
 					return oResult;

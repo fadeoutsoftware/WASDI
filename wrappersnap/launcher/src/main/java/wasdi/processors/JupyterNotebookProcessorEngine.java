@@ -60,8 +60,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		String sProcessorName = "jupyter-notebook";
 
 		try {
-						
-			processWorkspaceLog("Start launch of " + sProcessorName + " Type " + oParameter.getProcessorType());
 			processWorkspaceLog("Creating JupyterLab on this workspace");
 			
 			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
@@ -73,12 +71,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (!bProcessorTemplateFolderExists) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the ProcessorTemplateFolder does not exist: " + sProcessorTemplateFolder);
-
 				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 				return false;
 			}
 
-			processWorkspaceLog("copy template directory");
+			processWorkspaceLog("Copy template directory");
 
 			boolean bProcessorFolderExists = WasdiFileUtils.fileExists(sProcessorFolder);
 
@@ -180,7 +177,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: creating docker compose file");
 
 			// Generate the Jupyter Code
-			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getUserId(), oParameter.getWorkspace());
+			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getWorkspaceOwnerId(), oParameter.getWorkspace());
 			
 			processWorkspaceLog("Notebook id: " + sJupyterNotebookCode);
 			
@@ -197,7 +194,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			
 			// Add the paramters to the dictionary
 			aoDockerComposeTemplateParams.put("wasdiNotebookId", sJupyterNotebookCode);
-			aoDockerComposeTemplateParams.put("wasdiUserName", oParameter.getUserId());
+			aoDockerComposeTemplateParams.put("wasdiUserName", oParameter.getWorkspaceOwnerId());
 			aoDockerComposeTemplateParams.put("wasdiWorkspaceId", oParameter.getWorkspace());
 			
             if (WasdiConfig.Current.dockers.extraHosts != null) {            	
