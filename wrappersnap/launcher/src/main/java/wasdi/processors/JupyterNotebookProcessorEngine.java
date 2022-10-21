@@ -304,24 +304,19 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
-		ProcessWorkspace oProcessWorkspace = null;
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
-		String sProcessorName = oParameter.getName();
+		String sProcessorName = "jupyter-notebook";
 
 		try {
-			processWorkspaceLog("Start termination of " + sProcessorName + " Type " + oParameter.getProcessorType());
-
-			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = m_oProcessWorkspace;
+			processWorkspaceLog("Start termination of the notebook in the workspace " + oParameter.getWorkspace());
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			processWorkspaceLog("This is an attempt to terminate the Jupyter Notebook");
-
 
 			String sProcessorFolder = getProcessorFolder(sProcessorName);
 
-			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getUserId(), oParameter.getWorkspace());
+			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getWorkspaceOwnerId(), oParameter.getWorkspace());
 
 
 			// delete the Traefik configuration file
@@ -339,9 +334,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			// stop the container instance
 			// docker-compose [--file </path/to/the/docker-compose/file.yml] stop
-
-
-			processWorkspaceLog("execute command: docker-compose stop");
+			processWorkspaceLog("Stop docker");
 
 			// Launch docker-compose stop command
 			String sDockerComposeStopCommand = buildCommandDockerComposeStopJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
@@ -349,19 +342,15 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (!bDockerComposeStopResult) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose stop command failed:" + s_sLINE_SEPARATOR + sDockerComposeStopCommand);
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
-
-
 
 			// delete the container instance
 			// docker-compose [--file </path/to/the/docker-compose/file.yml] rm
 			
 
-			processWorkspaceLog("execute command: docker-compose rm");
+			processWorkspaceLog("Remove docker");
 
 			// Launch docker-compose rm command
 			String sDockerComposeRmCommand = buildCommandDockerComposeRmJupyterNotebook(sProcessorFolder, sJupyterNotebookCode);
@@ -369,18 +358,14 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			if (!bDockerComposeRmResult) {
 				LauncherMain.s_oLogger.error("JupyterNotebookProcessorEngine.launchJupyterNotebook: the docker compose rm command failed:" + s_sLINE_SEPARATOR + sDockerComposeRmCommand);
-
-				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
 
-
-
 			// Delete the Jupyter Notebook docker-compose file
 			// rm -f /data/wasdi/processors/jupyter-notebook/docker-compose_<notebook ID>.yml
 
-			String sDockerComposeFilePath = "/data/wasdi/processors/jupyter-notebook/docker-compose_" + sJupyterNotebookCode + ".yml";
+			String sDockerComposeFilePath = getProcessorFolder(sProcessorName) + "docker-compose_" + sJupyterNotebookCode + ".yml";
 			File oDockerComposeFile = new File(sDockerComposeFilePath);
 
 			if (WasdiFileUtils.fileExists(oDockerComposeFile)) {
@@ -388,8 +373,6 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
-
 
 			processWorkspaceLog(new EndMessageProvider().getGood());
 
