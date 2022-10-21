@@ -29,9 +29,12 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.ProcessWorkspaceService;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.CloudProvider;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.Node;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
@@ -41,6 +44,7 @@ import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -49,6 +53,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -623,9 +628,9 @@ public class WorkspaceResource {
 				return Response.ok().build();
 			}
 			
-			ConsoleResource oConsoleResource = new ConsoleResource();
-			oConsoleResource.terminate(sSessionId, sWorkspaceId);
-
+			// Terminate and clean the console/Jupyter Lab instance if present
+			terminateConsole(oWorkspace, sSessionId);
+			
 			//kill active processes
 			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
 			if(oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
@@ -776,6 +781,62 @@ public class WorkspaceResource {
 		}
 
 		return Response.serverError().build();
+	}
+	
+	/**
+	 * Terminates the notebook that may be present in the workspace
+	 * @param oWorkspace
+	 * @return
+	 */
+	protected boolean terminateConsole(Workspace oWorkspace, String sSessionId) {
+		try {
+			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), oWorkspace.getWorkspaceId());
+
+			JupyterNotebookRepository oJupyterNotebookRepository = new JupyterNotebookRepository();
+			JupyterNotebook oJupyterNotebook = oJupyterNotebookRepository.getJupyterNotebookByCode(sJupyterNotebookCode);
+
+			if (oJupyterNotebook != null) {
+				Utils.debugLog("WorkspaceResource.terminateConsole: found JupyterNotebook record: " + sJupyterNotebookCode + ". Trying to delete it!");
+				oJupyterNotebookRepository.deleteJupyterNotebook(sJupyterNotebookCode);
+			} 
+			else {
+				Utils.debugLog("WorkspaceResource.terminateConsole: no notebook in the workspace");
+				return true;
+			}
+
+
+			// Schedule the process to run the processor
+			String sProcessObjId = Utils.getRandomName();
+
+			Utils.debugLog("WorkspaceResource.terminateConsole: create local operation " + sProcessObjId);
+
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName("jupyter-notebook");
+			oProcessorParameter.setProcessorType(ProcessorTypes.JUPYTER_NOTEBOOK);
+			oProcessorParameter.setWorkspace(oWorkspace.getWorkspaceId());
+			oProcessorParameter.setUserId(oWorkspace.getUserId());
+			oProcessorParameter.setExchange(oWorkspace.getWorkspaceId());
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+
+			PrimitiveResult oRes = Wasdi.runProcess(oWorkspace.getUserId(), sSessionId, LauncherOperations.TERMINATEJUPYTERNOTEBOOK.name(), sJupyterNotebookCode, sPath, oProcessorParameter);
+
+			if (oRes.getBoolValue()) {
+				return true;
+			} 
+			else {
+				return false;
+			}
+			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("WorkspaceResource.terminateConsole: Exception " + oEx.toString());
+		}
+		
+		return false;
 	}
 
 	/**
