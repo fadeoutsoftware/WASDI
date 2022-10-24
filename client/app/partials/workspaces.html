@@ -247,14 +247,21 @@
                                 >
                                 {{m_oController.m_oWorkspaceViewModel.userId}}
                             </div>
+                            <div ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null">
+                                <span class="workspace-details-heading"
+                                ><i class="fa fa-tag text-blu-wasdi" aria-hidden="true"></i>&nbsp;{{"WORKSPACES_NODE_CODE" | translate}}</span>
+                                {{m_oController.m_oWorkspaceViewModel.nodeCode}}
+                            </div>
                             <!--div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div-->
                             <div>
                                 <span class="workspace-details-heading"
-                                    ><i class="fa fa-globe text-blu-wasdi"></i
-                                    >&nbsp;{{"WORKSPACES_PRODUCTS" |
-                                    translate}}</span
-                                >
+                                    ><i class="fa fa-globe text-blu-wasdi"></i>&nbsp;{{"WORKSPACES_PRODUCTS" | translate}}</span>
                                 {{m_oController.getProductList().length}}
+                            </div>
+                            <div>
+                                <span class="workspace-details-heading">
+                                    <i class="fa fa-id-badge text-blu-wasdi" aria-hidden="true"></i>&nbsp;{{"WORKSPACES_ID" | translate}}</span>
+                                    {{m_oController.m_oWorkspaceViewModel.workspaceId}}
                             </div>
                             <div>
                                 <span
