@@ -127,6 +127,7 @@ var RootController = (function() {
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
+            /*
             if(utilsIsObjectNullOrUndefined(newValue) === false)
             {
                 if(newValue.name.includes("Untitled Workspace"))
@@ -135,6 +136,7 @@ var RootController = (function() {
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
                 }
             }
+            */
         });
 
 
