@@ -8,14 +8,14 @@
     "devDependencies": {
         "compression-webpack-plugin": "^9.2.0",
         "copy-webpack-plugin": "^8.1.0",
-        "css-loader": "^5.2.0",
+        "css-loader": "^5.2.7",
         "file-loader": "^6.2.0",
         "html-webpack-plugin": "^5.3.1",
         "http-server": "^0.12.3",
         "jasmine-core": "^2.4.1",
         "node-sass": "7.0.0",
         "protractor": "^3.2.2",
-        "sass-loader": "13.1.0",
+        "sass-loader": "^13.1.0",
         "style-loader": "^2.0.0",
         "webpack": "^5.64.1",
         "webpack-cli": "^4.9.1"

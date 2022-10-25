@@ -574,7 +574,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
                     "regex": ".*",
                     "indexvalue":"OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS"
                 },
@@ -583,7 +583,7 @@
                     "indexlabel": "Protocol",
                     "indexvalues": "SUBS|FTP",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
                     "indexvalue":"SUBS"
                 },
                 {
@@ -659,6 +659,14 @@
                     "indexvalue":"dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt"
                 },
                 {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m",
+                    "regex": ".*",
+                    "visibilityConditions": "OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
+                    "indexvalue":"cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m"
+                },
+                {
                     "indexname": "variables",
                     "indexlabel": "Variables",
                     "indexvalues": "CHL+CHL_count+CHL_error|CHL|CHL_count|CHL_error",
@@ -721,6 +729,14 @@
                     "regex": ".*",
                     "visibilityConditions": "dataset:dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt&protocol:SUBS",
                     "indexvalue":"CHL+CHL_error+CHL_flags"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL+SPM+TUR|CHL|SPM|TUR",
+                    "regex": ".*",
+                    "visibilityConditions": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
+                    "indexvalue":"CHL+SPM+TUR"
                 }
             ]
         },

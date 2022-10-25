@@ -204,6 +204,9 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage, oTranslate) {
         case "READMETADATA":
             sUserMessage = oTranslate.instant("MSG_READMETADATA");
             break;
+        case "TERMINATEJUPYTERNOTEBOOK":
+        case "LAUNCHJUPYTERNOTEBOOK":
+            sUserMessage = "";
         default:
             console.log("ERROR: GOT EMPTY MESSAGE<br>READY");
     }
