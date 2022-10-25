@@ -14,7 +14,7 @@
                 <div class="right-side d-flex">
                     <!--SEARCH-->
                     <div class="search-wrapper mr-2 d-flex">
-                        <input type="text" name="search" placeholder='{{"MARKET_SEARCH_APP"|translate}}' class="search-field" ng-model="m_oController.m_sNameFilter">
+                        <input type="text" name="search" placeholder='{{"MARKET_SEARCH_APP"|translate}}' class="search-field" ng-model="m_oController.m_sNameFilter" ng-keyup="$event.keyCode == 13 && m_oController.refreshAppList()">
                         <div class="search-icon-wrapper px-4 d-flex align-items-center" ng-click="m_oController.refreshAppList()">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </div>
