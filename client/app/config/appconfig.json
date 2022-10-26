@@ -735,7 +735,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "CHL+SPM+TUR|CHL|SPM|TUR",
                     "regex": ".*",
-                    "visibilityConditions": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
+                    "visibilityConditions": "producttype:cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
                     "indexvalue":"CHL+SPM+TUR"
                 }
             ]
