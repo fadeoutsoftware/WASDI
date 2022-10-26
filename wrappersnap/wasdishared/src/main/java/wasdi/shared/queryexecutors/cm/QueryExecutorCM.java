@@ -162,6 +162,16 @@ public class QueryExecutorCM extends QueryExecutor {
 				}
 			}
 
+			Double dStartDepth = oQueryViewModel.cloudCoverageFrom;
+			if (dStartDepth != null) {
+				oSBQuery.append("&z_lo=").append(dStartDepth);
+			}
+
+			Double dEndDepth = oQueryViewModel.cloudCoverageTo;
+			if (dEndDepth != null) {
+				oSBQuery.append("&z_hi=").append(dEndDepth);
+			}
+
 			String sQuery = oSBQuery.toString();
 
 			String sLinks = s_oDataProviderConfig.link;
