@@ -663,7 +663,7 @@
                     "indexlabel": "Dataset",
                     "indexvalues": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m",
                     "regex": ".*",
-                    "visibilityConditions": "OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
                     "indexvalue":"cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m"
                 },
                 {
@@ -735,7 +735,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "CHL+SPM+TUR|CHL|SPM|TUR",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
                     "indexvalue":"CHL+SPM+TUR"
                 }
             ]
