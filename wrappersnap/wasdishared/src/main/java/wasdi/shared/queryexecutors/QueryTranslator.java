@@ -936,6 +936,24 @@ public abstract class QueryTranslator {
 			oResult.productLevel = extractValue(sQuery, "protocol");
 			oResult.productName = extractValue(sQuery, "dataset");
 			oResult.sensorMode = extractValue(sQuery, "variables");
+
+			if (sQuery.contains("startDepth")) {
+				String sStartDepth = extractValue(sQuery, "startDepth");
+				try {
+					oResult.cloudCoverageFrom = Double.parseDouble(sStartDepth);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing startDepth: " + sStartDepth);
+				}
+			}
+
+			if (sQuery.contains("endDepth")) {
+				String sEndDepth = extractValue(sQuery, "endDepth");
+				try {
+					oResult.cloudCoverageTo = Double.parseDouble(sEndDepth);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
+				}
+			}
 		}
 	}
 
