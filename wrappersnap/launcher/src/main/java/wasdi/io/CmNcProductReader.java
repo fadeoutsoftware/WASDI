@@ -67,11 +67,11 @@ public class CmNcProductReader extends WasdiProductReader {
 			for (Variable oVariable : aoVariables) {
 				String sVariableShortName = oVariable.getShortName();
 
-				if (sVariableShortName.equalsIgnoreCase("lon")) {
+				if (sVariableShortName.equalsIgnoreCase("lon") || sVariableShortName.equalsIgnoreCase("longitude")) {
 					iLongitudeLength = extractValueFromShape(oVariable);
 				}
 
-				if (sVariableShortName.equalsIgnoreCase("lat")) {
+				if (sVariableShortName.equalsIgnoreCase("lat") || sVariableShortName.equalsIgnoreCase("latitude")) {
 					iLatitudeLength = extractValueFromShape(oVariable);
 				}
 
