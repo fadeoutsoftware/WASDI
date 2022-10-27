@@ -2496,13 +2496,21 @@
                 function (response) {
                     var _contentType = response.headers('Content-Type');
 
+                    var sHeaderContentDisposition = response.headers('Content-Disposition');
+
+                    let sDownloadedFilename = sFileName;
+
+                    if (!utilsIsStrNullOrEmpty(sHeaderContentDisposition)) {
+                        sDownloadedFilename = sHeaderContentDisposition.split(';')[1].split('=')[1].replace(/\"/g, '');
+                    }
+
                     var blob = new Blob([ response.data ], { type : _contentType });
                     var url = (window.URL || window.webkitURL).createObjectURL(blob);
                     var anchor = angular.element('<a/>');
                     anchor.attr({
                         href : url,
                         target : '_blank',
-                        download : sFileName
+                        download : sDownloadedFilename
                     })[0].click();
                 },
                 function (error) {
