@@ -112,6 +112,7 @@ public class CatalogResources {
 					oResponseBuilder = Response.ok(oStream);
 					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 					//oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
+					oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
 				}
 			}
 			
@@ -273,6 +274,7 @@ public class CatalogResources {
 		Utils.debugLog("CatalogResources.zipShapeFile: sFileName after substring " + sFileName);
 		
 		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+		oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
 		Long lLength = 0L;
 		for (String sFile : aoFileEntries.keySet()) {
 			File oTempFile = aoFileEntries.get(sFile);
