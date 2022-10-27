@@ -633,6 +633,7 @@ var RootController = (function() {
 
             oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
                 oWorkspace.name = data.data.name
+                oController.m_oRootScope.title = data.data.name
                 oController.m_bIsEditModelWorkspaceNameActive = false;
             }); // no error handling in this case
         };
