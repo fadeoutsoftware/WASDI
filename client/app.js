@@ -64,6 +64,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.wapCheckBox',
     'wasdi.wapSlider',
     'wasdi.wapListBox',
+    'wasdi.wapTable',
     'wasdi.angularLightSlider',
     'wasdi.insertableTextArea',
     /*'wasdi.ChipsListDirective',*/

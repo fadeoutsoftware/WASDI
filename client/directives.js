@@ -22,6 +22,7 @@ require('./app/directives/wasdiApps/wapSearchEOImage/wapSearchEOImage.js');
 require('./app/directives/wasdiApps/wapCheckBox/wapCheckBox.js');
 require('./app/directives/wasdiApps/wapSlider/wapSlider.js');
 require('./app/directives/wasdiApps/wapListBox/wapListBox.js');
+require('./app/directives/wasdiApps/wapTable/wapTable.js')
 require('./app/directives/chips-list/chips-list.directive.js');
 require('./app/directives/AngularLightSlider.js');
 require('./app/directives/insertableTextArea.js');
