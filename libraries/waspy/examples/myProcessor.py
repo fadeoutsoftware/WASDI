@@ -5,6 +5,9 @@ def run():
     wasdi.setVerbose(True)
         
     wasdi.hello()
+    
+    aoImage = wasdi.searchEOImages("S1", sFileName="S1A_IW_SLC__1SDV_20221021T054200_20221021T054228_045536_057197_35F8")
+    wasdi.wasdiLog(str(aoImage))
 
     wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
     sNome = wasdi.getParameter("name")

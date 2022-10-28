@@ -4,6 +4,10 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 ## [0.7.5.1] - 2022-10-12
+### Added
+- searchEOImages: date are no more mandatory. If not present WASDI will assume from 01/01/1900 to the actual Day
+- searchEOImages: added sFileName input parameter, to search a specific file given the name
+
 ### Fixed
 - asynchExecuteProcessor: use post version instead of get had an error, fixed
 

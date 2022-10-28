@@ -180,9 +180,6 @@ var WorkspaceController = (function () {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             //data.data = []; // DEBUG
-                            if(utilsIsObjectNullOrUndefined(data.data.creationDate)) {
-                                console.log("no creation date")
-                            }
                             oController.m_aoWorkspaceList = data.data;
                             oController.m_aoWorkspaceList.forEach(oWorkspace => {
                                 if(utilsIsObjectNullOrUndefined(oWorkspace.creationDate)) {
@@ -252,6 +249,7 @@ var WorkspaceController = (function () {
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data.data;
+                console.log(oController.m_oWorkspaceViewModel)
                
             }
         },(function (data, status) {

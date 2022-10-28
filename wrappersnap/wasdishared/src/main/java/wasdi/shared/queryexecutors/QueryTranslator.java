@@ -905,7 +905,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseIMERG(String sQuery, QueryViewModel oResult) {
-		Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
+		//Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_IMERG)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_IMERG);
@@ -925,7 +925,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
+		//Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
