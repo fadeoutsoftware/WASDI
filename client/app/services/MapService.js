@@ -365,7 +365,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
      */
     this.initGeoSearchPluginForOpenStreetMap = function(opt)
     {
-        console.log("function executed")
+       
     //     
         if(utilsIsObjectNullOrUndefined(L.Control.Geocoder) === true) {
             console.log("Problem Loading Geocoder")
@@ -379,10 +379,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
         }).addTo(this.m_oWasdiMap); 
         }
        
-    //    
-            
-            
-        
+    //        
        
     };
 
