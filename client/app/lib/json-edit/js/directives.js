@@ -212,7 +212,7 @@ angular.module('JSONedit', ['ui.sortable'])
             + '<span class="jsonItemDesc">'+objectName+'</span>'
             + '<div class="jsonContents" ng-hide="collapsed">'
                 // repeat
-                + '<span class="block" ng-hide="key.indexOf(\'_\') == 0" ng-repeat="(key, val) in child">'
+                + '<span class="block" ng-hide="key.indexOf(\'_\') == 0" ng-repeat="(key, val) in child track by $index">'
                     // object key
                     + '<span class="jsonObjectKey">'
                         + '<input class="keyinput" type="text" ng-model="newkey" ng-init="newkey=key" '
