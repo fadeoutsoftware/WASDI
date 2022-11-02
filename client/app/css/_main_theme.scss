@@ -30,7 +30,7 @@ $wasdi-blue-logo-complementary-5:#ff5f5f;
     src:url(../fonts/hero/Hero.eot);
     src:url(../fonts/hero/Hero.ttf);
     src:url(../fonts/hero/Hero.woff);
-    src:url(../fonts/hero/Hero.svg);
+    src:url(../fonts/hero/Hero.svg) format('svg');
 }
 
 $wasdi-font-web: 'Hero' ,Helvetica, sans-serif;//arial
