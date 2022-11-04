@@ -28,6 +28,16 @@
                             {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
                         </button>
                     </div>
+                    <div class="form-group">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-wasdi"
+                            ng-click="m_oController.updateLibraryList(m_oController.sProcessorId)"
+                            ng-if="!m_oController.bIsEditing"
+                        >
+                            {{"DIALOG_PACKAGE_MANAGER_UPDATE" | translate }}
+                        </button>
+                    </div>
                 </form>
                 <div class="col-xs-3 my-3">
                     <input

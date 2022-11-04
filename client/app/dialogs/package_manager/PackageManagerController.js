@@ -155,6 +155,16 @@ let PackageManagerController = (function () {
         }
     };
 
+    PackageManagerController.prototype.updateLibraryList = function (sProcessorId) {
+        let oController = this;
+
+        oController.m_oPackageManagerService
+            .addLibrary(sProcessorId, null)
+            .then(function () {
+                oController.m_bIsLoading = true;
+            });
+    };
+
     PackageManagerController.prototype.upgradeLibrary = function (
         sProcessorId,
         sPackageName,
