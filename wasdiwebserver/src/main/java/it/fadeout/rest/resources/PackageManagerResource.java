@@ -241,6 +241,27 @@ public class PackageManagerResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
+
+		// Trying to read the Package Manager info from the packagesInfo.json file.
+		// If the info is valid, reply using it
+
+		String sContentAsJson = readPackagesInfoFile(sName);
+
+		if (!Utils.isNullOrEmpty(sContentAsJson)) {
+
+			PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
+
+			if (oPackageManagerFullInfoViewModel != null) {
+				PackageManagerViewModel oPackageManagerVM = oPackageManagerFullInfoViewModel.getPackageManager();
+
+				return Response.ok(oPackageManagerVM).build();
+			}
+		}
+
+
+
+		// Otherwise, if the Package Manager info from the packagesInfo.json file is not valid, make a live call.
+
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 		
