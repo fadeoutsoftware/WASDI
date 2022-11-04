@@ -990,7 +990,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 			Object oUpdateCommand = oJsonItem.get("updateCommand");
 
-			if (oUpdateCommand == null) {
+			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
 			} else {
 				String sUpdateCommand = (String) oUpdateCommand;
