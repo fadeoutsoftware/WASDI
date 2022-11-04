@@ -910,6 +910,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
             oConnection.disconnect();
 
+
+            waitForApplicationToStart(oParameter);
+
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				refreshPackagesInfo(oParameter);
+			}
+
             LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: lib updated");
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
