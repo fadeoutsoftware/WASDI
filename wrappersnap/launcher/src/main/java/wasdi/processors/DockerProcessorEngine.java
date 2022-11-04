@@ -988,11 +988,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
 			JSONObject oJsonItem = new JSONObject(sJson);
 
-			String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+			Object oUpdateCommand = oJsonItem.get("updateCommand");
 
-			if (sUpdateCommand == null) {
+			if (oUpdateCommand == null) {
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
 			} else {
+				String sUpdateCommand = (String) oUpdateCommand;
 				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
 				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
