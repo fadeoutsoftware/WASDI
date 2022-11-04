@@ -99,16 +99,22 @@ public class Environmentupdate extends Operation {
 					// Extract the command we just executed
 					String sJson = oParameter.getJson();
 					JSONObject oJsonItem = new JSONObject(sJson);
-					String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+					Object oUpdateCommand = oJsonItem.get("updateCommand");
+
+					if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+						LauncherMain.s_oLogger.debug("Environmentupdate.executeOperation: refresh of the list of libraries.");
+					} else {
+						String sUpdateCommand = (String) oUpdateCommand;
 					
-					// Add carriage return
-					sUpdateCommand += "\n";
+						// Add carriage return
+						sUpdateCommand += "\n";
 					
-					// Add this action to the list
-					try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
-						byte[] ayBytes = sUpdateCommand.getBytes();
-						oOutStream.write(ayBytes);
-					}		
+						// Add this action to the list
+						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
+							byte[] ayBytes = sUpdateCommand.getBytes();
+							oOutStream.write(ayBytes);
+						}
+					}
 				}
 			}
 			else {
