@@ -309,9 +309,10 @@ public class PackageManagerResource {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
-			if (Utils.isNullOrEmpty(sUpdateCommand)) {
-				return Response.status(Status.BAD_REQUEST).build();
-			}
+			// Allow an empty update command. it will simply refresh the list of libraries
+//			if (Utils.isNullOrEmpty(sUpdateCommand)) {
+//				return Response.status(Status.BAD_REQUEST).build();
+//			}
 
 			String sUserId = oUser.getUserId();
 			
