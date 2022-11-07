@@ -10,7 +10,7 @@ WASDI : Web Advanced Space Developer Interface
    .. youtube:: Ot92qAhJkXs <-> EoExpert Demo
    .. youtube:: 0xNs9O_x9kE <-> EndUser Demo
   
-.. youtube:: 6LHIwdyh45U <-> Wasdi | Democratizing EO
+
    
 WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers), private companies (i.e. insurance, agricolture).
 
@@ -26,6 +26,8 @@ This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main conce
 
 If you're acquired the basic concepts of WASDI and you're interested in how processors can be launched,  take a look at
 :doc:`this tutorial </SynchAsynch>`. This will highlights Synchronous and Asynchronous WASDI programming.
+
+.. youtube:: 6LHIwdyh45U
 
 
 .. toctree::
