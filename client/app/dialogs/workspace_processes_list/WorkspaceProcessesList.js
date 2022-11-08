@@ -225,6 +225,10 @@ var WorkspaceProcessesList = (function () {
             oEndTime = new Date();
         }
 
+        //account for different Date object in Firefox
+        if(utilsIsValidDate(oStartTime) === false) {
+            oStartTime = new Date(oProcess.operationStartDate.slice(0, -2)+ "Z")
+        }
         //pick time
         let iMilliseconds = Math.abs(oEndTime - oStartTime);
         //approximate result
