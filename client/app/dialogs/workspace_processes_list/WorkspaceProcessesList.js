@@ -199,8 +199,8 @@ var WorkspaceProcessesList = (function () {
      */
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
 
-        if (!oProcess.operationStartDate.endsWith(" Z"))   {
-            oProcess.operationStartDate += " Z";
+        if (!oProcess.operationStartDate.endsWith("Z"))   {
+            oProcess.operationStartDate += "Z";
         }
 
         // start time by server
@@ -210,8 +210,8 @@ var WorkspaceProcessesList = (function () {
         // reassign in case the process is already ended
         if(utilsIsObjectNullOrUndefined(oProcess.operationEndDate)==false){
 
-            if (!oProcess.operationEndDate.endsWith(" Z"))   {
-                oProcess.operationEndDate += " Z";
+            if (!oProcess.operationEndDate.endsWith("Z"))   {
+                oProcess.operationEndDate += "Z";
             }
 
             oEndTime = new Date(oProcess.operationEndDate);
@@ -225,12 +225,9 @@ var WorkspaceProcessesList = (function () {
             oEndTime = new Date();
         }
 
-        //account for different Date object in Firefox
-        if(utilsIsValidDate(oStartTime) === false) {
-            oStartTime = new Date(oProcess.operationStartDate.slice(0, -2)+ "Z")
-        }
         //pick time
         let iMilliseconds = Math.abs(oEndTime - oStartTime);
+        console.log(iMilliseconds)
         //approximate result
         let iSecondsTimeSpan = Math.ceil(iMilliseconds / 1000);
 
