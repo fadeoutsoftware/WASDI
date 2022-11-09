@@ -24,7 +24,7 @@ var ProductEditorInfoController = (function () {
             ...oExtras.product
         }; 
         this.m_asStyles = [];
-        this.m_aoStylesMap = {};
+        this.m_aoStylesMap = [];
         this.m_oStyle = {};
         this.m_bLoadingStyle = true;
         this.m_bProductChanged = false;
