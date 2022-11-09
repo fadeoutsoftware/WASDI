@@ -21,7 +21,7 @@ import wasdi.shared.utils.Utils;
 public class PipProcessorEngine extends DockerProcessorEngine {
 
 
-	protected String [] asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "pandas", "rasterio", "wheel", "wasdi" };
+	protected String [] m_asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "pandas", "rasterio", "wheel", "wasdi" };
 
 	public PipProcessorEngine() {
 		super();
@@ -64,10 +64,10 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 			}
 
 			// For all the packages already included in the docker template
-			for (int iPackages = 0; iPackages <asDockerTemplatePackages.length; iPackages ++) {
+			for (int iPackages = 0; iPackages <m_asDockerTemplatePackages.length; iPackages ++) {
 
 				// Take the name
-				String sExistingPackage = asDockerTemplatePackages[iPackages];
+				String sExistingPackage = m_asDockerTemplatePackages[iPackages];
 
 				// Check if it was included also by the user
 				if (!Utils.isNullOrEmpty(sExistingPackage)) {
@@ -94,10 +94,14 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 					if (!checkPipPackage(sPackage)) {
 						m_oProcessWorkspaceLogger.log("We did not find PIP package [" + sPackage + "], are you sure is correct?");
+						LauncherMain.s_oLogger.info("We did not find PIP package [" + sPackage + "], jump it");
+						continue;
 					}
-
-					oPipWriter.write(sPackage);
-					oPipWriter.newLine();
+					else {
+						LauncherMain.s_oLogger.info("Adding [" + sPackage + "]");
+						oPipWriter.write(sPackage);
+						oPipWriter.newLine();						
+					}
 				}
 
 				oPipWriter.close();	
@@ -115,9 +119,22 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 		}
 		
 	}
-
+	
+	/**
+	 * Checks if a pip package is valid or not. It does this searching for the package json file
+	 * @param sPackage
+	 * @return
+	 */
 	protected boolean checkPipPackage(String sPackage) {
 		try {
+			
+			if (Utils.isNullOrEmpty(sPackage)) {
+				return false;
+			}
+			
+			if (sPackage.contains("==")) {
+				sPackage = sPackage.split("==")[0];
+			}
 
 			String sPipApi = "https://pypi.org/pypi/" + sPackage + "/json/";
 
@@ -136,7 +153,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				}
 			}
 		}
-		catch (Exception e) {
+		catch (Exception oExtEx) {
+			LauncherMain.s_oLogger.info("PipProcessorEngine.checkPipPackage: exception " + oExtEx.toString());
 		}
 
 		return false;
