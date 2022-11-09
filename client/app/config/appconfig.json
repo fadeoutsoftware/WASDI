@@ -514,7 +514,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
                 }
