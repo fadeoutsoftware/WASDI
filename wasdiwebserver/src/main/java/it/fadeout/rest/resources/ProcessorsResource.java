@@ -1540,8 +1540,13 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
+
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId() + " and not shared either.");
+					return Response.status(Status.UNAUTHORIZED).build();
+				}
 			}
 
 
