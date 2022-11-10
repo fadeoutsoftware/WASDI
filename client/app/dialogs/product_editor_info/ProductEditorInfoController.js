@@ -1,6 +1,6 @@
 /**
  * Created by a.corrado on 15/02/2017.
- */
+*/
 
 var ProductEditorInfoController = (function () {
     function ProductEditorInfoController(
@@ -33,7 +33,7 @@ var ProductEditorInfoController = (function () {
 
         $scope.close = function (result) {
             //Check if product changed
-            if (!_.isEqual(oController.m_oProduct, oController.m_oOriginalProduct)) {
+            if (!_.isEqual(oController.m_oProduct, oController.m_oOriginalProduct) || oController.m_oStyle !== oController.m_oOriginalProduct.style) {
                 oController.m_bProductChanged = true;
                 oController.updateProduct(
                     oController.m_oProduct,
