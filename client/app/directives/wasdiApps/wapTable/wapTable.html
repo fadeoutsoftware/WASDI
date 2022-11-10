@@ -8,7 +8,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="row in tableVariables[1] track by $index">
-                <th scope="row">{{row}} {{$index}}</th>
+                <th scope="row">{{row}}</th>
                 <td ng-repeat="column in tableVariables[0] track by $index">
                     <input type="text" placeholder="column {{$index}}" ng-model="value"
                         ng-change="addValue(value, $index, $parent.$index)">
@@ -16,5 +16,5 @@
             </tr>
         </tbody>
     </table>
-    <!-- <button ng-click="printInputs()"></button> -->
+    <button ng-click="printInputs()"></button>
 </div>
