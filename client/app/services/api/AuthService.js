@@ -78,7 +78,6 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
 
         let sParams = 'client_id=' + m_sAuthClientId + '&grant_type=password&username=' + oCredentials.userId + '&password=' + oCredentials.userPassword
         let sAddress = keycloakConfiguration['token_endpoint'];
-        console.log(sAddress)
         return $http.post(sAddress,
             sParams,
             {'headers': {'Content-Type': 'application/x-www-form-urlencoded'}}

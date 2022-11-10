@@ -120,7 +120,6 @@ let PackageManagerController = (function () {
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_2");
 
         if (utilsIsStrNullOrEmpty(sPackageInfoVersion) === false) {
-            console.log("The version exists!");
             sAddCommand = sPackageInfoName + "/" + sPackageInfoVersion;
 
             utilsVexDialogConfirm(

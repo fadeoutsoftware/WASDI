@@ -43,7 +43,6 @@ var WappsController = (function() {
         $scope.close = function(result) {
 
             oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
-            console.log(oController.m_iHookIndex)
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
         $scope.add = function(result) {
@@ -61,7 +60,6 @@ var WappsController = (function() {
         var oController = this;
         // swap to true after loading icon is properly rendered
         oController.m_bIsLoadingProcessorList = true;
-        console.log("getting processors")
         this.m_oProcessorService.getProcessorsList().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
@@ -171,8 +169,6 @@ var WappsController = (function() {
                 {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
                     utilsVexCloseDialogAfter(4000,oDialog);
-
-                    console.log('Run ' + data.data);
 
                     let rootscope = oController.m_oScope.$parent;
                     while(rootscope.$parent != null || rootscope.$parent != undefined)
@@ -355,8 +351,6 @@ var WappsController = (function() {
         this.m_sMyJsonString = JSON.stringify(JSON.parse(this.m_sMyJsonString.replaceAll("'", '"')), null, 2);
     }
     WappsController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
-        console.log(oRabbitMessage)
-        console.log(oController)
         oController.getProcessorsList();
         oController.m_bIsLoadingProcessorList = false;
     }
