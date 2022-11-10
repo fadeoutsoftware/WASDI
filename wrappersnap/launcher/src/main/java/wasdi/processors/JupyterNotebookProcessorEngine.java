@@ -244,7 +244,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 
 			// create the JSON content of the waspy configuration file to let the lib know the workspace where it works
-			String sJsonContent = "{\"WORKSPACEID\":\"" + oParameter.getWorkspace() + "\"}";
+			String sJsonContent = "{\"WORKSPACEID\":\"" + oParameter.getWorkspace() + "\",\"UPLOADACTIVE\":false}";
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
 			// create the file on the workspace folder that will be mounted by docker
