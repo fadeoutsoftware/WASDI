@@ -250,6 +250,7 @@ public class WorkspaceResource {
 					oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
 					oWSViewModel.setWorkspaceName(oWorkspace.getName());
 					oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
+					oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 
 					if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 						if (oWorkspace.getNodeCode().equals("wasdi")) {
