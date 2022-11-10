@@ -248,7 +248,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
 			// create the file on the workspace folder that will be mounted by docker
-			String sWaspyNotebookConfigFileFullPath = LauncherMain.getWorkspacePath(oParameter) + "notebook_config.cfg";
+			String sWaspyNotebookConfigFileFullPath = LauncherMain.getWorkspacePath(oParameter) + "notebook/notebook_config.cfg";
 			LauncherMain.s_oLogger.info("JupyterNotebookProcessorEngine.launchJupyterNotebook: sWaspyNotebookConfigFileFullPath: " + sWaspyNotebookConfigFileFullPath);
 			WasdiFileUtils.writeFile(sJsonContent, sWaspyNotebookConfigFileFullPath);
 			
