@@ -258,8 +258,7 @@ export class Wasdi {
     if (request.status === 200) {
       let jsondata = JSON.parse(request.responseText);
       this._m_aoParamsDictionary = jsondata;
-    }
-    else{
+    } else {
       this._m_aoParamsDictionary = {};
     }
   }
