@@ -248,6 +248,9 @@ class Wasdi {
       let jsondata = JSON.parse(request.responseText);
       this._m_aoParamsDictionary = jsondata;
     }
+    else{
+      this._m_aoParamsDictionary = {};
+    }
   }
 
   /**
