@@ -179,7 +179,7 @@ var EditUserController = (function() {
         this.m_oProcessWorkspaceService.getProcessWorkspaceTotalRunningTimeByUserAndInterval(this.m_oUser.userId).then(
             function (data) {
                         if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                            oController.m_lTotalRuntime = new Date(data.data).toISOString().slice(11, 19);
+                            oController.m_lTotalRuntime = data.data;
                         } else {
                             utilsVexDialogAlertTop(
                                 "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME"

@@ -3,6 +3,7 @@ require('./app/lib/leafletbetterWMS/L.TileLayer.BetterWMS.js');
 require('./app/lib/leafletControlCustomMaster/Leaflet.Control.Custom.js');
 require('./app/filters/stringUtils/removeSpaces.js');
 require('./app/filters/stringUtils/formatFileSize.js');
+require('./app/filters/stringUtils/formatTime.js');
 
 require('./app/lib/enum/ProductsProviders.js'); // also unused?
 
