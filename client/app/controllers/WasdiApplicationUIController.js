@@ -460,7 +460,7 @@ var WasdiApplicationUIController = (function () {
         let oProcessorInput = this.createParams();
 
         // Log the parameters
-        console.log(oProcessorInput);
+        //console.log(oProcessorInput);
 
         // Reference to this controller
         let oController = this;

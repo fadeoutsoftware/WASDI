@@ -29,15 +29,13 @@ let PackageManagerController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
 
         /* 
+       Get package manager information (name and version)
+       */
+        this.fetchPackageManagerInfo(this.sWorkspaceName);
+        /* 
         Get list of packages
         */
         this.fetchPackageList();
-
-        /* 
-        Get package manager information (name and version)
-        */
-        this.fetchPackageManagerInfo(this.sWorkspaceName);
-
         /* 
         RabbitStomp Service call
         */
@@ -51,12 +49,16 @@ let PackageManagerController = (function () {
 
         // Close this Dialog handler
         $scope.close = function () {
-
             oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
 
             // close, but give 500ms for bootstrap to animate
             oClose(null, 300);
-        };        
+        };
+
+        $scope.add = function (result) {
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
+            oClose(result, 300); // close, but give 500ms for bootstrap to animate
+        };
     }
     PackageManagerController.prototype.fetchPackageManagerInfo = function (
         sWorkspaceName
@@ -85,14 +87,11 @@ let PackageManagerController = (function () {
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_REMOVE_LIB_PM_2");
 
         utilsVexDialogConfirm(
-            sConfirmMsg1 + sDeleteCommand + sConfirmMsg2,
-            function (value) {
-                if (value) {
-                    oController.m_oPackageManagerService
-                        .deleteLibrary(sProcessorId, sDeleteCommand)
-                        .then(function (response) {
-                            oController.m_bIsLoading = true;                           
-                        });
+            sConfirmMsg1 + sDeleteCommand + sConfirmMsg2, function (oValue) {
+                if (oValue === true) {
+                    oController.m_oPackageManagerService.deleteLibrary(sProcessorId, sDeleteCommand).then(function (data) {
+                        oController.m_bIsLoading = true
+                    });
                 }
                 oController.m_bIsLoading = false;
             }
@@ -120,14 +119,13 @@ let PackageManagerController = (function () {
         let sConfirmMsg2 = this.m_oTranslate.instant("MSG_ADD_LIB_PM_2");
 
         if (utilsIsStrNullOrEmpty(sPackageInfoVersion) === false) {
-            console.log("The version exists!");
             sAddCommand = sPackageInfoName + "/" + sPackageInfoVersion;
 
             utilsVexDialogConfirm(
                 sConfirmMsg1 +
-                    sPackageInfoName +
-                    sPackageInfoVersion +
-                    sConfirmMsg2,
+                sPackageInfoName +
+                sPackageInfoVersion +
+                sConfirmMsg2,
                 function (value) {
                     if (value) {
                         oController.m_oPackageManagerService
@@ -136,6 +134,7 @@ let PackageManagerController = (function () {
                                 oController.m_bIsLoading = true;
                             });
                     }
+                    oController.m_bIsLoading = false;
                 }
             );
         } else {
@@ -209,9 +208,9 @@ let PackageManagerController = (function () {
                 if (data.data != null) {
                     oController.clearInput();
                     oController.m_aoPackages = data.data;
-                    oController.m_bIsLoading = false;
                 }
             });
+        oController.m_bIsLoading = false;
     };
 
     PackageManagerController.prototype.clearInput = function () {
@@ -225,6 +224,7 @@ let PackageManagerController = (function () {
         oController
     ) {
         oController.fetchPackageList()
+        oController.m_bIsLoading = false;
     };
 
     PackageManagerController.$inject = [

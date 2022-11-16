@@ -214,31 +214,6 @@ var AdminDashboardController = (function () {
                 );
         };
 
-    AdminDashboardController.prototype.convertMsToTime = function (
-        lMilliseconds
-    ) {
-        let lSeconds = Math.floor(lMilliseconds / 1000);
-        let lMinutes = Math.floor(lSeconds / 60);
-        let lHours = Math.floor(lMinutes / 60);
-
-        lMilliseconds = lMilliseconds % 1000;
-        lSeconds = lSeconds % 60;
-        lMinutes = lMinutes % 60;
-        lHours = lHours % 24;
-
-        return `${this.padTo2Digits(lHours)}:${this.padTo2Digits(
-            lMinutes
-        )}:${this.padTo2Digits(lSeconds)} ${this.padTo3Digits(lMilliseconds)}`;
-    };
-
-    AdminDashboardController.prototype.padTo2Digits = function (lNum) {
-        return lNum.toString().padStart(2, "0");
-    };
-
-    AdminDashboardController.prototype.padTo3Digits = function (lNum) {
-        return lNum.toString().padStart(3, "0");
-    };
-
     AdminDashboardController.prototype.findWorkspacesByPartialName = function (
         sWorkspacePartialName
     ) {

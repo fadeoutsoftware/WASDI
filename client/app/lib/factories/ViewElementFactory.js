@@ -136,7 +136,6 @@ function ViewElementFactory() {
             for (; iValues < oControl.values.length; iValues++) {
                 oViewElement.aoElements.push(oControl.values[iValues]);
             }
-            console.log(oViewElement);
         } else if (oControl.type === 'table'){
             
             oViewElement = new Table();
@@ -150,10 +149,8 @@ function ViewElementFactory() {
                 const sElement = oControl.row_headers[sRowHeader];
                 oViewElement.aoTableVariables[1].push(sElement);
            }
-            console.log(oViewElement)  
         }
         else {
-            console.log(oControl.type)
             oViewElement = new TextBox();
         }
         if (!utilsIsObjectNullOrUndefined(oControl.tooltip)) {

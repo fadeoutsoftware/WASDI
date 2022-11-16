@@ -227,7 +227,7 @@ var WorkspaceProcessesList = (function () {
 
         //pick time
         let iMilliseconds = Math.abs(oEndTime - oStartTime);
-        console.log(iMilliseconds)
+        
         //approximate result
         let iSecondsTimeSpan = Math.ceil(iMilliseconds / 1000);
 

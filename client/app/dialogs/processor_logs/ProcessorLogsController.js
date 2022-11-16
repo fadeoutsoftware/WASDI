@@ -25,7 +25,6 @@
         var oController = this;
 
         $scope.close = function(result) {
-            console.log("processor_logs: close function")
             // Make sure that the interval is destroyed too
             oController.stopTick(oController);
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -129,9 +128,7 @@
      };
 
      ProcessorLogsController.prototype.stopTick=function(oController) {
-        console.log("processor_logs: stopTick")
          if (angular.isDefined(oController.m_oTick)) {
-            console.log("processor_logs: m_oTick is defined")
              oController.m_oInterval.cancel(oController.m_oTick);
              oController.m_oTick = undefined;
          }
@@ -145,7 +142,6 @@
         var oController=this;
 
         var oTick = this.m_oInterval(function () {
-            console.log("Update WAPPS logs");
             oController.getLogsCount(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
 
             sStatus = oController.m_oProcess.status;

@@ -1296,7 +1296,6 @@
                         sMessage = "WASDI IS PREPARING YOUR NOTEBOOK"
         
                         if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                            console.log(data.data)
                             if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
                                 sMessage = sMessage + "<BR>" + data.data.stringValue;
                             }

@@ -93,13 +93,13 @@
                         </legend>
                         <div class="d-flex flex-row">
                             <p class="mr-2 text-uppercase">
-                               {{"DIALOG_EDIT_USER_USER_ID" | translate}}:
+                                {{"DIALOG_EDIT_USER_USER_ID" | translate}}:
                             </p>
                             <p>{{m_oController.m_oUser.userId}}</p>
                         </div>
                         <div class="d-flex flex-row">
                             <p class="mr-2 text-uppercase">
-                               {{"DIALOG_EDIT_USER_ACCOUNT_TYPE" | translate}}:
+                                {{"DIALOG_EDIT_USER_ACCOUNT_TYPE" | translate}}:
                             </p>
                             <p>
                                 {{"DIALOG_EDIT_USER_ACCOUNT_TYPE_1" | translate}} <span class="text-success">{{m_oController.m_oUser.type}}</span> {{"DIALOG_EDIT_USER_ACCOUNT_TYPE_2" | translate}}.
@@ -109,7 +109,7 @@
                         <p>
                             {{"DIALOG_EDIT_USER_PROCESS_TIME_1" | translate}}
                             <span class="text-success"
-                                >{{m_oController.m_lTotalRuntime}}</span
+                                >{{m_oController.m_lTotalRuntime | convertMsToTime}}</span
                             >
                             {{"DIALOG_EDIT_USER_PROCESS_TIME_2" | translate}}.
                         </p>
@@ -157,7 +157,7 @@
                                 <h5
                                     class="error-message"
                                     ng-if="(m_oController.m_oEditUser.newPassword.length !== 0) &&
-                                                         (!changePasswordForm.usernewpassword.$valid)"
+                                                        (!changePasswordForm.usernewpassword.$valid)"
                                 >
                                     The value is too short
                                 </h5>
