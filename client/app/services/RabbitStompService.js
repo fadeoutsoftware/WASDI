@@ -62,6 +62,10 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
              * Key of the Controller Member of a Message Hook
              */
             this.m_sHookController = "CONTROLLER";
+            /**
+             * Key of the call once flag of a Message Hook
+             */
+             this.m_sCallOnce = "CALL_ONCE";
 
             this.m_oActiveController = null;
 
@@ -89,15 +93,20 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 this.m_oActiveController = oController;
             }
 
+            this.addMessageHook = function (sMessageType, oController, fCallback) {
+                return this.addMessageHook(sMessageType,oConstantsService,fCallback,false);
+            }
+
             /**
              * Adds a Message Hook to a message type.
              * The hook will be executed once when a message of the specified type is received.
              */
-            this.addMessageHook = function (sMessageType, oController, fCallback) {
+            this.addMessageHook = function (sMessageType, oController, fCallback, bCallOnce) {
                 oHook = {};
                 oHook[this.m_sHookMessageCode] = sMessageType;
                 oHook[this.m_sHookController] = oController;
                 oHook[this.m_sHookFunction] = fCallback;
+                oHook[this.m_sCallOnce] = bCallOnce;
 
                 this.m_afMessageHooks.push(oHook);
 
@@ -177,7 +186,10 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                                         if (oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookMessageCode]===oMessageResult.messageCode) {
                                             var fCallbackFunction = oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookFunction]
                                             fCallbackFunction(oMessageResult, oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookController]);
-                                            oThisService.m_afMessageHooks.splice(iHooks, 1);
+
+                                            if (oThisService.m_afMessageHook[iHooks][oThisService.m_sCallOnce]) {
+                                                oThisService.m_afMessageHooks.splice(iHooks, 1);
+                                            }
                                         }
                                     }
                                 }
