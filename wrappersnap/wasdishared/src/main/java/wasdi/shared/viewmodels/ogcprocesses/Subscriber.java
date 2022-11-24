@@ -1,4 +1,4 @@
-package ogc.wasdi.processes.viewmodels;
+package wasdi.shared.viewmodels.ogcprocesses;
 
 public class Subscriber {
 	private String successUri = null;

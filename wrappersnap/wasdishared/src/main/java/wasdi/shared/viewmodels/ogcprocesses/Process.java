@@ -1,4 +1,4 @@
-package ogc.wasdi.processes.viewmodels;
+package wasdi.shared.viewmodels.ogcprocesses;
 
 import java.util.Map;
 

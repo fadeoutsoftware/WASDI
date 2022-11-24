@@ -9,11 +9,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ogc.wasdi.processes.viewmodels.ApiException;
-import ogc.wasdi.processes.viewmodels.Execute;
-import ogc.wasdi.processes.viewmodels.ProcessList;
-import ogc.wasdi.processes.viewmodels.StatusInfo;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ogcprocesses.ApiException;
+import wasdi.shared.viewmodels.ogcprocesses.Execute;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.viewmodels.ogcprocesses.StatusInfo;
 
 @Path("processes")
 public class ProcessesResource {
@@ -49,7 +49,7 @@ public class ProcessesResource {
     public Response getProcessDescription(@PathParam("processID") String sProcessID) {
     	try {
     		// nota http 404 se non esiste
-    		ogc.wasdi.processes.viewmodels.Process oProcess = new ogc.wasdi.processes.viewmodels.Process();
+    		wasdi.shared.viewmodels.ogcprocesses.Process oProcess = new wasdi.shared.viewmodels.ogcprocesses.Process();
     		
     		return Response.status(Status.OK).entity(oProcess).build();
     	}
@@ -67,7 +67,7 @@ public class ProcessesResource {
 	 * @return
 	 */
     @POST
-    @Path("/{processID}/execute")
+    @Path("/{processID}/execution")
     @Produces(MediaType.APPLICATION_JSON)
     public Response executeApplication(@PathParam("processID") String sProcessID, Execute oExecute) {
     	try {

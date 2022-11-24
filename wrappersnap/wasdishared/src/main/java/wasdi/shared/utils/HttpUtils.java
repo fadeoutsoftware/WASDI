@@ -50,6 +50,15 @@ public final class HttpUtils {
 	private HttpUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
+	
+	/**
+	 * Internal version of get 
+	 * @param sUrl
+	 * @return
+	 */
+	public static String httpGet(String sUrl) {
+		return standardHttpGETQuery(sUrl, null);
+	}	
 
 	/**
 	 * Standard http get utility function
@@ -92,163 +101,7 @@ public final class HttpUtils {
 
 		return sMessage;
 	}
-
-	/**
-	 * Standard http delete utility function
-	 * 
-	 * @param sUrl url to call
-	 * @param asHeaders headers dictionary
-	 * @return server response
-	 */
-	public static String httpDelete(String sUrl, Map<String, String> asHeaders) {
-		String sMessage = "";
-
-		if (sUrl == null || sUrl.isEmpty()) {
-			Utils.debugLog("Wasdi.httpDelete: invalid URL, aborting");
-			return sMessage;
-		}
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-			oConnection.setRequestMethod("DELETE");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			oConnection.connect();
-
-			int iResponseCode =  oConnection.getResponseCode();
-
-			if (200 <= iResponseCode && 299 >= iResponseCode) {
-				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-				String sInputLine;
-				StringBuilder oResponse = new StringBuilder();
-
-				while ((sInputLine = oInputBuffer.readLine()) != null) {
-					oResponse.append(sInputLine);
-				}
-				oInputBuffer.close();
-
-				return oResponse.toString();
-			} else {
-				sMessage = oConnection.getResponseMessage();
-				Utils.debugLog("Wasdi.httpDelete:  connection failed, message follows");
-				Utils.debugLog(sMessage);
-
-				sMessage = "";
-			}
-
-			oConnection.disconnect();
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-		}
-
-		return sMessage;
-	}
-
-	/**
-	 * Get the size of a file to be downloaded via HTTP.
-	 * 
-	 * @param sUrl url to call
-	 * @param asHeaders headers dictionary
-	 * @return the size of the file
-	 */
-	public static long getDownloadFileSizeViaHttp(String sUrl, Map<String, String> asHeaders) {
-		long lLenght = 0L;
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			oConnection.setConnectTimeout(2000);
-			oConnection.setReadTimeout(2000);
-
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("GET");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			oConnection.connect();
-
-			lLenght = getHttpResponseContentLength(oConnection);
-
-			oConnection.disconnect();
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-		}
-
-		return lLenght;
-	}
-
-	public static String downloadFile(String sUrl, Map<String, String> asHeaders, String sOutputFilePath) {
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-				oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-			}
-
-			int responseCode =  oConnection.getResponseCode();
-
-			if (responseCode == HttpURLConnection.HTTP_OK) {
-
-				Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
-				List<String> asContents = null;
-				if (null != aoHeaders) {
-					asContents = aoHeaders.get("Content-Disposition");
-				}
-				String sAttachmentName = null;
-				if (null != asContents) {
-					String sHeader = asContents.get(0);
-					sAttachmentName = sHeader.split("filename=")[1];
-					if (sAttachmentName.startsWith("\"")) {
-						sAttachmentName = sAttachmentName.substring(1);
-					}
-					if(sAttachmentName.endsWith("\"")) {
-						sAttachmentName = sAttachmentName.substring(0, sAttachmentName.length() - 1);
-					}
-					Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
-				}
-				
-
-				
-				File oTargetFile = new File(sOutputFilePath);
-				File oTargetDir = oTargetFile.getParentFile();
-				oTargetDir.mkdirs();
-
-
-				try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
-						InputStream oInputStream = oConnection.getInputStream()) {
-					// 	opens an output stream to save into file
-					Util.copyStream(oInputStream, oOutputStream);
-				} catch (Exception oEx) {
-					oEx.printStackTrace();
-				}
-				return sOutputFilePath;
-			} else {
-				String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
-				Utils.debugLog(sMessage);
-				return "";
-			}
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-
+	
 	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
 
 		String sResult = null;
@@ -271,7 +124,7 @@ public final class HttpUtils {
 				int iResponseCode = oConnection.getResponseCode();
 				Utils.debugLog("HttpUtils.standardHttpGETQuery: Response Code : " + iResponseCode);
 				String sResponseExtract = null;
-				if (200 == iResponseCode) {
+				if (iResponseCode >= 200 && iResponseCode<=299) {
 					InputStream oInputStream = oConnection.getInputStream();
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					if (null != oInputStream) {
@@ -370,6 +223,196 @@ public final class HttpUtils {
 
 		return oHttpCallResponse;
 	}
+	
+	/**
+	 * Get the http headers for a basic authentication
+	 * @param sDownloadUser
+	 * @param sDownloadPassword
+	 * @return
+	 */
+	public static Map<String, String> getBasicAuthorizationHeaders(String sDownloadUser, String sDownloadPassword) {
+		
+		try {
+			// Add the auth header
+			String sAuth = sDownloadUser + ":" + sDownloadPassword;
+			String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+			String sAuthHeaderValue = "Basic " + sEncodedAuth;
+
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Authorization", sAuthHeaderValue);
+			
+			return asHeaders;			
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("HttpUtils.getBasicAuthorizationHeaders Exception " + oEx.toString());
+			return new HashMap<String, String>();
+		}
+	}
+
+	/**
+	 * Standard http delete utility function
+	 * 
+	 * @param sUrl url to call
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpDelete(String sUrl, Map<String, String> asHeaders) {
+		String sMessage = "";
+
+		if (sUrl == null || sUrl.isEmpty()) {
+			Utils.debugLog("Wasdi.httpDelete: invalid URL, aborting");
+			return sMessage;
+		}
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			oConnection.setRequestMethod("DELETE");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			oConnection.connect();
+
+			int iResponseCode =  oConnection.getResponseCode();
+
+			if (200 <= iResponseCode && 299 >= iResponseCode) {
+				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+				String sInputLine;
+				StringBuilder oResponse = new StringBuilder();
+
+				while ((sInputLine = oInputBuffer.readLine()) != null) {
+					oResponse.append(sInputLine);
+				}
+				oInputBuffer.close();
+
+				return oResponse.toString();
+			} else {
+				sMessage = oConnection.getResponseMessage();
+				Utils.debugLog("Wasdi.httpDelete:  connection failed, message follows");
+				Utils.debugLog(sMessage);
+
+				sMessage = "";
+			}
+
+			oConnection.disconnect();
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return sMessage;
+	}
+
+	/**
+	 * Get the size of a file to be downloaded via HTTP.
+	 * 
+	 * @param sUrl url to call
+	 * @param asHeaders headers dictionary
+	 * @return the size of the file
+	 */
+	public static long getDownloadFileSizeViaHttp(String sUrl, Map<String, String> asHeaders) {
+		long lLenght = 0L;
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setConnectTimeout(2000);
+			oConnection.setReadTimeout(2000);
+
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("GET");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			oConnection.connect();
+
+			lLenght = getHttpResponseContentLength(oConnection);
+
+			oConnection.disconnect();
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return lLenght;
+	}
+	
+	/**
+	 * Downloads a file from a specified url and saves it in a specified path
+	 * @param sUrl Url of the file to download
+	 * @param asHeaders Map of key-value that will be added as headers to the request
+	 * @param sOutputFilePath Output path where to save the file
+	 * @return The output path if all ok, empty string in case of error
+	 */
+	public static String downloadFile(String sUrl, Map<String, String> asHeaders, String sOutputFilePath) {
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+				oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+			}
+
+			int responseCode =  oConnection.getResponseCode();
+
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+
+				Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
+				List<String> asContents = null;
+				if (null != aoHeaders) {
+					asContents = aoHeaders.get("Content-Disposition");
+				}
+				String sAttachmentName = null;
+				if (null != asContents) {
+					String sHeader = asContents.get(0);
+					sAttachmentName = sHeader.split("filename=")[1];
+					if (sAttachmentName.startsWith("\"")) {
+						sAttachmentName = sAttachmentName.substring(1);
+					}
+					if(sAttachmentName.endsWith("\"")) {
+						sAttachmentName = sAttachmentName.substring(0, sAttachmentName.length() - 1);
+					}
+					Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
+				}
+				
+
+				
+				File oTargetFile = new File(sOutputFilePath);
+				File oTargetDir = oTargetFile.getParentFile();
+				oTargetDir.mkdirs();
+
+
+				try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+						InputStream oInputStream = oConnection.getInputStream()) {
+					// 	opens an output stream to save into file
+					Util.copyStream(oInputStream, oOutputStream);
+				} catch (Exception oEx) {
+					oEx.printStackTrace();
+				}
+				return sOutputFilePath;
+			} else {
+				String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
+				Utils.debugLog(sMessage);
+				return "";
+			}
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+
+
 
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
 
@@ -805,6 +848,7 @@ public final class HttpUtils {
 
 			Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
 			String sMessage = oByteArrayOutputStream.toString();
+			
 			if (200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode()) {
 				return sMessage;
 			} else {
@@ -936,44 +980,5 @@ public final class HttpUtils {
 		return null;
 	}
 
-	/**
-	 * Internal version of get 
-	 * @param sUrl
-	 * @return
-	 */
-	public static String httpGetResults(String sUrl) {
-		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
-
-		Map<String, String> asHeaders = new HashMap<>();
-
-		long lStart = System.nanoTime();
-		String sResult = standardHttpGETQuery(sUrl, asHeaders);
-		long lEnd = System.nanoTime();
-
-		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
-
-		return sResult;
-	}
-
-	public static String httpGetResults(String sUrl, String sDownloadUser, String sDownloadPassword) {
-		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
-
-		// Add the auth header
-		String sAuth = sDownloadUser + ":" + sDownloadPassword;
-		String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
-		String sAuthHeaderValue = "Basic " + sEncodedAuth;
-
-		Map<String, String> asHeaders = new HashMap<>();
-		asHeaders.put("Authorization", sAuthHeaderValue);
-
-
-		long lStart = System.nanoTime();
-		String sResult = standardHttpGETQuery(sUrl, asHeaders);
-		long lEnd = System.nanoTime();
-
-		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
-
-		return sResult;
-	}
 
 }

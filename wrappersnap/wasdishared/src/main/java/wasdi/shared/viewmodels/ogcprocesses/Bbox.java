@@ -1,4 +1,4 @@
-package ogc.wasdi.processes.viewmodels;
+package wasdi.shared.viewmodels.ogcprocesses;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -1,5 +1,5 @@
 
-package ogc.wasdi.processes.viewmodels;
+package wasdi.shared.viewmodels.ogcprocesses;
 
 import java.util.ArrayList;
 import java.util.List;

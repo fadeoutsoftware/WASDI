@@ -68,6 +68,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
 			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}		
+		else if (sType.equals(ProcessorTypes.EOEPCA)) {
+			return new EoepcaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
 		else {
 			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}

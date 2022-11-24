@@ -58,9 +58,14 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ogcprocesses.Conformance;
+import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessSummary;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -2116,6 +2121,8 @@ public class dbUtils {
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 
             boolean bExit = false;
+            
+            testOGC();
 
             s_oScanner = new Scanner(System.in);
 
@@ -2185,6 +2192,27 @@ public class dbUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void testOGC() {
+    	OgcProcessesClient oAPI = new OgcProcessesClient("https://gp-ades-03.terradue.com/wasdi/wps3/");
+    	
+    	LandingPage oLandingPage = oAPI.getLandingPage();
+    	Utils.debugLog(oLandingPage.toString());
+    	
+    	Conformance oConformance = oAPI.getConformance();
+    	Utils.debugLog(oConformance.toString());
+    	
+    	ProcessList oProcessList = oAPI.getProcesses();
+    	
+    	for (int iProcs = 0; iProcs < oProcessList.getProcesses().size(); iProcs++) {
+    		ProcessSummary oProcSum = oProcessList.getProcesses().get(iProcs);
+    		
+    		if (oProcSum != null)  {
+    			Utils.debugLog(oProcSum.getId());
+    		}
+    	}
+    	
     }
 
 	private static void ecoStress() {

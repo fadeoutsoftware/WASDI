@@ -480,7 +480,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 			}
 
 			try {
-				sResult = HttpUtils.httpGetResults(sUrl, s_oDataProviderConfig.user, s_oDataProviderConfig.password);
+				sResult = HttpUtils.standardHttpGETQuery(sUrl, HttpUtils.getBasicAuthorizationHeaders(s_oDataProviderConfig.user, s_oDataProviderConfig.password));
 			} catch (Exception oEx) {
 				Utils.debugLog("QueryExecutorGPM.performRequest: exception in http get call: " + oEx.toString());
 			}

@@ -9,13 +9,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ogc.wasdi.processes.viewmodels.ApiException;
-import ogc.wasdi.processes.viewmodels.JobList;
-import ogc.wasdi.processes.viewmodels.LandingPage;
-import ogc.wasdi.processes.viewmodels.ProcessList;
-import ogc.wasdi.processes.viewmodels.Results;
-import ogc.wasdi.processes.viewmodels.StatusInfo;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ogcprocesses.ApiException;
+import wasdi.shared.viewmodels.ogcprocesses.JobList;
+import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.viewmodels.ogcprocesses.Results;
+import wasdi.shared.viewmodels.ogcprocesses.StatusInfo;
 
 @Path("jobs")
 public class JobsResource {
