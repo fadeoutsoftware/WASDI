@@ -1,117 +1,120 @@
 FROM ubuntu:20.04
 
-MAINTAINER WASDI <info@wasdi.cloud>
+
+MAINTAINER "WASDI SARL"
 
 
-# Define argument used to create a user and a group in the container
-# Values are provided with the docker build command
-ARG USR_NAME
-ARG USR_ID
-ARG GRP_NAME
-ARG GRP_ID
-ARG USR_HOME="/home/wasdi"
-ARG PIP_INSTALL_WASDI_ARGUMENTS
-
-
-# Create environment variables:
-#   - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
-#   - VIRTUAL_ENV: to define the path to the venv we will use
-ENV DEBIAN_FRONTEND="noninteractive"
-ENV VIRTUAL_ENV=$USR_HOME/venv
-
-
-# Create a user, create a group and change rights on /home
-RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
-    useradd --create-home --home-dir $USR_HOME --uid $USR_ID --gid $GRP_ID --non-unique --shell /bin/bash $USR_NAME && \
-    chmod 755 /home
-
-
-# Set the workdir to $USR_HOME
-WORKDIR "$USR_HOME"
-
-
-# Update the system and install packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
-        build-essential \
-        curl \
-        git \
-        gdal-bin \
-        libffi-dev \
-        libgdal-dev \
-        libpq-dev \
-        libssl-dev \
-        libxml2-dev \
-        libxslt1-dev \
-        locate \
-        nano \
-        python3 \
-        python3-dev \
-        python3-gdal \
-        python3-pip \
-        python3-venv \
-        software-properties-common \
-        wget \
-        zlib1g-dev
-
-# Change rights
-RUN chmod -R 755 $USR_HOME/
-
-
-# From now, all commands executed are executed with the user $USR_NAME who must not be root
-USER $USR_NAME
-
-
-# Create a virtual environment
-RUN python3 -m venv $VIRTUAL_ENV
-
-
-# Override the environment PATH variable to be able to use binaries provided by our virtual environment
-# From here, all pip3 commands are executed in our virtual environment because of this setting
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-
-# [IN OUR VENV] Install needed Python libraries
-RUN pip3 install flask \
-    gunicorn \
-    requests \
-    numpy \
-    pandas \
-    rasterio \
-    wheel
-
-# [IN OUR VENV] Install needed Python GDAL library
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal && \
-    pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
-
-
-# Copy our files
-COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
-
-# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
-RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
-
-# From now, all commands executed are executed as root
+# From now, all commands executed are executed with the user 'root'
 USER root
 
 
-# Change rights
-RUN chmod -R 755 $USR_HOME/
+# Define arguments
+# Values not setted here are provided with the docker build command
+ARG sContainerGroupId="1000"
+ARG sContainerGroupName="wasdi"
+ARG sContainerPipWasdiArguments
+ARG sContainerUserId="1000"
+ARG sContainerUserHomeDirectory="/home/$sContainerGroupName"
+ARG sContainerUserName="wasdi"
 
 
-# Install user's packages:
-#   - only if $USR_HOME/packages.txt exists
-#   - we have to become root using USER instruction
-RUN test -f $USR_HOME/packages.txt && apt-get install -y `cat $USR_HOME/packages.txt | tr "\n" " "`; exit 0
+# Create environment variables:
+#   - SYSTEM (name are imposed):
+#     - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
+#     - PATH: to use binaries from our future virtual environment as default
+#     - PYTHONDONTWRITEBYTECODE: to stop Python to write pyc files
+#     - PYTHONUNBUFFERED: to force 'print' to flush message directly
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV PATH="$sContainerUserHomeDirectory/venv/bin:$PATH"
+ENV PYTHONDONTWRITEBYTECODE="False"
+ENV PYTHONUNBUFFERED="True"
 
 
-# From now, all commands executed are executed with the user $USR_NAME who must not be root
-USER $USR_NAME
+# Big task 1:
+#   - Create a group
+#   - Create a user
+#   - Change rights on /home
+#   - Configure the APT command
+#   - Update the repository cache
+#   - Update the system
+#   - Install needed packages
+RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
+    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+    echo "deb http://lu.archive.ubuntu.com/ubuntu/ focal main restricted" > /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install ca-certificates && \
+    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb mirror://mirrors.ubuntu.com/mirrors.txt focal-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get upgrade && \
+    apt-get install \
+        gdal-bin \
+        git \
+        python3 \
+        python3-gdal \
+        python3-requests \
+        python3-pip \
+        python3-venv && \
+    rm -rf /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm -rf {} +
 
 
-# Install user's Python libraries:
-#   - only if $USR_HOME/pip.txt exists
-RUN test -f $USR_HOME/pip.txt && pip3 install `cat $USR_HOME/pip.txt | tr "\n" " "`; exit 0
+# Big task 2:
+#   - create the internal group
+#   - create the internal user
+#   - create all directories
+#   - create a sudo configuration to become root with tomcat
+RUN groupadd --gid $sContainerGroupId --non-unique $sContainerGroupName && \
+    useradd --create-home --home-dir $sContainerUserHomeDirectory --uid $sContainerUserId --gid $sContainerGroupId --non-unique --shell /bin/bash $sContainerUserName && \
+    mkdir -p $sContainerUserHomeDirectory/application && \
+    chown -R $sContainerUserName:$sContainerGroupName $sContainerUserHomeDirectory/ && \
+    chmod -R 755 $sContainerUserHomeDirectory/
 
+
+# Set the workdir to $sContainerUserHomeDirectory
+WORKDIR $sContainerUserHomeDirectory/application
+
+
+# From now, all commands executed are executed with the user $sContainerUserName who must not be root
+USER $sContainerUserName
+
+
+# Create a virtual environment
+# [IN OUR VENV] Install needed Python libraries
+# Please note:
+#   - 'wasdi' is installed independently to be able to set the repository
+#   - there is no cache: I suppose because it is too much dynamic
+RUN python3 -m venv $sContainerUserHomeDirectory/venv && \
+    pip3 install --no-cache-dir --no-compile $sContainerPipWasdiArguments wasdi && \
+    pip3 install --no-cache-dir --no-compile \
+        numpy
+
+
+# Copy:
+#   - the tool to install package
+#   - the application files
+COPY --chown=$sContainerUserName:$sContainerGroupName ./ $sContainerUserHomeDirectory/application/
+
+
+# Install user's Python libraries only if $sContainerUserHomeDirectory/application/pip.txt exists
+RUN bash $sContainerUserHomeDirectory/application/installUserPackage.sh --home-directory $sContainerUserHomeDirectory/application --package-pip
+
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+# Install user's packages only if $sContainerUserHomeDirectory/application/packages.txt exists
+RUN bash $sContainerUserHomeDirectory/application/installUserPackage.sh --home-directory $sContainerUserHomeDirectory/application --package-apt
+
+
+# From now, all commands executed are executed with the user $sContainerUserName who must not be root
+USER $sContainerUserName
+
+
+# Execute the processor
+CMD ["python3", "eoepcaProcessorExecutor.py"]
