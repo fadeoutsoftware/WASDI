@@ -7,7 +7,7 @@ WASDI python programming library CHANGELOG.md, according to the
 ### Added
 - added separated timeout for the upload of files
 - added support to sessionId and procId in config
-- added "on non wasdi server" option
+- added "on external server" option
 
 ## [0.7.5.1] - 2022-10-12
 ### Added

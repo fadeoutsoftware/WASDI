@@ -71,14 +71,16 @@ $graph:
         - entryname: config.json
           entry: |-
             {
-              "USER": "$( inputs.wasdi__user__id )" 
-              "WORKSPACEID": "$( inputs.wasdi__user__id )"
+              "USER": "$( inputs.wasdi__user__id )",
+              "WORKSPACEID": "$( inputs.wasdi__user__id )",
+              "SESSIONID": "$( inputs.wasdi__session__id )",
+              "MYPROCID": "$( inputs.wasdi__proc__id )"
             }            
         - entryname: run_wasdi_app.sh
           entry: |-
             #!/bin/bash
             export HOME=$PWD
-            eoepcaProcessorExecutor params.json $( inputs.wasdi__session__id ) $( inputs.wasdi__proc__id ) $@    
+            eoepcaProcessorExecutor    
             res=$?
             rm -f params.json
             rm -f run_me.sh
@@ -86,8 +88,6 @@ $graph:
             exit $res
 
   baseCommand: ["python3", "eoepcaProcessorExecutor.py"]
- 
-  arguments:
   
   inputs: 
     {{ wasdiAppParametersDeclaration }} 
