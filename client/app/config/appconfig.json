@@ -514,7 +514,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
                 }
