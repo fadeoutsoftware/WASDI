@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.5.1
+Version 0.8.0.0
 
-Last Update: 12/10/2022
+Last Update: 25/11/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -86,6 +86,7 @@ m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
 #m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_iRequestsTimeout = 2 * 60
+m_iUploadTimeout = 10 * 60
 
 
 def printStatus():
@@ -490,10 +491,25 @@ def geRequestsTimeout():
 
 def setRequestsTimeout(iTimeout):
     """
-    :param fTimeout: the timeout to be set for HTTP requests
+    :param iTimeout: the timeout to be set for HTTP requests
     """
     global m_iRequestsTimeout
     m_iRequestsTimeout = iTimeout
+
+def geUploadTimeout():
+    """
+    :return: the timeout for HTTP uploads
+    """
+    global m_iUploadTimeout
+    return m_iUploadTimeout
+
+
+def setUploadTimeout(iTimeout):
+    """
+    :param iTimeout: the timeout to be set for HTTP requests
+    """
+    global m_iUploadTimeout
+    m_iUploadTimeout = iTimeout
 
 
 def refreshParameters():
