@@ -32,9 +32,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.7.5.1
+Version 0.8.0.0
 
-Last Update: 12/10/2022
+Last Update: 25/11/2022
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -85,25 +85,15 @@ m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
 #m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
+m_bIsOnExternalServer = False
 m_iRequestsTimeout = 2 * 60
+m_iUploadTimeout = 10 * 60
 
 
 def printStatus():
     """Prints status
     """
-    global m_sActiveWorkspace
     global m_sWorkspaceOwner
-    global m_sWorkspaceBaseUrl
-    global m_sParametersFilePath
-    global m_sSessionId
-    global m_sBasePath
-    global m_bDownloadActive
-    global m_bUploadActive
-    global m_bVerbose
-    global m_aoParamsDictionary
-    global m_sMyProcId
-    global m_sBaseUrl
-    global m_bIsOnServer
 
     _log('')
     _log('[INFO] waspy.printStatus: user: ' + str(getUser()))
@@ -120,6 +110,7 @@ def printStatus():
     _log('[INFO] waspy.printStatus: proc id: ' + str(getProcId()))
     _log('[INFO] waspy.printStatus: base url: ' + str(getBaseUrl()))
     _log('[INFO] waspy.printStatus: is on server: ' + str(getIsOnServer()))
+    _log('[INFO] waspy.printStatus: is on external server: ' + str(getIsOnExternalServer()))
     _log('[INFO] waspy.printStatus: workspace base url: ' + str(getWorkspaceBaseUrl()))
     if m_bValidSession:
         _log('[INFO] waspy.printStatus: session is valid :-)')
@@ -378,13 +369,30 @@ def setIsOnServer(bIsOnServer):
 
 def getIsOnServer():
     """
-    Get the WASDI API URL
+    Are we running on a WASDI Server?
 
     :return: True if it is running on server, False if it is running on the local Machine
     """
     global m_bIsOnServer
     return m_bIsOnServer
 
+def setIsOnExternalServer(bIsOnExternalServer):
+    """
+    Set the Is on  External Server Flag: keep it false, as default, while developing or when in another infrastructure
+
+    :param bIsOnServer: set the flag to know if the processor is running on an external server
+    """
+    global m_bIsOnExternalServer
+    m_bIsOnExternalServer = bIsOnExternalServer
+    
+def getIsOnExternalServer():
+    """
+    Are we running on an External Server?
+
+    :return: True if it is running on an external server, False if it is running on WASDI or on the local Machine
+    """
+    global m_bIsOnExternalServer
+    return m_bIsOnExternalServer
 
 def setDownloadActive(bDownloadActive):
     """
@@ -490,10 +498,25 @@ def geRequestsTimeout():
 
 def setRequestsTimeout(iTimeout):
     """
-    :param fTimeout: the timeout to be set for HTTP requests
+    :param iTimeout: the timeout to be set for HTTP requests
     """
     global m_iRequestsTimeout
     m_iRequestsTimeout = iTimeout
+
+def geUploadTimeout():
+    """
+    :return: the timeout for HTTP uploads
+    """
+    global m_iUploadTimeout
+    return m_iUploadTimeout
+
+
+def setUploadTimeout(iTimeout):
+    """
+    :param iTimeout: the timeout to be set for HTTP requests
+    """
+    global m_iUploadTimeout
+    m_iUploadTimeout = iTimeout
 
 
 def refreshParameters():
@@ -551,7 +574,7 @@ def init(sConfigFilePath=None):
         return False
 
     if m_sBasePath is None:
-        if m_bIsOnServer is True:
+        if getIsOnServer() is True:
             m_sBasePath = '/data/wasdi/'
         else:
             sHome = os.path.expanduser("~")
@@ -1033,11 +1056,10 @@ def getFullProductPath(sProductName):
     global m_sBasePath
     global m_sActiveWorkspace
     global m_sUser
-    global m_bIsOnServer
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
-    if m_bIsOnServer is True:
+    if getIsOnServer() is True:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
@@ -1047,7 +1069,7 @@ def getFullProductPath(sProductName):
     sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
 
     # If we are on the local PC
-    if m_bIsOnServer is False:
+    if getIsOnServer() is False:
         # If the download is active
         if m_bDownloadActive is True:
             # If there is no local file
@@ -1085,7 +1107,7 @@ def getSavePath():
     global m_sActiveWorkspace
     global m_sUser
 
-    if m_bIsOnServer is True:
+    if getIsOnServer() is True:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
@@ -1225,7 +1247,7 @@ def updateStatus(sStatus, iPerc=-1):
     """
     try:
 
-        if m_bIsOnServer is False:
+        if getIsOnServer() is False and getIsOnExternalServer() is False:
             _log("[INFO] Running Locally, will not update status on server")
             return sStatus
 
@@ -1363,7 +1385,7 @@ def updateProgressPerc(iPerc):
             if iPerc > 100:
                 iPerc = 100
 
-        if m_bIsOnServer is False:
+        if getIsOnServer() is False and getIsOnExternalServer() is False:
             _log("[INFO] Running locally, will not updateProgressPerc on server")
             return "RUNNING"
         else:
@@ -1444,9 +1466,8 @@ def setPayload(data):
     global m_sBaseUrl
     global m_sSessionId
     global m_sMyProcId
-    global m_bIsOnServer
 
-    if m_bIsOnServer is True:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         setProcessPayload(m_sMyProcId, data)
     else:
         _log('wasdi.setPayload( ' + str(data))
@@ -1687,7 +1708,7 @@ def wasdiLog(sLogRow):
 
     sForceLogRow = str(sLogRow)
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         asHeaders = _getStandardHeaders()
         sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + m_sMyProcId
         try:
@@ -2182,7 +2203,7 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     if sName is not None:
         sUrl += "&name="+urllib.parse.quote(sName)
     
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
@@ -2245,7 +2266,7 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     if sName is not None:
         sUrl += "&name="+ urllib.parse.quote(sName)    
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
@@ -2575,7 +2596,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
 
     sUrl = getBaseUrl() + '/processors/run?workspace=' + m_sActiveWorkspace + '&name=' + sProcessorName
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl = sUrl + '&parent=' + getProcId()
 
     # Try up to three time
@@ -2644,7 +2665,7 @@ def _uploadFile(sFileName):
         oResponse = None
         try:
             with open(sFullPath, 'rb') as oFile:
-                oResponse = requests.post(sUrl, files={'file': (sFileName, oFile)}, headers=asHeaders, timeout=m_iRequestsTimeout)
+                oResponse = requests.post(sUrl, files={'file': (sFileName, oFile)}, headers=asHeaders, timeout=m_iUploadTimeout)
         except Exception as oEx:
             wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
         try:
@@ -2725,7 +2746,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     sUrl = m_sBaseUrl + "/processing/subset?source=" + sInputFile + "&name=" + \
            sOutputFile + "&workspace=" + m_sActiveWorkspace
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
@@ -2800,7 +2821,7 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
     sUrl = m_sBaseUrl + "/processing/multisubset?source=" + sInputFile + "&name=" + \
            sInputFile + "&workspace=" + m_sActiveWorkspace
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
@@ -2911,7 +2932,8 @@ def _internalExecuteSen2Cor(sProductName, sWorkspaceId, bAsynch):
 
     sUrl += "&productName="
     sUrl += sProductName
-    if m_bIsOnServer:
+    
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parentId="
         sUrl += getProcId()
 
@@ -3055,7 +3077,7 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     sUrl = getBaseUrl() + "/processing/mosaic?name=" + sOutputFile + "&workspace=" + \
            getActiveWorkspaceId()
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
@@ -3164,7 +3186,7 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
 
         sUrl = getWorkspaceBaseUrl() + "/catalog/copytosfpt?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
 
-        if m_bIsOnServer:
+        if getIsOnServer() is True or getIsOnExternalServer() is True:
             sUrl += "&parent="
             sUrl += getProcId()
 
@@ -3390,6 +3412,10 @@ def _loadConfig(sConfigFilePath):
                 setBaseUrl(oJson['BASEURL'])
             if 'REQUESTSTIMEOUT' in oJson:
                 setRequestsTimeout(oJson['REQUESTSTIMEOUT'])
+            if 'SESSIONID' in oJson:
+                setSessionId(oJson['SESSIONID'])               
+            if 'MYPROCID' in oJson:
+                setProcId(oJson['MYPROCID']) 
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -3455,7 +3481,7 @@ def _unzip(sAttachmentName, sPath):
 
 
 def _waitForResume():
-    if m_bIsOnServer:
+    if getIsOnServer():
         # Put this processor as READY
         updateStatus("READY")
 
@@ -3536,7 +3562,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
 
     sResult = ''
     try:
-        if m_bIsOnServer is False:
+        if getIsOnServer() is False:
             if getUploadActive() is True:
                 if fileExistsOnWasdi(sFileName) is False:
                     _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
@@ -3569,7 +3595,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None, sStyle=""):
             if sStyle != "":
                 sUrl = sUrl + "&style=" + sStyle
 
-        if m_bIsOnServer:
+        if getIsOnServer() is True or getIsOnExternalServer() is True:
             sUrl += "&parent="
             sUrl += getProcId()
 
@@ -3659,7 +3685,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     sProcessId = ''
     sUrl = getBaseUrl() + "/workflows/run?workspace=" + getActiveWorkspaceId()
 
-    if m_bIsOnServer:
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
 
