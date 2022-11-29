@@ -51,7 +51,6 @@ public class DockersConfig {
 	public ArrayList<DockerRegistryConfig> getRegisters() {
 		try {
 			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
-			Collections.reverse(registers);
 		}		
 		catch (Exception oEx) {
 			Utils.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");

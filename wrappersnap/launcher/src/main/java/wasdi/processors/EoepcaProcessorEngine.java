@@ -133,7 +133,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
-				sAppParametersDeclaration += "    " + sKey + ":\n";
+				sAppParametersDeclaration += "    - " + sKey + ":\n";
 				sAppParametersDeclaration += "      type: ";
 				
 				// Set the type
@@ -158,6 +158,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sAppParametersAsArgs += "        " + sKey +": "+ sKey + "\n";
 			}
 			
+			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
+			sAppParametersAsArgs = sAppParametersDeclaration.substring(0, sAppParametersAsArgs.length()-1);
 			
 		}
 		catch (Exception oEx) {
@@ -198,7 +200,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sBodyTemplateOutput = getProcessorFolder(sProcessorName) + "appDeployBody.json";
 		
 		HashMap<String, Object> aoBodyParameters = new HashMap<>();		
-		aoCWLParameters.put("cwlLink", sCWLTemplateOutput);
+		aoBodyParameters.put("cwlLink", sCWLTemplateOutput);
 		
 		boolean bTranslateBody = oJinjaTemplateRenderer.translate(sBodyTemplateInput, sBodyTemplateOutput, aoBodyParameters);
 		

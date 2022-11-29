@@ -50,10 +50,12 @@ public class Deployprocessor extends Operation {
 	        
 	        try {
 	        	
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-					oEngine.waitForApplicationToStart(oParameter);
-					oEngine.refreshPackagesInfo(oParameter);
-				}	        	
+	        	if (oEngine.isRunAfterDeploy()) {
+					if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+						oEngine.waitForApplicationToStart(oParameter);
+						oEngine.refreshPackagesInfo(oParameter);
+					}	        		
+	        	}
 	        	
 	        	String sName = oParameter.getName();
 	        	

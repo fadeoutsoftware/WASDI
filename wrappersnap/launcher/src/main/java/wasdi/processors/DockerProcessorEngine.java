@@ -45,11 +45,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Name of the generated Docker Image
 	 */
 	protected String m_sDockerImageName = "";
-	
-	/**
-	 * Flag to decide if the system must run the docker after the deploy or not
-	 */
-	protected boolean m_bRunAfterDeploy = true;
 
 	public DockerProcessorEngine() {
 		super();

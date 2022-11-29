@@ -400,11 +400,11 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	}
 
 	private static String buildCommandDockerBuild(String sProcessorFolder) {
-		return "bash " + sProcessorFolder + "tool" + FILE_SEPARATOR + "dockerBuild.sh";
+		return "bash " + sProcessorFolder + "tool" + s_sFILE_SEPARATOR + "dockerBuild.sh";
 	}
 
 	private static String buildCommandDockerPush(String sProcessorFolder) {
-		return "bash " + sProcessorFolder + "tool" + FILE_SEPARATOR + "dockerPush.sh";
+		return "bash " + sProcessorFolder + "tool" + s_sFILE_SEPARATOR + "dockerPush.sh";
 	}
 
 	private static String buildCommandDockerComposeUpJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
@@ -416,7 +416,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
 		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
+		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    up \\");
 		oSB.append(s_sLINE_SEPARATOR);
@@ -435,7 +435,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
 		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
+		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    stop");
 
@@ -452,7 +452,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file " + sProcessorFolder + "docker-compose_" + sJupyterNotebookCode + ".yml \\");
 		oSB.append(s_sLINE_SEPARATOR);
-		oSB.append("    --env-file " + sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env \\");
+		oSB.append("    --env-file " + sProcessorFolder + "var" + s_sFILE_SEPARATOR + "general_common.env \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    rm \\");
 		oSB.append(s_sLINE_SEPARATOR);
