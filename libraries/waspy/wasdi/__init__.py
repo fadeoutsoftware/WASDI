@@ -1312,12 +1312,16 @@ def waitProcesses(asProcIdList):
 
     while not bAllDone:
 
+        oResult = None
         try:
             oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders, timeout=m_iRequestsTimeout)
-        except Exception as oEx:
-            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
-        if (oResult is not None) and (oResult.ok is True):
+        except Exception as oEx:
+            wasdiLog("[ERROR] waitProcesses: there was an error contacting the API " + str(oEx))
+            # nothing else we can do
+            return asReturnStatus
+
+        if (oResult is not None) and oResult.ok:
             asResultStatus = oResult.json()
             asReturnStatus = asResultStatus
 
@@ -1327,6 +1331,16 @@ def waitProcesses(asProcIdList):
                 if not (sProcStatus == "DONE" or sProcStatus == "ERROR" or sProcStatus == "STOPPED"):
                     bAllDone = False
                     break
+        else:
+            iReturn = None
+            try:
+                iReturn = oResult.status_code
+            except Exception as oEx:
+                wasdiLog("[ERROR] waitProcesses: return status was not ok but cannot read it due to: " + str(type(oEx)) + ": " + str(oEx))
+            else:
+                wasdiLog("[ERROR] waitProcesses: return status was " + str(iReturn))
+            # nothing else we can do
+            return asReturnStatus
 
         if not bAllDone:
             # Sleep a little bit
