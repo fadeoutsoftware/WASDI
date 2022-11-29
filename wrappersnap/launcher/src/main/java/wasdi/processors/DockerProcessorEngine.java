@@ -41,6 +41,11 @@ import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
+	
+	/**
+	 * Name of the generated Docker Image
+	 */
+	protected String m_sDockerImageName = "";
 
 	public DockerProcessorEngine() {
 		super();
@@ -156,7 +161,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create Docker Util and deploy the docker
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-            oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
 
@@ -749,7 +754,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
             LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: deploy the image");
-            oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
             

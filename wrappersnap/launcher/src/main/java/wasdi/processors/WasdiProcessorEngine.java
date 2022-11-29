@@ -420,5 +420,15 @@ public abstract class WasdiProcessorEngine {
             return false;
         }
         return true;
-    }	
+    }
+
+
+	public String getTomcatUser() {
+		return m_sTomcatUser;
+	}
+
+
+	public void setTomcatUser(String sTomcatUser) {
+		this.m_sTomcatUser = sTomcatUser;
+	}	
 }

@@ -34,5 +34,10 @@ public class DockersConfig {
 	 * The amount of time (in millis) to wait between the attempts
 	 */
 	public Integer millisBetweenAttmpts = 5000;
+	
+	/**
+	 * List of docker registries supported
+	 */
+	public ArrayList<DockerRegistryConfig> registers;
 
 }

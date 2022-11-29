@@ -58,17 +58,21 @@ public class DockerUtils {
         m_sUser = sTomcatUser;
     }
 
+
     /**
      * Deploy a docker
+     * @return the docker image tag if ok, empty string in case of problems
      */
-    public boolean deploy() {
+    public String deploy() {
+    	
+    	String sDockerName = "";
 
         try {
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
 
-            String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
 
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
@@ -119,10 +123,10 @@ public class DockerUtils {
             LauncherMain.s_oLogger.debug("DockerUtils.deploy: created image " + sDockerName);
         } catch (Exception oEx) {
             Utils.debugLog("DockerUtils.deploy: " + oEx.toString());
-            return false;
+            return "";
         }
 
-        return true;
+        return sDockerName;
     }
 
     /**
@@ -330,43 +334,91 @@ public class DockerUtils {
 
         return true;
     }
-
+    
+    public boolean login() {
+    	return true;
+    }
+    
+    public boolean push(String sRegistryAddress, String sRegistryUser, String sRegistryPassword) {
+    	return true;
+    }
+    
+    /**
+     * Get the processor entity
+     * @return Processor
+     */
 	public Processor getProcessor() {
 		return m_oProcessor;
 	}
-
+	
+	/**
+	 * Set the processor Entity
+	 * @param oProcessor Processor Entity
+	 */
 	public void setProcessor(Processor oProcessor) {
 		this.m_oProcessor = oProcessor;
 	}
-
+	
+	/**
+	 * Get the processor Folder
+	 * @return processor Folder
+	 */
 	public String getProcessorFolder() {
 		return m_sProcessorFolder;
 	}
 
+	/**
+	 * Set the processor Folder
+	 * @param sProcessorFolder Processor Folder
+	 */
 	public void setProcessorFolder(String sProcessorFolder) {
 		this.m_sProcessorFolder = sProcessorFolder;
 	}
-
+	
+	/**
+	 * Get the actual WASDI Working Path
+	 * @return actual WASDI Working Path
+	 */
 	public String getWorkingRootPath() {
 		return m_sWorkingRootPath;
 	}
-
+	
+	/**
+	 * Set the actual WASDI Working Path
+	 * @param sWorkingRootPath actual WASDI Working Path
+	 */
 	public void setWorkingRootPath(String sWorkingRootPath) {
 		this.m_sWorkingRootPath = sWorkingRootPath;
 	}
-
+	
+	/**
+	 * Get the path of the log file for docker
+	 * @return
+	 */
 	public String getDockerLogFile() {
 		return m_sDockerLogFile;
 	}
-
+	
+	/**
+	 * Set the path of the log file for docker
+	 * @param sDockerLogFile
+	 */
 	public void setDockerLogFile(String sDockerLogFile) {
 		this.m_sDockerLogFile = sDockerLogFile;
 	}
 
+	/**
+	 * Get the name of user to pass to docker. Empty string to avoid.
+	 * @return
+	 */
 	public String getUser() {
 		return m_sUser;
 	}
-
+	
+	/**
+	 * Set the name of user to pass to docker. Empty string to avoid.
+	 * @param sUser
+	 */
 	public void setUser(String sUser) {
 		this.m_sUser = sUser;
 	}
