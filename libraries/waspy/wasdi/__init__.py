@@ -57,7 +57,6 @@ import traceback
 import zipfile
 import requests
 import getpass
-import sys
 import os.path
 import inspect
 from datetime import datetime
@@ -3812,6 +3811,64 @@ def _getDefaultCRS():
             "          AXIS[\"Geodetic longitude\", EAST], \r\n" +
             "          AXIS[\"Geodetic latitude\", NORTH]]"
     )
+
+
+def asynchPublishBand(sFileName, sBand):
+    """
+    publishes a band of a given product
+
+    :param sProduct: the product containing the desired band
+    :param sBand: the band name in the product
+
+    :return: a string containing the processObjId of the publishBand operation
+    """
+    # TODO validate input
+    if sFileName is None or sFileName=='':
+        wasdiLog('[ERROR] asynchPublishBand: ' + sFileName + ' is not a valid file name, aborting')
+        return None
+
+    if sBand is None or sBand=='':
+        wasdiLog('[ERROR] asynchPublishBand: ' + sFileName + ' is not a valid band name, aborting')
+        return None
+
+    asProducts = getProductsByActiveWorkspace()
+    if sFileName not in asProducts:
+        wasdiLog('[ERROR] asynchPublishBand: ' + sFileName + ' not found in workspace, aborting')
+        return None
+
+    #TODO validate band is in given file
+
+    # TODO call publish band
+    oResult = None
+    try:
+        sUrl = getBaseUrl() + '/filebuffer/publishband?' + \
+               'fileUrl=' + sFileName + \
+               '&workspaceName=' + getActiveWorkspaceId() + \
+               '&band=' + sBand
+        asHeaders = _getStandardHeaders()
+        global m_iRequestsTimeout
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oE:
+        wasdiLog('[ERROR] asynchPublishBand: error in trying to publish band: ' + str(type(oE)) + ': ' + str(oE) )
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+        return oJsonResult
+
+    #TODO parse response
+
+    return None
+
+def publishBand(sProduct, sBand):
+    """
+    publishes a band of a given product
+
+    :param sProduct: the product containing the desired band
+    :param sBand: the band name in the product
+
+    :return: a string containing the final status of the operation: "DONE", "STOPPED", "ERROR"
+    """
+
+    return waitProcess(asynchPublishBand(sProduct, sBand))
 
 
 if __name__ == '__main__':
