@@ -29,19 +29,32 @@ public class RunTimeUtils {
 	 * @param sCommand Main command
 	 * @param asArgs List of args to the command
 	 * @param bWait True to wait the process to finish, false to not wait
-	 */	
+	 */
 	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+		shellExec(sCommand, asArgs, bWait, true);
+	}
+
+	/**
+	 * Execute a system task
+	 * @param sCommand Main command
+	 * @param asArgs List of args to the command
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bLogCommandLine True to log the command line false to jump
+	 */
+	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
 			
-			String sCommandLine = "";
+			if (bLogCommandLine) {
+				String sCommandLine = "";
+				
+				for (String sArg : asArgs) {
+					sCommandLine += sArg + " ";
+				}			
 			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
+				Utils.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
 			}
-			
-			Utils.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 			Process oProcess = oProcessBuilder.start();

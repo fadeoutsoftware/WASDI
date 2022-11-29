@@ -1,6 +1,10 @@
 package wasdi.shared.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+import wasdi.shared.utils.Utils;
 
 /**
  * Dockers configuration
@@ -34,5 +38,26 @@ public class DockersConfig {
 	 * The amount of time (in millis) to wait between the attempts
 	 */
 	public Integer millisBetweenAttmpts = 5000;
+	
+	/**
+	 * List of docker registries supported
+	 */
+	public ArrayList<DockerRegistryConfig> registers;
+	
+	/**
+	 * Get the list of registers ordered by priority
+	 * @return Ordered list of registers
+	 */
+	public ArrayList<DockerRegistryConfig> getRegisters() {
+		try {
+			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
+			Collections.reverse(registers);
+		}		
+		catch (Exception oEx) {
+			Utils.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
+		}
+		
+		return registers;
+	}
 
 }

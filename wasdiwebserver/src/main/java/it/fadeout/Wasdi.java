@@ -35,7 +35,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
 import org.apache.commons.io.FileUtils;
@@ -67,7 +66,6 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
-import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;

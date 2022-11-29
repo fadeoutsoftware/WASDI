@@ -37,10 +37,19 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
+	
+	/**
+	 * Name of the generated Docker Image
+	 */
+	protected String m_sDockerImageName = "";
+	
+	/**
+	 * Flag to decide if the system must run the docker after the deploy or not
+	 */
+	protected boolean m_bRunAfterDeploy = true;
 
 	public DockerProcessorEngine() {
 		super();
@@ -120,7 +129,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor: unzip processor");
 
             // Unzip the processor (and check for entry point myProcessor.py)
-            if (!UnzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
+            if (!unzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
 
                 processWorkspaceLog("Error unzipping the processor");
@@ -156,7 +165,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create Docker Util and deploy the docker
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-            oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
 
@@ -171,9 +180,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iProcessorPort = oProcessor.getPort();
             }
 
-            oDockerUtils.run(iProcessorPort);
-
-            processWorkspaceLog("Application started");
+            if (m_bRunAfterDeploy) {
+                oDockerUtils.run(iProcessorPort);
+                processWorkspaceLog("Application started");
+            }
+            else {
+            	LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: RunAfterDeploy is false, docker not started");
+            }
 
             if (bFirstDeploy) {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
@@ -251,65 +264,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
      */
     protected void onAfterDeploy(String sProcessorFolder) {
 
-    }
-
-    /**
-     * Unzip the processor
-     *
-     * @param sProcessorFolder
-     * @param sZipFileName
-     * @return
-     */
-    public boolean UnzipProcessor(String sProcessorFolder, String sZipFileName, String sProcessObjId) {
-        try {
-
-            sProcessorFolder = WasdiFileUtils.fixPathSeparator(sProcessorFolder);
-            if (!sProcessorFolder.endsWith(File.separator)) {
-                sProcessorFolder += File.separator;
-            }
-
-            // Create the file
-            File oProcessorZipFile = new File(sProcessorFolder + sZipFileName);
-            if (!oProcessorZipFile.exists()) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
-                return false;
-            }
-            try {
-                ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
-                oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
-            } catch (Exception oE) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
-                return false;
-            }
-
-            //check myProcessor exists:
-            // This class is generic. to use this code we need before to adapt it to run with all the different processor types
-//			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
-//			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
-//				oWalk.map(Path::toFile).forEach(oFile->{
-//					if(oFile.getName().equals("myProcessor.py")) {
-//						oMyProcessorExists.set(true);
-//					}
-//				});
-//			}
-//		    if (!oMyProcessorExists.get()) {
-//		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
-//		    	//return false;
-//		    }
-
-            try {
-                // Remove the zip?
-                if (!oProcessorZipFile.delete()) {
-                    LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
-                }
-            } catch (Exception e) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
-            }
-        } catch (Exception oEx) {
-            LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
-            return false;
-        }
-        return true;
     }
 
 
@@ -808,7 +762,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
             LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: deploy the image");
-            oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
             

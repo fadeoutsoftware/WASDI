@@ -41,7 +41,7 @@ public class DockerUtils {
     /**
      * User that run the docker
      */
-    String m_sUser = "tomcat8";
+    String m_sUser = "tomcat";
 
     /**
      * Create a new instance
@@ -58,17 +58,21 @@ public class DockerUtils {
         m_sUser = sTomcatUser;
     }
 
+
     /**
      * Deploy a docker
+     * @return the docker image tag if ok, empty string in case of problems
      */
-    public boolean deploy() {
+    public String deploy() {
+    	
+    	String sDockerName = "";
 
         try {
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
 
-            String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
 
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
@@ -81,14 +85,18 @@ public class DockerUtils {
             try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
                 // Fill the script file
                 if (oBuildScriptWriter != null) {
-                    LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating " + sBuildScriptFile + " file");
+                    LauncherMain.s_oLogger.debug("DockerUtils.deploy: Creating " + sBuildScriptFile + " file");
 
                     oBuildScriptWriter.write("#!/bin/bash");
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
                     oBuildScriptWriter.newLine();
-                    oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
-                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");
+                    oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
+                    
+                    if (!Utils.isNullOrEmpty(m_sUser)) {
+                        oBuildScriptWriter.write(" --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
+                                " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");                    	
+                    }
                     
                     if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
                     	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=\"" + WasdiConfig.Current.dockers.pipInstallWasdiAddress+"\""); 
@@ -115,10 +123,10 @@ public class DockerUtils {
             LauncherMain.s_oLogger.debug("DockerUtils.deploy: created image " + sDockerName);
         } catch (Exception oEx) {
             Utils.debugLog("DockerUtils.deploy: " + oEx.toString());
-            return false;
+            return "";
         }
 
-        return true;
+        return sDockerName;
     }
 
     /**
@@ -326,4 +334,153 @@ public class DockerUtils {
 
         return true;
     }
+    
+    /**
+     * Log in docker on a specific Repository Server
+     * @param sServer Server Address
+     * @param sUser Server User
+     * @param sPassword Server Password
+     * @return True if logged false otherwise
+     */
+    public boolean login(String sServer, String sUser, String sPassword) {
+    	
+    	try {
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Login
+            asArgs.add("login");
+            // User
+            asArgs.add("--username");
+            asArgs.add(sUser);
+            // Password
+            asArgs.add("-password");
+            asArgs.add(sPassword);
+            // Server
+            asArgs.add(sServer);
+            
+            String sCommand = "docker";
+
+            RunTimeUtils.shellExec(sCommand, asArgs, true, false);    		
+    		
+    	} catch (Exception oEx) {
+            Utils.debugLog("DockerUtils.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }
+    
+    /**
+     * Push a docker image to a registry. Must be logged 
+     * @param sServer Address of the registry server
+     * @param sImage Image name
+     * @return True if pushed false if error 
+     */
+    public boolean push(String sServer, String sImage) {
+    	
+    	try {
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Push
+            asArgs.add("push");
+            // Option
+            asArgs.add("--all-tags");
+            
+            String sServerImage = sServer + "/" + sImage;
+            
+            asArgs.add(sServerImage);
+            
+            String sCommand = "docker";
+
+            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+    		
+    	} catch (Exception oEx) {
+            Utils.debugLog("DockerUtils.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }
+    
+    /**
+     * Get the processor entity
+     * @return Processor
+     */
+	public Processor getProcessor() {
+		return m_oProcessor;
+	}
+	
+	/**
+	 * Set the processor Entity
+	 * @param oProcessor Processor Entity
+	 */
+	public void setProcessor(Processor oProcessor) {
+		this.m_oProcessor = oProcessor;
+	}
+	
+	/**
+	 * Get the processor Folder
+	 * @return processor Folder
+	 */
+	public String getProcessorFolder() {
+		return m_sProcessorFolder;
+	}
+
+	/**
+	 * Set the processor Folder
+	 * @param sProcessorFolder Processor Folder
+	 */
+	public void setProcessorFolder(String sProcessorFolder) {
+		this.m_sProcessorFolder = sProcessorFolder;
+	}
+	
+	/**
+	 * Get the actual WASDI Working Path
+	 * @return actual WASDI Working Path
+	 */
+	public String getWorkingRootPath() {
+		return m_sWorkingRootPath;
+	}
+	
+	/**
+	 * Set the actual WASDI Working Path
+	 * @param sWorkingRootPath actual WASDI Working Path
+	 */
+	public void setWorkingRootPath(String sWorkingRootPath) {
+		this.m_sWorkingRootPath = sWorkingRootPath;
+	}
+	
+	/**
+	 * Get the path of the log file for docker
+	 * @return
+	 */
+	public String getDockerLogFile() {
+		return m_sDockerLogFile;
+	}
+	
+	/**
+	 * Set the path of the log file for docker
+	 * @param sDockerLogFile
+	 */
+	public void setDockerLogFile(String sDockerLogFile) {
+		this.m_sDockerLogFile = sDockerLogFile;
+	}
+
+	/**
+	 * Get the name of user to pass to docker. Empty string to avoid.
+	 * @return
+	 */
+	public String getUser() {
+		return m_sUser;
+	}
+	
+	/**
+	 * Set the name of user to pass to docker. Empty string to avoid.
+	 * @param sUser
+	 */
+	public void setUser(String sUser) {
+		this.m_sUser = sUser;
+	}
 }

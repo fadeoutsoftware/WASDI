@@ -13,6 +13,8 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.ZipFileUtils;
 
 public abstract class WasdiProcessorEngine {
 
@@ -68,6 +70,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
 			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}		
+		else if (sType.equals(ProcessorTypes.EOEPCA)) {
+			return new EoepcaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
 		else {
 			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
@@ -357,4 +362,73 @@ public abstract class WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
 		}
 	}
+	
+    /**
+     * Unzip the processor
+     *
+     * @param sProcessorFolder
+     * @param sZipFileName
+     * @return
+     */
+    public boolean unzipProcessor(String sProcessorFolder, String sZipFileName, String sProcessObjId) {
+        try {
+
+            sProcessorFolder = WasdiFileUtils.fixPathSeparator(sProcessorFolder);
+            if (!sProcessorFolder.endsWith(File.separator)) {
+                sProcessorFolder += File.separator;
+            }
+
+            // Create the file
+            File oProcessorZipFile = new File(sProcessorFolder + sZipFileName);
+            if (!oProcessorZipFile.exists()) {
+                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
+                return false;
+            }
+            try {
+                ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
+                oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+            } catch (Exception oE) {
+                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
+                return false;
+            }
+
+            //check myProcessor exists:
+            // This class is generic. to use this code we need before to adapt it to run with all the different processor types
+//			AtomicBoolean oMyProcessorExists = new AtomicBoolean(false);
+//			try(Stream<Path> oWalk = Files.walk(Paths.get(sProcessorFolder));){
+//				oWalk.map(Path::toFile).forEach(oFile->{
+//					if(oFile.getName().equals("myProcessor.py")) {
+//						oMyProcessorExists.set(true);
+//					}
+//				});
+//			}
+//		    if (!oMyProcessorExists.get()) {
+//		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+//		    	//return false;
+//		    }
+
+            try {
+                // Remove the zip?
+                if (!oProcessorZipFile.delete()) {
+                    LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
+                }
+            } catch (Exception e) {
+                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
+            }
+        } catch (Exception oEx) {
+            LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
+            return false;
+        }
+        return true;
+    }
+
+
+	public String getTomcatUser() {
+		return m_sTomcatUser;
+	}
+
+
+	public void setTomcatUser(String sTomcatUser) {
+		this.m_sTomcatUser = sTomcatUser;
+	}	
 }

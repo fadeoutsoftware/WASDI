@@ -68,7 +68,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 				String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
 
 				// Make the call
-				String sTerrascopeResults = HttpUtils.httpGetResults(encodedUrl);
+				String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
 
 				Utils.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
 
@@ -106,7 +106,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 					String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
 
 					// Make the call
-					String sTerrascopeResults = HttpUtils.httpGetResults(encodedUrl);
+					String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
 
 					Utils.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
@@ -119,7 +119,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			if (Utils.isNullOrEmpty(sTerrascopeQuery)) return aoReturnList;
 
 			// Make the query
-			String sTerrascopeResults = HttpUtils.httpGetResults(sTerrascopeQuery);
+			String sTerrascopeResults = HttpUtils.httpGet(sTerrascopeQuery);
 
 			Utils.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
