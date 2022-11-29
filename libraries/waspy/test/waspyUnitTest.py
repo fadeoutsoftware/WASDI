@@ -50,9 +50,16 @@ class MarcoTestSearchEOImages(unittest.TestCase):
     def test_waitProcesses_wrongInputTypeExitsWithEmptyList(self):
         aoWrongList = [['a', 'b', 'c'], ['d', 'e', 'f']]
         asReturnList = wasdi.waitProcesses(aoWrongList)
-        self.assertTrue(len(asReturnList) == 0)
+        self.assertEqual(len(asReturnList), 0)
 
     def test_waitProcesses_wrongInputListExitsWithEmptyList(self):
         asWrongList = ['a', 'b', 'c']
         asReturnList = wasdi.waitProcesses(asWrongList)
-        self.assertTrue(len(asReturnList) == 0)
+        self.assertEqual(len(asReturnList), 0)
+
+    # the following code contains a processObjId which belongs to specific users.
+    # Make sure you can see the job, or add your own instead
+    # def test_waitProcesses_mixedWrongInputListExitsWithEmptyList(self):
+    #     asWrongList = ['a', 'b', 'a2d07cab-1800-4687-953b-d4c82732575a']
+    #     asReturnList = wasdi.waitProcesses(asWrongList)
+    #     self.assertEqual(len(asReturnList), 1)
