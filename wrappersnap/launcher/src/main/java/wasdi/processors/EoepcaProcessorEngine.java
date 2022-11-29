@@ -38,6 +38,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
 		m_sTomcatUser = "";
+		m_bRunAfterDeploy = false;
 		
 		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
 		
@@ -74,9 +75,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;			
 		}
 		
-		// This is the generated image name
-		String sImageName = "wasdi/" + sProcessorName + ":1";
-		
 		DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, "");
 		
 		// Here we keep track of how many registers we tried
@@ -92,7 +90,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: try to push to " + oDockerRegistryConfig.id);
 			
 			// Try to login and push
-			sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sImageName);
+			sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName);
 			
 			if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
 				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: image pushed");
@@ -116,7 +114,17 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sAppParametersAsArgs = "";
 		
 		// Get the parameters json sample
-		String sJsonSample = oProcessor.getParameterSample();
+		String sEncodedJson= oProcessor.getParameterSample();
+		String sJsonSample = sEncodedJson;
+		
+		try {
+			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+			return false;
+		}
+				
 		
 		try {
 			// Translate it in a Map
@@ -125,8 +133,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
-				sAppParametersDeclaration += sKey + ":\n";
-				sAppParametersDeclaration += "type: ";
+				sAppParametersDeclaration += "    " + sKey + ":\n";
+				sAppParametersDeclaration += "      type: ";
 				
 				// Set the type
 				Object oValue = aoProcessorParams.get(sKey);
@@ -147,7 +155,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sAppParametersDeclaration += "\n";
 				
 				// And prepare also the parameter as arg to the second step
-				sAppParametersAsArgs += sKey +": "+ sKey + "\n";
+				sAppParametersAsArgs += "        " + sKey +": "+ sKey + "\n";
 			}
 			
 			
@@ -213,17 +221,17 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		try {
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password);
 			
-			if (!bLogged) {
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
-				return "";
-			}
+//			if (!bLogged) {
+//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
+//				return "";
+//			}
 			
 			boolean bPushed = oDockerUtils.push(oDockerRegistryConfig.address, sImageName);
 			
-			if (!bPushed) {
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
-				return "";				
-			}
+//			if (!bPushed) {
+//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
+//				return "";				
+//			}
 			
 			String sPushedImageAddress = oDockerRegistryConfig.address + "/" + sImageName;
 			

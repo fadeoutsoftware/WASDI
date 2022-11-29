@@ -45,6 +45,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Name of the generated Docker Image
 	 */
 	protected String m_sDockerImageName = "";
+	
+	/**
+	 * Flag to decide if the system must run the docker after the deploy or not
+	 */
+	protected boolean m_bRunAfterDeploy = true;
 
 	public DockerProcessorEngine() {
 		super();
@@ -175,9 +180,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iProcessorPort = oProcessor.getPort();
             }
 
-            oDockerUtils.run(iProcessorPort);
-
-            processWorkspaceLog("Application started");
+            if (m_bRunAfterDeploy) {
+                oDockerUtils.run(iProcessorPort);
+                processWorkspaceLog("Application started");
+            }
+            else {
+            	LauncherMain.s_oLogger.debug("DockerProcessorEngine.DeployProcessor: RunAfterDeploy is false, docker not started");
+            }
 
             if (bFirstDeploy) {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);

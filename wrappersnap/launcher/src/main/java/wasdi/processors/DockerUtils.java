@@ -361,7 +361,7 @@ public class DockerUtils {
             
             String sCommand = "docker";
 
-            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+            RunTimeUtils.shellExec(sCommand, asArgs, true, false);    		
     		
     	} catch (Exception oEx) {
             Utils.debugLog("DockerUtils.login: " + oEx.toString());
