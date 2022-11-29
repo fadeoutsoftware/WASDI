@@ -42,11 +42,10 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 """
-from time import sleep
-from telnetlib import AO
 import urllib
-from urllib.parse import urlencode
 from builtins import str
+from time import sleep
+from urllib.parse import urlencode
 
 name = "wasdi"
 
