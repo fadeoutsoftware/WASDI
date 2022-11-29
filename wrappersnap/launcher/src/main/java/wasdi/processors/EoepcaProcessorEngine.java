@@ -159,7 +159,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			}
 			
 			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
-			sAppParametersAsArgs = sAppParametersDeclaration.substring(0, sAppParametersAsArgs.length()-1);
+			sAppParametersAsArgs = sAppParametersAsArgs.substring(0, sAppParametersAsArgs.length()-1);
 			
 		}
 		catch (Exception oEx) {
