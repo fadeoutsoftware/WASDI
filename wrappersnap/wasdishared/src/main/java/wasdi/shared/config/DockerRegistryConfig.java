@@ -26,4 +26,8 @@ public class DockerRegistryConfig {
 	 * Priority of the register
 	 */
 	public int priority;
+	
+	public int getPriority() {
+		return priority;
+	}
 }

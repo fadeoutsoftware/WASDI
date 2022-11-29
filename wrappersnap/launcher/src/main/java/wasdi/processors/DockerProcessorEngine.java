@@ -37,7 +37,6 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
-import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {

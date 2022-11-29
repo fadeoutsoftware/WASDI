@@ -12,8 +12,6 @@ import javax.ws.rs.core.Response.Status;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ogcprocesses.ApiException;
 import wasdi.shared.viewmodels.ogcprocesses.JobList;
-import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
-import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.ogcprocesses.Results;
 import wasdi.shared.viewmodels.ogcprocesses.StatusInfo;
 

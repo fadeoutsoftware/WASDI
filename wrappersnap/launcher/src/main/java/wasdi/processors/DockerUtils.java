@@ -335,11 +335,72 @@ public class DockerUtils {
         return true;
     }
     
-    public boolean login() {
+    /**
+     * Log in docker on a specific Repository Server
+     * @param sServer Server Address
+     * @param sUser Server User
+     * @param sPassword Server Password
+     * @return True if logged false otherwise
+     */
+    public boolean login(String sServer, String sUser, String sPassword) {
+    	
+    	try {
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Login
+            asArgs.add("login");
+            // User
+            asArgs.add("--username");
+            asArgs.add(sUser);
+            // Password
+            asArgs.add("-password");
+            asArgs.add(sPassword);
+            // Server
+            asArgs.add(sServer);
+            
+            String sCommand = "docker";
+
+            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+    		
+    	} catch (Exception oEx) {
+            Utils.debugLog("DockerUtils.login: " + oEx.toString());
+            return false;
+        }
+    	
     	return true;
     }
     
-    public boolean push(String sRegistryAddress, String sRegistryUser, String sRegistryPassword) {
+    /**
+     * Push a docker image to a registry. Must be logged 
+     * @param sServer Address of the registry server
+     * @param sImage Image name
+     * @return True if pushed false if error 
+     */
+    public boolean push(String sServer, String sImage) {
+    	
+    	try {
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Push
+            asArgs.add("push");
+            // Option
+            asArgs.add("--all-tags");
+            
+            String sServerImage = sServer + "/" + sImage;
+            
+            asArgs.add(sServerImage);
+            
+            String sCommand = "docker";
+
+            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+    		
+    	} catch (Exception oEx) {
+            Utils.debugLog("DockerUtils.login: " + oEx.toString());
+            return false;
+        }
+    	
     	return true;
     }
     
