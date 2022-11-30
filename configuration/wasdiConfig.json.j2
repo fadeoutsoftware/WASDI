@@ -211,7 +211,21 @@
         "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
         "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}",
         "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
-        "millisBetweenAttmpts": {{ dictWasdiConfiguration.dockers.millisBetweenAttmpts }}
+        "millisBetweenAttmpts": {{ dictWasdiConfiguration.dockers.millisBetweenAttmpts }},
+        "registers": [
+{% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.registers %}
+            {
+                "id": "{{ sCurrentDockerRegistry }}",
+                "address": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].address }}",
+                "user": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].user }}",
+                "password": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].password }}",
+                "priority": {{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].priority }}
+            }{% if not loop.last %},
+        ]
+{% endif %}
+{% endfor %}
+
+        ]
     },
     "scheduler": {
         "processingThreadWaitStartMS": "{{ dictWasdiConfiguration.scheduler.processingThreadWaitStartMS }}",
