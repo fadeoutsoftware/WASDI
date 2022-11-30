@@ -204,8 +204,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sBodyTemplateInput = getProcessorFolder(sProcessorName) + "appDeployBody.json.j2";
 		String sBodyTemplateOutput = getProcessorFolder(sProcessorName) + "appDeployBody.json";
 		
-		HashMap<String, Object> aoBodyParameters = new HashMap<>();		
-		aoBodyParameters.put("cwlLink", sCWLTemplateOutput);
+		HashMap<String, Object> aoBodyParameters = new HashMap<>();
+		String sCWLLink = WasdiConfig.Current.baseUrl + "processors/getcwl?processorName=" + sProcessorName;
+		aoBodyParameters.put("cwlLink", sCWLLink);
 		
 		boolean bTranslateBody = oJinjaTemplateRenderer.translate(sBodyTemplateInput, sBodyTemplateOutput, aoBodyParameters);
 		

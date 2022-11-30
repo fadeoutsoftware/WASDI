@@ -2619,7 +2619,7 @@ public class ProcessorsResource  {
 	}
 	
 	@GET
-	@Path("downloadprocessor")
+	@Path("getcwl")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getCWLDescriptor(@QueryParam("processorName") String sProcessorName)
 	{			
