@@ -9,7 +9,7 @@ import com.google.common.io.Files;
 import wasdi.LauncherMain;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.RunTimeUtils;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	

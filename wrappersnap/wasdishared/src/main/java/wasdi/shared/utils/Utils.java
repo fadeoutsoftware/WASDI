@@ -453,13 +453,35 @@ public class Utils {
 		log("", sMessage);
 	}
 	
+	public static LoggerWrapper s_oLoggerWrapper = null;
+	
 	public static void log(String sLevel, String sMessage) {
 		String sPrefix = "";
 		if(!Utils.isNullOrEmpty(sLevel)) {
 			sPrefix = "[" + sLevel + "] ";
 		}
 		LocalDateTime oNow = LocalDateTime.now();
-		System.out.println( sPrefix + oNow + ": " + sMessage);
+		
+		String sFinalLine = sPrefix + oNow + ": " + sMessage;
+		
+		if (s_oLoggerWrapper != null) {
+			
+			if (sLevel.equals("DEBUG")) {
+				s_oLoggerWrapper.debug(sFinalLine);	
+			}
+			else if (sLevel.equals("INFO")) {
+				s_oLoggerWrapper.info(sFinalLine);
+			}
+			else if (sLevel.equals("ERROR")) {
+				s_oLoggerWrapper.error(sFinalLine);
+			}
+			else {
+				s_oLoggerWrapper.info(sFinalLine);
+			}
+			
+		}
+		
+		System.out.println(sFinalLine);
 	}
 	
 	///////// end log

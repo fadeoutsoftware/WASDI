@@ -13,6 +13,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 
 public class EoepcaProcessorEngine extends DockerProcessorEngine {
@@ -35,12 +36,28 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
+				
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			return false;			
+		}
+		
+		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
 		m_sTomcatUser = "";
+		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
-		
-		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;
 		
 		// Build the image of the docker
 		boolean bResult = super.deploy(oParameter, bFirstDeploy);
@@ -62,18 +79,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// And get the processor folder
 		String sProcessorFolder = getProcessorFolder(sProcessorName);
 		
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-		
-		if (aoRegisters == null) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
-			return false;			
-		}
 		
 		DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, "");
 		
@@ -90,7 +95,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: try to push to " + oDockerRegistryConfig.id);
 			
 			// Try to login and push
-			sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName);
+			sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
 			
 			if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
 				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: image pushed");
@@ -209,6 +214,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;		
 		}
 		
+		WasdiFileUtils.deleteFile(sCWLTemplateInput);
+		WasdiFileUtils.deleteFile(sBodyTemplateInput);
+		
         return true;
 	}
 	
@@ -219,9 +227,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @param sImageName
 	 * @return
 	 */
-	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName) {
+	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
 		try {
-			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password);
+			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
 				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");

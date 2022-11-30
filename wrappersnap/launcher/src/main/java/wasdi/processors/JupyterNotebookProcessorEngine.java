@@ -18,10 +18,10 @@ import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
