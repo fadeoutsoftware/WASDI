@@ -17,17 +17,52 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 
 public abstract class WasdiProcessorEngine {
-
-	protected static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
+	/**
+	 * File Separator
+	 */
+	protected static final String s_sFILE_SEPARATOR = System.getProperty("file.separator");
+	
+	/**
+	 * Base Working path of WASDI
+	 */
 	protected String m_sWorkingRootPath = "";
+	
+	/**
+	 * Folder of the docker templates
+	 */
 	protected String m_sDockerTemplatePath = "";
+	
+	/**
+	 * Util to log in the WADSI end user interface
+	 */
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
+	
+	/**
+	 * User to mount on Docker. If "" will not be added
+	 */
 	protected String m_sTomcatUser;
+	
+	/**
+	 * Processor Parameter of this operation
+	 */
 	ProcessorParameter m_oParameter;
+	
+	/**
+	 * Actual process workspace
+	 */
 	protected ProcessWorkspace m_oProcessWorkspace= null;
+	
+	/**
+	 * Utility to send rabbit messages
+	 */
 	protected Send m_oSendToRabbit = new Send(null);
-
+	
+	/**
+	 * Flag to decide if the system must run the docker after the deploy or not
+	 */
+	protected boolean m_bRunAfterDeploy = true;
+	
 	/**
 	 * Create an instance of a Processor Engine
 	 * @param sType Type of Processor
@@ -319,7 +354,7 @@ public abstract class WasdiProcessorEngine {
 	 * @return
 	 */
 	public String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
-		return getProcessorFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
+		return getProcessorFolder(sProcessorName) + "var" + s_sFILE_SEPARATOR + "general_common.env";
 	}
 
 	/**
@@ -328,7 +363,7 @@ public abstract class WasdiProcessorEngine {
 	 * @return
 	 */
 	public String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
-		return getProcessorTemplateFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
+		return getProcessorTemplateFolder(sProcessorName) + "var" + s_sFILE_SEPARATOR + "general_common.env";
 	}
 	
 	/**
@@ -422,13 +457,35 @@ public abstract class WasdiProcessorEngine {
         return true;
     }
 
-
+    /**
+     * Get the user to mount of the docker
+     * @return
+     */
 	public String getTomcatUser() {
 		return m_sTomcatUser;
 	}
 
-
+	/**
+	 * Set the user to mount of the docker
+	 * @param sTomcatUser
+	 */
 	public void setTomcatUser(String sTomcatUser) {
 		this.m_sTomcatUser = sTomcatUser;
+	}
+
+	/**
+	 * Flag to know if this application type needs to be ran after the deploy or not
+	 * @return true to run, false otherwise
+	 */
+	public boolean isRunAfterDeploy() {
+		return m_bRunAfterDeploy;
+	}
+
+	/**
+	 * Flag to know if this application type needs to be ran after the deploy or not
+	 * @param m_bRunAfterDeploy true to run after deploy, false otherwise
+	 */
+	public void setRunAfterDeploy(boolean bRunAfterDeploy) {
+		this.m_bRunAfterDeploy = bRunAfterDeploy;
 	}	
 }

@@ -45,11 +45,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Name of the generated Docker Image
 	 */
 	protected String m_sDockerImageName = "";
-	
-	/**
-	 * Flag to decide if the system must run the docker after the deploy or not
-	 */
-	protected boolean m_bRunAfterDeploy = true;
 
 	public DockerProcessorEngine() {
 		super();
@@ -644,7 +639,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
-            oDockerUtils.delete(sProcessorName);
+            oDockerUtils.delete(sProcessorName, oProcessor.getVersion());
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 
@@ -766,19 +761,21 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterDeploy(sProcessorFolder);
             
-            // Run
-            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
-            LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: run the container");
-            oDockerUtils.run();
-            
-            
-            // Recreate the user environment
-            waitForApplicationToStart(oParameter);
-            reconstructEnvironment(oParameter, oProcessor.getPort());
-            
-			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-				refreshPackagesInfo(oParameter);
-			}            
+            if (m_bRunAfterDeploy) {
+                // Run
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
+                LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: run the container");
+                oDockerUtils.run();
+                
+                
+                // Recreate the user environment
+                waitForApplicationToStart(oParameter);
+                reconstructEnvironment(oParameter, oProcessor.getPort());
+                
+    			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+    				refreshPackagesInfo(oParameter);
+    			}            	
+            }
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 

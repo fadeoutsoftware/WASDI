@@ -103,6 +103,7 @@ var ProcessorController = (function () {
             { name: "OCTAVE 6.x", id: "octave" },
             { name: "Python 3.x Conda", id: "conda" },
             { name: "C# .NET Core", id: "csharp" },
+            { name: "EOEPCA", id: "eoepca" }
         ];
         /**
          * Selected Processor Type

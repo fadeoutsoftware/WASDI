@@ -133,7 +133,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
-				sAppParametersDeclaration += "    " + sKey + ":\n";
+				sAppParametersDeclaration += "    - " + sKey + ":\n";
 				sAppParametersDeclaration += "      type: ";
 				
 				// Set the type
@@ -158,6 +158,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sAppParametersAsArgs += "        " + sKey +": "+ sKey + "\n";
 			}
 			
+			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
+			sAppParametersAsArgs = sAppParametersAsArgs.substring(0, sAppParametersAsArgs.length()-1);
 			
 		}
 		catch (Exception oEx) {
@@ -198,7 +200,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sBodyTemplateOutput = getProcessorFolder(sProcessorName) + "appDeployBody.json";
 		
 		HashMap<String, Object> aoBodyParameters = new HashMap<>();		
-		aoCWLParameters.put("cwlLink", sCWLTemplateOutput);
+		aoBodyParameters.put("cwlLink", sCWLTemplateOutput);
 		
 		boolean bTranslateBody = oJinjaTemplateRenderer.translate(sBodyTemplateInput, sBodyTemplateOutput, aoBodyParameters);
 		
@@ -221,17 +223,17 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		try {
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password);
 			
-//			if (!bLogged) {
-//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
-//				return "";
-//			}
+			if (!bLogged) {
+				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
+				return "";
+			}
 			
 			boolean bPushed = oDockerUtils.push(oDockerRegistryConfig.address, sImageName);
 			
-//			if (!bPushed) {
-//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
-//				return "";				
-//			}
+			if (!bPushed) {
+				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
+				return "";				
+			}
 			
 			String sPushedImageAddress = oDockerRegistryConfig.address + "/" + sImageName;
 			
@@ -252,14 +254,18 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 
 	@Override
 	public boolean delete(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean bDeleted = super.delete(oParameter);
+		
+		// TODO: remove the image. Remove the csw. Undeploy from ADES?
+		
+		return bDeleted;
 	}
 
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean bRes = super.redeploy(oParameter);
+		
+		return bRes;
 	}
 
 	@Override

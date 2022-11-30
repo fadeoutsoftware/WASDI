@@ -40,6 +40,16 @@ public class DockersConfig {
 	public Integer millisBetweenAttmpts = 5000;
 	
 	/**
+	 * The amout of time  (in millis) to wait for docker to complete delete operation
+	 */
+	public Integer millisWaitAfterDelete = 15000;
+	
+	/**
+	 * The amout of time  (in millis) to wait after the deploy.sh file is created before proceeding (to be safe that the file is written completly)
+	 */
+	public Integer millisWaitAfterDeployScriptCreated = 2000;
+	
+	/**
 	 * List of docker registries supported
 	 */
 	public ArrayList<DockerRegistryConfig> registers;
@@ -51,7 +61,6 @@ public class DockersConfig {
 	public ArrayList<DockerRegistryConfig> getRegisters() {
 		try {
 			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
-			Collections.reverse(registers);
 		}		
 		catch (Exception oEx) {
 			Utils.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");

@@ -241,10 +241,14 @@ public class RunTimeUtils {
 
 		return null;
 	}
-
-	private static void deleteLogFile(File logFile) {
+	
+	/**
+	 * Deletes a temporary log file
+	 * @param oLogFile
+	 */
+	private static void deleteLogFile(File oLogFile) {
 		try {
-			FileUtils.forceDelete(logFile);
+			FileUtils.forceDelete(oLogFile);
 		} catch (IOException e) {
 			Utils.debugLog("RunTimeUtils.deleteLogFile exception: " + e.getMessage());
 		}

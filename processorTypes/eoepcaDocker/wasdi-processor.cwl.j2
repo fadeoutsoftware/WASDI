@@ -18,7 +18,7 @@ $graph:
   - class: InlineJavascriptRequirement
 
   inputs:
-    {{ wasdiAppParametersDeclaration }}
+{{ wasdiAppParametersDeclaration }}
     - wasdi__proc__id:
       type: string
     - wasdi__session__id
@@ -37,7 +37,7 @@ $graph:
   steps:
     node_wasdi:
       in:
-        {{ wasdiAppParametersAsArgs }}
+{{ wasdiAppParametersAsArgs }}
         wasdi__proc__id: wasdi__proc__id
         wasdi__session__id: wasdi__session__id
         wasdi__user__id: wasdi__user__id
@@ -64,9 +64,28 @@ $graph:
       listing:
         - entryname: params.json
           entry: |-
-            {
-            #Cycle for each key value to generate params.json
-              $( inputs.date )
+            ${
+               var sParamsJson = "{\n";
+               var asKeys = Object.keys(inputs);
+
+               for (var i=0; i<asKeys.length; i++) {
+                 var sKey = asKeys[i];
+                 var oValue = inputs[sKey];
+                 sParamsJson += sKey + ":"
+                 if (typeof oValue === 'string' || oValue instanceof String) {
+                   sParamsJson += '"' + oValue + '"';
+                 }
+                 else {
+                   sParamsJson += oValue;
+                 }
+                 if (i<asKeys.length-1) {
+                   sParamsJson += ",\n"
+                 }
+               }
+
+               sParamsJson += "\n}\n"
+
+               return sParamsJson;
             }
         - entryname: config.json
           entry: |-
@@ -74,7 +93,8 @@ $graph:
               "USER": "$( inputs.wasdi__user__id )",
               "WORKSPACEID": "$( inputs.wasdi__user__id )",
               "SESSIONID": "$( inputs.wasdi__session__id )",
-              "MYPROCID": "$( inputs.wasdi__proc__id )"
+              "MYPROCID": "$( inputs.wasdi__proc__id )",
+              "PARAMETERSFILEPATH": "./params.json"
             }            
         - entryname: run_wasdi_app.sh
           entry: |-
