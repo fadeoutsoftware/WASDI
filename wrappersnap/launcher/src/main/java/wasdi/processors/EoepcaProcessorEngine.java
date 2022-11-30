@@ -138,8 +138,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
-				sAppParametersDeclaration += "    - " + sKey + ":\n";
-				sAppParametersDeclaration += "      type: ";
+				sAppParametersDeclaration += "  " + sKey + ":\n";
+				sAppParametersDeclaration += "    type: ";
 				
 				// Set the type
 				Object oValue = aoProcessorParams.get(sKey);
@@ -184,7 +184,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		aoCWLParameters.put("wasdiAppId", sProcessorName);
 		aoCWLParameters.put("wasdiAppDescription",oProcessor.getDescription());
 		aoCWLParameters.put("wasdiAppParametersDeclaration",sAppParametersDeclaration);
-		aoCWLParameters.put("wasdiAppParametersAsArgs",sAppParametersAsArgs);
+		//aoCWLParameters.put("wasdiAppParametersAsArgs",sAppParametersAsArgs);
 		aoCWLParameters.put("wasdiProcessorImage", sPushedImageAddress);
 		
 		String sCWLTemplateInput = getProcessorFolder(sProcessorName) + "wasdi-processor.cwl.j2";
@@ -244,9 +244,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				return "";				
 			}
 			
-			String sPushedImageAddress = oDockerRegistryConfig.address + "/" + sImageName;
-			
-			return sPushedImageAddress;
+			return sImageName;
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
