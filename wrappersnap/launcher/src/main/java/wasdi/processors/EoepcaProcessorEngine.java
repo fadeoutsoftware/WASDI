@@ -223,17 +223,17 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		try {
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password);
 			
-//			if (!bLogged) {
-//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
-//				return "";
-//			}
+			if (!bLogged) {
+				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
+				return "";
+			}
 			
 			boolean bPushed = oDockerUtils.push(oDockerRegistryConfig.address, sImageName);
 			
-//			if (!bPushed) {
-//				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
-//				return "";				
-//			}
+			if (!bPushed) {
+				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
+				return "";				
+			}
 			
 			String sPushedImageAddress = oDockerRegistryConfig.address + "/" + sImageName;
 			
@@ -254,14 +254,18 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 
 	@Override
 	public boolean delete(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean bDeleted = super.delete(oParameter);
+		
+		// TODO: remove the image. Remove the csw. Undeploy from ADES?
+		
+		return bDeleted;
 	}
 
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean bRes = super.redeploy(oParameter);
+		
+		return bRes;
 	}
 
 	@Override
