@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.StreamGobbler;
 
 /**
  * Wrap main docker functionalities
@@ -44,6 +45,11 @@ public class DockerUtils {
     String m_sUser = "tomcat";    
 
     /**
+     * Docker registry in use
+     */
+    String m_sDockerRegistry = "";    
+
+    /**
      * Create a new instance
      *
      * @param oProcessor       Processor
@@ -57,7 +63,6 @@ public class DockerUtils {
         m_sWorkingRootPath = sWorkingRootPath;
         m_sUser = sTomcatUser;
     }
-    
     
     /**
      * Get the processor entity
@@ -139,6 +144,14 @@ public class DockerUtils {
 		this.m_sUser = sUser;
 	}    
 
+	public String getDockerRegistry() {
+		return m_sDockerRegistry;
+	}
+
+
+	public void setDockerRegistry(String sDockerRegistry) {
+		this.m_sDockerRegistry = sDockerRegistry;
+	}
 
     /**
      * Deploy a docker
@@ -154,6 +167,10 @@ public class DockerUtils {
             String sProcessorName = m_oProcessor.getName();
 
             sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
 
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
@@ -415,43 +432,74 @@ public class DockerUtils {
 
         return true;
     }
-    
+
     /**
      * Log in docker on a specific Repository Server
      * @param sServer Server Address
      * @param sUser Server User
      * @param sPassword Server Password
+     * @param sFolder 
      * @return True if logged false otherwise
      */
-    public boolean login(String sServer, String sUser, String sPassword) {
+    public boolean login(String sServer, String sUser, String sPassword, String sFolder) {
+    	try {
+            // Create the docker command            
+            String sCommand = "docker login --username " + sUser + " --password '" + sPassword + "' " + sServer;
+            
+            RunTimeUtils.runCommand(sFolder, sCommand, true, true);
+            
+    	} catch (Exception oEx) {
+    		LauncherMain.s_oLogger.error("DockerUtils.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }
+    
+
+    public boolean loginOld(String sServer, String sUser, String sPassword, String sFolder) {
     	
     	try {
     		
             // Create the docker command
             ArrayList<String> asArgs = new ArrayList<>();
+            
+            //String sCommand = "docker";
+            asArgs.add("sh");
+            asArgs.add("-c");
+            
+            asArgs.add("docker");
             // Login
             asArgs.add("login");
             // User
             asArgs.add("--username");
             asArgs.add(sUser);
             // Password
-            asArgs.add("-password");
-            asArgs.add(sPassword);
+            asArgs.add("--password");
+            //asArgs.add("'"+sPassword+"'");
+            asArgs.add("'"+sPassword+"'");
             // Server
             asArgs.add(sServer);
             
-            String sCommand = "docker";
+            //RunTimeUtils.shellExec(sCommand, asArgs, true);
             
-			String sCommandLine = sCommand;
+			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			Process oProcess = oProcessBuilder.start();
 			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}			
-		
-			LauncherMain.s_oLogger.debug("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
-            
-
-            RunTimeUtils.shellExec(sCommand, asArgs, true, false);    		
+			StreamGobbler oOutputGobbler = new StreamGobbler(oProcess.getInputStream(), "OUTPUT" , LauncherMain.s_oLogger);
+			StreamGobbler oErrorGobbler = new StreamGobbler(oProcess.getErrorStream(), "ERROR" , LauncherMain.s_oLogger);
+			oOutputGobbler.start();
+			oErrorGobbler.start();
+			
+//			OutputStream oStdin = oProcess.getOutputStream();
+//
+//		    BufferedWriter oWriter = new BufferedWriter(new OutputStreamWriter(oStdin));
+//
+//		    oWriter.write(sPassword+"\n");
+//		    oWriter.flush();
+//		    oWriter.close();
+		    		    
+		    oProcess.wait(WasdiConfig.Current.dockers.millisWaitForLogin);
     		
     	} catch (Exception oEx) {
     		LauncherMain.s_oLogger.error("DockerUtils.login: " + oEx.toString());
@@ -471,6 +519,11 @@ public class DockerUtils {
     	
     	try {
     		
+    		if (sImage.contains(":")) {
+    			LauncherMain.s_oLogger.debug("DockerUtils.push image contains a tag: remove it");
+    			sImage = sImage.split(":")[0];
+    		}
+    		
             // Create the docker command
             ArrayList<String> asArgs = new ArrayList<>();
             // Push
@@ -478,13 +531,13 @@ public class DockerUtils {
             // Option
             asArgs.add("--all-tags");
             
-            String sServerImage = sServer + "/" + sImage;
+            String sServerImage = sImage;
             
             asArgs.add(sServerImage);
             
             String sCommand = "docker";
             
-			String sCommandLine = sCommand;
+			String sCommandLine = sCommand + " ";
 			
 			for (String sArg : asArgs) {
 				sCommandLine += sArg + " ";
@@ -502,4 +555,5 @@ public class DockerUtils {
     	
     	return true;
     }
+
 }

@@ -126,6 +126,9 @@ public class LauncherMain  {
         }
 
         s_oLogger.debug("WASDI Launcher Main Start");
+        
+        // Set the logger for the shared lib
+        Utils.s_oLoggerWrapper = s_oLogger;
 
         // We need to read the command line parameters.
 

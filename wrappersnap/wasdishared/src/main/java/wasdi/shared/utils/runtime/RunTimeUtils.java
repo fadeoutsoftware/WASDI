@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.shared.utils.runtime;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.Utils;
 
 public class RunTimeUtils {
 	
@@ -68,6 +69,10 @@ public class RunTimeUtils {
 			e.printStackTrace();
 		}
 	}
+	
+	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
+		return shellExecWithLogs(sCommand, asArgs, true);
+	}
 
 	/**
 	 * Executes a command in the system registering the logs on a temp log file
@@ -75,7 +80,7 @@ public class RunTimeUtils {
 	 * @param asArgs
 	 * @return
 	 */
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
+	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs, boolean bDelete) {
 		Utils.debugLog("RunTimeUtils.shellExecWithLogs sCommand: " + sCommand);
 
 		try {
@@ -93,12 +98,12 @@ public class RunTimeUtils {
 			
 			Utils.debugLog("RunTimeUtils.shellExecWithLogs CommandLine: " + sCommandLine);
 
-			File logFile = createLogFile();
+			File oLogFile = createLogFile();
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
 
 			oProcessBuilder.redirectErrorStream(true);
-			oProcessBuilder.redirectOutput(logFile);
+			oProcessBuilder.redirectOutput(oLogFile);
 
 			Process oProcess = oProcessBuilder.start();
 
@@ -107,8 +112,11 @@ public class RunTimeUtils {
 
 			if (iProcOuptut == 0) {
 
-				String sOutputFileContent = readLogFile(logFile);
-				deleteLogFile(logFile);
+				String sOutputFileContent = readLogFile(oLogFile);
+				
+				if (bDelete) {
+					deleteLogFile(oLogFile);
+				}
 
 				if (!Utils.isNullOrEmpty(sOutputFileContent)) {
 					if (sOutputFileContent.trim().equalsIgnoreCase("false")) {
@@ -118,10 +126,12 @@ public class RunTimeUtils {
 
 				return true;
 			} else {
-				String sOutputFileContent = readLogFile(logFile);
+				String sOutputFileContent = readLogFile(oLogFile);
 				Utils.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
 
-				deleteLogFile(logFile);
+				if (bDelete) {
+					deleteLogFile(oLogFile);
+				}
 
 				return false;
 			}
@@ -150,12 +160,20 @@ public class RunTimeUtils {
 		}
 	}
 	
+	public static boolean runCommand(String sFolder, String sCommand) {
+		return runCommand(sFolder, sCommand, false);
+	}
+	
+	public static boolean runCommand(String sFolder, String sCommand, boolean bRunInShell) {
+		return runCommand(sFolder, sCommand, false, true);
+	}
+	
 	/**
 	 * Run Linux command
 	 * @param sCommand the command to run
 	 * @return boolean in case of success, false otherwise
 	 */
-	public static boolean runCommand(String sFolder, String sCommand) {
+	public static boolean runCommand(String sFolder, String sCommand, boolean bRunInShell, boolean bDelete) {
 
 		try {
 			
@@ -189,15 +207,23 @@ public class RunTimeUtils {
 			// Initialize Args
 			List<String> asArgs = new ArrayList<>();
 
-
-			// Generate shell command
 			Utils.debugLog("RunTimeUtils.runCommand: Running the shell command");
-			Utils.debugLog(sCommand);
-
+			
 			// Run the script
-			boolean bResult = RunTimeUtils.shellExecWithLogs(sBuildScriptFile, asArgs);
-
-			FileUtils.forceDelete(oBuildScriptFile);
+			boolean bResult = false;
+			
+			if (bRunInShell) {
+				asArgs.add("-c");
+				asArgs.add(sBuildScriptFile);
+				bResult = RunTimeUtils.shellExecWithLogs("sh", asArgs, bDelete);				
+			}
+			else {
+				bResult = RunTimeUtils.shellExecWithLogs(sBuildScriptFile, asArgs, bDelete);
+			}
+			
+			if (bDelete) {
+				FileUtils.forceDelete(oBuildScriptFile);
+			}
 
 			if (bResult) {
 				Utils.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");

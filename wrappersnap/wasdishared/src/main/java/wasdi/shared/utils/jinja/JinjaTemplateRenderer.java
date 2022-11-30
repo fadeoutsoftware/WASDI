@@ -4,8 +4,8 @@ import java.util.Map;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * Utility class to translate a Jinja Template in a valorized file

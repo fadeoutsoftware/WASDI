@@ -50,6 +50,11 @@ public class DockersConfig {
 	public Integer millisWaitAfterDeployScriptCreated = 2000;
 	
 	/**
+	 * The amout of time  (in millis) to wait for the docker login operation to finish
+	 */
+	public Integer millisWaitForLogin= 4000;
+	
+	/**
 	 * List of docker registries supported
 	 */
 	public ArrayList<DockerRegistryConfig> registers;

@@ -43,6 +43,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
+import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
 import it.fadeout.threads.ForceLibraryUpdateWorker;
@@ -2616,5 +2617,52 @@ public class ProcessorsResource  {
 			return Response.serverError().build();
 		}
 	}
+	
+	@GET
+	@Path("downloadprocessor")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response getCWLDescriptor(@QueryParam("processorName") String sProcessorName)
+	{			
+
+		Utils.debugLog("ProcessorsResource.getCWLDescriptor( processorName: " + sProcessorName);
+		
+		try {
+						
+			// Check the processor
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
+			
+			if (oProcessor == null) {
+				Utils.debugLog("ProcessorsResource.getCWLDescriptor: processor does not exists");
+				return Response.status(Status.NO_CONTENT).build();				
+			}
+			
+			// Take path
+			String sDownloadRootPath = Wasdi.getDownloadPath();
+			String sCWLFile = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorName + ".cwl";
+			File oFile = new File(sCWLFile);
+			Utils.debugLog("CatalogResources.getCWLDescriptor: file " + sCWLFile);
+			
+			if (!oFile.exists()) {
+				Utils.debugLog("CatalogResources.getCWLDescriptor: unable to find the file");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+			
+			ResponseBuilder oResponseBuilder = null;
+			
+			FileStreamingOutput oStream = new FileStreamingOutput(oFile);
+			Utils.debugLog("CatalogResources.getCWLDescriptor: file ok return content");
+			oResponseBuilder = Response.ok(oStream);
+			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+			oResponseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition");
+									
+			return oResponseBuilder.build();			
+		} 
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.downloadProcessor: " + oEx);
+		}
+		
+		return Response.serverError().build();
+	}			
 	
 }

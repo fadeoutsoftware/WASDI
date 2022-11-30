@@ -45,6 +45,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Name of the generated Docker Image
 	 */
 	protected String m_sDockerImageName = "";
+	
+	/**
+	 * Address of the docker registry in use
+	 */
+	protected String m_sDockerRegistry = "";
 
 	public DockerProcessorEngine() {
 		super();
@@ -54,6 +59,22 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
     }
 
+	public String getDockerImageName() {
+		return m_sDockerImageName;
+	}
+
+	public void setDockerImageName(String sDockerImageName) {
+		this.m_sDockerImageName = sDockerImageName;
+	}
+
+	public String getDockerRegistry() {
+		return m_sDockerRegistry;
+	}
+
+	public void setDockerRegistry(String sDockerRegistry) {
+		this.m_sDockerRegistry = sDockerRegistry;
+	}
+	
     /**
      * Deploy a new Processor in WASDI
      *
@@ -160,6 +181,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create Docker Util and deploy the docker
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
@@ -1141,4 +1163,5 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		
 		return bRet;
 	}
+
 }
