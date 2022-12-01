@@ -12,10 +12,10 @@ USER root
 # Values not setted here are provided with the docker build command
 ARG sContainerGroupId="1000"
 ARG sContainerGroupName="wasdi"
-ARG sContainerPipWasdiArguments
 ARG sContainerUserId="1000"
-ARG sContainerUserHomeDirectory="/home/$sContainerGroupName"
+ARG sContainerUserHomeDirectory="/home/$sContainerUserName"
 ARG sContainerUserName="wasdi"
+ARG PIP_INSTALL_WASDI_ARGUMENTS
 
 
 # Create environment variables:
@@ -88,8 +88,8 @@ USER $sContainerUserName
 # Please note:
 #   - 'wasdi' is installed independently to be able to set the repository
 #   - there is no cache: I suppose because it is too much dynamic
-RUN python3 -m venv $sContainerUserHomeDirectory/venv && \
-    pip3 install --no-cache-dir --no-compile $sContainerPipWasdiArguments wasdi && \
+RUN python3 -m venv --system-site-packages $sContainerUserHomeDirectory/venv && \
+    pip3 install --no-cache-dir --no-compile $PIP_INSTALL_WASDI_ARGUMENTS wasdi && \
     pip3 install --no-cache-dir --no-compile \
         numpy
 
