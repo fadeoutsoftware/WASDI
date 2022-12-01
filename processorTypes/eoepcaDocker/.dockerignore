@@ -1,0 +1,4 @@
+*.j2
+cleanwasdidocker.sh
+deploywasdidocker.sh
+Dockerfile
