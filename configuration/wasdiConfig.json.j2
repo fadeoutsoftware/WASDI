@@ -212,20 +212,29 @@
         "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}",
         "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
         "millisBetweenAttmpts": {{ dictWasdiConfiguration.dockers.millisBetweenAttmpts }},
-        "registers": [
-{% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.registers %}
-            {
-                "id": "{{ sCurrentDockerRegistry }}",
-                "address": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].address }}",
-                "user": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].user }}",
-                "password": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].password }}",
-                "priority": {{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].priority }}
-            }{% if not loop.last %},
-        ]
+        "millisWaitAfterDelete": {{ dictWasdiConfiguration.dockers.millisWaitAfterDelete }},
+        "millisWaitAfterDeployScriptCreated": {{ dictWasdiConfiguration.dockers.millisWaitAfterDeployScriptCreated }},
+        "millisWaitForLogin": {{ dictWasdiConfiguration.dockers.millisWaitForLogin }},
+        "eoepca": {
+            "registers": [
+{% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.eoepca.registers %}
+                {
+                    "id": "{{ sCurrentDockerRegistry }}",
+                    "address": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].address }}",
+                    "user": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].user }}",
+                    "password": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].password }}",
+                    "priority": {{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].priority }}
+                }{% if not loop.last %},
+            ]
 {% endif %}
 {% endfor %}
 
-        ]
+            ],
+            "dockerWriteFolder": "{{ dictWasdiConfiguration.dockers.eoepca.dockerWriteFolder }}",
+            "adesServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.adesServerAddress }}",
+            "adesUser": "{{ dictWasdiConfiguration.dockers.eoepca.adesUser }}",
+            "adesPassword": "{{ dictWasdiConfiguration.dockers.eoepca.adesPassword }}"
+        }
     },
     "scheduler": {
         "processingThreadWaitStartMS": "{{ dictWasdiConfiguration.scheduler.processingThreadWaitStartMS }}",

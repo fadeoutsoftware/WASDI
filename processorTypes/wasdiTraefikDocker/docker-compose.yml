@@ -7,7 +7,7 @@ networks:
 
 services:
   traefik-notebook:
-    image: "traefik:v2.8.1"
+    image: "traefik:v2.9.1"
     container_name: "traefik-notebook"
     restart: "unless-stopped"
     user: "root:root"
@@ -17,7 +17,7 @@ services:
       - "--api.dashboard=true"
       - "--api.insecure=false"
       - "--log=true"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--log.format=common"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -28,7 +28,13 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entryPoints.web.forwardedHeaders.insecure"
     ports:
-      - "9000:80"
+{% if ( companyServiceName | lower ) in ["computationalnode003"] %}
+      - "127.0.0.1:8083:80"
+{% elif ( companyEnvironmentName | lower ) in ["test"] and ( companyServiceName | lower ) in ["mainnode002"] %}
+      - "127.0.0.1:8083:80"
+{% else %}
+      - "8083:80"
+{% endif %}
     volumes:
       - "/data/wasdi/container/volume/traefik-notebook/etc_traefik:/etc/traefik"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
