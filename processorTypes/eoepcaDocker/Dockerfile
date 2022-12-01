@@ -15,7 +15,7 @@ ARG sContainerGroupName="wasdi"
 ARG sContainerUserId="1000"
 ARG sContainerUserHomeDirectory="/home/$sContainerUserName"
 ARG sContainerUserName="wasdi"
-ARG PIP_INSTALL_WASDI_ARGUMENTS
+ARG PIP_INSTALL_WASDI_ARGUMENTS=""
 
 
 # Create environment variables:
