@@ -476,26 +476,27 @@ public class Utils {
 		if(!Utils.isNullOrEmpty(sLevel)) {
 			sPrefix = "[" + sLevel + "] ";
 		}
-		LocalDateTime oNow = LocalDateTime.now();
 		
-		String sFinalLine = sPrefix + oNow + ": " + sMessage;
+		LocalDateTime oNow = LocalDateTime.now();
 		
 		if (s_oLoggerWrapper != null) {
 			
 			if (sLevel.equals("DEBUG")) {
-				s_oLoggerWrapper.debug(sFinalLine);	
+				s_oLoggerWrapper.debug(sMessage);	
 			}
 			else if (sLevel.equals("INFO")) {
-				s_oLoggerWrapper.info(sFinalLine);
+				s_oLoggerWrapper.info(sMessage);
 			}
 			else if (sLevel.equals("ERROR")) {
-				s_oLoggerWrapper.error(sFinalLine);
+				s_oLoggerWrapper.error(sMessage);
 			}
 			else {
-				s_oLoggerWrapper.info(sFinalLine);
+				s_oLoggerWrapper.info(sMessage);
 			}
 			
 		}
+		
+		String sFinalLine = sPrefix + oNow + ": " + sMessage;
 		
 		System.out.println(sFinalLine);
 	}

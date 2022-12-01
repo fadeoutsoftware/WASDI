@@ -244,6 +244,11 @@ public class DockerUtils {
         try {
             // Get the docker name
             String sDockerName = "wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
+            
             String sCommand = "docker";
 
             // Initialize Args
@@ -382,6 +387,10 @@ public class DockerUtils {
             // docker rmi -f <imagename>
 
             String sDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
 
             String sDeleteScriptFile = m_sProcessorFolder + "cleanwasdidocker.sh";
             File oDeleteScriptFile = new File(sDeleteScriptFile);
@@ -456,67 +465,12 @@ public class DockerUtils {
     	return true;
     }
     
-
-    public boolean loginOld(String sServer, String sUser, String sPassword, String sFolder) {
-    	
-    	try {
-    		
-            // Create the docker command
-            ArrayList<String> asArgs = new ArrayList<>();
-            
-            //String sCommand = "docker";
-            asArgs.add("sh");
-            asArgs.add("-c");
-            
-            asArgs.add("docker");
-            // Login
-            asArgs.add("login");
-            // User
-            asArgs.add("--username");
-            asArgs.add(sUser);
-            // Password
-            asArgs.add("--password");
-            //asArgs.add("'"+sPassword+"'");
-            asArgs.add("'"+sPassword+"'");
-            // Server
-            asArgs.add(sServer);
-            
-            //RunTimeUtils.shellExec(sCommand, asArgs, true);
-            
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess = oProcessBuilder.start();
-			
-			StreamGobbler oOutputGobbler = new StreamGobbler(oProcess.getInputStream(), "OUTPUT" , LauncherMain.s_oLogger);
-			StreamGobbler oErrorGobbler = new StreamGobbler(oProcess.getErrorStream(), "ERROR" , LauncherMain.s_oLogger);
-			oOutputGobbler.start();
-			oErrorGobbler.start();
-			
-//			OutputStream oStdin = oProcess.getOutputStream();
-//
-//		    BufferedWriter oWriter = new BufferedWriter(new OutputStreamWriter(oStdin));
-//
-//		    oWriter.write(sPassword+"\n");
-//		    oWriter.flush();
-//		    oWriter.close();
-		    		    
-		    oProcess.wait(WasdiConfig.Current.dockers.millisWaitForLogin);
-    		
-    	} catch (Exception oEx) {
-    		LauncherMain.s_oLogger.error("DockerUtils.login: " + oEx.toString());
-            return false;
-        }
-    	
-    	return true;
-    }
-    
     /**
      * Push a docker image to a registry. Must be logged 
-     * @param sServer Address of the registry server
      * @param sImage Image name
      * @return True if pushed false if error 
      */
-    public boolean push(String sServer, String sImage) {
-    	
+    public boolean push(String sImage) {	
     	try {
     		
     		if (sImage.contains(":")) {

@@ -611,6 +611,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         }
     }
 
+    /**
+     * Deletes a docker image
+     */
     public boolean delete(ProcessorParameter oParameter) {
         // Get the docker Id or name from the param; we should save it in the build or run
         // call docker rmi -f <containerId>
@@ -660,6 +663,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Delete Processor Docker");
 
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            // Set also the docker registry
+            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
             oDockerUtils.delete(sProcessorName, oProcessor.getVersion());
 
@@ -771,6 +776,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create utils
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
 
             // Delete the image
             LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: delete the container");

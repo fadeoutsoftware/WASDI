@@ -16,8 +16,22 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 
+/**
+ * EOEPCA Processor Engine.
+ * This processor engine is designed to deploy and run applications in
+ * and EOEPCA reference architecture server installation. 
+ * 
+ * @author p.campanella
+ *
+ */
 public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	
+	/**
+	 * Constructor that initializes the main members
+	 * @param sWorkingRootPath Wasdi root path
+	 * @param sDockerTemplatePath Docker templates path 
+	 * @param sTomcatUser User to use in the docker
+	 */
 	public EoepcaProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
 		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 
@@ -27,6 +41,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 	}	
 	
+	/**
+	 * Default constructor
+	 */
 	public EoepcaProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
@@ -34,6 +51,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 	}
 	
+	/**
+	 * Deploy the processor in ADES.
+	 * The method creates the docker in "single run mode".
+	 * Then it pushes the image in Nexus
+	 * Then creates the CWL and the body to post to the ades api to deploy a processor.
+	 */
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 				
@@ -70,44 +93,13 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Get Processor Name and Id
 		String sProcessorId = oParameter.getProcessorID();
-		String sProcessorName = oParameter.getName();
 		
 		// Read the processor from the db
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
-		// And get the processor folder
-		String sProcessorFolder = getProcessorFolder(sProcessorName);
-		
-		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, "");
-		
-		// Here we keep track of how many registers we tried
-		int iAvailableRegisters=0;
 		// Here we save the address of the image
-		String sPushedImageAddress = "";
-		
-		// For each register: ordered by priority
-		for (; iAvailableRegisters<aoRegisters.size(); iAvailableRegisters++) {
-			
-			DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
-			
-			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: try to push to " + oDockerRegistryConfig.id);
-			
-			// Try to login and push
-			sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
-			
-			if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: image pushed");
-				// Ok we got a valid address!
-				break;
-			}
-		}
-		
-		// Did we used all the avaialbe options?
-		if (iAvailableRegisters<aoRegisters.size()) {
-			// TODO: push also in other registers. This would be better in a thread
-		}
+		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to push the image.");
@@ -115,64 +107,85 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		// Prepare the args for the j2 template
-		String sAppParametersDeclaration = "";
-		String sAppParametersAsArgs = "";
+		String sAppParametersDeclaration = getParametersInputDescription(oProcessor);
 		
-		// Get the parameters json sample
-		String sEncodedJson= oProcessor.getParameterSample();
-		String sJsonSample = sEncodedJson;
-		
-		try {
-			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-		}
-		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+
+		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: empty args, not good");
 			return false;
 		}
-				
 		
+		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
+		
+		if (!bTemplates) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: problems rendering the template");
+			return false;
+		}
+		
+        return true;
+	}
+	
+	/**
+	 * Push one image in all the registers
+	 * @param oProcessor Processor
+	 * @return name of the image
+	 */
+	protected String pushImageInRegisters(Processor oProcessor) {
 		try {
-			// Translate it in a Map
-			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
+			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 			
-			// For each parameter
-			for (String sKey : aoProcessorParams.keySet()) {
-				// Declare the parameter
-				sAppParametersDeclaration += "  " + sKey + ":\n";
-				sAppParametersDeclaration += "    type: ";
+			// And get the processor folder
+			String sProcessorFolder = getProcessorFolder(oProcessor.getName());
+			
+			// Create the docker utils
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, "");
+			
+			// Here we keep track of how many registers we tried
+			int iAvailableRegisters=0;
+			// Here we save the address of the image
+			String sPushedImageAddress = "";
+			
+			// For each register: ordered by priority
+			for (; iAvailableRegisters<aoRegisters.size(); iAvailableRegisters++) {
 				
-				// Set the type
-				Object oValue = aoProcessorParams.get(sKey);
+				DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
 				
-				if (oValue instanceof String) {
-					sAppParametersDeclaration += "string";
-				}
-				else if (oValue instanceof Integer) {
-					sAppParametersDeclaration += "int";
-				}
-				else if (oValue instanceof Float) {
-					sAppParametersDeclaration += "float";
-				}
-				else if (oValue instanceof Double) {
-					sAppParametersDeclaration += "double";
-				}
+				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
 				
-				sAppParametersDeclaration += "\n";
+				// Try to login and push
+				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
 				
-				// And prepare also the parameter as arg to the second step
-				sAppParametersAsArgs += "        " + sKey +": "+ sKey + "\n";
+				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
+					LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.pushImageInRegisters: image pushed");
+					// Ok we got a valid address!
+					break;
+				}
 			}
 			
-			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
-			sAppParametersAsArgs = sAppParametersAsArgs.substring(0, sAppParametersAsArgs.length()-1);
+			// Did we used all the avaialbe options?
+			if (iAvailableRegisters<aoRegisters.size()) {
+				// TODO: push also in other registers. This would be better in a thread
+			}
 			
+			return sPushedImageAddress;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
-			return false;
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.pushImageInRegisters: error " + oEx.toString());
 		}
 		
+		return "";
+	}
+	
+	/**
+	 * Renders the CWL (and app body) templates
+	 * @param oProcessor Processor
+	 * @param sAppParametersDeclaration Description of the parameters
+	 * @return true or false
+	 */
+	protected boolean renderCWLTemplates(Processor oProcessor, String sAppParametersDeclaration) {
 		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: generate csw file");
+		
+		String sProcessorName = oProcessor.getName();
 		
 		// We need to generate actual files from params
 		JinjaTemplateRenderer oJinjaTemplateRenderer = new JinjaTemplateRenderer();
@@ -185,7 +198,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		aoCWLParameters.put("wasdiAppDescription", oProcessor.getDescription());
 		aoCWLParameters.put("wasdiAppParametersDeclaration", sAppParametersDeclaration);
 		aoCWLParameters.put("wasdiOutputFolder", WasdiConfig.Current.dockers.eoepca.dockerWriteFolder);
-		aoCWLParameters.put("wasdiProcessorImage", sPushedImageAddress);
+		aoCWLParameters.put("wasdiProcessorImage", m_sDockerImageName);
 		
 		String sCWLTemplateInput = getProcessorFolder(sProcessorName) + "wasdi-processor.cwl.j2";
 		String sCWLTemplateOutput = getProcessorFolder(sProcessorName) + sProcessorName + ".cwl";
@@ -218,7 +231,63 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		WasdiFileUtils.deleteFile(sCWLTemplateInput);
 		WasdiFileUtils.deleteFile(sBodyTemplateInput);
 		
-        return true;
+		return true;
+	}
+	
+	protected String getParametersInputDescription(Processor oProcessor) {
+		// Prepare the args for the j2 template
+		String sAppParametersDeclaration = "";
+		
+		// Get the parameters json sample
+		String sEncodedJson= oProcessor.getParameterSample();
+		String sJsonSample = sEncodedJson;
+		
+		try {
+			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+			return sAppParametersDeclaration;
+		}
+				
+		
+		try {
+			// Translate it in a Map
+			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
+			
+			// For each parameter
+			for (String sKey : aoProcessorParams.keySet()) {
+				// Declare the parameter
+				sAppParametersDeclaration += "  " + sKey + ":\n";
+				sAppParametersDeclaration += "    type: ";
+				
+				// Set the type
+				Object oValue = aoProcessorParams.get(sKey);
+				
+				if (oValue instanceof String) {
+					sAppParametersDeclaration += "string";
+				}
+				else if (oValue instanceof Integer) {
+					sAppParametersDeclaration += "int";
+				}
+				else if (oValue instanceof Float) {
+					sAppParametersDeclaration += "float";
+				}
+				else if (oValue instanceof Double) {
+					sAppParametersDeclaration += "double";
+				}
+				
+				sAppParametersDeclaration += "\n";
+			}
+			
+			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
+			return "";
+		}
+		
+		return sAppParametersDeclaration;
 	}
 	
 	/**
@@ -237,7 +306,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				return "";
 			}
 			
-			boolean bPushed = oDockerUtils.push(oDockerRegistryConfig.address, sImageName);
+			boolean bPushed = oDockerUtils.push(sImageName);
 			
 			if (!bPushed) {
 				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
@@ -261,24 +330,105 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 
 	@Override
 	public boolean delete(ProcessorParameter oParameter) {
+
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+		
+		if (aoRegisters == null) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			return false;			
+		}
+
+		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
+		m_sTomcatUser = "";
+		// And we do not need to start after the build
+		m_bRunAfterDeploy = false;
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;
+		
 		boolean bDeleted = super.delete(oParameter);
 		
-		// TODO: remove the image. Remove the csw. Undeploy from ADES?
+		// TODO: remove the image from the registers 
+		// Undeploy from ADES?
 		
 		return bDeleted;
 	}
 
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
-		boolean bRes = super.redeploy(oParameter);
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
-		return bRes;
+		if (aoRegisters == null) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			return false;			
+		}
+		
+		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
+		
+		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
+		m_sTomcatUser = "";
+		// And we do not need to start after the build
+		m_bRunAfterDeploy = false;
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;
+		
+		boolean bResult = super.redeploy(oParameter);
+		
+		if (!bResult) {
+			// This is not good
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
+			return false;
+		}
+		
+		// Get Processor Name and Id
+		String sProcessorId = oParameter.getProcessorID();
+		
+		// Read the processor from the db
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		// Here we save the address of the image
+		String sPushedImageAddress = pushImageInRegisters(oProcessor);
+		
+		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to push the image.");
+			return false;
+		}
+		
+		// Prepare the args for the j2 template
+		String sAppParametersDeclaration = getParametersInputDescription(oProcessor);
+		
+
+		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: empty args, not good");
+			return false;
+		}
+		
+		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
+		
+		if (!bTemplates) {
+			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: problems rendering the template");
+			return false;
+		}
+		
+        return true;
 	}
 
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		// Library update is not possible in EOEPCA. It needs a full rebuild
+		return true;
 	}
 
 	@Override
