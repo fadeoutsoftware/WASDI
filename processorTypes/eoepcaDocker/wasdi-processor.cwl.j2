@@ -21,11 +21,14 @@ outputs:
     type: Directory
 
 requirements:
+  EnvVarRequirement:
+    envDef:
+      WASDI_OUTPUT: {{ wasdiOutputFolder }}
   NetworkAccess:
     networkAccess: true
   DockerRequirement:
     dockerPull: {{ wasdiProcessorImage }}
-    dockerOutputDirectory: /home/wasdi/application
+    dockerOutputDirectory: {{ wasdiOutputFolder }}
   ResourceRequirement:
     coresMax: 4
     ramMax: 36000
