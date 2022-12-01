@@ -1,77 +1,54 @@
-cwlVersion: v1.0
+cwlVersion: v1.2
 
-$namespaces:
-  s: https://schema.org/
-s:softwareVersion: 0.5.0
-schemas:
-- http://schema.org/version/9.0/schemaorg-current-http.rdf
+class: CommandLineTool
+id: {{wasdiAppId}}
+label: executes the WASDI Processor
 
-
-$graph:
-- class: Workflow
-
-  id: {{  wasdiAppId }}
-  label: {{ wasdiAppDescription }}
-  doc: {{ wasdiAppDescription }}
-
-  requirements:
-  - class: InlineJavascriptRequirement
-
-  inputs:
+inputs:
 {{ wasdiAppParametersDeclaration }}
-    - wasdi__proc__id:
-      type: string
-    - wasdi__session__id
-      type: string        
-    - wasdi__user__id
-      type: string
-    - wasdi__ws__id
-      type: string
+  wasdi__proc__id:
+    type: string
+  wasdi__session__id:
+    type: string
+  wasdi__user__id:
+    type: string
+  wasdi__ws__id:
+    type: string
 
-  outputs: 
-  - id: results
-    outputSource:
-    - node_wasdi/results
+outputs:
+  results:
     type: Directory
-  
-  steps:
-    node_wasdi:
-      in:
-{{ wasdiAppParametersAsArgs }}
-        wasdi__proc__id: wasdi__proc__id
-        wasdi__session__id: wasdi__session__id
-        wasdi__user__id: wasdi__user__id
-        wasdi__ws__id: wasdi__ws__id         
-      out:
-      - results
 
-      run: "#wasdi_app"
+requirements:
+  EnvVarRequirement:
+    envDef:
+      WASDI_OUTPUT: {{ wasdiOutputFolder }}
+  NetworkAccess:
+    networkAccess: true
+  DockerRequirement:
+    dockerPull: {{ wasdiProcessorImage }}
+    dockerOutputDirectory: {{ wasdiOutputFolder }}
+  ResourceRequirement:
+    coresMax: 4
+    ramMax: 36000
+  InlineJavascriptRequirement: {}
+  InitialWorkDirRequirement:
+    listing:
+      - entryname: params.json
+        entry: |-
+          ${
+                var sParamsJson = "{";
+                var asKeys = Object.keys(inputs);
 
-
-- class: CommandLineTool
-
-  id: wasdi_app
-  label: executes the WASDI Processor
-
-  requirements: 
-    DockerRequirement:
-      dockerPull: {{ wasdiProcessorImage }}
-    ResourceRequirement:
-      coresMax: 4
-      ramMax: 36000
-    InlineJavascriptRequirement: {}
-    InitialWorkDirRequirement:
-      listing:
-        - entryname: params.json
-          entry: |-
-            ${
-               var sParamsJson = "{\n";
-               var asKeys = Object.keys(inputs);
-
-               for (var i=0; i<asKeys.length; i++) {
+                for (var i=0; i<asKeys.length; i++) {
                  var sKey = asKeys[i];
+
+                 if (sKey=="wasdi__proc__id" || sKey=="wasdi__session__id" || sKey=="wasdi__user__id" || sKey=="wasdi__ws__id") {
+                   continue;
+                 }
+
                  var oValue = inputs[sKey];
-                 sParamsJson += sKey + ":"
+                 sParamsJson += '"' + sKey + '":';
                  if (typeof oValue === 'string' || oValue instanceof String) {
                    sParamsJson += '"' + oValue + '"';
                  }
@@ -79,42 +56,32 @@ $graph:
                    sParamsJson += oValue;
                  }
                  if (i<asKeys.length-1) {
-                   sParamsJson += ",\n"
+                   sParamsJson += ","
                  }
                }
 
-               sParamsJson += "\n}\n"
+               sParamsJson += "}"
 
                return sParamsJson;
-            }
-        - entryname: config.json
-          entry: |-
-            {
-              "USER": "$( inputs.wasdi__user__id )",
-              "WORKSPACEID": "$( inputs.wasdi__user__id )",
-              "SESSIONID": "$( inputs.wasdi__session__id )",
-              "MYPROCID": "$( inputs.wasdi__proc__id )",
-              "PARAMETERSFILEPATH": "./params.json"
-            }            
-        - entryname: run_wasdi_app.sh
-          entry: |-
-            #!/bin/bash
-            export HOME=$PWD
-            eoepcaProcessorExecutor    
-            res=$?
-            rm -f params.json
-            rm -f run_me.sh
-            rm -fr $HOME/.wasdi
-            exit $res
+          }
+      - entryname: config.json
+        entry: |-
+          {
+            "USER": "$( inputs.wasdi__user__id )",
+            "WORKSPACEID": "$( inputs.wasdi__ws__id )",
+            "SESSIONID": "$( inputs.wasdi__session__id )",
+            "MYPROCID": "$( inputs.wasdi__proc__id )",
+            "PARAMETERSFILEPATH": "{{ wasdiOutputFolder.rstrip('/') }}/params.json"
+          }
+      - entryname: run_wasdi_app.sh
+        entry: |-
+          #!/bin/bash
+          export HOME=$PWD
+          eoepcaProcessorExecutor
+          res=$?
+          rm -f params.json
+          rm -f run_me.sh
+          rm -fr $HOME/.wasdi
+          exit $res
 
-  baseCommand: ["python3", "eoepcaProcessorExecutor.py"]
-  
-  inputs: 
-    {{ wasdiAppParametersDeclaration }} 
-  
-  outputs:
-    results:
-      type: Directory
-      outputBinding:
-        glob: .
-
+baseCommand: ["python3", "/home/wasdi/application/eoepcaProcessorExecutor.py"]

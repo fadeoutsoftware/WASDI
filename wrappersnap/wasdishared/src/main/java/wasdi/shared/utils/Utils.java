@@ -437,12 +437,7 @@ public class Utils {
 
 	}
 	
-	//////////////////////// All about log
-	
-
-	public static void debugLog(int iValue) {
-		debugLog("" + iValue);
-	}
+	//////////////////////// Log short cuts for the lib
 	
 	/**
 	 * Debug Log
@@ -450,11 +445,32 @@ public class Utils {
 	 * @param sMessage
 	 */
 	public static void debugLog(String sMessage) {
-		log("", sMessage);
+		log("DEBUG", sMessage);
+	}
+	
+	/**
+	 * Info log
+	 * @param sMessage
+	 */
+	public static void infoLog(String sMessage) {
+		log("INFO", sMessage);
+	}
+	
+	/**
+	 * Error log
+	 * @param sMessage
+	 */
+	public static void errorLog(String sMessage) {
+		log("ERROR", sMessage);
 	}
 	
 	public static LoggerWrapper s_oLoggerWrapper = null;
 	
+	/**
+	 * Log
+	 * @param sLevel
+	 * @param sMessage
+	 */
 	public static void log(String sLevel, String sMessage) {
 		String sPrefix = "";
 		if(!Utils.isNullOrEmpty(sLevel)) {

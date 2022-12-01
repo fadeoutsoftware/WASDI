@@ -38,7 +38,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 				
 		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
 		if (aoRegisters == null) {
 			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
@@ -138,8 +138,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
-				sAppParametersDeclaration += "    - " + sKey + ":\n";
-				sAppParametersDeclaration += "      type: ";
+				sAppParametersDeclaration += "  " + sKey + ":\n";
+				sAppParametersDeclaration += "    type: ";
 				
 				// Set the type
 				Object oValue = aoProcessorParams.get(sKey);
@@ -182,9 +182,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Valorize the parameters
 		aoCWLParameters.put("wasdiAppId", sProcessorName);
-		aoCWLParameters.put("wasdiAppDescription",oProcessor.getDescription());
-		aoCWLParameters.put("wasdiAppParametersDeclaration",sAppParametersDeclaration);
-		aoCWLParameters.put("wasdiAppParametersAsArgs",sAppParametersAsArgs);
+		aoCWLParameters.put("wasdiAppDescription", oProcessor.getDescription());
+		aoCWLParameters.put("wasdiAppParametersDeclaration", sAppParametersDeclaration);
+		aoCWLParameters.put("wasdiOutputFolder", WasdiConfig.Current.dockers.eoepca.dockerWriteFolder);
 		aoCWLParameters.put("wasdiProcessorImage", sPushedImageAddress);
 		
 		String sCWLTemplateInput = getProcessorFolder(sProcessorName) + "wasdi-processor.cwl.j2";
@@ -244,9 +244,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				return "";				
 			}
 			
-			String sPushedImageAddress = oDockerRegistryConfig.address + "/" + sImageName;
-			
-			return sPushedImageAddress;
+			return sImageName;
 		}
 		catch (Exception oEx) {
 			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
