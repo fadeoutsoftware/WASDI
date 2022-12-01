@@ -55,23 +55,7 @@ public class DockersConfig {
 	public Integer millisWaitForLogin= 4000;
 	
 	/**
-	 * List of docker registries supported
+	 * Configuration of the EoEpca related docker parameters
 	 */
-	public ArrayList<DockerRegistryConfig> registers;
-	
-	/**
-	 * Get the list of registers ordered by priority
-	 * @return Ordered list of registers
-	 */
-	public ArrayList<DockerRegistryConfig> getRegisters() {
-		try {
-			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
-		}		
-		catch (Exception oEx) {
-			Utils.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
-		}
-		
-		return registers;
-	}
-
+	public EOEPCAConfig eoepca;
 }

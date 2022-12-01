@@ -1,12 +1,11 @@
 cwlVersion: v1.2
 
 class: CommandLineTool
-id: {{wasdi_app}}
+id: {{wasdiAppId}}
 label: executes the WASDI Processor
 
 inputs:
 {{ wasdiAppParametersDeclaration }}
-    type: string
   wasdi__proc__id:
     type: string
   wasdi__session__id:
@@ -38,13 +37,18 @@ requirements:
       - entryname: params.json
         entry: |-
           ${
-                var sParamsJson = "{\n";
+                var sParamsJson = "{";
                 var asKeys = Object.keys(inputs);
 
                 for (var i=0; i<asKeys.length; i++) {
                  var sKey = asKeys[i];
+
+                 if (sKey=="wasdi__proc__id" || sKey=="wasdi__session__id" || sKey=="wasdi__user__id" || sKey=="wasdi__ws__id") {
+                   continue;
+                 }
+
                  var oValue = inputs[sKey];
-                 sParamsJson += sKey + ":"
+                 sParamsJson += '"' + sKey + '":';
                  if (typeof oValue === 'string' || oValue instanceof String) {
                    sParamsJson += '"' + oValue + '"';
                  }
@@ -52,11 +56,11 @@ requirements:
                    sParamsJson += oValue;
                  }
                  if (i<asKeys.length-1) {
-                   sParamsJson += ",\n"
+                   sParamsJson += ","
                  }
                }
 
-               sParamsJson += "\n}\n"
+               sParamsJson += "}"
 
                return sParamsJson;
           }
@@ -64,10 +68,10 @@ requirements:
         entry: |-
           {
             "USER": "$( inputs.wasdi__user__id )",
-            "WORKSPACEID": "$( inputs.wasdi__user__id )",
+            "WORKSPACEID": "$( inputs.wasdi__ws__id )",
             "SESSIONID": "$( inputs.wasdi__session__id )",
             "MYPROCID": "$( inputs.wasdi__proc__id )",
-            "PARAMETERSFILEPATH": "params.json"
+            "PARAMETERSFILEPATH": "{{ wasdiOutputFolder.rstrip('/') }}/params.json"
           }
       - entryname: run_wasdi_app.sh
         entry: |-
