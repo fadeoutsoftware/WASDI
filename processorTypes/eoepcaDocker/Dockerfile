@@ -13,8 +13,8 @@ USER root
 ARG sContainerGroupId="1000"
 ARG sContainerGroupName="wasdi"
 ARG sContainerUserId="1000"
-ARG sContainerUserHomeDirectory="/home/$sContainerUserName"
 ARG sContainerUserName="wasdi"
+ARG sContainerUserHomeDirectory="/home/$sContainerUserName"
 ARG PIP_INSTALL_WASDI_ARGUMENTS=""
 
 
