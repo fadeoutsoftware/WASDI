@@ -15,6 +15,7 @@ import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessScheduler {
 	
@@ -101,7 +102,7 @@ public class ProcessScheduler {
 			File oFolder = new File(WasdiConfig.Current.paths.serializationPath);
 			
 			if (!oFolder.isDirectory()) {
-				WasdiScheduler.error(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
+				WasdiLog.errorLog(m_sLogPrefix + ".init: cannot access parameters folder: " + oFolder.getAbsolutePath());
 			}
 			
 			// Save the path 
@@ -117,7 +118,7 @@ public class ProcessScheduler {
 						int iMaxConcurrents = Integer.parseInt(oSchedulerQueueConfig.maxQueue);
 						if (iMaxConcurrents>0) {
 							m_iNumberOfConcurrentProcess = iMaxConcurrents;
-							WasdiScheduler.log(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
+							WasdiLog.infoLog(m_sLogPrefix + ".init: Max Concurrent Processes: " + m_iNumberOfConcurrentProcess);
 						}					
 					}
 				} catch (Exception e) {
@@ -130,7 +131,7 @@ public class ProcessScheduler {
 						long lTimeout = Long.parseLong(oSchedulerQueueConfig.timeoutMs);
 						if (lTimeout>0) {
 							m_lTimeOutMs = lTimeout;
-							WasdiScheduler.log(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
+							WasdiLog.infoLog(m_sLogPrefix + ".init:  TimeOut Ms: " + m_lTimeOutMs);
 						}
 					}
 				} catch (Exception e) {
@@ -178,7 +179,7 @@ public class ProcessScheduler {
 						long iStartWaitSleep = Long.parseLong( WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 						if (iStartWaitSleep>0) {
 							m_lWaitProcessStartMS = iStartWaitSleep;
-							WasdiScheduler.log(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
+							WasdiLog.infoLog(m_sLogPrefix + ".init: Wait Proc Start Ms: " + m_lWaitProcessStartMS);
 						}
 					}
 				} catch (Exception e) {
@@ -199,10 +200,10 @@ public class ProcessScheduler {
 			m_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		}
 		catch (Exception oEx) {
-			WasdiScheduler.error(m_sLogPrefix + ".init: init Exception: " + oEx);
+			WasdiLog.errorLog(m_sLogPrefix + ".init: init Exception: " + oEx);
 			return false;
 		}
-		WasdiScheduler.log(m_sLogPrefix + ".init: good to go :-)\n");
+		WasdiLog.infoLog(m_sLogPrefix + ".init: good to go :-)\n");
 		return true;
 	}
 	
@@ -241,7 +242,7 @@ public class ProcessScheduler {
 					oReadyProcess.setStatus(ProcessStatus.RUNNING.name());
 					m_oProcessWorkspaceRepository.updateProcess(oReadyProcess);
 					
-					WasdiScheduler.log(m_sLogPrefix + ".run: Resumed " + oReadyProcess.getProcessObjId());
+					WasdiLog.infoLog(m_sLogPrefix + ".run: Resumed " + oReadyProcess.getProcessObjId());
 					
 					// Move in the running list
 					aoReadyList.remove(0);
@@ -264,7 +265,7 @@ public class ProcessScheduler {
 						// Execute the process
 						if (executeProcess(oCreatedProcess) != null) {
 							
-							WasdiScheduler.log(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
+							WasdiLog.infoLog(m_sLogPrefix + ".run: Lauched " + oCreatedProcess.getProcessObjId());
 							
 							// Give a little bit of time to the launcher to start
 							waitForProcessToStart();
@@ -273,7 +274,7 @@ public class ProcessScheduler {
 							aoRunningList.add(oCreatedProcess);		
 						}
 						else {
-							WasdiScheduler.log(m_sLogPrefix + ".run: ERROR Lauching " + oCreatedProcess.getProcessObjId());
+							WasdiLog.infoLog(m_sLogPrefix + ".run: ERROR Lauching " + oCreatedProcess.getProcessObjId());
 						}
 					}
 					
@@ -281,12 +282,12 @@ public class ProcessScheduler {
 				}
 			}
 			else {
-				//if (iSometimes == m_iSometimesCounter) WasdiScheduler.log(m_sLogPrefix + "Running Queue full, next cycle.");
+				//if (iSometimes == m_iSometimesCounter) WasdiLog.infoLog(m_sLogPrefix + "Running Queue full, next cycle.");
 			}
 			
 		} 
 		catch (Exception oEx) {
-			WasdiScheduler.error(m_sLogPrefix + ".run: " + oEx); 
+			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
 			oEx.printStackTrace();
 		} 
 	}
@@ -297,7 +298,7 @@ public class ProcessScheduler {
 		
 		try {
 			if (m_aoLaunchedProcesses.size()!=0) {
-				WasdiScheduler.log(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
+				WasdiLog.infoLog(m_sLogPrefix + ".run: Launched Processes Size: " + m_aoLaunchedProcesses.size());
 			}
 			
 			// Check Launched Proc list
@@ -314,14 +315,14 @@ public class ProcessScheduler {
 					}					
 				}
 				else {
-					WasdiScheduler.log(m_sLogPrefix + ".run: Invalid Proc WS ID : " + sLaunchedProcessWorkspaceId);
+					WasdiLog.infoLog(m_sLogPrefix + ".run: Invalid Proc WS ID : " + sLaunchedProcessWorkspaceId);
 					asLaunchedToDelete.add(sLaunchedProcessWorkspaceId);
 				}
 			}
 			
 			// Remove launched elements
 			for (String sLaunchedToRemove : asLaunchedToDelete) {
-				WasdiScheduler.log(m_sLogPrefix + ".run: Remove from launched : " + sLaunchedToRemove);
+				WasdiLog.infoLog(m_sLogPrefix + ".run: Remove from launched : " + sLaunchedToRemove);
 				m_aoLaunchedProcesses.remove(sLaunchedToRemove);
 			}
 			
@@ -343,7 +344,7 @@ public class ProcessScheduler {
 				if (!Utils.isNullOrEmpty(sPid)) {
 					if (!Utils.isProcessStillAllive(sPid)) {
 						// PID does not exists: recheck and remove
-						WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
+						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
@@ -360,13 +361,13 @@ public class ProcessScheduler {
 								}
 								// Update the process
 								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-								WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
+								WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " status changed to ERROR");
 							}								
 						}
 					}
 				}
 				else {
-					WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
+					WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " with status RUNNING has null PID");
 				}
 				
 				// Is there a timeout?
@@ -381,7 +382,7 @@ public class ProcessScheduler {
 						// We ran over?
 						if (lTimeSpan > m_lTimeOutMs) {
 							// Change the status to STOPPED
-							WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
+							WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " is in Timeout");
 							
 							// Stop the process
 							stopProcess(oRunningPws.getPid());
@@ -394,11 +395,11 @@ public class ProcessScheduler {
 							}
 
 							m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
-							WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
+							WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oRunningPws.getProcessObjId() + " Status changed to STOPPED");
 						}
 					}
 					else {
-						WasdiScheduler.log(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
+						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " Does not have a last state change date");
 					}
 				}
 			}
@@ -421,7 +422,7 @@ public class ProcessScheduler {
 					// Wait 10 time more than standard waiting
 					if (lTimeSpan > 2000*m_lWaitProcessStartMS) {
 						// No good, set as ERROR
-						WasdiScheduler.warn(m_sLogPrefix + ".run: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
+						WasdiLog.warnLog(m_sLogPrefix + ".run: **************Process " + oCreatedProcess.getProcessObjId() + " is GETTING OLD.. ");
 						
 						/*
 						oCreatedProcess.setStatus(ProcessStatus.ERROR.name());
@@ -459,7 +460,7 @@ public class ProcessScheduler {
 				if (!Utils.isNullOrEmpty(sPid)) {
 					if (!Utils.isProcessStillAllive(sPid)) {
 						// PID does not exists: recheck and remove
-						WasdiScheduler.warn(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
+						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
@@ -481,18 +482,18 @@ public class ProcessScheduler {
 								
 								// Update the process
 								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
-								WasdiScheduler.log(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
+								WasdiLog.infoLog(m_sLogPrefix + ".run: **************Process " + oWaitingReadyPws.getProcessObjId() + " with WAITING or READY  status changed to ERROR");
 							}							
 						}
 					}
 				}
 				else {
-					WasdiScheduler.log(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
+					WasdiLog.infoLog(m_sLogPrefix + "Process " + oWaitingReadyPws.getProcessObjId() + " has null PID");
 				}
 			}	
 		}
 		catch (Exception oEx) {
-			WasdiScheduler.error(m_sLogPrefix + ".run: " + oEx); 
+			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
 			oEx.printStackTrace();
 		}
 		
@@ -671,34 +672,34 @@ public class ProcessScheduler {
 					" -operation " + oProcessWorkspace.getOperationType() +
 					" -parameter " + oParameterFilePath.getAbsolutePath();
 	
-			WasdiScheduler.log(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
-			WasdiScheduler.log(sShellExString);
+			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+			WasdiLog.infoLog(sShellExString);
 
 			
 			Process oSystemProc = Runtime.getRuntime().exec(sShellExString);
-			WasdiScheduler.log(m_sLogPrefix + "executeProcess: executed!!!");
+			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
 			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
 			
 		} 
 		catch (IOException oEx) {
-			WasdiScheduler.error(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());
 			oEx.printStackTrace();
-			WasdiScheduler.error(m_sLogPrefix + "executeProcess : try to set the process in Error");
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess : try to set the process in Error");
 			
 			try {
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				m_oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);				
-				WasdiScheduler.error(m_sLogPrefix + "executeProcess: Error status set");
+				WasdiLog.errorLog(m_sLogPrefix + "executeProcess: Error status set");
 			}
 			catch (Exception oInnerEx) {
-				WasdiScheduler.error(m_sLogPrefix + "executeProcess:  INNER Exception" + oInnerEx);
+				WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  INNER Exception" + oInnerEx);
 				oInnerEx.printStackTrace();
 			}
 			
 			return null;
 		}
 		catch(Throwable oThrowable) {
-			WasdiScheduler.error(m_sLogPrefix + "executeProcess:  Exception" + oThrowable.toString());
+			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oThrowable.toString());
 			oThrowable.printStackTrace();
 			return null;
 		}
@@ -717,14 +718,14 @@ public class ProcessScheduler {
 			// kill process command
 			String sShellExString = m_sKillCommand + " " + iPid;
 			
-			WasdiScheduler.log(m_sLogPrefix + "stopProcess: shell exec " + sShellExString);
+			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: shell exec " + sShellExString);
 			
 			Process oProc;
 		
 			oProc = Runtime.getRuntime().exec(sShellExString);
 			return oProc.waitFor();
 		} catch (Exception e) {
-			WasdiScheduler.log(m_sLogPrefix + "stopProcess: exception: " + e.getMessage());
+			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: exception: " + e.getMessage());
 			return -1;
 		}
 	}
