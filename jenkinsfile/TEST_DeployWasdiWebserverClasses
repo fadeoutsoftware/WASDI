@@ -21,14 +21,14 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "Rebuild #${env.BUILD_ID}"
-          currentBuild.description = "WASDI - REBUILD THE LAUNCHER - ${env.BUILD_ID}"
+          currentBuild.description = "WASDI - UPDATE WASDI WEB SERVER CLASSES - ${env.BUILD_ID}"
         }
       }
     }
 
     stage('BUILD') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/rebuildWasdiLauncher.yml --inventory inventories/wasdi.yml --limit test --diff", label: "Execute ansible-playbook"
+        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiWebserverClasses.yml --inventory inventories/wasdi.yml --limit test --diff", label: "Execute ansible-playbook"
       }
     }
   }
