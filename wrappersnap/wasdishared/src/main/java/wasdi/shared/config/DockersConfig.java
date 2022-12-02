@@ -1,10 +1,6 @@
 package wasdi.shared.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import wasdi.shared.utils.Utils;
 
 /**
  * Dockers configuration

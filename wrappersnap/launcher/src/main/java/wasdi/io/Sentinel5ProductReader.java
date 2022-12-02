@@ -15,7 +15,6 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
-import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;

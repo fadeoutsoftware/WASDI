@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import org.json.JSONObject;
 
-import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;

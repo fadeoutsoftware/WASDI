@@ -3,7 +3,6 @@ package wasdi.processors;
 import java.io.File;
 import java.util.Map;
 
-import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;

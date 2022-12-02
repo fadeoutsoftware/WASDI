@@ -11,7 +11,6 @@ import java.util.HashMap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import wasdi.LauncherMain;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;

@@ -8,7 +8,6 @@ import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import wasdi.LauncherMain;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;

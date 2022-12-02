@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.esa.snap.core.datamodel.Product;
 
-import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;

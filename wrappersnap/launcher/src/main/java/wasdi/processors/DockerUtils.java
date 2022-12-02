@@ -4,9 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.List;
 
-import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -165,11 +166,14 @@ public class DockerUtils {
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
-
-            sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
             
+            // Prepare the name of the docker
+            String sDockerBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            
+            // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            	// Yes, add it to the docker name
+            	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
             }
 
             // Initialize Args
@@ -177,9 +181,8 @@ public class DockerUtils {
 
             // Generate shell script file
             String sBuildScriptFile = m_sProcessorFolder + "deploywasdidocker.sh";
-
             File oBuildScriptFile = new File(sBuildScriptFile);
-
+            
             try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
                 // Fill the script file
                 if (oBuildScriptWriter != null) {
@@ -189,7 +192,38 @@ public class DockerUtils {
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
                     oBuildScriptWriter.newLine();
-                    oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
+                    
+                    // Are we building locally or for a register?
+                    if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                    	// Local build
+                    	oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
+                    }
+                    else {
+                    	WasdiLog.debugLog("DockerUtils.deploy: multi tag build ");
+                    	
+                    	// Register: the first tag is already in the Docker Name
+                    	String sMultiTagBuild = "docker build -t" + sDockerName;
+                    	
+                    	// Take all our registers
+                    	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+                    	
+                    	// For each register
+                    	for (DockerRegistryConfig oDockerRegistryConfig : aoRegisters) {
+                    		// Is this the main one? So jump, already added
+							if (oDockerRegistryConfig.address.equals(m_sDockerRegistry)) continue;
+							
+							// No, ok, we can add a new tag
+							sMultiTagBuild += " -t" +  oDockerRegistryConfig.address + "/"  + sDockerBaseName;
+							
+							WasdiLog.debugLog("DockerUtils.deploy: added tag  for " + oDockerRegistryConfig.id);
+						}
+                    	
+                    	// Last the space and the folder to build
+                    	sMultiTagBuild += " " + m_sProcessorFolder;
+                    	
+                    	// We can write our script
+                    	oBuildScriptWriter.write(sMultiTagBuild);
+                    }
                     
                     if (!Utils.isNullOrEmpty(m_sUser)) {
                         oBuildScriptWriter.write(" --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +

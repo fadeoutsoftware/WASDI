@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wasdi.shared.utils.log.WasdiLog;
-
 /**
  * @author c.nattero
  *

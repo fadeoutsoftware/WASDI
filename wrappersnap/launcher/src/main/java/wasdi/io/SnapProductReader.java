@@ -21,7 +21,6 @@ import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.referencing.CRS;
 
-import wasdi.LauncherMain;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.Utils;
