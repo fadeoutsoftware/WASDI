@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
-import wasdi.LauncherMain;
 import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.utils.log.WasdiLog;

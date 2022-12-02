@@ -8,7 +8,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -115,7 +114,7 @@ public class WasdiScheduler
 		}
 		
 		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
-		WasdiLog.s_oLoggerWrapper = oLoggerWrapper;
+		WasdiLog.setLoggerWrapper(oLoggerWrapper);
 		
 		WasdiLog.infoLog("main: Logger configured :-)\n");
 		
@@ -166,7 +165,7 @@ public class WasdiScheduler
 				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
 				if (iThreadSleep>0) {
 					s_lSleepingTimeMS = iThreadSleep;
-					WasdiScheduler.log("main: CatNap Ms: " + s_lSleepingTimeMS);
+					WasdiLog.infoLog("main: CatNap Ms: " + s_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -328,7 +327,7 @@ public class WasdiScheduler
 				catnap();
 			} 
 			catch (Exception oEx) {
-				WasdiScheduler.error("WasdiScheduler.run: exception with finally: " + oEx);
+				WasdiLog.errorLog("WasdiScheduler.run: exception with finally: " + oEx);
 				oEx.printStackTrace();
 			}
 		}
@@ -347,51 +346,6 @@ public class WasdiScheduler
 		}
 	}
 
-	/**
-	 * Error Log thread safe method
-	 * @param sLogRow
-	 */
-	public static void error(String sLogRow) {
-		log(sLogRow,Level.ERROR);
-	}
-	
-	/**
-	 * Info Log thread safe method
-	 * @param sLogRow
-	 */
-	public static void log(String sLogRow) {
-		log(sLogRow,Level.INFO);
-	}
-	
-	/**
-	 * Warn Log thread safe method
-	 * @param sLogRow
-	 */
-	public static void warn(String sLogRow) {
-		log(sLogRow, Level.WARN);
-		
-	}
-	
-	/**
-	 * Log thread safe method
-	 * @param sLogRow
-	 * @param oLogLevel
-	 */
-	public static void log(String sLogRow, Level oLogLevel) {
-		synchronized (s_oLogger) {
-			String sLevel ="INFO";
-			
-			if (oLogLevel==Level.DEBUG) sLevel = "DEBUG";
-			else if (oLogLevel==Level.ERROR) sLevel = "ERROR";
-			else if (oLogLevel==Level.WARN) sLevel = "WARN";
-			
-			WasdiLog.log(sLevel, sLogRow);
-		}
-	}
-
-
-	
-	
 	/**
 	 * Get the list of running processes
 	 * @return list of running processes

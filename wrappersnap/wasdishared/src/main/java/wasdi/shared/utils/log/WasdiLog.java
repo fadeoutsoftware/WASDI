@@ -20,6 +20,19 @@ import wasdi.shared.utils.Utils;
 public class WasdiLog {
 	
 	/**
+	 * Reference to the logger wrapper to use
+	 */
+	protected static LoggerWrapper s_oLoggerWrapper = null;
+	
+	/**
+	 * Set the active logger wrapper
+	 * @param oLoggerWrapper
+	 */
+	public static void setLoggerWrapper(LoggerWrapper oLoggerWrapper) {
+		s_oLoggerWrapper = oLoggerWrapper;
+	}	
+	
+	/**
 	 * Debug Log
 	 * 
 	 * @param sMessage
@@ -66,19 +79,6 @@ public class WasdiLog {
 	}	
 	
 	/**
-	 * Reference to the logger wrapper to use
-	 */
-	public static LoggerWrapper s_oLoggerWrapper = null;
-	
-	/**
-	 * Set the active logger wrapper
-	 * @param oLoggerWrapper
-	 */
-	public static void setLoggerWrapper(LoggerWrapper oLoggerWrapper) {
-		s_oLoggerWrapper = oLoggerWrapper;
-	}
-	
-	/**
 	 * Log
 	 * @param oLevel Log Level
 	 * @param sMessage Log Message
@@ -103,19 +103,29 @@ public class WasdiLog {
 		if (s_oLoggerWrapper != null) {
 			
 			if (sLevel.equals(WasdiLogLevels.DEBUG.name())) {
-				s_oLoggerWrapper.debug(sMessage);	
+				synchronized (s_oLoggerWrapper) {
+					s_oLoggerWrapper.debug(sMessage);
+				}
 			}
 			else if (sLevel.equals(WasdiLogLevels.INFO.name())) {
-				s_oLoggerWrapper.info(sMessage);
+				synchronized (s_oLoggerWrapper) {
+					s_oLoggerWrapper.info(sMessage);
+				}
 			}
 			else if (sLevel.equals(WasdiLogLevels.WARNING.name())) {
-				s_oLoggerWrapper.warn(sMessage);
+				synchronized (s_oLoggerWrapper) {
+					s_oLoggerWrapper.warn(sMessage);
+				}
 			}
 			else if (sLevel.equals(WasdiLogLevels.ERROR.name())) {
-				s_oLoggerWrapper.error(sMessage);
+				synchronized (s_oLoggerWrapper) {
+					s_oLoggerWrapper.error(sMessage);
+				}
 			}
 			else {
-				s_oLoggerWrapper.info(sMessage);
+				synchronized (s_oLoggerWrapper) {
+					s_oLoggerWrapper.info(sMessage);
+				}
 			}
 			
 		}

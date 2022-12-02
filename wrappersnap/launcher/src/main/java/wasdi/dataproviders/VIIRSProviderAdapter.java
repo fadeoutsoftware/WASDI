@@ -5,7 +5,6 @@ import java.io.File;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class VIIRSProviderAdapter extends ProviderAdapter {

@@ -9,7 +9,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.PatternSyntaxException;
 
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

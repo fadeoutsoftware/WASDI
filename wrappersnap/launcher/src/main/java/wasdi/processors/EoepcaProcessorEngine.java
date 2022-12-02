@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import wasdi.LauncherMain;
+import wasdi.asynch.PushDockerImagesThread;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -165,7 +165,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			// Did we used all the avaialbe options?
 			if (iAvailableRegisters<aoRegisters.size()) {
-				// TODO: push also in other registers. This would be better in a thread
+				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
+				oPushDockerImagesThread.setProcessor(oProcessor);
+				oPushDockerImagesThread.setDockerImageName(m_sDockerImageName);
 			}
 			
 			return sPushedImageAddress;
@@ -235,6 +237,13 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		return true;
 	}
 	
+	/**
+	 * Translates the WASDI JSON Parameters of this application in
+	 * the equivalent text for the CSW Yaml template.
+	 * The output can be used to fill the csw j2 template 
+	 * @param oProcessor Processor that takes the inputs
+	 * @return String with yaml representation of these inputs
+	 */
 	protected String getParametersInputDescription(Processor oProcessor) {
 		// Prepare the args for the j2 template
 		String sAppParametersDeclaration = "";
@@ -323,12 +332,18 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		return "";
 	}
 
+	/**
+	 * Executes an EOEPCA Processor
+	 */
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	/**
+	 * Deletes an EOEPCA Processor
+	 */
 	@Override
 	public boolean delete(ProcessorParameter oParameter) {
 
@@ -359,7 +374,10 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		return bDeleted;
 	}
-
+	
+	/**
+	 * Force the redeploy of an image
+	 */
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
 		// We read  the registers from the config
@@ -425,25 +443,37 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
         return true;
 	}
-
+	
+	/**
+	 * Force the library update
+	 */
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		// Library update is not possible in EOEPCA. It needs a full rebuild
 		return true;
 	}
-
+	
+	/**
+	 * Force an environment update
+	 */
 	@Override
 	public boolean environmentUpdate(ProcessorParameter oParameter) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	/**
+	 * Refreshes the packages info
+	 */
 	@Override
 	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	/**
+	 * Get the related package manager
+	 */
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
 		return null;

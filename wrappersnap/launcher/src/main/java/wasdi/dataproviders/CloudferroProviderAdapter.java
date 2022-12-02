@@ -5,7 +5,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class CloudferroProviderAdapter extends ProviderAdapter {

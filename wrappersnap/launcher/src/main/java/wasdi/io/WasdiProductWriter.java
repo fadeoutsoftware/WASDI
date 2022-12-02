@@ -7,7 +7,6 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.common.WriteOp;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
 
-import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.log.WasdiLog;
