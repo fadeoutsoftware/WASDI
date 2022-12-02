@@ -23,7 +23,7 @@ public class LoggerWrapper {
 	public void debug(String sText) {
 		
 		if (m_oLogger!=null) {
-			WasdiLog.debugLog(m_sPrefix + " " + sText);
+			m_oLogger.debug(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -33,7 +33,7 @@ public class LoggerWrapper {
 	public void warn(String sText) {
 		
 		if (m_oLogger!=null) {
-			WasdiLog.warnLog(m_sPrefix + " " + sText);
+			m_oLogger.warn(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -42,7 +42,7 @@ public class LoggerWrapper {
 	
 	public void info(String sText) {
 		if (m_oLogger!=null) {
-			WasdiLog.infoLog(m_sPrefix + " " + sText);
+			m_oLogger.info(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -52,7 +52,7 @@ public class LoggerWrapper {
 	
 	public void error(String sText) {
 		if (m_oLogger!=null) {
-			WasdiLog.errorLog(m_sPrefix + " " + sText);
+			m_oLogger.error(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -61,7 +61,7 @@ public class LoggerWrapper {
 	
 	public void error(String sText, Exception oEx) {
 		if (m_oLogger!=null) {
-			WasdiLog.errorLog(m_sPrefix + " " + sText, oEx);
+			m_oLogger.error(m_sPrefix + " " + sText, oEx);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
