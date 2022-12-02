@@ -7,9 +7,9 @@ import java.io.IOException;
 
 import com.google.common.io.Files;
 
-import wasdi.LauncherMain;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class OctaveProcessorEngine extends DockerProcessorEngine {
 	
@@ -48,7 +48,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		try (BufferedWriter oMainFileWriter = new BufferedWriter(new FileWriter(oMainFile))) {
 			// Fill the script file
 			if(oMainFileWriter != null ) {
-				LauncherMain.s_oLogger.debug("OctaveProcessorEngine.deploy: Creating "+sMainFile+" file");
+				WasdiLog.debugLog("OctaveProcessorEngine.deploy: Creating "+sMainFile+" file");
 
 				oMainFileWriter.write("function myProcessor()");
 				oMainFileWriter.newLine();
@@ -89,10 +89,10 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 				oMainFileWriter.close();
 			}
 		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("OctaveProcessorEngine.deploy: Exception Creating Main File :"+e.toString());
+			WasdiLog.debugLog("OctaveProcessorEngine.deploy: Exception Creating Main File :"+e.toString());
 		}
 		
-		LauncherMain.s_oLogger.debug("OctaveProcessorEngine.deploy: call super Docker Proc Engine deploy method");
+		WasdiLog.debugLog("OctaveProcessorEngine.deploy: call super Docker Proc Engine deploy method");
 		
 		return super.deploy(oParameter, bFirstDeploy);
 	}
@@ -102,7 +102,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		
 		try {
-			LauncherMain.s_oLogger.debug("OctaveProcessorEngine.libraryUpdate: move lib in the processor folder");
+			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: move lib in the processor folder");
 			
 			// Get the lib path
 			String sLibFilePath = m_sDockerTemplatePath;
@@ -136,12 +136,12 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 				}
 			}
 						
-			LauncherMain.s_oLogger.debug("OctaveProcessorEngine.libraryUpdate: call super implementation to update the docker");
+			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: call super implementation to update the docker");
 			
 			return super.libraryUpdate(oParameter);
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
+			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
 			return false;
 		}
 	}

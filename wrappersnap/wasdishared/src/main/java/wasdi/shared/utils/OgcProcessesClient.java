@@ -1,6 +1,7 @@
 package wasdi.shared.utils;
 
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.Conformance;
 import wasdi.shared.viewmodels.ogcprocesses.Execute;
 import wasdi.shared.viewmodels.ogcprocesses.JobList;
@@ -57,7 +58,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(m_sBaseUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getLandingPage: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getLandingPage: empty response, return null");
 				return null;
 			}
 			
@@ -66,7 +67,7 @@ public class OgcProcessesClient {
 			return oLandingPage;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getLandingPage: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getLandingPage: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -82,7 +83,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getConformance: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getConformance: empty response, return null");
 				return null;
 			}
 			
@@ -91,7 +92,7 @@ public class OgcProcessesClient {
 			return oConformance;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getConformance: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getConformance: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -107,7 +108,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getProcesses: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getProcesses: empty response, return null");
 				return null;
 			}
 			
@@ -116,7 +117,7 @@ public class OgcProcessesClient {
 			return oProcessList;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getProcesses: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getProcesses: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -132,7 +133,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getProcessDescription: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getProcessDescription: empty response, return null");
 				return null;
 			}
 			
@@ -141,7 +142,7 @@ public class OgcProcessesClient {
 			return oProcess;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getProcessDescription: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getProcessDescription: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -161,7 +162,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpPost(sUrl, sPayload, null);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.executProcess: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.executProcess: empty response, return null");
 				return null;
 			}
 			
@@ -170,7 +171,7 @@ public class OgcProcessesClient {
 			return oProcessList;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.executProcess: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.executProcess: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -186,7 +187,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getJobs: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getJobs: empty response, return null");
 				return null;
 			}
 			
@@ -195,7 +196,7 @@ public class OgcProcessesClient {
 			return oJobList;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getJobs: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getJobs: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -212,7 +213,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getStatus: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getStatus: empty response, return null");
 				return null;
 			}
 			
@@ -221,7 +222,7 @@ public class OgcProcessesClient {
 			return oStatusInfo;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getStatus: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getStatus: Exception " + oEx.toString());
 			return null;
 		}
 	}	
@@ -238,7 +239,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpDelete(sUrl, null);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.dismiss: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.dismiss: empty response, return null");
 				return null;
 			}
 			
@@ -247,7 +248,7 @@ public class OgcProcessesClient {
 			return oStatusInfo;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.dismiss: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.dismiss: Exception " + oEx.toString());
 			return null;
 		}
 	}
@@ -264,7 +265,7 @@ public class OgcProcessesClient {
 			String sResponse = HttpUtils.httpGet(sUrl);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				Utils.debugLog("OgcProcessesClient.getResults: empty response, return null");
+				WasdiLog.debugLog("OgcProcessesClient.getResults: empty response, return null");
 				return null;
 			}
 			
@@ -273,7 +274,7 @@ public class OgcProcessesClient {
 			return oResults;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("OgcProcessesClient.getResults: Exception " + oEx.toString());
+			WasdiLog.debugLog("OgcProcessesClient.getResults: Exception " + oEx.toString());
 			return null;
 		}
 	}	

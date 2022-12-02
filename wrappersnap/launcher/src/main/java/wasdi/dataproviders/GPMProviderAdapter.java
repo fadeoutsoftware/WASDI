@@ -8,8 +8,9 @@ import java.util.Map;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class GPMProviderAdapter extends ProviderAdapter {
 
@@ -22,17 +23,12 @@ public class GPMProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "GPM";
 	}
 
-	public GPMProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "GPM";
-	}
-
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		Utils.debugLog("GPMProviderAdapter.getDownloadFileSize | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("GPMProviderAdapter.getDownloadFileSize | sFileURL: " + sFileURL);
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("GPMProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
+			WasdiLog.errorLog("GPMProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 
@@ -45,9 +41,9 @@ public class GPMProviderAdapter extends ProviderAdapter {
 
 			lSizeInBytes = HttpUtils.getDownloadFileSizeViaHttp(sFileURL, asHeaders);
 
-			m_oLogger.debug("GPMProviderAdapter.getDownloadFileSize: file size is: " + sResult);
+			WasdiLog.debugLog("GPMProviderAdapter.getDownloadFileSize: file size is: " + sResult);
 		} catch (Exception oE) {
-			m_oLogger.debug("GPMProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
+			WasdiLog.debugLog("GPMProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
 		}
 
 		return lSizeInBytes;
@@ -56,18 +52,18 @@ public class GPMProviderAdapter extends ProviderAdapter {
 	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
-		Utils.debugLog("GPMProviderAdapter.executeDownloadFile | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("GPMProviderAdapter.executeDownloadFile | sFileURL: " + sFileURL);
 
 		String sResult = "";
 
 		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
 
-			Utils.debugLog("GPMProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("GPMProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 
 			try {
 				sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 			} catch (Exception oEx) {
-				Utils.debugLog("GPMProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("GPMProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 
 			if (!Utils.isNullOrEmpty(sResult)) {
@@ -78,7 +74,7 @@ public class GPMProviderAdapter extends ProviderAdapter {
 				int iMsSleep = (int) ( (Math.random() * 1500.0) + 1000.0 );
 				Thread.sleep(iMsSleep);
 			} catch (Exception oEx) {
-				Utils.debugLog("GPMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("GPMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 
@@ -99,7 +95,7 @@ public class GPMProviderAdapter extends ProviderAdapter {
 		try {
 			asHeaders.put("Authorization", sAuthHeaderValue);
 		} catch (Exception oE) {
-			Utils.debugLog("GPMProviderAdapter.getGPMHeaders: " + oE);
+			WasdiLog.debugLog("GPMProviderAdapter.getGPMHeaders: " + oE);
 		}
 
 		return asHeaders;
@@ -107,7 +103,7 @@ public class GPMProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		Utils.debugLog("GPMProviderAdapter.getFileName | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("GPMProviderAdapter.getFileName | sFileURL: " + sFileURL);
 
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
@@ -125,7 +121,7 @@ public class GPMProviderAdapter extends ProviderAdapter {
 			m_sProviderUser = m_oDataProviderConfig.user;
 			m_sProviderPassword = m_oDataProviderConfig.password;
 		} catch (Exception e) {
-			m_oLogger.error("GPMProviderAdapter: Config reader is null");
+			WasdiLog.errorLog("GPMProviderAdapter: Config reader is null");
 		}
 	}
 

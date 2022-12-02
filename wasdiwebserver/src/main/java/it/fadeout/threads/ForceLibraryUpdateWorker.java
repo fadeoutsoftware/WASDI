@@ -6,7 +6,7 @@ import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ForceLibraryUpdateWorker extends Thread  {
 	/**
@@ -50,7 +50,7 @@ public class ForceLibraryUpdateWorker extends Thread  {
 	@Override
 	public void run() {
 		
-		Utils.debugLog("ForceLibraryUpdateWorker.run: start force lib update for processor " + m_sProcessorId);
+		WasdiLog.debugLog("ForceLibraryUpdateWorker.run: start force lib update for processor " + m_sProcessorId);
 		
 		// For each node		
 		for (Node oNode : m_aoNodes) {
@@ -75,20 +75,20 @@ public class ForceLibraryUpdateWorker extends Thread  {
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
-				Utils.debugLog("ForceLibraryUpdateWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: calling url: " + sUrl);
 				
 				// It is a get call				
 				HttpUtils.httpGet(sUrl, asHeaders);
 				
-				Utils.debugLog("ForceLibraryUpdateWorker.run: lib updated on node " + oNode.getNodeCode());
+				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: lib updated on node " + oNode.getNodeCode());
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("ForceLibraryUpdateWorker.run: Exception " + oEx.toString());
+				WasdiLog.debugLog("ForceLibraryUpdateWorker.run: Exception " + oEx.toString());
 			}
 		}
 
 		// All nodes updated
-		Utils.debugLog("ForceLibraryUpdateWorker.run: distribuited force lib update done");
+		WasdiLog.debugLog("ForceLibraryUpdateWorker.run: distribuited force lib update done");
 	}
 }

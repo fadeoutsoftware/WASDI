@@ -1,6 +1,6 @@
 package it.fadeout.sftp;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Class for sftp account management. In each WASDI Node a little web-socket server is installed.
@@ -47,7 +47,7 @@ public class SFTPManager {
 		try {
 			WsClient oClient = new WsClient(m_sAddress, sCommand);
 			if (oClient.isOk()) return oClient.getData();		
-			Utils.debugLog("ERROR: " + oClient.getData());		
+			WasdiLog.debugLog("ERROR: " + oClient.getData());		
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			Thread.currentThread().interrupt();

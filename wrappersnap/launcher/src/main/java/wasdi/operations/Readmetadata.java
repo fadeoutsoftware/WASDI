@@ -10,21 +10,22 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ReadMetadataParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Readmetadata extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Readmetadata.executeOperation");
+		WasdiLog.debugLog("Readmetadata.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}		
 
@@ -34,7 +35,7 @@ public class Readmetadata extends Operation {
             String sProductName = oReadMetadataParameter.getProductName();
 
             if (sProductName == null) {
-                m_oLocalLogger.error("Readmetadata.executeOperation: Product Path is null");
+                WasdiLog.errorLog("Readmetadata.executeOperation: Product Path is null");
                 return false;
             }
 
@@ -45,12 +46,12 @@ public class Readmetadata extends Operation {
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
             
             if (oDownloadedFile == null) {
-                m_oLocalLogger.error("Readmetadata.executeOperation: Downloaded file not found for path " + sProductPath);
+                WasdiLog.errorLog("Readmetadata.executeOperation: Downloaded file not found for path " + sProductPath);
                 return false;
             }
 
             if (oDownloadedFile.getProductViewModel() == null) {
-                m_oLocalLogger.error("Readmetadata.executeOperation: Product View Model is null");
+                WasdiLog.errorLog("Readmetadata.executeOperation: Product View Model is null");
                 return false;
 
             }
@@ -61,27 +62,27 @@ public class Readmetadata extends Operation {
             if (Utils.isNullOrEmpty(oDownloadedFile.getProductViewModel().getMetadataFileReference())) {
                 if (oDownloadedFile.getProductViewModel().getMetadataFileCreated() == false) {
 
-                    m_oLocalLogger.info("Readmetadata.executeOperation: Metadata File still not created. Generate it");
+                    WasdiLog.infoLog("Readmetadata.executeOperation: Metadata File still not created. Generate it");
 
                     oDownloadedFile.getProductViewModel().setMetadataFileCreated(true);
                     oDownloadedFile.getProductViewModel().setMetadataFileReference(asynchSaveMetadata(sProductPath));
 
-                    m_oLocalLogger.info("Readmetadata.executeOperation: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+                    WasdiLog.infoLog("Readmetadata.executeOperation: Metadata File Creation Thread started. Saving Metadata in path " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
 
                     oDownloadedFilesRepository.updateDownloadedFile(oDownloadedFile);
                 } else {
-                    m_oLocalLogger.info("Readmetadata.executeOperation: attemp to create metadata file has already been done");
+                    WasdiLog.infoLog("Readmetadata.executeOperation: attemp to create metadata file has already been done");
                 }
             } else {
-                m_oLocalLogger.info("Readmetadata.executeOperation: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
+                WasdiLog.infoLog("Readmetadata.executeOperation: metadata file reference already present " + oDownloadedFile.getProductViewModel().getMetadataFileReference());
             }
 
-            m_oLocalLogger.info("Readmetadata.executeOperation: done, bye");
+            WasdiLog.infoLog("Readmetadata.executeOperation: done, bye");
             
             return true;
             
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Readmetadata.executeOperation Exception " + oEx.toString());
+            WasdiLog.errorLog("Readmetadata.executeOperation Exception " + oEx.toString());
         }
         
 		return false;
@@ -98,17 +99,17 @@ public class Readmetadata extends Operation {
                 sMetadataPath += "/";
             String sMetadataFileName = Utils.getRandomName();
 
-            m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: file = " + sMetadataFileName);
+            WasdiLog.debugLog("Readmetadata.asynchSaveMetadata: file = " + sMetadataFileName);
 
             SaveMetadataThread oThread = new SaveMetadataThread(sMetadataPath + sMetadataFileName, sProductFile);
             oThread.start();
 
-            m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: thread started");
+            WasdiLog.debugLog("Readmetadata.asynchSaveMetadata: thread started");
 
             return sMetadataFileName;
 
         } catch (Exception e) {
-            m_oLocalLogger.debug("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
+            WasdiLog.debugLog("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
             e.printStackTrace();
         }
 

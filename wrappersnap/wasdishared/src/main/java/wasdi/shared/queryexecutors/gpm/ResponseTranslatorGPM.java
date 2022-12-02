@@ -3,7 +3,7 @@ package wasdi.shared.queryexecutors.gpm;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -17,14 +17,14 @@ public class ResponseTranslatorGPM extends ResponseTranslator {
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
-		Utils.debugLog("ResponseTranslatorGPM.translateBatch | sResponse: " + sResponse);
+		WasdiLog.debugLog("ResponseTranslatorGPM.translateBatch | sResponse: " + sResponse);
 
 		return null;
 	}
 
 	@Override
 	public int getCountResult(String sQueryResult) {
-		Utils.debugLog("ResponseTranslatorGPM.getCountResult | sQueryResult: " + sQueryResult);
+		WasdiLog.debugLog("ResponseTranslatorGPM.getCountResult | sQueryResult: " + sQueryResult);
 
 		return 0;
 	}

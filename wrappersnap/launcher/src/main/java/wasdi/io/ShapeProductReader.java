@@ -14,6 +14,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -78,7 +79,7 @@ public class ShapeProductReader extends WasdiProductReader{
             oRetViewModel.setBbox(sBbox);
     	}
     	catch (Exception oEx) {
-    		LauncherMain.s_oLogger.debug("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
+    		WasdiLog.debugLog("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
 		}
     	
     	return oRetViewModel;
@@ -114,7 +115,7 @@ public class ShapeProductReader extends WasdiProductReader{
 			
 		} 
 		catch (IOException e) {
-			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
+			WasdiLog.errorLog("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
 		}
 		finally {
 			if (oShpFileDataStore != null) {
@@ -171,7 +172,7 @@ public class ShapeProductReader extends WasdiProductReader{
 			}
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("ShapeProductReader.getEPSG(): exception " + oEx.toString());
+			WasdiLog.errorLog("ShapeProductReader.getEPSG(): exception " + oEx.toString());
 		}
 		return null;    	
     }

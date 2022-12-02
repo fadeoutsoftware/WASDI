@@ -35,7 +35,8 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.log4j.Logger;
+
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Utility class for zip extraction operation with some security considerations.
@@ -94,7 +95,7 @@ public class ZipFileUtils {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.errorLog("ZipFileUtils.pokeZipArchiveContent: Error during creation of zip archive " );
+			WasdiLog.errorLog("ZipFileUtils.pokeZipArchiveContent: Error during creation of zip archive " );
 			throw oE;
 		}
 
@@ -127,7 +128,7 @@ public class ZipFileUtils {
 	
 			Path oPath = Paths.get(sTempAbsolutePath).toAbsolutePath().normalize();
 			if (oPath.toFile().mkdirs()) {
-				Utils.infoLog(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
+				WasdiLog.infoLog(m_sLoggerPrefix + "unzip: Temporary directory created: "  + sTempAbsolutePath);
 			} else {
 				throw new IOException("Can't create temporary dir " + sTempAbsolutePath);
 			}
@@ -141,13 +142,13 @@ public class ZipFileUtils {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.errorLog(m_sLoggerPrefix + ".unzip: " + oE);
+			WasdiLog.errorLog(m_sLoggerPrefix + ".unzip: " + oE);
 			throw oE;
 		} finally {
 			// make sure temporary directory gets deleted
-			Utils.infoLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
+			WasdiLog.infoLog(m_sLoggerPrefix + "Copy and clean tmp dir.");
 			if (!cleanTempDir(sTempAbsolutePath, sTempRelativeDirectory)) {
-				Utils.errorLog(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
+				WasdiLog.errorLog(m_sLoggerPrefix + " cleanTempDir( " + sTempAbsolutePath + ", " + sTempRelativeDirectory + " returned false...");
 			}
 		}
 		return sTempAbsolutePath;
@@ -164,7 +165,7 @@ public class ZipFileUtils {
 			Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries) throws Exception {
 		try {
 			ZipArchiveEntry oEntry = aoZipArchiveEntries.nextElement();
-			Utils.infoLog(m_sLoggerPrefix + "unzip: extracting: " + oEntry);
+			WasdiLog.infoLog(m_sLoggerPrefix + "unzip: extracting: " + oEntry);
 
 			String sName = validateFilename(sTempAbsolutePath + oEntry.getName(), sTempAbsolutePath); // throws exception in case
 
@@ -177,10 +178,10 @@ public class ZipFileUtils {
 			File oFile = new File(sName);
 			File oParent = oFile.getParentFile(); 
 			if(null!=oParent && !oParent.exists()) {
-				Utils.infoLog(m_sLoggerPrefix + "unzip: creating parent directory " + oParent);
+				WasdiLog.infoLog(m_sLoggerPrefix + "unzip: creating parent directory " + oParent);
 				if(!oParent.mkdirs()) {
 					String sMessage = "failed creating required directories of " + oFile;
-					Utils.errorLog(m_sLoggerPrefix + "unzip: " + sMessage);
+					WasdiLog.errorLog(m_sLoggerPrefix + "unzip: " + sMessage);
 					throw new RuntimeException(sMessage);
 				}
 			}
@@ -193,7 +194,7 @@ public class ZipFileUtils {
 			}
 			checkUnzipStatus(m_iEntries, m_lTotal, sTempRelativeDirectory, sTempAbsolutePath, m_lSingle);
 		} catch (Exception oE) {
-			Utils.errorLog(m_sLoggerPrefix + "unzip: error extracting entry: "+ oE);
+			WasdiLog.errorLog(m_sLoggerPrefix + "unzip: error extracting entry: "+ oE);
 			throw oE;
 		}
 	}
@@ -207,7 +208,7 @@ public class ZipFileUtils {
 			String sTempDirectory = "tmp-" + iRandom + File.separator;
 			return sTempDirectory;
 		}catch (Exception oE) {
-			Utils.errorLog(m_sLoggerPrefix + "nameRandomTempLocalDirectory: " + oE);
+			WasdiLog.errorLog(m_sLoggerPrefix + "nameRandomTempLocalDirectory: " + oE);
 			return null;
 		}
 	}
@@ -244,17 +245,17 @@ public class ZipFileUtils {
 			throws IllegalStateException {
 		if ( (lSingle + BUFFER > m_lToobigsingle) && (m_lToobigsingle>0)) {
 			cleanTempDir(sTempFullPath, sTempDirectory);
-			Utils.errorLog(m_sLoggerPrefix + "checkUnzipStatus: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
+			WasdiLog.errorLog(m_sLoggerPrefix + "checkUnzipStatus: File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 			throw new IllegalStateException("File being unzipped is too big. The limit is " + humanReadableByteCountSI(m_lToobigsingle));
 		}
 		if ( (lTotal + BUFFER > m_lToobigtotal) && (m_lToobigtotal>0)) {
 			cleanTempDir(sTempFullPath, sTempDirectory);
-			Utils.errorLog(m_sLoggerPrefix + "checkUnzipStatus: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
+			WasdiLog.errorLog(m_sLoggerPrefix + "checkUnzipStatus: File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 			throw new IllegalStateException("File extraction interrupted because total dimension is over extraction limits. The limit is " + humanReadableByteCountSI(m_lToobigtotal));
 		}
 		if ( (iEntries > m_lToomany) && (m_lToomany>0)) {
 			cleanTempDir(sTempFullPath, sTempDirectory);
-			Utils.errorLog(m_sLoggerPrefix + "checkUnzipStatus: Too many files inside the archive. The limit is "+m_lToomany);
+			WasdiLog.errorLog(m_sLoggerPrefix + "checkUnzipStatus: Too many files inside the archive. The limit is "+m_lToomany);
 			throw new IllegalStateException("Too many files inside the archive. The limit is "+m_lToomany);
 		}
 	}
@@ -269,7 +270,7 @@ public class ZipFileUtils {
 			sTempPath += sTemp;
 			return sTempPath;
 		} catch (Exception oE) {
-			Utils.errorLog(m_sLoggerPrefix + "buildTempFullPath: " + oE);
+			WasdiLog.errorLog(m_sLoggerPrefix + "buildTempFullPath: " + oE);
 			return null;
 		}
 	}
@@ -326,7 +327,7 @@ public class ZipFileUtils {
 		if (sCanonicalPath.startsWith(sCanonicalID)) {
 			return sCanonicalPath;
 		} else {
-			Utils.errorLog(m_sLoggerPrefix + "validateFilename: File is outside extraction target directory." );
+			WasdiLog.errorLog(m_sLoggerPrefix + "validateFilename: File is outside extraction target directory." );
 			throw new IllegalStateException("File is outside extraction target directory.");
 		}
 	}
@@ -384,26 +385,26 @@ public class ZipFileUtils {
 							Files.setPosixFilePermissions(oDest.getCanonicalFile().toPath(), PosixFilePermissions.fromString("rw-rw-r--"));
 						}
 						catch (Exception oE) {
-							Utils.errorLog(m_sLoggerPrefix +".cleanTempDir: set posix file permissions failed because: " + oE);
+							WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: set posix file permissions failed because: " + oE);
 						}
 	
 					} catch (Exception oE) {
-						Utils.errorLog(m_sLoggerPrefix +".cleanTempDir: map for each file failed because: " + oE);
+						WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: map for each file failed because: " + oE);
 					}
 				});
 			} catch (IOException oE) {
-				Utils.errorLog(m_sLoggerPrefix +".cleanTempDir: files walk failed because: " + oE);
+				WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: files walk failed because: " + oE);
 				return false;
 			}
 	
 			try {
 				deleteDirectory(oDir.toPath());
 			} catch (IOException oE) {
-				Utils.errorLog(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
+				WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir: delete directory failed because: " + oE);
 				return false;
 			}
 		} catch (Exception oE) {
-			Utils.errorLog(m_sLoggerPrefix +".cleanTempDir (outmost): " + oE);
+			WasdiLog.errorLog(m_sLoggerPrefix +".cleanTempDir (outmost): " + oE);
 			return false;
 		}
 
@@ -474,7 +475,7 @@ public class ZipFileUtils {
 					Files.copy(path, oZipOutputStream);
 					oZipOutputStream.closeEntry();
 				} catch (IOException e) {
-					Utils.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
+					WasdiLog.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
 				}
 			});
 		}
@@ -510,7 +511,7 @@ public class ZipFileUtils {
 					Files.copy(oPath, oZipOutputStream);
 					oZipOutputStream.closeEntry();
 				} catch (IOException e) {
-					Utils.errorLog("ZipFileUtils.zipFiles: Error during creation of zip archive " );
+					WasdiLog.errorLog("ZipFileUtils.zipFiles: Error during creation of zip archive " );
 				}				
 			}
 		}
@@ -559,17 +560,17 @@ public class ZipFileUtils {
 	 */
 	public static void cleanUnzipFile(File zipFile, File destDir) throws Exception {
 		if (zipFile == null) {
-			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
 			return;
 		} else if (!zipFile.exists()) {
-			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
 		}
 
 		if (destDir == null) {
-			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir is null");
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir is null");
 			return;
 		} else if (!destDir.exists()) {
-			Utils.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
@@ -595,17 +596,17 @@ public class ZipFileUtils {
 
 	public static void extractInnerZipFileAndCleanZipFile(File oZipFile, File oDestDir) throws Exception {
 		if (oZipFile == null) {
-			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
+			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile is null");
 			return;
 		} else if (!oZipFile.exists()) {
-			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
+			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
 		}
 
 		if (oDestDir == null) {
-			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
+			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir is null");
 			return;
 		} else if (!oDestDir.exists()) {
-			Utils.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
+			WasdiLog.log("ERROR", "ZipFileUtils.extractInnerZipFileAndCleanZipFile: destDir does not exist: " + oDestDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
@@ -633,13 +634,13 @@ public class ZipFileUtils {
 
 	public static void fixZipFileInnerSafePath(String zipFilePath) throws Exception {
 		if (zipFilePath == null) {
-			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
+			WasdiLog.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFilePath is null");
 			return;
 		}
 
 		File zipFile = new File(zipFilePath);
 		if (!zipFile.exists()) {
-			Utils.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
+			WasdiLog.log("ERROR", "ZipFileUtils.fixZipFileInnerSafePath: zipFile does not exist: " + zipFile.getAbsolutePath());
 			return;
 		}
 

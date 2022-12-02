@@ -11,6 +11,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.gis.BoundingBoxUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -39,7 +40,7 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 			m_oManager = new GeoServerManager(m_sApiURl, m_sUser, m_sPassword);
 		}
 		catch (Exception e) {
-			Utils.debugLog("QueryExecutorSTATICS: Exception " + e.toString());
+			WasdiLog.debugLog("QueryExecutorSTATICS: Exception " + e.toString());
 		}
 		
 	}
@@ -50,28 +51,28 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 		QueryViewModel oQuery =  m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 		
 		if (oQuery == null) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: parsed query is null, return 0");
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: parsed query is null, return 0");
 			return 0;
 		}
 		
 		if (m_oManager == null) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: geoserver manager is null, return 0");
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: geoserver manager is null, return 0");
 		}
 		
 		try {
 			
 			if (doesQueryMatch(oQuery)) {
-				Utils.debugLog("QueryExecutorSTATICS.executeCount: query has a match, return 1");
+				WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: query has a match, return 1");
 				return 1;
 			}
 			else {
-				Utils.debugLog("QueryExecutorSTATICS.executeCount: query does not match, return 0");
+				WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: query does not match, return 0");
 				return 0;
 			}
 			
 		}
 		catch (Exception e) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: error " + e.toString());
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: error " + e.toString());
 		}
 		
 		return 0;
@@ -85,18 +86,18 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 		QueryViewModel oQueryVM =  m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 		
 		if (oQueryVM == null) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: parsed query is null, return 0");
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: parsed query is null, return 0");
 			return aoResults;
 		}
 		
 		if (m_oManager == null) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: geoserver manager is null, return 0");
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: geoserver manager is null, return 0");
 		}
 		
 		try {
 			
 			if (doesQueryMatch(oQueryVM)) {
-				Utils.debugLog("QueryExecutorSTATICS.executeCount: query has a match, return 1");
+				WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: query has a match, return 1");
 				
 				QueryResultViewModel oQueryResultViewModel = new QueryResultViewModel();
 				
@@ -129,13 +130,13 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 				return aoResults;
 			}
 			else {
-				Utils.debugLog("QueryExecutorSTATICS.executeCount: query does not match, return 0");
+				WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: query does not match, return 0");
 				return aoResults;
 			}
 			
 		}
 		catch (Exception e) {
-			Utils.debugLog("QueryExecutorSTATICS.executeCount: error " + e.toString());
+			WasdiLog.debugLog("QueryExecutorSTATICS.executeCount: error " + e.toString());
 		}
 		
 		return aoResults;
@@ -173,7 +174,7 @@ public class QueryExecutorSTATICS extends QueryExecutor {
 			return BoundingBoxUtils.bboxIntersects(oBbox.getMinY(), oBbox.getMinX(), oBbox.getMaxY(), oBbox.getMaxX(), oQuery.south, oQuery.west, oQuery.north, oQuery.east);			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorSTATICS.doesQueryMatch: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorSTATICS.doesQueryMatch: error " + oEx.toString());
 		}
 		
 		return false;

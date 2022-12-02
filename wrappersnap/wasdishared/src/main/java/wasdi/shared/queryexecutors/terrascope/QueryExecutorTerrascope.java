@@ -9,6 +9,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -70,7 +71,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 				// Make the call
 				String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
 
-				Utils.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
+				WasdiLog.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
 
 				iCount += m_oResponseTranslator.getCountResult(sTerrascopeResults);
 			}
@@ -108,7 +109,7 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 					// Make the call
 					String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
 
-					Utils.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
+					WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
 					aoReturnList.addAll(m_oResponseTranslator.translateBatch(sTerrascopeResults, bFullViewModel));
 				}
@@ -121,11 +122,11 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			// Make the query
 			String sTerrascopeResults = HttpUtils.httpGet(sTerrascopeQuery);
 
-			Utils.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
+			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
 			return m_oResponseTranslator.translateBatch(sTerrascopeResults, bFullViewModel);
 		} catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorTerrascope.executeAndRetrieve: Exception = " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: Exception = " + oEx.toString());
 		}
 
 		return aoReturnList;

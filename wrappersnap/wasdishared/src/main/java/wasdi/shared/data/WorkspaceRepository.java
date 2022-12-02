@@ -17,6 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 25/10/2016.
@@ -186,7 +187,7 @@ public class WorkspaceRepository extends  MongoRepository {
     		}
     		
     	} catch (Exception oE) {
-			Utils.debugLog("WorkspaceRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.debugLog("WorkspaceRepository.getByName( " + sName + "): error: " + oE);
 		}
     	
     	return null;
@@ -221,7 +222,7 @@ public class WorkspaceRepository extends  MongoRepository {
     		}
     		
     	} catch (Exception oE) {
-			Utils.debugLog("WorkspaceRepository.getByNameAndNode( " + sName + ", " + sNode + "): error: " + oE);
+			WasdiLog.debugLog("WorkspaceRepository.getByNameAndNode( " + sName + ", " + sNode + "): error: " + oE);
 		}
     	
     	return null;
@@ -298,7 +299,7 @@ public class WorkspaceRepository extends  MongoRepository {
 	    		return true;
 	    	}
     	}catch (Exception oE) {
-			Utils.debugLog("WorkspaceRepository.belongsToUser( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+			WasdiLog.debugLog("WorkspaceRepository.belongsToUser( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
 		}
     	return false;
     }

@@ -9,10 +9,11 @@ package wasdi.shared.queryexecutors.onda;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -121,11 +122,11 @@ public class QueryTranslatorONDA extends QueryTranslator {
 					stmpQuerySoFar.contains("s1") || stmpQuerySoFar.contains("s2") || stmpQuerySoFar.contains("s3") ||
 					stmpQuerySoFar.contains("sentinel") || stmpQuerySoFar.contains("landsat") || stmpQuerySoFar.contains("envisat") ||
 					stmpQuerySoFar.contains("productmainclass") || stmpQuerySoFar.contains("copernicus") || stmpQuerySoFar.contains("marine"))) {
-				Utils.debugLog("QueryTranslatorONDA.translate: abort search: Proba-V is not supported by ONDA");
+				WasdiLog.debugLog("QueryTranslatorONDA.translate: abort search: Proba-V is not supported by ONDA");
 				//sResult += "AND (_Proba-V_are_Not_Supported_by_ONDA,_then_invalidate_query_with_this_text_to_return_zero_results_)";
 				return null;
 			} else {
-				Utils.debugLog("QueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");
+				WasdiLog.debugLog("QueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");
 			}
 
 		}

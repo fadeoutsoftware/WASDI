@@ -34,6 +34,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
@@ -45,7 +46,7 @@ public class ConsoleResource {
 	@POST
 	@Path("/create")
 	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
-		Utils.debugLog("ConsoleResource.create( WS: " + sWorkspaceId + " )");
+		WasdiLog.debugLog("ConsoleResource.create( WS: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -54,7 +55,7 @@ public class ConsoleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 				return oResult;
 			}
@@ -68,7 +69,7 @@ public class ConsoleResource {
 
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				Utils.debugLog("ConsoleResource.create: user cannot access workspace info, aborting");
+				WasdiLog.debugLog("ConsoleResource.create: user cannot access workspace info, aborting");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 
 				return oResult;
@@ -78,7 +79,7 @@ public class ConsoleResource {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			if (oWorkspace == null) {
-				Utils.debugLog("ConsoleResource.create: " + sWorkspaceId + " is not a valid workspace, aborting");
+				WasdiLog.debugLog("ConsoleResource.create: " + sWorkspaceId + " is not a valid workspace, aborting");
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 
 				return oResult;
@@ -94,7 +95,7 @@ public class ConsoleResource {
 			}
 			
 			String sClientIp = resolveClientIp(oRequest);
-			Utils.debugLog("ConsoleResource.create: client IP: " + sClientIp);
+			WasdiLog.debugLog("ConsoleResource.create: client IP: " + sClientIp);
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oWorkspace.getUserId(), sWorkspaceId);
 
@@ -103,7 +104,7 @@ public class ConsoleResource {
 
 			if (oJupyterNotebook != null) {
 				
-				Utils.debugLog("ConsoleResource.create: this is an existing notebook");
+				WasdiLog.debugLog("ConsoleResource.create: this is an existing notebook");
 				
 				// We want to be safe
 				if (Utils.isNullOrEmpty(oJupyterNotebook.getAllowedIpAddresses())) {
@@ -115,10 +116,10 @@ public class ConsoleResource {
 				boolean bIsAllowed = isClientIpAllowedForThisUser(oJupyterNotebook.getAllowedIpAddresses(), sUserId, sClientIp);
 				
 				if (bIsAllowed) {
-					Utils.debugLog("ConsoleResource.create: client ip allowed for the notebook");
+					WasdiLog.debugLog("ConsoleResource.create: client ip allowed for the notebook");
 				}
 				else {
-					Utils.debugLog("ConsoleResource.create: client ip NOT allowed for the notebook: add it");
+					WasdiLog.debugLog("ConsoleResource.create: client ip NOT allowed for the notebook: add it");
 					
 					// Take the paths of the template and the output file
 					String sVolumeFolder = WasdiConfig.Current.paths.traefikMountedVolume;
@@ -161,7 +162,7 @@ public class ConsoleResource {
 				}
 				
 				
-				Utils.debugLog("ConsoleResource.create: notebook already exists, check if it is up and running");
+				WasdiLog.debugLog("ConsoleResource.create: notebook already exists, check if it is up and running");
 				
 				// Here we know it is a db: so if it is null is for sure not active
 				JupyterNotebook oNotebook = internalIsJupyterActive(oWorkspace.getUserId(), sWorkspaceId); 
@@ -170,13 +171,13 @@ public class ConsoleResource {
 				
 				if (oNotebook!=null) bIsActive = true;
 				
-				Utils.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
+				WasdiLog.debugLog("ConsoleResource.create | bIsActive: " + bIsActive);
 				
 				boolean bIsUpToDate = internalNotebookUpToDate();
-				Utils.debugLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
+				WasdiLog.debugLog("ConsoleResource.create | bIsUpToDate: " + bIsUpToDate);
 
 				if (bIsActive && bIsUpToDate) {
-					Utils.debugLog("ConsoleResource.create: JupyterNotebook started");
+					WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook started");
 
 					String sUrl = oNotebook.getUrl();
 
@@ -185,7 +186,7 @@ public class ConsoleResource {
 
 					return oResult;
 				} else {
-					Utils.debugLog("ConsoleResource.create: JupyterNotebook is not started or is out-of-date");
+					WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook is not started or is out-of-date");
 
 					// restart JN instance
 					// update JN instance
@@ -196,7 +197,7 @@ public class ConsoleResource {
 			} 
 			else {
 				
-				Utils.debugLog("ConsoleResource.create: this is an NEW notebook");
+				WasdiLog.debugLog("ConsoleResource.create: this is an NEW notebook");
 				
 				// This is a new notebook!
 				oJupyterNotebook = new JupyterNotebook();
@@ -216,7 +217,7 @@ public class ConsoleResource {
 				// Schedule the process to run the processor
 				String sProcessObjId = Utils.getRandomName();
 
-				Utils.debugLog("ConsoleResource.create: create local operation");
+				WasdiLog.debugLog("ConsoleResource.create: create local operation");
 
 				ProcessorParameter oProcessorParameter = new ProcessorParameter();
 				oProcessorParameter.setName(sJupyterNotebookCode);
@@ -246,7 +247,7 @@ public class ConsoleResource {
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("ConsoleResource.create: " + oEx);
+			WasdiLog.debugLog("ConsoleResource.create: " + oEx);
 
 			oResult.setStringValue("Error in starting proccess");
 			oResult.setBoolValue(false);
@@ -259,7 +260,7 @@ public class ConsoleResource {
 	@Path("/active")
 	public PrimitiveResult isJupyterNotebookActive(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId) {
-		Utils.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
+		WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( WS: " + sWorkspaceId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -267,7 +268,7 @@ public class ConsoleResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ConsoleResource.isJupyterNotebookActive( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 
 			return oResult;
@@ -284,7 +285,7 @@ public class ConsoleResource {
 
 		//check the user can access the workspace
 		if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-			Utils.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace info, aborting");
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace info, aborting");
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 
 			return oResult;
@@ -294,7 +295,7 @@ public class ConsoleResource {
 		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 		if (oWorkspace == null) {
-			Utils.debugLog("ConsoleResource.isJupyterNotebookActive: " + sWorkspaceId + " is not a valid workspace, aborting");
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: " + sWorkspaceId + " is not a valid workspace, aborting");
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 
 			return oResult;
@@ -333,12 +334,12 @@ public class ConsoleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				Utils.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid workspace id");
+				WasdiLog.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid workspace id");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -346,7 +347,7 @@ public class ConsoleResource {
 
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				Utils.debugLog("ConsoleResource.ready: user cannot access workspace info, aborting");
+				WasdiLog.debugLog("ConsoleResource.ready: user cannot access workspace info, aborting");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			
@@ -355,7 +356,7 @@ public class ConsoleResource {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			if (oWorkspace == null) {
-				Utils.debugLog("ConsoleResource.ready: " + sWorkspaceId + " is not a valid workspace, aborting");
+				WasdiLog.debugLog("ConsoleResource.ready: " + sWorkspaceId + " is not a valid workspace, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
@@ -365,7 +366,7 @@ public class ConsoleResource {
 			if (oNotebook == null) {
 				
 				// No: so for sure is not ready
-				Utils.debugLog("ConsoleResource.ready: notebook not active, return false");
+				WasdiLog.debugLog("ConsoleResource.ready: notebook not active, return false");
 				
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setBoolValue(false);
@@ -379,20 +380,20 @@ public class ConsoleResource {
 			
 			if (bIsUpToDate) {
 				// Ok we can return the url
-				Utils.debugLog("ConsoleResource.ready: JupyterNotebook Up and Running");
+				WasdiLog.debugLog("ConsoleResource.ready: JupyterNotebook Up and Running");
 				
 				oResult.setStringValue(oNotebook.getUrl());
 				oResult.setBoolValue(true);
 			} else {
 				// No way
-				Utils.debugLog("ConsoleResource.ready: JupyterNotebook changed, not ready");
+				WasdiLog.debugLog("ConsoleResource.ready: JupyterNotebook changed, not ready");
 				oResult.setBoolValue(false);				
 			}	
 			
 			return Response.ok(oResult).build();
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ConsoleResource.create: JupyterNotebook started");
+			WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook started");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
@@ -440,7 +441,7 @@ public class ConsoleResource {
 		}
 		catch (Exception oEx) {
 			// Something went wrong
-			Utils.debugLog("ConsoleResource.internalIsActive exception: " + oEx.toString());
+			WasdiLog.debugLog("ConsoleResource.internalIsActive exception: " + oEx.toString());
 		}
 		
 		return null;
@@ -455,13 +456,13 @@ public class ConsoleResource {
 		String sProcessorName = "jupyter-notebook";
 
 		String sProcessorTemplateGeneralCommonEnvFilePath = getProcessorTemplateGeneralCommonEnvFilePath(sProcessorName);
-		Utils.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorTemplateGeneralCommonEnvFilePath: " + sProcessorTemplateGeneralCommonEnvFilePath);
+		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorTemplateGeneralCommonEnvFilePath: " + sProcessorTemplateGeneralCommonEnvFilePath);
 
 		String sProcessorGeneralCommonEnvFilePath = getProcessorGeneralCommonEnvFilePath(sProcessorName);
-		Utils.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorGeneralCommonEnvFilePath: " + sProcessorGeneralCommonEnvFilePath);
+		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | sProcessorGeneralCommonEnvFilePath: " + sProcessorGeneralCommonEnvFilePath);
 
 		boolean bFilesAreTheSame = WasdiFileUtils.filesAreTheSame(sProcessorTemplateGeneralCommonEnvFilePath, sProcessorGeneralCommonEnvFilePath);
-		Utils.debugLog("ConsoleResource.internalNotebookUpToDate | bFilesAreTheSame: " + bFilesAreTheSame);	
+		WasdiLog.debugLog("ConsoleResource.internalNotebookUpToDate | bFilesAreTheSame: " + bFilesAreTheSame);	
 		
 		return bFilesAreTheSame;
 	}
@@ -571,7 +572,7 @@ public class ConsoleResource {
 			}					
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ConsoleResource.isClientIpAllowedForThisUser exception: " + oEx.toString());
+			WasdiLog.debugLog("ConsoleResource.isClientIpAllowedForThisUser exception: " + oEx.toString());
 		}
 
 		return bIsAllowed;

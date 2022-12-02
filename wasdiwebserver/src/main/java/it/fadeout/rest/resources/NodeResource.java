@@ -27,6 +27,7 @@ import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.NodeSharingViewModel;
 import wasdi.shared.viewmodels.NodeViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -64,13 +65,13 @@ public class NodeResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<NodeViewModel> getAllNodes(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
+		WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + ")");
 		
 		// Check the user
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			Utils.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + "): invalid session");
+			WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + "): invalid session");
 			return null;			
 		}
 		
@@ -79,7 +80,7 @@ public class NodeResource {
 		List<Node> aoNodes = oNodeRepository.getNodesList();
 	
 		if (aoNodes == null) {
-			Utils.debugLog("NodeResource.getAllNodes: Node list is null");
+			WasdiLog.debugLog("NodeResource.getAllNodes: Node list is null");
 			return null;
 		}
 		
@@ -113,11 +114,11 @@ public class NodeResource {
 				}
 			}
 			catch (Throwable oEx) {
-				Utils.debugLog("NodeResource.getAllNodes: Exception " + oEx.toString());
+				WasdiLog.debugLog("NodeResource.getAllNodes: Exception " + oEx.toString());
 			}
 		}
 		
-		Utils.debugLog("NodeResource.getAllNodes: end cycle");
+		WasdiLog.debugLog("NodeResource.getAllNodes: end cycle");
 		
 		// done, return the list to the user
 		return aoNodeViewModelList;
@@ -138,7 +139,7 @@ public class NodeResource {
 	public PrimitiveResult shareNode(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sDestinationUserId) {
 
-		Utils.debugLog("NodeResource.ShareNode( Node: " + sNodeCode + ", User: " + sDestinationUserId + " )");
+		WasdiLog.debugLog("NodeResource.ShareNode( Node: " + sNodeCode + ", User: " + sDestinationUserId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -147,7 +148,7 @@ public class NodeResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("NodeResource.shareNode: invalid session");
+			WasdiLog.debugLog("NodeResource.shareNode: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
@@ -160,7 +161,7 @@ public class NodeResource {
 		Node oNode = oNodeRepository.getNodeByCode(sNodeCode);
 
 		if (oNode == null) {
-			Utils.debugLog("NodeResource.ShareNode: invalid node");
+			WasdiLog.debugLog("NodeResource.ShareNode: invalid node");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_NODE);
@@ -170,7 +171,7 @@ public class NodeResource {
 
 		// Can the user access this section?
 		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), NODE_READ)) {
-			Utils.debugLog("NodeResource.shareNode: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
+			WasdiLog.debugLog("NodeResource.shareNode: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE);
@@ -180,7 +181,7 @@ public class NodeResource {
 
 		// Can the user access this resource?
 		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-			Utils.debugLog("NodeResource.shareNode: " + sNodeCode + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
+			WasdiLog.debugLog("NodeResource.shareNode: " + sNodeCode + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_NODE);
@@ -193,7 +194,7 @@ public class NodeResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			Utils.debugLog("NodeResource.ShareNode: Destination user does not exists");
+			WasdiLog.debugLog("NodeResource.ShareNode: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
@@ -210,7 +211,7 @@ public class NodeResource {
 
 				oUserResourcePermissionRepository.insertPermission(oNodeSharing);				
 			} else {
-				Utils.debugLog("NodeResource.ShareNode: already shared!");
+				WasdiLog.debugLog("NodeResource.ShareNode: already shared!");
 				oResult.setStringValue("Already Shared.");
 				oResult.setBoolValue(true);
 				oResult.setIntValue(Status.OK.getStatusCode());
@@ -218,7 +219,7 @@ public class NodeResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeResource.ShareNode: " + oEx);
+			WasdiLog.debugLog("NodeResource.ShareNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -239,11 +240,11 @@ public class NodeResource {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				Utils.debugLog("NodeResource.ShareNode: sMercuriusAPIAddress is null");
+				WasdiLog.debugLog("NodeResource.ShareNode: sMercuriusAPIAddress is null");
 			}
 			else {
 
-				Utils.debugLog("NodeResource.ShareNode: send notification");
+				WasdiLog.debugLog("NodeResource.ShareNode: send notification");
 
 				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);	
 				Message oMessage = new Message();
@@ -267,12 +268,12 @@ public class NodeResource {
 
 				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
 
-				Utils.debugLog("NodeResource.ShareNode: notification sent with result " + iPositiveSucceded);
+				WasdiLog.debugLog("NodeResource.ShareNode: notification sent with result " + iPositiveSucceded);
 			}
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("NodeResource.ShareNode: notification exception " + oEx.toString());
+			WasdiLog.debugLog("NodeResource.ShareNode: notification exception " + oEx.toString());
 		}
 	}
 
@@ -288,7 +289,7 @@ public class NodeResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<NodeSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("node") String sNodeCode) {
 
-		Utils.debugLog("NodeResource.getEnableUsersSharedWorksace( WS: " + sNodeCode + " )");
+		WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace( WS: " + sNodeCode + " )");
 
 	
 		List<UserResourcePermission> aoNodeSharing = null;
@@ -296,7 +297,7 @@ public class NodeResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			Utils.debugLog("NodeResource.getEnableUsersSharedWorksace: invalid session");
+			WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace: invalid session");
 			return aoNodeSharingViewModels;
 		}
 
@@ -316,7 +317,7 @@ public class NodeResource {
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeResource.getEnableUsersSharedWorksace: " + oEx);
+			WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace: " + oEx);
 			return aoNodeSharingViewModels;
 		}
 
@@ -330,14 +331,14 @@ public class NodeResource {
 	public PrimitiveResult deleteUserSharedNode(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("node") String sNodeCode, @QueryParam("userId") String sUserId) {
 
-		Utils.debugLog("NodeResource.deleteUserSharedNode( WS: " + sNodeCode + ", User:" + sUserId + " )");
+		WasdiLog.debugLog("NodeResource.deleteUserSharedNode( WS: " + sNodeCode + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oRequestingUser == null) {
-			Utils.debugLog("NodeResource.deleteUserSharedNode: invalid session");
+			WasdiLog.debugLog("NodeResource.deleteUserSharedNode: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
@@ -351,7 +352,7 @@ public class NodeResource {
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 
 			if (oDestinationUser == null) {
-				Utils.debugLog("NodeResource.deleteUserSharedNode: invalid destination user");
+				WasdiLog.debugLog("NodeResource.deleteUserSharedNode: invalid destination user");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
@@ -362,7 +363,7 @@ public class NodeResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndNodeCode(sUserId, sNodeCode);
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeResource.deleteUserSharedNode: " + oEx);
+			WasdiLog.debugLog("NodeResource.deleteUserSharedNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);

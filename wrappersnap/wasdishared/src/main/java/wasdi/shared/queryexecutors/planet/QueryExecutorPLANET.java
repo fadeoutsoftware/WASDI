@@ -14,6 +14,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -54,7 +55,7 @@ public class QueryExecutorPLANET extends QueryExecutor {
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 		
 		if (oQueryViewModel == null) {
-			Utils.debugLog("QueryExecutorPLANET.executeAndRetrieve: Error decoding input query");
+			WasdiLog.debugLog("QueryExecutorPLANET.executeAndRetrieve: Error decoding input query");
 			return null;
 		}
 		
@@ -171,7 +172,7 @@ public class QueryExecutorPLANET extends QueryExecutor {
 				return aoResult;
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("QueryExecutorPLANET.executeAndRetrieve: exception searching for name");
+				WasdiLog.debugLog("QueryExecutorPLANET.executeAndRetrieve: exception searching for name");
 			}
 		}
 		

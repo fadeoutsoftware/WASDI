@@ -5,19 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import wasdi.shared.utils.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class StreamGobbler extends Thread {
 
 	InputStream m_oInputStream;
 	String m_sStreamType;
-	LoggerWrapper m_oLoggerWrapper;
 
-	public StreamGobbler(InputStream oInputStream, String sType, LoggerWrapper oLoggerWrapper)
+	public StreamGobbler(InputStream oInputStream, String sType)
 	{
 		this.m_oInputStream = oInputStream;
 		this.m_sStreamType = sType;
-		this.m_oLoggerWrapper = oLoggerWrapper;
 	}
 
 	public void run()
@@ -28,14 +26,12 @@ public class StreamGobbler extends Thread {
 			BufferedReader oBufferedReader = new BufferedReader(oInputStreamReader);
 			String sLine=null;
 			while ( (sLine = oBufferedReader.readLine()) != null) {
-				if (m_oLoggerWrapper != null) {
-					m_oLoggerWrapper.info(m_sStreamType + ">" + sLine);
-				}
+				WasdiLog.infoLog(m_sStreamType + ">" + sLine);
 			}
 				    
-		} catch (IOException ioe)
+		} catch (IOException oIOEx)
 		{
-			ioe.printStackTrace();  
+			oIOEx.printStackTrace();  
 		}
 	}	
 }

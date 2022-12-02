@@ -20,9 +20,9 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.payloads.OperationPayload;
 import wasdi.shared.rabbit.Send;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -45,11 +45,6 @@ public abstract class Operation {
 	 * Logger to write to the database so that the user can access these logs from web-ui or libraries
 	 */
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = new ProcessWorkspaceLogger(null);
-	
-	/**
-	 * Local logger, usually on file/console
-	 */
-	protected LoggerWrapper m_oLocalLogger = new LoggerWrapper(null);
 	
 	/**
 	 * Utility to send messages to rabbit to notify client about progress of the operation
@@ -75,22 +70,6 @@ public abstract class Operation {
 	 */
 	public void setProcessWorkspaceLogger(ProcessWorkspaceLogger oProcessWorkspaceLogger) {
 		this.m_oProcessWorkspaceLogger = oProcessWorkspaceLogger;
-	}
-
-	/**
-	 * Get the Local Logger
-	 * @return LoggerWrapper of the local logger
-	 */
-	public LoggerWrapper getLocalLogger() {
-		return m_oLocalLogger;
-	}
-
-	/**
-	 * Set the Local Logger
-	 * @param oLocalLogger
-	 */
-	public void setLocalLogger(LoggerWrapper oLocalLogger) {
-		this.m_oLocalLogger = oLocalLogger;
 	}
 	
 	/**
@@ -149,12 +128,12 @@ public abstract class Operation {
     public void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
 
         if (oFile == null) {
-            m_oLocalLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
+            WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: input file is null");
             return;
         }
 
         if (!oFile.exists()) {
-        	m_oLocalLogger.error("LauncherMain.SetFileSizeToProcess: input file does not exists");
+        	WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: input file does not exists");
             return;
         }
 
@@ -174,7 +153,7 @@ public abstract class Operation {
                 // Get folder size
                 lSize = FileUtils.sizeOfDirectory(oDataFolder);
             } catch (Exception oEx) {
-            	m_oLocalLogger.error("LauncherMain.SetFileSizeToProcess: Error computing folder size");
+            	WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: Error computing folder size");
                 oEx.printStackTrace();
             }
         }
@@ -191,11 +170,11 @@ public abstract class Operation {
     protected void setFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
 
         if (oProcessWorkspace == null) {
-        	m_oLocalLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
+        	WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: input process is null");
             return;
         }
 
-        m_oLocalLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.getFormatFileDimension(lSize));
+        WasdiLog.debugLog("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.getFormatFileDimension(lSize));
         oProcessWorkspace.setFileSize(Utils.getFormatFileDimension(lSize));
     }
     
@@ -275,7 +254,7 @@ public abstract class Operation {
     protected void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oProductViewModel, String sFullPathFileName,
                                                            String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata,
                                                            Boolean bSendToRabbit, String sStyle) throws Exception {
-        m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
+        WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
         // Check if the file is really to Add
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -295,11 +274,11 @@ public abstract class Operation {
                 GeorefProductViewModel oGeorefProductViewModel = (GeorefProductViewModel) oProductViewModel;
                 sBBox = oGeorefProductViewModel.getBbox();
             } catch (Exception oE) {
-                m_oLocalLogger.warn("LauncherMain.AddProductToDbAndSendToRabbit: could not extract BBox from GeorefProductViewModel due to: " + oE);
+                WasdiLog.warnLog("LauncherMain.AddProductToDbAndSendToRabbit: could not extract BBox from GeorefProductViewModel due to: " + oE);
             }
         }
         if (Utils.isNullOrEmpty(sBBox)) {
-            m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
+            WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
             sBBox = oReadProduct.getProductBoundingBox();
         }
 
@@ -309,13 +288,13 @@ public abstract class Operation {
             if (oProductViewModel == null) {
 
                 // Get The product view Model
-                m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
+                WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
                 oProductViewModel = oReadProduct.getProductViewModel();
 
-                m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
+                WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
             }
 
-            m_oLocalLogger.debug("AddProductToDbAndSendToRabbit: Insert in db");
+            WasdiLog.debugLog("AddProductToDbAndSendToRabbit: Insert in db");
 
             // Save it in the register
             DownloadedFile oDownloadedProduct = new DownloadedFile();
@@ -334,9 +313,9 @@ public abstract class Operation {
 
             // Insert in the Db
             if (!oDownloadedRepo.insertDownloadedFile(oDownloadedProduct)) {
-                m_oLocalLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database.");
+                WasdiLog.errorLog("Impossible to Insert the new Product " + oFile.getName() + " in the database.");
             } else {
-                m_oLocalLogger.info("Product Inserted");
+                WasdiLog.infoLog("Product Inserted");
             }
         } else {
 
@@ -351,7 +330,7 @@ public abstract class Operation {
 
             // TODO: Update metadata?
 
-            m_oLocalLogger.debug("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
+            WasdiLog.debugLog("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
         }
 
         // The Add Product to Workspace is safe. No need to check if the product is
@@ -359,7 +338,7 @@ public abstract class Operation {
         addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace, sBBox);
 
         if (bSendToRabbit) {
-            m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
+            WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
             if (m_oSendToRabbit != null)
                 m_oSendToRabbit.SendRabbitMessage(true, sOperation, sWorkspace, oProductViewModel, sExchange);
@@ -369,7 +348,7 @@ public abstract class Operation {
             oReadProduct.getSnapProduct().dispose();
         }
 
-        m_oLocalLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
+        WasdiLog.debugLog("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
     }
     
     /**
@@ -400,19 +379,19 @@ public abstract class Operation {
                 // Try to insert
                 if (oProductWorkspaceRepository.insertProductWorkspace(oProductWorkspace)) {
 
-                    m_oLocalLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
+                    WasdiLog.debugLog("LauncherMain.AddProductToWorkspace:  Inserted [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
                     return true;
                 } else {
 
-                    m_oLocalLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
+                    WasdiLog.debugLog("LauncherMain.AddProductToWorkspace:  Error adding [" + sProductFullPath + "] in WS: [" + sWorkspaceId + "]");
                     return false;
                 }
             } else {
-                m_oLocalLogger.debug("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath + "] Already exists in WS: [" + sWorkspaceId + "]");
+                WasdiLog.debugLog("LauncherMain.AddProductToWorkspace: Product [" + sProductFullPath + "] Already exists in WS: [" + sWorkspaceId + "]");
                 return true;
             }
         } catch (Exception e) {
-            m_oLocalLogger.error("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+            WasdiLog.errorLog("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
         }
 
         return false;
@@ -428,7 +407,7 @@ public abstract class Operation {
             String sPayload = LauncherMain.s_oMapper.writeValueAsString(oPayload);
             oProcessWorkspace.setPayload(sPayload);
         } catch (Exception oPayloadEx) {
-            m_oLocalLogger.error("Operation.setPayload: payload exception: " + oPayloadEx.toString());
+            WasdiLog.errorLog("Operation.setPayload: payload exception: " + oPayloadEx.toString());
         }
     	
     }

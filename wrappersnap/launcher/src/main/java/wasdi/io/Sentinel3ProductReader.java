@@ -12,6 +12,7 @@ import org.esa.snap.core.datamodel.Product;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 
 /**
@@ -31,25 +32,25 @@ public class Sentinel3ProductReader extends SnapProductReader {
 	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
 		try {
 			if(Utils.isNullOrEmpty(sDownloadedFileFullPath)) {
-				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: sDownloadedFileFullPath null or empty, aborting");
+				WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: sDownloadedFileFullPath null or empty, aborting");
 				return null;
 			}
 			if(Utils.isNullOrEmpty(sFileNameFromProvider)){
-				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: sFileNameFromProvider null or empty, aborting");
+				WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: sFileNameFromProvider null or empty, aborting");
 				return null;
 			}
 			if(!sFileNameFromProvider.toLowerCase().startsWith("s3") || !sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
-				LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a Sentinel-3 file name");
+				WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a Sentinel-3 file name");
 				return null;
 			}
 		} catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: arguments checking failed due to: " + oE + ", aborting");
+			WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: arguments checking failed due to: " + oE + ", aborting");
 			return null;
 		}
 
 		try {
 			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
-			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
+			WasdiLog.debugLog("Sentinel3ProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
 			ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 			//remove .SEN3 from the file name -> required for CREODIAS
@@ -65,14 +66,14 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			}
 
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
-			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
-			LauncherMain.s_oLogger.debug("Sentinel3ProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
+			WasdiLog.debugLog("Sentinel3ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+			WasdiLog.debugLog("Sentinel3ProductReader.adjustFileAfterDownload: File Name changed in: " + sFolderName);
 
 			m_oProductFile = new File(sFolderName);
 			return sFolderName;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 
 		return sDownloadedFileFullPath;
@@ -86,12 +87,12 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		try {
 			File oZipFile = new File(sDownloadedFileFullPath);
 			if(!oZipFile.delete()) {
-				LauncherMain.s_oLogger.error("Sentinel3ProductReader.deleteZipFile: cannot delete zip file");
+				WasdiLog.errorLog("Sentinel3ProductReader.deleteZipFile: cannot delete zip file");
 			} else {
-				LauncherMain.s_oLogger.debug("Sentinel3ProductReader.deleteZipFile: file zip successfully deleted");
+				WasdiLog.debugLog("Sentinel3ProductReader.deleteZipFile: file zip successfully deleted");
 			}
 		} catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+			WasdiLog.errorLog("Sentinel3ProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
 		}
 	}
 
@@ -116,7 +117,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			}
 			sBase += File.separator;
 		} catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: setting paths failed due to: " + oE);
+			WasdiLog.errorLog("Sentinel3ProductReader.getSnapProduct: setting paths failed due to: " + oE);
 		}
 		
 		//prepare list of plausible file names
@@ -150,7 +151,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		try {
 			m_oProductFile = new File(sBase + sFileName);
 			if(!m_oProductFile.exists()) {
-				LauncherMain.s_oLogger.warn("Sentinel3ProductReader.getSnapProduct: file " + sBase + sFileName + " does not exist");
+				WasdiLog.warnLog("Sentinel3ProductReader.getSnapProduct: file " + sBase + sFileName + " does not exist");
 				return;
 			}
 			if (m_bSnapReadAlreadyDone == false) {
@@ -163,7 +164,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			}
 		}
 		catch (Exception oE) {
-			LauncherMain.s_oLogger.error("Sentinel3ProductReader.getSnapProduct: tried to read " + sFileName + " but failed: " + oE);
+			WasdiLog.errorLog("Sentinel3ProductReader.getSnapProduct: tried to read " + sFileName + " but failed: " + oE);
 		}
 	}
 }

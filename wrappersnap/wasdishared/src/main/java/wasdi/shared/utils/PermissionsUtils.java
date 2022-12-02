@@ -11,6 +11,7 @@ import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -37,7 +38,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sNodeCode);
 		} catch (Exception oE) {
-			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sNodeCode + " ): error: " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sNodeCode + " ): error: " + oE);
 		}
 
 		return false;
@@ -63,7 +64,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
-			Utils.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
 		}
 
 		return false;
@@ -89,7 +90,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
 		} catch (Exception oE) {
-			Utils.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
 		}
 
 		return false;
@@ -118,7 +119,7 @@ public class PermissionsUtils {
 				return canUserAccessWorkspace(sUserId, sWorkspaceId);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcess( " + sUserId + ", " + sProcessObjId + " ): " + oE);
 		}
 
 		return false;
@@ -145,7 +146,7 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sUserId, sTemplateId);
 		} catch (Exception oE) {
-			Utils.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessorParametersTemplate( " + sUserId + ", " + sTemplateId + " ): error: " + oE);
 		}
 
 		return false;

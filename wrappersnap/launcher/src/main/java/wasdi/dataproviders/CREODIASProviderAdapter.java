@@ -32,10 +32,11 @@ import com.google.common.io.CharStreams;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -58,14 +59,6 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	}
 
 	/**
-	 * @param logger
-	 */
-	public CREODIASProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "CREODIAS";
-	}
-
-	/**
 	 * Get the size of the file to download/copy
 	 * @see wasdi.dataproviders.ProviderAdapter#GetDownloadFileSize(java.lang.String)
 	 */
@@ -73,7 +66,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
+			WasdiLog.errorLog("CREODIASProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 
@@ -86,7 +79,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			} else if(isHttpsProtocol(sFileURL)) {
 				sPath = extractFilePathFromHttpsUrl(sFileURL);
 			} else {
-				Utils.debugLog("CREODIASProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
+				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
 			}
 
 			if (sPath != null) {
@@ -113,9 +106,9 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				sFileURL = oUrl.toString();
 
 				lSizeInBytes = getDownloadFileSizeViaHttp(sFileURL);
-				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
+				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: file size is: " + sResult);
 			} catch (Exception oE) {
-				m_oLogger.debug("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
+				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
 			}
 		}
 
@@ -131,8 +124,8 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		String sProductIdentifier = extractProductIdentifierFromURL(sHttpsURL);
 		String filesystemPath = m_sProviderBasePath + sProductIdentifier;
 
-		Utils.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sProductIdentifier);
-		Utils.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sProductIdentifier);
+		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
 
 		return filesystemPath;
 	}
@@ -145,7 +138,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// TODO fail instead
 		if(Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
+			WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: URL is null or empty, aborting");
 			return null;
 		}
 
@@ -158,7 +151,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			} else if (isHttpsProtocol(sFileURL)) {
 				filesystemPath = extractFilePathFromHttpsUrl(sFileURL);
 			} else {
-				Utils.debugLog("CREODIASProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
+				WasdiLog.debugLog("CREODIASProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
 			}
 
 			if (filesystemPath != null) {
@@ -177,16 +170,16 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				//todo check availability
 				boolean bShallWeOrderIt = productShallBeOrdered(sFileURL, sDownloadUser, sDownloadPassword);
 				if(bShallWeOrderIt) {
-					m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
+					WasdiLog.infoLog("CREODIASProviderAdapter.ExecuteDownloadFile: requested file is not available, ordering it"); 
 					JSONObject oJsonStatus = orderProduct(sFileURL, sDownloadUser, sDownloadPassword);
 					if(null==oJsonStatus || !oJsonStatus.has("status") || oJsonStatus.isNull("status")) {
 						throw new NullPointerException("Order failed: JSON status is null, aborting");
 					}
-					m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: product ordered");
+					WasdiLog.infoLog("CREODIASProviderAdapter.executeDownloadFile: product ordered");
 					boolean bLoop = true;
 					String sStatus = oJsonStatus.getString("status");
 					if(sStatus.equals("done")) {
-						m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: good news! The requested file is already available :-)");
+						WasdiLog.infoLog("CREODIASProviderAdapter.executeDownloadFile: good news! The requested file is already available :-)");
 						bLoop = false;
 					}
 					boolean bInit = true;
@@ -197,7 +190,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 					while(bLoop) {
 					
 						if (iAttemps > iMaxAttemps) {
-							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: made " + iAttemps + ", this is really too much");
+							WasdiLog.infoLog("CREODIASProviderAdapter.ExecuteDownloadFile: made " + iAttemps + ", this is really too much");
 							break;
 						}
 						//todo tune waiting times
@@ -209,22 +202,22 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 						switch(sStatus) {
 						case "done_with_error":
 							//todo shall we download it anyway?
-							m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed with status: done_with_error: " + oJsonStatus);
+							WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: order failed with status: done_with_error: " + oJsonStatus);
 							break;
 						case "cancelled":
-							m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
+							WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: order failed: " + oJsonStatus);
 							return null;
 						case "done":
-							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: order complete :-) proceeding to download");
+							WasdiLog.infoLog("CREODIASProviderAdapter.ExecuteDownloadFile: order complete :-) proceeding to download");
 							bLoop = false;
 							break;
 						default:
-							m_oLogger.info("CREODIASProviderAdapter.ExecuteDownloadFile: status is: " + sStatus);
+							WasdiLog.infoLog("CREODIASProviderAdapter.ExecuteDownloadFile: status is: " + sStatus);
 							//todo replace this polling using a callback
 							//todo set processor status to waiting
 							if(bInit) {
 								Long lFirstWait = 360l;
-								m_oLogger.info("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete, sleep for " + lFirstWait);
+								WasdiLog.infoLog("CREODIASProviderAdapter.executeDownloadFile: waiting for order to complete, sleep for " + lFirstWait);
 								TimeUnit.SECONDS.sleep(lFirstWait);
 								bInit = false;
 							} else {
@@ -232,7 +225,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 								//prepare to wait longer next time
 								lLo = lRandomWaitSeconds;
 								lUp += lWaitStep;
-								m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+								WasdiLog.warnLog("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
 								TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
 							}
 							oJsonStatus = checkStatus(oJsonStatus, sDownloadUser, sDownloadPassword);
@@ -246,7 +239,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				}
 
 			} catch (Exception oE) {
-				m_oLogger.error("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
+				WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
 				return null;
 			}
 
@@ -258,7 +251,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			int iAttempt = 0;
 			while(iAttempt < iMaxRetry) {
 				try {
-					m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: attempt " + iAttempt + " at downloading from " + sFileURL ); 
+					WasdiLog.debugLog("CREODIASProviderAdapter.executeDownloadFile: attempt " + iAttempt + " at downloading from " + sFileURL ); 
 					//todo check product availability
 					String sKeyCloakToken = obtainKeycloakToken(sDownloadUser, sDownloadPassword);
 					//reconstruct appropriate url
@@ -272,16 +265,16 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 						//prepare to wait longer next time
 						lLo = lRandomWaitSeconds;
 						lUp += lWaitStep;
-						m_oLogger.warn("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
+						WasdiLog.warnLog("CREODIASProviderAdapter.executeDownloadFile: download failed, trying again after a nap of " + lRandomWaitSeconds +" seconds...");
 						//todo set the processor as waiting
 						TimeUnit.SECONDS.sleep(lRandomWaitSeconds);
 					} else {
 						//we're done
-						m_oLogger.debug("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
+						WasdiLog.debugLog("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
 						break;
 					}
 				} catch (Exception oE) {
-					m_oLogger.error("CREODIASProviderAdapter.executeDownloadFile: " + oE);
+					WasdiLog.errorLog("CREODIASProviderAdapter.executeDownloadFile: " + oE);
 				}
 			}
 		}
@@ -295,15 +288,15 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		String sResult = "";
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: sFileURL is null");
+			WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: sFileURL is null");
 			return "";
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
+			WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
 		
-		m_oLogger.debug("CREODIASProviderAdapter.ExecuteDownloadFile: start");
+		WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: start");
 		
 		setProcessWorkspace(oProcessWorkspace);
 
@@ -363,7 +356,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.checkStatus( " + oJsonOrder + ", ... ): " + oE );
+			WasdiLog.errorLog("CREODIASProviderAdapter.checkStatus( " + oJsonOrder + ", ... ): " + oE );
 		}
 		return null;
 	}
@@ -380,13 +373,13 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 
 		String[] sTokens = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS);
 		if(sTokens.length < 1) {
-			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): not enough tokens, aborting" ); 
+			WasdiLog.errorLog("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): not enough tokens, aborting" ); 
 			return null;
 		}
 
 		String sProductName = sTokens[ResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 		if(sProductName.isEmpty()) {
-			m_oLogger.error("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): product name is empty, aborting" );
+			WasdiLog.errorLog("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): product name is empty, aborting" );
 			return null;
 		}
 
@@ -450,11 +443,11 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			OutputStream oOutputStream = oHttpConn.getOutputStream();
 			oOutputStream.write(oJsonRequest.toString().getBytes());
 			
-			m_oLogger.info("CREODIASProviderAdapter.orderProduct: payload - " + oJsonRequest.toString());
+			WasdiLog.infoLog("CREODIASProviderAdapter.orderProduct: payload - " + oJsonRequest.toString());
 
 			return handleResponseStatus(oHttpConn);
 		} catch (Exception oE) {
-			m_oLogger.warn("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE );
+			WasdiLog.warnLog("CREODIASProviderAdapter.orderProduct( " + sFileURL + ", ... ): " + oE );
 		}
 		return null;
 	}
@@ -472,7 +465,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				}
 			}
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASPRoviderAdapter.getRequiredProcessor: " + oE);
+			WasdiLog.errorLog("CREODIASPRoviderAdapter.getRequiredProcessor: " + oE);
 		}
 		return "sen2cor";
 	}
@@ -503,10 +496,10 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 						sResponse += "}";
 					}
 					JSONObject oJson = new JSONObject(sResponse);
-					m_oLogger.info("CREODIASProviderAdapter.handleResponseStatus: order placed");
+					WasdiLog.infoLog("CREODIASProviderAdapter.handleResponseStatus: order placed");
 					return oJson;
 				} catch (Exception oE) {
-					m_oLogger.warn("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve response from CREODIAS server" );
+					WasdiLog.warnLog("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve response from CREODIAS server" );
 				}
 			}
 		} else {
@@ -518,14 +511,14 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 					sError = CharStreams.toString(oReader);
 					//todo check: is it a json object? If yes, parse and return it
 				} catch (Exception oE) {
-					m_oLogger.warn("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve error from CREODIAS server" );
+					WasdiLog.warnLog("CREODIASProviderAdapter.handleResponseStatus: " + oE + " while trying to retrieve error from CREODIAS server" );
 				}
 			} 
 			String sLog = "CREODIASProviderAdapter.handleResponseStatus: could not complete order, server returned status " + iResponseCode;
 			if(!Utils.isNullOrEmpty(sError)) {
 				sLog += " with message: " + sError;
 			}
-			m_oLogger.error(sLog);
+			WasdiLog.errorLog(sLog);
 		}
 		return null;
 	}
@@ -556,7 +549,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				return false;
 			}
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.checkAvailability: could not check availability due to: " + oE + ", assuming product available, try to do download it anyway");
+			WasdiLog.errorLog("CREODIASProviderAdapter.checkAvailability: could not check availability due to: " + oE + ", assuming product available, try to do download it anyway");
 		}
 		//try and download it anyway
 		return false;
@@ -569,7 +562,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			String sStatus = asParts[ResponseTranslatorCREODIAS.IPOSITIONOF_STATUS];
 			return sStatus;
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.extractStatusFromURL: " + oE);
+			WasdiLog.errorLog("CREODIASProviderAdapter.extractStatusFromURL: " + oE);
 		}
 		return null;
 	}
@@ -581,7 +574,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			String sProductIdentifier = asParts[ResponseTranslatorCREODIAS.IPOSITIONOF_PRODUCTIDENTIFIER];
 			return sProductIdentifier;
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
+			WasdiLog.errorLog("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
 		}
 		return null;
 	}
@@ -591,7 +584,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 		try {
 			sResult = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS)[ResponseTranslatorCREODIAS.IPOSITIONOF_LINK];
 		} catch (Exception oE) {
-			m_oLogger.error("CREODIASProviderAdapter.getZipperUrl: " + oE);
+			WasdiLog.errorLog("CREODIASProviderAdapter.getZipperUrl: " + oE);
 		}
 		return sResult;
 	}
@@ -603,7 +596,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 	public String getFileName(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
+			WasdiLog.errorLog("CREODIASProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
 
@@ -614,7 +607,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				String[] asTokens = sFileURL.split(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); 
 				sResult = asTokens[ResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 			} catch (Exception oE) {
-				m_oLogger.error("CREODIASProviderAdapter.GetFileName: " + oE);
+				WasdiLog.errorLog("CREODIASProviderAdapter.GetFileName: " + oE);
 			}
 		} else if (isFileProtocol(sFileURL)) {
 			String[] asParts = sFileURL.split("/");
@@ -637,14 +630,14 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			oConnection.setDoOutput(true);
 			oConnection.getOutputStream().write(("client_id=CLOUDFERRO_PUBLIC&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
 			int iStatus = oConnection.getResponseCode();
-			m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: Response status: " + iStatus);
+			WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken: Response status: " + iStatus);
 			if( iStatus == 200) {
 				InputStream oInputStream = oConnection.getInputStream();
 				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 				if(null!=oInputStream) {
 					Util.copyStream(oInputStream, oBytearrayOutputStream);
 					String sResult = oBytearrayOutputStream.toString();
-					//m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: json: " + sResult);
+					//WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken: json: " + sResult);
 					JSONObject oJson = new JSONObject(sResult);
 					String sToken = oJson.optString("access_token", null);
 					return sToken;
@@ -654,11 +647,11 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 				InputStream oErrorStream = oConnection.getErrorStream();
 				Util.copyStream(oErrorStream, oBytearrayOutputStream);
 				String sMessage = oBytearrayOutputStream.toString();
-				m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken:" + sMessage);
+				WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken:" + sMessage);
 
 			}
 		} catch (Exception oE) {
-			m_oLogger.debug("CREODIASProviderAdapter.obtainKeycloakToken: " + oE);
+			WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken: " + oE);
 		}
 
 		return null;
@@ -671,7 +664,7 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 			m_sDefaultProtocol = m_oDataProviderConfig.defaultProtocol; 
 			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
 		} catch (Exception e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+			WasdiLog.errorLog("CREODIASProvierAdapter: Config reader is null");
 		}
 	}
 

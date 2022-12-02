@@ -21,7 +21,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Base Repository Class
@@ -128,12 +128,12 @@ public class MongoRepository {
             	// Add it to the dictionary
             	s_aoDbConnections.put(sDbCode, oMongoConnection);
             	
-            	Utils.debugLog("MongoRepository.addMongoConnection: Configuration added: " + sDbCode);
+            	WasdiLog.debugLog("MongoRepository.addMongoConnection: Configuration added: " + sDbCode);
     		}
     	}
     	catch (Exception e) 
     	{
-    		Utils.debugLog("MongoRepository.addMongoConnection: exception " + e.getMessage());
+    		WasdiLog.debugLog("MongoRepository.addMongoConnection: exception " + e.getMessage());
 			e.printStackTrace();
     	}    	
     }
@@ -160,7 +160,7 @@ public class MongoRepository {
     			else {
     				
     				if (!s_bDbSwitchLogged) {
-    					Utils.debugLog("MongoRepository.getMongoDatabase: Db Code " + sDbCode + " NOT FOUND. try to recover with default db");
+    					WasdiLog.debugLog("MongoRepository.getMongoDatabase: Db Code " + sDbCode + " NOT FOUND. try to recover with default db");
     					s_bDbSwitchLogged = true;
     				}
     				
@@ -175,7 +175,7 @@ public class MongoRepository {
     	}
     	catch (Exception e) 
     	{
-    		Utils.debugLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
+    		WasdiLog.debugLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
 			e.printStackTrace();
     	}
         return null;
@@ -211,13 +211,13 @@ public class MongoRepository {
         			oConnection.m_oMongoClient.close();
         		}
         		catch (Exception e) {
-    				Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
+    				WasdiLog.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
     				e.printStackTrace();
     			}
 			}
     	}
     	catch (Exception e) {
-			Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
+			WasdiLog.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
 			e.printStackTrace();
 		}    	
     }
@@ -243,7 +243,7 @@ public class MongoRepository {
                 	oEntity = s_oMapper.readValue(sJSON,oClass);
                     aoReturnList.add(oEntity);
                 } catch (Exception oEx) {
-                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                	WasdiLog.debugLog(m_sThisCollection + ".fillList: " + oEx);
                 }            		
         	}
         }
@@ -265,7 +265,7 @@ public class MongoRepository {
                 	oEntity = s_oMapper.readValue(sJSON,oClass);
                     aoReturnList.add(oEntity);
                 } catch (Exception oEx) {
-                	Utils.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                	WasdiLog.debugLog(m_sThisCollection + ".fillList: " + oEx);
                 }            		
         	}
         }
@@ -284,7 +284,7 @@ public class MongoRepository {
 				sResult = oDocument.getObjectId("_id").toHexString();
 	
 			} catch (Exception oEx) {
-				Utils.debugLog(sRepositoryCommand + ": " + oEx);
+				WasdiLog.debugLog(sRepositoryCommand + ": " + oEx);
 			}
 		}
 		return sResult;

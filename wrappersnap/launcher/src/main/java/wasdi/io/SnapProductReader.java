@@ -29,6 +29,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.AttributeViewModel;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -43,7 +44,7 @@ public class SnapProductReader extends WasdiProductReader {
 	
 	public ProductViewModel getProductViewModel() {
 		
-		LauncherMain.s_oLogger.debug("SnapProductReader.getProductViewModel: start");
+		WasdiLog.debugLog("SnapProductReader.getProductViewModel: start");
 		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
@@ -61,7 +62,7 @@ public class SnapProductReader extends WasdiProductReader {
         	oViewModel.setName(oViewModel.getFileName());
         }
 
-        LauncherMain.s_oLogger.debug("SnapProductReader.getProductViewModel: done");
+        WasdiLog.debugLog("SnapProductReader.getProductViewModel: done");
 		return oViewModel;
 	}
 
@@ -73,18 +74,18 @@ public class SnapProductReader extends WasdiProductReader {
     protected void getSnapProductBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: ViewModel null, return");
+            WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: ViewModel null, return");
             return;
         }
 
         if (oProduct == null) {
-            LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: Product null, return");
+            WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: Product null, return");
             return;
         }
 
         if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
 
-        LauncherMain.s_oLogger.debug("SnapProductReader.FillBandsViewModel: add bands");
+        WasdiLog.debugLog("SnapProductReader.FillBandsViewModel: add bands");
         
         for (Band oBand : oProduct.getBands()) {
 
@@ -104,7 +105,7 @@ public class SnapProductReader extends WasdiProductReader {
 		Product oProduct = getSnapProduct();
 		
 		if (oProduct == null) {
-			LauncherMain.s_oLogger.info("SnapProductReader.getProductBoundingBox: product is null return empty ");
+			WasdiLog.infoLog("SnapProductReader.getProductBoundingBox: product is null return empty ");
 			return "";
 		}
 		
@@ -131,7 +132,7 @@ public class SnapProductReader extends WasdiProductReader {
 
 			return sBB;
 		} catch (Exception e) {
-			LauncherMain.s_oLogger.error("SnapProductReader.getProductBoundingBox: Exception " + e.getMessage());
+			WasdiLog.errorLog("SnapProductReader.getProductBoundingBox: Exception " + e.getMessage());
 		}
 		
 		return "";
@@ -200,17 +201,17 @@ public class SnapProductReader extends WasdiProductReader {
 
 	        if (sFileNameFromProvider.startsWith("S3") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
 	        	String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
-	        	LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
+	        	WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File is a Sentinel 3 image, start unzip");
 	            ZipFileUtils oZipExtractor = new ZipFileUtils();
 	            oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
 	            String sFolderName = sDownloadPath + sFileNameFromProvider.replace(".zip", ".SEN3");
-	            LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 	            sFileName = sFolderName + "/" + "xfdumanifest.xml";
-	            LauncherMain.s_oLogger.debug("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+	            WasdiLog.debugLog("SnapProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
 	        }
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("SnapProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.errorLog("SnapProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 		
 		return sFileName;
@@ -228,7 +229,7 @@ public class SnapProductReader extends WasdiProductReader {
 		
 		if (m_oProductFile.getName().toLowerCase().endsWith(".tif") || m_oProductFile.getName().toLowerCase().endsWith(".tiff")) {
 			
-			LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: this is a geotiff file");
+			WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: this is a geotiff file");
 			
 			addPrjToMollweidTiffFiles();
 			
@@ -238,7 +239,7 @@ public class SnapProductReader extends WasdiProductReader {
 	        // Check if it is a S2
 	        if (sPlatform.equals(Platforms.SENTINEL2)) {
 
-	        	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Managing S2 Product Band " + sBand);
+	        	WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  Managing S2 Product Band " + sBand);
 
 	            Band oBand = m_oProduct.getBand(sBand);
 	            Product oGeotiffProduct = new Product(sBand, "GEOTIFF");
@@ -247,10 +248,10 @@ public class SnapProductReader extends WasdiProductReader {
 				try {
 					sOutputFilePath = new WasdiProductWriter(null, null).WriteGeoTiff(oGeotiffProduct, sBaseDir, sLayerId+".tif");
 				} catch (Exception oEx) {
-					LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: Exception converting S2 to geotiff " + oEx.toString() );
+					WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: Exception converting S2 to geotiff " + oEx.toString() );
 				}
 	            File oOutputFile = new File(sOutputFilePath);
-	            LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Geotiff File Created" + sOutputFilePath);
+	            WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  Geotiff File Created" + sOutputFilePath);
 	            
 	            return oOutputFile;
 
@@ -259,7 +260,7 @@ public class SnapProductReader extends WasdiProductReader {
 	        	String sOutputFilePath = sBaseDir + sLayerId + ".tif";
 	        	File oOutputFile = new File(sOutputFilePath);
 
-	        	LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Managing NON S2 Product Band " + sBand);
+	        	WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  Managing NON S2 Product Band " + sBand);
 
 	            // Get the Band
 	            Band oBand = m_oProduct.getBand(sBand);
@@ -289,21 +290,21 @@ public class SnapProductReader extends WasdiProductReader {
 	            
 	            try {
 					if (GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata)) {
-						LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  GeoTiff File Created: " + sOutputFilePath);
+						WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  GeoTiff File Created: " + sOutputFilePath);
 					}
 					else {
-						LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand:  Impossible to create: " + sOutputFilePath);
+						WasdiLog.debugLog("SnapProductReader.getFileForPublishBand:  Impossible to create: " + sOutputFilePath);
 					}
 					
 				} catch (IOException oEx) {
-					LauncherMain.s_oLogger.debug("Exception converting S1 to geotiff " + oEx.toString() );
+					WasdiLog.debugLog("Exception converting S1 to geotiff " + oEx.toString() );
 				}
 	            
 	            return oOutputFile;
 	        }			
 		}
 		
-		LauncherMain.s_oLogger.debug("SnapProductReader.getFileForPublishBand: we did not find any useful way, return null");
+		WasdiLog.debugLog("SnapProductReader.getFileForPublishBand: we did not find any useful way, return null");
 		return null;
 	}
 	
@@ -313,13 +314,13 @@ public class SnapProductReader extends WasdiProductReader {
             String sEPSG = CRS.lookupIdentifier(getSnapProduct().getSceneCRS(), true);
             
             if (Utils.isNullOrEmpty(sEPSG)) {
-            	LauncherMain.s_oLogger.error("SnapProductReader.getEPSG(): sEPSG is null, try with gdal");
+            	WasdiLog.errorLog("SnapProductReader.getEPSG(): sEPSG is null, try with gdal");
             	sEPSG = super.getEPSG();
             }
 			return sEPSG;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("SnapProductReader.getEPSG(): exception " + oEx.toString());
+			WasdiLog.errorLog("SnapProductReader.getEPSG(): exception " + oEx.toString());
 		}
 		return null;    	
     }
@@ -334,7 +335,7 @@ public class SnapProductReader extends WasdiProductReader {
 			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
 			if (oGdalInfoResult != null) {
 				if (oGdalInfoResult.coordinateSystemWKT.contains("Mollweide")) {
-					LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: this is a Mollweide file, try to convert");
+					WasdiLog.debugLog("SnapProductReader.addPrjToMollweidTiffFiles: this is a Mollweide file, try to convert");
 					
 					String sExtension = Utils.GetFileNameExtension(m_oProductFile.getName());
 					String sOutputFile = m_oProductFile.getAbsolutePath().replace("." +sExtension, ".prj");
@@ -345,13 +346,13 @@ public class SnapProductReader extends WasdiProductReader {
 			            try (BufferedWriter oPrjWriter = new BufferedWriter(new FileWriter(oPrjFile))) {
 			                // Fill the script file
 			                if (oPrjWriter != null) {
-			                    LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: " + sOutputFile + " file");
+			                    WasdiLog.debugLog("SnapProductReader.addPrjToMollweidTiffFiles: " + sOutputFile + " file");
 			                    oPrjWriter.write(GdalUtils.getMollweideProjectionDescription());
 			                    oPrjWriter.flush();
 			                    oPrjWriter.close();
 			                }
 			            } catch (IOException oEx) {
-			            	LauncherMain.s_oLogger.debug("SnapProductReader.addPrjToMollweidTiffFiles: Exception converting Generating prj file " + oEx.toString() );
+			            	WasdiLog.debugLog("SnapProductReader.addPrjToMollweidTiffFiles: Exception converting Generating prj file " + oEx.toString() );
 						}
 		            }
 				}

@@ -13,7 +13,8 @@ import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
-import wasdi.shared.utils.gis.*;
+import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 
 /**
@@ -36,14 +37,14 @@ public class Publisher {
 
         } catch(Exception oEx) {
             //no log4j configuration
-        	Utils.debugLog( "Publisher: Error loading log.  Reason: " + oEx.getMessage() );
+        	WasdiLog.debugLog( "Publisher: Error loading log.  Reason: " + oEx.getMessage() );
         }
         
         // Set the publisher 
         try {
             m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.Current.geoserver.maxGeotiffDimensionPyramid);
         } catch (Exception e) {
-            Utils.debugLog("Publisher: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 1024");
+            WasdiLog.debugLog("Publisher: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 1024");
             m_lMaxMbTiffPyramid = 1024L;
         }
         
@@ -78,7 +79,7 @@ public class Publisher {
                             
             String sCmd = String.format("%s -targetDir %s %s", sGdalRetile, sTargetDir, sInputFile);
 
-            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
+            WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
 
             Process oProcess = null;
             try {
@@ -104,7 +105,7 @@ public class Publisher {
                     if (oProcess.getErrorStream() !=null) oProcess.getErrorStream().close();
                 }
                 catch (Exception oEx) {
-                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception closing Streams " + oEx.toString());
+                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception closing Streams " + oEx.toString());
                 }
 
 
@@ -112,24 +113,24 @@ public class Publisher {
                     oOutputWriter.interrupt();
                 }
                 catch (Exception oEx) {
-                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception interrupting Output Writer thread " + oEx.toString());
+                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception interrupting Output Writer thread " + oEx.toString());
                 }
                 try  {
                     oErrorWriter.interrupt();
                 }
                 catch (Exception oEx) {
-                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception interrupting Error Writer Thread " + oEx.toString());
+                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception interrupting Error Writer Thread " + oEx.toString());
                 }
 
 
-                s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
+                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
 
             } catch (IOException e) {
-                s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
                 return  false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
                 Thread.currentThread().interrupt();
 
                 return  false;
@@ -142,11 +143,11 @@ public class Publisher {
 
         } catch (Exception e) {
             e.printStackTrace();
-            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+            WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
             return  false;
         }
 
-        s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Return true");
+        WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Return true");
         return  true;
     }
 
@@ -158,7 +159,7 @@ public class Publisher {
         // Create Pyramid
         if (!launchImagePyramidCreation(sFileName, sPath)) return null;
 
-        s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid With Geoserver Manager");
+        WasdiLog.debugLog("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid With Geoserver Manager");
 
         //publish image pyramid
         try {
@@ -169,14 +170,14 @@ public class Publisher {
             //Pubblico il layer
             //TODO check the epsg specification
             if (!oManager.publishImagePyramid(sStoreName, sStyle, "EPSG:4326", oSourceDir)) {
-            	s_oLogger.error("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName);
+            	WasdiLog.errorLog("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName);
             	return null;
             }
             
-            s_oLogger.info("Publisher.PublishImagePyramidOnGeoServer: image mosaic published " + sStoreName);
+            WasdiLog.infoLog("Publisher.PublishImagePyramidOnGeoServer: image mosaic published " + sStoreName);
 
         }catch (Exception oEx) {
-        	s_oLogger.error("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName, oEx);
+        	WasdiLog.errorLog("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName, oEx);
         	return null;
         }
 
@@ -194,13 +195,13 @@ public class Publisher {
         	
             //Pubblico il layer
             if (!oManager.publishStandardGeoTiff(sStoreName, oFile, sEPSG, sStyle, s_oLogger)) {
-            	s_oLogger.error("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
+            	WasdiLog.errorLog("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
             	return null;
             }
-            s_oLogger.info("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
+            WasdiLog.infoLog("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
 
         } catch (Exception oEx) {
-        	s_oLogger.error("Publisher.PublishGeoTiffImage Exception: unable to publish geotiff " + sStoreName, oEx);
+        	WasdiLog.errorLog("Publisher.PublishGeoTiffImage Exception: unable to publish geotiff " + sStoreName, oEx);
         	return null;
         }
 
@@ -255,13 +256,13 @@ public class Publisher {
         	
             //Pubblico il layer
             if (!oManager.publishShapeFile(sStore, oZippedShapeFile, sEPSG, sStyle, s_oLogger)) {
-            	s_oLogger.error("Publisher.publishShapeFile: unable to publish shapefile " + sStore);
+            	WasdiLog.errorLog("Publisher.publishShapeFile: unable to publish shapefile " + sStore);
             	return null;
             }
-            s_oLogger.info("Publisher.publishShapeFile: shapefile published " + sStore);
+            WasdiLog.infoLog("Publisher.publishShapeFile: shapefile published " + sStore);
 
         } catch (Exception oEx) {
-        	s_oLogger.error("Publisher.publishShapeFile Exception: unable to publish shapefile " + sStore, oEx);
+        	WasdiLog.errorLog("Publisher.publishShapeFile Exception: unable to publish shapefile " + sStore, oEx);
         	return null;
         }
 

@@ -13,6 +13,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -124,14 +125,14 @@ public abstract class WasdiProductReader {
 		try {
 			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(m_oProductFile);
 			if (oGdalInfoResult != null) {
-				LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): WKT " + oGdalInfoResult.coordinateSystemWKT);
+				WasdiLog.errorLog("WasdiProductReader.getEPSG(): WKT " + oGdalInfoResult.coordinateSystemWKT);
 				CoordinateReferenceSystem oCRS = CRS.parseWKT(oGdalInfoResult.coordinateSystemWKT);
 				String sEPSG = CRS.lookupIdentifier(oCRS, true);
 				return sEPSG;
 			}
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("WasdiProductReader.getEPSG(): exception " + oEx.toString());
+			WasdiLog.errorLog("WasdiProductReader.getEPSG(): exception " + oEx.toString());
 		}
 		return null;    	
     }
@@ -153,40 +154,40 @@ public abstract class WasdiProductReader {
         // so the cache was useless and could have memory problems
         
         if (m_oProductFile == null) {
-        	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: file to read is null, return null ");
+        	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: file to read is null, return null ");
         	return null;
         }
         
         if (WasdiFileUtils.isSentinel5PFile(m_oProductFile)) {
-        	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
+        	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: we do not want SNAP to read S5P, return null ");
         	return null;        	
         }
         
         if (m_oProductFile.getName().toUpperCase().endsWith(".ZIP")) {
         	if (!ZipFileUtils.isValidZipFile(m_oProductFile)) {
-            	LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: not valid zip file, return null");
+            	WasdiLog.debugLog("WasdiProductReader.readSnapProduct: not valid zip file, return null");
             	return null;        	        		
         	}
         }
         
         try {
-            LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: begin read " + m_oProductFile.getAbsolutePath());
+            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: begin read " + m_oProductFile.getAbsolutePath());
             
             long lStartTime = System.currentTimeMillis();
             oProduct = ProductIO.readProduct(m_oProductFile);  
             long lEndTime = System.currentTimeMillis();
             
-            LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: read done in " + (lEndTime - lStartTime) + "ms");
+            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: read done in " + (lEndTime - lStartTime) + "ms");
 
             if(null== oProduct) {
-            	LauncherMain.s_oLogger.error("WasdiProductReader.readSnapProduct: apparently SNAP could not read it, the returned product is null");
+            	WasdiLog.errorLog("WasdiProductReader.readSnapProduct: apparently SNAP could not read it, the returned product is null");
             }
             
             return oProduct;
             
         } catch (Throwable oEx) {
             oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug("WasdiProductReader.readSnapProduct: exception: " + oEx);
+            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: exception: " + oEx);
         }
 
         return null;

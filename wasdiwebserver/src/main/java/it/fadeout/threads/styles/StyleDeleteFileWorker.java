@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to delete the file of a style
@@ -28,7 +28,7 @@ public class StyleDeleteFileWorker extends Thread {
 
 	@Override
 	public void run() {
-		Utils.debugLog("StyleDeleteFileWorker.run: start nodes delete for style " + m_sStyleName);
+		WasdiLog.debugLog("StyleDeleteFileWorker.run: start nodes delete for style " + m_sStyleName);
 
 		for (Node oNode : m_aoNodes) {
 
@@ -52,17 +52,17 @@ public class StyleDeleteFileWorker extends Thread {
 				Map<String, String> asHeaders = new HashMap<>();
 				asHeaders.put("x-session-token", m_sSessionId);
 
-				Utils.debugLog("StyleDeleteFileWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("StyleDeleteFileWorker.run: calling url: " + sUrl);
 
 				HttpUtils.httpDelete(sUrl, asHeaders);
 
-				Utils.debugLog("StyleDeleteFileWorker.run: node deleted " + oNode.getNodeCode());
+				WasdiLog.debugLog("StyleDeleteFileWorker.run: node deleted " + oNode.getNodeCode());
 			} catch (Exception oEx) {
-				Utils.debugLog("StyleDeleteFileWorker.run: Exception " + oEx.getMessage());
+				WasdiLog.debugLog("StyleDeleteFileWorker.run: Exception " + oEx.getMessage());
 			}
 		}
 
-		Utils.debugLog("StyleDeleteFileWorker.run: distribuited delete done");
+		WasdiLog.debugLog("StyleDeleteFileWorker.run: distribuited delete done");
 	}
 
 }

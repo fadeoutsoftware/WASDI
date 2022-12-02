@@ -6,7 +6,7 @@ import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to delete a processor
@@ -66,7 +66,7 @@ public class DeleteProcessorWorker extends Thread  {
 	@Override
 	public void run() {
 		
-		Utils.debugLog("DeleteProcessorWorker.run: start nodes delete for processor " + m_sProcessorId);
+		WasdiLog.debugLog("DeleteProcessorWorker.run: start nodes delete for processor " + m_sProcessorId);
 		
 		// For each node
 		for (Node oNode : m_aoNodes) {
@@ -92,20 +92,20 @@ public class DeleteProcessorWorker extends Thread  {
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
-				Utils.debugLog("DeleteProcessorWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("DeleteProcessorWorker.run: calling url: " + sUrl);
 				
 				// It is a get call
 				HttpUtils.httpGet(sUrl, asHeaders);
 				
-				Utils.debugLog("DeleteProcessorWorker.run: deleted on node " + oNode.getNodeCode());
+				WasdiLog.debugLog("DeleteProcessorWorker.run: deleted on node " + oNode.getNodeCode());
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("DeleteProcessorWorker.run: Exception " + oEx.toString());
+				WasdiLog.debugLog("DeleteProcessorWorker.run: Exception " + oEx.toString());
 			}
 		}
 		
 		// All nodes updated
-		Utils.debugLog("DeleteProcessorWorker.run: distribuited delete done");
+		WasdiLog.debugLog("DeleteProcessorWorker.run: distribuited delete done");
 	}
 }

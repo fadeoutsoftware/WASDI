@@ -14,6 +14,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Processor;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessorRepository extends  MongoRepository {
 	
@@ -280,7 +281,7 @@ public class ProcessorRepository extends  MongoRepository {
 			}
 	
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessorRepository.countProcessors( " + bInAppStoreOnly + ", " + bPublicOnly + " ): " + oE);
+			WasdiLog.debugLog("ProcessorRepository.countProcessors( " + bInAppStoreOnly + ", " + bPublicOnly + " ): " + oE);
 		}
 		return -1l;
 	}

@@ -17,7 +17,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import com.google.api.client.util.ByteStreams;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -28,7 +28,7 @@ public class FileStreamingOutput implements StreamingOutput {
 	final File m_oFile;
 
 	public FileStreamingOutput(File oFile){
-		Utils.debugLog("FileStreamingOutput.FileStreamingOutput");
+		WasdiLog.debugLog("FileStreamingOutput.FileStreamingOutput");
 		if(null==oFile) {
 			throw new NullPointerException("FileStreamingOutput.FileStreamingOutput: passed a null File");
 		}
@@ -41,42 +41,42 @@ public class FileStreamingOutput implements StreamingOutput {
 	@Override
 	public void write(OutputStream oOutputStream) throws IOException, WebApplicationException {
 		try {
-			Utils.debugLog("FileStreamingOutput.write");
+			WasdiLog.debugLog("FileStreamingOutput.write");
 			if(null == oOutputStream) {
 				throw new NullPointerException("FileStreamingOutput.write: passed a null OutputStream");
 			}
 			try {
 				try (InputStream oInputStream = new FileInputStream(m_oFile)) {
 					long lCopiedBytes = 0;
-					Utils.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
+					WasdiLog.debugLog("FileStreamingOutput.write: using guava ByteStreams.copy to copy file");
 					lCopiedBytes = ByteStreams.copy(oInputStream,  oOutputStream);
 					
 					if( oOutputStream!=null ) {
 						oOutputStream.flush();
 					}
 					
-					Utils.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );					
+					WasdiLog.debugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );					
 				}
 				
 			} 
 			catch (Exception oE) {
-				Utils.debugLog("FileStreamingOutput.write: " + oE);
+				WasdiLog.debugLog("FileStreamingOutput.write: " + oE);
 			} finally {
 				
 				// Flush output
 				if( oOutputStream!=null ) {
 					try {
 						oOutputStream.close();
-						Utils.debugLog("FileStreamingOutput.write: OutputStream closed");						
+						WasdiLog.debugLog("FileStreamingOutput.write: OutputStream closed");						
 					}
 					catch (Exception oEx) {
-						Utils.debugLog("FileStreamingOutput.write: OutputStream close exception: " + oEx.toString());
+						WasdiLog.debugLog("FileStreamingOutput.write: OutputStream close exception: " + oEx.toString());
 					}
 				}
 				
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("FileStreamingOutput.write: uncaught error: " + oE);
+			WasdiLog.debugLog("FileStreamingOutput.write: uncaught error: " + oE);
 		}
 	}
 }

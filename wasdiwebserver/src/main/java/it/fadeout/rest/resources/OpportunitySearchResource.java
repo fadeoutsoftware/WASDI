@@ -39,6 +39,7 @@ import satLib.astro.time.Time;
 import wasdi.shared.business.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.plan.CoverageSwathResultViewModel;
 import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
 import wasdi.shared.viewmodels.plan.SatelliteOrbitResultViewModel;
@@ -72,7 +73,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,
 			OpportunitiesSearchViewModel OpportunitiesSearch) {
-		Utils.debugLog("OpportunitySearchResource.Search");
+		WasdiLog.debugLog("OpportunitySearchResource.Search");
 
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
 
@@ -80,7 +81,7 @@ public class OpportunitySearchResource {
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("OpportunitySearchResource.Search: invalid session");
+				WasdiLog.debugLog("OpportunitySearchResource.Search: invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -93,7 +94,7 @@ public class OpportunitySearchResource {
 			if (Nfs == null)
 				System.setProperty("nfs.data.download", userHome + "/nfs/download");
 
-			Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
+			WasdiLog.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
 
 			int iIdCoverageCounter = 1;
 
@@ -122,7 +123,7 @@ public class OpportunitySearchResource {
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("OpportunitySearchResource.Search: Error searching opportunity " + oEx);
+			WasdiLog.debugLog("OpportunitySearchResource.Search: Error searching opportunity " + oEx);
 		}
 
 		return aoCoverageSwathResultViewModels;
@@ -136,7 +137,7 @@ public class OpportunitySearchResource {
 	 */
 	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(
 			CoverageSwathResult oSwath) {
-		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
+		WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
 		try {
@@ -210,7 +211,7 @@ public class OpportunitySearchResource {
 			}
 			oVM.aoChilds = aoChildsViewModel;
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
 		return oVM;
 	}
@@ -221,7 +222,7 @@ public class OpportunitySearchResource {
 	 * @return CoverageSwathResultViewModel View Model
 	 */
 	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
-		Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
+		WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult");
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
 		try {
 			if (oSwath != null) {
@@ -282,7 +283,7 @@ public class OpportunitySearchResource {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
 		return oVM;
 	}
@@ -293,7 +294,7 @@ public class OpportunitySearchResource {
 	 * @return WASDI View Model
 	 */
 	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
-		Utils.debugLog("OpportunitySearchResource.getSwatViewModelFromResult");
+		WasdiLog.debugLog("OpportunitySearchResource.getSwatViewModelFromResult");
 		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
 		try {
 			if (oSwath == null)
@@ -351,7 +352,7 @@ public class OpportunitySearchResource {
 				aoResults.add(oSwathResult);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getSwatViewModelFromResult: " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getSwatViewModelFromResult: " + oE);
 		}
 		return aoResults;
 	}
@@ -370,7 +371,7 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack: invalid session");
+			WasdiLog.debugLog("OpportunitySearchResource.GetSatelliteTrack: invalid session");
 		}
 
 		SatelliteOrbitResultViewModel oReturnViewModel = new SatelliteOrbitResultViewModel();
@@ -380,7 +381,7 @@ public class OpportunitySearchResource {
 			String sNfs = System.getProperty("nfs.data.download");
 			if (sNfs == null) {
 				System.setProperty("nfs.data.download", sUserHome + "/nfs/download");
-				Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
+				WasdiLog.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
 			}
 
 			String sSatres = InstanceFinder.getOrbitSatsMap().get(sSatname);
@@ -412,10 +413,10 @@ public class OpportunitySearchResource {
 				for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
 					oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
 			} catch (Exception oE) {
-				Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
+				WasdiLog.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 		}
 		return oReturnViewModel;
 	}
@@ -433,7 +434,7 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_XML)
 	public Kml getKmlSearchResults(@HeaderParam("x-session-token") String sSessionId, @QueryParam("text") String sText,
 			@QueryParam("footPrint") String sFootPrint) {
-		Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " )");
+		WasdiLog.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " )");
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -482,7 +483,7 @@ public class OpportunitySearchResource {
 
 			kml.setFeature(oPlacemark);
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
 		}
 
 		return kml;
@@ -504,7 +505,7 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null==oUser) {
-			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): invalid session");
+			WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): invalid session");
 		}
 
 		// Check if we have codes
@@ -555,7 +556,7 @@ public class OpportunitySearchResource {
 					oSatellite.getOrbitCore().setShowGroundTrack(true);
 
 				} catch (Exception e) {
-					Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
+					WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
 					e.printStackTrace();
 					continue;
 				}
@@ -563,7 +564,7 @@ public class OpportunitySearchResource {
 				aoRet.add(oPositionViewModel);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
 			oE.printStackTrace();
 		}
 
@@ -582,13 +583,13 @@ public class OpportunitySearchResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ArrayList<SatelliteResourceViewModel> getSatellitesResources(
 			@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("OpportunitySearchResource.getSatellitesResources");
+		WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources");
 
 		ArrayList<SatelliteResourceViewModel> aaoReturnValue = new ArrayList<SatelliteResourceViewModel>();
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null==oUser) {
-				Utils.debugLog("OpportunitySearchResource.getSatellitesResources: invalid session");
+				WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources: invalid session");
 				return aaoReturnValue;
 			}
 
@@ -636,12 +637,12 @@ public class OpportunitySearchResource {
 					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
-					Utils.debugLog("getSatellitesResources Exception: " + oE);
+					WasdiLog.debugLog("getSatellitesResources Exception: " + oE);
 					return aaoReturnValue;
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpportunitySearchResource.getSatellitesResources: " + oE);
+			WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources: " + oE);
 		}
 		return aaoReturnValue;
 

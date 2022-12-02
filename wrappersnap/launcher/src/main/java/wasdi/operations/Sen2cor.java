@@ -12,21 +12,22 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Sen2cor extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Sen2core.executeOperation");
+		WasdiLog.debugLog("Sen2core.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}		
     	
@@ -41,17 +42,17 @@ public class Sen2cor extends Operation {
 
             if (oSen2CorParameter.isValid()) {
                 try {
-                    m_oLocalLogger.debug("Sen2core.executeOperation: Start");
+                    WasdiLog.debugLog("Sen2core.executeOperation: Start");
                     
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
-                    m_oLocalLogger.debug("Sen2core.executeOperation: Extraction of " + sL1ProductName + " product");
+                    WasdiLog.debugLog("Sen2core.executeOperation: Extraction of " + sL1ProductName + " product");
                     ZipFileUtils oZipExtractor = new ZipFileUtils(oSen2CorParameter.getProcessObjId());
                     oZipExtractor.unzip(sDestinationPath + sL1ProductName + ".zip", sDestinationPath);
 
                     // 4 - Convert -> obtain L2A.SAFE
                     String sSen2CorPath = WasdiConfig.Current.paths.sen2CorePath;
-                    m_oLocalLogger.debug("Sen2core.executeOperation: Extraction completed, begin conversion");
+                    WasdiLog.debugLog("Sen2core.executeOperation: Extraction completed, begin conversion");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
                     ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
 
@@ -63,12 +64,12 @@ public class Sen2cor extends Operation {
 
 
                     // 5 - ZipIt -> L2A.zip
-                    m_oLocalLogger.debug("Sen2core.executeOperation: Conversion done, begin compression of L2 archive");
+                    WasdiLog.debugLog("Sen2core.executeOperation: Conversion done, begin compression of L2 archive");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 75);
                     oZipExtractor.zipFolder(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
 
 
-                    m_oLocalLogger.debug("Sen2core.executeOperation: Done");
+                    WasdiLog.debugLog("Sen2core.executeOperation: Done");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
                 }
                 catch (Exception oe){
@@ -77,7 +78,7 @@ public class Sen2cor extends Operation {
                     FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE")); // Level1 .Safe, if exists
                     FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE")); // Level2 .Safe, if exists
                     
-                    m_oLocalLogger.error("Sen2core.executeOperation: exception " + oe.toString());
+                    WasdiLog.errorLog("Sen2core.executeOperation: exception " + oe.toString());
                     
                     return false;
                 }
@@ -102,12 +103,12 @@ public class Sen2cor extends Operation {
 
             } 
             else {
-            	m_oLocalLogger.error("Sen2core.executeOperation: invalid parameters");
+            	WasdiLog.errorLog("Sen2core.executeOperation: invalid parameters");
             	return false;
             }    		
     	}
     	catch (Exception oEx) {
-    		m_oLocalLogger.error("Sen2core.executeOperation: exception " + oEx.toString());
+    		WasdiLog.errorLog("Sen2core.executeOperation: exception " + oEx.toString());
 		}
     	
 		return false;

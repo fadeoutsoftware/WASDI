@@ -23,12 +23,13 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Killprocesstree extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		m_oLocalLogger.debug("Killprocesstree.executeOperation");
+		WasdiLog.debugLog("Killprocesstree.executeOperation");
 
 		try {
 			Preconditions.checkNotNull(oParam, "process workspace is null");
@@ -44,10 +45,10 @@ public class Killprocesstree extends Operation {
 			for (String sProcessObjId: oKillProcessTreeParameter.getProcessesToBeKilledObjId()) {
 				ProcessWorkspace oProcessToKill = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
 				if (null != oProcessToKill) {
-					m_oLocalLogger.info("Killprocesstree.executeOperation: collecting and killing processes for " + oProcessToKill.getProcessObjId());
+					WasdiLog.infoLog("Killprocesstree.executeOperation: collecting and killing processes for " + oProcessToKill.getProcessObjId());
 					aoProcessesToBeKilled.add(oProcessToKill);
 				} else {
-					m_oLocalLogger.warn("Killprocesstree.executeOperation: no process found for processObjId " + sProcessObjId);
+					WasdiLog.warnLog("Killprocesstree.executeOperation: no process found for processObjId " + sProcessObjId);
 				}
 			}
 
@@ -57,11 +58,11 @@ public class Killprocesstree extends Operation {
 				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
 
 				if (null == oProcess) {
-					m_oLocalLogger.error("Killprocesstree.executeOperation: a null process was added, skipping");
+					WasdiLog.errorLog("Killprocesstree.executeOperation: a null process was added, skipping");
 					continue;
 				}
 				
-				m_oLocalLogger.info("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
+				WasdiLog.infoLog("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
 
 				terminate(oProcess);
 				
@@ -76,13 +77,13 @@ public class Killprocesstree extends Operation {
 				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
 				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
 				if (!bCanSpawnChildren) {
-					m_oLocalLogger.debug("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
 					continue;
 				}
 
 				//a dead process cannot spawn any more children, add the remaining ones to the set of processes to be killed
 				if (Utils.isNullOrEmpty(oProcess.getProcessObjId())) {
-					m_oLocalLogger.error("Killprocesstree.executeOperation: process has null or empty ObjId, skipping");
+					WasdiLog.errorLog("Killprocesstree.executeOperation: process has null or empty ObjId, skipping");
 					continue;
 				}
 				List<ProcessWorkspace> aoChildren = oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
@@ -96,7 +97,7 @@ public class Killprocesstree extends Operation {
 				}
 			}
 
-			m_oLocalLogger.info("Killprocesstree.executeOperation: Kill loop done");
+			WasdiLog.infoLog("Killprocesstree.executeOperation: Kill loop done");
 			
 			if(oKillProcessTreeParameter.getCleanDb()) {
 				cleanDB(asKilledProcessObjIds);
@@ -108,10 +109,10 @@ public class Killprocesstree extends Operation {
 			return true;
 
 		} catch (Exception oE) {
-			m_oLocalLogger.error("Killprocesstree.executeOperation: " + oE);
+			WasdiLog.errorLog("Killprocesstree.executeOperation: " + oE);
 		} 
 
-		m_oLocalLogger.info("Killprocesstree.executeOperation: done");
+		WasdiLog.infoLog("Killprocesstree.executeOperation: done");
 
 		return false;
 	}
@@ -121,7 +122,7 @@ public class Killprocesstree extends Operation {
 	 * @param asKilledProcessObjIds
 	 */
 	private void cleanDB(List<String> asKilledProcessObjIds) {
-		m_oLocalLogger.info("Killprocesstree.executeOperation: cleaning DB");
+		WasdiLog.infoLog("Killprocesstree.executeOperation: cleaning DB");
 		ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository(); 
 		for (String sProcessObjId: asKilledProcessObjIds) {
@@ -142,14 +143,14 @@ public class Killprocesstree extends Operation {
 			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
 
 			if (oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
-				m_oLocalLogger.info("Killprocesstree.killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
+				WasdiLog.infoLog("Killprocesstree.killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
 				killDocker(oProcessToKill);
 			}
 
 			killProcess(oProcessToKill);
 			setStatusAsStopped(oProcessToKill);
 		} catch (Exception oE) {
-			m_oLocalLogger.error("Killprocesstree.killProcessAndDocker: " + oE);
+			WasdiLog.errorLog("Killprocesstree.killProcessAndDocker: " + oE);
 		}
 	}
 
@@ -169,15 +170,15 @@ public class Killprocesstree extends Operation {
 				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
 				sShellExString += " " + iPid;
 
-				m_oLocalLogger.info("Killprocesstree.killProcess: shell exec " + sShellExString);
+				WasdiLog.infoLog("Killprocesstree.killProcess: shell exec " + sShellExString);
 				Process oProc = Runtime.getRuntime().exec(sShellExString);
-				m_oLocalLogger.info("Killprocesstree.killProcess: kill result: " + oProc.waitFor());
+				WasdiLog.infoLog("Killprocesstree.killProcess: kill result: " + oProc.waitFor());
 
 			} else {
-				m_oLocalLogger.error("Killprocesstree.killProcess: Process pid not in data");
+				WasdiLog.errorLog("Killprocesstree.killProcess: Process pid not in data");
 			}
 		} catch (Exception oE) {
-			m_oLocalLogger.error("Killprocesstree.killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+			WasdiLog.errorLog("Killprocesstree.killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}
 	}
 
@@ -201,11 +202,11 @@ public class Killprocesstree extends Operation {
 			oKilledProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 
 			if (!oRepository.updateProcess(oKilledProcessWorkspace)) {
-				m_oLocalLogger.error("Killprocesstree.setStatusAsStopped: Unable to update process status of process " +
+				WasdiLog.errorLog("Killprocesstree.setStatusAsStopped: Unable to update process status of process " +
 				oKilledProcessWorkspace.getProcessObjId() + " from: " + sPrevSatus + " to: STOPPED");
 			}
 		} else {
-			m_oLocalLogger.info("Killprocesstree.setStatusAsStopped: Process " + oKilledProcessWorkspace.getProcessObjId() +
+			WasdiLog.infoLog("Killprocesstree.setStatusAsStopped: Process " + oKilledProcessWorkspace.getProcessObjId() +
 					" was already over with status: " + sPrevSatus);
 		}
 	}
@@ -240,15 +241,15 @@ public class Killprocesstree extends Operation {
 			String sOutputCumulativeResult = "";
 
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				m_oLocalLogger.debug("killDocker: " + sOutputResult);
+				WasdiLog.debugLog("killDocker: " + sOutputResult);
 				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
 			}
 			oConnection.disconnect();
 
-			m_oLocalLogger.info("Killprocesstree.killDocker: " + sOutputCumulativeResult);
-			m_oLocalLogger.info("Killprocesstree.killDocker: Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
+			WasdiLog.infoLog("Killprocesstree.killDocker: " + sOutputCumulativeResult);
+			WasdiLog.infoLog("Killprocesstree.killDocker: Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
 		} catch (Exception oE) {
-			m_oLocalLogger.error("Killprocesstree.killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
+			WasdiLog.errorLog("Killprocesstree.killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}
 	}
 

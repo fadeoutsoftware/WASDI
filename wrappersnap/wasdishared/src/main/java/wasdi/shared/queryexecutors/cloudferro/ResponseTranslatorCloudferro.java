@@ -8,8 +8,9 @@ import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
@@ -186,7 +187,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 			oResult.getProperties().put(SURL, sUrl);
 			oResult.setLink(sUrl);
 		} else {
-			Utils.debugLog("ResponseTranslatorCloudferro.parseServices: download link not found! dumping object:\n"
+			WasdiLog.debugLog("ResponseTranslatorCloudferro.parseServices: download link not found! dumping object:\n"
 					+ "Object DUMP BEGIN\n" + oItem.toString() + "Object DUMP END");
 		}
 	}
@@ -200,7 +201,7 @@ public class ResponseTranslatorCloudferro extends ResponseTranslator {
 
 		sItem = oResult.getProperties().get(SURL);
 		if (sItem == null || sItem.isEmpty()) {
-			Utils.debugLog("ResponseTranslatorCloudferro.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
+			WasdiLog.debugLog("ResponseTranslatorCloudferro.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
 			sItem = "http://";
 		}
 		oLink.append(sItem).append(SLINK_SEPARATOR); //0

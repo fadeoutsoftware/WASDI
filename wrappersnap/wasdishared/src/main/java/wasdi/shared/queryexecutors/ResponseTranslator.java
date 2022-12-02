@@ -11,6 +11,7 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -55,7 +56,7 @@ public abstract class ResponseTranslator {
 				oResult.getProperties().put(sKey, sValue);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslator.addToProperties: " + oE);
+			WasdiLog.debugLog("ResponseTranslator.addToProperties: " + oE);
 		}
 	}
 }

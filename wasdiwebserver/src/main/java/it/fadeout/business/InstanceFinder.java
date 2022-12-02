@@ -20,7 +20,7 @@ import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
 
 import satLib.astro.time.Time;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.plan.OpportunitiesSearchViewModel;
 import wasdi.shared.viewmodels.plan.SatelliteFilterViewModel;
 import wasdi.shared.viewmodels.plan.SensorModeViewModel;
@@ -116,7 +116,7 @@ public class InstanceFinder {
 	 */
 	public static  ArrayList<CoverageSwathResult> findSwatsByFilters(OpportunitiesSearchViewModel oOpportunitiesSearch)
 	{
-		Utils.debugLog("findSwatsByFilters: start");
+		WasdiLog.debugLog("findSwatsByFilters: start");
 		
 		// Create satellites
 		m_aoSatellites = new ArrayList<ISatellite>();
@@ -126,15 +126,15 @@ public class InstanceFinder {
 		for (int iIndexSatelliteFitler = 0; iIndexSatelliteFitler < aoSatelliteFilters.size() ; iIndexSatelliteFitler++) {
 			
 			String sSatelliteName = aoSatelliteFilters.get(iIndexSatelliteFitler).getSatelliteName();
-			Utils.debugLog("InstanceFinder::findSwatsByFilters: building : " + sSatelliteName);
+			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: building : " + sSatelliteName);
 
 			Satellite oSatellite;
 			try {
 				oSatellite=SatFactory.buildSat(s_asOrbitSatsMap.get(sSatelliteName));
-				Utils.debugLog("costruito");
+				WasdiLog.debugLog("costruito");
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				Utils.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_asOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
+				WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_asOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
 				return null;
 			}
 
@@ -143,10 +143,10 @@ public class InstanceFinder {
 		}
 
 		if (m_aoSatellites != null) {
-			Utils.debugLog("InstanceFinder::findSwatsByFilters: Satellites Available: " + m_aoSatellites.size());
+			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: Satellites Available: " + m_aoSatellites.size());
 		}
 		else {
-			Utils.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
+			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
 		}
 		
 		// Check selected sensors: for each satellite 
@@ -191,12 +191,12 @@ public class InstanceFinder {
 		coverageRequest = getCoverageRequest(oAreaOfInterest,m_aoSatellites,oDateTimeStart,oDateTimeEnd);
 		
 		
-		Utils.debugLog("InstanceFinder::findSwatsByFilters: start solve request");
+		WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: start solve request");
 		
 		// Start the search: tre means to find any potential coverage with all available resources
 		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
 
-		Utils.debugLog("InstanceFinder::findSwatsByFilters: search done ");
+		WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: search done ");
 		
 		return oResults;
 	}
@@ -287,7 +287,7 @@ public class InstanceFinder {
 					dX = Double.valueOf(asPoint[0]);
 					
 				} catch (Exception oEx) {
-					Utils.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+					WasdiLog.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
 					dX = 0;
 				}
 				
@@ -295,7 +295,7 @@ public class InstanceFinder {
 				try {
 					dY = Double.valueOf(asPoint[1]);
 				} catch (Exception oEx) {
-					Utils.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+					WasdiLog.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
 					dY = 0;
 				}
 				

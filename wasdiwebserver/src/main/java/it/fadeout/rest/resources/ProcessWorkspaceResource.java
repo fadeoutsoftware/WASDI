@@ -46,6 +46,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
@@ -104,7 +105,7 @@ public class ProcessWorkspaceResource {
 			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo,
 			@QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( WS: " + sWorkspaceId +
+		WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( WS: " + sWorkspaceId +
 				", status: " + sStatus + ", name pattern: " + sNamePattern +
 				", Start: " + iStartIndex + ", End: " + iEndIndex);
 
@@ -113,18 +114,18 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: workspace id is null, aborting");
 				return aoProcessList;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: invalid session");
 				return aoProcessList;
 			}
 			
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user " + oUser.getUserId() + " is not allowed to access workspace " + sWorkspaceId +", aborting" );
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user " + oUser.getUserId() + " is not allowed to access workspace " + sWorkspaceId +", aborting" );
 				return aoProcessList;
 			}
 			
@@ -139,7 +140,7 @@ public class ProcessWorkspaceResource {
 				try {
 					eStatus = ProcessStatus.valueOf(sStatus);
 				}catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
+					WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
 				}
 			}
 			
@@ -148,7 +149,7 @@ public class ProcessWorkspaceResource {
 				try {
 					eLauncherOperation = LauncherOperations.valueOf(sOperationType);
 				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
+					WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
 				}
 			}
 
@@ -171,7 +172,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: " + oEx);
 		}
 
 		return aoProcessList;
@@ -189,7 +190,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser()");
+		WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser()");
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
 			
@@ -198,7 +199,7 @@ public class ProcessWorkspaceResource {
 			// Domain Check
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser: invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser: invalid session");
 				return aoProcessList;
 			}
 			
@@ -220,7 +221,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx);
 		}
 
 		return aoProcessList;
@@ -242,30 +243,30 @@ public class ProcessWorkspaceResource {
 	public ArrayList<ProcessHistoryViewModel> getProcessByApplication(
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorName") String sProcessorName) {
-		Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication " + sProcessorName);
+		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication " + sProcessorName);
 		ArrayList<ProcessHistoryViewModel> aoProcessList = new ArrayList<ProcessHistoryViewModel>();
 		try {			
 			// Domain Check
 			if(Utils.isNullOrEmpty(sProcessorName)) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name, aborting");
 				return aoProcessList;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid session, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid session, aborting");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication session invalid aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication session invalid aborting");
 				return aoProcessList;
 			}
 			
 			// checks that processor is in db -> needed to avoid url injection from users 
 			ProcessorRepository oProcessRepository = new ProcessorRepository();
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
 				return aoProcessList;
 			}
 
@@ -317,7 +318,7 @@ public class ProcessWorkspaceResource {
 					oRun.setWorkspaceName(aoWorkspaceNames.get(oProcess.getWorkspaceId()));					
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception generating History View Model " + oEx.toString());
+					WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception generating History View Model " + oEx.toString());
 				}
 				
 				if (oRun.getWorkspaceName().equals("wasdi_specific_node_ws_code")) continue;
@@ -346,7 +347,7 @@ public class ProcessWorkspaceResource {
 						Map<String, String> asHeaders = new HashMap<String, String>();
 						asHeaders.put("x-session-token", sSessionId);
 						
-						Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
+						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
 						
 						
 						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
@@ -360,7 +361,7 @@ public class ProcessWorkspaceResource {
 						
 					}
 					catch (Exception e) {
-						Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception contacting computing node: " + e.toString());
+						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception contacting computing node: " + e.toString());
 					}
 				}
 				
@@ -368,7 +369,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);
 		}
 
 		return aoProcessList;
@@ -391,7 +392,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public AppStatsViewModel getApplicationStatistics(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " )");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " )");
 		
 		AppStatsViewModel oReturnStats = new AppStatsViewModel();
 		oReturnStats.setApplicationName(sProcessorName);
@@ -399,25 +400,25 @@ public class ProcessWorkspaceResource {
 		try {			
 			// Domain Check
 			if(Utils.isNullOrEmpty(sProcessorName)) {
-				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( " + sSessionId + ", " + sProcessorName + " ): invalid processor name, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( " + sSessionId + ", " + sProcessorName + " ): invalid processor name, aborting");
 				return oReturnStats;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): invalid session, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): invalid session, aborting");
 				return oReturnStats;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): is valid, but userId is not (" + oUser.getUserId() + "), aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + " ): is valid, but userId is not (" + oUser.getUserId() + "), aborting");
 				return oReturnStats;
 			}
 			
 			// checks that processor is in db -> needed to avoid url injection from users 
 			ProcessorRepository oProcessRepository = new ProcessorRepository();
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-				Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Processor name: " + sProcessorName+ " ): Processor name not found in DB, aborting");
 				return oReturnStats;
 			}
 
@@ -455,7 +456,7 @@ public class ProcessWorkspaceResource {
 					}
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception generating History View Model " + oEx.toString());
+					WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception generating History View Model " + oEx.toString());
 				}
 				
 			}
@@ -482,7 +483,7 @@ public class ProcessWorkspaceResource {
 						Map<String, String> asHeaders = new HashMap<String, String>();
 						asHeaders.put("x-session-token", sSessionId);
 						
-						Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
+						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
 						
 						
 						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
@@ -507,7 +508,7 @@ public class ProcessWorkspaceResource {
 						
 					}
 					catch (Exception e) {
-						Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception contacting computing node: " + e.toString());
+						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception contacting computing node: " + e.toString());
 					}
 				}
 				
@@ -525,7 +526,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getApplicationStatistics: error retrieving process " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: error retrieving process " + oEx);
 		}
 
 		return oReturnStats;
@@ -537,7 +538,7 @@ public class ProcessWorkspaceResource {
 	 * @return ProcessWorkspaceViewModel
 	 */
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
-		//Utils.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
+		//WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
@@ -571,7 +572,7 @@ public class ProcessWorkspaceResource {
 			oViewModel.setProcessObjId(oProcess.getProcessObjId());
 			oViewModel.setPayload(oProcess.getPayload());
 		} catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel: " + oEx);
 		}
 		return oViewModel;
 	}
@@ -589,7 +590,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 		
-		Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( WS: " + sWorkspaceId + " )");
+		WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( WS: " + sWorkspaceId + " )");
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
@@ -597,16 +598,16 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: user id is null");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: user id is null");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				Utils.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: ws id is null");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: ws id is null");
 				return aoProcessList;
 			}
 
@@ -625,7 +626,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: " + oEx);
 		}
 
 		return aoProcessList;
@@ -643,7 +644,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser()");
+		WasdiLog.debugLog("ProcessWorkspaceResource.GetLastProcessByUser()");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -652,7 +653,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser(): invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetLastProcessByUser(): invalid session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -674,7 +675,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.GetLastProcessByUser: " + oEx);
 		}
 
 		return aoProcessList;
@@ -693,7 +694,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetSummary()");
+		WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary()");
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
@@ -702,11 +703,11 @@ public class ProcessWorkspaceResource {
 
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
 				return oSummaryViewModel;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary: invalid session: " + sSessionId);
 				return oSummaryViewModel;
 			}
 			
@@ -743,7 +744,7 @@ public class ProcessWorkspaceResource {
 			oSummaryViewModel.setUserProcessRunning(iUserRunning);
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.GetSummary: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary: " + oEx);
 		}
 
 		return oSummaryViewModel;
@@ -762,18 +763,18 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sToKillProcessObjId, @QueryParam("treeKill") Boolean bKillTheEntireTree) {
 
-		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
+		WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " )");
 
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
 				return Response.status(401).build();
 			}
 
 			if(Utils.isNullOrEmpty(sToKillProcessObjId)) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
 				return Response.status(401).build();
 			}
 
@@ -782,13 +783,13 @@ public class ProcessWorkspaceResource {
 
 			//check that the process exists
 			if(null==oProcessToKill) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
 				return Response.status(400).build();
 			}
 
 			// check that the user can access the processWorkspace
 			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
-				Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
+				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
 				return Response.status(403).build();
 			}
 	
@@ -801,7 +802,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("WorkspaceResource.DeleteProcess: " + oEx);
+			WasdiLog.debugLog("WorkspaceResource.DeleteProcess: " + oEx);
 		}
 
 		return Response.status(500).build();
@@ -821,7 +822,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessWorkspaceId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessById( ProcWsId: " + sProcessWorkspaceId + " )");
+		WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessById( ProcWsId: " + sProcessWorkspaceId + " )");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -833,7 +834,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessById( x-session-token: " + sSessionId + ", sProcessId: " + sProcessWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessById( x-session-token: " + sSessionId + ", sProcessId: " + sProcessWorkspaceId + " ): invalid session");
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -849,7 +850,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.GetProcessById: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessById: " + oEx);
 		}
 
 		return oProcess;
@@ -868,7 +869,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<String> getStatusProcessesById(@HeaderParam("x-session-token") String sSessionId, ArrayList<String> asProcessesWorkspaceId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
@@ -877,7 +878,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById: invalid session");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById: invalid session");
 				return asReturnStatusList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -892,7 +893,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getStatusProcessesById: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById: " + oEx);
 		}
 
 		return asReturnStatusList;
@@ -908,12 +909,12 @@ public class ProcessWorkspaceResource {
 	@Path("/getstatusbyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public String getProcessStatusById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId) {
-		Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById(" + sProcessObjId + " )" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById(" + sProcessObjId + " )" );
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById: invalid session" );
+				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById: invalid session" );
 				return null;
 			}
 			
@@ -922,7 +923,7 @@ public class ProcessWorkspaceResource {
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceResource.getProcessStatusById: " + oE );
+			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById: " + oE );
 		}
 		return null;
 	}
@@ -944,7 +945,7 @@ public class ProcessWorkspaceResource {
 			@QueryParam("procws") String sProcessObjId, @QueryParam("status") String sNewStatus,
 			@QueryParam("perc") int iPerc, @QueryParam("sendrabbit") String sSendToRabbit) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status: " + sNewStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -953,7 +954,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session: " + sSessionId );
+				WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById: invalid session: " + sSessionId );
 				return oProcess;
 			}
 
@@ -968,7 +969,7 @@ public class ProcessWorkspaceResource {
 					(sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
 				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
-					Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
+					WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
 					// No end-date set: put it here
 					oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 				}
@@ -984,7 +985,7 @@ public class ProcessWorkspaceResource {
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
 			
-			Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status updated : " +  oProcess.getStatus());
+			WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status updated : " +  oProcess.getStatus());
 
 			// Check if we need to send the asynch rabbit message
 			if (Utils.isNullOrEmpty(sSendToRabbit) == false) {
@@ -1007,7 +1008,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById: " + oEx);
 		}
 
 		return oProcess;
@@ -1046,7 +1047,7 @@ public class ProcessWorkspaceResource {
 	
 	protected ProcessWorkspaceViewModel internalSetPaylod(String sSessionId, String sProcessObjId, String sPayload) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload" );
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -1055,12 +1056,12 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload: invalid session" );
+				WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload: invalid session" );
 				return oProcess;
 			}
 
-			Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload: process id " + sProcessObjId);
-			Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload: PAYLOAD " + sPayload);
+			WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload: process id " + sProcessObjId);
+			WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload: PAYLOAD " + sPayload);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -1078,7 +1079,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload: " + oEx);
 		}
 
 		return oProcess;
@@ -1099,7 +1100,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel setSubProcessPid(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId, @QueryParam("subpid") int iSubPid) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid( ProcWsId: " + sProcessObjId +", SubPid: " + iSubPid + " )" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid( ProcWsId: " + sProcessObjId +", SubPid: " + iSubPid + " )" );
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -1108,7 +1109,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid( ProcWsId: " + sProcessObjId +", Payload: " + iSubPid + " ): invalid session" );
+				WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid( ProcWsId: " + sProcessObjId +", Payload: " + iSubPid + " ): invalid session" );
 				return oProcess;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -1133,7 +1134,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.setSubProcessPid: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid: " + oEx);
 			oEx.printStackTrace();
 		}
 
@@ -1151,26 +1152,26 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public String getPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("procws") String sProcessObjId) {
 
-		Utils.debugLog("ProcessWorkspaceResource.getPayload(" + sProcessObjId + " )" );
+		WasdiLog.debugLog("ProcessWorkspaceResource.getPayload(" + sProcessObjId + " )" );
 
 		try {
 			if(Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: session is null or empty, aborting");
 				return null;
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				Utils.debugLog("ProcessWorkspaceResource.getPayload: invalid session" );
+				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: invalid session" );
 				return null;
 			}
 			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
 			} else {
-				Utils.debugLog("ProcessWorkspaceResource.getPayload: user " + oUser.getUserId() + " cannot access process obj id " + sProcessObjId );
+				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: user " + oUser.getUserId() + " cannot access process obj id " + sProcessObjId );
 			}
 		}catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
+			WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
 		}
 		
 		return null;
@@ -1183,14 +1184,14 @@ public class ProcessWorkspaceResource {
 			@QueryParam("userId") String sTargetUserId,
 			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo) {
 
-		Utils.debugLog("ProcessWorkspaceResource.getRunningTime");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime");
 
 		Long lRunningTime = null;
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: invalid session");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: invalid session");
 			return lRunningTime;
 		}
 
@@ -1261,7 +1262,7 @@ public class ProcessWorkspaceResource {
 						Map<String, String> asHeaders = new HashMap<String, String>();
 						asHeaders.put("x-session-token", sSessionId);
 
-						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
 
 						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
 
@@ -1271,12 +1272,12 @@ public class ProcessWorkspaceResource {
 							lRunningTime += lRunningTimeOnNode;
 						}
 					} catch (Exception e) {
-						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: exception contacting computing node: " + e.toString());
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: exception contacting computing node: " + e.toString());
 					}
 				}
 			}
 		} catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
 		}
 
 		return lRunningTime;
@@ -1296,7 +1297,7 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
 			return aoViewModel;
 		}
 
@@ -1309,7 +1310,7 @@ public class ProcessWorkspaceResource {
 			}
 			else {
 				if (WasdiConfig.Current.nodeCode.equals(sNodeCode) == false) {
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: distributed node answer only for itself");
+					WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: distributed node answer only for itself");
 					return aoViewModel;					
 				}
 			}
@@ -1320,12 +1321,12 @@ public class ProcessWorkspaceResource {
 
 			if (!sNodeCode.equals("wasdi")) {
 				if (oNode == null) {
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Impossible to find node " + sNodeCode);
+					WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: Impossible to find node " + sNodeCode);
 					return aoViewModel;
 				}
 
 				if (!oNode.getActive())  {
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: node " + sNodeCode + " is not active");
+					WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: node " + sNodeCode + " is not active");
 					return aoViewModel;				
 				}
 			}
@@ -1336,7 +1337,7 @@ public class ProcessWorkspaceResource {
 			
 			if (WasdiConfig.Current.nodeCode.equals(sNodeCode)) {
 				
-				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on my node, read proc status from db");
+				WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on my node, read proc status from db");
 				
 				// Split the states
 				String[] asStatuses = sStatuses.split(",");
@@ -1472,7 +1473,7 @@ public class ProcessWorkspaceResource {
 			}
 			else {
 				
-				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on remote node, call API to " + sNodeCode);
+				WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on remote node, call API to " + sNodeCode);
 				
 				// Ask to the node!!
 				try {
@@ -1495,13 +1496,13 @@ public class ProcessWorkspaceResource {
 					
 				}
 				catch (Exception oNodeEx) {
-					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Exception contacting the remote node: " + oNodeEx);
+					WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: Exception contacting the remote node: " + oNodeEx);
 				}
 			}
 
 
 		} catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
 		}
 
 		return aoViewModel;		
@@ -1513,7 +1514,7 @@ public class ProcessWorkspaceResource {
 	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("nodeCode") String sNodeCode,
 			@QueryParam("statuses") String sStatuses) {
-		Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus");
 		
 		return ProcessWorkspaceResource.getNodeQueuesStatus(sSessionId, sNodeCode, sStatuses);
 	}
@@ -1522,14 +1523,14 @@ public class ProcessWorkspaceResource {
 	@Path("/nodesByScore")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore");
 
 		List<NodeScoreByProcessWorkspaceViewModel> aoViewModels = new ArrayList<>();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
 			return aoViewModels;
 		}
 
@@ -1542,7 +1543,7 @@ public class ProcessWorkspaceResource {
 			
 
 		} catch (Exception oEx) {
-			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: " + oEx);
 		}
 
 		return aoViewModels;

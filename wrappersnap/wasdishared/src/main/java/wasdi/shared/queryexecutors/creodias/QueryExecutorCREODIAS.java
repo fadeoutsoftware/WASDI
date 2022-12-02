@@ -13,6 +13,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -78,7 +79,7 @@ public class QueryExecutorCREODIAS extends QueryExecutorHttpGet {
 			return "";					
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());
 		}
 		
 		return "";

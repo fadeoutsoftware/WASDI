@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -63,7 +64,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.translateBatch: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.translateBatch: " + oE);
 		}
 		return aoResults;
 	}
@@ -116,7 +117,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.parseMd( " + oJsonItem + ", QueryResultViewModel )" + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.parseMd( " + oJsonItem + ", QueryResultViewModel )" + oE);
 		}
 
 	}
@@ -132,7 +133,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 					double dY = aDCooordinatesPair.optDouble(1);
 					sCoordinates += dX + " " + dY + ", ";
 				} catch (Exception oE) {
-					Utils.debugLog("ResponseTranslatorSOBLOO.parseCoordinates: " + oE);
+					WasdiLog.debugLog("ResponseTranslatorSOBLOO.parseCoordinates: " + oE);
 				}
 
 			}
@@ -142,7 +143,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 			sCoordinates = "MULTIPOLYGON (((" + sCoordinates + ")))";
 			oResult.setFootprint(sCoordinates);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.parseCoordinates: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.parseCoordinates: " + oE);
 		}
 	}
 
@@ -224,12 +225,12 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 							}
 						}
 					}catch (Exception oE) {
-						Utils.debugLog("ResponseTranslatorSOBLOO.parseData: " + oE);
+						WasdiLog.debugLog("ResponseTranslatorSOBLOO.parseData: " + oE);
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.parseData: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.parseData: " + oE);
 		}	
 	}
 
@@ -256,7 +257,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 				sResult = s_asKeyMap.get(sKey);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.getProviderKey: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.getProviderKey: " + oE);
 			sResult = sKey;
 		}
 		return sResult;
@@ -279,7 +280,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 				addToProperties(oResult, getStandardKey(sKey), ""+lBuffer);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.addPositiveLongToProperties: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.addPositiveLongToProperties: " + oE);
 		}
 	}
 
@@ -293,7 +294,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 			addToProperties(oResult, "ingestiondate", sDate);
 			addToProperties(oResult, "beginposition", sDate);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorSOBLOO.finalizeViewModel: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorSOBLOO.finalizeViewModel: " + oE);
 		}
 		
 		String sSummary = "Date: " + sDate + ", ";
@@ -338,7 +339,7 @@ public class ResponseTranslatorSOBLOO extends ResponseTranslator {
 			iResult = Integer.parseInt(sResult);
 			
 		} catch (NumberFormatException oNfe) {
-			Utils.debugLog("QueryExecutor.executeCount: the response ( " + sQueryResult + " ) was not an int: " + oNfe);
+			WasdiLog.debugLog("QueryExecutor.executeCount: the response ( " + sQueryResult + " ) was not an int: " + oNfe);
 			return -1;
 		}
 		return iResult;

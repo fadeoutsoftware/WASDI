@@ -30,7 +30,7 @@ import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
 import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -41,7 +41,7 @@ public class QueryExecutorFactory {
 	private static final Map<String, Supplier<QueryExecutor>> s_aoExecutors;
 
 	static {
-		Utils.debugLog("QueryExecutorFactory");
+		WasdiLog.debugLog("QueryExecutorFactory");
 		final Map<String, Supplier<QueryExecutor>> aoMap = new HashMap<>();
 
 		aoMap.put("ONDA", QueryExecutorONDA::new);
@@ -63,9 +63,9 @@ public class QueryExecutorFactory {
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
-		Utils.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
+		WasdiLog.debugLog("QueryExecutorFactory.static constructor, s_aoExecutors content:");
 		for (String sKey : s_aoExecutors.keySet()) {
-			Utils.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sKey);
+			WasdiLog.debugLog("QueryExecutorFactory.s_aoExecutors key: " + sKey);
 		}
 	}
 
@@ -78,7 +78,7 @@ public class QueryExecutorFactory {
 				oExecutor = oSupplier.get();
 			}
 		} else {
-			Utils.debugLog("QueryExecutorFactory.QueryExecutor: sProvider is null");
+			WasdiLog.debugLog("QueryExecutorFactory.QueryExecutor: sProvider is null");
 		}
 		return oExecutor;	
 	}
@@ -90,7 +90,7 @@ public class QueryExecutorFactory {
 		try {
 			oExecutor = supply(sProvider);
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorFactory.getExecutor: " + oE );
+			WasdiLog.debugLog("QueryExecutorFactory.getExecutor: " + oE );
 		}
 		if( null != oExecutor) {
 			try {
@@ -98,7 +98,7 @@ public class QueryExecutorFactory {
 				oExecutor.setParserConfigPath(sParserConfigPath);
 				oExecutor.setAppconfigPath(sAppConfigPath);
 			} catch (Exception oE1) {
-				Utils.debugLog("QueryExecutorFactory.getExecutor: " + oE1 );
+				WasdiLog.debugLog("QueryExecutorFactory.getExecutor: " + oE1 );
 			}
 		} else {
 			throw new NullPointerException("QueryExecutorFactory.getExecutor: could not get a non-null QueryExecutor" );
@@ -114,7 +114,7 @@ public class QueryExecutorFactory {
 	 * @return QueryExecutor of the specific provider
 	 */
 	public static  QueryExecutor getExecutor(String sProvider) {
-		Utils.debugLog("QueryExecutorFactory.getExecutor, provider: " + sProvider);
+		WasdiLog.debugLog("QueryExecutorFactory.getExecutor, provider: " + sProvider);
 		QueryExecutor oExecutor = null;
 		try {
 			if(null!=sProvider) {
@@ -139,7 +139,7 @@ public class QueryExecutorFactory {
 				oExecutor.init();
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + " ): " + oE);
+			WasdiLog.debugLog("QueryExecutorFactory.getExecutor( " + sProvider + " ): " + oE);
 		}
 		return oExecutor;
 
@@ -159,7 +159,7 @@ public class QueryExecutorFactory {
 			oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password);
 			
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorFactory.getCredentials( " + sProvider + " ): " + oE);
+			WasdiLog.debugLog("QueryExecutorFactory.getCredentials( " + sProvider + " ): " + oE);
 		}
 		return oCredentials;
 	}	
