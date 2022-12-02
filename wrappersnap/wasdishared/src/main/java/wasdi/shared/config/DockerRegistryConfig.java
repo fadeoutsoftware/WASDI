@@ -26,6 +26,10 @@ public class DockerRegistryConfig {
 	 * Priority of the register
 	 */
 	public int priority;
+	/**
+	 * http address of the API of the register
+	 */
+	public String apiAddress;
 	
 	public int getPriority() {
 		return priority;
