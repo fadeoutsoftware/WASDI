@@ -9,6 +9,7 @@ import java.util.Map;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Wrapper of GDAL utils
@@ -67,12 +68,12 @@ public class GdalUtils {
     		
     		// Domain check
     		if (oFile == null) {
-    			Utils.debugLog("GdalUtils.getGdalInfoResult: File is null, return null");
+    			WasdiLog.debugLog("GdalUtils.getGdalInfoResult: File is null, return null");
     			return null;
     		}
 
     		if (oFile.exists()==false) {
-    			Utils.debugLog("GdalUtils.getGdalInfoResult: File " + oFile.getPath() + " does not exists, return null");
+    			WasdiLog.debugLog("GdalUtils.getGdalInfoResult: File " + oFile.getPath() + " does not exists, return null");
     			return null;
     		}
     		
@@ -116,7 +117,7 @@ public class GdalUtils {
 				Map<String, Object> aoInfoJson = JsonUtils.jsonToMapOfObjects(sOutput);
 				
 				if (aoInfoJson == null) {
-	    			Utils.debugLog("GdalUtils.getGdalInfoResult: aoInfoJson is null, return null");
+	    			WasdiLog.debugLog("GdalUtils.getGdalInfoResult: aoInfoJson is null, return null");
 	    			return null;					
 				}
 				
@@ -201,7 +202,7 @@ public class GdalUtils {
 						}
 						catch (Exception oEx) {
 							
-							Utils.debugLog("GdalUtils.getGdalInfoResult: exception getting wgs84 extent: " + oEx.toString());
+							WasdiLog.debugLog("GdalUtils.getGdalInfoResult: exception getting wgs84 extent: " + oEx.toString());
 						}
 					}
 				}	
@@ -240,14 +241,14 @@ public class GdalUtils {
 				return oGdalInfoResult;
 			}
 	    	catch (Exception oEx) {
-	    		Utils.debugLog("GdalUtils.getGdalInfoResult: exception converting the result: " + oEx.toString());
+	    		WasdiLog.debugLog("GdalUtils.getGdalInfoResult: exception converting the result: " + oEx.toString());
 			}
 			
 			return null;
 			
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("GdalUtils.getGdalInfoResult: exception " + oEx.toString());
+    		WasdiLog.debugLog("GdalUtils.getGdalInfoResult: exception " + oEx.toString());
 		}
     	
     	return null;
@@ -293,12 +294,12 @@ public class GdalUtils {
     		
     		BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
     		while ((sLine = oReader.readLine()) != null)
-    			Utils.debugLog("GdalUtils.convertToWGS84 [gdal]: " + sLine);
+    			WasdiLog.debugLog("GdalUtils.convertToWGS84 [gdal]: " + sLine);
     		
     		oProcess.waitFor();    	    		
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("GdalUtils.convertToWGS84: exception " + oEx.toString());
+    		WasdiLog.debugLog("GdalUtils.convertToWGS84: exception " + oEx.toString());
 		}
     }
     

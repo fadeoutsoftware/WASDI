@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class RunTimeUtils {
 	
@@ -54,7 +55,7 @@ public class RunTimeUtils {
 					sCommandLine += sArg + " ";
 				}			
 			
-				Utils.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
+				WasdiLog.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
 			}
 			
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
@@ -62,7 +63,7 @@ public class RunTimeUtils {
 			
 			if (bWait) {
 				int iProcOuptut = oProcess.waitFor();				
-				Utils.debugLog("RunTimeUtils.ShellExec CommandLine RETURNED: " + iProcOuptut);
+				WasdiLog.debugLog("RunTimeUtils.ShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 		}
 		catch (Exception e) {
@@ -81,7 +82,7 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs, boolean bDelete) {
-		Utils.debugLog("RunTimeUtils.shellExecWithLogs sCommand: " + sCommand);
+		WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sCommand: " + sCommand);
 
 		try {
 			if (asArgs == null) {
@@ -96,7 +97,7 @@ public class RunTimeUtils {
 				sCommandLine += sArg + " ";
 			}
 			
-			Utils.debugLog("RunTimeUtils.shellExecWithLogs CommandLine: " + sCommandLine);
+			WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs CommandLine: " + sCommandLine);
 
 			File oLogFile = createLogFile();
 			
@@ -108,7 +109,7 @@ public class RunTimeUtils {
 			Process oProcess = oProcessBuilder.start();
 
 			int iProcOuptut = oProcess.waitFor();				
-			Utils.debugLog("RunTimeUtils.shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
+			WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
 
 			if (iProcOuptut == 0) {
 
@@ -127,7 +128,7 @@ public class RunTimeUtils {
 				return true;
 			} else {
 				String sOutputFileContent = readLogFile(oLogFile);
-				Utils.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
+				WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
 
 				if (bDelete) {
 					deleteLogFile(oLogFile);
@@ -136,7 +137,7 @@ public class RunTimeUtils {
 				return false;
 			}
 		} catch (Exception e) {			
-			Utils.debugLog("RunTimeUtils.shellExecWithLogs exception: " + e.getMessage());
+			WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs exception: " + e.getMessage());
 
 			return false;
 		}
@@ -156,7 +157,7 @@ public class RunTimeUtils {
 			Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
+			WasdiLog.debugLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
 		}
 	}
 	
@@ -190,7 +191,7 @@ public class RunTimeUtils {
 			try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
 				// Fill the script file
 				if (oBuildScriptWriter != null) {
-					Utils.debugLog("RunTimeUtils.runCommand: Creating " + sBuildScriptFile + " file");
+					WasdiLog.debugLog("RunTimeUtils.runCommand: Creating " + sBuildScriptFile + " file");
 					oBuildScriptWriter.write(sCommand);
 
 					oBuildScriptWriter.flush();
@@ -207,7 +208,7 @@ public class RunTimeUtils {
 			// Initialize Args
 			List<String> asArgs = new ArrayList<>();
 
-			Utils.debugLog("RunTimeUtils.runCommand: Running the shell command");
+			WasdiLog.debugLog("RunTimeUtils.runCommand: Running the shell command");
 			
 			// Run the script
 			boolean bResult = false;
@@ -226,14 +227,14 @@ public class RunTimeUtils {
 			}
 
 			if (bResult) {
-				Utils.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");
+				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");
 			} else {
-				Utils.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully.");
+				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully.");
 			}
 
 			return bResult;
 		} catch (Exception oEx) {
-			Utils.debugLog("RunTimeUtils.runCommand: " + oEx.toString());
+			WasdiLog.debugLog("RunTimeUtils.runCommand: " + oEx.toString());
 			return false;
 		}
 	}	
@@ -243,7 +244,7 @@ public class RunTimeUtils {
 	 * @return
 	 */
 	private static File createLogFile() {
-		Utils.debugLog("RunTimeUtils.createLogFile Working Directory = " + WasdiConfig.Current.paths.wasdiTempFolder);
+		WasdiLog.debugLog("RunTimeUtils.createLogFile Working Directory = " + WasdiConfig.Current.paths.wasdiTempFolder);
 		
 		String sTmpFolder = WasdiConfig.Current.paths.wasdiTempFolder;
 		if (!sTmpFolder.endsWith("/")) sTmpFolder += "/";
@@ -262,7 +263,7 @@ public class RunTimeUtils {
 		try {
 			return FileUtils.readFileToString(oLogFile);
 		} catch (IOException oEx) {
-			Utils.debugLog("RunTimeUtils.readLogFile exception: " + oEx.getMessage());
+			WasdiLog.debugLog("RunTimeUtils.readLogFile exception: " + oEx.getMessage());
 		}
 
 		return null;
@@ -276,7 +277,7 @@ public class RunTimeUtils {
 		try {
 			FileUtils.forceDelete(oLogFile);
 		} catch (IOException e) {
-			Utils.debugLog("RunTimeUtils.deleteLogFile exception: " + e.getMessage());
+			WasdiLog.debugLog("RunTimeUtils.deleteLogFile exception: " + e.getMessage());
 		}
 	}
 }

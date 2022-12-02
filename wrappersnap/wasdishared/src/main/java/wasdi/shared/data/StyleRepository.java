@@ -14,6 +14,7 @@ import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.Style;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class StyleRepository extends MongoRepository {
 
@@ -247,7 +248,7 @@ public class StyleRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): " + oE);
+			WasdiLog.debugLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): " + oE);
 		}
 
 		return false;

@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * @author c.nattero
  *
@@ -33,7 +35,7 @@ public class TimeEpochUtils {
 			return oSimpleDateFormat.format(new Date(lEpochMilliSeconds));
 		}
 		catch (Exception oE) {
-			Utils.debugLog("TimeEpochUtils.fromEpochToDateString: " + oE);
+			WasdiLog.debugLog("TimeEpochUtils.fromEpochToDateString: " + oE);
 			return "";
 		}
 	}
@@ -52,7 +54,7 @@ public class TimeEpochUtils {
 			Date oDate = oSimpleDateFormat.parse(sDate);
 			lEpochMilliSeconds = oDate.getTime();
 		} catch (Exception oE) {
-			Utils.log("ERROR", "Utils.fromDateStringToTimestamp: " + oE);
+			WasdiLog.log("ERROR", "Utils.fromDateStringToTimestamp: " + oE);
 		}
 		return lEpochMilliSeconds;
 
@@ -121,7 +123,7 @@ public class TimeEpochUtils {
 			try {
 				oDateFrom = Instant.parse(sDate);
 			} catch (Exception oE) {
-				Utils.debugLog("TimeEpochUtils.fromDateStringToInstant: could not convert start date " + sDate + " to a valid date, ignoring it");
+				WasdiLog.debugLog("TimeEpochUtils.fromDateStringToInstant: could not convert start date " + sDate + " to a valid date, ignoring it");
 			}
 		}
 

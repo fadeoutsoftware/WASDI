@@ -15,6 +15,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public abstract class WasdiProcessorEngine {
 	
@@ -215,12 +216,12 @@ public abstract class WasdiProcessorEngine {
 			String sProcessorId = oProcessor.getProcessorId();
 			
 			if (sProcessorId == null) {
-				Utils.debugLog("sProcessorId must not be null");
+				WasdiLog.debugLog("sProcessorId must not be null");
 				return "";
 			}
 
 			if (sProcessorId.equals("")) {
-				Utils.debugLog("sProcessorId must not be empty");
+				WasdiLog.debugLog("sProcessorId must not be empty");
 				return "";
 			}
 
@@ -384,17 +385,17 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
-	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
 	        Thread.sleep(5000);
 
 //	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
 //	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
 //
-//	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
+//	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
 //	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
 		}
 	}
 	
@@ -416,14 +417,14 @@ public abstract class WasdiProcessorEngine {
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sZipFileName);
             if (!oProcessorZipFile.exists()) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
+                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
                 return false;
             }
             try {
                 ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
                 oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
             } catch (Exception oE) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
+                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
                 return false;
             }
 
@@ -438,20 +439,20 @@ public abstract class WasdiProcessorEngine {
 //				});
 //			}
 //		    if (!oMyProcessorExists.get()) {
-//		    	LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+//		    	WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
 //		    	//return false;
 //		    }
 
             try {
                 // Remove the zip?
                 if (!oProcessorZipFile.delete()) {
-                    LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
+                    WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
                 }
             } catch (Exception e) {
-                LauncherMain.s_oLogger.error("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
+                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
             }
         } catch (Exception oEx) {
-            LauncherMain.s_oLogger.error("DockerProcessorEngine.DeployProcessor Exception", oEx);
+            WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor Exception", oEx);
             return false;
         }
         return true;

@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * Utility class for JSON related operations.
  * 
@@ -26,7 +28,7 @@ public final class JsonUtils {
 		try {
 			return s_oMapper.writeValueAsString(aoJSONMap);
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
 		return "";
@@ -36,7 +38,7 @@ public final class JsonUtils {
 		try {
 			return s_oMapper.writeValueAsString(object);
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
 		return "";
@@ -50,7 +52,7 @@ public final class JsonUtils {
 
 			return aoJSONMap;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToMapOfObjects: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.jsonToMapOfObjects: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;
@@ -64,7 +66,7 @@ public final class JsonUtils {
 
 			return aoJSONMap;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToMapOfStrings: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.jsonToMapOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;
@@ -78,7 +80,7 @@ public final class JsonUtils {
 
 			return aoJSONList;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return aoJSONList;
@@ -92,7 +94,7 @@ public final class JsonUtils {
 
 			return aoJSONList;
 		} catch (JsonProcessingException oE) {
-			Utils.debugLog("JsonUtils.jsonToListOfMapOfObjects: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.debugLog("JsonUtils.jsonToListOfMapOfObjects: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;

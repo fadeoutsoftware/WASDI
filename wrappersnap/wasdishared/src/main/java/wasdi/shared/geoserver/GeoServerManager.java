@@ -34,6 +34,7 @@ import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * GeoServerManager: utility class to add layers to geoserver
@@ -125,7 +126,7 @@ public class GeoServerManager {
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-    		Utils.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
+    		WasdiLog.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return "";
 		}
     }
@@ -138,7 +139,7 @@ public class GeoServerManager {
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-    		Utils.debugLog("GeoServerManager.getLayers: ERROR " + sError);
+    		WasdiLog.debugLog("GeoServerManager.getLayers: ERROR " + sError);
     		return null;
 		}        	 
     }
@@ -157,7 +158,7 @@ public class GeoServerManager {
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-    		Utils.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
+    		WasdiLog.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return null;
 		}    	
     }
@@ -175,7 +176,7 @@ public class GeoServerManager {
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-    		Utils.debugLog("GeoServerManager.getLayerStyle: ERROR " + sError);
+    		WasdiLog.debugLog("GeoServerManager.getLayerStyle: ERROR " + sError);
     		return null;
 		}    	
     }
@@ -204,7 +205,7 @@ public class GeoServerManager {
 		case RASTER:
 			return m_oGsPublisher.removeCoverageStore(m_sWorkspace, sStoreName, true, Purge.ALL);
 		default:
-			Utils.debugLog("GeoServerManager.removeLayer: unknown layer type for " + sLayerId);
+			WasdiLog.debugLog("GeoServerManager.removeLayer: unknown layer type for " + sLayerId);
 			break;
 		}
 
@@ -434,7 +435,7 @@ public class GeoServerManager {
         	return bRes;		
     	}
     	catch (Exception oEx) {
-			Utils.debugLog("GeoServerManager.configureLayerStyle: exception " + oEx.toString());
+			WasdiLog.debugLog("GeoServerManager.configureLayerStyle: exception " + oEx.toString());
 		}
     	
     	return false;
@@ -458,7 +459,7 @@ public class GeoServerManager {
         final String sXmlBody = getFeatureTypeFromShapeFile(sShapeFilePath, sStoreName, sEPSG);
         final String sResult = HTTPUtils.postXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
         if (sResult != null) {
-        	Utils.debugLog(sResult);
+        	WasdiLog.debugLog(sResult);
         } 
 
         return sResult != null;
@@ -562,7 +563,7 @@ public class GeoServerManager {
             oShapefileDataStore.dispose();        		
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("GeoServerManager.getFeatureTypeFromShapeFile: " + oEx.toString());
+    		WasdiLog.debugLog("GeoServerManager.getFeatureTypeFromShapeFile: " + oEx.toString());
 		}
     	return sXML;
     }

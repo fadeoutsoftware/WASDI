@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.ApiException;
 import wasdi.shared.viewmodels.ogcprocesses.Execute;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
@@ -31,7 +31,7 @@ public class ProcessesResource {
     		return Response.status(Status.OK).entity(oProcessList).build();
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("");
+    		WasdiLog.debugLog("");
     		
     		ApiException oApiException = new ApiException();
     		
@@ -54,7 +54,7 @@ public class ProcessesResource {
     		return Response.status(Status.OK).entity(oProcess).build();
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("");
+    		WasdiLog.debugLog("");
     		
     		ApiException oApiException = new ApiException();
     		
@@ -77,7 +77,7 @@ public class ProcessesResource {
     		return Response.status(Status.CREATED).entity(oStatusInfo).build();
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("");
+    		WasdiLog.debugLog("");
     		
     		ApiException oApiException = new ApiException();
     		

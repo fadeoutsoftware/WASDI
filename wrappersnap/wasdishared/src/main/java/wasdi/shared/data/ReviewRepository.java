@@ -10,6 +10,7 @@ import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.Review;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ReviewRepository extends MongoRepository {
 	
@@ -117,7 +118,7 @@ public class ReviewRepository extends MongoRepository {
 			}
 			
 		} catch (Exception oEx) {
-			Utils.debugLog("ReviewRepository.InsertReview: " + oEx);
+			WasdiLog.debugLog("ReviewRepository.InsertReview: " + oEx);
 		}
 		return bAlreadyVoted;
 	}

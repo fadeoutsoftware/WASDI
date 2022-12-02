@@ -30,6 +30,7 @@ import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 /**
@@ -67,15 +68,15 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Download.executeOperation");
+		WasdiLog.debugLog("Download.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -97,11 +98,11 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	oProviderAdapter = getBestProviderAdapater(oParameter, oProcessWorkspace);
             	
             	if (oProviderAdapter != null) {
-                    m_oLocalLogger.error("Got Data Provider " + oProviderAdapter.getCode());
+                    WasdiLog.errorLog("Got Data Provider " + oProviderAdapter.getCode());
                     m_oProcessWorkspaceLogger.log("Fetch - SELECTED " + oProviderAdapter.getCode());            	            		
             	}
             	else {
-                    m_oLocalLogger.error("Download.executeOperation: Impossible to get a valid Data Provider");
+                    WasdiLog.errorLog("Download.executeOperation: Impossible to get a valid Data Provider");
                     m_oProcessWorkspaceLogger.log("ERROR - Impossible to get a valid Data Provider");
                     return false;
             	}
@@ -127,7 +128,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             // Get the file name
             String sFileNameWithoutPath = oProviderAdapter.getFileName(oParameter.getUrl());
-            m_oLocalLogger.debug("Download.executeOperation: File to download: " + sFileNameWithoutPath);
+            WasdiLog.debugLog("Download.executeOperation: File to download: " + sFileNameWithoutPath);
             m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
             
             // Check if the file is already available
@@ -136,7 +137,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
             
             if (oAlreadyDownloaded == null) {
-                m_oLocalLogger.debug("Download.executeOperation: File not already downloaded. Download it");
+                WasdiLog.debugLog("Download.executeOperation: File not already downloaded. Download it");
 
                 if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
                 	
@@ -149,7 +150,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                     m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
                     
                 } else {
-                    m_oLocalLogger.error("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
+                    WasdiLog.errorLog("Download.executeOperation: sFileNameWithoutPath is null or empty!!");
                 }
                 
                 Product oProduct = null;
@@ -192,7 +193,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
         					oVM = oProductReader.getProductViewModel();
         				}
         				catch (Exception oVMEx) {
-        					m_oLocalLogger.warn("Download.executeOperation: exception reading Product View Model " + oVMEx.toString());
+        					WasdiLog.warnLog("Download.executeOperation: exception reading Product View Model " + oVMEx.toString());
 						}
         				
         				if (oVM == null) {
@@ -208,14 +209,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         oProviderAdapter = getNextDataProvider(oParameter);
                                                 
                         if (oProviderAdapter == null) {
-                        	m_oLocalLogger.warn("Download.executeOperation: data provider finished, return false");
+                        	WasdiLog.warnLog("Download.executeOperation: data provider finished, return false");
                         	return false;
                         }
                         
                         oProviderAdapter.subscribe(this);
                         
                         m_oProcessWorkspaceLogger.log("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());
-                        m_oLocalLogger.warn("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
+                        WasdiLog.warnLog("Download.executeOperation: got next data provider " + oProviderAdapter.getCode());                    	
                     }
                 }
 
@@ -240,7 +241,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                     oAlreadyDownloaded.setBoundingBox(sBoundingBox);
                 } else {
-                    m_oLocalLogger.info("Download.executeOperation: bounding box not available in the parameter");
+                    WasdiLog.infoLog("Download.executeOperation: bounding box not available in the parameter");
                 }
 
 				if (oProduct != null) {
@@ -253,12 +254,12 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
                 
             } else {
-                m_oLocalLogger.debug("Download.executeOperation: File already downloaded: make a copy");
+                WasdiLog.debugLog("Download.executeOperation: File already downloaded: make a copy");
 
                 // Yes!! Here we have the path
                 sFileName = oAlreadyDownloaded.getFilePath();
 
-                m_oLocalLogger.debug("Download.executeOperation: Check if file exists");
+                WasdiLog.debugLog("Download.executeOperation: Check if file exists");
 
                 // Check the path where we want the file
                 String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
@@ -283,7 +284,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             if (Utils.isNullOrEmpty(sFileName)) {
             	
             	// No, we are in error
-                m_oLocalLogger.debug("Download.executeOperation: file is null there must be an error");
+                WasdiLog.debugLog("Download.executeOperation: file is null there must be an error");
 
                 String sError = "The name of the file to download result null";
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.DOWNLOAD.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -307,14 +308,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             setPayload(oProcessWorkspace, oDownloadPayload);
             
-            m_oLocalLogger.debug("Download.executeOperation: operation done");
+            WasdiLog.debugLog("Download.executeOperation: operation done");
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
             
             return true;
             
         } catch (Exception oEx) {
         	
-            m_oLocalLogger.error("Download.executeOperation: Exception "
+            WasdiLog.errorLog("Download.executeOperation: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
@@ -323,7 +324,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                         sError, oParam.getExchange());
         }
 
-        m_oLocalLogger.debug("Download.executeOperation: return file name " + sFileName);
+        WasdiLog.debugLog("Download.executeOperation: return file name " + sFileName);
 
         return false;
 		
@@ -339,17 +340,17 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             // update the process
             if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
-                m_oLocalLogger.error("Download.executeOperationFile: Error during process update with process Perc");
+                WasdiLog.errorLog("Download.executeOperationFile: Error during process update with process Perc");
 
             // send update process message
             if (m_oSendToRabbit != null) {
                 if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                	m_oLocalLogger.error("Download.executeOperationFile: Error sending rabbitmq message to update process list");
+                	WasdiLog.errorLog("Download.executeOperationFile: Error sending rabbitmq message to update process list");
                 }
             }
         } catch (Exception oEx) {
-        	m_oLocalLogger.error("Download.executeOperationFile: Exception: " + oEx);
-        	m_oLocalLogger.debug("Download.executeOperationFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        	WasdiLog.errorLog("Download.executeOperationFile: Exception: " + oEx);
+        	WasdiLog.debugLog("Download.executeOperationFile: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
     
@@ -377,7 +378,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             	
             	// Check if it is already downloaded, in any workpsace
             	
-                m_oLocalLogger.debug("Download.fileAlreadyAvailable: Product NOT found in the workspace, search in other workspaces");
+                WasdiLog.debugLog("Download.fileAlreadyAvailable: Product NOT found in the workspace, search in other workspaces");
                 
                 List<DownloadedFile> aoExistingList = oDownloadedRepo.getDownloadedFileListByName(sFileNameWithoutPath);
 
@@ -386,7 +387,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
                     if (new File(oDownloadedCandidate.getFilePath()).exists()) {
                         oAlreadyDownloaded = oDownloadedCandidate;
-                        m_oLocalLogger.debug("Download.fileAlreadyAvailable: found already existing copy on this computing node");
+                        WasdiLog.debugLog("Download.fileAlreadyAvailable: found already existing copy on this computing node");
                         break;
                     }
                 }
@@ -394,14 +395,14 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             if (oAlreadyDownloaded != null)  
             {
-            	m_oLocalLogger.debug("Download.fileAlreadyAvailable: File already downloaded: make a copy");
+            	WasdiLog.debugLog("Download.fileAlreadyAvailable: File already downloaded: make a copy");
             	
             	String sFileNameWithFullPath = "";
 
                 // Yes!! Here we have the path
                 sFileNameWithFullPath = oAlreadyDownloaded.getFilePath();
 
-                m_oLocalLogger.debug("Download.fileAlreadyAvailable: Check if file exists");
+                WasdiLog.debugLog("Download.fileAlreadyAvailable: Check if file exists");
 
                 // Check the path where we want the file
                 String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
@@ -431,7 +432,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
         } catch (Exception oEx) {
         	
-            m_oLocalLogger.error("Download.executeOperation: Exception "
+            WasdiLog.errorLog("Download.executeOperation: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
@@ -496,7 +497,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		}
 		catch (Exception oEx) {
         	
-            m_oLocalLogger.error("Download.getBestProviderAdapater: Exception "
+            WasdiLog.errorLog("Download.getBestProviderAdapater: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 		
@@ -583,7 +584,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 		}
 		catch (Exception oEx) {
         	
-            m_oLocalLogger.error("Download.getProviderAdapater: Exception "
+            WasdiLog.errorLog("Download.getProviderAdapater: Exception "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 		

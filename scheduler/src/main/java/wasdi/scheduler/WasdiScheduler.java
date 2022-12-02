@@ -20,6 +20,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Hello world!
@@ -134,7 +135,7 @@ public class WasdiScheduler
 				
 				// Configure also the local connection
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
-				Utils.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
+				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
 			}			
 		}
 		catch (Throwable oEx) {
@@ -206,7 +207,7 @@ public class WasdiScheduler
 						
 						if (Utils.isNullOrEmpty(oProcessScheduler.getOperationSubType())) {
 							// No: remove from the scheduler
-							s_oLogger.error("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
+							WasdiLog.errorLog("main: Scheduler " + sScheduler + " support type " + sSupportedType + " that does not exists or has already been supported by other scheduler. It will be removed");
 							oProcessScheduler.removeSupportedType(sSupportedType);							
 						}
 						else {
@@ -265,14 +266,14 @@ public class WasdiScheduler
 			
 		}
 		catch( Exception oEx ) {
-			s_oLogger.error("Could not complete operations preparations. Reason: " + oEx);
+			WasdiLog.errorLog("Could not complete operations preparations. Reason: " + oEx);
 			oEx.printStackTrace();
 		}
 		s_oLogger.info("main: operations prepared, lets start \n");
 		
 		run(aoProcessSchedulers);
 		
-		s_oLogger.debug(new EndMessageProvider().getGood() + '\n');
+		WasdiLog.debugLog(new EndMessageProvider().getGood() + '\n');
 
 	}
 	

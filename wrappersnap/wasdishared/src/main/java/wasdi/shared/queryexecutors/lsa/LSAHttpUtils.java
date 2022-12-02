@@ -16,6 +16,7 @@ import org.apache.commons.net.io.Util;
 
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class LSAHttpUtils {
 	private LSAHttpUtils() {
@@ -30,7 +31,7 @@ public class LSAHttpUtils {
     	
     	try {
     		
-    		Utils.debugLog("LSAProviderAdapter.authenticate: " + sUser);
+    		WasdiLog.debugLog("LSAProviderAdapter.authenticate: " + sUser);
     		
     		// Create the cookie manager
     		CookieManager oCookieManager = new CookieManager();
@@ -59,7 +60,7 @@ public class LSAHttpUtils {
     		String sLoginResult = LSAHttpUtils.httpPostResults(sActionLink, sLoginData, oCookieManager);
     	}
     	catch (Exception oEx) {
-			Utils.debugLog("LSAProviderAdapter.authenticate: Exception " + oEx.toString());
+			WasdiLog.debugLog("LSAProviderAdapter.authenticate: Exception " + oEx.toString());
 		}
     }
     
@@ -70,7 +71,7 @@ public class LSAHttpUtils {
 	 * @return
 	 */
 	public static String httpGetResults(String sUrl, CookieManager oCookieManager) {
-		Utils.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " )");
+		WasdiLog.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " )");
 
 		HashMap<String, String> asHeaders = new HashMap<String, String>();
 
@@ -85,7 +86,7 @@ public class LSAHttpUtils {
 
 	
 	public static String httpPostResults(String sUrl, String sPayload, CookieManager oCookieManager) {
-		Utils.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + " )");
+		WasdiLog.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + " )");
 		String sResult = null;
 		long lStart = 0l;
 		int iResponseSize = -1;
@@ -125,12 +126,12 @@ public class LSAHttpUtils {
 			}
 			
 
-			//Utils.debugLog("QueryExecutorLSA.httpPostResults: Sending 'POST' request to URL : " + sUrl);
+			//WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Sending 'POST' request to URL : " + sUrl);
 
 			lStart = System.nanoTime();
 			try {
 				int iResponseCode =  oConnection.getResponseCode();
-				//Utils.debugLog("QueryExecutorLSA.httpGetResults: Response Code : " + iResponseCode);
+				//WasdiLog.debugLog("QueryExecutorLSA.httpGetResults: Response Code : " + iResponseCode);
 				String sResponseExtract = null;
 				if(iResponseCode == 200) {
 					InputStream oInputStream = oConnection.getInputStream();
@@ -144,7 +145,7 @@ public class LSAHttpUtils {
 					String sNewUrl = oConnection.getHeaderField("Location");
 					String sCookies = oConnection.getHeaderField("Set-Cookie");
 					
-					//Utils.debugLog("QueryExecutorLSA.httpPostResults: redirect to " + sNewUrl);
+					//WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: redirect to " + sNewUrl);
 					
 					oConnection = (HttpURLConnection) new URL(sNewUrl).openConnection();
 					
@@ -159,21 +160,21 @@ public class LSAHttpUtils {
 				}
 				else {
 					
-					Utils.debugLog("QueryExecutorLSA.httpPostResults: provider did not return 200 but "+iResponseCode+ " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+					WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: provider did not return 200 but "+iResponseCode+ " (1/2) and the following message:\n" + oConnection.getResponseMessage());
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					InputStream oErrorStream = oConnection.getErrorStream();
 					Util.copyStream(oErrorStream, oBytearrayOutputStream);
 					String sMessage = oBytearrayOutputStream.toString();
 					if(null!=sMessage) {
 						sResponseExtract = sMessage.substring(0,  200) + "...";
-						Utils.debugLog("QueryExecutorLSA.httpPostResults: provider did not return 200 but "+iResponseCode+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
+						WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: provider did not return 200 but "+iResponseCode+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
 						if(iResponseSize <= 0) {
 							iResponseSize = sMessage.length();
 						}						
 					}
 				}
 			}catch (Exception oEint) {
-				Utils.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oEint);
+				WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oEint);
 			} finally {
 				oConnection.disconnect();
 			}
@@ -186,10 +187,10 @@ public class LSAHttpUtils {
 				dSpeed = ( (double) iResponseSize ) / dMillis;
 				dSpeed *= 1000.0;
 			}
-			Utils.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + ") performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
+			WasdiLog.debugLog("QueryExecutorLSA.httpPostResults( " + sUrl + ") performance: " + dMillis + " ms, " + iResponseSize + " B (" + dSpeed + " B/s)");
 		}
 		catch (Exception oE) {
-			Utils.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oE);
+			WasdiLog.debugLog("QueryExecutorLSA.httpPostResults: Exception " + oE);
 		}
 		return sResult;
 	}

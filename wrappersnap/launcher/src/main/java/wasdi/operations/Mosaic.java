@@ -9,21 +9,22 @@ import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.payloads.MosaicPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Mosaic extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		m_oLocalLogger.debug("Mosaic.executeOperation");
+		WasdiLog.debugLog("Mosaic.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -36,13 +37,13 @@ public class Mosaic extends Operation {
 
             // Run the gdal mosaic
             if (oMosaic.runGDALMosaic()) {
-                m_oLocalLogger.debug("Mosaic.executeOperation done");
+                WasdiLog.debugLog("Mosaic.executeOperation done");
                 
                 oProcessWorkspace.setProgressPerc(100);
                 oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
                 // Log here and to the user
-                m_oLocalLogger.debug("Mosaic.executeOperation adding product to Workspace");
+                WasdiLog.debugLog("Mosaic.executeOperation adding product to Workspace");
                 m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
 
                 // Get the full path of the output
@@ -65,24 +66,24 @@ public class Mosaic extends Operation {
                     setPayload(oProcessWorkspace, oMosaicPayload);
                     
                 } catch (Exception oPayloadException) {
-                    m_oLocalLogger.error("Mosaic.executeOperation: Exception creating operation payload: ", oPayloadException);
+                    WasdiLog.errorLog("Mosaic.executeOperation: Exception creating operation payload: ", oPayloadException);
                 }
 
-                m_oLocalLogger.debug("Mosaic.executeOperation: product added to workspace");
+                WasdiLog.debugLog("Mosaic.executeOperation: product added to workspace");
                 
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
                 
                 return true;
             } else {
                 // error
-                m_oLocalLogger.debug("Mosaic.executeOperation: error");
+                WasdiLog.debugLog("Mosaic.executeOperation: error");
                 
                 return false;
             }
 
         } 
         catch (Exception oEx) {
-            m_oLocalLogger.error("Mosaic.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Mosaic.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 

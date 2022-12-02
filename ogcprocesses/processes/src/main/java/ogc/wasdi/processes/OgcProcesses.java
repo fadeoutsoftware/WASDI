@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class OgcProcesses extends ResourceConfig {
 	
@@ -17,6 +17,6 @@ public class OgcProcesses extends ResourceConfig {
 	 */
 	@PostConstruct
 	public void initOgcProcesses() {
-		Utils.debugLog("WASDI OGC-Processes Server start");
+		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 	}
 }

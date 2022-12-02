@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import wasdi.LauncherMain;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -101,7 +101,7 @@ public class AdsNetcdfZipProductReader extends WasdiProductReader {
 				asDates.add(extractDateFromFileName(sFileName));
 			}
 		} catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("AdsNetcdfZipProductReader.readZipArchiveFileNames: error ", oEx);
+			WasdiLog.errorLog("AdsNetcdfZipProductReader.readZipArchiveFileNames: error ", oEx);
 		}
 
 		Collections.sort(asDates);

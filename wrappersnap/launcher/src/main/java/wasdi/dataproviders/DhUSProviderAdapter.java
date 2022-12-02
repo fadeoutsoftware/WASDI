@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Donwload File Utility Class for DhUS
@@ -17,12 +17,8 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     public DhUSProviderAdapter() {
 		super();
 		m_sDataProviderCode = "SENTINEL";
-	}
-    
-    public DhUSProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "SENTINEL";
-	}
+	}    
+
 
     @Override
 	public long getDownloadFileSize(String sFileURL)  throws Exception  {
@@ -40,7 +36,7 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     	String sResult = "";
     	
     	while (iAttemps>0) {
-    		m_oLogger.debug("DhUS Provider: attemp # " + (iMaxRetry-iAttemps+1));
+    		WasdiLog.debugLog("DhUS Provider: attemp # " + (iMaxRetry-iAttemps+1));
     		sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
     		if (!Utils.isNullOrEmpty(sResult)) break;
     		iAttemps--;

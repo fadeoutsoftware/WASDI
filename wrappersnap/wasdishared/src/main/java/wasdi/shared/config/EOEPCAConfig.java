@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class EOEPCAConfig {
 	/**
@@ -21,7 +21,7 @@ public class EOEPCAConfig {
 			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
 		}		
 		catch (Exception oEx) {
-			Utils.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
+			WasdiLog.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
 		}
 		
 		return registers;

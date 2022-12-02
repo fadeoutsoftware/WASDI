@@ -37,6 +37,7 @@ import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
@@ -56,7 +57,7 @@ public class PackageManagerResource {
 
 		try {
 
-			Utils.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
+			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
 			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
@@ -64,7 +65,7 @@ public class PackageManagerResource {
 			File oDirFile = oDirPath.toFile();
 
 			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				Utils.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
+				WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
 				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
 			} 
 			
@@ -75,7 +76,7 @@ public class PackageManagerResource {
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
+			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
 		}
 
 		return sOutput;
@@ -92,7 +93,7 @@ public class PackageManagerResource {
 
 		try {
 
-			Utils.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
+			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
 			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
@@ -100,21 +101,21 @@ public class PackageManagerResource {
 			File oDirFile = oDirPath.toFile();
 
 			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				Utils.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
 				return "error: directory " + oDirPath.toString() + " not found";
 			} else {
-				Utils.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
 			}
 			
 			// Read the file
 			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
 			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
 				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-				Utils.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.readEnvActionsFile: " + oEx);
+			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: " + oEx);
 		}
 
 		return sOutput;
@@ -124,7 +125,7 @@ public class PackageManagerResource {
 	@Path("/listPackages")
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
+		WasdiLog.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
 		
 		List<PackageViewModel> aoPackages = new ArrayList<>();
 		
@@ -132,21 +133,21 @@ public class PackageManagerResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
 			
-			Utils.debugLog("PackageManagerResource.getListPackages: invalid session");
+			WasdiLog.debugLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sContentAsJson = readPackagesInfoFile(sName);
 
 		if (Utils.isNullOrEmpty(sContentAsJson)) {
-			Utils.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
+			WasdiLog.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
 
 		if (oPackageManagerFullInfoViewModel == null) {
-			Utils.debugLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
+			WasdiLog.debugLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -178,7 +179,7 @@ public class PackageManagerResource {
 	@Path("/environmentActions")
 	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
+		WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
 
 		List<String> asEnvActions = new ArrayList<>();
 
@@ -186,19 +187,19 @@ public class PackageManagerResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
+			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (WasdiConfig.Current.nodeCode.equals("wasdi") == false) {
-			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
+			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
 		String sContent = readEnvironmentActionsFile(sName);
 
 		if (Utils.isNullOrEmpty(sContent)) {
-			Utils.debugLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
+			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -227,17 +228,17 @@ public class PackageManagerResource {
 	@Path("/managerVersion")
 	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
+		WasdiLog.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 		
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			Utils.debugLog("PackageManagerResource.getManagerVersion: invalid session");
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (Utils.isNullOrEmpty(sName)) {
-			Utils.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
@@ -266,7 +267,7 @@ public class PackageManagerResource {
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 		
 		if (oProcessorToRun==null) {
-			Utils.debugLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -277,7 +278,7 @@ public class PackageManagerResource {
 
 			oPackageManagerVM = oPackageManager.getManagerVersion();
 		} catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
 		}
 
 		return Response.ok(oPackageManagerVM).build();
@@ -298,14 +299,14 @@ public class PackageManagerResource {
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("updateCommand") String sUpdateCommand) {
-		Utils.debugLog("PackageManagerResource.environmentupdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " updateCommand: " + sUpdateCommand + " )");
+		WasdiLog.debugLog("PackageManagerResource.environmentupdate( Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " updateCommand: " + sUpdateCommand + " )");
 
 		try {
 			// Check Session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -316,12 +317,12 @@ public class PackageManagerResource {
 
 			String sUserId = oUser.getUserId();
 			
-			Utils.debugLog("PackageManagerResource.environmentupdate: get Processor");	
+			WasdiLog.debugLog("PackageManagerResource.environmentupdate: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToForceUpdate == null) {
-				Utils.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
+				WasdiLog.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
 			
@@ -330,7 +331,7 @@ public class PackageManagerResource {
 				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 				
 				if (!oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId)) {
-					Utils.debugLog("PackageManagerResource.environmentupdate: processor not of user " + oProcessorToForceUpdate.getUserId());
+					WasdiLog.debugLog("PackageManagerResource.environmentupdate: processor not of user " + oProcessorToForceUpdate.getUserId());
 					return Response.status(Status.UNAUTHORIZED).build();					
 				}
 			}
@@ -344,7 +345,7 @@ public class PackageManagerResource {
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
 			
-			Utils.debugLog("PackageManagerResource.environmentupdate: create local operation");
+			WasdiLog.debugLog("PackageManagerResource.environmentupdate: create local operation");
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
@@ -358,7 +359,7 @@ public class PackageManagerResource {
 			asCommand.put("updateCommand", sUpdateCommand);
 			String sJson = MongoRepository.s_oMapper.writeValueAsString(asCommand);
 			oProcessorParameter.setJson(sJson);
-			Utils.debugLog("PackageManagerResource.environmentupdate( sJson: " + sJson + " )");
+			WasdiLog.debugLog("PackageManagerResource.environmentupdate( sJson: " + sJson + " )");
 
 			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
 			oProcessorParameter.setSessionID(sSessionId);
@@ -371,7 +372,7 @@ public class PackageManagerResource {
 				// In the main node: start a thread to update all the computing nodes
 				
 				try {
-					Utils.debugLog("PackageManagerResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
+					WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
 					
 					//This is the main node: forward the request to other nodes
 					UpdateProcessorEnvironmentWorker oUpdateWorker = new UpdateProcessorEnvironmentWorker();
@@ -382,10 +383,10 @@ public class PackageManagerResource {
 					oUpdateWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, sUpdateCommand);
 					oUpdateWorker.start();
 					
-					Utils.debugLog("PackageManagerResource.environmentupdate: Worker started");						
+					WasdiLog.debugLog("PackageManagerResource.environmentupdate: Worker started");						
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
+					WasdiLog.debugLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
 				}
 			}			
 			
@@ -397,7 +398,7 @@ public class PackageManagerResource {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PackageManagerResource.environmentupdate: " + oEx);
+			WasdiLog.debugLog("PackageManagerResource.environmentupdate: " + oEx);
 			return Response.serverError().build();
 		}
 	}	

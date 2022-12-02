@@ -15,10 +15,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.BoundingBoxUtils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CDSProviderAdapter extends ProviderAdapter {
 
@@ -32,14 +33,6 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "CDS";
 	}
 
-	/**
-	 * @param logger
-	 */
-	public CDSProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "CDS";
-	}
-
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		return 0;
@@ -49,7 +42,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		Utils.debugLog("CDSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("CDSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
 		String sDesiredFileName = oProcessWorkspace.getProductName();
 
@@ -83,7 +76,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			String sCdsGetStatusRequestState = "undefined";
 
 			for (int i = 0; i < 120; i++) {
-				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: attemp #" + i);
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: attemp #" + i);
 				sCdsGetStatusRequestResult = performCdsGetStatusRequest(sDownloadUser, sDownloadPassword, sCdsSearchRequestId, iMaxRetry);
 
 				List<Map<String, Object>> aoRequests = JsonUtils.jsonToListOfMapOfObjects(sCdsGetStatusRequestResult);
@@ -116,10 +109,10 @@ public class CDSProviderAdapter extends ProviderAdapter {
 					break;
 				} else if ("failed".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					String sReason = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.data.reason");
-					Utils.debugLog("CDSProviderAdapter.executeDownloadFile: getStatus request failed: " + sReason);
+					WasdiLog.debugLog("CDSProviderAdapter.executeDownloadFile: getStatus request failed: " + sReason);
 					break;
 				} else {
-					Utils.debugLog("CDSProviderAdapter.executeDownloadFile: getStatus request is in an unknown state: " + sCdsGetStatusRequestState);
+					WasdiLog.debugLog("CDSProviderAdapter.executeDownloadFile: getStatus request is in an unknown state: " + sCdsGetStatusRequestState);
 					break;
 				}
 			}
@@ -142,7 +135,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("CDSProviderAdapter.performCdsSearchRequest.httpPost: attemp #" + iAttemp);
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsSearchRequest.httpPost: attemp #" + iAttemp);
 			}
 
 			try {
@@ -150,7 +143,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				String sAuth = sDownloadUser + ":" + sDownloadPassword;
 				sResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders, sAuth);
 			} catch (Exception oEx) {
-				Utils.debugLog("CDSProviderAdapter.performCdsSearchRequest: exception in http get call: " + oEx.toString());
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsSearchRequest: exception in http get call: " + oEx.toString());
 			}
 
 			iAttemp ++;
@@ -175,13 +168,13 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest.httpGet: attemp #" + iAttemp);
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsGetStatusRequest.httpGet: attemp #" + iAttemp);
 			}
 
 			try {
 				sResult = HttpUtils.httpGet(CDS_URL_GET_STATUS, asHeaders);
 			} catch (Exception oEx) {
-				Utils.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: exception in http get call: " + oEx.toString());
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: exception in http get call: " + oEx.toString());
 			}
 
 			iAttemp ++;
@@ -206,14 +199,14 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp<iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("CDSProviderAdapter.performCdsDownloadRequest.downloadViaHttp: attemp #" + iAttemp);
+				WasdiLog.debugLog("CDSProviderAdapter.performCdsDownloadRequest.downloadViaHttp: attemp #" + iAttemp);
 			}
 			
 			try {
 				sResult = downloadViaHttp(sUrl, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("CDSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("CDSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
 			iAttemp ++;
@@ -307,7 +300,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		case "2T":
 			return "2m_temperature";
 		default:
-			Utils.debugLog("CDSProviderAdapter.inflateVariable: unexpected variable: " + sVariable + ".");
+			WasdiLog.debugLog("CDSProviderAdapter.inflateVariable: unexpected variable: " + sVariable + ".");
 			return sVariable;
 		}
 	}
@@ -316,7 +309,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		try {
 			return URLDecoder.decode(sUrlEncoded, java.nio.charset.StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException oE) {
-			Utils.debugLog("Wasdi.deodeUrl: could not decode URL due to " + oE + ".");
+			WasdiLog.debugLog("Wasdi.deodeUrl: could not decode URL due to " + oE + ".");
 		}
 
 		return sUrlEncoded;

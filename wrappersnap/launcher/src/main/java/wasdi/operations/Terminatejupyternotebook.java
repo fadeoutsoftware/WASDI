@@ -5,20 +5,21 @@ import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Terminatejupyternotebook extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		m_oLocalLogger.debug("Terminatejupyternotebook.executeOperation");
+		WasdiLog.debugLog("Terminatejupyternotebook.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");	
+			WasdiLog.errorLog("Parameter is null");	
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -33,12 +34,12 @@ public class Terminatejupyternotebook extends Operation {
 
 			boolean bRet = oEngine.terminateJupyterNotebook(oParameter);
 			
-			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: delete result " + bRet);
+			WasdiLog.errorLog("Terminatejupyternotebook.executeOperation: delete result " + bRet);
 			
 			return true;
 			
 		} catch (Exception oEx) {
-			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Terminatejupyternotebook.executeOperation: exception", oEx);
 		}
 
 		return false;

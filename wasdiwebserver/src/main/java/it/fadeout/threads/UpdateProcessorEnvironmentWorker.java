@@ -6,7 +6,7 @@ import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to update the processor's environment
@@ -63,7 +63,7 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 	 */
 	@Override
 	public void run() {
-		Utils.debugLog("UpdateProcessorEnvironmentWorker.run: start nodes environment update for processor " + m_sProcessorId);
+		WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: start nodes environment update for processor " + m_sProcessorId);
 
 		// For each node
 		for (Node oNode : m_aoNodes) {
@@ -93,20 +93,20 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 				Map<String, String> asHeaders = new HashMap<>();
 				asHeaders.put("x-session-token", m_sSessionId);
 
-				Utils.debugLog("UpdateProcessorEnvironmentWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: calling url: " + sUrl);
 
 				// It is a get call
 				HttpUtils.httpGet(sUrl, asHeaders);
 
-				Utils.debugLog("UpdateProcessorEnvironmentWorker.run: environment update on node " + oNode.getNodeCode());
+				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: environment update on node " + oNode.getNodeCode());
 
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("UpdateProcessorEnvironmentWorker.run: Exception " + oEx.toString());
+				WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: Exception " + oEx.toString());
 			}
 		}
 
 		// All nodes updated
-		Utils.debugLog("UpdateProcessorEnvironmentWorker.run: distribuited environment update done");
+		WasdiLog.debugLog("UpdateProcessorEnvironmentWorker.run: distribuited environment update done");
 	}
 }

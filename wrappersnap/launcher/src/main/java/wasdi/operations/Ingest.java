@@ -18,6 +18,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.ShapeFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class Ingest extends Operation {
@@ -25,15 +26,15 @@ public class Ingest extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		m_oLocalLogger.debug("Ingest.executeOperation");
+		WasdiLog.debugLog("Ingest.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -47,7 +48,7 @@ public class Ingest extends Operation {
 
             if (!oFileToIngestPath.canRead()) {
                 String sMsg = "Ingest.executeOperation: ERROR: unable to access file to Ingest " + oFileToIngestPath.getAbsolutePath();
-                m_oLocalLogger.error(sMsg);
+                WasdiLog.errorLog(sMsg);
                 throw new IOException("Unable to access file to Ingest");
             }
 
@@ -71,7 +72,7 @@ public class Ingest extends Operation {
             m_oProcessWorkspaceLogger.log("Ingest Start - File " + oFileToIngestPath.getName() + " in Workspace " + oParameter.getWorkspace());
 
             if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
-                m_oLocalLogger.error("Ingest.executeOperation: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+                WasdiLog.errorLog("Ingest.executeOperation: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
                 m_oProcessWorkspaceLogger.log("Error accessing destination directory");
                 throw new IOException("Unable to access destination directory for the Workspace");
             }
@@ -86,7 +87,7 @@ public class Ingest extends Operation {
 				oReadProduct = WasdiProductReaderFactory.getProductReader(oFileToIngestPath);
 				oImportProductViewModel = oReadProduct.getProductViewModel();
             } catch (Exception oE) {
-            	m_oLocalLogger.error("Ingest.executeOperation: cannot read product. Maybe file needs unzipping?");
+            	WasdiLog.errorLog("Ingest.executeOperation: cannot read product. Maybe file needs unzipping?");
 			}
 
             String sDestinationFileName = oFileToIngestPath.getName();
@@ -94,7 +95,7 @@ public class Ingest extends Operation {
             // Did we got the View Model ?
             if (oImportProductViewModel == null) {
 
-                m_oLocalLogger.warn("Ingest.executeOperation: Impossible to read the Product View Model");
+                WasdiLog.warnLog("Ingest.executeOperation: Impossible to read the Product View Model");
 
                 // Check if this is a Zipped Shape File
                 if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
@@ -102,7 +103,7 @@ public class Ingest extends Operation {
                     if (oShapeFileUtils.isShapeFileZipped(oFileToIngestPath.getPath(), 30)) {
 
                         // May be.
-                        m_oLocalLogger.info("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
+                        WasdiLog.infoLog("Ingest.executeOperation: it looks like the File to ingest might be a zipped shape file, let's try to unzip it...");
 
                         // Unzip
                         ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
@@ -121,7 +122,7 @@ public class Ingest extends Operation {
                             // Now get the view model again
 							oImportProductViewModel = oReadShapeProduct.getProductViewModel();
                             bUnzipAfterCopy = true;
-                            m_oLocalLogger.info("Ingest.executeOperation: Ok, zipped shape file found");
+                            WasdiLog.infoLog("Ingest.executeOperation: Ok, zipped shape file found");
 
                             m_oProcessWorkspaceLogger.log("Found shape file");
 
@@ -143,7 +144,7 @@ public class Ingest extends Operation {
 
                 m_oProcessWorkspaceLogger.log("Error reading the input product.");
 
-                m_oLocalLogger.error("Ingest.executeOperation: ERROR: unable to get the product view model");
+                WasdiLog.errorLog("Ingest.executeOperation: ERROR: unable to get the product view model");
                 throw new IOException("Unable to get the product view model");
             }
 
@@ -152,7 +153,7 @@ public class Ingest extends Operation {
             // copy file to workspace directory
             if (!oFileToIngestPath.getParent().equals(oDstDir.getAbsolutePath())) {
 
-                m_oLocalLogger.debug("Ingest.executeOperation: File in another folder make a copy");
+                WasdiLog.debugLog("Ingest.executeOperation: File in another folder make a copy");
                 FileUtils.copyFileToDirectory(oFileToIngestPath, oDstDir);
 
                 m_oProcessWorkspaceLogger.log("File ingestion done");
@@ -160,15 +161,15 @@ public class Ingest extends Operation {
                 // Must be unzipped?
                 if (bUnzipAfterCopy) {
 
-                    m_oLocalLogger.debug("File must be unzipped");
+                    WasdiLog.debugLog("File must be unzipped");
                     ZipFileUtils oZipExtractor = new ZipFileUtils(oParameter.getProcessObjId());
                     oZipExtractor.unzip(oFileToIngestPath.getCanonicalPath(), oDstDir.getCanonicalPath());
-                    m_oLocalLogger.debug("Unzip done");
+                    WasdiLog.debugLog("Unzip done");
 
                     m_oProcessWorkspaceLogger.log("File unzipped");
                 }
             } else {
-                m_oLocalLogger.debug("Ingest.executeOperation: File already in the right path no need to copy");
+                WasdiLog.debugLog("Ingest.executeOperation: File already in the right path no need to copy");
                 m_oProcessWorkspaceLogger.log("File already in place");
             }
 
@@ -199,10 +200,10 @@ public class Ingest extends Operation {
 
         } 
         catch (Throwable e) {
-            m_oLocalLogger.error("Ingest.executeOperation: ERROR: Exception occurrend during file ingestion");
+            WasdiLog.errorLog("Ingest.executeOperation: ERROR: Exception occurrend during file ingestion");
             
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-            m_oLocalLogger.error("Ingest.executeOperation: " + sError);
+            WasdiLog.errorLog("Ingest.executeOperation: " + sError);
             
             m_oProcessWorkspaceLogger.log("Exception ingesting the file");
 
@@ -219,10 +220,10 @@ public class Ingest extends Operation {
 		try {
 			sFileName = oZippedFileToIngestWithAbsolutePath.getName();
 		    if(!oZippedFileToIngestWithAbsolutePath.delete()) {
-		    	m_oLocalLogger.error("Ingest.executeOperation: could not delete zip file " + oZippedFileToIngestWithAbsolutePath.getName());
+		    	WasdiLog.errorLog("Ingest.executeOperation: could not delete zip file " + oZippedFileToIngestWithAbsolutePath.getName());
 		    }
 		} catch (Exception oE) {
-			m_oLocalLogger.warn("Ingest.executeOperation: exception while trying to delete zip file "  + sFileName +  ": " + oE);
+			WasdiLog.warnLog("Ingest.executeOperation: exception while trying to delete zip file "  + sFileName +  ": " + oE);
 		}
 	}
 

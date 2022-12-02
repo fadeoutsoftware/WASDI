@@ -17,6 +17,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -56,7 +57,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorLSA.init(): exception reading parser config file " + m_sParserConfigPath);
+			WasdiLog.debugLog("QueryExecutorLSA.init(): exception reading parser config file " + m_sParserConfigPath);
 		}
 	}
 		
@@ -86,7 +87,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 		// Make the query
 		String sRLSAResults = LSAHttpUtils.httpGetResults(sLSAQuery, (CookieManager) CookieHandler.getDefault());
 		
-		Utils.debugLog("QueryExecutorLSA: get Results, extract the total count");
+		WasdiLog.debugLog("QueryExecutorLSA: get Results, extract the total count");
 		
 		try {
 			
@@ -107,7 +108,7 @@ public class QueryExecutorLSA extends QueryExecutor {
 			oDocument = oParser.parse(new StringReader(sRLSAResults), oParserOptions);
 			
 			if (oDocument == null) {
-				Utils.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
+				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Document response null, aborting");
 				return -1;
 			}
 			
@@ -121,18 +122,18 @@ public class QueryExecutorLSA extends QueryExecutor {
 				}
 			} 
 			
-			Utils.debugLog("QueryExecutorLSA.executeCount: " + sText);
+			WasdiLog.debugLog("QueryExecutorLSA.executeCount: " + sText);
 			
 			try {
 				// Cast the result
 				iCount = Integer.parseInt(sText);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
+				WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorLSA.executeCount: Exception = " + oEx.toString());
 		}
 		
 		return iCount;
@@ -176,13 +177,13 @@ public class QueryExecutorLSA extends QueryExecutor {
 				return null;
 			}
 			
-			Utils.debugLog("QueryExecutorLSA.executeAndRetrieve: got result, start conversion");
+			WasdiLog.debugLog("QueryExecutorLSA.executeAndRetrieve: got result, start conversion");
 			
 			return m_oResponseTranslator.translateBatch(sRLSAResults, bFullViewModel);
 		
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorLSA.executeAndRetrieve: Exception = " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorLSA.executeAndRetrieve: Exception = " + oEx.toString());
 		}		
 
 		

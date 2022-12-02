@@ -17,7 +17,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -104,7 +104,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 			sResultAsString = standardHttpGETQuery(sUrl);
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
-				Utils.debugLog("QueryExecutorSENTINEL.executeCount: Document response null, aborting");
+				WasdiLog.debugLog("QueryExecutorSENTINEL.executeCount: Document response null, aborting");
 				return -1;
 			}
 			
@@ -119,7 +119,7 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 					
 			return Integer.parseInt(sText);
 		} catch (NullPointerException oE) {
-			Utils.debugLog("QueryExecutorSENTINEL.executeCount: " + oE);
+			WasdiLog.debugLog("QueryExecutorSENTINEL.executeCount: " + oE);
 		}
 		return -1;
 	}

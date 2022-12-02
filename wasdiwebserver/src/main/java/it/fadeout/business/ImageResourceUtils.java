@@ -11,6 +11,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Static Methods to handle images related to applications: 
@@ -172,7 +173,7 @@ public class ImageResourceUtils {
 			
 			if(sDeleteFileName.equalsIgnoreCase(sFileName)){
 				if (!oImage.delete()) {
-					Utils.debugLog("Image resource Utils - File " + sFileName + " can't be deleted");
+					WasdiLog.debugLog("Image resource Utils - File " + sFileName + " can't be deleted");
 					}
 				break;
 			} 

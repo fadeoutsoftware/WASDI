@@ -11,8 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
@@ -42,7 +43,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 			sUrl += sFlag + "/";
 		}
 
-		s_oLogger.debug("PipPackageManagerImpl.callGetPackages | sUrl:" + sUrl + ".");
+		WasdiLog.debugLog("PipPackageManagerImpl.callGetPackages | sUrl:" + sUrl + ".");
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -51,8 +52,8 @@ public class PipPackageManagerImpl implements IPackageManager {
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
 		if (iResult == null || iResult.intValue() != 200) {
-			s_oLogger.error("PipPackageManagerImpl.listPackages | iResult:" + iResult + ".");
-			s_oLogger.error("PipPackageManagerImpl.listPackages | sJsonResponse:" + sJsonResponse + ".");
+			WasdiLog.errorLog("PipPackageManagerImpl.listPackages | iResult:" + iResult + ".");
+			WasdiLog.errorLog("PipPackageManagerImpl.listPackages | sJsonResponse:" + sJsonResponse + ".");
 
 			return null;
 		}
@@ -75,7 +76,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 			}
 		}
 
-		s_oLogger.debug("PipPackageManagerImpl.listPackages | aoPackages.size():" + aoPackages.size() + ".");
+		WasdiLog.debugLog("PipPackageManagerImpl.listPackages | aoPackages.size():" + aoPackages.size() + ".");
 
 		return aoPackages;
 	}
@@ -84,7 +85,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 	public PackageManagerViewModel getManagerVersion() {
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/managerVersion/";
 
-		s_oLogger.debug("PipPackageManagerImpl.callGetManagerVersion | sUrl:" + sUrl);
+		WasdiLog.debugLog("PipPackageManagerImpl.callGetManagerVersion | sUrl:" + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -93,8 +94,8 @@ public class PipPackageManagerImpl implements IPackageManager {
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
 		if (iResult == null || iResult.intValue() != 200) {
-			s_oLogger.error("PipPackageManagerImpl.getManagerVersion | iResult:" + iResult + ".");
-			s_oLogger.error("PipPackageManagerImpl.getManagerVersion | sJsonResponse:" + sJsonResponse + ".");
+			WasdiLog.errorLog("PipPackageManagerImpl.getManagerVersion | iResult:" + iResult + ".");
+			WasdiLog.errorLog("PipPackageManagerImpl.getManagerVersion | sJsonResponse:" + sJsonResponse + ".");
 
 			return null;
 		}
@@ -109,7 +110,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 		PackageManagerViewModel oPackageManagerVM = new PackageManagerViewModel(sName, sVersion, iMajor, iMinor, iPatch);
 
-		s_oLogger.debug("PipPackageManagerImpl.getManagerVersion | oPackageManager:" + oPackageManagerVM.toString() + ".");
+		WasdiLog.debugLog("PipPackageManagerImpl.getManagerVersion | oPackageManager:" + oPackageManagerVM.toString() + ".");
 
 		return oPackageManagerVM;
 	}
@@ -134,7 +135,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 	public boolean operatePackageChange(String sUpdateCommand) {
 		// Call localhost:port
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
-		s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
+		WasdiLog.debugLog("PipPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -142,13 +143,13 @@ public class PipPackageManagerImpl implements IPackageManager {
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sResponse = oHttpCallResponse.getResponseBody();
 
-		s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: iResult: " + iResult);
-		s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: " + sResponse);
+		WasdiLog.debugLog("PipPackageManagerImpl.operatePackageChange: iResult: " + iResult);
+		WasdiLog.debugLog("PipPackageManagerImpl.operatePackageChange: " + sResponse);
 
 		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-			s_oLogger.info("PipPackageManagerImpl.operatePackageChange: Output from Server .... \n");
-			s_oLogger.info("PipPackageManagerImpl.operatePackageChange: " + sResponse);
-			s_oLogger.debug("PipPackageManagerImpl.operatePackageChange: env updated");
+			WasdiLog.infoLog("PipPackageManagerImpl.operatePackageChange: Output from Server .... \n");
+			WasdiLog.infoLog("PipPackageManagerImpl.operatePackageChange: " + sResponse);
+			WasdiLog.debugLog("PipPackageManagerImpl.operatePackageChange: env updated");
 			return true;
 		} else {
 			return false;

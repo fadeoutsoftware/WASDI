@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * Created by s.adamo on 22/03/2017.
  */
@@ -28,16 +30,15 @@ public class StreamProcessWriter extends Thread {
 
             String sLine=null;
             while ( (sLine = oBr.readLine()) != null) {
-                Publisher.s_oLogger.debug(m_sType + ">" + sLine);
-                System.out.println(m_sType + ">" + sLine);
+                WasdiLog.debugLog(m_sType + ">" + sLine);
             }
 
             oBr.close();
         } catch (IOException oEx)
         {
-            Publisher.s_oLogger.debug("StreamProcessWriter.run: " +  oEx.getMessage());
+            WasdiLog.debugLog("StreamProcessWriter.run: " +  oEx.getMessage());
         }
 
-        Publisher.s_oLogger.debug("Stream Process Writer " + m_sType + " END");
+        WasdiLog.debugLog("Stream Process Writer " + m_sType + " END");
     }
 }

@@ -11,6 +11,7 @@ import wasdi.shared.business.ecostress.EcoStressItemForReading;
 import wasdi.shared.business.ecostress.EcoStressItemForWriting;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class EcoStressRepository extends MongoRepository {
 
@@ -45,9 +46,9 @@ public class EcoStressRepository extends MongoRepository {
 				getCollection(m_sThisCollection).insertOne(oDocument);
 				String sResult = oDocument.getObjectId("_id").toHexString();
 
-				Utils.debugLog("EcoStressRepository | sResult: " + sResult);
+				WasdiLog.debugLog("EcoStressRepository | sResult: " + sResult);
 			} catch (Exception oEx) {
-				Utils.debugLog("EcoStressRepository: " + oEx);
+				WasdiLog.debugLog("EcoStressRepository: " + oEx);
 			}
 		}
 	}

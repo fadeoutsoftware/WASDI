@@ -14,6 +14,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * Utility class to handle String related operations.
  * 
@@ -70,7 +72,7 @@ public final class StringUtils {
 		try {
 			return URLEncoder.encode(sUrl, java.nio.charset.StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException oE) {
-			Utils.debugLog("StringUtils.encodeUrl: could not encode URL due to " + oE + ".");
+			WasdiLog.debugLog("StringUtils.encodeUrl: could not encode URL due to " + oE + ".");
 		}
 
 		return sUrl;
@@ -84,9 +86,9 @@ public final class StringUtils {
 
 			return digest;
 		} catch (NoSuchAlgorithmException oEx) {
-			Utils.debugLog("StringUtils.generateSha224: invalid digest algorithm SHA-224: " + oEx + ".");
+			WasdiLog.debugLog("StringUtils.generateSha224: invalid digest algorithm SHA-224: " + oEx + ".");
 		} catch (Exception oEx) {
-			Utils.debugLog("StringUtils.generateSha224: could not generate Sha224 due to " + oEx + ".");
+			WasdiLog.debugLog("StringUtils.generateSha224: could not generate Sha224 due to " + oEx + ".");
 		}
 
 		return input;

@@ -13,12 +13,13 @@ import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryTranslationParser;
+import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
@@ -189,7 +190,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorCREODIAS.translate( " + sQueryFromClient + " ): " + oE);
 		}
 
 		return sResult;
@@ -254,7 +255,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd).replaceAll(" ", "+") + "))";
 			}
 		} catch (Exception oE) {
-			Utils.log("ERROR", "QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.log("ERROR", "QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
 		}
 		return sResult;
 	}
@@ -280,7 +281,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			sResult += "&completionDate=" + asStartEnd[1];
 
 		}catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorCREODIAS.parseTimeFrame: " + oE);
+			WasdiLog.debugLog("QueryTranslatorCREODIAS.parseTimeFrame: " + oE);
 		}
 
 		return sResult;
@@ -429,7 +430,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 	public String getCountUrl(String sQuery) {
 		
 		if(Utils.isNullOrEmpty(sQuery)) {
-			Utils.debugLog("QueryTranslatorCREODIAS.getCountUrl: sQuery is null");
+			WasdiLog.debugLog("QueryTranslatorCREODIAS.getCountUrl: sQuery is null");
 		}
 		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
 		sUrl+=translateAndEncodeParams(sQuery);
@@ -461,7 +462,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryTranslatorCREODIAS.getSearchUrl: exception generating the page parameter  " + oEx.toString());
+			WasdiLog.debugLog("QueryTranslatorCREODIAS.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
 		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"

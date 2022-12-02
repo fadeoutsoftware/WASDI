@@ -6,9 +6,9 @@ import java.io.FileWriter;
 
 import com.google.common.io.Files;
 
-import wasdi.LauncherMain;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class IDL2ProcessorEngine extends DockerProcessorEngine {
@@ -48,12 +48,12 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			
 			if (oRunScriptFile.exists()) {
 				if (!oRunScriptFile.delete()) {
-					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterUnzipProcessor: ERROR deleting runwasdidocker.sh");
+					WasdiLog.debugLog("IDL2ProcessorEngine.onAfterUnzipProcessor: ERROR deleting runwasdidocker.sh");
 				}
 			}
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterUnzipProcessor: Exception :"+oEx.toString());
+			WasdiLog.debugLog("IDL2ProcessorEngine.onAfterUnzipProcessor: Exception :"+oEx.toString());
 		}
 	}
 
@@ -98,7 +98,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			
 			try (BufferedWriter oCallIdlWriter = new BufferedWriter(new FileWriter(oCallIdlFile))) {
 				if(null!= oCallIdlWriter) {
-					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.DeployProcessor: Creating call_idl.pro file");
+					WasdiLog.debugLog("IDL2ProcessorEngine.DeployProcessor: Creating call_idl.pro file");
 					
 					oCallIdlWriter.write("iArgs = 0");
 					oCallIdlWriter.newLine();
@@ -150,7 +150,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			
 			try (BufferedWriter oWasdiWrapperWriter = new BufferedWriter(new FileWriter(oWasdiWrapperFile))) {
 				if(null!= oWasdiWrapperWriter) {
-					LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.DeployProcessor: Creating wasdi_wrapper.pro file");
+					WasdiLog.debugLog("IDL2ProcessorEngine.DeployProcessor: Creating wasdi_wrapper.pro file");
 
 					oWasdiWrapperWriter.write("PRO CALLWASDI");
 					oWasdiWrapperWriter.newLine();
@@ -181,7 +181,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			RunTimeUtils.addRunPermission(sGetPIDFile);
 			
 		} catch (Exception e) {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.deploy: Exception Creating Files :"+e.toString());
+			WasdiLog.debugLog("IDL2ProcessorEngine.deploy: Exception Creating Files :"+e.toString());
 		}
 	}
 	
@@ -196,7 +196,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			oFile.delete();
 		}
 		catch (Exception e) {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: "+e.toString());
+			WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: "+e.toString());
 		}
 	}
 
@@ -205,7 +205,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		
 		try {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: move lib in the processor folder");
+			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: move lib in the processor folder");
 			
 			// Get the lib path
 			String sLibFilePath = m_sDockerTemplatePath;
@@ -228,12 +228,12 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			// Copy the lib
 			Files.copy(oLibFile, oDestinationFile);
 			
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: call super implementation to update the docker");
+			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: call super implementation to update the docker");
 			
 			return super.libraryUpdate(oParameter);
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
+			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
 			return false;
 		}
 	}

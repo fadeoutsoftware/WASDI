@@ -5,7 +5,7 @@ import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -47,13 +47,13 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 		try {
 			// Check if we have the Query Translator
 			if (m_oQueryTranslator == null) {
-				Utils.debugLog("QueryExecutorHttpGet.executeCount: Query Translator is null. Return -1");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: Query Translator is null. Return -1");
 				return -1;
 			}
 			
 			// And if we have the response translator
 			if (m_oResponseTranslator == null) {
-				Utils.debugLog("QueryExecutorHttpGet.executeCount: Response Translator is null. Return -1");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: Response Translator is null. Return -1");
 				return -1;
 			}
 			
@@ -62,7 +62,7 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			
 			// Check if the platform is supported
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-				Utils.debugLog("QueryExecutorHttpGet.executeCount: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return -1.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return -1.");
 				return 0;
 			}		
 			
@@ -74,16 +74,16 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			int iResults = m_oResponseTranslator.getCountResult(sResults);
 			
 			
-			Utils.debugLog("QueryExecutorHttpGet.executeCount: count done, found " + iResults);
+			WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: count done, found " + iResults);
 			
 			// Return the number
 			return iResults;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorHttpGet.executeCount: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: exception " + oEx.toString());
 		}
 		
-		Utils.debugLog("QueryExecutorHttpGet.executeCount: Something went wrong, return -1");
+		WasdiLog.debugLog("QueryExecutorHttpGet.executeCount: Something went wrong, return -1");
 		return -1;
 	}
 
@@ -98,13 +98,13 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			
 			// Check if we have the Query Translator
 			if (m_oQueryTranslator == null) {
-				Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Query Translator is null. Return empty list.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Query Translator is null. Return empty list.");
 				return new ArrayList<QueryResultViewModel>();
 			}
 			
 			// Check if we have the Response Translator
 			if (m_oResponseTranslator == null) {
-				Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Response Translator is null. Return empty list.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Response Translator is null. Return empty list.");
 				return new ArrayList<QueryResultViewModel>();
 			}
 			
@@ -113,7 +113,7 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			
 			// Check if the platform is supported
 			if (m_asSupportedPlatforms.contains(oQueryViewModel.platformName) == false) {
-				Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return empty list.");
+				WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: platform " + oQueryViewModel.platformName + " not supported by " + m_sProvider + ". Return empty list.");
 				return new ArrayList<QueryResultViewModel>();
 			}		
 			
@@ -124,16 +124,16 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			// Transalte the result
 			List<QueryResultViewModel> aoResults = m_oResponseTranslator.translateBatch(sResults, bFullViewModel);
 			
-			Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: query done, return " + aoResults.size() + " results.");
+			WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: query done, return " + aoResults.size() + " results.");
 			
 			// Return the list to the user
 			return aoResults;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: exception " + oEx.toString());
 		}
 		
-		Utils.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Something went wrong, return null list");
+		WasdiLog.debugLog("QueryExecutorHttpGet.executeAndRetrieve: Something went wrong, return null list");
 		return null;
 	}
 

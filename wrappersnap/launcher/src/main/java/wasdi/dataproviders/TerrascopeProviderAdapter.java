@@ -8,11 +8,12 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class TerrascopeProviderAdapter extends ProviderAdapter {
 
@@ -40,20 +41,12 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	public TerrascopeProviderAdapter() {
 		m_sDataProviderCode = "TERRASCOPE";
 	}
-
-	/**
-	 * @param logger
-	 */
-	public TerrascopeProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "TERRASCOPE";
-	}
-
+	
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("TerrascopeProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
+			WasdiLog.errorLog("TerrascopeProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 
@@ -76,9 +69,9 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 				lSizeInBytes = HttpUtils.getDownloadFileSizeViaHttp(sFileURL, asHeaders);
 
-				m_oLogger.debug("TerrascopeProviderAdapter.getDownloadFileSize: file size is: " + sResult);
+				WasdiLog.debugLog("TerrascopeProviderAdapter.getDownloadFileSize: file size is: " + sResult);
 			} catch (Exception oE) {
-				m_oLogger.debug("TerrascopeProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
+				WasdiLog.debugLog("TerrascopeProviderAdapter.getDownloadFileSize: could not extract file size due to " + oE);
 			}
 		}
 
@@ -100,7 +93,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 		try {
 			sResult = sFileURL.split(",")[0];
 		} catch (Exception oE) {
-			m_oLogger.error("TerrascopeProviderAdapter.getZipperUrl: " + oE);
+			WasdiLog.errorLog("TerrascopeProviderAdapter.getZipperUrl: " + oE);
 		}
 
 		return sResult;
@@ -110,7 +103,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		Utils.debugLog("TerrascopeProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
 		String sResult = "";
 
@@ -122,7 +115,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 //			} else if (isHttpsProtocol(sFileURL)) {
 //				sPathLinux = extractFilePathFromHttpsUrl(sFileURL);
 //			} else {
-//				Utils.debugLog("TerrascopeProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
+//				WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
 //			}
 //
 //			if (sPathLinux != null) {
@@ -187,7 +180,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 		try {
 			sPayload = StringUtils.uncompressString(sCompressedPayload);
 		} catch (IOException e) {
-			Utils.debugLog("TerrascopeProviderAdapter.uncompressPayload: the payload cannot be uncompressed: " + e.getMessage());
+			WasdiLog.debugLog("TerrascopeProviderAdapter.uncompressPayload: the payload cannot be uncompressed: " + e.getMessage());
 		}
 		
 		return sPayload;
@@ -203,12 +196,12 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 		for (int iAttempt = 0; iAttempt < iMaxRetry; iAttempt ++) {
 
-			Utils.debugLog("TerrascopeProviderAdapter.downloadHttps: attemp #" + iAttempt);
+			WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttps: attemp #" + iAttempt);
 
 			try {
 				sResult = downloadViaHttp(sFileURL, asHeaders, sSaveDirOnServer);
 			} catch (Exception oEx) {
-				Utils.debugLog("TerrascopeProviderAdapter.downloadHttps: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttps: exception in download via http call: " + oEx.toString());
 			}
 
 			if (!Utils.isNullOrEmpty(sResult)) {
@@ -219,7 +212,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
 			} catch (Exception oEx) {
-				Utils.debugLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 
@@ -233,12 +226,12 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 		for (int iAttempt = 0; iAttempt < iMaxRetry; iAttempt ++) {
 
-			Utils.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: attemp #" + iAttempt);
+			WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: attemp #" + iAttempt);
 
 			try {
 				sResult = downloadViaHttpPost(sFileURL, asHeaders, sPayload, sSaveDirOnServer);
 			} catch (Exception oEx) {
-				Utils.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in download via http call: " + oEx.toString());
 			}
 
 			if (!Utils.isNullOrEmpty(sResult)) {
@@ -249,7 +242,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
 			} catch (Exception oEx) {
-				Utils.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 
@@ -287,7 +280,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			m_sProviderBasePath = m_oDataProviderConfig.localFilesBasePath;
 			m_sProviderUrlDomain = m_oDataProviderConfig.urlDomain;
 		} catch (Exception e) {
-			m_oLogger.error("TerrascopeProviderAdapter: Config reader is null");
+			WasdiLog.errorLog("TerrascopeProviderAdapter: Config reader is null");
 		}
 	}
 

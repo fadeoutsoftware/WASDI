@@ -1,5 +1,8 @@
 package wasdi.operations;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.esa.snap.core.datamodel.Product;
 
@@ -19,11 +22,8 @@ import wasdi.shared.payloads.DownloadPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.ProductViewModel;
-
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * Share Operation
@@ -56,31 +56,31 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 			// update the process
 			if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace))
-				m_oLocalLogger.error("Share.executeOperationFile: Error during process update with process Perc");
+				WasdiLog.errorLog("Share.executeOperationFile: Error during process update with process Perc");
 
 			// send update process message
 			if (m_oSendToRabbit != null) {
 				if (!m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-					m_oLocalLogger.error("Share.executeOperationFile: Error sending rabbitmq message to update process list");
+					WasdiLog.errorLog("Share.executeOperationFile: Error sending rabbitmq message to update process list");
 				}
 			}
 		} catch (Exception oEx) {
-			m_oLocalLogger.error("Share.executeOperationFile: Exception: " + oEx);
-			m_oLocalLogger.debug("Share.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("Share.executeOperationFile: Exception: " + oEx);
+			WasdiLog.debugLog("Share.executeOperationFile: " + ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		m_oLocalLogger.debug("Share.executeOperation");
+		WasdiLog.debugLog("Share.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -111,7 +111,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				// Get the file name
 				String sFileNameWithoutPath = oParameter.getProductName();
-				m_oLocalLogger.debug("Share.executeOperation: File to share: " + sFileNameWithoutPath);
+				WasdiLog.debugLog("Share.executeOperation: File to share: " + sFileNameWithoutPath);
 				m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
 
 				if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
@@ -123,7 +123,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 					// Send Rabbit notification
 					m_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
 				} else {
-					m_oLocalLogger.error("Share.executeOperation: sFileNameWithoutPath is null or empty!!");
+					WasdiLog.errorLog("Share.executeOperation: sFileNameWithoutPath is null or empty!!");
 				}
 
 				Product oProduct = null;
@@ -133,7 +133,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				try {
 					FileUtils.copyFile(oOriginFile, oDestinationFile);
 				} catch (Exception oE) {
-					m_oLocalLogger.error("Share.executeOperation: could not copy file due to: " + oE);
+					WasdiLog.errorLog("Share.executeOperation: could not copy file due to: " + oE);
 				}
 
 				if (oDestinationFile.exists()) {
@@ -154,7 +154,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 					try {
 						oVM = oProductReader.getProductViewModel();
 					} catch (Exception oVMEx) {
-						m_oLocalLogger.warn("Share.executeOperation: exception reading Product View Model " + oVMEx.toString());
+						WasdiLog.warnLog("Share.executeOperation: exception reading Product View Model " + oVMEx.toString());
 					}
 
 					if (oVM == null) {
@@ -176,7 +176,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 					if (!Utils.isNullOrEmpty(sBoundingBox)) {
 						oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 					} else {
-						m_oLocalLogger.info("Share.executeOperation: bounding box not available in the parameter");
+						WasdiLog.infoLog("Share.executeOperation: bounding box not available in the parameter");
 					}
 
 					if (oProduct != null) {
@@ -197,7 +197,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				// Final Check: do we have at the end a valid file name?
 				if (Utils.isNullOrEmpty(sFileName)) {
 					// No, we are in error
-					m_oLocalLogger.debug("Share.executeOperation: file is null there must be an error");
+					WasdiLog.debugLog("Share.executeOperation: file is null there must be an error");
 
 					String sError = "The name of the file to share result null";
 					m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
@@ -219,7 +219,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				setPayload(oProcessWorkspace, oDownloadPayload);
 
-				m_oLocalLogger.debug("Share.executeOperation: operation done");
+				WasdiLog.debugLog("Share.executeOperation: operation done");
 				updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
 				return true;
@@ -228,7 +228,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 			}
 
 		} catch (Exception oEx) {
-			m_oLocalLogger.error("Share.executeOperation: Exception "
+			WasdiLog.errorLog("Share.executeOperation: Exception "
 					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
@@ -237,7 +237,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 					sError, oParam.getExchange());
 		}
 
-		m_oLocalLogger.debug("Share.executeOperation: return file name " + sFileName);
+		WasdiLog.debugLog("Share.executeOperation: return file name " + sFileName);
 
 		return false;
 	}

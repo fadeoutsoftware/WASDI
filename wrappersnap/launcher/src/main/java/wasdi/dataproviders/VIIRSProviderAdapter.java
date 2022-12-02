@@ -4,18 +4,14 @@ import java.io.File;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class VIIRSProviderAdapter extends ProviderAdapter {
 	
 	public VIIRSProviderAdapter() {
 		super();
-		m_sDataProviderCode = "VIIRS";
-	}
-	
-	public VIIRSProviderAdapter(LoggerWrapper logger) {
-		super(logger);
 		m_sDataProviderCode = "VIIRS";
 	}
 
@@ -28,7 +24,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		Utils.debugLog("VIIRSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 				
 		String sResult = "";
 		
@@ -36,7 +32,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		
 		while (Utils.isNullOrEmpty(sResult) && iAttemp<iMaxRetry) {
 			
-			Utils.debugLog("VIIRSProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 			
 			try {
 				sResult = downloadViaHttp(sFileURL.replace("_part", ".part"), "", "", sSaveDirOnServer);
@@ -49,7 +45,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("VIIRSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
 			iAttemp ++;

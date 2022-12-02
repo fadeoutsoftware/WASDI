@@ -9,8 +9,8 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
-import wasdi.shared.utils.runtime.StreamGobbler;
 
 /**
  * Wrap main docker functionalities
@@ -183,7 +183,7 @@ public class DockerUtils {
             try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
                 // Fill the script file
                 if (oBuildScriptWriter != null) {
-                    LauncherMain.s_oLogger.debug("DockerUtils.deploy: Creating " + sBuildScriptFile + " file");
+                    WasdiLog.debugLog("DockerUtils.deploy: Creating " + sBuildScriptFile + " file");
 
                     oBuildScriptWriter.write("#!/bin/bash");
                     oBuildScriptWriter.newLine();
@@ -218,9 +218,9 @@ public class DockerUtils {
             // Run the script
             RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
 
-            LauncherMain.s_oLogger.debug("DockerUtils.deploy: created image " + sDockerName);
+            WasdiLog.debugLog("DockerUtils.deploy: created image " + sDockerName);
         } catch (Exception oEx) {
-        	LauncherMain.s_oLogger.error("DockerUtils.deploy: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.deploy: " + oEx.toString());
             return "";
         }
 
@@ -286,7 +286,7 @@ public class DockerUtils {
                 if (WasdiConfig.Current.dockers.extraHosts != null) {
                 	
                 	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-                		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
+                		WasdiLog.debugLog("DockerUtils.run adding configured extra host mapping to the run arguments");
                     	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
                     		
                     		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
@@ -308,11 +308,11 @@ public class DockerUtils {
                     sCommandLine += sArg + " ";
                 }
 
-                LauncherMain.s_oLogger.debug("DockerUtils.run CommandLine: " + sCommandLine);
+                WasdiLog.debugLog("DockerUtils.run CommandLine: " + sCommandLine);
 
                 try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
                     if (null != oRunWriter) {
-                        LauncherMain.s_oLogger.debug("DockerUtils.run: Creating " + sRunFile + " file");
+                        WasdiLog.debugLog("DockerUtils.run: Creating " + sRunFile + " file");
 
                         oRunWriter.write("#!/bin/bash");
                         oRunWriter.newLine();
@@ -342,9 +342,9 @@ public class DockerUtils {
             // Execute the command to start the docker
             RunTimeUtils.shellExec(sRunFile, asArgs, false);
 
-            LauncherMain.s_oLogger.debug("DockerUtils.run " + sDockerName + " started");
+            WasdiLog.debugLog("DockerUtils.run " + sDockerName + " started");
         } catch (Exception oEx) {
-        	LauncherMain.s_oLogger.error("DockerUtils.run: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.run: " + oEx.toString());
             return false;
         }
 
@@ -398,7 +398,7 @@ public class DockerUtils {
             if (!oDeleteScriptFile.exists() || oDeleteScriptFile.length() == 0L) {
                 try (BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile))) {
                     if (oDeleteScriptWriter != null) {
-                        LauncherMain.s_oLogger.debug("DockerUtils.delete: Creating " + sDeleteScriptFile + " file");
+                        WasdiLog.debugLog("DockerUtils.delete: Creating " + sDeleteScriptFile + " file");
 
                         oDeleteScriptWriter.write("#!/bin/bash");
                         oDeleteScriptWriter.newLine();
@@ -435,7 +435,7 @@ public class DockerUtils {
             // Wait for docker to finish
             Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
         } catch (Exception oEx) {
-        	LauncherMain.s_oLogger.error("DockerUtils.delete: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.delete: " + oEx.toString());
             return false;
         }
 
@@ -458,7 +458,7 @@ public class DockerUtils {
             RunTimeUtils.runCommand(sFolder, sCommand, true, true);
             
     	} catch (Exception oEx) {
-    		LauncherMain.s_oLogger.error("DockerUtils.login: " + oEx.toString());
+    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
             return false;
         }
     	
@@ -474,7 +474,7 @@ public class DockerUtils {
     	try {
     		
     		if (sImage.contains(":")) {
-    			LauncherMain.s_oLogger.debug("DockerUtils.push image contains a tag: remove it");
+    			WasdiLog.debugLog("DockerUtils.push image contains a tag: remove it");
     			sImage = sImage.split(":")[0];
     		}
     		
@@ -497,13 +497,13 @@ public class DockerUtils {
 				sCommandLine += sArg + " ";
 			}			
 		
-			LauncherMain.s_oLogger.debug("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
+			WasdiLog.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
 
 
             RunTimeUtils.shellExec(sCommand, asArgs, true);    		
     		
     	} catch (Exception oEx) {
-    		LauncherMain.s_oLogger.error("DockerUtils.login: " + oEx.toString());
+    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
             return false;
         }
     	

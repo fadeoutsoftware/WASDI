@@ -15,6 +15,7 @@ import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorTerrascope extends ResponseTranslator {
@@ -86,7 +87,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.translateBatch: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.translateBatch: " + oE);
 		}
 		return aoResults;
 	}
@@ -115,7 +116,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			buildLink(oResult);
 			buildSummary(oResult);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.translate( " +
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.translate( " +
 					oInJson.toString() + ", " +
 					bFullViewModel + " ): " + oE );
 		}
@@ -136,7 +137,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				oResult.getProperties().put(ResponseTranslatorTerrascope.STYPE, oInJson.optString(ResponseTranslatorTerrascope.STYPE, null));
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.parseMainInfo( " +
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseMainInfo( " +
 					oInJson.toString() + ", ...): " + oE );
 		}
 	}
@@ -184,7 +185,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.parseFootPrint( " + oInJson.toString() + ", ... ): " + oE );
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseFootPrint( " + oInJson.toString() + ", ... ): " + oE );
 		}
 	}
 
@@ -238,7 +239,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 		try {
 			JSONObject oProperties = oInJson.optJSONObject("properties");
 			if (null == oProperties) {
-				Utils.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null properties");
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.addProperties: input json has null properties");
 				return;
 			}
 
@@ -317,7 +318,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
 			parseServices(oResult, oProperties);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
 		}
 	}
 
@@ -336,11 +337,11 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 		try {
 			//links
 			if (!oProperties.has("links")) {
-				Utils.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
 						oProperties + "\nJSON DUMP END");
 			}
 			if (oProperties.isNull("links")) {
-				Utils.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
 						oProperties + "\nJSON DUMP END");
 			}
 			//try as object
@@ -377,13 +378,13 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 							}
 
 						} catch (Exception oE) {
-							Utils.debugLog("ResponseTranslatorTerrascope.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
+							WasdiLog.debugLog("ResponseTranslatorTerrascope.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
 						}
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
+			WasdiLog.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
 		}
 	}
 
@@ -447,7 +448,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			oResult.getProperties().put("format", sUrl.substring(sUrl.lastIndexOf(".") + 1));
 			oResult.setLink(sUrl);
 		} else {
-			Utils.debugLog("ResponseTranslatorTerrascope.parseServices: download link not found! dumping json:\n"
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.parseServices: download link not found! dumping json:\n"
 					+ "JSON DUMP BEGIN\n" + oProperties.toString() + "JSON DUMP END");
 		}
 	}
@@ -458,7 +459,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 		try {
 			sCompressedPayload = StringUtils.compressString(sPayload);
 		} catch (IOException e) {
-			Utils.debugLog("ResponseTranslatorTerrascope.compressPayload: the payload cannot be compressed: " + e.getMessage());
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.compressPayload: the payload cannot be compressed: " + e.getMessage());
 		}
 
 		return sCompressedPayload;
@@ -533,7 +534,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 
 			sItem = oResult.getProperties().get(ResponseTranslatorTerrascope.SURL);
 			if (sItem == null || sItem.isEmpty()) {
-				Utils.debugLog("ResponseTranslatorTerrascope.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
+				WasdiLog.debugLog("ResponseTranslatorTerrascope.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle());
 				sItem = "http://";
 			}
 			oLink.append(sItem).append(ResponseTranslatorTerrascope.SLINK_SEPARATOR_TERRASCOPE); //0
@@ -587,7 +588,7 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 			oResult.getProperties().put(ResponseTranslatorTerrascope.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorTerrascope.buildLink: could not extract download link: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorTerrascope.buildLink: could not extract download link: " + oE);
 		}
 	}
 

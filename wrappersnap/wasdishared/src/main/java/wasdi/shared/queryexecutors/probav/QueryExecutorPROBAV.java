@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -75,7 +75,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 	@Override
 	protected String getSearchUrl(PaginatedQuery oQuery){
-		Utils.debugLog("QueryExecutorPROBAV.buildUrl");
+		WasdiLog.debugLog("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "https://services.terrascope.be/catalogue/products?";
 		String sPolygon = null;
@@ -174,7 +174,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 	public int executeCount(String sQuery)
 	{
 		try {
-			Utils.debugLog("QueryExecutorPROBAV.executeCount");
+			WasdiLog.debugLog("QueryExecutorPROBAV.executeCount");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
 			String sUrl = getSearchUrl(oQuery);
 
@@ -214,11 +214,11 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			Document<Feed> oDocument = null;
 
 			if (response.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog("QueryExecutor.executeCount: Response ERROR: " + response.getType());
+				WasdiLog.debugLog("QueryExecutor.executeCount: Response ERROR: " + response.getType());
 				return 0;
 			}
 
-			Utils.debugLog("Response Success");		
+			WasdiLog.debugLog("Response Success");		
 
 			// Get The Result as a string
 			BufferedReader oBuffRead = new BufferedReader(response.getReader());
@@ -230,12 +230,12 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 			String sResultAsString = oResponseStringBuilder.toString();
 
-			//		Utils.debugLog(sResultAsString);
+			//		WasdiLog.debugLog(sResultAsString);
 
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 
 			if (oDocument == null) {
-				Utils.debugLog("OpenSearchQuery.ExecuteQuery: Document response null");
+				WasdiLog.debugLog("OpenSearchQuery.ExecuteQuery: Document response null");
 				return 0;
 			}
 
@@ -248,7 +248,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			return Integer.valueOf(sTotal);			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorProbaV.executeCount: Exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorProbaV.executeCount: Exception " + oEx.toString());
 		}
 		
 		return -1;
@@ -257,7 +257,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 	@Override
 	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
-		Utils.debugLog("QueryExecutorPROBAV.buildResultLightViewModel");
+		WasdiLog.debugLog("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);
@@ -266,7 +266,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
-			Utils.debugLog(oEntry.toString());
+			WasdiLog.debugLog(oEntry.toString());
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
@@ -307,7 +307,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			aoResults.add(oResult);
 		} 
 
-		Utils.debugLog("Search Done: found " + aoResults.size() + " results");
+		WasdiLog.debugLog("Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
@@ -315,7 +315,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 	@Override
 	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
-		Utils.debugLog("QueryExecutorPROBAV.buildResultViewModel");
+		WasdiLog.debugLog("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
@@ -355,39 +355,39 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");			
 			if (oLink != null) {
-				//				Utils.debugLog("Icon Link: " + oLink.getHref().toString());
+				//				WasdiLog.debugLog("Icon Link: " + oLink.getHref().toString());
 
 				try {
 					IRI oIri = oLink.getHref();
 					String sHref = oIri.toString();
 					ClientResponse oImageResponse = oClient.get(sHref, oOptions);
-					//					Utils.debugLog("Response Got from the client");
+					//					WasdiLog.debugLog("Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS)
 					{
-						//						Utils.debugLog("Success: saving image preview");
+						//						WasdiLog.debugLog("Success: saving image preview");
 						InputStream oInputStreamImage = oImageResponse.getInputStream();
 						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 						ByteArrayOutputStream bas = new ByteArrayOutputStream();
 						ImageIO.write(oImage, "png", bas);
 						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						//						Utils.debugLog("Image Saved");
+						//						WasdiLog.debugLog("Image Saved");
 					}				
 				}
 				catch (Exception e) {
-					Utils.debugLog("Image Preview Cycle Exception " + e.toString());
+					WasdiLog.debugLog("Image Preview Cycle Exception " + e.toString());
 				}					
 			}
 
 			aoResults.add(oResult);
 		} 
 
-		Utils.debugLog("Search Done: found " + aoResults.size() + " results");
+		WasdiLog.debugLog("Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
 
 	private Map<String, String> getFootprint(Document<Feed> oDocument){
-		Utils.debugLog("QueryExecutorPROBAV.getFootprint");
+		WasdiLog.debugLog("QueryExecutorPROBAV.getFootprint");
 		Map<String, String> oMap = new HashMap<String, String>();
 
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -402,7 +402,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					sDocSummary += "...";
 				}
 			}
-			Utils.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE);
+			WasdiLog.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE);
 		}
 		
 		InputStream oInputStreamReader = new ByteArrayInputStream(outStream.toByteArray());
@@ -415,7 +415,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
 			org.w3c.dom.Document doc = oDocBuilder.parse(oInputStreamReader);
 			doc.getDocumentElement().normalize();
-			Utils.debugLog("Root element: " + doc.getDocumentElement().getNodeName());
+			WasdiLog.debugLog("Root element: " + doc.getDocumentElement().getNodeName());
 			// loop through each item
 			doc.getDocumentElement().toString();
 			NodeList items = doc.getChildNodes().item(0).getChildNodes();
@@ -471,7 +471,7 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					sDocSummary += "...";
 				}
 			}
-			Utils.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE1);
+			WasdiLog.debugLog("QueryExecutorPROBAV.getFootprint( " + sDocSummary+ " ): " + oE1);
 		}
 		return oMap;
 	}

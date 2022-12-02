@@ -32,6 +32,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.QueryExecutorFactory;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public abstract class LauncherMainTest {
@@ -47,7 +48,7 @@ public abstract class LauncherMainTest {
 	@BeforeClass
     public static void setUpParent() throws Exception {
 		s_sClassName = "LauncherMainTest";
-		Utils.debugLog(s_sClassName + ".setUp");
+		WasdiLog.debugLog(s_sClassName + ".setUp");
 		
 		m_aoCredentials = new HashMap<>();
 
@@ -349,7 +350,7 @@ public abstract class LauncherMainTest {
 				iLimit = Integer.parseInt(sLimit);
 			} 
 			catch (NumberFormatException oE1) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
+				WasdiLog.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
 				return null;
 			}
 			
@@ -364,7 +365,7 @@ public abstract class LauncherMainTest {
 				iOffset = Integer.parseInt(sOffset);
 			} 
 			catch (NumberFormatException oE2) {
-				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
+				WasdiLog.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
 				return null;
 			}
 			
@@ -379,7 +380,7 @@ public abstract class LauncherMainTest {
 					aiCounterMap.put(sProvider, iProviderCountResults);
 				}
 			} catch (Exception oE) {
-				Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+				WasdiLog.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 			}
 			
 			// For each provider
@@ -394,14 +395,14 @@ public abstract class LauncherMainTest {
 				String sCurrentOffset = "" + iCurrentOffset;
 				
 				
-				Utils.debugLog(s_sClassName + ".search, executing. " + sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
+				WasdiLog.debugLog(s_sClassName + ".search, executing. " + sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
 				
 				try {
 					// Get the query executor
 					QueryExecutor oExecutor = QueryExecutorFactory.getExecutor(sProviders);
 					
 					if (oExecutor == null) {
-						Utils.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
+						WasdiLog.debugLog(s_sClassName + ".search: executor null for Provider: " + sProvider);
 						aoResults.add(null);
 						continue;
 					}
@@ -416,20 +417,20 @@ public abstract class LauncherMainTest {
 						if (aoTmp != null && !aoTmp.isEmpty()) {
 							// Yes perfect add all
 							aoResults.addAll(aoTmp);
-							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
+							WasdiLog.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
 						} 
 						else {
 							// Nothing to add
-							Utils.debugLog(s_sClassName + ".search: no results found for " + sProvider);
+							WasdiLog.debugLog(s_sClassName + ".search: no results found for " + sProvider);
 						}
 					} 
 					catch (NumberFormatException oNumberFormatException) {
-						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
+						WasdiLog.debugLog(s_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
 					} 
 				}
 				catch (Exception oE) {
-					Utils.debugLog(s_sClassName + ".search: " + oE);
+					WasdiLog.debugLog(s_sClassName + ".search: " + oE);
 					aoResults.add(null);
 				}
 			}
@@ -440,7 +441,7 @@ public abstract class LauncherMainTest {
 
 
 	private AuthenticationCredentials getCredentials(String sProvider) {
-		//Utils.debugLog(s_sClassName + ".getCredentials( Provider: " + sProvider + " )");
+		//WasdiLog.debugLog(s_sClassName + ".getCredentials( Provider: " + sProvider + " )");
 		AuthenticationCredentials oCredentials = null;
 		try {
 			oCredentials = m_aoCredentials.get(sProvider);
@@ -454,7 +455,7 @@ public abstract class LauncherMainTest {
 				m_aoCredentials.put(sProvider, oCredentials);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
+			WasdiLog.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
 		}
 		return oCredentials;
 	}

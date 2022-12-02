@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.shared.utils.log;
 
 import org.apache.log4j.Logger;
 
@@ -23,7 +23,7 @@ public class LoggerWrapper {
 	public void debug(String sText) {
 		
 		if (m_oLogger!=null) {
-			m_oLogger.debug(m_sPrefix + " " + sText);
+			WasdiLog.debugLog(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -33,7 +33,7 @@ public class LoggerWrapper {
 	public void warn(String sText) {
 		
 		if (m_oLogger!=null) {
-			m_oLogger.warn(m_sPrefix + " " + sText);
+			WasdiLog.warnLog(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -42,7 +42,7 @@ public class LoggerWrapper {
 	
 	public void info(String sText) {
 		if (m_oLogger!=null) {
-			m_oLogger.info(m_sPrefix + " " + sText);
+			WasdiLog.infoLog(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -52,7 +52,7 @@ public class LoggerWrapper {
 	
 	public void error(String sText) {
 		if (m_oLogger!=null) {
-			m_oLogger.error(m_sPrefix + " " + sText);
+			WasdiLog.errorLog(m_sPrefix + " " + sText);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);
@@ -61,7 +61,7 @@ public class LoggerWrapper {
 	
 	public void error(String sText, Exception oEx) {
 		if (m_oLogger!=null) {
-			m_oLogger.error(m_sPrefix + " " + sText, oEx);
+			WasdiLog.errorLog(m_sPrefix + " " + sText, oEx);
 		} 
 		else {
 			System.out.println(m_sPrefix + " " + sText);

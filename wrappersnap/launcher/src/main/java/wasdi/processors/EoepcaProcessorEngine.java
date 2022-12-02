@@ -15,6 +15,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * EOEPCA Processor Engine.
@@ -64,16 +65,16 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
 		if (aoRegisters == null) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
 			return false;			
 		}
 		
-		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
+		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
 		m_sTomcatUser = "";
@@ -87,7 +88,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		if (!bResult) {
 			// This is not good
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
 		
@@ -102,7 +103,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to push the image.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to push the image.");
 			return false;
 		}
 		
@@ -111,14 +112,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 
 		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: empty args, not good");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: empty args, not good");
 			return false;
 		}
 		
 		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
 		
 		if (!bTemplates) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: problems rendering the template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: problems rendering the template");
 			return false;
 		}
 		
@@ -150,13 +151,13 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
 				DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
 				
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
+				WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
 				
 				// Try to login and push
 				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
 				
 				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
-					LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.pushImageInRegisters: image pushed");
+					WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: image pushed");
 					// Ok we got a valid address!
 					break;
 				}
@@ -170,7 +171,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return sPushedImageAddress;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.pushImageInRegisters: error " + oEx.toString());
+			WasdiLog.errorLog("EoepcaProcessorEngine.pushImageInRegisters: error " + oEx.toString());
 		}
 		
 		return "";
@@ -183,7 +184,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @return true or false
 	 */
 	protected boolean renderCWLTemplates(Processor oProcessor, String sAppParametersDeclaration) {
-		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: generate csw file");
+		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate csw file");
 		
 		String sProcessorName = oProcessor.getName();
 		
@@ -207,12 +208,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		boolean bTranslateCSW = oJinjaTemplateRenderer.translate(sCWLTemplateInput, sCWLTemplateOutput, aoCWLParameters);
 		
 		if (!bTranslateCSW) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: error translating CSW template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: error translating CSW template");
 			return false;		
 		}
 		
 		// Generate the body of the descriptor to deploy
-		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: generate app body deploy json file");
+		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate app body deploy json file");
 		
 		String sBodyTemplateInput = getProcessorFolder(sProcessorName) + "appDeployBody.json.j2";
 		String sBodyTemplateOutput = getProcessorFolder(sProcessorName) + "appDeployBody.json";
@@ -224,7 +225,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		boolean bTranslateBody = oJinjaTemplateRenderer.translate(sBodyTemplateInput, sBodyTemplateOutput, aoBodyParameters);
 		
 		if (!bTranslateBody) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: error translating Body json template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: error translating Body json template");
 			return false;		
 		}
 		
@@ -246,7 +247,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
 			return sAppParametersDeclaration;
 		}
 				
@@ -283,7 +284,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
 			return "";
 		}
 		
@@ -302,21 +303,21 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
+				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
 				return "";
 			}
 			
 			boolean bPushed = oDockerUtils.push(sImageName);
 			
 			if (!bPushed) {
-				LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
+				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
 				return "";				
 			}
 			
 			return sImageName;
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
+			WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
 		}
 		
 		return "";
@@ -335,12 +336,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
 		if (aoRegisters == null) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
 			return false;			
 		}
 
@@ -365,16 +366,16 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
 		if (aoRegisters == null) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
 			return false;			
 		}
 		
-		LauncherMain.s_oLogger.debug("EoepcaProcessorEngine.deploy: call base class deploy");
+		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
 		m_sTomcatUser = "";
@@ -387,7 +388,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		if (!bResult) {
 			// This is not good
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
 		
@@ -402,7 +403,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: Impossible to push the image.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to push the image.");
 			return false;
 		}
 		
@@ -411,14 +412,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 
 		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: empty args, not good");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: empty args, not good");
 			return false;
 		}
 		
 		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
 		
 		if (!bTemplates) {
-			LauncherMain.s_oLogger.error("EoepcaProcessorEngine.deploy: problems rendering the template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: problems rendering the template");
 			return false;
 		}
 		

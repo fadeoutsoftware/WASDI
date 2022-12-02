@@ -24,6 +24,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorLSA extends ResponseTranslator {
@@ -62,7 +63,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 			oDocument = oParser.parse(new StringReader(sJson), oParserOptions);
 			
 			if (oDocument == null) {
-				Utils.debugLog("ResponseTranslatorLSA.executeAndRetrieve: Document response null, aborting");
+				WasdiLog.debugLog("ResponseTranslatorLSA.executeAndRetrieve: Document response null, aborting");
 				return aoResults;
 			}
 			
@@ -106,7 +107,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 								iAbsoluteOrbit = Integer.parseInt(sAbsoluteOrbit);
 							}
 							catch (Exception oEx) {
-								Utils.debugLog("ResponseTranslatorLSA: Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
+								WasdiLog.debugLog("ResponseTranslatorLSA: Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
 							}
 							
 							if (iAbsoluteOrbit != -1) {
@@ -158,7 +159,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 								iRelativeOrbit = Integer.parseInt(sRelativeOrbit);
 							}
 							catch (Exception oEx) {
-								Utils.debugLog("Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
+								WasdiLog.debugLog("Exception converting LSA Result Relative Orbit: "  + oEx.toString()) ;
 							}
 							
 							if (iRelativeOrbit != -1) {
@@ -207,7 +208,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 									}				
 								}
 								catch (Exception e) {
-									Utils.debugLog("ResponseTranslatorLSA.translateBatch: Image Preview Cycle Exception " + e.toString());
+									WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Image Preview Cycle Exception " + e.toString());
 								}					
 							} 
 						}						
@@ -251,7 +252,7 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 								
 							}
 							catch (Exception oEx) {
-								Utils.debugLog("Exception " + oEx.toString());
+								WasdiLog.debugLog("Exception " + oEx.toString());
 							}
 						}
 						else if (sName.equals("{http://purl.org/dc/elements/1.1/}date")) {
@@ -277,10 +278,10 @@ public class ResponseTranslatorLSA extends ResponseTranslator {
 				aoResults.add(oResult);
 			} 
 			
-			Utils.debugLog("ResponseTranslatorLSA.translateBatch: Search Done: found " + aoResults.size() + " results");		
+			WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Search Done: found " + aoResults.size() + " results");		
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ResponseTranslatorLSA.translateBatch: Exception = " + oEx.toString());
+			WasdiLog.debugLog("ResponseTranslatorLSA.translateBatch: Exception = " + oEx.toString());
 		}			
 		return aoResults;
 	}

@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * @author c.nattero
  *
@@ -21,7 +23,7 @@ public class EndMessageProvider {
 	private static final List<String> s_asBadEndMessagges;
 	
 	static {
-		Utils.debugLog("EndMessageProvider static constructor");
+		WasdiLog.debugLog("EndMessageProvider static constructor");
 		
 		String sPrefix =  "----WASDI:";
 		String sSuffix = "----";

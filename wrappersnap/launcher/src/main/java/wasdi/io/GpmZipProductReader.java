@@ -7,6 +7,7 @@ import java.util.List;
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -25,7 +26,7 @@ public class GpmZipProductReader extends WasdiProductReader {
 
 		try {
 			if (sFileNameFromProvider.toUpperCase().startsWith("3B-") || sFileNameFromProvider.toUpperCase().contains("IMERG")) {
-				LauncherMain.s_oLogger.debug("GpmZipProductReader.adjustFileAfterDownload: File is a zip file, start unzip");
+				WasdiLog.debugLog("GpmZipProductReader.adjustFileAfterDownload: File is a zip file, start unzip");
 				String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 
 				String sTargetDirectoryPath = sDownloadPath;
@@ -35,15 +36,15 @@ public class GpmZipProductReader extends WasdiProductReader {
 				ZipFileUtils.extractInnerZipFileAndCleanZipFile(oSourceFile, oTargetDirectory);
 
 				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
-				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 
 				sFileName = sFolderName + ".tif";
-				LauncherMain.s_oLogger.debug("GpmZipProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+				WasdiLog.debugLog("GpmZipProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
 
 				m_oProductFile = new File(sFileName);
 			}
 		} catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("GpmZipProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.errorLog("GpmZipProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 
 		return sFileName;

@@ -17,6 +17,7 @@ import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class PipProcessorEngine extends DockerProcessorEngine {
 
@@ -43,13 +44,13 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 		super.onAfterUnzipProcessor(sProcessorFolder);
 
 		try {
-			LauncherMain.s_oLogger.info("PipProcessorEngine.onAfterUnzipProcessor: sanitize pip.txt");
+			WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: sanitize pip.txt");
 
 			// Check the pip file
 			File oPipFile = new File(sProcessorFolder+"pip.txt");
 
 			if (!oPipFile.exists()) {
-				LauncherMain.s_oLogger.info("PipProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: pip file not present, done");
 				return;
 			}
 
@@ -74,7 +75,7 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 					if (asUserPackages.contains(sExistingPackage)) {
 
 						// Remove it
-						LauncherMain.s_oLogger.info("PipProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
+						WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: removing already existing package " + sExistingPackage);
 						asUserPackages.remove(sExistingPackage);
 					}
 				}
@@ -82,7 +83,7 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 			// Do we still have packages
 			if (asUserPackages.size() > 0) {
-				LauncherMain.s_oLogger.info("PipProcessorEngine.onAfterUnzipProcessor: writing new pip.txt file");
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: writing new pip.txt file");
 
 				FileOutputStream oNewPipFile = new FileOutputStream(oPipFile);
 
@@ -94,11 +95,11 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 					if (!checkPipPackage(sPackage)) {
 						m_oProcessWorkspaceLogger.log("We did not find PIP package [" + sPackage + "], are you sure is correct?");
-						LauncherMain.s_oLogger.info("We did not find PIP package [" + sPackage + "], jump it");
+						WasdiLog.infoLog("We did not find PIP package [" + sPackage + "], jump it");
 						continue;
 					}
 					else {
-						LauncherMain.s_oLogger.info("Adding [" + sPackage + "]");
+						WasdiLog.infoLog("Adding [" + sPackage + "]");
 						oPipWriter.write(sPackage);
 						oPipWriter.newLine();						
 					}
@@ -109,13 +110,13 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				oNewPipFile.close();
 			}
 			else {
-				LauncherMain.s_oLogger.info("PipProcessorEngine.onAfterUnzipProcessor: no more packages after filtering: delete pip file");
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: no more packages after filtering: delete pip file");
 				oPipFile.delete();
 			}
 
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("PipProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
+			WasdiLog.errorLog("PipProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
 		}
 		
 	}
@@ -154,7 +155,7 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 			}
 		}
 		catch (Exception oExtEx) {
-			LauncherMain.s_oLogger.info("PipProcessorEngine.checkPipPackage: exception " + oExtEx.toString());
+			WasdiLog.infoLog("PipProcessorEngine.checkPipPackage: exception " + oExtEx.toString());
 		}
 
 		return false;

@@ -14,9 +14,9 @@ import org.apache.commons.io.FileUtils;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class PROBAVProviderAdapter extends ProviderAdapter {
 
@@ -30,26 +30,20 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		
 	}
 
-	public PROBAVProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		
-		m_sDataProviderCode = "PROBAV";
-	}
-
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		long lLenght = 0L;
 
 	    // Domain check
 	    if (Utils.isNullOrEmpty(sFileURL)) {
-	    	m_oLogger.debug("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
+	    	WasdiLog.debugLog("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
 	        return lLenght;
 	    }
 
 	    final String sFinalUser = m_sProviderUser;
 	    final String sFinalPassword = m_sProviderPassword;
 	        
-	    m_oLogger.debug("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
+	    WasdiLog.debugLog("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
 	    URL oUrl = new URL(sFileURL);
 	    HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -68,11 +62,11 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	    // always check HTTP response code first
 	    if (responseCode == HttpURLConnection.HTTP_OK) {
 	    	lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
-	    	m_oLogger.debug("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
+	    	WasdiLog.debugLog("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
 	    	return lLenght;
 	    } 
 	    else {
-	    	m_oLogger.debug("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
+	    	WasdiLog.debugLog("PROBAVProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
 	        m_iLastError = responseCode;
 	    }
 	        
@@ -85,11 +79,11 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("PROBAVProviderAdapter.ExecuteDownloadFile: sFileURL is null");
+			WasdiLog.debugLog("PROBAVProviderAdapter.ExecuteDownloadFile: sFileURL is null");
 			return "";
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("PROBAVProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
+			WasdiLog.debugLog("PROBAVProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
 		setProcessWorkspace(oProcessWorkspace);
@@ -97,11 +91,11 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		String sReturnFilePath = CopyLocalFile(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
 
 		if (!Utils.isNullOrEmpty(sReturnFilePath)) {
-			m_oLogger.debug("PROBAVProviderAdapter.ExecuteDownloadFile: File found in local repo. Return");
+			WasdiLog.debugLog("PROBAVProviderAdapter.ExecuteDownloadFile: File found in local repo. Return");
 
 			return sReturnFilePath;
 		} else {
-			m_oLogger.debug( "PROBAVProviderAdapter.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
+			WasdiLog.debugLog( "PROBAVProviderAdapter.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
 			
 			return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 		}
@@ -113,9 +107,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		
 		String sReturnFilePath = "";
 		
-		m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+		WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
 		
-		m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+		WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
 		URL oUrl = new URL(sFileURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -134,14 +128,14 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 
-			m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp: Connected");
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Connected");
 
 			String sFileName = "";
 			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 			String sContentType = oHttpConn.getContentType();
 			long lContentLength = oHttpConn.getContentLengthLong();
 
-			m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
 			if (sDisposition != null) {
 				// extracts file name from header field
@@ -154,10 +148,10 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 			}
 
-			m_oLogger.debug("Content-Type = " + sContentType);
-			m_oLogger.debug("Content-Disposition = " + sDisposition);
-			m_oLogger.debug("Content-Length = " + lContentLength);
-			m_oLogger.debug("fileName = " + sFileName);
+			WasdiLog.debugLog("Content-Type = " + sContentType);
+			WasdiLog.debugLog("Content-Disposition = " + sDisposition);
+			WasdiLog.debugLog("Content-Length = " + lContentLength);
+			WasdiLog.debugLog("fileName = " + sFileName);
 
 			// opens input stream from the HTTP connection
 			InputStream oInputStream = oHttpConn.getInputStream();
@@ -166,7 +160,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			
 			String sSaveFilePath = sSaveDirOnServer + sFileName;
 
-			m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
 
 			File oTargetFile = new File(sSaveFilePath);
 			File oTargetDir = oTargetFile.getParentFile();
@@ -180,9 +174,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 			sReturnFilePath = sSaveFilePath;
 
-			m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
-			m_oLogger.debug("PROBAVProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
+			WasdiLog.debugLog("PROBAVProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
 			m_iLastError = responseCode;
 		}
 		oHttpConn.disconnect();
@@ -238,15 +232,15 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 				// Safe check
 				if (asSplittedFileName == null) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name is null");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name is null");
 					return "";
 				}
 				if (asSplittedFileName.length == 0) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name is empyt");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name is empyt");
 					return "";
 				}
 				if (asSplittedFileName.length < 3) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name length < 3");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name length < 3");
 					return "";
 				}
 
@@ -254,7 +248,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 				String sDateString = asSplittedFileName[2];
 
 				if (sDateString.length() < 8) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: Date String lenght < 8");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: Date String lenght < 8");
 					return "";
 				}
 
@@ -268,15 +262,15 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 				// Safe check
 				if (asSplittedFileName == null) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 is null");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 is null");
 					return "";
 				}
 				if (asSplittedFileName.length == 0) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 is empyt");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 is empyt");
 					return "";
 				}
 				if (asSplittedFileName.length < 2) {
-					m_oLogger.error("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 length < 2");
+					WasdiLog.errorLog("PROBAVProviderAdapter.CopyLocalFile: splitted file name 2 length < 2");
 					return "";
 				}
 
@@ -287,19 +281,19 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 				sSourceFolder = sSourceFolder + "/" + sYear + "/" + sMonth + "/" + sDateString + "/" + sFileFolder + "/"
 						+ sFileName;
 
-				m_oLogger.debug("PROBAVProviderAdapter.CopyLocalFile: Source File" + sSourceFolder);
+				WasdiLog.debugLog("PROBAVProviderAdapter.CopyLocalFile: Source File" + sSourceFolder);
 
 				// Final destination: base + file
 				if (!sSaveDirOnServer.endsWith("/"))
 					sSaveDirOnServer += "/";
 				sSaveDirOnServer += sFileName;
 
-				m_oLogger.debug("PROBAVProviderAdapter.CopyLocalFile: Destination File" + sSaveDirOnServer);
+				WasdiLog.debugLog("PROBAVProviderAdapter.CopyLocalFile: Destination File" + sSaveDirOnServer);
 
 				File oSourceFile = new File(sSourceFolder);
 
 				if (oSourceFile.exists() == false) {
-					m_oLogger.warn("PROBAVProviderAdapter.CopyLocalFile: Source File not available. exit");
+					WasdiLog.warnLog("PROBAVProviderAdapter.CopyLocalFile: Source File not available. exit");
 					return "";
 				}
 
@@ -337,7 +331,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		try {
 			// Domain check
 			if (Utils.isNullOrEmpty(sFileURL)) {
-				m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
+				WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
 				return "";
 			}
 
@@ -346,14 +340,14 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			final String sFinalUser = m_sProviderUser;
 			final String sFinalPassword = m_sProviderPassword;
 
-			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
+			WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
 			
 			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
 			int iReadTimeOut = WasdiConfig.Current.readTimeout;
 			
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: Connection Created");
+			WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: Connection Created");
 			
 			//NOTE: the DhUS version did not set GET and Accept. ONDA did. TEST 
 			oHttpConn.setRequestMethod("GET");
@@ -368,13 +362,13 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			oHttpConn.setRequestProperty("Authorization",sBasicAuth);
 			oHttpConn.setConnectTimeout(iConnectionTimeOut);
 			oHttpConn.setReadTimeout(iReadTimeOut);
-			m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
+			WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
 			int responseCode = oHttpConn.getResponseCode();
 
 			// always check HTTP response code first
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 
-				m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp: Connected");
+				WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: Connected");
 
 				String sFileName = "";
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
@@ -400,12 +394,12 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 
 				sReturnFilePath = sFileName;
 
-				m_oLogger.debug("Content-Type = " + sContentType);
-				m_oLogger.debug("Content-Disposition = " + sDisposition);
-				m_oLogger.debug("Content-Length = " + sContentLength);
-				m_oLogger.debug("fileName = " + sFileName);
+				WasdiLog.debugLog("Content-Type = " + sContentType);
+				WasdiLog.debugLog("Content-Disposition = " + sDisposition);
+				WasdiLog.debugLog("Content-Length = " + sContentLength);
+				WasdiLog.debugLog("fileName = " + sFileName);
 			} else {
-				m_oLogger.debug("PROBAVProviderAdapter.getFileNameViaHttp No file to download. Server replied HTTP code: " + responseCode);
+				WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp No file to download. Server replied HTTP code: " + responseCode);
 				m_iLastError = responseCode;
 			}
 			oHttpConn.disconnect();
@@ -413,7 +407,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error("PROBAVProviderAdapter.getFileName: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("PROBAVProviderAdapter.getFileName: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 
 		return "";
@@ -430,9 +424,9 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			}
 
 		} catch (IOException e) {
-			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+			WasdiLog.errorLog("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
 		} catch (Exception e) {
-			m_oLogger.error("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
+			WasdiLog.errorLog("PROBAVProviderAdapter.internalReadConfig: exception " + e.toString());
 		}
 		
 	}

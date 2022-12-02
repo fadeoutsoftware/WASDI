@@ -13,21 +13,22 @@ import wasdi.shared.parameters.settings.MultiSubsetSetting;
 import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Multisubset extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
         
-		m_oLocalLogger.debug("Multisubset.executeOperation");
+		WasdiLog.debugLog("Multisubset.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}        
 
@@ -44,7 +45,7 @@ public class Multisubset extends Operation {
 
             if (iTileCount > 15) {
                 m_oProcessWorkspaceLogger.log("Sorry, no more than 15 tiles... " + new EndMessageProvider().getBad());
-                m_oLocalLogger.error("Multisubset.executeOperation: More than 15 tiles: it hangs, need to refuse");
+                WasdiLog.errorLog("Multisubset.executeOperation: More than 15 tiles: it hangs, need to refuse");
                 return false;
             }
 
@@ -67,29 +68,29 @@ public class Multisubset extends Operation {
                 // Check th bbox
                 if (oSettings.getLatNList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
-                    m_oLocalLogger.debug("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
+                    WasdiLog.debugLog("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLatSList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
-                    m_oLocalLogger.debug("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
+                    WasdiLog.debugLog("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonEList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
-                    m_oLocalLogger.debug("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
+                    WasdiLog.debugLog("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonWList().size() <= iTiles) {
                     m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
-                    m_oLocalLogger.debug("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
+                    WasdiLog.debugLog("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
-                m_oLocalLogger.debug("Multisubset.executeOperation: Computing tile " + sOutputProduct);
+                WasdiLog.debugLog("Multisubset.executeOperation: Computing tile " + sOutputProduct);
 
                 // Translate
                 String sGdalTranslateCommand = "gdal_translate";
@@ -132,7 +133,7 @@ public class Multisubset extends Operation {
                     sCommand += sArg + " ";
                 }
 
-                m_oLocalLogger.debug("Multisubset.executeOperation Command Line " + sCommand);
+                WasdiLog.debugLog("Multisubset.executeOperation Command Line " + sCommand);
 
                 // oProcessBuidler.redirectErrorStream(true);
                 oProcess = oProcessBuidler.start();
@@ -144,16 +145,16 @@ public class Multisubset extends Operation {
                 if (oTileFile.exists()) {
                     String sOutputPath = LauncherMain.getWorkspacePath(oParameter) + sOutputProduct;
 
-                    m_oLocalLogger.debug("Multisubset.executeOperation done for index " + iTiles);
+                    WasdiLog.debugLog("Multisubset.executeOperation done for index " + iTiles);
 
                     m_oProcessWorkspaceLogger.log("adding output to the workspace");
 
                     addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false, false);
 
-                    m_oLocalLogger.debug("Multisubset.executeOperation: product added to workspace");
+                    WasdiLog.debugLog("Multisubset.executeOperation: product added to workspace");
 
                 } else {
-                    m_oLocalLogger.debug("Multisubset.executeOperation Subset null for index " + iTiles);
+                    WasdiLog.debugLog("Multisubset.executeOperation Subset null for index " + iTiles);
                 }
 
                 iProgress = iProgress + iStepPerTile;
@@ -173,7 +174,7 @@ public class Multisubset extends Operation {
 
                 setPayload(oProcessWorkspace, oMultiSubsetPayload);
             } catch (Exception oPayloadException) {
-                m_oLocalLogger.error("Multisubset.executeOperation: Error creating operation payload: ", oPayloadException);
+                WasdiLog.errorLog("Multisubset.executeOperation: Error creating operation payload: ", oPayloadException);
             }
 
 
@@ -184,7 +185,7 @@ public class Multisubset extends Operation {
             return true;
         } catch (Exception oEx) {
 
-            m_oLocalLogger.error("Multisubset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Multisubset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 

@@ -22,6 +22,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -74,7 +75,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			return iCount;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorVIIRS.executeCount: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorVIIRS.executeCount: error " + oEx.toString());
 		}
 		
 		return -1;
@@ -124,14 +125,14 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 		    	iOffset = Integer.parseInt(sOffset);
 		    }
 		    catch (Exception oE) {
-		    	Utils.debugLog("QueryExecutorVIIRS.executeAndRetrieve: " + oE.toString());
+		    	WasdiLog.debugLog("QueryExecutorVIIRS.executeAndRetrieve: " + oE.toString());
 			}
 		    
 		    try {
 		    	iLimit = Integer.parseInt(sLimit);
 		    }
 		    catch (Exception oE) {
-		    	Utils.debugLog("QueryExecutorVIIRS.executeAndRetrieve: " + oE.toString());
+		    	WasdiLog.debugLog("QueryExecutorVIIRS.executeAndRetrieve: " + oE.toString());
 			}
 		    
 		    DateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
@@ -186,7 +187,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			return aoResults;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorVIIRS.executeAndRetrieve: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorVIIRS.executeAndRetrieve: error " + oEx.toString());
 		}
 		
 		return null;
@@ -202,7 +203,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorVIIRS.init(): exception reading parser config file " + m_sParserConfigPath);
+			WasdiLog.debugLog("QueryExecutorVIIRS.init(): exception reading parser config file " + m_sParserConfigPath);
 		}		
 	}
 	
@@ -237,7 +238,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 				}
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("QueryExecutorVIIRS.getInvolvedSections.Exception " + oEx.toString());
+				WasdiLog.debugLog("QueryExecutorVIIRS.getInvolvedSections.Exception " + oEx.toString());
 			}
 
 		}
@@ -254,7 +255,7 @@ public class QueryExecutorVIIRS extends QueryExecutor {
 			return oFeatureSource.getFeatures(oFilter);
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorVIIRS.grabFeaturesInBoundingBox Exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorVIIRS.grabFeaturesInBoundingBox Exception " + oEx.toString());
 		}
 		
 		return null;

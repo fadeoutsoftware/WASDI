@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import wasdi.shared.data.MongoRepository;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * WASDI Configuration
@@ -205,7 +205,7 @@ public class WasdiConfig {
 			
 			return true;
 		} catch (Exception e) {
-			Utils.debugLog("WasdiConfig.readConfig: exception " + e.toString());
+			WasdiLog.debugLog("WasdiConfig.readConfig: exception " + e.toString());
 		}
         
         return false;

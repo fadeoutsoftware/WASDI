@@ -10,6 +10,7 @@ import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.snapopearations.WasdiProgressMonitor;
 
 /**
@@ -46,7 +47,7 @@ public class WasdiProductWriter  {
         try {
             if (!sFilePath.endsWith("/")) sFilePath += "/";
             File newFile = new File(sFilePath + sFileName + sExtension);
-            LauncherMain.s_oLogger.debug("WriteProduct: Output File: " + newFile.getAbsolutePath());
+            WasdiLog.debugLog("WriteProduct: Output File: " + newFile.getAbsolutePath());
             
             WriteOp writeOp = new WriteOp(oProduct, newFile, sFormat);
             writeOp.setDeleteOutputOnFailure(true);
@@ -61,7 +62,7 @@ public class WasdiProductWriter  {
         catch (Exception oEx)
         {
         	oEx.printStackTrace();
-            LauncherMain.s_oLogger.error("WriteProduct: Error writing product. " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("WriteProduct: Error writing product. " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return null;

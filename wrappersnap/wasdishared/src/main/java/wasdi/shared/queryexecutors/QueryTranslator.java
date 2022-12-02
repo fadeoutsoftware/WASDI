@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
@@ -323,7 +324,7 @@ public abstract class QueryTranslator {
 			return sQuery;
 
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.getProductName( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.getProductName( " + sQuery + " ): " + oE);
 		}
 		return "";
 	}
@@ -358,7 +359,7 @@ public abstract class QueryTranslator {
 			try {
 				iOffset = readInt(sQuery, QueryTranslator.s_sOFFSET);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse offset: " + oE);
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse offset: " + oE);
 			}
 
 			oResult.offset = iOffset;
@@ -368,7 +369,7 @@ public abstract class QueryTranslator {
 			try {
 				iLimit = readInt(sQuery, QueryTranslator.s_sLIMIT);
 			} catch (Exception oE) {
-				Utils.debugLog( "QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse limit: " + oE);
+				WasdiLog.debugLog( "QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): could not parse limit: " + oE);
 			}
 
 			oResult.limit = iLimit;
@@ -410,7 +411,7 @@ public abstract class QueryTranslator {
 								dEast = Double.max(dEast, dMeridian);
 								dWest = Double.min(dWest, dMeridian);
 							} catch (Exception oE) {
-								Utils.log("ERROR",
+								WasdiLog.log("ERROR",
 										"QueryTranslator.parseWasdiClientQuery: issue with current coordinate pair: "
 												+ sPair + ": " + oE);
 							}
@@ -431,7 +432,7 @@ public abstract class QueryTranslator {
 						}
 
 					} catch (Exception oE) {
-						Utils.log("ERROR",
+						WasdiLog.log("ERROR",
 								"QueryTranslator.parseWasdiClientQuery: could not complete footprint detection: " + oE);
 					}
 				}
@@ -441,7 +442,7 @@ public abstract class QueryTranslator {
 					reverseEngineerQueryFromProductName(oResult, oResult.productName);
 				}
 			} catch (Exception oE) {
-				Utils.log("ERROR",
+				WasdiLog.log("ERROR",
 						"QueryTranslator.parseWasdiClientQuery: could not identify footprint substring limits: "
 								+ oE);
 			}
@@ -464,7 +465,7 @@ public abstract class QueryTranslator {
 				}
 				
 			}catch (Exception oE) {
-				Utils.debugLog("QueryTranslator.parseWasdiClientQuery: product type: " + oE);
+				WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: product type: " + oE);
 			}
 
 			// Try to get time filters
@@ -536,9 +537,9 @@ public abstract class QueryTranslator {
 			// Try get Info about ECOSTRESS
 			parseECOSTRESS(sQuery, oResult);
 		} catch (Exception oEx) {
-			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
-			Utils.debugLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
+			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: stack " + sStack);
 		}
 
 		return oResult;
@@ -606,7 +607,7 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
+					WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
 							+ " ): error while parsing product type: " + oE);
 				}
 
@@ -635,7 +636,7 @@ public abstract class QueryTranslator {
 						oResult.sensorMode = sMode;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
+					WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery
 							+ " ): error while parsing product type: " + oE);
 				}
 
@@ -667,13 +668,13 @@ public abstract class QueryTranslator {
 						oResult.relativeOrbit = iOrbit;
 
 					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslator.parseWasdiClientQuery(" + sQuery
+						WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery(" + sQuery
 								+ " ): error while parsing relative orbit: " + oE);
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
 
@@ -695,7 +696,7 @@ public abstract class QueryTranslator {
 				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseSentinel_2( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseSentinel_2( " + sQuery + " ): " + oE);
 		}
 	}
 	
@@ -733,7 +734,7 @@ public abstract class QueryTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseCloudCoverage( " + sQuery + " ): could not parse cloud coverage: " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseCloudCoverage( " + sQuery + " ): could not parse cloud coverage: " + oE);
 		}
 		
 	}
@@ -777,11 +778,11 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseVIIRS( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
 		}
 	}
 
@@ -860,7 +861,7 @@ public abstract class QueryTranslator {
 				try {
 					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
+					WasdiLog.debugLog("QueryTranslator.parseECOSTRESS( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
 				}
 			}
 
@@ -905,7 +906,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseIMERG(String sQuery, QueryViewModel oResult) {
-		//Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
+		//WasdiLog.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_IMERG)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_IMERG);
@@ -925,7 +926,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		//Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
+		//WasdiLog.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -942,7 +943,7 @@ public abstract class QueryTranslator {
 				try {
 					oResult.cloudCoverageFrom = Double.parseDouble(sStartDepth);
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing startDepth: " + sStartDepth);
+					WasdiLog.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing startDepth: " + sStartDepth);
 				}
 			}
 
@@ -951,7 +952,7 @@ public abstract class QueryTranslator {
 				try {
 					oResult.cloudCoverageTo = Double.parseDouble(sEndDepth);
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
+					WasdiLog.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
 				}
 			}
 		}
@@ -1033,14 +1034,14 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseLandsat( " + sQuery
+					WasdiLog.debugLog("QueryTranslator.parseLandsat( " + sQuery
 							+ " ): error while parsing product type: " + oE);
 				}
 				
 				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseLandsat( " + sQuery + " ): " + oE);
 		}
 	}
 	
@@ -1076,14 +1077,14 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseProbaV( " + sQuery
+					WasdiLog.debugLog("QueryTranslator.parseProbaV( " + sQuery
 							+ " ): error while parsing product type: " + oE);
 				}
 				
 				parseCloudCoverage(sQuery, oResult);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseProbaV( " + sQuery + " ): " + oE);
 		}
 	}	
 	
@@ -1124,7 +1125,7 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 
 				// check for product type
@@ -1151,11 +1152,11 @@ public abstract class QueryTranslator {
 						oResult.timeliness = sTimeliness;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
 		}
 	}
 	
@@ -1196,7 +1197,7 @@ public abstract class QueryTranslator {
 						oResult.productLevel = sLevel;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product level: " + oE);
 				}
 
 				// check for timeliness
@@ -1220,7 +1221,7 @@ public abstract class QueryTranslator {
 						oResult.timeliness = sTimeliness;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 				
 				
@@ -1253,16 +1254,16 @@ public abstract class QueryTranslator {
 							oResult.absoluteOrbit = iOrbit;
 
 						} catch (Exception oE) {
-							Utils.debugLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
+							WasdiLog.debugLog("QueryTranslator.parseSentinel5P(" + sQuery + " ): error while parsing absolute orbit: " + oE);
 						}
 					}						
 				}
 				catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseSentinel5P( " + sQuery + " ): error while parsing absolute orbit: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseSentinel3( " + sQuery + " ): " + oE);
 		}
 	}
 	
@@ -1302,11 +1303,11 @@ public abstract class QueryTranslator {
 						oResult.productType = sType;
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
 
@@ -1324,7 +1325,7 @@ public abstract class QueryTranslator {
 				oResult.platformName = Platforms.COPERNICUS_MARINE;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseCopernicusMarine( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseCopernicusMarine( " + sQuery + " ): " + oE);
 		}
 	}
 	
@@ -1340,7 +1341,7 @@ public abstract class QueryTranslator {
 				oResult.platformName = Platforms.PLANET;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslator.parseEnvisat( " + sQuery + " ): " + oE);
 		}
 	}	
 	
@@ -1404,7 +1405,7 @@ public abstract class QueryTranslator {
 	protected void reverseEngineerQueryFromProductName(QueryViewModel oQueryViewModel, String sProductName) {
 		try {
 			if(Utils.isNullOrEmpty(sProductName)) {
-				Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: query is null or empty");
+				WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: query is null or empty");
 			}
 			//mission
 			if(sProductName.startsWith("S1")) {
@@ -1414,7 +1415,7 @@ public abstract class QueryTranslator {
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
 					oQueryViewModel.productType=(sProductName.substring(7, 10));
 				} else {
-					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if (sProductName.startsWith("S2")) {
 				oQueryViewModel.platformName = Platforms.SENTINEL2;
@@ -1422,7 +1423,7 @@ public abstract class QueryTranslator {
 				if(Arrays.stream(asTypesA).anyMatch((sProductName.substring(7, 10))::equals)){
 					oQueryViewModel.productType="S2MSI" + sProductName.substring(8, 10);
 				} else {
-					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
+					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: product type not recognized from Sentinel-1 product " + sProductName + ", skipping");
 				}
 			} else if(sProductName.startsWith("S3A_") || sProductName.startsWith("S3B_")) {
 				oQueryViewModel.platformName = Platforms.SENTINEL3;
@@ -1436,12 +1437,12 @@ public abstract class QueryTranslator {
 					oQueryViewModel.platformName = sPlatformName;
 				}
 				else {
-					Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
+					WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: platform not recognized (maybe not implemented yet) in product: " + sProductName + ", ignoring");
 				}
 				
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: " + oE);
+			WasdiLog.debugLog("QueryTranslator.reverseEngineerQueryFromProductName: " + oE);
 		}
 	}
 }

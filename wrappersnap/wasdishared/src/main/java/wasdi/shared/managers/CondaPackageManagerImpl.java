@@ -11,8 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
@@ -42,7 +43,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 			sUrl += sFlag + "/";
 		}
 
-		s_oLogger.debug("CondaPackageManagerImpl.callGetPackages | sUrl:" + sUrl + ".");
+		WasdiLog.debugLog("CondaPackageManagerImpl.callGetPackages | sUrl:" + sUrl + ".");
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -51,8 +52,8 @@ public class CondaPackageManagerImpl implements IPackageManager {
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
 		if (iResult == null || iResult.intValue() != 200) {
-			s_oLogger.error("CondaPackageManagerImpl.listPackages | iResult:" + iResult + ".");
-			s_oLogger.error("CondaPackageManagerImpl.listPackages | sJsonResponse:" + sJsonResponse + ".");
+			WasdiLog.errorLog("CondaPackageManagerImpl.listPackages | iResult:" + iResult + ".");
+			WasdiLog.errorLog("CondaPackageManagerImpl.listPackages | sJsonResponse:" + sJsonResponse + ".");
 
 			return null;
 		}
@@ -75,7 +76,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 			}
 		}
 
-		s_oLogger.debug("CondaPackageManagerImpl.listPackages | aoPackages.size():" + aoPackages.size() + ".");
+		WasdiLog.debugLog("CondaPackageManagerImpl.listPackages | aoPackages.size():" + aoPackages.size() + ".");
 
 		return aoPackages;
 	}
@@ -84,7 +85,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 	public PackageManagerViewModel getManagerVersion() {
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/managerVersion/";
 
-		s_oLogger.debug("CondaPackageManagerImpl.callGetManagerVersion | sUrl:" + sUrl);
+		WasdiLog.debugLog("CondaPackageManagerImpl.callGetManagerVersion | sUrl:" + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -93,8 +94,8 @@ public class CondaPackageManagerImpl implements IPackageManager {
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
 		if (iResult == null || iResult.intValue() != 200) {
-			s_oLogger.error("CondaPackageManagerImpl.getManagerVersion | iResult:" + iResult + ".");
-			s_oLogger.error("CondaPackageManagerImpl.getManagerVersion | sJsonResponse:" + sJsonResponse + ".");
+			WasdiLog.errorLog("CondaPackageManagerImpl.getManagerVersion | iResult:" + iResult + ".");
+			WasdiLog.errorLog("CondaPackageManagerImpl.getManagerVersion | sJsonResponse:" + sJsonResponse + ".");
 
 			return null;
 		}
@@ -109,7 +110,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 
 		PackageManagerViewModel oPackageManagerVM = new PackageManagerViewModel(sName, sVersion, iMajor, iMinor, iPatch);
 
-		s_oLogger.debug("CondaPackageManagerImpl.getManagerVersion | oPackageManager:" + oPackageManagerVM.toString() + ".");
+		WasdiLog.debugLog("CondaPackageManagerImpl.getManagerVersion | oPackageManager:" + oPackageManagerVM.toString() + ".");
 
 		return oPackageManagerVM;
 	}
@@ -131,7 +132,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 	public boolean operatePackageChange(String sUpdateCommand) {
 		// Call localhost:port
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
-		s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
+		WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -139,17 +140,17 @@ public class CondaPackageManagerImpl implements IPackageManager {
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sResponse = oHttpCallResponse.getResponseBody();
 
-		s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: iResult: " + iResult);
-		//s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
+		WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: iResult: " + iResult);
+		//WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
 
 		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
 			//s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
 			//
-			s_oLogger.debug("CondaPackageManagerImpl.operatePackageChange: env updated");
+			WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: env updated");
 			
 			return true;
 		} else {
-			s_oLogger.error("CondaPackageManagerImpl.error: " + iResult + " response "+ sResponse);
+			WasdiLog.errorLog("CondaPackageManagerImpl.error: " + iResult + " response "+ sResponse);
 			return false;
 		}
 	}

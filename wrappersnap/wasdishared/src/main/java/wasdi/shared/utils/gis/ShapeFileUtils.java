@@ -9,6 +9,7 @@ import java.util.zip.ZipFile;
 import org.apache.log4j.Logger;
 
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ShapeFileUtils {
 	String m_sLoggerPrefix = "ShapeFileUtils."; 
@@ -45,7 +46,7 @@ public class ShapeFileUtils {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				
 				if (iFileCounter > iMaxFileInZipFile) {
-					s_oLogger.error(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					WasdiLog.errorLog(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
 					return false;
 				}
 				
@@ -81,7 +82,7 @@ public class ShapeFileUtils {
 			while(aoEntries.hasMoreElements()) {
 				ZipEntry oZipEntry = aoEntries.nextElement();
 				if (iFileCounter > iMaxFileInZipFile) {
-					s_oLogger.error(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
+					WasdiLog.errorLog(this.m_sLoggerPrefix + "isShapeFileZipped: too many files inside the zip. The limit is " + iMaxFileInZipFile);
 					return "";
 				}
 				

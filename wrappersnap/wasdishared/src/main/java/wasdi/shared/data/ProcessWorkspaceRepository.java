@@ -4,6 +4,19 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
 
+import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -11,20 +24,14 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
+
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.MongoDbSumResult;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.utils.Utils;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.*;
-import java.util.regex.Pattern;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by s.adamo on 31/01/2017.
@@ -188,11 +195,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public List<ProcessWorkspace> getRoots(List<ProcessWorkspace> aoChildren){
     	if(null==aoChildren) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getRoots: list of children is null, aborting");
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getRoots: list of children is null, aborting");
     		return new ArrayList<ProcessWorkspace>(0);
     	}
     	if(aoChildren.size()<=0) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getRoots: list of children is empty, aborting");
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getRoots: list of children is empty, aborting");
     		return new ArrayList<ProcessWorkspace>(0);
     	}
     	try {
@@ -212,7 +219,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			}
     		return aoFathers;
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getRoots: " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceRepository.getRoots: " + oE);
 		}
     	return new ArrayList<ProcessWorkspace>(0);
     }
@@ -226,11 +233,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
     	//check inputs
     	if(null == aoChildProcesses) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list is null, aborting");
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: the list is null, aborting");
     		return new LinkedList<ProcessWorkspace>();
     	}
     	if(aoChildProcesses.size() <= 0) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: the list has size 0, aborting");
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: the list has size 0, aborting");
     		return new LinkedList<ProcessWorkspace>();
     	}
 
@@ -248,7 +255,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				asChildrenProcessObjIds.add(oChildProcess.getProcessObjId());
 			}
     	} catch (Exception oE) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: " + oE);
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: " + oE);
     		return new LinkedList<ProcessWorkspace>();
     	}
 
@@ -276,7 +283,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				)
 			);
     	} catch (Exception oE) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to " + oE );
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to " + oE );
     		return new LinkedList<ProcessWorkspace>();
 		}
 
@@ -297,13 +304,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	    				oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
 	    				aoFathers.add(oProcessWorkspace);
 	    			} catch (IOException oE) {
-	    				Utils.debugLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
+	    				WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
 	    			}
 	    		}
     		}
 
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to " + oE);
 		}
     	return aoFathers;
     }
@@ -315,15 +322,15 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public List<ProcessWorkspace> getProcessByWorkspace(String sWorkspaceId, List<ProcessStatus> aeDesiredStatuses) {
         if(Utils.isNullOrEmpty(sWorkspaceId)) {
-        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): sWorkspaceId null or empty, aborting");
+        	WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): sWorkspaceId null or empty, aborting");
         	return new ArrayList<>();
         }
         if(null == aeDesiredStatuses) {
-        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", null ): aeDesiredStatuses is null, aborting");
+        	WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", null ): aeDesiredStatuses is null, aborting");
         	return new ArrayList<>();
         }
         if(aeDesiredStatuses.size() <= 0) {
-        	Utils.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): aeDesiredStatuses is empty, returning empty list");
+        	WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessByWorkspace( \"" + sWorkspaceId + "\", aeDesiredStatuses ): aeDesiredStatuses is empty, returning empty list");
         	return new ArrayList<>();
         }
 
@@ -357,7 +364,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
      */
     public List<String> getProcessObjIdsFromWorkspaceId(String sWorkspaceId){
     	if(Utils.isNullOrEmpty(sWorkspaceId)) {
-    		Utils.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: workspace id null or empty, aborting");
+    		WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: workspace id null or empty, aborting");
     		return new ArrayList<String>(0);
     	}
 
@@ -378,7 +385,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					String sProcessObjId = (String)oDocument.get("processObjId");
 					asProcessObjIds.add(sProcessObjId);
 				} catch (Exception oE) {
-					Utils.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: cannot parse document due to " + oE + ", skipping");
+					WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: cannot parse document due to " + oE + ", skipping");
 					continue;
 				}
 			}
@@ -526,7 +533,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			ProcessWorkspace oProcessWorkspace = s_oMapper.readValue(sJson, ProcessWorkspace.class);
 			return oProcessWorkspace.getStatus();
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
+			WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
 		}
 		return null;
 	}
@@ -1334,7 +1341,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             	}
         	}
         	
-        	//Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	//WasdiLog.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());
@@ -1358,7 +1365,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         try {
         	
-        	Utils.debugLog("Cleaning ProcessWorkspace Queue");
+        	WasdiLog.debugLog("Cleaning ProcessWorkspace Queue");
         	String sJSON = "{\"status\":\"ERROR\"}";
             Document oFilter = new Document("status", "CREATED");
 			Document oUpdate = new Document("$set", new Document(Document.parse(sJSON)));
@@ -1480,7 +1487,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
 		}
 		return false;
 	}
@@ -1495,7 +1502,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					Filters.eq("processObjId", sProcessObjId)
 					).first();
 			if(null==oDoc) {
-				Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId: " + sProcessObjId + " is not a valid process obj id, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId: " + sProcessObjId + " is not a valid process obj id, aborting");
 				return null;
 			}
 			if(oDoc.containsKey("workspaceId")) {
@@ -1503,7 +1510,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sWorkspaceId;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
 		}
 		return null;
 	}
@@ -1519,7 +1526,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					Filters.eq("processObjId", sProcessObjId)
 					).first();
 			if(null==oDoc) {
-				Utils.debugLog("ProcessWorkspaceRepository.getPayload: " + sProcessObjId + " is not a valid process obj id, aborting");
+				WasdiLog.debugLog("ProcessWorkspaceRepository.getPayload: " + sProcessObjId + " is not a valid process obj id, aborting");
 				return null;
 			}
 			if(oDoc.containsKey("payload")) {
@@ -1527,7 +1534,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sPayload;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
 		}
 		return null;
 	}

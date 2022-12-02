@@ -19,8 +19,8 @@ import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
-import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -127,7 +127,7 @@ public class CmNcProductReader extends WasdiProductReader {
 			oNodeGroupViewModel.setBands(oBands);
 			oRetViewModel.setBandsGroups(oNodeGroupViewModel);
 		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("CmNcProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+			WasdiLog.debugLog("CmNcProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
 		}
 
 		return oRetViewModel;
@@ -152,13 +152,13 @@ public class CmNcProductReader extends WasdiProductReader {
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
 		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("CmNcProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
+			WasdiLog.debugLog("CmNcProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
 		}
 
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
 		} catch (IOException e) {
-			LauncherMain.s_oLogger.debug("CmNcProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
+			WasdiLog.debugLog("CmNcProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
 		}
 
 		return null;

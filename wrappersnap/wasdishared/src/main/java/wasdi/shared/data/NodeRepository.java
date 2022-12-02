@@ -13,6 +13,7 @@ import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Repository of the WASDI Nodes entities
@@ -33,7 +34,7 @@ public class NodeRepository extends MongoRepository {
 	public String insertNode(Node oNode) {
 		try {
 			if(null == oNode) {
-				Utils.debugLog("NodeRepository.InsertNode: oNode is null");
+				WasdiLog.debugLog("NodeRepository.InsertNode: oNode is null");
 				return null;
 			}	        	
 			String sJSON = s_oMapper.writeValueAsString(oNode);
@@ -43,7 +44,7 @@ public class NodeRepository extends MongoRepository {
 			return oDocument.getObjectId("_id").toHexString();
 
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.InsertNode: "+oEx);
+			WasdiLog.debugLog("NodeRepository.InsertNode: "+oEx);
 		}
 		return "";
 	}
@@ -60,7 +61,7 @@ public class NodeRepository extends MongoRepository {
 			return true;
 
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.deleteNode( "+sId+" )" +oEx);
+			WasdiLog.debugLog("NodeRepository.deleteNode( "+sId+" )" +oEx);
 		}
 
 		return false;
@@ -85,7 +86,7 @@ public class NodeRepository extends MongoRepository {
 			}
 
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.getNodeByCode( "+sCode+" )" +oEx.toString());
+			WasdiLog.debugLog("NodeRepository.getNodeByCode( "+sCode+" )" +oEx.toString());
 		}
 
 		return  null;
@@ -129,7 +130,7 @@ public class NodeRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, Node.class);
 			
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
+			WasdiLog.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -150,7 +151,7 @@ public class NodeRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, Node.class);
 			
 		} catch (Exception oEx) {
-			Utils.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
+			WasdiLog.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
 		}
 
 		return aoReturnList;

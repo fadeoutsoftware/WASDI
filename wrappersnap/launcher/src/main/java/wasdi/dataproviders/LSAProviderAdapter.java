@@ -5,8 +5,9 @@ import java.io.File;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lsa.LSAHttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class LSAProviderAdapter extends ProviderAdapter {
 	
@@ -29,11 +30,6 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		super();
 		m_sDataProviderCode = "LSA";
 	}
-	
-	public LSAProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "LSA";
-	}
 
 
 	@Override
@@ -53,7 +49,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			} else if (isHttpsProtocol(sFileURL)) {
 				sPath = extractFilePathFromHttpsUrl(sFileURL);
 			} else {
-				Utils.debugLog("LSAProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
+				WasdiLog.debugLog("LSAProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
 			}
 
 			if (sPath != null) {
@@ -82,8 +78,8 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	private String extractFilePathFromHttpsUrl(String sHttpsURL) {
 		String filesystemPath = m_sProviderBasePath + sHttpsURL.replace(m_sProviderUrlDomain, "");
 
-		Utils.debugLog("LSAProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
-		Utils.debugLog("LSAProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+		WasdiLog.debugLog("LSAProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
+		WasdiLog.debugLog("LSAProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
 
 		return filesystemPath;
 	}
@@ -99,7 +95,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
-		Utils.debugLog("LSAProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 		
 		if (!m_bAuthenticated) {
 			LSAHttpUtils.authenticate(m_sProviderUser, m_sProviderPassword);
@@ -116,7 +112,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			} else if (isHttpsProtocol(sFileURL)) {
 				sPathLinux = extractFilePathFromHttpsUrl(sFileURL);
 			} else {
-				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
+				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: unknown protocol " + sFileURL);
 			}
 
 			if (sPathLinux != null) {
@@ -143,15 +139,15 @@ public class LSAProviderAdapter extends ProviderAdapter {
 		String sResult = "";
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("LSAProviderAdapter.ExecuteDownloadFile: sFileURL is null");
+			WasdiLog.debugLog("LSAProviderAdapter.ExecuteDownloadFile: sFileURL is null");
 			return "";
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("LSAProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
+			WasdiLog.debugLog("LSAProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
 		
-		m_oLogger.debug("LSAProviderAdapter.ExecuteDownloadFile: start");
+		WasdiLog.debugLog("LSAProviderAdapter.ExecuteDownloadFile: start");
 		
 		setProcessWorkspace(oProcessWorkspace);
 
@@ -165,13 +161,13 @@ public class LSAProviderAdapter extends ProviderAdapter {
 	private String downloadHttps(String sFileURL, String sSaveDirOnServer, int iMaxRetry, String sResult) {
 		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
 
-			Utils.debugLog("LSAProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
+			WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 			
 			try {
 				sResult = downloadViaHttp(sFileURL, "", "", sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
 			if (!Utils.isNullOrEmpty(sResult)) {
@@ -183,7 +179,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 				Thread.sleep(iMsSleep);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}
 		
@@ -214,7 +210,7 @@ public class LSAProviderAdapter extends ProviderAdapter {
 			m_sProviderUrlDomain = m_oDataProviderConfig.urlDomain;
 			
 		} catch (Exception e) {
-			m_oLogger.error("CREODIASProvierAdapter: Config reader is null");
+			WasdiLog.errorLog("CREODIASProvierAdapter: Config reader is null");
 		}		
 	}
 

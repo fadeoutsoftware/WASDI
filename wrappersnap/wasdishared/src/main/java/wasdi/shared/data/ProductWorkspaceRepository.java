@@ -17,6 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 18/11/2016.
@@ -61,7 +62,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
     public List<ProductWorkspace> getProductsByWorkspace(String sWorkspaceId) {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         if(Utils.isNullOrEmpty(sWorkspaceId)) {
-        	Utils.debugLog("ProductWorkspaceRepository.GetProductsByWorkspace( "+sWorkspaceId + " ): null workspace");
+        	WasdiLog.debugLog("ProductWorkspaceRepository.GetProductsByWorkspace( "+sWorkspaceId + " ): null workspace");
         	return aoReturnList;
         }
         try {

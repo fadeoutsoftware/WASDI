@@ -10,20 +10,21 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Launchjupyternotebook extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		m_oLocalLogger.debug("Launchjupyternotebook.executeOperation");
+		WasdiLog.debugLog("Launchjupyternotebook.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -81,12 +82,12 @@ public class Launchjupyternotebook extends Operation {
 				}
 
 			} catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Launchjupyternotebook.executeOperation: exception sending Rabbit Message",
+				WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception sending Rabbit Message",
 						oRabbitException);
 			}
 
 		} catch (Exception oEx) {
-			m_oLocalLogger.error("Launchjupyternotebook.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception", oEx);
 		}
 
 		return false;

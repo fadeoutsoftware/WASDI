@@ -14,21 +14,22 @@ import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.payloads.FTPUploadPayload;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Ftpupload extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Ftpupload.executeOperation");
+		WasdiLog.debugLog("Ftpupload.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 		
@@ -73,22 +74,22 @@ public class Ftpupload extends Operation {
 
                     m_oProcessWorkspaceLogger.log("SFTP protocol");
 
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: SFTP");
                     try (SSHClient oClient = new SSHClient()) {
                         oClient.addHostKeyVerifier(new PromiscuousVerifier());
-                        m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: connecting to " + oParameter.getFtpServer());
+                        WasdiLog.debugLog("Ftpupload.executeOperation: SFTP: connecting to " + oParameter.getFtpServer());
                         oClient.connect(oParameter.getFtpServer());
-                        m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: authenticating as " + oParameter.getUsername());
+                        WasdiLog.debugLog("Ftpupload.executeOperation: SFTP: authenticating as " + oParameter.getUsername());
                         oClient.authPassword(oParameter.getUsername(), oParameter.getPassword());
 
                         try (SFTPClient sftpClient = oClient.newSFTPClient()) {
                             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 4);
-                            m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: transferring file");
+                            WasdiLog.debugLog("Ftpupload.executeOperation: SFTP: transferring file");
                             m_oProcessWorkspaceLogger.log("Start transfer");
                             sftpClient.put(sFullLocalPath, oParameter.getRemotePath() + oParameter.getLocalFileName());
                             //todo check that the file is there
                             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 95);
-                            m_oLocalLogger.debug("Ftpupload.executeOperation: SFTP: closing SFTP client");
+                            WasdiLog.debugLog("Ftpupload.executeOperation: SFTP: closing SFTP client");
                             sftpClient.close();
                             oClient.disconnect();
                             oClient.close();
@@ -99,17 +100,17 @@ public class Ftpupload extends Operation {
 
                 } else {
                     m_oProcessWorkspaceLogger.log("FTP Protocol");
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: FTP");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: FTP");
                     FtpClient oFtpClient = new FtpClient(oParameter.getFtpServer(), oParameter.getPort(), oParameter.getUsername(), oParameter.getPassword());
 
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: opening connection");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: FTP: opening connection");
 
                     if (!oFtpClient.open()) {
                         throw new IOException("could not connect to FTP");
                     }
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 4);
 
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: transferring file");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: FTP: transferring file");
                     m_oProcessWorkspaceLogger.log("Start transfer");
 
                     // XXX see how to modify FTP client to update status
@@ -120,14 +121,14 @@ public class Ftpupload extends Operation {
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 95);
                     // String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
                     String sRemotePath = ".";
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: checking the file is on server");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: FTP: checking the file is on server");
                     Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName());
 
                     if (!bCheck) {
                         m_oProcessWorkspaceLogger.log("Error checking if the file is on the server");
                         throw new IOException("could not find file on server");
                     }
-                    m_oLocalLogger.debug("Ftpupload.executeOperation: FTP: closing client");
+                    WasdiLog.debugLog("Ftpupload.executeOperation: FTP: closing client");
                     oFtpClient.close();
 
                     m_oProcessWorkspaceLogger.log("Transfer done");
@@ -141,16 +142,16 @@ public class Ftpupload extends Operation {
                 setPayload(oProcessWorkspace, oPayload);
                 
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
-                m_oLocalLogger.info("Ftpupload.executeOperation: completed successfully");
+                WasdiLog.infoLog("Ftpupload.executeOperation: completed successfully");
                 
                 return true;
                 
             } catch (Throwable oEx) {
-                m_oLocalLogger.error("Ftpupload.executeOperation: could not complete due to: " + oEx);
+                WasdiLog.errorLog("Ftpupload.executeOperation: could not complete due to: " + oEx);
                 oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             } 
         } catch (Throwable oEx) {
-            m_oLocalLogger.error("Ftpupload.executeOperation: " + oEx);
+            WasdiLog.errorLog("Ftpupload.executeOperation: " + oEx);
             oEx.printStackTrace();
         }		
 		return false;

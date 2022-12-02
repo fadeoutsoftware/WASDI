@@ -19,6 +19,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -81,7 +82,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) {
-		Utils.debugLog("QueryExecutorGPM.executeCount | sQuery: " + sQuery);
+		WasdiLog.debugLog("QueryExecutorGPM.executeCount | sQuery: " + sQuery);
 
 		int iCount = 0;
 
@@ -112,7 +113,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 			oEndToDate = getDefaultEndDate();
 		} else {
 			if (oEndToDateProvided.before(oStartFromDateProvided)) {
-				Utils.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
+				WasdiLog.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
 
 				oStartFromDate = oEndToDateProvided;
 				oEndToDate = oStartFromDateProvided;
@@ -269,7 +270,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutorGPM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
+		WasdiLog.debugLog("QueryExecutorGPM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
 
 		try {
 			List<QueryResultViewModel> aoResults = new ArrayList<>();
@@ -290,13 +291,13 @@ public class QueryExecutorGPM extends QueryExecutor {
 			try {
 				iOffset = Integer.parseInt(sOffset);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryExecutorGPM.executeAndRetrieve: " + oE.toString());
+				WasdiLog.debugLog("QueryExecutorGPM.executeAndRetrieve: " + oE.toString());
 			}
 
 			try {
 				iLimit = Integer.parseInt(sLimit);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryExecutorGPM.executeAndRetrieve: " + oE.toString());
+				WasdiLog.debugLog("QueryExecutorGPM.executeAndRetrieve: " + oE.toString());
 			}
 
 			
@@ -319,7 +320,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 				oEndToDate = getDefaultEndDate();
 			} else {
 				if (oEndToDateProvided.before(oStartFromDateProvided)) {
-					Utils.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
+					WasdiLog.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
 
 					oStartFromDate = oEndToDateProvided;
 					oEndToDate = oStartFromDateProvided;
@@ -461,7 +462,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 			return aoResults;
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
-			Utils.debugLog("QueryExecutorGPM.executeAndRetrieve: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorGPM.executeAndRetrieve: error " + oEx.toString());
 		}
 
 		return null;
@@ -476,13 +477,13 @@ public class QueryExecutorGPM extends QueryExecutor {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("QueryExecutorGPM.performRequest.httpGetResults: attemp #" + iAttemp);
+				WasdiLog.debugLog("QueryExecutorGPM.performRequest.httpGetResults: attemp #" + iAttemp);
 			}
 
 			try {
 				sResult = HttpUtils.standardHttpGETQuery(sUrl, HttpUtils.getBasicAuthorizationHeaders(s_oDataProviderConfig.user, s_oDataProviderConfig.password));
 			} catch (Exception oEx) {
-				Utils.debugLog("QueryExecutorGPM.performRequest: exception in http get call: " + oEx.toString());
+				WasdiLog.debugLog("QueryExecutorGPM.performRequest: exception in http get call: " + oEx.toString());
 			}
 
 			iAttemp ++;
@@ -655,7 +656,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 					aoReturnList.add(oResponseObject);					
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("QueryExecutorGPM.parseRetrieveResponse: exception handling a row of answers: " + oEx.toString());
+					WasdiLog.debugLog("QueryExecutorGPM.parseRetrieveResponse: exception handling a row of answers: " + oEx.toString());
 				}
 
 			}

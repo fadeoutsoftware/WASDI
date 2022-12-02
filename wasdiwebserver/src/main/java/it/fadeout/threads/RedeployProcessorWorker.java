@@ -6,7 +6,7 @@ import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to redeploy a processor
@@ -65,7 +65,7 @@ public class RedeployProcessorWorker extends Thread  {
 	@Override
 	public void run() {
 		
-		Utils.debugLog("RedeployProcessorWorker.run: start nodes redeploy for processor " + m_sProcessorId);
+		WasdiLog.debugLog("RedeployProcessorWorker.run: start nodes redeploy for processor " + m_sProcessorId);
 		
 		// For each node		
 		for (Node oNode : m_aoNodes) {
@@ -90,20 +90,20 @@ public class RedeployProcessorWorker extends Thread  {
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
-				Utils.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("RedeployProcessorWorker.run: calling url: " + sUrl);
 				
 				// It is a get call				
 				HttpUtils.httpGet(sUrl, asHeaders);
 				
-				Utils.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
+				WasdiLog.debugLog("RedeployProcessorWorker.run: redeployed on node " + oNode.getNodeCode());
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("RedeployProcessorWorker.run: Exception " + oEx.toString());
+				WasdiLog.debugLog("RedeployProcessorWorker.run: Exception " + oEx.toString());
 			}
 		}
 
 		// All nodes updated
-		Utils.debugLog("RedeployProcessorWorker.run: distribuited redeploy done");
+		WasdiLog.debugLog("RedeployProcessorWorker.run: distribuited redeploy done");
 	}
 }
