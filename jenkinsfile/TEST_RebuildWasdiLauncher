@@ -20,8 +20,8 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI - REBUILD THE LAUNCHER"
-          currentBuild.description = "WASDI - REBUILD THE LAUNCHER"
+          currentBuild.displayName = "${env.BUILD_ID}"
+          currentBuild.description = "WASDI - REBUILD THE LAUNCHER - ${env.BUILD_ID}"
         }
       }
     }
