@@ -1,0 +1,41 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        sh script: "pwd", label: "Current location"
+
+        echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
+        echo "env.WORKSPACE = " + env.WORKSPACE
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.description = "WASDI - BUILD OF THE CLIENT"
+        }
+      }
+    }
+
+    stage('BUILD') {
+      steps {
+        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/rebuildWasdiLauncher.yml --inventory inventories/wasdi.yml --diff", label: "Execute ansible-playbook"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
