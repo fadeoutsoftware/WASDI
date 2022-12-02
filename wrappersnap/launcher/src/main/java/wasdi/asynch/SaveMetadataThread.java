@@ -37,9 +37,6 @@ public class SaveMetadataThread extends Thread {
 				m_oReadProduct.getSnapProduct().dispose();
 			}
 		} 
-		catch (IOException oEx) {
-			oEx.printStackTrace();
-		} 
 		catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
