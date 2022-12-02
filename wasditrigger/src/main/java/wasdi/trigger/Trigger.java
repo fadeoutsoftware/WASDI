@@ -19,6 +19,7 @@ import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class Trigger {
@@ -68,6 +69,8 @@ public class Trigger {
 			System.err.println( "Trigger - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
 			System.exit(-1);
 		}
+		
+		WasdiLog.setLoggerWrapper(new LoggerWrapper(s_oLogger));
 
 		WasdiLog.debugLog("Trigger Start");
 

@@ -174,7 +174,7 @@ public class Publisher {
             	return null;
             }
             
-            s_oLogger.info("Publisher.PublishImagePyramidOnGeoServer: image mosaic published " + sStoreName);
+            WasdiLog.infoLog("Publisher.PublishImagePyramidOnGeoServer: image mosaic published " + sStoreName);
 
         }catch (Exception oEx) {
         	WasdiLog.errorLog("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName, oEx);
@@ -198,7 +198,7 @@ public class Publisher {
             	WasdiLog.errorLog("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
             	return null;
             }
-            s_oLogger.info("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
+            WasdiLog.infoLog("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
 
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Publisher.PublishGeoTiffImage Exception: unable to publish geotiff " + sStoreName, oEx);
@@ -259,7 +259,7 @@ public class Publisher {
             	WasdiLog.errorLog("Publisher.publishShapeFile: unable to publish shapefile " + sStore);
             	return null;
             }
-            s_oLogger.info("Publisher.publishShapeFile: shapefile published " + sStore);
+            WasdiLog.infoLog("Publisher.publishShapeFile: shapefile published " + sStore);
 
         } catch (Exception oEx) {
         	WasdiLog.errorLog("Publisher.publishShapeFile Exception: unable to publish shapefile " + sStore, oEx);

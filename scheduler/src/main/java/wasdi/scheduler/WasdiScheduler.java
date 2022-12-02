@@ -20,6 +20,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -112,21 +113,25 @@ public class WasdiScheduler
 			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
 			oEx.printStackTrace();
 		}
-		s_oLogger.info("main: Logger configured :-)\n");
+		
+		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
+		WasdiLog.s_oLoggerWrapper = oLoggerWrapper;
+		
+		WasdiLog.infoLog("main: Logger configured :-)\n");
 		
 		
 		//mongo config
 		try {
-			s_oLogger.info("main: Configuring mongo...");
+			WasdiLog.infoLog("main: Configuring mongo...");
 			// Init Mongo Configuration
 			MongoRepository.readConfig();	
 		} 
 		catch (Throwable oEx) {
-			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
+			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
 			oEx.printStackTrace();
 			System.exit(-1);
 		}
-		s_oLogger.info("main: Mongo configured :-)\n");
+		WasdiLog.infoLog("main: Mongo configured :-)\n");
 		
 		// Computational nodes need to configure also the local dababase
 		try {
@@ -139,14 +144,14 @@ public class WasdiScheduler
 			}			
 		}
 		catch (Throwable oEx) {
-			s_oLogger.fatal("main: Mongo configuration failed. Reason: " + oEx);
+			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
 			oEx.printStackTrace();
 		}		
 		
 		// Read the list of configured schedulers
 		ArrayList<String> asSchedulers = new ArrayList<String>();
 		try {
-			s_oLogger.info("main: reading schedulers configurations...");
+			WasdiLog.infoLog("main: reading schedulers configurations...");
 			
 			for (SchedulerQueueConfig oQueueConfig: WasdiConfig.Current.scheduler.schedulers) {
 				asSchedulers.add(oQueueConfig.name);
@@ -168,12 +173,12 @@ public class WasdiScheduler
 			}			
 		} 
 		catch (Exception oEx) {
-			s_oLogger.fatal("Could not read schedulers configurations. Reason: " + oEx);
+			WasdiLog.errorLog("Could not read schedulers configurations. Reason: " + oEx);
 			oEx.printStackTrace();
 			System.exit(-1);
 		}
 		
-		s_oLogger.info("main: preparing operations...");
+		WasdiLog.infoLog("main: preparing operations...");
 		
 		// List of active schedulers
 		ArrayList<ProcessScheduler> aoProcessSchedulers = new ArrayList<ProcessScheduler>();
@@ -193,7 +198,7 @@ public class WasdiScheduler
 			for (String sScheduler : asSchedulers) {
 				
 				// Create and init the scheduler
-				s_oLogger.info("main: Creating Scheduler: " + sScheduler);
+				WasdiLog.infoLog("main: Creating Scheduler: " + sScheduler);
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init(sScheduler);
 				
@@ -211,7 +216,7 @@ public class WasdiScheduler
 							oProcessScheduler.removeSupportedType(sSupportedType);							
 						}
 						else {
-							s_oLogger.info("main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
+							WasdiLog.infoLog("main: Assigning to Scheduler " + sScheduler + " support type " + sSupportedType + " SubType " + oProcessScheduler.getOperationSubType());
 						}
 					}
 					else {
@@ -223,7 +228,7 @@ public class WasdiScheduler
 						}
 						
 						// Yes: remove from the full list
-						s_oLogger.info("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
+						WasdiLog.infoLog("main: Assigning to Scheduler: " + sScheduler + " support type: " + sSupportedType + sSubTypeLog);
 						asWasdiOperationTypes.remove(sSupportedType);
 					}
 				}
@@ -234,11 +239,11 @@ public class WasdiScheduler
 				
 				if (sSchedulerEnabled.equals("1")) {
 					// Start the scheduler
-					s_oLogger.info("main: Adding Scheduler: " + sScheduler);
+					WasdiLog.infoLog("main: Adding Scheduler: " + sScheduler);
 					aoProcessSchedulers.add(oProcessScheduler);		
 				}
 				else {
-					s_oLogger.warn("main: Scheduler: " + sScheduler + " not enabled, will not start");
+					WasdiLog.warnLog("main: Scheduler: " + sScheduler + " not enabled, will not start");
 				}
 			}
 			
@@ -246,22 +251,22 @@ public class WasdiScheduler
 			if (asWasdiOperationTypes.size() > 0) {
 				
 				// Create and Init the Default Scheduler
-				s_oLogger.info("main: Creating DEFAULT Scheduler");
+				WasdiLog.infoLog("main: Creating DEFAULT Scheduler");
 				ProcessScheduler oProcessScheduler = new ProcessScheduler();
 				oProcessScheduler.init("DEFAULT");
 				
 				// Assign all the types
 				for (String sOtherType : asWasdiOperationTypes) {
-					s_oLogger.info("main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
+					WasdiLog.infoLog("main: Assigning to Scheduler: DEFAULT support type: " + sOtherType);
 					oProcessScheduler.addSupportedType(sOtherType);
 				}
 				
 				// Start
-				s_oLogger.info("main: Adding Scheduler: DEFAULT");
+				WasdiLog.infoLog("main: Adding Scheduler: DEFAULT");
 				aoProcessSchedulers.add(oProcessScheduler);
 			}
 			else {
-				s_oLogger.info("main: All types covered, do not start DEFAULT scheduler");
+				WasdiLog.infoLog("main: All types covered, do not start DEFAULT scheduler");
 			}
 			
 		}
@@ -269,7 +274,7 @@ public class WasdiScheduler
 			WasdiLog.errorLog("Could not complete operations preparations. Reason: " + oEx);
 			oEx.printStackTrace();
 		}
-		s_oLogger.info("main: operations prepared, lets start \n");
+		WasdiLog.infoLog("main: operations prepared, lets start \n");
 		
 		run(aoProcessSchedulers);
 		
@@ -374,7 +379,13 @@ public class WasdiScheduler
 	 */
 	public static void log(String sLogRow, Level oLogLevel) {
 		synchronized (s_oLogger) {
-			s_oLogger.log(oLogLevel, sLogRow);
+			String sLevel ="INFO";
+			
+			if (oLogLevel==Level.DEBUG) sLevel = "DEBUG";
+			else if (oLogLevel==Level.ERROR) sLevel = "ERROR";
+			else if (oLogLevel==Level.WARN) sLevel = "WARN";
+			
+			WasdiLog.log(sLevel, sLogRow);
 		}
 	}
 
