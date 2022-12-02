@@ -144,7 +144,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 		//WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: " + sResponse);
 
 		if (iResult != null && (200 <= iResult.intValue() && 299 >= iResult.intValue())) {
-			//s_oLogger.info("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
+			//WasdiLog.infoLog("CondaPackageManagerImpl.operatePackageChange: Output from Server .... \n");
 			//
 			WasdiLog.debugLog("CondaPackageManagerImpl.operatePackageChange: env updated");
 			
