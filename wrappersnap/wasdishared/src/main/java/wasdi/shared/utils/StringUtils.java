@@ -109,5 +109,27 @@ public final class StringUtils {
 		// return the HashText
 		return hashtext;
 	}
+	
+	/**
+	 * Assume that the sNumber parameter contains the representation of an integer.
+	 * It returns the number incremented by 1.
+	 * @param sNumber Input string with the number
+	 * @return String with the number incremented, empty string otherwise
+	 */
+	public static String incrementIntegerString(String sNumber) {
+		String sReturnString = "";
+		
+		try {
+			int iNumber = Integer.parseInt(sNumber);
+			
+			iNumber = iNumber+1;
+			sReturnString = "" + iNumber;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StringUtils.incrementIntegerString: not valid input string - ", oEx);
+		}
+		
+		return sReturnString;
+	}
 
 }

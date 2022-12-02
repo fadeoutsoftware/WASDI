@@ -13,7 +13,6 @@ import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.gis.GdalUtils;
-import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class Mosaic {

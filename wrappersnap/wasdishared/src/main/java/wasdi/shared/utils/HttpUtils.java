@@ -54,22 +54,33 @@ public final class HttpUtils {
 	}
 	
 	/**
-	 * Internal version of get 
-	 * @param sUrl
-	 * @return
+	 * Http Get Call 
+	 * @param sUrl Url to call
+	 * @return The received response as a String
 	 */
 	public static String httpGet(String sUrl) {
 		return standardHttpGETQuery(sUrl, null);
-	}	
-
+	}
+	
 	/**
-	 * Standard http get utility function
-	 * 
-	 * @param sUrl url to call
-	 * @param asHeaders headers dictionary
-	 * @return server response
+	 * Http Get Call
+	 * @param sUrl Url to call
+	 * @param asHeaders Map of headers to add to the http call
+	 * @return  The received response as a String
 	 */
 	public static String httpGet(String sUrl, Map<String, String> asHeaders) {
+		return httpGet(sUrl, asHeaders, null);
+	}
+
+	/**
+	 * Http Get Call
+	 * 
+	 * @param sUrl Url to call
+	 * @param asHeaders Map of headers to add to the http call
+	 * @param aoOutputHeaders Map of response headers 
+	 * @return  The received response as a String
+	 */
+	public static String httpGet(String sUrl, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders) {
 		String sMessage = "";
 
 		if (sUrl == null || sUrl.isEmpty()) {
@@ -94,7 +105,7 @@ public final class HttpUtils {
 
 			oConnection.connect();
 
-			sMessage = readHttpResponse(oConnection);
+			sMessage = readHttpResponse(oConnection, aoOutputHeaders);
 
 			oConnection.disconnect();
 		} catch (Exception oEx) {
@@ -818,15 +829,35 @@ public final class HttpUtils {
 			return "";
 		}
 	}
+	
+	public static String readHttpResponse(HttpURLConnection oConnection) {
+		return readHttpResponse(oConnection);
+	}
 
 	/**
 	 * Read http response stream
-	 * @param oConnection
+	 * @param oConnection Http Connection
+	 * @param aoOutputHeaders Map of response headers 
 	 * @throws IOException
 	 * @throws CopyStreamException
 	 */
-	public static String readHttpResponse(HttpURLConnection oConnection) {
+	public static String readHttpResponse(HttpURLConnection oConnection, Map<String, List<String>> aoOutputHeaders) {
 		try {
+			
+			if (aoOutputHeaders!=null) {
+				try {
+					
+					Map<String, List<String>> aoReceivedHeaders = oConnection.getHeaderFields();
+					
+					for (Map.Entry<String, List<String>> oEntry : aoReceivedHeaders.entrySet()) {
+						aoOutputHeaders.put(oEntry.getKey(), oEntry.getValue());
+					}
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("exception getting the output headers ", oEx);
+				}
+			}
+			
 			// response
 
 			InputStream oResponseInputStream = null;

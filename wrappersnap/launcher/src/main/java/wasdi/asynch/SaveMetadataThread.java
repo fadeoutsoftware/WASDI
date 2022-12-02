@@ -1,11 +1,11 @@
 package wasdi.asynch;
 
 import java.io.File;
-import java.io.IOException;
 
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 
 /**
@@ -38,7 +38,7 @@ public class SaveMetadataThread extends Thread {
 			}
 		} 
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SaveMetadataThread.run: exception " + oEx.toString());
 		}
 	}
 }
