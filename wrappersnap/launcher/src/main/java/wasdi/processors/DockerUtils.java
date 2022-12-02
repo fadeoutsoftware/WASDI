@@ -473,7 +473,7 @@ public class DockerUtils {
             // Wait for docker to finish
             Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
             
-            if (WasdiConfig.Current.nodeCode == "wasdi") {            	
+            if (WasdiConfig.Current.nodeCode.equals("wasdi")) {            	
                 if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
                 	WasdiLog.infoLog("This is a registry stored docker: clean all our registers");
                 	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.eoepca.registers) {
