@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -81,7 +82,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
 			if(null!=aoJsonArray) {
 				if(aoJsonArray.length()<=0) {
-					Utils.debugLog("ResponseTranslatorONDA.buildResultViewModel: JSON string contains an empty array");
+					WasdiLog.debugLog("ResponseTranslatorONDA.buildResultViewModel: JSON string contains an empty array");
 				} else {
 					for (Object oObject : aoJsonArray) {
 						if(null!=oObject) {
@@ -102,7 +103,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorONDA.buildResultViewModel: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorONDA.buildResultViewModel: " + oE);
 		}
 		return aoResult;
 	}
@@ -114,7 +115,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 			JSONObject oJson = (JSONObject)oObject;
 			oResult = translate(oJson);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorONDA.translate exception: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorONDA.translate exception: " + oE);
 		}
 		return oResult;
 	}
@@ -137,7 +138,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 				finalizeViewModel(oResult);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorONDA.translate exception: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorONDA.translate exception: " + oE);
 		}
 		
 		return oResult;
@@ -170,7 +171,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 			oResult.getProperties().put("link", sLink);
 		} else {
 			//NOTE this should not happen. Is it possible to take countermeasures?
-			Utils.debugLog("ResponseTranslatorONDA.translate: WARNING: sProductId is null");
+			WasdiLog.debugLog("ResponseTranslatorONDA.translate: WARNING: sProductId is null");
 		}
 
 		String sPreview = oJsonOndaResult.optString("quicklook",(String)null);
@@ -204,7 +205,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 				}
 			} else {
 				//NOTE this should not happen. Is it possible to take countermeasures?
-				Utils.debugLog("ResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
+				WasdiLog.debugLog("ResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
 			}
 
 			//TODO change how the launcher works so that alternatives can be used
@@ -215,7 +216,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 			}
 		} else {
 			//NOTE this should not happen. Is it possible to take countermeasures?
-			Utils.debugLog("ResponseTranslatorONDA.translate: WARNING: sProductFileName is null");
+			WasdiLog.debugLog("ResponseTranslatorONDA.translate: WARNING: sProductFileName is null");
 		}
 
 		Long lSize = oJsonOndaResult.optLong("size");
@@ -294,11 +295,11 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 
 	protected void parseMetadata(QueryResultViewModel oResult, JSONObject oEntireMetadata) {
 		if(null==oEntireMetadata) {
-			Utils.debugLog("DiasResponseTranslator.parseMetadata: oMetadata is null");
+			WasdiLog.debugLog("DiasResponseTranslator.parseMetadata: oMetadata is null");
 			return;
 		}
 		if(null== oResult ) {
-			Utils.debugLog("DiasResponseTranslator.parseMetadata: oResult is null");
+			WasdiLog.debugLog("DiasResponseTranslator.parseMetadata: oResult is null");
 			//XXX should we throw an exception instead?
 			return;
 		}
@@ -329,21 +330,21 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 						if(null == sKey) {
 //							String sPrevious = oResult.getProperties().get(sMetaKey);
 //							if(null!=sPrevious) {
-//								Utils.debugLog("ResponseTranslatorONDA.parseMetadataArray: sMetaKey : "+sPrevious);
+//								WasdiLog.debugLog("ResponseTranslatorONDA.parseMetadataArray: sMetaKey : "+sPrevious);
 //							}
 							oResult.getProperties().put(sMetaKey, sMetaValue);
 						} else if( sKey.startsWith(m_sPropertyPrefix) ) {
 							String sTmpKey = sKey.substring( sKey.indexOf(m_sPropertyPrefix) + m_sPropertyPrefix.length() );
 							String sPrevious = oResult.getProperties().get(sTmpKey);
 							if(null!=sPrevious) {
-								//Utils.debugLog("ResponseTranslatorONDA.parseMetadataArray: sKey : "+sPrevious);
+								//WasdiLog.debugLog("ResponseTranslatorONDA.parseMetadataArray: sKey : "+sPrevious);
 								if(sTmpKey.equals("size")) {
 									sMetaValue = Utils.getNormalizedSize(Double.parseDouble(sMetaValue));
 								}
 							}
 							oResult.getProperties().put(sTmpKey, sMetaValue);
 						} else {
-							Utils.debugLog("ResponseTranslatorONDA.parseMetadata: hit a viewmodel field: " + sKey + " = " + sMetaValue);
+							WasdiLog.debugLog("ResponseTranslatorONDA.parseMetadata: hit a viewmodel field: " + sKey + " = " + sMetaValue);
 							switch(sKey) {
 							case "preview":
 								oResult.setPreview(sMetaValue);
@@ -367,7 +368,7 @@ public class ResponseTranslatorONDA extends ResponseTranslator {
 								oResult.setProvider(sMetaValue);
 								break;
 							default:
-								Utils.debugLog("ResponseTranslatorONDA.parseMetadata: unknown viewmodel field");
+								WasdiLog.debugLog("ResponseTranslatorONDA.parseMetadata: unknown viewmodel field");
 							}
 						}
 					}

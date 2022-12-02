@@ -7,10 +7,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ogc.wasdi.processes.viewmodels.ApiException;
-import ogc.wasdi.processes.viewmodels.Conformance;
-import ogc.wasdi.processes.viewmodels.LandingPage;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ogcprocesses.ApiException;
+import wasdi.shared.viewmodels.ogcprocesses.Conformance;
+import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
 
 /**
  * Base Operations
@@ -32,7 +32,7 @@ public class CoreResource {
     		return Response.status(Status.OK).entity(oLandingPage).build();
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("");
+    		WasdiLog.debugLog("");
     		
     		ApiException oApiException = new ApiException();
     		
@@ -54,7 +54,7 @@ public class CoreResource {
     		return Response.status(Status.OK).entity(oConformance).build();
     	}
     	catch (Exception oEx) {
-    		Utils.debugLog("");
+    		WasdiLog.debugLog("");
     		
     		ApiException oApiException = new ApiException();
     		

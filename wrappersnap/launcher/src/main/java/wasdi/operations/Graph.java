@@ -5,6 +5,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.snapopearations.WasdiGraph;
 
 public class Graph extends Operation {
@@ -12,15 +13,15 @@ public class Graph extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Graph.executeOperation");
+		WasdiLog.debugLog("Graph.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 		
@@ -33,7 +34,7 @@ public class Graph extends Operation {
             return true;
             
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Graph.executeOperation: Exception", oEx);
+            WasdiLog.errorLog("Graph.executeOperation: Exception", oEx);
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
             // P.Campanella 2018/03/30: handle exception and close the process

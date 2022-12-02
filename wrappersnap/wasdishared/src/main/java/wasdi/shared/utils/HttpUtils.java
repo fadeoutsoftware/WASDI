@@ -22,8 +22,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -32,6 +32,8 @@ import org.apache.commons.net.io.Util;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
@@ -50,6 +52,15 @@ public final class HttpUtils {
 	private HttpUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
+	
+	/**
+	 * Internal version of get 
+	 * @param sUrl
+	 * @return
+	 */
+	public static String httpGet(String sUrl) {
+		return standardHttpGETQuery(sUrl, null);
+	}	
 
 	/**
 	 * Standard http get utility function
@@ -62,7 +73,7 @@ public final class HttpUtils {
 		String sMessage = "";
 
 		if (sUrl == null || sUrl.isEmpty()) {
-			Utils.debugLog("Wasdi.httpGet: invalid URL, aborting");
+			WasdiLog.debugLog("Wasdi.httpGet: invalid URL, aborting");
 			return sMessage;
 		}
 
@@ -92,6 +103,153 @@ public final class HttpUtils {
 
 		return sMessage;
 	}
+	
+	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
+
+		String sResult = null;
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			WasdiLog.debugLog("\nSending 'GET' request to URL : " + sUrl);
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: Response Code : " + iResponseCode);
+				String sResponseExtract = null;
+				if (iResponseCode >= 200 && iResponseCode<=299) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+					}
+
+					if (sResult != null) {
+						if (sResult.length() > 201) {
+							sResponseExtract = sResult.substring(0, 200) + "...";
+						} else {
+							sResponseExtract = new String(sResult);
+						}
+						WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: Response extract: " + sResponseExtract);
+					} else {
+						WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: reponse is empty");
+					}
+				} else {
+					WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					String sMessage = oBytearrayOutputStream.toString();
+					if (null != sMessage) {
+						sResponseExtract = sMessage.substring(0, Math.min(sMessage.length(), 200)) + "...";
+						WasdiLog.debugLog(
+								"HttpUtils.standardHttpGETQuery: provider did not return 200 but " + iResponseCode
+										+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
+					}
+				}
+			} catch (Exception oEint) {
+				WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: " + oE);
+		}
+		return sResult;
+	}
+
+	public static HttpCallResponse newStandardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+
+		String sResult = null;
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			WasdiLog.debugLog("Sending 'GET' request to URL : " + sUrl);
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: Response Code : " + iResponseCode);
+
+				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+				if (200 <= iResponseCode && 299 >= iResponseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpCallResponse.setResponseBody(sResult);
+					}
+				} else {
+					WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+					sResult = oBytearrayOutputStream.toString();
+					oHttpCallResponse.setResponseBody(sResult);
+				}
+			} catch (Exception oEint) {
+				WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: " + oE);
+		}
+
+		return oHttpCallResponse;
+	}
+	
+	/**
+	 * Get the http headers for a basic authentication
+	 * @param sDownloadUser
+	 * @param sDownloadPassword
+	 * @return
+	 */
+	public static Map<String, String> getBasicAuthorizationHeaders(String sDownloadUser, String sDownloadPassword) {
+		
+		try {
+			// Add the auth header
+			String sAuth = sDownloadUser + ":" + sDownloadPassword;
+			String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
+			String sAuthHeaderValue = "Basic " + sEncodedAuth;
+
+			Map<String, String> asHeaders = new HashMap<>();
+			asHeaders.put("Authorization", sAuthHeaderValue);
+			
+			return asHeaders;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("HttpUtils.getBasicAuthorizationHeaders Exception " + oEx.toString());
+			return new HashMap<String, String>();
+		}
+	}
 
 	/**
 	 * Standard http delete utility function
@@ -104,7 +262,7 @@ public final class HttpUtils {
 		String sMessage = "";
 
 		if (sUrl == null || sUrl.isEmpty()) {
-			Utils.debugLog("Wasdi.httpDelete: invalid URL, aborting");
+			WasdiLog.debugLog("Wasdi.httpDelete: invalid URL, aborting");
 			return sMessage;
 		}
 
@@ -137,8 +295,8 @@ public final class HttpUtils {
 				return oResponse.toString();
 			} else {
 				sMessage = oConnection.getResponseMessage();
-				Utils.debugLog("Wasdi.httpDelete:  connection failed, message follows");
-				Utils.debugLog(sMessage);
+				WasdiLog.debugLog("Wasdi.httpDelete:  connection failed, message follows");
+				WasdiLog.debugLog(sMessage);
 
 				sMessage = "";
 			}
@@ -187,7 +345,14 @@ public final class HttpUtils {
 
 		return lLenght;
 	}
-
+	
+	/**
+	 * Downloads a file from a specified url and saves it in a specified path
+	 * @param sUrl Url of the file to download
+	 * @param asHeaders Map of key-value that will be added as headers to the request
+	 * @param sOutputFilePath Output path where to save the file
+	 * @return The output path if all ok, empty string in case of error
+	 */
 	public static String downloadFile(String sUrl, Map<String, String> asHeaders, String sOutputFilePath) {
 
 		try {
@@ -219,7 +384,7 @@ public final class HttpUtils {
 					if(sAttachmentName.endsWith("\"")) {
 						sAttachmentName = sAttachmentName.substring(0, sAttachmentName.length() - 1);
 					}
-					Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
+					WasdiLog.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
 				}
 				
 
@@ -239,7 +404,7 @@ public final class HttpUtils {
 				return sOutputFilePath;
 			} else {
 				String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
-				Utils.debugLog(sMessage);
+				WasdiLog.debugLog(sMessage);
 				return "";
 			}
 
@@ -249,127 +414,7 @@ public final class HttpUtils {
 		}
 	}
 
-	public static String standardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
 
-		String sResult = null;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				Utils.debugLog("HttpUtils.standardHttpGETQuery: Response Code : " + iResponseCode);
-				String sResponseExtract = null;
-				if (200 == iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-					}
-
-					if (sResult != null) {
-						if (sResult.length() > 201) {
-							sResponseExtract = sResult.substring(0, 200) + "...";
-						} else {
-							sResponseExtract = new String(sResult);
-						}
-						Utils.debugLog("HttpUtils.standardHttpGETQuery: Response extract: " + sResponseExtract);
-					} else {
-						Utils.debugLog("HttpUtils.standardHttpGETQuery: reponse is empty");
-					}
-				} else {
-					Utils.debugLog("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-					String sMessage = oBytearrayOutputStream.toString();
-					if (null != sMessage) {
-						sResponseExtract = sMessage.substring(0, Math.min(sMessage.length(), 200)) + "...";
-						Utils.debugLog(
-								"HttpUtils.standardHttpGETQuery: provider did not return 200 but " + iResponseCode
-										+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
-					}
-				}
-			} catch (Exception oEint) {
-				Utils.debugLog("HttpUtils.standardHttpGETQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.standardHttpGETQuery: " + oE);
-		}
-		return sResult;
-	}
-
-	public static HttpCallResponse newStandardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
-		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
-
-		String sResult = null;
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			s_oLogger.debug("Sending 'GET' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: Response Code : " + iResponseCode);
-
-				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
-
-				if (200 <= iResponseCode && 299 >= iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-						oHttpCallResponse.setResponseBody(sResult);
-					}
-				} else {
-					s_oLogger.debug("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
-				}
-			} catch (Exception oEint) {
-				s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-		} catch (Exception oE) {
-			s_oLogger.debug("HttpUtils.newStandardHttpGETQuery: " + oE);
-		}
-
-		return oHttpCallResponse;
-	}
 
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
 
@@ -396,11 +441,11 @@ public final class HttpUtils {
 				os.write(ayBytes);
 			}
 
-			Utils.debugLog("HttpUtils.standardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
+			WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
 
 			try {
 				int responseCode = oConnection.getResponseCode();
-				Utils.debugLog("HttpUtils.httpGetResults: Response Code : " + responseCode);
+				WasdiLog.debugLog("HttpUtils.httpGetResults: Response Code : " + responseCode);
 				String sResponseExtract = null;
 				if (200 == responseCode) {
 					InputStream oInputStream = oConnection.getInputStream();
@@ -416,12 +461,12 @@ public final class HttpUtils {
 						} else {
 							sResponseExtract = new String(sResult);
 						}
-						Utils.debugLog("HttpUtils.standardHttpPOSTQuery: Response extract: " + sResponseExtract);
+						WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: Response extract: " + sResponseExtract);
 					} else {
-						Utils.debugLog("HttpUtils.standardHttpPOSTQuery: reponse is empty");
+						WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: reponse is empty");
 					}
 				} else {
-					Utils.debugLog("HttpUtils.standardHttpPOSTQuery: provider did not return 200 but "
+					WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: provider did not return 200 but "
 							+ responseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					InputStream oErrorStream = oConnection.getErrorStream();
@@ -429,19 +474,19 @@ public final class HttpUtils {
 					String sMessage = oBytearrayOutputStream.toString();
 					if (null != sMessage) {
 						sResponseExtract = sMessage.substring(0, 200) + "...";
-						Utils.debugLog(
+						WasdiLog.debugLog(
 								"HttpUtils.standardHttpPOSTQuery: provider did not return 200 but " + responseCode
 										+ " (2/2) and this is the content of the error stream:\n" + sResponseExtract);
 					}
 				}
 			} catch (Exception oEint) {
-				Utils.debugLog("HttpUtils.standardHttpPOSTQuery: " + oEint);
+				WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: " + oEint);
 			} finally {
 				oConnection.disconnect();
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.standardHttpPOSTQuery: " + oE);
+			WasdiLog.debugLog("HttpUtils.standardHttpPOSTQuery: " + oE);
 		}
 		return sResult;
 	}
@@ -472,11 +517,11 @@ public final class HttpUtils {
 				os.write(ayBytes);
 			}
 
-			Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
+			WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
 
 			try {
 				int iResponseCode = oConnection.getResponseCode();
-				Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: Response Code : " + iResponseCode);
+				WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: Response Code : " + iResponseCode);
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 
@@ -490,7 +535,7 @@ public final class HttpUtils {
 						oHttpCallResponse.setResponseBody(sResult);
 					}
 				} else {
-					Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: provider did not return 200 but "
+					WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: provider did not return 200 but "
 							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
 
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
@@ -501,13 +546,13 @@ public final class HttpUtils {
 					oHttpCallResponse.setResponseBody(sResult);
 				}
 			} catch (Exception oEint) {
-				Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oEint);
+				WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oEint);
 			} finally {
 				oConnection.disconnect();
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oE);
+			WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oE);
 		}
 
 		return oHttpCallResponse;
@@ -585,7 +630,7 @@ public final class HttpUtils {
 		//local file -> automatically checks for null
 		File oFile = new File(sFileName);
 		if (!oFile.exists()) {
-			Utils.debugLog("Wasdi.httpPostFile: file not found");
+			WasdiLog.debugLog("Wasdi.httpPostFile: file not found");
 			return false;
 		}
 
@@ -594,7 +639,7 @@ public final class HttpUtils {
 		// Check if we need to zip this file
 		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
 
-			Utils.debugLog("HttpUtils.httpPostFile: File not zipped, zip it");
+			WasdiLog.debugLog("HttpUtils.httpPostFile: File not zipped, zip it");
 
 			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
 
@@ -608,7 +653,7 @@ public final class HttpUtils {
 
 			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
 			if (oPath.toFile().mkdir()) {
-				Utils.debugLog("HttpUtils.httpPostFile: Temporary directory created");
+				WasdiLog.debugLog("HttpUtils.httpPostFile: Temporary directory created");
 			} else {
 				throw new IOException("HttpUtils.httpPostFile: Can't create temporary dir " + sTempPath);
 			}
@@ -642,7 +687,7 @@ public final class HttpUtils {
 			int iBufferSize = 8192;//8*1024*1024
 			oConnection.setChunkedStreamingMode(iBufferSize);
 			Long lLen = oFile.length();
-			Utils.debugLog("HttpUtils.httpPostFile: file length is: " + Long.toString(lLen));
+			WasdiLog.debugLog("HttpUtils.httpPostFile: file length is: " + Long.toString(lLen));
 
 			if (asHeaders != null) {
 				for (String sKey : asHeaders.keySet()) {
@@ -673,7 +718,7 @@ public final class HttpUtils {
 
 				// response
 				int iResponse = oConnection.getResponseCode();
-				Utils.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
+				WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
 
 				InputStream oResponseInputStream = null;
 
@@ -687,7 +732,7 @@ public final class HttpUtils {
 				if(null!=oResponseInputStream) {
 					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
 					String sMessage = "HttpUtils.uploadFile: " + oByteArrayOutputStream.toString();
-					Utils.debugLog(sMessage);
+					WasdiLog.debugLog(sMessage);
 				} else {
 					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 				}
@@ -695,11 +740,11 @@ public final class HttpUtils {
 				oConnection.disconnect();
 
 			} catch(Exception oE) {
-				Utils.debugLog("HttpUtils.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
+				WasdiLog.debugLog("HttpUtils.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
 				return false;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
+			WasdiLog.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 			return false;
 		}
 
@@ -708,7 +753,7 @@ public final class HttpUtils {
 				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
 			}
 			catch (Exception oE) {
-				Utils.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
+				WasdiLog.debugLog("HttpUtils.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}
 		}
 
@@ -788,7 +833,7 @@ public final class HttpUtils {
 			try {
 				oResponseInputStream = oConnection.getInputStream();
 			} catch (Exception oE) {
-				Utils.debugLog("HttpUtils.readHttpResponse: could not getInputStream due to: " + oE);
+				WasdiLog.debugLog("HttpUtils.readHttpResponse: could not getInputStream due to: " + oE);
 			}
 
 			try {
@@ -796,7 +841,7 @@ public final class HttpUtils {
 					oResponseInputStream = oConnection.getErrorStream();
 				}
 			} catch (Exception oE) {
-				Utils.debugLog("HttpUtils.readHttpResponse: could not getErrorStream due to: " + oE);
+				WasdiLog.debugLog("HttpUtils.readHttpResponse: could not getErrorStream due to: " + oE);
 			}
 
 
@@ -805,15 +850,16 @@ public final class HttpUtils {
 
 			Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
 			String sMessage = oByteArrayOutputStream.toString();
+			
 			if (200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode()) {
 				return sMessage;
 			} else {
-				Utils.debugLog("HttpUtils.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
+				WasdiLog.debugLog("HttpUtils.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
 				return "";
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.readHttpResponse: exception: " + oE );
+			WasdiLog.debugLog("HttpUtils.readHttpResponse: exception: " + oE );
 		}
 		return "";
 	}
@@ -834,12 +880,12 @@ public final class HttpUtils {
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				lLenght = oConnection.getHeaderFieldLong("Content-Length", 0L);
 
-				Utils.debugLog("HttpUtils.getHttpResponseContentLength: File size = " + lLenght);
+				WasdiLog.debugLog("HttpUtils.getHttpResponseContentLength: File size = " + lLenght);
 			} else {
-				Utils.debugLog("HttpUtils.getHttpResponseContentLength: No file to download. Server replied HTTP code: " + responseCode);
+				WasdiLog.debugLog("HttpUtils.getHttpResponseContentLength: No file to download. Server replied HTTP code: " + responseCode);
 			}
 		} catch (IOException oE) {
-			Utils.debugLog("HttpUtils.getHttpResponseContentLength: exception: " + oE );
+			WasdiLog.debugLog("HttpUtils.getHttpResponseContentLength: exception: " + oE );
 		}
 
 		return lLenght;
@@ -891,7 +937,7 @@ public final class HttpUtils {
 			dSpeed *= 1000.0;
 		}
 
-		Utils.debugLog("HttpUtils." + sMethodName + " performance: " + dMillis + " ms, "
+		WasdiLog.debugLog("HttpUtils." + sMethodName + " performance: " + dMillis + " ms, "
 				+ iResponseSize + " B (" + dSpeed + " B/s)");
 	}
 
@@ -906,7 +952,7 @@ public final class HttpUtils {
 			oConnection.getOutputStream().write(("client_id=" + sClientId + "&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
 
 			int iStatus = oConnection.getResponseCode();
-			Utils.debugLog("HttpUtils.obtainOpenidConnectToken: Response status: " + iStatus);
+			WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: Response status: " + iStatus);
 
 			if (iStatus == 200) {
 				InputStream oInputStream = oConnection.getInputStream();
@@ -927,53 +973,14 @@ public final class HttpUtils {
 				Util.copyStream(oErrorStream, oBytearrayOutputStream);
 
 				String sMessage = oBytearrayOutputStream.toString();
-				Utils.debugLog("HttpUtils.obtainOpenidConnectToken:" + sMessage);
+				WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken:" + sMessage);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("HttpUtils.obtainOpenidConnectToken: " + oE);
+			WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: " + oE);
 		}
 
 		return null;
 	}
 
-	/**
-	 * Internal version of get 
-	 * @param sUrl
-	 * @return
-	 */
-	public static String httpGetResults(String sUrl) {
-		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
-
-		Map<String, String> asHeaders = new HashMap<>();
-
-		long lStart = System.nanoTime();
-		String sResult = standardHttpGETQuery(sUrl, asHeaders);
-		long lEnd = System.nanoTime();
-
-		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
-
-		return sResult;
-	}
-
-	public static String httpGetResults(String sUrl, String sDownloadUser, String sDownloadPassword) {
-		Utils.debugLog("HttpUtils.httpGetResults( " + sUrl + " )");
-
-		// Add the auth header
-		String sAuth = sDownloadUser + ":" + sDownloadPassword;
-		String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
-		String sAuthHeaderValue = "Basic " + sEncodedAuth;
-
-		Map<String, String> asHeaders = new HashMap<>();
-		asHeaders.put("Authorization", sAuthHeaderValue);
-
-
-		long lStart = System.nanoTime();
-		String sResult = standardHttpGETQuery(sUrl, asHeaders);
-		long lEnd = System.nanoTime();
-
-		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
-
-		return sResult;
-	}
 
 }

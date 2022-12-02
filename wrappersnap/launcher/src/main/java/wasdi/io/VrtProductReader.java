@@ -3,9 +3,13 @@ package wasdi.io;
 import java.io.File;
 import java.util.ArrayList;
 
-import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.products.*;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.products.BandViewModel;
+import wasdi.shared.viewmodels.products.GeorefProductViewModel;
+import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
+import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class VrtProductReader extends WasdiProductReader {
 
@@ -52,7 +56,7 @@ public class VrtProductReader extends WasdiProductReader {
         	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
     	}
     	catch (Exception oEx) {
-    		LauncherMain.s_oLogger.debug("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
+    		WasdiLog.debugLog("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
 		}
     	
     	return oRetViewModel;

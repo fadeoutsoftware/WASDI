@@ -16,6 +16,7 @@ import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
@@ -68,7 +69,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorSOBLOO.translate( " + sQueryFromClient + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorSOBLOO.translate( " + sQueryFromClient + " ): " + oE);
 		}
 
 		return sResult;
@@ -114,7 +115,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							Utils.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
 						}
 					}
 
@@ -126,11 +127,11 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 					}
 					sResult = sPrefix + sCoordinates;
 				} catch (Exception oE) {
-					Utils.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
+					WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not complete: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.log("ERROR", "QueryTranslatorSOBLOO.parseFootprint: could not identify footprint substring limits: " + oE);
 		}
 		return sResult;
 	}
@@ -205,7 +206,7 @@ public class QueryTranslatorSOBLOO extends QueryTranslator {
 		try {
 			sUrl = "https://sobloo.eu/api/v1/services/explore/explore/catalog/_count?" + translateAndEncodeParams(sQuery);
 		} catch (Exception oE) {
-			Utils.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
+			WasdiLog.log("ERROR", "QueryExecutorSOBLOO.getCountUrl: " + oE);
 		}
 		return sUrl;
 	}

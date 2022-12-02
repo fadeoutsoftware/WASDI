@@ -29,6 +29,7 @@ import wasdi.shared.parameters.settings.SubsetSetting;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -64,7 +65,7 @@ public class ProcessingResources {
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, MosaicSetting oSetting) throws IOException {
-        Utils.debugLog("ProcessingResources.Mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+        WasdiLog.debugLog("ProcessingResources.Mosaic( Destination: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC, sParentId);
     }
     
@@ -85,7 +86,7 @@ public class ProcessingResources {
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, RegridSetting oSetting) throws IOException {
-        Utils.debugLog("ProcessingResources.Regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
+        WasdiLog.debugLog("ProcessingResources.Regrid( Dest: " + sDestinationProductName + ", Ws: " + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID, sParentId);
     }
     
@@ -109,7 +110,7 @@ public class ProcessingResources {
                                   @QueryParam("name") String sDestinationProductName,
                                   @QueryParam("workspace") String sWorkspaceId,
                                   @QueryParam("parent") String sParentId, SubsetSetting oSetting) throws IOException {
-        Utils.debugLog("ProcessingResources.Subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+        WasdiLog.debugLog("ProcessingResources.Subset( Source: " + sSourceProductName + ", Dest:" + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET, sParentId);
     }
 
@@ -133,7 +134,7 @@ public class ProcessingResources {
                                        @QueryParam("name") String sDestinationProductName,
                                        @QueryParam("workspace") String sWorkspaceId,
                                        @QueryParam("parent") String sParentId, MultiSubsetSetting oSetting) throws IOException {
-        Utils.debugLog("ProcessingResources.MultiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
+        WasdiLog.debugLog("ProcessingResources.MultiSubset( Source: " + sSourceProductName + ", Dest: " + sDestinationProductName + ", Ws:" + sWorkspaceId + ", ... )");
         return callExecuteSNAPOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET, sParentId);
     }
 
@@ -145,29 +146,29 @@ public class ProcessingResources {
                                       @QueryParam("workspace") String sWorkspaceId,
                                       @QueryParam("parentId") String sParentId) {
 
-        Utils.debugLog("ProcessingResources.sen2CorConversion, Received request");
+        WasdiLog.debugLog("ProcessingResources.sen2CorConversion, Received request");
 
         if (sProductName == null || sWorkspaceId == null) {
-            Utils.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
+            WasdiLog.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
 
             return Response.status(Status.BAD_REQUEST).build();
         }
 
         if (sProductName != null && sWorkspaceId != null) {
-            Utils.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
+            WasdiLog.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
 
 
             try {
                 // Check authorization
                 if (Utils.isNullOrEmpty(sSessionId)) {
-                    Utils.debugLog("ProcessingResources.sen2CorConversion: invalid session");
+                    WasdiLog.debugLog("ProcessingResources.sen2CorConversion: invalid session");
 
                     return Response.status(Status.UNAUTHORIZED).build();
                 }
 
                 User oUser = Wasdi.getUserFromSession(sSessionId);
                 if (oUser == null) {
-                    Utils.debugLog("ProcessingResources.sen2CorConversion: user not found");
+                    WasdiLog.debugLog("ProcessingResources.sen2CorConversion: user not found");
 
                     return Response.status(Status.UNAUTHORIZED).build();
 
@@ -180,11 +181,11 @@ public class ProcessingResources {
                 oParameter.setUserId(oUser.getUserId());
                 oParameter.setExchange(sWorkspaceId);
 
-                Utils.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
+                WasdiLog.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
                 String sPath = WasdiConfig.Current.paths.serializationPath;
 
                 PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
-                Utils.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
+                WasdiLog.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
                 return Response.ok(oPrimitiveResult).build();
             } catch (Exception oe) {
                 oe.printStackTrace();
@@ -192,7 +193,7 @@ public class ProcessingResources {
 
         }
 
-        Utils.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
+        WasdiLog.debugLog("ProcessingResources.sen2CorConversion, conversion failed");
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 	
@@ -212,7 +213,7 @@ public class ProcessingResources {
             sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation, String
                                                      sParentProcessWorkspaceId) {
 
-        Utils.debugLog("ProsessingResources.executeOperation (Source: " + sSourceProductName + ", Destination: "
+        WasdiLog.debugLog("ProsessingResources.executeOperation (Source: " + sSourceProductName + ", Destination: "
                 + sDestinationProductName + ", WS: " + sWorkspaceId + ", Parent: " + sParentProcessWorkspaceId + " )");
         PrimitiveResult oResult = new PrimitiveResult();
         String sProcessObjId = "";
@@ -238,7 +239,7 @@ public class ProcessingResources {
             OperatorParameter oParameter = getParameter(oOperation);
 
             if (oParameter == null) {
-                Utils.debugLog("ProsessingResources.ExecuteOperation: impossible to create the parameter from the operation");
+                WasdiLog.debugLog("ProsessingResources.ExecuteOperation: impossible to create the parameter from the operation");
                 oResult.setBoolValue(false);
                 oResult.setIntValue(500);
                 return oResult;
@@ -262,12 +263,12 @@ public class ProcessingResources {
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
         } catch (IOException e) {
-            Utils.debugLog("ProsessingResources.ExecuteOperation: " + e);
+            WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
             return oResult;
         } catch (Exception e) {
-            Utils.debugLog("ProsessingResources.ExecuteOperation: " + e);
+            WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
             return oResult;
@@ -306,7 +307,7 @@ public class ProcessingResources {
         if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
         
         // Log intro
-        Utils.debugLog("ProsessingResources.runProcess( Operation: " + sOperationType + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
+        WasdiLog.debugLog("ProsessingResources.runProcess( Operation: " + sOperationType + ", OperationSubType: " + sOperationSubType + ", Product: " + sProductName + " Parent Id: " + sParentProcessWorkspaceId + ")");
         
         PrimitiveResult oResult = new PrimitiveResult();
 
@@ -353,7 +354,7 @@ public class ProcessingResources {
             // Make Wasdi handle this request: this should be in this node...
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
         } catch (Exception oE) {
-            Utils.debugLog("ProcessingResources.runProcess: " + oE);
+            WasdiLog.debugLog("ProcessingResources.runProcess: " + oE);
             oE.printStackTrace();
             oResult.setStringValue(oE.toString());
             oResult.setIntValue(500);

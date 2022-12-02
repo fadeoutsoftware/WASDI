@@ -28,6 +28,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 public class Publishband extends Operation {
@@ -35,17 +36,17 @@ public class Publishband extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Publishband.executeOperation");
+		WasdiLog.debugLog("Publishband.executeOperation");
 		
         String sLayerId = "";
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -61,7 +62,7 @@ public class Publishband extends Operation {
             // Check integrity
             if (Utils.isNullOrEmpty(sInputFile)) {
                 // File not good!!
-                m_oLocalLogger.debug("Publishband.executeOperation: file is null or empty");
+                WasdiLog.debugLog("Publishband.executeOperation: file is null or empty");
                 String sError = "Input File path is null";
 
                 m_oProcessWorkspaceLogger.log(sError);
@@ -92,7 +93,7 @@ public class Publishband extends Operation {
             }
 
             if (oDownloadedFile == null) {
-                m_oLocalLogger.error("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sInputFile + "]");
+                WasdiLog.errorLog("Publishband.executeOperation: Downloaded file is null!! Return empyt layer id for [" + sInputFile + "]");
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Cannot find product to publish", oParameter.getExchange());
                 return false;
             }
@@ -106,7 +107,7 @@ public class Publishband extends Operation {
             String sProductName = oDownloadedFile.getProductViewModel().getName();
 
             m_oProcessWorkspaceLogger.log("Publish Band " + sProductName + " - " + oParameter.getBandName());
-            m_oLocalLogger.debug("Publishband.executeOperation: " + sProductName + " - " + oParameter.getBandName());
+            WasdiLog.debugLog("Publishband.executeOperation: " + sProductName + " - " + oParameter.getBandName());
 
             // Create input file object
             File oInputFile = new File(sInputFile);
@@ -131,7 +132,7 @@ public class Publishband extends Operation {
 
             if (oAlreadyPublished != null) {
                 // Yes !!
-                m_oLocalLogger.debug("Publishband.executeOperation:  Band already published. Return result");
+                WasdiLog.debugLog("Publishband.executeOperation:  Band already published. Return result");
 
                 m_oProcessWorkspaceLogger.log("Band already published.");
 
@@ -154,7 +155,7 @@ public class Publishband extends Operation {
                 sStyle = oParameter.getStyle();
             }
             
-            m_oLocalLogger.debug("Publishband.executeOperation:  Generating Band Image with style " + sStyle);
+            WasdiLog.debugLog("Publishband.executeOperation:  Generating Band Image with style " + sStyle);
             m_oProcessWorkspaceLogger.log("Generate Band Image with style " + sStyle);
 
             // Create the Product Reader
@@ -164,7 +165,7 @@ public class Publishband extends Operation {
 			File oFileToCopy = oReadProduct.getFileForPublishBand(oParameter.getBandName(), sLayerId);
 			
 			if (oFileToCopy == null) {
-                m_oLocalLogger.debug("Publishband.executeOperation:  File for geoserver is null, return");
+                WasdiLog.debugLog("Publishband.executeOperation:  File for geoserver is null, return");
                 m_oProcessWorkspaceLogger.log("Sorry, but we do not know how to show this file on the map");
                 m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), "Looks we cannot show\nthis file on map", oParameter.getExchange());
                 return false;
@@ -191,12 +192,12 @@ public class Publishband extends Operation {
             // Output File
             File oOutputFile = new File(sOutputFilePath);
 
-            m_oLocalLogger.debug("Publishband.executeOperation: copy geoserver ready file to " + sOutputFilePath + " [LayerId] = " + sLayerId);
+            WasdiLog.debugLog("Publishband.executeOperation: copy geoserver ready file to " + sOutputFilePath + " [LayerId] = " + sLayerId);
             
             FileUtils.copyFile(oFileToCopy, oOutputFile);
             asCopiedFiles.add(oOutputFile.getPath());
             
-            m_oLocalLogger.debug("Publishband.executeOperation: search for other files to copy (same name, different extension)");
+            WasdiLog.debugLog("Publishband.executeOperation: search for other files to copy (same name, different extension)");
             
 			ArrayList<String> asFilesToCopy = new ArrayList<String>();
 			File oWorkspaceFolder = new File(oFileToCopy.getParent());
@@ -217,7 +218,7 @@ public class Publishband extends Operation {
 					// Does it match?
 					if (oChild.getName().startsWith(sBaseFileNameFilter))  {
 						asFilesToCopy.add(oChild.getPath());
-						m_oLocalLogger.debug("Publishband.executeOperation: found other file to copy " + oChild.getName());
+						WasdiLog.debugLog("Publishband.executeOperation: found other file to copy " + oChild.getName());
 					}
 				}
 			}
@@ -230,7 +231,7 @@ public class Publishband extends Operation {
     				
     				sOtherOutputFile = sOtherOutputFile.replace(sOtherOutputExtension, sNewExtension);
     				
-    				m_oLocalLogger.debug("Publishband.executeOperation: copy also " + sFileToCopy + " to " + sOtherOutputFile);
+    				WasdiLog.debugLog("Publishband.executeOperation: copy also " + sFileToCopy + " to " + sOtherOutputFile);
     				
     				FileUtils.copyFile(new File(sFileToCopy), new File(sOtherOutputFile));
     				asCopiedFiles.add(sOtherOutputFile);
@@ -256,20 +257,20 @@ public class Publishband extends Operation {
             String sEPSG = oFileToPublishReader.getEPSG();
             
             if (Utils.isNullOrEmpty(sEPSG)) {
-            	m_oLocalLogger.error("Publishband.executeOperation: EPSG is still null. Try to recover with default EPSG:4326");
+            	WasdiLog.errorLog("Publishband.executeOperation: EPSG is still null. Try to recover with default EPSG:4326");
             	sEPSG = "EPSG:4326";
             }
             
             if (sOutputFilePath.toLowerCase().endsWith(".shp")) {
-                m_oLocalLogger.debug("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                WasdiLog.debugLog("Publishband.executeOperation: Call publish shapefile sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
                 sLayerId = oPublisher.publishShapeFile(sOutputFilePath, asCopiedFiles, sLayerId, sEPSG, sStyle, oGeoServerManager);
             }
             else {
-                m_oLocalLogger.debug("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
+                WasdiLog.debugLog("Publishband.executeOperation: Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId + " Style = " + sStyle);
                 sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);            	
             }
 
-            m_oLocalLogger.debug("Publishband.executeOperation: Obtained sLayerId = " + sLayerId);
+            WasdiLog.debugLog("Publishband.executeOperation: Obtained sLayerId = " + sLayerId);
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
@@ -278,20 +279,20 @@ public class Publishband extends Operation {
             if (sLayerId == null) {
                 m_oProcessWorkspaceLogger.log("Error publishing in Geoserver... :(");
                 bResultPublishBand = false;
-                m_oLocalLogger.debug("Publishband.executeOperation: Image not published . ");
+                WasdiLog.debugLog("Publishband.executeOperation: Image not published . ");
                 throw new Exception("Layer Id is null. Image not published");
             } else {
 
                 m_oProcessWorkspaceLogger.log("Ok got layer id " + sLayerId);
 
-                m_oLocalLogger.debug("Publishband.executeOperation: Image published.");
+                WasdiLog.debugLog("Publishband.executeOperation: Image published.");
 
                 // get bounding box from data base
                 String sBBox = oDownloadedFile.getBoundingBox();
                 String sGeoserverBBox = oGeoServerManager.getLayerBBox(sLayerId);
 
-                m_oLocalLogger.debug("Publishband.executeOperation: Bounding Box: " + sBBox);
-                m_oLocalLogger.debug("Publishband.executeOperation: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
+                WasdiLog.debugLog("Publishband.executeOperation: Bounding Box: " + sBBox);
+                WasdiLog.debugLog("Publishband.executeOperation: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
 
                 // Create Entity
                 PublishedBand oPublishedBand = new PublishedBand();
@@ -306,14 +307,14 @@ public class Publishband extends Operation {
                 Node oNode = LauncherMain.getWorkspaceNode(oParameter.getWorkspace());
 
                 if (oNode != null) {
-                    m_oLocalLogger.debug("Publishband.executeOperation: node code: " + oNode.getNodeCode());
+                    WasdiLog.debugLog("Publishband.executeOperation: node code: " + oNode.getNodeCode());
                     oPublishedBand.setGeoserverUrl(oNode.getNodeGeoserverAddress());
                 }
 
                 // Add it the the db
                 oPublishedBandsRepository.insertPublishedBand(oPublishedBand);
 
-                m_oLocalLogger.debug("Publishband.executeOperation: Index Updated");
+                WasdiLog.debugLog("Publishband.executeOperation: Index Updated");
 
                 // Create the View Model
                 PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -350,7 +351,7 @@ public class Publishband extends Operation {
 
             m_oProcessWorkspaceLogger.log("Exception " + oEx.toString());
 
-            m_oLocalLogger.error("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Publishband.executeOperation: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
@@ -444,21 +445,21 @@ public class Publishband extends Operation {
             // Do we have the file?
             if (!oStyleFile.exists()) {
                 // No, Download style
-                m_oLocalLogger.info("Publishband.executeOperation: download style " + sStyle + " from main node");
+                WasdiLog.infoLog("Publishband.executeOperation: download style " + sStyle + " from main node");
                 String sRet = downloadStyle(sStyle, oParameter.getSessionID(), sStylePath);
 
                 // Check download result
                 if (!sRet.equals(sStylePath)) {
                     // Not good...
-                    m_oLocalLogger.error("Publishband.executeOperation: error downloading style " + sStyle);
+                    WasdiLog.errorLog("Publishband.executeOperation: error downloading style " + sStyle);
                 }
             }
 
             // Publish the style
             if (oGeoServerManager.publishStyle(sStylePath)) {
-                m_oLocalLogger.info("Publishband.executeOperation: published style " + sStyle + " on local geoserver");
+                WasdiLog.infoLog("Publishband.executeOperation: published style " + sStyle + " on local geoserver");
             } else {
-                m_oLocalLogger.error("Publishband.executeOperation: error publishing style " + sStyle + " reset on raster");
+                WasdiLog.errorLog("Publishband.executeOperation: error publishing style " + sStyle + " reset on raster");
                 sStyle = "raster";
             }
         }
@@ -476,12 +477,12 @@ public class Publishband extends Operation {
         try {
 
             if (sStyle == null) {
-                m_oLocalLogger.error("Publishband.downloadStyle: sStyle must not be null");
+                WasdiLog.errorLog("Publishband.downloadStyle: sStyle must not be null");
                 return "";
             }
 
             if (sStyle.equals("")) {
-                m_oLocalLogger.error("Publishband.downloadStylesStyle must not be empty");
+                WasdiLog.errorLog("Publishband.downloadStylesStyle must not be empty");
                 return "";
             }
 

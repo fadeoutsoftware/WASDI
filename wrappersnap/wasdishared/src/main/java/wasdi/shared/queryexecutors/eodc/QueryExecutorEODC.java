@@ -11,6 +11,7 @@ import java.util.List;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -37,7 +38,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 	@Override
 	public int executeCount(String sQuery) {
 		try {
-			Utils.debugLog("QueryExecutorEODC.executeCount( " + sQuery + " )");
+			WasdiLog.debugLog("QueryExecutorEODC.executeCount( " + sQuery + " )");
 			
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			
@@ -55,7 +56,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 			
 			return iResult;
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorEODC.executeCount: " + oE);
+			WasdiLog.debugLog("QueryExecutorEODC.executeCount: " + oE);
 			return -1;
 		}
 	}
@@ -89,13 +90,13 @@ public class QueryExecutorEODC extends QueryExecutor {
 						//in EODC offset starts at 1
 						iOffset += 1;
 					}catch (Exception oE) {
-						Utils.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse offset, defaulting");
+						WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse offset, defaulting");
 					}
 				}
 				if(!sQuery.contains("offset=")) {
 					sQuery += "&offset="+iOffset;
 				} else {
-					Utils.debugLog("QueryExecutorEODC.executeAndRetrieve: offset already specified: " + sQuery);
+					WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: offset already specified: " + sQuery);
 				}
 				
 				//limit
@@ -104,13 +105,13 @@ public class QueryExecutorEODC extends QueryExecutor {
 					try {
 						iLimit = Integer.parseInt(sLimit);
 					}catch (Exception oE) {
-						Utils.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse limit, defaulting");
+						WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse limit, defaulting");
 					}
 				}
 				if(!sQuery.contains("limit=")) {
 					sQuery += "&limit="+iLimit;
 				} else {
-					Utils.debugLog("QueryExecutorEODC.executeAndRetrieve: limit already specified: " + sQuery);
+					WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: limit already specified: " + sQuery);
 				}
 				
 			} else {
@@ -129,8 +130,8 @@ public class QueryExecutorEODC extends QueryExecutor {
 			
 			sPayload = ((QueryTranslatorEODC)m_oQueryTranslator).translate(sQuery);
 			
-			Utils.debugLog("EODC Payload:");
-			Utils.debugLog(sPayload);
+			WasdiLog.debugLog("EODC Payload:");
+			WasdiLog.debugLog(sPayload);
 			
 			sResult = standardHttpPOSTQuery(sUrl, sPayload);
 			
@@ -143,12 +144,12 @@ public class QueryExecutorEODC extends QueryExecutor {
 					return null; 
 				}
 			} else {
-				Utils.debugLog("QueryExecutorEODC.executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
+				WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
 				return null;
 			}
 			return aoResult;
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorEODC.executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
+			WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
 		}
 		return null;
 	}

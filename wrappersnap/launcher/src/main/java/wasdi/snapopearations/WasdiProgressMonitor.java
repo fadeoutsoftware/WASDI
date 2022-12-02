@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Wasdi Progres Monitor Listener
@@ -45,9 +46,9 @@ public class WasdiProgressMonitor implements ProgressMonitor {
 					if (m_oProcessRepository!=null) {
 		                //update the process
 		                if (!m_oProcessRepository.updateProcess(m_oProcess)) {
-		                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: Error during process update");
+		                	WasdiLog.debugLog("WasdiProgressMonitor: Error during process update");
 		                } else {
-		                	LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS " + m_iComputedIntervals + "% ProcId: " + m_oProcess.getProcessObjId());
+		                	WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS " + m_iComputedIntervals + "% ProcId: " + m_oProcess.getProcessObjId());
 		                }						
 					}
 	                
@@ -55,12 +56,12 @@ public class WasdiProgressMonitor implements ProgressMonitor {
 						if (LauncherMain.s_oSendToRabbit != null) LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(m_oProcess);
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();
-						LauncherMain.s_oLogger.error("WasdiProgressMonitor: Error during SendUpdateProcessMessage: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+						WasdiLog.errorLog("WasdiProgressMonitor: Error during SendUpdateProcessMessage: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 					}
 	                    
 	            }
 				else {
-					LauncherMain.s_oLogger.debug("WasdiProgressMonitor: process is null");
+					WasdiLog.debugLog("WasdiProgressMonitor: process is null");
 				}
 				
 			}
@@ -69,17 +70,17 @@ public class WasdiProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public void setTaskName(String sTaskName) {
-		LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS: setTaskName: " + sTaskName);
+		WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS: setTaskName: " + sTaskName);
 	}
 
 	@Override
 	public void setSubTaskName(String sSubTaskName) {
-		LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS: setSubTaskName: " + sSubTaskName);
+		WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS: setSubTaskName: " + sSubTaskName);
 	}
 
 	@Override
 	public void setCanceled(boolean bCanceled) {
-		LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS: setCanceled: " + bCanceled);		
+		WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS: setCanceled: " + bCanceled);		
 	}
 
 	@Override
@@ -93,12 +94,12 @@ public class WasdiProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public void done() {
-		LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS: done");				
+		WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS: done");				
 	}
 
 	@Override
 	public void beginTask(String sTaskName, int iTotalWork) {
-		LauncherMain.s_oLogger.debug("WasdiProgressMonitor: PROGRESS: beginTask: " + sTaskName + " total work: " +iTotalWork );
+		WasdiLog.debugLog("WasdiProgressMonitor: PROGRESS: beginTask: " + sTaskName + " total work: " +iTotalWork );
 		m_iTotalSteps = iTotalWork;
 	}
 

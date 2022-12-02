@@ -1,0 +1,87 @@
+cwlVersion: v1.2
+
+class: CommandLineTool
+id: {{wasdiAppId}}
+label: executes the WASDI Processor
+
+inputs:
+{{ wasdiAppParametersDeclaration }}
+  wasdi__proc__id:
+    type: string
+  wasdi__session__id:
+    type: string
+  wasdi__user__id:
+    type: string
+  wasdi__ws__id:
+    type: string
+
+outputs:
+  results:
+    type: Directory
+
+requirements:
+  EnvVarRequirement:
+    envDef:
+      WASDI_OUTPUT: {{ wasdiOutputFolder }}
+  NetworkAccess:
+    networkAccess: true
+  DockerRequirement:
+    dockerPull: {{ wasdiProcessorImage }}
+    dockerOutputDirectory: {{ wasdiOutputFolder }}
+  ResourceRequirement:
+    coresMax: 4
+    ramMax: 36000
+  InlineJavascriptRequirement: {}
+  InitialWorkDirRequirement:
+    listing:
+      - entryname: params.json
+        entry: |-
+          ${
+                var sParamsJson = "{";
+                var asKeys = Object.keys(inputs);
+
+                for (var i=0; i<asKeys.length; i++) {
+                 var sKey = asKeys[i];
+
+                 if (sKey=="wasdi__proc__id" || sKey=="wasdi__session__id" || sKey=="wasdi__user__id" || sKey=="wasdi__ws__id") {
+                   continue;
+                 }
+
+                 var oValue = inputs[sKey];
+                 sParamsJson += '"' + sKey + '":';
+                 if (typeof oValue === 'string' || oValue instanceof String) {
+                   sParamsJson += '"' + oValue + '"';
+                 }
+                 else {
+                   sParamsJson += oValue;
+                 }
+                 if (i<asKeys.length-1) {
+                   sParamsJson += ","
+                 }
+               }
+
+               sParamsJson += "}"
+
+               return sParamsJson;
+          }
+      - entryname: config.json
+        entry: |-
+          {
+            "USER": "$( inputs.wasdi__user__id )",
+            "WORKSPACEID": "$( inputs.wasdi__ws__id )",
+            "SESSIONID": "$( inputs.wasdi__session__id )",
+            "MYPROCID": "$( inputs.wasdi__proc__id )",
+            "PARAMETERSFILEPATH": "{{ wasdiOutputFolder.rstrip('/') }}/params.json"
+          }
+      - entryname: run_wasdi_app.sh
+        entry: |-
+          #!/bin/bash
+          export HOME=$PWD
+          eoepcaProcessorExecutor
+          res=$?
+          rm -f params.json
+          rm -f run_me.sh
+          rm -fr $HOME/.wasdi
+          exit $res
+
+baseCommand: ["python3", "/home/wasdi/application/eoepcaProcessorExecutor.py"]

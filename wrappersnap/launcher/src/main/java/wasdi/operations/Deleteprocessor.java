@@ -7,6 +7,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Delete Processor Operation
@@ -25,15 +26,15 @@ public class Deleteprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Deleteprocessor.executeOperation");
+		WasdiLog.debugLog("Deleteprocessor.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -66,7 +67,7 @@ public class Deleteprocessor extends Operation {
         	}	        
 		}
 		catch (Exception oEx) {
-			m_oLocalLogger.error("Deleteprocessor.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Deleteprocessor.executeOperation: exception", oEx);
 		}
 		
 		return bRet;

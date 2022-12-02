@@ -2,7 +2,7 @@ package wasdi.shared.queryexecutors.gpm;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryTranslator;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Query Translator GPM.
@@ -17,14 +17,14 @@ public class QueryTranslatorGPM extends QueryTranslator {
 
 	@Override
 	public String getCountUrl(String sQuery) {
-		Utils.debugLog("QueryTranslatorGPM.getCountUrl | sQuery: " + sQuery);
+		WasdiLog.debugLog("QueryTranslatorGPM.getCountUrl | sQuery: " + sQuery);
 
 		return null;
 	}
 
 	@Override
 	public String getSearchUrl(PaginatedQuery oQuery) {
-		Utils.debugLog("QueryTranslatorGPM.getSearchUrl | sQuery: " + oQuery.getQuery());
+		WasdiLog.debugLog("QueryTranslatorGPM.getSearchUrl | sQuery: " + oQuery.getQuery());
 
 		return null;
 	}

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -51,7 +52,7 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 			try {
 				iResultCount = Integer.parseInt((String)aoSearchResults.get("@numberOfRecordsReturned"));
 			} catch (Exception oE) {
-				Utils.debugLog("ResponseTranslatorEODC.translateBatch: cast to int failed: " + oE);
+				WasdiLog.debugLog("ResponseTranslatorEODC.translateBatch: cast to int failed: " + oE);
 			}
 			
 			ArrayList<Map<String, Object>> aoRecords = new ArrayList<Map<String, Object>>();
@@ -65,7 +66,7 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 				}
 			}
 			catch (Exception oE) {
-				Utils.debugLog("ResponseTranslatorEODC.translateBatch: aoRecords creation failed: " + oE);
+				WasdiLog.debugLog("ResponseTranslatorEODC.translateBatch: aoRecords creation failed: " + oE);
 			}
 			
 			// For each record
@@ -129,7 +130,7 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 									iAbsoluteOrbit = Integer.parseInt(sAbsoluteOrbit);
 								}
 								catch (Exception oEx) {
-									Utils.debugLog("ResponseTranslatorEODC.translateBatch: Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
+									WasdiLog.debugLog("ResponseTranslatorEODC.translateBatch: Exception converting EODC Result Relative Orbit: "  + oEx.toString()) ;
 								}
 								
 								if (iAbsoluteOrbit != -1) {
@@ -157,16 +158,16 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 					aoResults.add(oResViewModel);
 				}
 				catch (Exception oInnerEx) {
-					Utils.debugLog("ResponseTranslatorEODC.translateBatch: " + oInnerEx.toString());
+					WasdiLog.debugLog("ResponseTranslatorEODC.translateBatch: " + oInnerEx.toString());
 				}
 
 			}
 			
-			Utils.debugLog("Conversion done");
+			WasdiLog.debugLog("Conversion done");
 			
 		} 
 		catch (IOException oE) {
-			Utils.debugLog("ResponseTranslatorEODC.translateBatch: outer exception: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorEODC.translateBatch: outer exception: " + oE);
 		}
 		
 		return aoResults;
@@ -177,7 +178,7 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 		//parse response json and extract number
 
 		if(Utils.isNullOrEmpty(sQueryResult)) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: response is null, aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: response is null, aborting");
 			return -1;
 		}
 
@@ -186,40 +187,40 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 			oJson = new JSONObject(sQueryResult);
 		}
 		catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: could not create JSONObject (syntax error or duplicate key), aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not create JSONObject (syntax error or duplicate key), aborting");
 			return -1;
 		}
 
 		if(!oJson.has("csw:GetRecordsResponse")) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:GetRecordsResponse\" not found in JSON, aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:GetRecordsResponse\" not found in JSON, aborting");
 			return -1;
 		}
 
 		JSONObject oCswGetRecordsResponse = oJson.optJSONObject("csw:GetRecordsResponse");
 		if(null==oCswGetRecordsResponse) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:GetRecordsResponse\", aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:GetRecordsResponse\", aborting");
 			return -1;
 		}
 
 		if(!oCswGetRecordsResponse.has("csw:SearchResults")) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:SearchResults\" not found in \"csw:GetRecordsResponse\", aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:SearchResults\" not found in \"csw:GetRecordsResponse\", aborting");
 			return -1;
 		}
 
 		JSONObject oSearchResults = oCswGetRecordsResponse.optJSONObject("csw:SearchResults");
 		if(null==oSearchResults) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:SearchResults\", aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:SearchResults\", aborting");
 			return -1;
 		}
 
 		if(!oSearchResults.has("@numberOfRecordsMatched")) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: \"@numberOfRecordsMatched\" not found int \"csw:SearchResults\", aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: \"@numberOfRecordsMatched\" not found int \"csw:SearchResults\", aborting");
 			return -1;
 		}
 
 		int iResults = oSearchResults.optInt("@numberOfRecordsMatched", -1);
 		if(iResults < 0) {
-			Utils.debugLog("ResponseTranslatorEODC.getCountResult: could not access \"@numberOfRecordsMatched\", aborting");
+			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not access \"@numberOfRecordsMatched\", aborting");
 			return -1;
 		}
 		

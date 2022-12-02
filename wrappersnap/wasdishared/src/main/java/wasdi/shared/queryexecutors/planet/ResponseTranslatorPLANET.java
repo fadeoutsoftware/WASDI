@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.ResponseTranslator;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorPLANET extends ResponseTranslator {
@@ -127,7 +127,7 @@ public class ResponseTranslatorPLANET extends ResponseTranslator {
 								oWasdiResult.setFootprint(sFootprint);
 							}
 							catch (Exception oEx) {
-								Utils.debugLog("ResponseTranslatorPLANET.translateBatch: Exception reding footprint of one result = " + oEx.toString());
+								WasdiLog.debugLog("ResponseTranslatorPLANET.translateBatch: Exception reding footprint of one result = " + oEx.toString());
 							}							
 							
 						}
@@ -136,7 +136,7 @@ public class ResponseTranslatorPLANET extends ResponseTranslator {
 					aoWasdiResults.add(oWasdiResult);
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("ResponseTranslatorPLANET.translateBatch: Exception converting one result = " + oEx.toString());
+					WasdiLog.debugLog("ResponseTranslatorPLANET.translateBatch: Exception converting one result = " + oEx.toString());
 				}							
 
 			}
@@ -145,7 +145,7 @@ public class ResponseTranslatorPLANET extends ResponseTranslator {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ResponseTranslatorPLANET.translateBatch: Exception = " + oEx.toString());
+			WasdiLog.debugLog("ResponseTranslatorPLANET.translateBatch: Exception = " + oEx.toString());
 		}			
 		return null;
 	}
@@ -162,7 +162,7 @@ public class ResponseTranslatorPLANET extends ResponseTranslator {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("ResponseTranslatorPLANET.getCountResult: Exception = " + oEx.toString());
+			WasdiLog.debugLog("ResponseTranslatorPLANET.getCountResult: Exception = " + oEx.toString());
 		}			
 		return -1;
 	}

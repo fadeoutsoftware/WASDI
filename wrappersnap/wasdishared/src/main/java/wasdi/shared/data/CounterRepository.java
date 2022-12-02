@@ -4,6 +4,7 @@ import org.bson.Document;
 
 import wasdi.shared.business.Counter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CounterRepository extends MongoRepository {
 	
@@ -49,7 +50,7 @@ public class CounterRepository extends MongoRepository {
 				sResult = oDocument.getObjectId("_id").toHexString();
 	
 			} catch (Exception oEx) {
-				Utils.debugLog("CounterRepository.InsertCounter: " + oEx);
+				WasdiLog.debugLog("CounterRepository.InsertCounter: " + oEx);
 			}
 		}
 		return sResult;
@@ -68,7 +69,7 @@ public class CounterRepository extends MongoRepository {
 				String sJSON = oWSDocument.toJson();
 				oCounter = s_oMapper.readValue(sJSON,Counter.class);
 			} catch (Exception oEx) {
-				Utils.debugLog("CounterRepository.GetCounterBySequence( " + sSequence + " ): Counter still not existing");
+				WasdiLog.debugLog("CounterRepository.GetCounterBySequence( " + sSequence + " ): Counter still not existing");
 			}
 		}
 		return oCounter;
@@ -91,7 +92,7 @@ public class CounterRepository extends MongoRepository {
 				return true;
 	
 			} catch (Exception oEx) {
-				Utils.debugLog("CounterRepository.UpdateCounter: " + oEx);
+				WasdiLog.debugLog("CounterRepository.UpdateCounter: " + oEx);
 			}
 		}
 		return false;

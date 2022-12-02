@@ -11,9 +11,10 @@ import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Mosaic {
 	
@@ -26,12 +27,6 @@ public class Mosaic {
 	 * Mosaic Parameter
 	 */
 	MosaicParameter m_oMosaicParameter;	
-	
-	/**
-	 * Logger
-	 */
-	private LoggerWrapper m_oLogger = LauncherMain.s_oLogger;
-	
 	
 	/**
 	 * Output file format
@@ -83,19 +78,19 @@ public class Mosaic {
 		// Check parameter
 		if (m_oMosaicSetting == null) {
 			processWorkspaceLog("Error on parameters");
-			m_oLogger.error("Mosaic.runGDALMosaic: parameter is null, return false");
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: parameter is null, return false");
 			return false;
 		}
 		
 		if (m_oMosaicSetting.getSources() == null) {
 			processWorkspaceLog("Error: sources not available");
-			m_oLogger.error("Mosaic.runGDALMosaic: sources are null, return false");
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: sources are null, return false");
 			return false;
 		}
 		
 		if (m_oMosaicSetting.getSources().size() <= 0) {
 			processWorkspaceLog("Error: sources not available");
-			m_oLogger.error("Mosaic.runGDALMosaic: sources are empty, return false");
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: sources are empty, return false");
 			return false;
 		}
 		
@@ -202,7 +197,7 @@ public class Mosaic {
 				
 				// Get full path
 				String sProductFile = sWorkspacePath+m_oMosaicSetting.getSources().get(iProducts);
-				m_oLogger.debug("Mosaic.runGDALMosaic: Product [" + iProducts +"] = " + sProductFile);
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: Product [" + iProducts +"] = " + sProductFile);
 				
 				processWorkspaceLog("Adding input product " + m_oMosaicSetting.getSources().get(iProducts));
 				
@@ -220,7 +215,7 @@ public class Mosaic {
 			
 			processWorkspaceLog("Start real mosaic");
 			
-			m_oLogger.debug("Mosaic.runGDALMosaic: Command = " + sCommand);
+			WasdiLog.debugLog("Mosaic.runGDALMosaic: Command = " + sCommand);
 			
 			oProcessBuidler.redirectErrorStream(true);
 			oProcess = oProcessBuidler.start();
@@ -228,7 +223,7 @@ public class Mosaic {
 			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
 			String sLine;
 			while ((sLine = oReader.readLine()) != null)
-				m_oLogger.debug("[gdal]: " + sLine);
+				WasdiLog.debugLog("[gdal]: " + sLine);
 			
 			oProcess.waitFor();
 			
@@ -237,20 +232,20 @@ public class Mosaic {
 				processWorkspaceLog("Mosaic done");
 				
 				// Done
-				m_oLogger.debug("Mosaic.runGDALMosaic: created GDAL file = " + m_sOuptutFile);				
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: created GDAL file = " + m_sOuptutFile);				
 			}
 			else {
 				processWorkspaceLog("Error creating output file");
 				// Error
-				m_oLogger.debug("Mosaic.runGDALMosaic: error creating mosaic = " + m_sOuptutFile);
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: error creating mosaic = " + m_sOuptutFile);
 				return false;
 			}
 			
 		} 
         catch (Throwable e) {
         	processWorkspaceLog("There was an exception...");
-			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
-			m_oLogger.error("Mosaic.runGDALMosaic: " + e.toString());
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}
 

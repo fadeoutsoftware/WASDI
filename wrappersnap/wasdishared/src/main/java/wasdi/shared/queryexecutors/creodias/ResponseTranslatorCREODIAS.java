@@ -16,6 +16,7 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -72,7 +73,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.translateBatch: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.translateBatch: " + oE);
 		}
 		return aoResults;
 	}
@@ -92,7 +93,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 			buildSummary(oResult);
 			
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.translate( " +
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.translate( " +
 					oInJson.toString() + ", " +
 					bFullViewModel + " ): " + oE );
 		}
@@ -112,7 +113,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 				oResult.getProperties().put(ResponseTranslatorCREODIAS.STYPE, oInJson.optString(ResponseTranslatorCREODIAS.STYPE, null));
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.parseMainInfo( " +
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseMainInfo( " +
 					oInJson.toString() + ", ...): " + oE );
 		}
 	}
@@ -162,7 +163,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("DiasQueryTranslatorCREODIAS.parseFootPrint( " + oInJson.toString() + ", ... ): " + oE );
+			WasdiLog.debugLog("DiasQueryTranslatorCREODIAS.parseFootPrint( " + oInJson.toString() + ", ... ): " + oE );
 		}
 	}
 
@@ -245,7 +246,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 		try {
 			JSONObject oProperties = oInJson.optJSONObject("properties");
 			if(null == oProperties) {
-				Utils.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
+				WasdiLog.debugLog("DiasResponseTranslatorCREDODIAS.addProperties: input json has null properties");
 				return;
 			}
 
@@ -315,7 +316,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 
 			parseServices(oResult, oProperties);
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseProperties(" + oInJson.toString() + ", " + bFullViewModel + ", ... ): " + oE);
 		}
 	}
 
@@ -331,11 +332,11 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 		try {
 			//links
 			if(!oProperties.has("links")) {
-				Utils.debugLog("ResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" was expected but not found, here's the json:\nJSON DUMP BEGIN\n" +
 						oProperties + "\nJSON DUMP END");
 			}
 			if(oProperties.isNull("links")) {
-				Utils.debugLog("ResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseProperties: warning: field \"links\" is present but has null value, here's the json:\nJSON DUMP BEGIN\n" +
 						oProperties + "\nJSON DUMP END");
 			}
 			//try as object
@@ -372,13 +373,13 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 							}								
 
 						} catch (Exception oE) {
-							Utils.debugLog("ResponseTranslatorCREODIAS.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
+							WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseProperties: exception while trying to cast item object to JSONObject: " + oE);
 						}
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
+			WasdiLog.debugLog("DiasResponseTranslator.parseLinks( " + oProperties.toString() + ", ... ): " + oE);
 		}
 	}
 
@@ -433,20 +434,20 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 						oResult.getProperties().put(ResponseTranslatorCREODIAS.SURL, sUrl);						
 						oResult.setLink(sUrl);
 					} else {
-						Utils.debugLog("ResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
+						WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
 								"JSON DUMP BEGIN\n" +
 								oProperties.toString() + 
 								"JSON DUMP END" );
 					}
 				} else {
-					Utils.debugLog("ResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
+					WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseServices: download link not found! dumping json:\n" +
 							"JSON DUMP BEGIN\n" +
 							oProperties.toString() + 
 							"JSON DUMP END" );
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.parseServices( ..., " + oProperties.toString() + " ):" + oE );
 		}
 	}
 
@@ -459,7 +460,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 			
 			sItem = oResult.getProperties().get(ResponseTranslatorCREODIAS.SURL);
 			if(null==sItem || sItem.isEmpty()) {
-				Utils.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
 				sItem = "http://";
 			} 
 			oLink.append(sItem).append(ResponseTranslatorCREODIAS.SLINK_SEPARATOR_CREODIAS); //0
@@ -516,7 +517,7 @@ public class ResponseTranslatorCREODIAS extends ResponseTranslator {
 			oResult.getProperties().put(ResponseTranslatorCREODIAS.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
-			Utils.debugLog("ResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
 		}
 	}
 

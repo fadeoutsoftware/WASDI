@@ -11,6 +11,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -40,7 +41,7 @@ public class KeycloakService implements AuthProviderService {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
-			Utils.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
+			WasdiLog.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
 			String sAuthResult = HttpUtils.httpPost(sAuthUrl, sPayload, asHeaders);
 			if(Utils.isNullOrEmpty(sAuthResult)) {
 				throw new RuntimeException("could not login into keycloak");
@@ -58,10 +59,10 @@ public class KeycloakService implements AuthProviderService {
 			if(Utils.isNullOrEmpty(sKcTokenId)) {
 				throw new NullPointerException("Token id null or empty");
 			}
-			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: admin token obtained :-)");
+			WasdiLog.debugLog("KeycloakService.getKeycloakAdminCliToken: admin token obtained :-)");
 			return sKcTokenId;
 		} catch (Exception oE) {
-			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
+			WasdiLog.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
 		}
 		return null;
 	}
@@ -74,12 +75,12 @@ public class KeycloakService implements AuthProviderService {
 		}
 		sUrl += "admin/realms/wasdi/users?exact=true&username=";
 		sUrl += sUserId;
-		Utils.debugLog("KeycloakService.getUserData: about to GET to " + sUrl);
+		WasdiLog.debugLog("KeycloakService.getUserData: about to GET to " + sUrl);
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.clear();
 		asHeaders.put("Authorization", "Bearer " + sToken);
 		String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
-		Utils.debugLog("KeycloakService.getUserData: user data: " + sResponse);
+		WasdiLog.debugLog("KeycloakService.getUserData: user data: " + sResponse);
 		return sResponse;
 	}
 
@@ -96,38 +97,38 @@ public class KeycloakService implements AuthProviderService {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 		String sAuthResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
-		Utils.debugLog("KeycloakService.login: auth result: " + sAuthResult);
+		WasdiLog.debugLog("KeycloakService.login: auth result: " + sAuthResult);
 		return sAuthResult;
 	}
 	
 	@Override
 	public String getUserDbId(String sUserId) {
 		if(Utils.isNullOrEmpty(sUserId)) {
-			Utils.debugLog("KeycloakService.getUserDbId: user id null or empty, aborting");
+			WasdiLog.debugLog("KeycloakService.getUserDbId: user id null or empty, aborting");
 			return null;
 		}
 		String sToken = getToken();
 		if(Utils.isNullOrEmpty(sToken)) {
-			Utils.debugLog("KeycloakService.getUserDbId: token null or empty, aborting");
+			WasdiLog.debugLog("KeycloakService.getUserDbId: token null or empty, aborting");
 			return null;
 		}
 		String sResponse = getUserData(sToken, sUserId);
 		if(Utils.isNullOrEmpty(sResponse)) {
-			Utils.debugLog("KeycloakService.getUserDbId: response null or empty, aborting");
+			WasdiLog.debugLog("KeycloakService.getUserDbId: response null or empty, aborting");
 			return null;
 		}
 		try {
 			JSONArray oResponseArray = new JSONArray(sResponse);
 			if(oResponseArray.length() != 1) {
-				Utils.debugLog("KeycloakService.getUserDbId: response array has length " + oResponseArray.length() + ", but lenght of exactly 1 was expected, aborting");
+				WasdiLog.debugLog("KeycloakService.getUserDbId: response array has length " + oResponseArray.length() + ", but lenght of exactly 1 was expected, aborting");
 				return null;
 			}
 			JSONObject oEntry = oResponseArray.getJSONObject(0);
 			String sUserDbId = oEntry.optString("id", null);
-			Utils.debugLog("KeycloakService.getUserDbId: user DB id: " + sUserDbId );
+			WasdiLog.debugLog("KeycloakService.getUserDbId: user DB id: " + sUserDbId );
 			return sUserDbId;
 		} catch (Exception oE) {
-			Utils.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
+			WasdiLog.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
 		}
 		return null;
 	}
@@ -138,12 +139,12 @@ public class KeycloakService implements AuthProviderService {
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
 		if(Utils.isNullOrEmpty(sUserId)) {
-			Utils.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user id null or empty, aborting");
+			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user id null or empty, aborting");
 			return oResult;
 		}
 		String sUserDbId = getUserDbId(sUserId);
 		if(Utils.isNullOrEmpty(sUserDbId)) {
-			Utils.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user DB id null or empty, aborting");
+			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user DB id null or empty, aborting");
 			return oResult;
 		}
 		StringBuilder oUrlBuilder = new StringBuilder()
@@ -161,11 +162,11 @@ public class KeycloakService implements AuthProviderService {
 			asHeaders.put("Authorization", "Bearer " + sToken);
 			asHeaders.put("Content-Type", "application/json");
 			String sResponse = HttpUtils.httpPut(sUrl, sPayload, asHeaders);
-			Utils.debugLog("KeycloakService.getUserDbId: response (should be empty): \"" + sResponse + "\"");
+			WasdiLog.debugLog("KeycloakService.getUserDbId: response (should be empty): \"" + sResponse + "\"");
 			oResult.setIntValue(200);
 			return oResult;
 		} catch (Exception oE) {
-			Utils.debugLog("KeycloakService.requirePasswordUpdateViaEmail: could not establish connection due to: " + oE + ", aborting");
+			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: could not establish connection due to: " + oE + ", aborting");
 		}
 		
 				
@@ -227,11 +228,11 @@ public class KeycloakService implements AuthProviderService {
 			Map<String, String> asHeaders = new HashMap<>();
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
-			Utils.debugLog("KeycloakService.logout: about to logout: " + sUrl + ", " + sPayload);
+			WasdiLog.debugLog("KeycloakService.logout: about to logout: " + sUrl + ", " + sPayload);
 			String sLogoutResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
 			return true;
 		} catch (Exception oE) {
-			Utils.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
+			WasdiLog.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);
 		}
 		return false;
 	}

@@ -47,6 +47,7 @@ import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
 import wasdi.shared.viewmodels.processors.CommentDetailViewModel;
@@ -109,7 +110,7 @@ public class ProcessorsMediaResource {
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
 		
-		Utils.debugLog("ProcessorsMediaResource.uploadProcessorLogo( ProcId: " + sProcessorId + ")");
+		WasdiLog.debugLog("ProcessorsMediaResource.uploadProcessorLogo( ProcId: " + sProcessorId + ")");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -117,12 +118,12 @@ public class ProcessorsMediaResource {
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessorLogo: get Processor " + sProcessorId);	
+		WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: unable to find processor " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: unable to find processor " + sProcessorId);
 			return Response.serverError().build();
 		}
 		
@@ -133,11 +134,11 @@ public class ProcessorsMediaResource {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
-				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: processor not of user " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: processor not of user " + oUser.getUserId());
 				return Response.status(Status.UNAUTHORIZED).build();					
 			}
 			else {
-				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
 			}
 			
 		}
@@ -151,32 +152,32 @@ public class ProcessorsMediaResource {
 			sFileName = oFileMetaData.getFileName();
 			sExt = FilenameUtils.getExtension(sFileName);
 			
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: FileName " + sFileName + " Extension: " + sExt);
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: FileName " + sFileName + " Extension: " + sExt);
 		} 
 		else {
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: File metadata not available");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: File metadata not available");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		// Check if this is an accepted file extension
 		if(ImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: extension invalid");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: extension invalid");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		// Take path
 		String sPath = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessorLogo: sPath: " + sPath);
+		WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: sPath: " + sPath);
 		
 		String sExtensionOfSavedLogo = ImageResourceUtils.getExtensionOfImageInFolder(sPath+DEFAULT_LOGO_PROCESSOR_NAME, IMAGE_PROCESSORS_EXTENSIONS);
 		
 		//if there is a saved logo with a different extension remove it 
 		if(sExtensionOfSavedLogo.isEmpty() == false){
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: delete old logo");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: delete old logo");
 		    File oOldLogo = new File(sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExtensionOfSavedLogo);
 		    if (!oOldLogo.delete()) {
-		    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't delete old logo");
+		    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: can't delete old logo");
 		   	}
 		}
 			
@@ -184,16 +185,16 @@ public class ProcessorsMediaResource {
 	    
 	    String sOutputFilePath = sPath + DEFAULT_LOGO_PROCESSOR_NAME + "." + sExt.toLowerCase();
 	    
-	    Utils.debugLog("ProcessorsResource.uploadProcessorLogo: sOutputFilePath: " + sOutputFilePath);
+	    WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: sOutputFilePath: " + sOutputFilePath);
 	    
 	    File oTouchFile = new File(sOutputFilePath);
 	    
 	    try {
 			if (!oTouchFile.createNewFile()) {
-				Utils.debugLog("ProcessorsResource.uploadProcessorLogo: can't create new file");
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: can't create new file");
 			}
 		} catch (IOException e) {
-			Utils.debugLog("ProcessorsResource.uploadProcessorLogo: " + e.toString());
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: " + e.toString());
 			e.printStackTrace();
 		}	    
 	    
@@ -201,14 +202,14 @@ public class ProcessorsMediaResource {
 	    boolean bIsSaved =  oOutputLogo.saveImage(oInputFileStream);
 	    
 	    if(bIsSaved == false){
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  not saved!");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo:  not saved!");
 	    	return Response.status(Status.BAD_REQUEST).build();
 	    }
 	    
 	    boolean bIsResized = oOutputLogo.resizeImage(LOGO_SIZE, LOGO_SIZE);
 	    
 	    if(bIsResized == false){
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: error in resize");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: error in resize");
 	    }	    
 	    	    
 	    try {
@@ -216,28 +217,28 @@ public class ProcessorsMediaResource {
 		    // Create the thumb:
 		    String sThumbPath = sOutputFilePath;	    	
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: creating thumb");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: creating thumb");
 	    	
 	    	String [] asSplit = sOutputFilePath.split("\\.");
 	    	
 	    	sThumbPath = asSplit[0] + "_thumb." + asSplit[1];
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file path: " + sThumbPath);
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file path: " + sThumbPath);
 	    	
 	    	File oThumb = new File(sThumbPath);
 	    	
 	    	Files.copy(oOutputLogo, oThumb);
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file created");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: thumb file created");
 	    	
 	    	ImageFile oImageThumb = new ImageFile(sThumbPath);
 	    	if (!oImageThumb.resizeImage(50, 44)) {
-	    		Utils.debugLog("ProcessorsResource.uploadProcessorLogo: error resizing the thumb");
+	    		WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: error resizing the thumb");
 	    	}
 	    	
 	    }
 	    catch (Exception oEx) {
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
 		}
 	    
 	    
@@ -256,7 +257,7 @@ public class ProcessorsMediaResource {
 	@Path("/logo/get")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getProcessorLogo ( ProcId: " + sProcessorId + " )");
+		WasdiLog.debugLog("ProcessorsMediaResource.getProcessorLogo ( ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -264,12 +265,12 @@ public class ProcessorsMediaResource {
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
-		Utils.debugLog("ProcessorsResource.getProcessorLogo: get Processor " + sProcessorId);	
+		WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsResource.getProcessorLogo: unable to find processor " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: unable to find processor " + sProcessorId);
 			return Response.serverError().build();
 		}
 		
@@ -280,11 +281,11 @@ public class ProcessorsMediaResource {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
-				Utils.debugLog("ProcessorsResource.getProcessorLogo: processor not of user " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: processor not of user " + oUser.getUserId());
 				return Response.status(Status.UNAUTHORIZED).build();					
 			}
 			else {
-				Utils.debugLog("ProcessorsResource.getProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
 			}
 			
 		}
@@ -318,7 +319,7 @@ public class ProcessorsMediaResource {
 	public Response getAppImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId,
 								@QueryParam("imageName") String sImageName) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getAppImage + " + sImageName + " Proc " + sProcessorId);
+		WasdiLog.debugLog("ProcessorsMediaResource.getAppImage + " + sImageName + " Proc " + sProcessorId);
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -326,12 +327,12 @@ public class ProcessorsMediaResource {
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
-		Utils.debugLog("ProcessorsResource.getAppImage: get Processor " + sProcessorId);	
+		WasdiLog.debugLog("ProcessorsResource.getAppImage: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsResource.getAppImage: unable to find processor " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsResource.getAppImage: unable to find processor " + sProcessorId);
 			return Response.serverError().build();
 		}
 		
@@ -342,11 +343,11 @@ public class ProcessorsMediaResource {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
-				Utils.debugLog("ProcessorsResource.getAppImage: processor not of user " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.getAppImage: processor not of user " + oUser.getUserId());
 				return Response.status(Status.UNAUTHORIZED).build();					
 			}
 			else {
-				Utils.debugLog("ProcessorsResource.getAppImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.getAppImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
 			}
 		}
 		
@@ -377,7 +378,7 @@ public class ProcessorsMediaResource {
 	@Path("/images/delete")
 	public Response deleteProcessorImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("imageName") String sImageName ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteProcessorImage( ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
+		WasdiLog.debugLog("ProcessorsMediaResource.deleteProcessorImage( ProcId: " + sProcessorId + ", Image Name: " + sImageName + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -385,12 +386,12 @@ public class ProcessorsMediaResource {
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
-		Utils.debugLog("ProcessorsResource.deleteProcessorImage: get Processor " + sProcessorId);	
+		WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: unable to find processor " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: unable to find processor " + sProcessorId);
 			return Response.serverError().build();
 		}
 		
@@ -399,22 +400,22 @@ public class ProcessorsMediaResource {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
-				Utils.debugLog("ProcessorsResource.deleteProcessorImage: processor not of user " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: processor not of user " + oUser.getUserId());
 				return Response.status(Status.UNAUTHORIZED).build();					
 			}
 			else {
-				Utils.debugLog("ProcessorsResource.deleteProcessorImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
 			}
 		}
 				
 		if(Utils.isNullOrEmpty(sImageName)) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name is null" );
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: Image name is null" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		//sanity check: is sImageName safe? It must be a file name, not a path
 		if(sImageName.contains("/") || sImageName.contains("\\")) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: Image name looks like a path" );
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: Image name looks like a path" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -424,17 +425,17 @@ public class ProcessorsMediaResource {
 		try {
 			oNioDir = Paths.get(sPathFolder);
 		} catch (InvalidPathException  oE) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be obtained from OS due to " + oE );
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be obtained from OS due to " + oE );
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		if(!java.nio.file.Files.isDirectory(oNioDir)) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sPathFolder + " is not a directory" );
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: " + sPathFolder + " is not a directory" );
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		java.nio.file.Path oNioFile = oNioDir.resolve(sImageName);
 		if(!java.nio.file.Files.exists(oNioFile)) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder);
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder);
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
@@ -442,13 +443,13 @@ public class ProcessorsMediaResource {
 		try {
 			java.nio.file.Files.delete(oNioFile);
 		} catch (NoSuchFileException oE) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder + ": " + oE);
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: file " + sImageName +" not found in " + sPathFolder + ": " + oE);
 			return Response.status(Status.NOT_FOUND).build();
 		} catch (DirectoryNotEmptyException oE) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: " + sImageName + " in " + sPathFolder + " is a non-empty directory and cannot be deleted: " + oE);
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: " + sImageName + " in " + sPathFolder + " is a non-empty directory and cannot be deleted: " + oE);
 			return Response.status(Status.BAD_REQUEST).build();
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be deleted due to " + oE );
+			WasdiLog.debugLog("ProcessorsResource.deleteProcessorImage: requested directory " + sPathFolder + " could not be deleted due to " + oE );
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
@@ -471,7 +472,7 @@ public class ProcessorsMediaResource {
 	public Response uploadProcessorImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
 										@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
-		Utils.debugLog("ProcessorsMediaResource.uploadProcessorImage( ProcId: " + sProcessorId + " )");
+		WasdiLog.debugLog("ProcessorsMediaResource.uploadProcessorImage( ProcId: " + sProcessorId + " )");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -479,12 +480,12 @@ public class ProcessorsMediaResource {
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessorImage: get Processor " + sProcessorId);	
+		WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: unable to find processor " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: unable to find processor " + sProcessorId);
 			return Response.serverError().build();
 		}
 		
@@ -495,11 +496,11 @@ public class ProcessorsMediaResource {
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
 			
 			if (oSharing == null) {
-				Utils.debugLog("ProcessorsResource.uploadProcessorImage: processor not of user " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: processor not of user " + oUser.getUserId());
 				return Response.status(Status.UNAUTHORIZED).build();					
 			}
 			else {
-				Utils.debugLog("ProcessorsResource.uploadProcessorImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
 			}
 		}		
 	
@@ -511,12 +512,12 @@ public class ProcessorsMediaResource {
 			sFileName = fileMetaData.getFileName();
 			sExt = FilenameUtils.getExtension(sFileName);
 		} else {
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid uploaded file");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: Invalid uploaded file");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if( ImageResourceUtils.isValidExtension(sExt,IMAGE_PROCESSORS_EXTENSIONS) == false ){
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: Invalid extension");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: Invalid extension");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -527,10 +528,10 @@ public class ProcessorsMediaResource {
 		ImageResourceUtils.createDirectory(sAbsolutePathFolder);
 		String sAvaibleFileName = ImageResourceUtils.getAvaibleProcessorImageFileName(sAbsolutePathFolder);
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
+		WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
 		
 		if(sAvaibleFileName.isEmpty()){
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: max images count reached");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: max images count reached");
 			//the user have reach the max number of images 
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -542,10 +543,10 @@ public class ProcessorsMediaResource {
 	    
 	    try {
 			if (!oTouchFile.createNewFile()) {
-				Utils.debugLog("ProcessorsResource.uploadProcessorImage: can't create new file");
+				WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: can't create new file");
 			}
 		} catch (IOException e) {
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: " + e.toString());
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: " + e.toString());
 			e.printStackTrace();
 		}
 		
@@ -554,18 +555,18 @@ public class ProcessorsMediaResource {
 		//TODO SCALE IMAGE ?
 		boolean bIsSaved = oNewImage.saveImage(fileInputStream);
 	    if(bIsSaved == false){
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: error saving the image");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: error saving the image");
 	    	return Response.status(Status.BAD_REQUEST).build();
 	    }
 	    
-	    Utils.debugLog("ProcessorsResource.uploadProcessorImage: image saved, check size");
+	    WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: image saved, check size");
 	    
 		double dBytes = (double) oNewImage.length();
 		double dKilobytes = (dBytes / 1024);
 		double dMegabytes = (dKilobytes / 1024);
 		
 		if( dMegabytes > (double) ProcessorsMediaResource.MAX_IMAGE_MB_SIZE){
-			Utils.debugLog("ProcessorsResource.uploadProcessorImage: image too big, delete it");
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: image too big, delete it");
 			oNewImage.delete();
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -575,32 +576,32 @@ public class ProcessorsMediaResource {
 		    // Create the thumb:
 		    String sThumbPath = sAbsoluteImageFilePath;	    	
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: creating thumb");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: creating thumb");
 	    	
 	    	String [] asSplit = sAbsoluteImageFilePath.split("\\.");
 	    	
 	    	sThumbPath = asSplit[0] + "_thumb." + asSplit[1];
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: thumb file path: " + sThumbPath);
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: thumb file path: " + sThumbPath);
 	    	
 	    	File oThumb = new File(sThumbPath);
 	    	
 	    	Files.copy(oNewImage, oThumb);
 	    	
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorImage: thumb file created");
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: thumb file created");
 	    	
 	    	ImageFile oImageThumb = new ImageFile(sThumbPath);
 	    	if (!oImageThumb.resizeImage(50, 44)) {
-	    		Utils.debugLog("ProcessorsResource.uploadProcessorImage: error resizing the thumb");
+	    		WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: error resizing the thumb");
 	    	}
 	    	
 	    }
 	    catch (Exception oEx) {
-	    	Utils.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
+	    	WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo:  error creating the thumb " + oEx.toString());
 		}
 		
 		
-		Utils.debugLog("ProcessorsResource.uploadProcessorImage: image uploaded");
+		WasdiLog.debugLog("ProcessorsResource.uploadProcessorImage: image uploaded");
 		oProcessorRepository.updateProcessorDate(oProcessor);
 		
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
@@ -618,7 +619,7 @@ public class ProcessorsMediaResource {
 	@Path("categories/get")
 	public Response getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getCategories");
+		WasdiLog.debugLog("ProcessorsMediaResource.getCategories");
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
@@ -651,16 +652,16 @@ public class ProcessorsMediaResource {
 		try {
 		    sProcessorId = java.net.URLDecoder.decode(sProcessorId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			Utils.debugLog("ProcessorsMediaResource.deleteReview excepion decoding processor Id");
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview excepion decoding processor Id");
 		}
 		
 		try {
 			sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			Utils.debugLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
 		}		
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
+		WasdiLog.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
@@ -714,16 +715,16 @@ public class ProcessorsMediaResource {
 		try {
 		    sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			Utils.debugLog("ProcessorsMediaResource.deleteComment excepion decoding parent review Id");
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment excepion decoding parent review Id");
 		}
 		
 		try {
 			sCommentId = java.net.URLDecoder.decode(sCommentId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			Utils.debugLog("ProcessorsMediaResource.deleteComment excepion decoding comment Id");
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment excepion decoding comment Id");
 		}		
 		
-		Utils.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");
+		WasdiLog.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
@@ -768,7 +769,7 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/update")
 	public Response updateReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {
 		
-		Utils.debugLog("ProcessorsMediaResource.updateReview");
+		WasdiLog.debugLog("ProcessorsMediaResource.updateReview");
 	
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
@@ -810,7 +811,7 @@ public class ProcessorsMediaResource {
 	@Path("/comments/update")
 	public Response updateComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
-		Utils.debugLog("ProcessorsMediaResource.updateComment");
+		WasdiLog.debugLog("ProcessorsMediaResource.updateComment");
 	
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
@@ -846,17 +847,17 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/add")
 	public Response addReview(@HeaderParam("x-session-token") String sSessionId, ReviewViewModel oReviewViewModel) {//
 		
-		Utils.debugLog("ProcessorsMediaResource.addReview");
+		WasdiLog.debugLog("ProcessorsMediaResource.addReview");
 	
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			Utils.debugLog("ProcessorsMediaResource.addReview: invalid user");
+			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if(oReviewViewModel == null ){
-			Utils.debugLog("ProcessorsMediaResource.addReview: invalid view model");
+			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
@@ -864,14 +865,14 @@ public class ProcessorsMediaResource {
 				
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			Utils.debugLog("ProcessorsMediaResource.addReview: invalid vote");
+			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid vote");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		String sProcessorId = oReviewViewModel.getProcessorId();
 		
 		if (Utils.isNullOrEmpty(sProcessorId)) {
-			Utils.debugLog("ProcessorsMediaResource.addReview: invalid proc id");
+			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid proc id");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -880,7 +881,7 @@ public class ProcessorsMediaResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			Utils.debugLog("ProcessorsMediaResource.addReview: processor null " + sProcessorId);
+			WasdiLog.debugLog("ProcessorsMediaResource.addReview: processor null " + sProcessorId);
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
@@ -908,17 +909,17 @@ public class ProcessorsMediaResource {
 	@Path("/comments/add")
 	public Response addComment(@HeaderParam("x-session-token") String sSessionId, CommentDetailViewModel oCommentViewModel) {
 		
-		Utils.debugLog("ProcessorsMediaResource.addComment");
+		WasdiLog.debugLog("ProcessorsMediaResource.addComment");
 	
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
-			Utils.debugLog("ProcessorsMediaResource.addComment: invalid user");
+			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (oCommentViewModel == null ) {
-			Utils.debugLog("ProcessorsMediaResource.addComment: invalid view model");
+			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
@@ -927,7 +928,7 @@ public class ProcessorsMediaResource {
 		String sReviewId = oCommentViewModel.getReviewId();
 		
 		if (Utils.isNullOrEmpty(sReviewId)) {
-			Utils.debugLog("ProcessorsMediaResource.addComment: invalid parent review id");
+			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid parent review id");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -936,7 +937,7 @@ public class ProcessorsMediaResource {
 		Review oReview = oReviewRepository.getReview(sReviewId);
 		
 		if (oReview == null) {
-			Utils.debugLog("ProcessorsMediaResource.addComment: review null " + sReviewId);
+			WasdiLog.debugLog("ProcessorsMediaResource.addComment: review null " + sReviewId);
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
@@ -961,7 +962,7 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/getlist")
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getReview");
+		WasdiLog.debugLog("ProcessorsMediaResource.getReview");
 
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -1022,7 +1023,7 @@ public class ProcessorsMediaResource {
 	@GET
 	@Path("/comments/getlist")
 	public Response getCommentListByReview(@HeaderParam("x-session-token") String sSessionId, @QueryParam("reviewId") String sReviewId) {
-		Utils.debugLog("ProcessorsMediaResource.getCommentListByReview");
+		WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
@@ -1113,7 +1114,7 @@ public class ProcessorsMediaResource {
 	@Path("/publisher/getlist")
 	public Response getPublishers(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessorsMediaResource.getPublishers");
+		WasdiLog.debugLog("ProcessorsMediaResource.getPublishers");
 
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);

@@ -8,9 +8,10 @@ package wasdi.shared.queryexecutors.eodc;
 
 import com.google.common.base.Preconditions;
 
-import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
@@ -48,7 +49,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 				sTranslatedQuery += s_sQuerySuffix;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorEODC.translate( " + sQueryFromClient + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorEODC.translate( " + sQueryFromClient + " ): " + oE);
 		}
 		return sTranslatedQuery;
 	}
@@ -67,7 +68,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 			try {
 				iOffset = readInt(sQuery, QueryTranslatorEODC.s_sOFFSET);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse offset: " + oE);
+				WasdiLog.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse offset: " + oE);
 			}
 			if(iOffset > 0) {
 				sTranslatedQuery += s_siOffset;
@@ -79,7 +80,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 			try {
 				iLimit = readInt(sQuery, QueryTranslatorEODC.s_sLIMIT);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse limit: " + oE);
+				WasdiLog.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): could not parse limit: " + oE);
 			}
 			if(iLimit >= 0) {
 				sTranslatedQuery += s_sMaxRecords;
@@ -89,7 +90,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 
 			sTranslatedQuery += s_sRemainingPartOfPrefix;
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorEODC.parseCommon( " + sQuery + " ): " + oE);
 		}
 		return sTranslatedQuery;
 	}
@@ -172,11 +173,11 @@ public class QueryTranslatorEODC extends QueryTranslator {
 						sSentinel2Query += "</ogc:Literal></ogc:PropertyIsLessThanOrEqualTo>";					
 					}
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): could not parse cloud coverage: " + oE);
+					WasdiLog.debugLog("QueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): could not parse cloud coverage: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorEODC.parseSentinel_2( " + sQuery + " ): " + oE);
 		}
 		return sSentinel2Query;
 	}
@@ -208,7 +209,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 					sSentinel1Query += "%GRDH%";
 					sSentinel1Query += "</ogc:Literal></ogc:PropertyIsLike>";
 				} catch (Exception oE) {
-					Utils.debugLog("QueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): error while parsing product type: " + oE);
+					WasdiLog.debugLog("QueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): error while parsing product type: " + oE);
 				}
 
 				//check for relative orbit
@@ -239,12 +240,12 @@ public class QueryTranslatorEODC extends QueryTranslator {
 						sSentinel1Query += iOrbit;
 						sSentinel1Query += "</ogc:Literal></ogc:PropertyIsEqualTo>";
 					} catch (Exception oE) {
-						Utils.debugLog("QueryTranslatorEODC.parseSentinel_1(" + sQuery + " ): error while parsing relative orbit: " + oE );
+						WasdiLog.debugLog("QueryTranslatorEODC.parseSentinel_1(" + sQuery + " ): error while parsing relative orbit: " + oE );
 					}
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorEODC.parseSentinel_1( " + sQuery + " ): " + oE);
 		}
 		return sSentinel1Query;
 	}
@@ -327,7 +328,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 				sResult += "</ogc:Literal></ogc:PropertyIsEqualTo>";
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("QueryTranslatorEODC.parseFreeText( " + sQuery + " ): " + oE);
+			WasdiLog.debugLog("QueryTranslatorEODC.parseFreeText( " + sQuery + " ): " + oE);
 		}
 		return sResult;
 	}
@@ -367,7 +368,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							Utils.log("ERROR", "QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
 						}
 					}
 					//todo check coordinates are within bounds
@@ -385,11 +386,11 @@ public class QueryTranslatorEODC extends QueryTranslator {
 					}
 
 				} catch (Exception oE) {
-					Utils.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not complete: " + oE);
+					WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not complete: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			Utils.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: " + oE);
 		}
 		return sResult;
 	}
@@ -425,8 +426,8 @@ public class QueryTranslatorEODC extends QueryTranslator {
 		String sTranslatedQuery = translate(sQuery);
 		sTranslatedQuery = sTranslatedQuery.replace("<csw:ElementSetName>full</csw:ElementSetName>", "<csw:ElementSetName>brief</csw:ElementSetName>");
 		
-		Utils.debugLog("EODC Payload:");
-		Utils.debugLog(sTranslatedQuery);
+		WasdiLog.debugLog("EODC Payload:");
+		WasdiLog.debugLog(sTranslatedQuery);
 		
 		return sTranslatedQuery;
 	}

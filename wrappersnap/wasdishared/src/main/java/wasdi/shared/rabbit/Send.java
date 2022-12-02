@@ -13,7 +13,7 @@ import com.rabbitmq.client.Connection;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
 /**
@@ -37,7 +37,7 @@ public class Send {
             if (m_oConnection!=null) m_oChannel = m_oConnection.createChannel();
             m_sExchangeName = sExchange;
         } catch (Exception e) {
-            Utils.debugLog("Send.Init: Error connecting to rabbit " + e.toString());
+            WasdiLog.debugLog("Send.Init: Error connecting to rabbit " + e.toString());
         }
 	}
 	
@@ -53,9 +53,9 @@ public class Send {
 			}
 			
 		} catch (IOException e) {
-			Utils.debugLog("Send.Free: Error closing connection " + e.toString());
+			WasdiLog.debugLog("Send.Free: Error closing connection " + e.toString());
 		} catch (TimeoutException e) {
-			Utils.debugLog("Send.Free: Error closing connection " + e.toString());
+			WasdiLog.debugLog("Send.Free: Error closing connection " + e.toString());
 		}
 	}
 	
@@ -69,7 +69,7 @@ public class Send {
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
     	if (m_oConnection == null || m_oChannel == null) {
-    		Utils.debugLog("Send.SendMgs: impossibile to send " + sMessageAttribute + " to " + sRoutingKey);
+    		WasdiLog.debugLog("Send.SendMgs: impossibile to send " + sMessageAttribute + " to " + sRoutingKey);
     		return false;
     	}
     	
@@ -78,11 +78,11 @@ public class Send {
             return true;
             
         } catch (IOException e) {
-        	Utils.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	WasdiLog.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
         catch (Exception e) {
-        	Utils.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	WasdiLog.debugLog("Send.SendMgs: Error sending message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
     }
@@ -105,7 +105,7 @@ public class Send {
         oUpdateProcessMessage.setPayload(oProcess.getProcessObjId() + ";" + oProcess.getStatus() + ";" + oProcess.getProgressPerc());
         
         if(0 == oProcess.getProgressPerc() % 10) {
-        	Utils.debugLog("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
+        	WasdiLog.debugLog("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
         }
         
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oUpdateProcessMessage);
@@ -140,7 +140,7 @@ public class Send {
             return SendMsg(sExchangeId, sJSON);
         }
         catch (Exception oEx) {
-        	Utils.debugLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
+        	WasdiLog.debugLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
             return  false;
         }
 

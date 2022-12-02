@@ -3,6 +3,12 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.0.1] - 2022-11-25
+### Added
+- added separated timeout for the upload of files
+- added support to sessionId and procId in config
+- added "on external server" option
+
 ## [0.7.5.1] - 2022-10-12
 ### Added
 - searchEOImages: date are no more mandatory. If not present WASDI will assume from 01/01/1900 to the actual Day

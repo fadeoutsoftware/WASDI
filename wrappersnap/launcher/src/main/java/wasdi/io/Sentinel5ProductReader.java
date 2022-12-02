@@ -19,6 +19,7 @@ import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -102,7 +103,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
         	oNodeGroupViewModel.setBands(oBands);
 	    	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
 		} catch (Exception e) {
-    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+    		WasdiLog.debugLog("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
 		}
 		
     	return oRetViewModel;
@@ -116,7 +117,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
 		} catch (Exception e) {
-    		LauncherMain.s_oLogger.debug("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
+    		WasdiLog.debugLog("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
 
     		return null;
 		}
@@ -263,7 +264,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		
 		try {
 			if (sFileNameFromProvider.startsWith("S5P") && sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
-				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File is a Sentinel 5P image, start unzip");
+				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: File is a Sentinel 5P image, start unzip");
 				String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
 				
 				String sTargetDirectoryPath = sDownloadPath;
@@ -273,10 +274,10 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				ZipFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
 				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
-				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 				
 				sFileName = sFolderName + ".nc";
-				LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
 				
 				String sCdlFileName = sFolderName + ".cdl";
 				
@@ -284,17 +285,17 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				
 				if (oCdlFile.exists()) {
 					oCdlFile.delete();
-					LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: deleted cdl file " + sCdlFileName);
+					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: deleted cdl file " + sCdlFileName);
 				}
 				else {
-					LauncherMain.s_oLogger.debug("Sentinel5ProductReader.adjustFileAfterDownload: impossible to find cdl file " + oCdlFile.getPath());
+					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: impossible to find cdl file " + oCdlFile.getPath());
 				}
 
 				m_oProductFile = new File(sFileName);
 			}			
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("Sentinel5ProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.errorLog("Sentinel5ProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 		
 		
@@ -340,7 +341,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
 			String sLine;
 			while ((sLine = oReader.readLine()) != null)
-				LauncherMain.s_oLogger.debug("Publishband.convertS5PtoGeotiff [gdal]: " + sLine);
+				WasdiLog.debugLog("Publishband.convertS5PtoGeotiff [gdal]: " + sLine);
 			
 			oProcess.waitFor();			
 			
@@ -363,7 +364,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 			
 			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
 			while ((sLine = oReader.readLine()) != null)
-				LauncherMain.s_oLogger.debug("Publishband.convertSentine5PtoGeotiff [gdal]: " + sLine);
+				WasdiLog.debugLog("Publishband.convertSentine5PtoGeotiff [gdal]: " + sLine);
 			
 			oProcess.waitFor();
 			
@@ -371,7 +372,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 		}
 		catch (Exception oEx) {
 			
-			LauncherMain.s_oLogger.debug("Publishband.convertSentinel5PtoGeotiff: Exception = " + oEx.toString());
+			WasdiLog.debugLog("Publishband.convertSentinel5PtoGeotiff: Exception = " + oEx.toString());
 			
 			return null;
 		}

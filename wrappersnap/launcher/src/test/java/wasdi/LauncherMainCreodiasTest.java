@@ -16,8 +16,8 @@ import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -34,7 +34,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 	@BeforeClass
     public static void setUp() throws Exception {
 		s_sClassName = "LauncherMainCreodiasTest";
-		Utils.debugLog(s_sClassName + ".setUp");
+		WasdiLog.debugLog(s_sClassName + ".setUp");
 		
 		m_oCreodiasConfig = WasdiConfig.Current.getDataProviderConfig("CREODIAS");
 
@@ -159,8 +159,8 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 	private String parseHttpsUrlToFilePath(String sHttpsURL) {
 		String filesystemPath = m_sProviderBasePath + extractFilePathFromUrl(sHttpsURL);
 
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+		WasdiLog.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
+		WasdiLog.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: file path: " + filesystemPath);
 
 		return filesystemPath;
 	}
@@ -206,7 +206,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 			String sFileName = asParts[ResponseTranslatorCREODIAS.IPOSITIONOF_FILENAME];
 			return sFileName;
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".extractFileNameFromUrl: " + oE);
+			WasdiLog.debugLog(s_sClassName + ".extractFileNameFromUrl: " + oE);
 		}
 		return null;
 	}
@@ -241,7 +241,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 
 			return sFilePathWithoutSafeTermination.replace(sFileNameWithoutZipExtension, "");
 		} catch (Exception oE) {
-			Utils.debugLog(s_sClassName + ".extractFilePathFromUrl: " + oE);
+			WasdiLog.debugLog(s_sClassName + ".extractFilePathFromUrl: " + oE);
 		}
 		return null;
 	}

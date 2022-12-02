@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * Wrap main docker functionalities
@@ -41,7 +42,12 @@ public class DockerUtils {
     /**
      * User that run the docker
      */
-    String m_sUser = "tomcat8";
+    String m_sUser = "tomcat";    
+
+    /**
+     * Docker registry in use
+     */
+    String m_sDockerRegistry = "";    
 
     /**
      * Create a new instance
@@ -57,18 +63,114 @@ public class DockerUtils {
         m_sWorkingRootPath = sWorkingRootPath;
         m_sUser = sTomcatUser;
     }
+    
+    /**
+     * Get the processor entity
+     * @return Processor
+     */
+	public Processor getProcessor() {
+		return m_oProcessor;
+	}
+	
+	/**
+	 * Set the processor Entity
+	 * @param oProcessor Processor Entity
+	 */
+	public void setProcessor(Processor oProcessor) {
+		this.m_oProcessor = oProcessor;
+	}
+	
+	/**
+	 * Get the processor Folder
+	 * @return processor Folder
+	 */
+	public String getProcessorFolder() {
+		return m_sProcessorFolder;
+	}
+
+	/**
+	 * Set the processor Folder
+	 * @param sProcessorFolder Processor Folder
+	 */
+	public void setProcessorFolder(String sProcessorFolder) {
+		this.m_sProcessorFolder = sProcessorFolder;
+	}
+	
+	/**
+	 * Get the actual WASDI Working Path
+	 * @return actual WASDI Working Path
+	 */
+	public String getWorkingRootPath() {
+		return m_sWorkingRootPath;
+	}
+	
+	/**
+	 * Set the actual WASDI Working Path
+	 * @param sWorkingRootPath actual WASDI Working Path
+	 */
+	public void setWorkingRootPath(String sWorkingRootPath) {
+		this.m_sWorkingRootPath = sWorkingRootPath;
+	}
+	
+	/**
+	 * Get the path of the log file for docker
+	 * @return
+	 */
+	public String getDockerLogFile() {
+		return m_sDockerLogFile;
+	}
+	
+	/**
+	 * Set the path of the log file for docker
+	 * @param sDockerLogFile
+	 */
+	public void setDockerLogFile(String sDockerLogFile) {
+		this.m_sDockerLogFile = sDockerLogFile;
+	}
+
+	/**
+	 * Get the name of user to pass to docker. Empty string to avoid.
+	 * @return
+	 */
+	public String getUser() {
+		return m_sUser;
+	}
+	
+	/**
+	 * Set the name of user to pass to docker. Empty string to avoid.
+	 * @param sUser
+	 */
+	public void setUser(String sUser) {
+		this.m_sUser = sUser;
+	}    
+
+	public String getDockerRegistry() {
+		return m_sDockerRegistry;
+	}
+
+
+	public void setDockerRegistry(String sDockerRegistry) {
+		this.m_sDockerRegistry = sDockerRegistry;
+	}
 
     /**
      * Deploy a docker
+     * @return the docker image tag if ok, empty string in case of problems
      */
-    public boolean deploy() {
+    public String deploy() {
+    	
+    	String sDockerName = "";
 
         try {
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
 
-            String sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            sDockerName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
 
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
@@ -81,14 +183,18 @@ public class DockerUtils {
             try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
                 // Fill the script file
                 if (oBuildScriptWriter != null) {
-                    LauncherMain.s_oLogger.debug("DockerProcessorEngine.deploy: Creating " + sBuildScriptFile + " file");
+                    WasdiLog.debugLog("DockerUtils.deploy: Creating " + sBuildScriptFile + " file");
 
                     oBuildScriptWriter.write("#!/bin/bash");
                     oBuildScriptWriter.newLine();
                     oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
                     oBuildScriptWriter.newLine();
-                    oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder + " --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
-                            " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");
+                    oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
+                    
+                    if (!Utils.isNullOrEmpty(m_sUser)) {
+                        oBuildScriptWriter.write(" --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
+                                " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");                    	
+                    }
                     
                     if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
                     	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=\"" + WasdiConfig.Current.dockers.pipInstallWasdiAddress+"\""); 
@@ -104,7 +210,7 @@ public class DockerUtils {
             }
 
             // Wait a little bit to let the file be written
-            Thread.sleep(2000);
+            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDeployScriptCreated);
 
             // Make it executable
             RunTimeUtils.addRunPermission(sBuildScriptFile);
@@ -112,13 +218,13 @@ public class DockerUtils {
             // Run the script
             RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
 
-            LauncherMain.s_oLogger.debug("DockerUtils.deploy: created image " + sDockerName);
+            WasdiLog.debugLog("DockerUtils.deploy: created image " + sDockerName);
         } catch (Exception oEx) {
-            Utils.debugLog("DockerUtils.deploy: " + oEx.toString());
-            return false;
+        	WasdiLog.errorLog("DockerUtils.deploy: " + oEx.toString());
+            return "";
         }
 
-        return true;
+        return sDockerName;
     }
 
     /**
@@ -138,6 +244,11 @@ public class DockerUtils {
         try {
             // Get the docker name
             String sDockerName = "wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
+            
             String sCommand = "docker";
 
             // Initialize Args
@@ -175,7 +286,7 @@ public class DockerUtils {
                 if (WasdiConfig.Current.dockers.extraHosts != null) {
                 	
                 	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-                		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
+                		WasdiLog.debugLog("DockerUtils.run adding configured extra host mapping to the run arguments");
                     	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
                     		
                     		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
@@ -197,11 +308,11 @@ public class DockerUtils {
                     sCommandLine += sArg + " ";
                 }
 
-                LauncherMain.s_oLogger.debug("DockerUtils.run CommandLine: " + sCommandLine);
+                WasdiLog.debugLog("DockerUtils.run CommandLine: " + sCommandLine);
 
                 try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
                     if (null != oRunWriter) {
-                        LauncherMain.s_oLogger.debug("DockerUtils.run: Creating " + sRunFile + " file");
+                        WasdiLog.debugLog("DockerUtils.run: Creating " + sRunFile + " file");
 
                         oRunWriter.write("#!/bin/bash");
                         oRunWriter.newLine();
@@ -231,9 +342,9 @@ public class DockerUtils {
             // Execute the command to start the docker
             RunTimeUtils.shellExec(sRunFile, asArgs, false);
 
-            LauncherMain.s_oLogger.debug("DockerUtils.run " + sDockerName + " started");
+            WasdiLog.debugLog("DockerUtils.run " + sDockerName + " started");
         } catch (Exception oEx) {
-            Utils.debugLog("DockerUtils.run: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.run: " + oEx.toString());
             return false;
         }
 
@@ -276,6 +387,10 @@ public class DockerUtils {
             // docker rmi -f <imagename>
 
             String sDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+            }
 
             String sDeleteScriptFile = m_sProcessorFolder + "cleanwasdidocker.sh";
             File oDeleteScriptFile = new File(sDeleteScriptFile);
@@ -283,7 +398,7 @@ public class DockerUtils {
             if (!oDeleteScriptFile.exists() || oDeleteScriptFile.length() == 0L) {
                 try (BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile))) {
                     if (oDeleteScriptWriter != null) {
-                        LauncherMain.s_oLogger.debug("DockerUtils.delete: Creating " + sDeleteScriptFile + " file");
+                        WasdiLog.debugLog("DockerUtils.delete: Creating " + sDeleteScriptFile + " file");
 
                         oDeleteScriptWriter.write("#!/bin/bash");
                         oDeleteScriptWriter.newLine();
@@ -304,7 +419,7 @@ public class DockerUtils {
             Runtime.getRuntime().exec(sDeleteScriptFile);
 
             // Wait for docker to finish
-            Thread.sleep(15000);
+            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
 
             // Delete this image
             ArrayList<String> asArgs = new ArrayList<>();
@@ -318,12 +433,81 @@ public class DockerUtils {
             RunTimeUtils.shellExec(sCommand, asArgs, false);
 
             // Wait for docker to finish
-            Thread.sleep(15000);
+            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
         } catch (Exception oEx) {
-            Utils.debugLog("DockerUtils.delete: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.delete: " + oEx.toString());
             return false;
         }
 
         return true;
     }
+
+    /**
+     * Log in docker on a specific Repository Server
+     * @param sServer Server Address
+     * @param sUser Server User
+     * @param sPassword Server Password
+     * @param sFolder 
+     * @return True if logged false otherwise
+     */
+    public boolean login(String sServer, String sUser, String sPassword, String sFolder) {
+    	try {
+            // Create the docker command            
+            String sCommand = "docker login --username " + sUser + " --password '" + sPassword + "' " + sServer;
+            
+            RunTimeUtils.runCommand(sFolder, sCommand, true, true);
+            
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }
+    
+    /**
+     * Push a docker image to a registry. Must be logged 
+     * @param sImage Image name
+     * @return True if pushed false if error 
+     */
+    public boolean push(String sImage) {	
+    	try {
+    		
+    		if (sImage.contains(":")) {
+    			WasdiLog.debugLog("DockerUtils.push image contains a tag: remove it");
+    			sImage = sImage.split(":")[0];
+    		}
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Push
+            asArgs.add("push");
+            // Option
+            asArgs.add("--all-tags");
+            
+            String sServerImage = sImage;
+            
+            asArgs.add(sServerImage);
+            
+            String sCommand = "docker";
+            
+			String sCommandLine = sCommand + " ";
+			
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}			
+		
+			WasdiLog.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
+
+
+            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+    		
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }
+
 }

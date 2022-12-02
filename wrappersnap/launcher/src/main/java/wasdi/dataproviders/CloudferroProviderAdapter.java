@@ -3,9 +3,10 @@ package wasdi.dataproviders;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CloudferroProviderAdapter extends ProviderAdapter {
 
@@ -21,19 +22,11 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "CLOUDFERRO";
 	}
 
-	/**
-	 * @param logger
-	 */
-	public CloudferroProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "CLOUDFERRO";
-	}
-
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		//todo fail instead
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CloudferroProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
+			WasdiLog.errorLog("CloudferroProviderAdapter.GetDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 
@@ -54,7 +47,7 @@ public class CloudferroProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		Utils.debugLog("CloudferroProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("CloudferroProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
 		String sResult = "";
 		

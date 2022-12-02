@@ -7,6 +7,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Deploy Processor Operation
@@ -24,15 +25,15 @@ public class Deployprocessor extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Deployprocessor.executeOperation");
+		WasdiLog.debugLog("Deployprocessor.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -50,10 +51,12 @@ public class Deployprocessor extends Operation {
 	        
 	        try {
 	        	
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-					oEngine.waitForApplicationToStart(oParameter);
-					oEngine.refreshPackagesInfo(oParameter);
-				}	        	
+	        	if (oEngine.isRunAfterDeploy()) {
+					if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+						oEngine.waitForApplicationToStart(oParameter);
+						oEngine.refreshPackagesInfo(oParameter);
+					}	        		
+	        	}
 	        	
 	        	String sName = oParameter.getName();
 	        	
@@ -68,14 +71,14 @@ public class Deployprocessor extends Operation {
 	            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        	
 	        }
 	        catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Deployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
+				WasdiLog.errorLog("Deployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
             
             return bRet;
 	        
 		}
 		catch (Exception oEx) {
-			m_oLocalLogger.error("Deployprocessor.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Deployprocessor.executeOperation: exception", oEx);
 		}
 		
 		return false;

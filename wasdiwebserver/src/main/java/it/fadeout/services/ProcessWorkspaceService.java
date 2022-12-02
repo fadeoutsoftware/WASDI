@@ -20,6 +20,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -30,11 +31,11 @@ public class ProcessWorkspaceService {
 
 	public boolean killProcesses(List<ProcessWorkspace> aoProcesses, Boolean bKillProcessTree, Boolean bCleanDB, String sSessionId) {
 		if (null == aoProcesses) {
-			Utils.debugLog("ProcessWorkspaceService.killFathers: list of processes is null, aborting");
+			WasdiLog.debugLog("ProcessWorkspaceService.killFathers: list of processes is null, aborting");
 			return false;
 		}
 		if (aoProcesses.size() <= 0) {
-			Utils.debugLog("ProcessWorkspaceService.killFathers: list of processes is empty, aborting");
+			WasdiLog.debugLog("ProcessWorkspaceService.killFathers: list of processes is empty, aborting");
 			return true;
 		}
 		
@@ -55,7 +56,7 @@ public class ProcessWorkspaceService {
 			asProcesses = new LinkedList<String>();
 			for (ProcessWorkspace oProcessWorkspace : aoProcesses) {
 				if (null == oProcessWorkspace) {
-					Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: found a null process, skipping");
+					WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: found a null process, skipping");
 					continue;
 				}
 				asProcesses.add(oProcessWorkspace.getProcessObjId());
@@ -84,19 +85,19 @@ public class ProcessWorkspaceService {
 			oKillProcessParameter.setUserId(oUser.getUserId());
 			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(),
 					asProcesses.get(0), WasdiConfig.Current.paths.serializationPath, oKillProcessParameter, null);
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: "
+			WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: "
 					+ oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
 			return oResult.getBoolValue();
 
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceResource.DeleteProcess: " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: " + oE);
 		}
 		return false;
 	}
 
 	public boolean killProcessesInWorkspace(String sWorkspaceId, String sSessionId, boolean bCleanDB) {
 		if (Utils.isNullOrEmpty(sWorkspaceId)) {
-			Utils.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: workspace is null or empty, aborting");
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: workspace is null or empty, aborting");
 			return false;
 		}
 
@@ -123,7 +124,7 @@ public class ProcessWorkspaceService {
 			}
 			
 		} catch (Exception oE) {
-			Utils.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcessesInWorkspace: " + oE);
 		}
 		return killProcesses(aoFilteredProcesses, true, true, sSessionId);
 	}

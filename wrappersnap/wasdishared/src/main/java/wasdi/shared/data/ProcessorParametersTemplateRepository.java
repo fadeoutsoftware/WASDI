@@ -11,6 +11,7 @@ import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ProcessorParametersTemplate;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * ProcessorParametersTemplate repository
@@ -147,7 +148,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 	public String insertProcessorParametersTemplate(ProcessorParametersTemplate oProcessorParametersTemplate) {
 		try {
 			if (oProcessorParametersTemplate == null) {
-				Utils.debugLog(
+				WasdiLog.debugLog(
 						"ProcessorParametersTemplateRepository.InsertProcessorParametersTemplate: oProcessorParametersTemplate is null");
 				return null;
 			}
@@ -158,7 +159,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 			getCollection(m_sThisCollection).insertOne(oDocument);
 			return oDocument.getObjectId("_id").toHexString();
 		} catch (Exception oEx) {
-			Utils.debugLog("ProcessorParametersTemplateRepository.InsertProcessorParametersTemplate: " + oEx);
+			WasdiLog.debugLog("ProcessorParametersTemplateRepository.InsertProcessorParametersTemplate: " + oEx);
 		}
 
 		return "";

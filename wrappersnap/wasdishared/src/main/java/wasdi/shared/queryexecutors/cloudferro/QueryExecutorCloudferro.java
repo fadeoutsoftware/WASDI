@@ -10,7 +10,7 @@ import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -55,7 +55,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public int executeCount(String sQuery) {
-		Utils.debugLog("QueryExecutorCloudferro.executeCount | sQuery: " + sQuery);
+		WasdiLog.debugLog("QueryExecutorCloudferro.executeCount | sQuery: " + sQuery);
 		
 		// Parse the query
 		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
@@ -106,7 +106,7 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 	 */
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve | sQuery: " + oQuery.getQuery());
+		WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve | sQuery: " + oQuery.getQuery());
 
 		String sOffset = oQuery.getOffset();
 		String sLimit = oQuery.getLimit();
@@ -117,13 +117,13 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		try {
 			iOffset = Integer.parseInt(sOffset);
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
 		try {
 			iLimit = Integer.parseInt(sLimit);
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
+			WasdiLog.debugLog("QueryExecutorCloudferro.executeAndRetrieve: " + oE.toString());
 		}
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();

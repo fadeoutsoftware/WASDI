@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to update the file of a style
@@ -28,7 +28,7 @@ public class StyleUpdateFileWorker extends Thread {
 
 	@Override
 	public void run() {
-		Utils.debugLog("StyleUpdateFileWorker.run: start nodes update for style " + m_sStyleId);
+		WasdiLog.debugLog("StyleUpdateFileWorker.run: start nodes update for style " + m_sStyleId);
 
 		for (Node oNode : m_aoNodes) {
 
@@ -52,17 +52,17 @@ public class StyleUpdateFileWorker extends Thread {
 				Map<String, String> asHeaders = new HashMap<>();
 				asHeaders.put("x-session-token", m_sSessionId);
 
-				Utils.debugLog("StyleUpdateFileWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("StyleUpdateFileWorker.run: calling url: " + sUrl);
 
 				HttpUtils.httpPostFile(sUrl, m_sFilePath, asHeaders);
 
-				Utils.debugLog("StyleUpdateFileWorker.run: node updated " + oNode.getNodeCode());
+				WasdiLog.debugLog("StyleUpdateFileWorker.run: node updated " + oNode.getNodeCode());
 			} catch (Exception oEx) {
-				Utils.debugLog("StyleUpdateFileWorker.run: Exception " + oEx.getMessage());
+				WasdiLog.debugLog("StyleUpdateFileWorker.run: Exception " + oEx.getMessage());
 			}
 		}
 
-		Utils.debugLog("StyleUpdateFileWorker.run: distribuited update done");
+		WasdiLog.debugLog("StyleUpdateFileWorker.run: distribuited update done");
 	}
 
 }

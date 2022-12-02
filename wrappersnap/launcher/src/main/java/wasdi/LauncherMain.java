@@ -42,9 +42,10 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * WASDI Launcher Main Class
@@ -125,7 +126,10 @@ public class LauncherMain  {
             System.err.println("Launcher Main - Error loading log configuration.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
         }
 
-        s_oLogger.debug("WASDI Launcher Main Start");
+        WasdiLog.debugLog("WASDI Launcher Main Start");
+        
+        // Set the logger for the shared lib
+        WasdiLog.s_oLoggerWrapper = s_oLogger;
 
         // We need to read the command line parameters.
 
@@ -207,38 +211,38 @@ public class LauncherMain  {
 
             // This is the operation we have to do, it must exists
             if (s_oProcessWorkspace == null) {
-                s_oLogger.error("Process Workspace null for parameter [" + sParameter + "]. Are you sure the configured Node is correct? Exit");
+                WasdiLog.errorLog("Process Workspace null for parameter [" + sParameter + "]. Are you sure the configured Node is correct? Exit");
                 System.exit(-1);
             }
 
             // Set the process object id as Logger Prefix: it will help to filter logs
             s_oLogger.setPrefix("[" + s_oProcessWorkspace.getProcessObjId() + "]");
-            s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
+            WasdiLog.debugLog("Executing " + sOperation + " Parameter " + sParameter);
 
             // Set the ProcessWorkspace STATUS as running
-            s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
+            WasdiLog.debugLog("LauncherMain: setting ProcessWorkspace start date to now");
             s_oProcessWorkspace.setOperationStartTimestamp(Utils.nowInMillis());
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
             s_oProcessWorkspace.setProgressPerc(0);
             s_oProcessWorkspace.setPid(getProcessId());
 
             if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
-                s_oLogger.error("LauncherMain: ERROR setting ProcessWorkspace start date and RUNNING STATE");
+                WasdiLog.errorLog("LauncherMain: ERROR setting ProcessWorkspace start date and RUNNING STATE");
             } else {
-                s_oLogger.debug("LauncherMain: RUNNING state and operationStartDate updated");
+                WasdiLog.debugLog("LauncherMain: RUNNING state and operationStartDate updated");
             }
 
             // Run the operation
             oLauncher.executeOperation(sOperation, sParameter);
 
             // Operation Done
-            s_oLogger.debug(getBye());
+            WasdiLog.debugLog(getBye());
 
         }
         catch (Throwable oException) {
 
         	// ERROR: we need to put the ProcessWorkspace in a end-state, error in this case
-            s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
+            WasdiLog.errorLog("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
 
             try {
                 System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
@@ -252,11 +256,11 @@ public class LauncherMain  {
                     ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
                     if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
-                        s_oLogger.debug("LauncherMain FINAL: Error during process update (terminated) " + sParameter);
+                        WasdiLog.debugLog("LauncherMain FINAL: Error during process update (terminated) " + sParameter);
                     }
                 }
             } catch (Exception oInnerEx) {
-                s_oLogger.error("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
+                WasdiLog.errorLog("Launcher Main FINAL-catch Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oInnerEx));
             }
 
             // Exit with error
@@ -272,7 +276,7 @@ public class LauncherMain  {
 
                 s_oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(s_oProcessWorkspace.getProcessObjId());
 
-                s_oLogger.error("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
+                WasdiLog.errorLog("Launcher Main FINAL: process status [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
 
                 // If it is not in a runnig state
                 if (s_oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name())
@@ -282,13 +286,13 @@ public class LauncherMain  {
 
 
                 	// Force the closing
-                    s_oLogger.error("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
-                    s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
+                    WasdiLog.errorLog("Launcher Main FINAL: process status not closed [" + s_oProcessWorkspace.getProcessObjId() + "]: " + s_oProcessWorkspace.getStatus());
+                    WasdiLog.errorLog("Launcher Main FINAL: force status as ERROR [" + s_oProcessWorkspace.getProcessObjId() + "]");
 
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
                     if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
-                        s_oLogger.debug("LauncherMain FINAL : Error during process update (terminated) " + sParameter);
+                        WasdiLog.debugLog("LauncherMain FINAL : Error during process update (terminated) " + sParameter);
                     }
                 }
             }
@@ -300,7 +304,7 @@ public class LauncherMain  {
 				// Stop SNAP Engine
 				Engine.getInstance().stop();
 			} catch (Exception oE) {
-				s_oLogger.error("main: while doing Engine.getInstance().stop(): " + oE);
+				WasdiLog.errorLog("main: while doing Engine.getInstance().stop(): " + oE);
 			}
         }
     }
@@ -322,12 +326,12 @@ public class LauncherMain  {
 
             // Read this node code
             LauncherMain.s_sNodeCode = WasdiConfig.Current.nodeCode;
-            s_oLogger.debug("NODE CODE: " + LauncherMain.s_sNodeCode);
+            WasdiLog.debugLog("NODE CODE: " + LauncherMain.s_sNodeCode);
 
             // If this is not the main node
             if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
             	// Configure also the local connection
-                s_oLogger.debug("Adding local mongo config");
+                WasdiLog.debugLog("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
 
@@ -338,7 +342,7 @@ public class LauncherMain  {
             configureSNAP();
 
         } catch (Throwable oEx) {
-            s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -363,7 +367,7 @@ public class LauncherMain  {
                 String sSnapLogLevel = WasdiConfig.Current.snap.launcherLogLevel;
                 String sSnapLogFile = WasdiConfig.Current.snap.launcherLogFile;
 
-                s_oLogger.debug("SNAP Log file active with level " + sSnapLogLevel + " file: " + sSnapLogFile);
+                WasdiLog.debugLog("SNAP Log file active with level " + sSnapLogLevel + " file: " + sSnapLogFile);
 
                 Level oLogLevel = Level.SEVERE;
 
@@ -392,7 +396,7 @@ public class LauncherMain  {
                     System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
             } else {
-                s_oLogger.debug("SNAP Log file not active: clean log handlers");
+                WasdiLog.debugLog("SNAP Log file not active: clean log handlers");
                 
                 try {
 
@@ -416,18 +420,18 @@ public class LauncherMain  {
             	Path oPath = OpenJpegExecRetriever.getOpenJPEGAuxDataPath();
             	
             	if (oPath != null) {
-            		s_oLogger.debug("getOpenJPEGAuxDataPath = " + oPath.toString());
+            		WasdiLog.debugLog("getOpenJPEGAuxDataPath = " + oPath.toString());
             	}
             	else {
-            		s_oLogger.debug("getOpenJPEGAuxDataPath = null");
+            		WasdiLog.debugLog("getOpenJPEGAuxDataPath = null");
             	}
             }
             catch (Throwable oEx) {
-            	s_oLogger.error("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            	WasdiLog.errorLog("LauncherMain.configureSNAP Exception OpenJpegExecRetriever.getOpenJPEGAuxDataPath(): " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			}
     	}
     	catch (Throwable oEx) {
-            s_oLogger.error("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("LauncherMain.configureSNAP Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -463,9 +467,7 @@ public class LauncherMain  {
 
             // Create the operation class
         	Operation oOperation = (Operation) Class.forName(sClassName).newInstance();
-
-        	// Set the local logger
-        	oOperation.setLocalLogger(s_oLogger);
+        	
         	// Set the process workspace logger
         	oOperation.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
         	// Set the send to rabbit object
@@ -485,14 +487,14 @@ public class LauncherMain  {
             	else s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());        		
         	}
 
-        	s_oLogger.debug("LauncherMain.executeOperation: Operation Result " + bOperationResult);
+        	WasdiLog.debugLog("LauncherMain.executeOperation: Operation Result " + bOperationResult);
 
         }
         catch (Exception oEx) {
 
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
-            s_oLogger.error("LauncherMain.executeOperation Exception ", oEx);
+            WasdiLog.errorLog("LauncherMain.executeOperation Exception ", oEx);
 
             s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace, sError, sExchange);
 
@@ -500,10 +502,10 @@ public class LauncherMain  {
         finally {
             // update process status and send rabbit updateProcess message
             closeProcessWorkspace();
-            s_oLogger.debug("LauncherMain.executeOperation: CloseProcessWorkspace done");
+            WasdiLog.debugLog("LauncherMain.executeOperation: CloseProcessWorkspace done");
         }
 
-        s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
+        WasdiLog.debugLog("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
     }
 
     /**
@@ -590,11 +592,11 @@ public class LauncherMain  {
     {
 
         if (oProcessWorkspace == null) {
-            s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
+            WasdiLog.errorLog("LauncherMain.updateProcessStatus oProcessWorkspace is null");
             return;
         }
         if (oProcessWorkspaceRepository == null) {
-            s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
+            WasdiLog.errorLog("LauncherMain.updateProcessStatus oProcessWorkspace is null");
             return;
         }
 
@@ -604,15 +606,15 @@ public class LauncherMain  {
 
             // update the process
             if (!oProcessWorkspaceRepository.updateProcess(oProcessWorkspace)) {
-                s_oLogger.debug("Error during process update");
+                WasdiLog.debugLog("Error during process update");
             }
 
             if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-                s_oLogger.debug("Error sending rabbitmq message to update process list");
+                WasdiLog.debugLog("Error sending rabbitmq message to update process list");
             }
         }
         catch (Exception oEx) {
-        	s_oLogger.debug("LauncherMain.updateProcessStatus Exception "+oEx.toString());
+        	WasdiLog.debugLog("LauncherMain.updateProcessStatus Exception "+oEx.toString());
 		}
     }
 
@@ -621,7 +623,7 @@ public class LauncherMain  {
      */
     private void closeProcessWorkspace() {
         try {
-            s_oLogger.debug("LauncherMain.CloseProcessWorkspace");
+            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace");
 
             if (s_oProcessWorkspace != null) {
 
@@ -632,13 +634,13 @@ public class LauncherMain  {
                 ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
                 if (!oProcessWorkspaceRepository.updateProcess(s_oProcessWorkspace)) {
-                    s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error during process workspace update");
+                    WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Error during process workspace update");
                 }
 
                 s_oSendToRabbit.SendUpdateProcessMessage(s_oProcessWorkspace);
             }
         } catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
+            WasdiLog.debugLog("LauncherMain.CloseProcessWorkspace: Exception closing process workspace "
                     + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
@@ -661,10 +663,10 @@ public class LauncherMain  {
 
         } catch (Throwable oEx) {
             try {
-                s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: "
+                WasdiLog.errorLog("LauncherMain.GetProcessId: Error getting processId: "
                         + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             } finally {
-                s_oLogger.error("LauncherMain.GetProcessId: finally here");
+                WasdiLog.errorLog("LauncherMain.GetProcessId: finally here");
             }
         }
 
@@ -691,7 +693,7 @@ public class LauncherMain  {
                 oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
             }
         } catch (Exception oEx) {
-            s_oLogger.error("LauncherMain.waitForProcessResume: " + oEx.toString());
+            WasdiLog.errorLog("LauncherMain.waitForProcessResume: " + oEx.toString());
         }
 
         return "ERROR";

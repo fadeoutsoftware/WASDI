@@ -58,9 +58,15 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ogcprocesses.Conformance;
+import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessSummary;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -955,7 +961,7 @@ public class dbUtils {
                 // Get all Products in workspace
                 List<ProductWorkspace> aoProductsWorkspaces = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
 
-                Utils.debugLog("Deleting workspace layers");
+                WasdiLog.debugLog("Deleting workspace layers");
 
                 // GeoServer Manager Object
                 GeoServerManager oGeoServerManager = new GeoServerManager();
@@ -971,7 +977,7 @@ public class dbUtils {
 
                     if (aoDownloadedFileList.size() > 1) {
                         // Yes, it is in other Ws, jump
-                        Utils.debugLog("The file is also in other workspaces, leave the bands as they are");
+                        WasdiLog.debugLog("The file is also in other workspaces, leave the bands as they are");
                         continue;
                     }
 
@@ -992,18 +998,18 @@ public class dbUtils {
                         try {
                             // Remove Geoserver layer (and file)
                             if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-                                Utils.debugLog("error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+                                WasdiLog.debugLog("error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
                             }
 
                             try {
                                 // delete published band on database
                                 oPublishRepository.deleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
                             } catch (Exception oEx) {
-                                Utils.debugLog("error deleting published band on data base " + oEx.toString());
+                                WasdiLog.debugLog("error deleting published band on data base " + oEx.toString());
                             }
 
                         } catch (Exception oEx) {
-                            Utils.debugLog("error deleting layer id " + oEx.toString());
+                            WasdiLog.debugLog("error deleting layer id " + oEx.toString());
                         }
 
                     }
@@ -1011,7 +1017,7 @@ public class dbUtils {
 
                 try {
 
-                    Utils.debugLog("Delete workspace folder " + sWorkspacePath);
+                    WasdiLog.debugLog("Delete workspace folder " + sWorkspacePath);
 
                     // delete directory
                     FileUtils.deleteDirectory(new File(sWorkspacePath));
@@ -1021,16 +1027,16 @@ public class dbUtils {
 
                         try {
 
-                            Utils.debugLog("Deleting file " + oProductWorkspace.getProductName());
+                            WasdiLog.debugLog("Deleting file " + oProductWorkspace.getProductName());
                             oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
 
                         } catch (Exception oEx) {
-                            Utils.debugLog("Error deleting download on data base: " + oEx);
+                            WasdiLog.debugLog("Error deleting download on data base: " + oEx);
                         }
                     }
 
                 } catch (Exception oEx) {
-                    Utils.debugLog("Error deleting workspace directory: " + oEx);
+                    WasdiLog.debugLog("Error deleting workspace directory: " + oEx);
                 }
 
                 // Delete Product Workspace entry
@@ -1041,11 +1047,11 @@ public class dbUtils {
                 oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
             } else {
-                Utils.debugLog("Error deleting workspace on data base");
+                WasdiLog.debugLog("Error deleting workspace on data base");
             }
 
         } catch (Exception oEx) {
-            Utils.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
+            WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
         }
 
     }
@@ -1155,7 +1161,7 @@ public class dbUtils {
                     Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oUserResourcePermission.getResourceId());
 
                     if (oWorkspace == null) {
-                        Utils.debugLog("UserResourcePermissions: DELETE WS Shared not available " + oUserResourcePermission.getResourceId());
+                        WasdiLog.debugLog("UserResourcePermissions: DELETE WS Shared not available " + oUserResourcePermission.getResourceId());
 
                         oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUserResourcePermission.getUserId(), oUserResourcePermission.getResourceId());
                         continue;
@@ -1263,7 +1269,7 @@ public class dbUtils {
 
                             if (aoDownloadedFileList.size() > 1) {
                                 // Yes, it is in other Ws, jump
-                                Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+                                WasdiLog.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
                                 continue;
                             }
 
@@ -1599,7 +1605,7 @@ public class dbUtils {
 
 			                            if (aoDownloadedFileList.size() > 1) {
 			                                // Yes, it is in other Ws, jump
-			                                Utils.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
+			                                WasdiLog.debugLog("ProductResource.DeleteProduct: The file is also in other workspaces, leave the bands as they are");
 			                                continue;
 			                            }
 
@@ -2116,6 +2122,8 @@ public class dbUtils {
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 
             boolean bExit = false;
+            
+            testOGC();
 
             s_oScanner = new Scanner(System.in);
 
@@ -2185,6 +2193,27 @@ public class dbUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void testOGC() {
+    	OgcProcessesClient oAPI = new OgcProcessesClient("https://gp-ades-03.terradue.com/wasdi/wps3/");
+    	
+    	LandingPage oLandingPage = oAPI.getLandingPage();
+    	WasdiLog.debugLog(oLandingPage.toString());
+    	
+    	Conformance oConformance = oAPI.getConformance();
+    	WasdiLog.debugLog(oConformance.toString());
+    	
+    	ProcessList oProcessList = oAPI.getProcesses();
+    	
+    	for (int iProcs = 0; iProcs < oProcessList.getProcesses().size(); iProcs++) {
+    		ProcessSummary oProcSum = oProcessList.getProcesses().get(iProcs);
+    		
+    		if (oProcSum != null)  {
+    			WasdiLog.debugLog(oProcSum.getId());
+    		}
+    	}
+    	
     }
 
 	private static void ecoStress() {

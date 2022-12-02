@@ -14,10 +14,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.BoundingBoxUtils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ADSProviderAdapter extends ProviderAdapter {
 
@@ -31,14 +32,6 @@ public class ADSProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "ADS";
 	}
 
-	/**
-	 * @param logger
-	 */
-	public ADSProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "ADS";
-	}
-
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		return 0;
@@ -48,7 +41,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
-		Utils.debugLog("ADSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("ADSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 
 		String sDesiredFileName = oProcessWorkspace.getProductName();
 
@@ -82,7 +75,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 			String sAdsGetStatusRequestState = "undefined";
 
 			for (int i = 0; i < 1440; i++) {
-				Utils.debugLog("ADSProviderAdapter.performAdsGetStatusRequest: attemp #" + i);
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsGetStatusRequest: attemp #" + i);
 				sAdsGetStatusRequestResult = performAdsGetStatusRequest(sDownloadUser, sDownloadPassword, sAdsSearchRequestId, iMaxRetry);
 
 				List<Map<String, Object>> aoRequests = JsonUtils.jsonToListOfMapOfObjects(sAdsGetStatusRequestResult);
@@ -115,10 +108,10 @@ public class ADSProviderAdapter extends ProviderAdapter {
 					break;
 				} else if ("failed".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					String sReason = (String) JsonUtils.getProperty(oAdsGetStatusRequestResult, "status.data.reason");
-					Utils.debugLog("ADSProviderAdapter.executeDownloadFile: getStatus request failed: " + sReason);
+					WasdiLog.debugLog("ADSProviderAdapter.executeDownloadFile: getStatus request failed: " + sReason);
 					break;
 				} else {
-					Utils.debugLog("ADSProviderAdapter.executeDownloadFile: getStatus request is in an unknown state: " + sAdsGetStatusRequestState);
+					WasdiLog.debugLog("ADSProviderAdapter.executeDownloadFile: getStatus request is in an unknown state: " + sAdsGetStatusRequestState);
 					break;
 				}
 			}
@@ -141,7 +134,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("ADSProviderAdapter.performAdsSearchRequest.httpPost: attemp #" + iAttemp);
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsSearchRequest.httpPost: attemp #" + iAttemp);
 			}
 
 			try {
@@ -149,7 +142,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 				String sAuth = sDownloadUser + ":" + sDownloadPassword;
 				sResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders, sAuth);
 			} catch (Exception oEx) {
-				Utils.debugLog("ADSProviderAdapter.performAdsSearchRequest: exception in http get call: " + oEx.toString());
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsSearchRequest: exception in http get call: " + oEx.toString());
 			}
 
 			iAttemp ++;
@@ -174,13 +167,13 @@ public class ADSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp < iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("ADSProviderAdapter.performAdsGetStatusRequest.httpGet: attemp #" + iAttemp);
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsGetStatusRequest.httpGet: attemp #" + iAttemp);
 			}
 
 			try {
 				sResult = HttpUtils.httpGet(ADS_URL_GET_STATUS, asHeaders);
 			} catch (Exception oEx) {
-				Utils.debugLog("ADSProviderAdapter.performAdsGetStatusRequest: exception in http get call: " + oEx.toString());
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsGetStatusRequest: exception in http get call: " + oEx.toString());
 			}
 
 			iAttemp ++;
@@ -205,14 +198,14 @@ public class ADSProviderAdapter extends ProviderAdapter {
 		while (Utils.isNullOrEmpty(sResult) && iAttemp<iMaxRetry) {
 
 			if (iAttemp > 0) {
-				Utils.debugLog("ADSProviderAdapter.performAdsDownloadRequest.downloadViaHttp: attemp #" + iAttemp);
+				WasdiLog.debugLog("ADSProviderAdapter.performAdsDownloadRequest.downloadViaHttp: attemp #" + iAttemp);
 			}
 			
 			try {
 				sResult = downloadViaHttp(sUrl, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("ADSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
+				WasdiLog.debugLog("ADSProviderAdapter.executeDownloadFile: exception in download via http call: " + oEx.toString());
 			}
 			
 			iAttemp ++;
@@ -269,7 +262,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 		try {
 			return URLDecoder.decode(sUrlEncoded, java.nio.charset.StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException oE) {
-			Utils.debugLog("Wasdi.deodeUrl: could not decode URL due to " + oE + ".");
+			WasdiLog.debugLog("Wasdi.deodeUrl: could not decode URL due to " + oE + ".");
 		}
 
 		return sUrlEncoded;

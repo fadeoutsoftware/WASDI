@@ -24,7 +24,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -49,12 +49,12 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			try {
 				iResult = Integer.parseInt(extractNumberOfResults(sResponse));
 			} catch (NumberFormatException oNfe) {
-				Utils.debugLog("QueryExecutorOpenSearch.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
+				WasdiLog.debugLog("QueryExecutorOpenSearch.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
 				return -1;
 			}
 			return iResult;
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorOpenSearch.executeCount: " + oE);
+			WasdiLog.debugLog("QueryExecutorOpenSearch.executeCount: " + oE);
 			return -1;
 		}
 	}
@@ -72,7 +72,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		if(null == oQuery) {
-			Utils.debugLog("QueryExecutorOpenSearch.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
 			return null;
 		}
 		try {
@@ -115,7 +115,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 	
 			Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
-				Utils.debugLog("OpenSearchQuery.executeAndRetrieve: Document response null");
+				WasdiLog.debugLog("OpenSearchQuery.executeAndRetrieve: Document response null");
 				return null;
 			}
 	
@@ -125,7 +125,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 				return buildResultLightViewModel(oDocument, oClient, oOptions);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
+			WasdiLog.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
 			return null;
 		}
 	}	
@@ -141,9 +141,9 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 	
 
 	protected String getSearchUrl(PaginatedQuery oQuery) {
-		//Utils.debugLog("QueryExecutorOpenSearch.buildUrl( " + oQuery + " )");
+		//WasdiLog.debugLog("QueryExecutorOpenSearch.buildUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildUrl: oQuery is null");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildUrl: oQuery is null");
 			return null;
 		}
 		Template oTemplate = getTemplate();
@@ -170,17 +170,17 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 	protected abstract String getCountUrl(String sQuery);	
 
 	protected List<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args)");
+		WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args)");
 		if(oDocument == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
 			return null;
 		}
 		if(oClient == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
 			return null;
 		}
 		if(oOptions == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
 			return null;
 		}
 		
@@ -194,7 +194,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 
 		List<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 		
-		Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Entries = " + oFeed.getEntries().size());
+		WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Entries = " + oFeed.getEntries().size());
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
@@ -247,28 +247,28 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 					}				
 				}
 				catch (Exception e) {
-					Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
+					WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
 				}					
 			}
 			*/
 			aoResults.add(oResult);
 		} 
-		Utils.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
+		WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
 		return aoResults;
 	}
 
 	protected List<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		Utils.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args)");
+		WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args)");
 		if(oDocument == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
 			return null;
 		}
 		if(oClient == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
 			return null;
 		}
 		if(oOptions == null) {
-			Utils.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
+			WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
 			return null;
 		}
 		Feed oFeed = (Feed) oDocument.getRoot();
@@ -301,7 +301,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			oResult.setPreview(null);
 			aoResults.add(oResult);
 		} 
-		Utils.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
+		WasdiLog.debugLog("QueryExecutorOpenSearch.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
 		return aoResults;
 	}
 

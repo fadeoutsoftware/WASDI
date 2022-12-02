@@ -71,6 +71,7 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.monitoring.Disk;
 import wasdi.shared.viewmodels.monitoring.License;
@@ -151,7 +152,7 @@ public class Wasdi extends ResourceConfig {
 	@PostConstruct
 	public void initWasdi() {
 
-		Utils.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
+		WasdiLog.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
 		
 		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
 		
@@ -160,7 +161,7 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
-			Utils.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
+			WasdiLog.debugLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
 		// set nfs properties download folder
@@ -169,14 +170,14 @@ public class Wasdi extends ResourceConfig {
 		if (sNfsFolder == null)
 			System.setProperty(Wasdi.s_SNFS_DATA_DOWNLOAD, sUserHome + "/nfs/download");
 
-		Utils.debugLog("-------nfs dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
+		WasdiLog.debugLog("-------nfs dir " + System.getProperty(Wasdi.s_SNFS_DATA_DOWNLOAD));
 		
 		// Read MongoDb Configuration
 		try {
 
             MongoRepository.readConfig();
 
-			Utils.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
+			WasdiLog.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -186,7 +187,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 
 			s_sMyNodeCode = WasdiConfig.Current.nodeCode;
-			Utils.debugLog("-------Node Code " + s_sMyNodeCode);
+			WasdiLog.debugLog("-------Node Code " + s_sMyNodeCode);
 
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -204,7 +205,7 @@ public class Wasdi extends ResourceConfig {
 				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
-				Utils.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
+				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
 			}			
 		}
 		catch (Throwable e) {
@@ -231,17 +232,17 @@ public class Wasdi extends ResourceConfig {
 		try {
 			RabbitFactory.readConfig();
 			
-			Utils.debugLog("-------Rabbit Initialized ");
+			WasdiLog.debugLog("-------Rabbit Initialized ");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		
 		// Initialize Snap
-		Utils.debugLog("-------initializing snap...");
+		WasdiLog.debugLog("-------initializing snap...");
 
 		try {
 			String snapAuxPropPath = WasdiConfig.Current.snap.auxPropertiesFile;
-			Utils.debugLog("snap aux properties file: " + snapAuxPropPath);
+			WasdiLog.debugLog("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
 			Config.instance("snap.auxdata").load(propFile);
 			Config.instance().load();
@@ -268,7 +269,7 @@ public class Wasdi extends ResourceConfig {
 		
 		
 		// Each node must have a special workspace for depoy operations: here it check if exists: if not it will be created
-		Utils.debugLog("-------initializing node local workspace...");
+		WasdiLog.debugLog("-------initializing node local workspace...");
 		
 		try {
 			// Check if it exists
@@ -278,7 +279,7 @@ public class Wasdi extends ResourceConfig {
 			if (oWorkspace == null) {
 				
 				// Create the working Workspace in this node
-				Utils.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
+				WasdiLog.debugLog("Local Workpsace Node " + Wasdi.s_sLocalWorkspaceName + " does not exist create it");
 				
 				oWorkspace = new Workspace();
 				// Default values
@@ -292,7 +293,7 @@ public class Wasdi extends ResourceConfig {
 				// Insert in the db
 				oWorkspaceRepository.insertWorkspace(oWorkspace);
 				
-				Utils.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
+				WasdiLog.debugLog("Workspace " + Wasdi.s_sLocalWorkspaceName + " created");
 			}
 			
 		}
@@ -300,21 +301,21 @@ public class Wasdi extends ResourceConfig {
 			e.printStackTrace();
 		}
 		
-		Utils.debugLog("------- WASDI Init done\n\n");
-		Utils.debugLog("-----------------------------------------------");
-		Utils.debugLog("--------        Welcome to space        -------");
-		Utils.debugLog("-----------------------------------------------\n\n");
+		WasdiLog.debugLog("------- WASDI Init done\n\n");
+		WasdiLog.debugLog("-----------------------------------------------");
+		WasdiLog.debugLog("--------        Welcome to space        -------");
+		WasdiLog.debugLog("-----------------------------------------------\n\n");
 		
 		
 		
 		try {
 			// Can be useful for debug
-			Utils.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
-			for (String string : enviorntmentVars.keySet()) { Utils.debugLog(string + ": " + enviorntmentVars.get(string)); }
+			WasdiLog.debugLog("******************************Environment Vars*****************************"); Map<String, String> enviorntmentVars = System.getenv();
+			for (String string : enviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + enviorntmentVars.get(string)); }
 			 			
 		}
 		catch (Exception e) {
-			Utils.debugLog(e.toString());
+			WasdiLog.debugLog(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -324,16 +325,16 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static void shutDown() {
 		try {
-			Utils.debugLog("-------Shutting Down Wasdi");
+			WasdiLog.debugLog("-------Shutting Down Wasdi");
 			
 			// Stop mongo
 			try {
 				MongoRepository.shutDownConnection();
 			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
+				WasdiLog.debugLog("Wasdi.shutDown: could not shut down connection to DB: " + oE);
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WASDI SHUTDOWN EXCEPTION: " + oE);
+			WasdiLog.debugLog("WASDI SHUTDOWN EXCEPTION: " + oE);
 			oE.printStackTrace();
 		}
 	}
@@ -367,7 +368,7 @@ public class Wasdi extends ResourceConfig {
 				}				
 			}
 			catch (Exception oKeyEx) {
-				Utils.debugLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				WasdiLog.debugLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
 
 
@@ -393,7 +394,7 @@ public class Wasdi extends ResourceConfig {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.debugLog("WAsdi.getUserFromSession: something bad happened: " + oE);
 		}
 
 		return oUser;
@@ -411,7 +412,7 @@ public class Wasdi extends ResourceConfig {
 			//delete data base session
 			if (!oSessionRepository.deleteSession(oUserSession)) {
 
-				Utils.debugLog("AuthService.Login: Error deleting session.");
+				WasdiLog.debugLog("AuthService.Login: Error deleting session.");
 			}
 		}
 	}
@@ -554,7 +555,7 @@ public class Wasdi extends ResourceConfig {
 		//filter out invalid sessions
 		User oUser = getUserFromSession(sSessionId);
 		if(null == oUser) {
-			Utils.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
+			WasdiLog.debugLog("Wasdi.runProcess( " + sUserId + ", " + sSessionId + ", " + sOperationType + ", " + sProductName + ", ... ): session not valid, aborting");
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
 			return oResult;
@@ -570,7 +571,7 @@ public class Wasdi extends ResourceConfig {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oParameter.getWorkspace());
 			
 			if (oWorkspace == null) {
-				Utils.debugLog("Wasdi.runProcess: ws not found. Return 500");
+				WasdiLog.debugLog("Wasdi.runProcess: ws not found. Return 500");
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;				
@@ -586,42 +587,42 @@ public class Wasdi extends ResourceConfig {
 			if (!sWsNodeCode.equals(sMyNodeCode)) {
 				
 				// No: forward the call on the owner node
-				Utils.debugLog("Wasdi.runProcess: forwarding request to [" + sWsNodeCode+"]");
+				WasdiLog.debugLog("Wasdi.runProcess: forwarding request to [" + sWsNodeCode+"]");
 				
 				// Get the Node
 				NodeRepository oNodeRepository = new NodeRepository();
 				wasdi.shared.business.Node oDestinationNode = oNodeRepository.getNodeByCode(sWsNodeCode);
 				
 				if (oDestinationNode==null) {
-					Utils.debugLog("Wasdi.runProcess: Node [" + sWsNodeCode+"] not found. Return 500");
+					WasdiLog.debugLog("Wasdi.runProcess: Node [" + sWsNodeCode+"] not found. Return 500");
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;									
 				}
 				
-				Utils.debugLog("Wasdi.runProcess: serializing parameter to XML");
+				WasdiLog.debugLog("Wasdi.runProcess: serializing parameter to XML");
 				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
 				// Get the URL of the destination Node
 				String sUrl = oDestinationNode.getNodeBaseAddress();
-				Utils.debugLog("Wasdi.runProcess: base url is: " + sUrl );
+				WasdiLog.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
 				sUrl += "processing/run?operation=" + sOperationType + "&name=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
-					Utils.debugLog("Wasdi.runProcess: adding parent " + sParentId);
+					WasdiLog.debugLog("Wasdi.runProcess: adding parent " + sParentId);
 					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
 				}
 				
 				// Is there a subType?
 				if (!Utils.isNullOrEmpty(sOperationSubId)) {
-					Utils.debugLog("Wasdi.runProcess: adding sub type " + sOperationSubId);
+					WasdiLog.debugLog("Wasdi.runProcess: adding sub type " + sOperationSubId);
 					sUrl += "&subtype=" + sOperationSubId;
 				}
 
-				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
-				//Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
+				WasdiLog.debugLog("Wasdi.runProcess: URL: " + sUrl);
+				//WasdiLog.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
 				// call the API on the destination node 
 				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
@@ -635,7 +636,7 @@ public class Wasdi extends ResourceConfig {
 		        } 
 		        catch (Exception oEx) {
 		            oEx.printStackTrace();
-					Utils.debugLog("Wasdi.runProcess: exception " + oEx);
+					WasdiLog.debugLog("Wasdi.runProcess: exception " + oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;				
@@ -700,16 +701,16 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setStatus(ProcessStatus.CREATED.name());
 					oProcess.setNodeCode(sWsNodeCode);
 					oRepository.insertProcessWorkspace(oProcess);
-					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
+					WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
 				} catch (Exception oEx) {
-					Utils.debugLog("Wasdi.runProcess: " + oEx);
+					WasdiLog.debugLog("Wasdi.runProcess: " + oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;
 				}				
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.runProcess: " + oE);
+			WasdiLog.debugLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -816,7 +817,7 @@ public class Wasdi extends ResourceConfig {
 		// Check if we need to zip this file
 		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
 			
-			Utils.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
+			WasdiLog.debugLog("Wasdi.httpPostFile: File not zipped, zip it");
 			
 			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
 			
@@ -830,7 +831,7 @@ public class Wasdi extends ResourceConfig {
 			
 			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
 			if (oPath.toFile().mkdir()) {
-				Utils.debugLog("Wasdi.httpPostFile: Temporary directory created");
+				WasdiLog.debugLog("Wasdi.httpPostFile: Temporary directory created");
 			} else {
 				throw new IOException("Wasdi.httpPostFile: Can't create temporary dir " + sTempPath);
 			}
@@ -863,7 +864,7 @@ public class Wasdi extends ResourceConfig {
 			int iBufferSize = 8192;//8*1024*1024
 			oConnection.setChunkedStreamingMode(iBufferSize);
 			Long lLen = oFile.length();
-			Utils.debugLog("Wasdi.httpPostFile: file length is: "+Long.toString(lLen));
+			WasdiLog.debugLog("Wasdi.httpPostFile: file length is: "+Long.toString(lLen));
 			
 			if (asHeaders != null) {
 				for (String sKey : asHeaders.keySet()) {
@@ -894,7 +895,7 @@ public class Wasdi extends ResourceConfig {
 
 				// response
 				int iResponse = oConnection.getResponseCode();
-				Utils.debugLog("Wasdi.httpPostFile: server returned " + iResponse);
+				WasdiLog.debugLog("Wasdi.httpPostFile: server returned " + iResponse);
 				
 				InputStream oResponseInputStream = null;
 				
@@ -908,7 +909,7 @@ public class Wasdi extends ResourceConfig {
 				if(null!=oResponseInputStream) {
 					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
 					String sMessage = "WasdiLib.uploadFile: " + oByteArrayOutputStream.toString();
-					Utils.debugLog(sMessage);
+					WasdiLog.debugLog(sMessage);
 				} else {
 					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 				}
@@ -916,11 +917,11 @@ public class Wasdi extends ResourceConfig {
 				oConnection.disconnect();
 
 			} catch(Exception oE) {
-				Utils.debugLog("WasdiLib.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
+				WasdiLog.debugLog("WasdiLib.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
 				throw oE;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
+			WasdiLog.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 			throw oE;
 		}
 		
@@ -929,7 +930,7 @@ public class Wasdi extends ResourceConfig {
 				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
 			}
 			catch (Exception oE) {
-				Utils.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
+				WasdiLog.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}			
 		}
 	}
@@ -1044,7 +1045,7 @@ public class Wasdi extends ResourceConfig {
 			try {
 				oResponseInputStream = oConnection.getInputStream();
 			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.readHttpResponse: could not getInputStream due to: " + oE );
+				WasdiLog.debugLog("Wasdi.readHttpResponse: could not getInputStream due to: " + oE );
 			}
 			
 			try {
@@ -1052,7 +1053,7 @@ public class Wasdi extends ResourceConfig {
 					oResponseInputStream = oConnection.getErrorStream();
 				}
 			} catch (Exception oE) {
-				Utils.debugLog("Wasdi.readHttpResponse: could not getErrorStream due to: " + oE );
+				WasdiLog.debugLog("Wasdi.readHttpResponse: could not getErrorStream due to: " + oE );
 			}
 			
 
@@ -1064,12 +1065,12 @@ public class Wasdi extends ResourceConfig {
 			if( 200 <= oConnection.getResponseCode() && 299 >= oConnection.getResponseCode() ) {
 				return sMessage;
 			} else {
-				Utils.debugLog("Wasdi.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
+				WasdiLog.debugLog("Wasdi.readHttpResponse: status: " + oConnection.getResponseCode() + ", error message: " + sMessage);
 				return "";
 			}
 			
 		} catch (Exception oE) {
-			Utils.debugLog("Wasdi.readHttpResponse: exception: " + oE );
+			WasdiLog.debugLog("Wasdi.readHttpResponse: exception: " + oE );
 		}
 		return "";
 	}
@@ -1084,7 +1085,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 			
 			if (Utils.isNullOrEmpty(sWorkflowId)) {
-				Utils.debugLog("sWorkflowId is null or empty");
+				WasdiLog.debugLog("sWorkflowId is null or empty");
 				return "";
 			}
 			
@@ -1128,7 +1129,7 @@ public class Wasdi extends ResourceConfig {
 						if(sAttachmentName.endsWith("\"")) {
 							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
 						}
-						Utils.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
+						WasdiLog.debugLog("Wasdi.downloadWorkflow: attachment name: " + sAttachmentName);
 						
 					}
 					
@@ -1151,7 +1152,7 @@ public class Wasdi extends ResourceConfig {
 					return sOutputFilePath;
 				} else {
 					String sMessage = "Wasdi.downloadWorkflow: response message: " + oConnection.getResponseMessage();
-					Utils.debugLog(sMessage);
+					WasdiLog.debugLog(sMessage);
 					return "";
 				}
  				
@@ -1182,7 +1183,7 @@ public class Wasdi extends ResourceConfig {
 			return s_oMyNode;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("Wasdi.getActualNode: " + oEx.toString());
+			WasdiLog.debugLog("Wasdi.getActualNode: " + oEx.toString());
 		}
 		
 		return null;
@@ -1205,7 +1206,7 @@ public class Wasdi extends ResourceConfig {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
 			return aoOrderedNodeList;
 		}
 		
@@ -1219,7 +1220,7 @@ public class Wasdi extends ResourceConfig {
 			// Is this a professional user?
 			if (oUser.isProfessionalUser())  {
 				
-				Utils.debugLog("Wasdi.getNodesSortedByScore: Search dedicated nodes for Professional User");
+				WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Search dedicated nodes for Professional User");
 				
 				// Try to get the dedicated node/nodes: we read node permissions
 				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -1246,7 +1247,7 @@ public class Wasdi extends ResourceConfig {
 					aoNodes = aoDedicatedNodes;
 				}
 				else {
-					Utils.debugLog("Wasdi.getNodesSortedByScore: Professional User " + oUser.getUserId() + " does not have any node associated! Will fallback with shared nodes");
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Professional User " + oUser.getUserId() + " does not have any node associated! Will fallback with shared nodes");
 				}
 			}
 			
@@ -1275,7 +1276,7 @@ public class Wasdi extends ResourceConfig {
 				MetricsEntry oMetricsEntry = oMetricsEntryRepository.getLatestMetricsEntryByNode(sNodeCode);
 
 				if (oMetricsEntry == null) {
-					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics are null for node " + sNodeCode + ". Skip.");
 					continue;
 				}
 
@@ -1284,7 +1285,7 @@ public class Wasdi extends ResourceConfig {
 				Timestamp oTimestamp = oMetricsEntry.getTimestamp();
 
 				if (oTimestamp == null) {
-					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
 					continue;
 				}
 
@@ -1294,7 +1295,7 @@ public class Wasdi extends ResourceConfig {
 					Double oTimestampInSeconds = oTimestamp.getSeconds();
 
 					if (oTimestampInSeconds == null) {
-						Utils.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
+						WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics timestamp values are null for node " + sNodeCode + ". Skip.");
 						continue;
 					} else {
 						oTimestampInMillis = BigDecimal.valueOf(oTimestampInSeconds).multiply(BigDecimal.valueOf(1000L)).doubleValue();
@@ -1307,7 +1308,7 @@ public class Wasdi extends ResourceConfig {
 				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
 
 				if (bMetricsEntryTooOld) {
-					Utils.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
+					WasdiLog.debugLog("Wasdi.getNodesSortedByScore: metrics too old for node " + sNodeCode + ". Possibly, the node is down. Skip.");
 					continue;
 				}
 
@@ -1367,7 +1368,7 @@ public class Wasdi extends ResourceConfig {
 			
 			// Lets verify if we have at least one node, otherwise we relax the first filter
 			if (aoOrderedNodeList.size() <= 0)  {
-				Utils.debugLog("Wasdi.getNodesSortedByScore: Impossible to find any node with given rules: try to recover excluded one");
+				WasdiLog.debugLog("Wasdi.getNodesSortedByScore: Impossible to find any node with given rules: try to recover excluded one");
 				aoOrderedNodeList = aoExcludedNodeList;
 			}
 			
@@ -1399,7 +1400,7 @@ public class Wasdi extends ResourceConfig {
 			// Ok. we should have finished. But did we find at least one node?
 			if (aoOrderedNodeList.size() <= 0) {
 				// No. We do not like this. Try to recover the old WASDI rules: user default node or generic WASDI default node
-				Utils.debugLog("Wasdi.getNodesSortedByScore: the list of nodes is empty!! fallback to defaults");
+				WasdiLog.debugLog("Wasdi.getNodesSortedByScore: the list of nodes is empty!! fallback to defaults");
 				
 				String sDefaultNode = WasdiConfig.Current.usersDefaultNode;
 				
@@ -1413,7 +1414,7 @@ public class Wasdi extends ResourceConfig {
 			}			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
+			WasdiLog.debugLog("Wasdi.getNodesSortedByScore: exception " + oEx.toString());
 		}
 		
 		return aoOrderedNodeList;

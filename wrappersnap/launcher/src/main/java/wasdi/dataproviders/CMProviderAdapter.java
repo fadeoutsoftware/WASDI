@@ -3,17 +3,13 @@ package wasdi.dataproviders;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.cm.CMHttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CMProviderAdapter extends ProviderAdapter {
 
 	public CMProviderAdapter() {
-		m_sDataProviderCode = "COPERNICUSMARINE";
-	}
-
-	public CMProviderAdapter(LoggerWrapper logger) {
-		super(logger);
 		m_sDataProviderCode = "COPERNICUSMARINE";
 	}
 
@@ -23,16 +19,16 @@ public class CMProviderAdapter extends ProviderAdapter {
 			m_sProviderUser = m_oDataProviderConfig.user;
 			m_sProviderPassword = m_oDataProviderConfig.password;
 		} catch (Exception e) {
-			m_oLogger.error("CMProviderAdapter: Config reader is null");
+			WasdiLog.errorLog("CMProviderAdapter: Config reader is null");
 		}
 	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		Utils.debugLog("CPMProviderAdapter.getDownloadFileSize | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("CPMProviderAdapter.getDownloadFileSize | sFileURL: " + sFileURL);
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CPMProviderAdapter.getDownloadFileSize: sFileURL is null or Empty");
+			WasdiLog.errorLog("CPMProviderAdapter.getDownloadFileSize: sFileURL is null or Empty");
 			return 0l;
 		}
 
@@ -48,15 +44,15 @@ public class CMProviderAdapter extends ProviderAdapter {
 	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
-		Utils.debugLog("CMProviderAdapter.executeDownloadFile | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("CMProviderAdapter.executeDownloadFile | sFileURL: " + sFileURL);
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("CPMProviderAdapter.executeDownloadFile: sFileURL is null or Empty");
+			WasdiLog.errorLog("CPMProviderAdapter.executeDownloadFile: sFileURL is null or Empty");
 			return null;
 		}
 
 		if (Utils.isNullOrEmpty(m_oDataProviderConfig.link)) {
-			m_oLogger.error("CPMProviderAdapter.executeDownloadFile: provider URL is null or Empty");
+			WasdiLog.errorLog("CPMProviderAdapter.executeDownloadFile: provider URL is null or Empty");
 			return null;
 		}
 
@@ -85,7 +81,7 @@ public class CMProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		Utils.debugLog("CMProviderAdapter.getFileName | sFileURL: " + sFileURL);
+		WasdiLog.debugLog("CMProviderAdapter.getFileName | sFileURL: " + sFileURL);
 
 		return "dataset";
 	}

@@ -21,21 +21,22 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.settings.SubsetSetting;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Subset extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
         
-		m_oLocalLogger.debug("Subset.executeOperation");
+		WasdiLog.debugLog("Subset.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}        
 
@@ -54,7 +55,7 @@ public class Subset extends Operation {
 			Product oInputProduct = oReadProduct.getSnapProduct();
 
             if (oInputProduct == null) {
-                m_oLocalLogger.error("Subset.executeOperation: product is not a SNAP product ");
+                WasdiLog.errorLog("Subset.executeOperation: product is not a SNAP product ");
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;
             }
@@ -108,20 +109,20 @@ public class Subset extends Operation {
 
             ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
 
-            m_oLocalLogger.debug("Subset.executeOperation done");
+            WasdiLog.debugLog("Subset.executeOperation done");
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
 
-            m_oLocalLogger.debug("Subset.executeOperation adding product to Workspace");
+            WasdiLog.debugLog("Subset.executeOperation adding product to Workspace");
 
             addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
 
-            m_oLocalLogger.debug("Subset.executeOperation: product added to workspace");
+            WasdiLog.debugLog("Subset.executeOperation: product added to workspace");
             
             return true;
 
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Subset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Subset.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 

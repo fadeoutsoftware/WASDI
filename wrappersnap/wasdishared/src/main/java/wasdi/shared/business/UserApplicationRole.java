@@ -1,6 +1,16 @@
 package wasdi.shared.business;
 
-import static wasdi.shared.business.UserApplicationPermission.*;
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+import static wasdi.shared.business.UserApplicationPermission.NODE_READ;
+import static wasdi.shared.business.UserApplicationPermission.NODE_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_READ;
+import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.STYLE_READ;
+import static wasdi.shared.business.UserApplicationPermission.STYLE_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.USER_READ;
+import static wasdi.shared.business.UserApplicationPermission.USER_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_READ;
+import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_WRITE;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,6 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public enum UserApplicationRole {
 
@@ -57,10 +68,10 @@ public enum UserApplicationRole {
 		boolean bResult = false;
 
 		if (Utils.isNullOrEmpty(sUserRole)) {
-			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole
+			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole
 					+ "): is invalid");
 		} else if (ePermission == null) {
-			Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission
+			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission
 					+ "): is invalid");
 		} else {
 			UserApplicationRole oUserApplicationRole = UserApplicationRole.get(sUserRole);
@@ -69,7 +80,7 @@ public enum UserApplicationRole {
 			if (asGrantedAuthorities != null && asGrantedAuthorities.contains(ePermission.getPermission())) {
 				bResult = true;
 			} else {
-				Utils.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role " + sUserRole
+				WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role " + sUserRole
 						+ " does not have the rights to access the resource (" + ePermission.name() + ").");
 			}
 		}

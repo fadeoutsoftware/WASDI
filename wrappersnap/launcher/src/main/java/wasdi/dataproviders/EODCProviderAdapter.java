@@ -4,9 +4,9 @@ import java.io.File;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class EODCProviderAdapter extends ProviderAdapter{
 	
@@ -14,15 +14,10 @@ public class EODCProviderAdapter extends ProviderAdapter{
 		super();
 		m_sDataProviderCode = "EODC";
 	}
-	
-	public EODCProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "EODC";
-	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		m_oLogger.debug("EODCProviderAdapter.GetDownloadSize: start " + sFileURL);
+		WasdiLog.debugLog("EODCProviderAdapter.GetDownloadSize: start " + sFileURL);
 
 		long lLenght = 0L;
 
@@ -45,15 +40,15 @@ public class EODCProviderAdapter extends ProviderAdapter{
 
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: sFileURL is null");
+			WasdiLog.debugLog("EODCProviderAdapter.ExecuteDownloadFile: sFileURL is null");
 			return "";
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
+			WasdiLog.debugLog("EODCProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
 		
-		m_oLogger.debug("EODCProviderAdapter.ExecuteDownloadFile: start");
+		WasdiLog.debugLog("EODCProviderAdapter.ExecuteDownloadFile: start");
 		
 		setProcessWorkspace(oProcessWorkspace);
 
@@ -70,7 +65,7 @@ public class EODCProviderAdapter extends ProviderAdapter{
 		//extract file name
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.error("EODCProviderAdapter.GetFileName: sFileURL is null or Empty");
+			WasdiLog.errorLog("EODCProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
 

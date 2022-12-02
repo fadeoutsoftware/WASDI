@@ -44,6 +44,7 @@ import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
@@ -90,9 +91,9 @@ public class FileBufferResource {
 									@QueryParam("productName") String sProductName,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException {
-		Utils.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId);
-		Utils.debugLog("FileBufferResource.share, sDestinationWorkspaceId: " + sDestinationWorkspaceId);
-		Utils.debugLog("FileBufferResource.share, sProductName: " + sProductName);
+		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId);
+		WasdiLog.debugLog("FileBufferResource.share, sDestinationWorkspaceId: " + sDestinationWorkspaceId);
+		WasdiLog.debugLog("FileBufferResource.share, sProductName: " + sProductName);
 
 		// find the origin workspace. make sure it is valid. 
 		// find the destination workspace. make sure it is valid
@@ -113,7 +114,7 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("FileBufferResource.getStyles: invalid session");
+				WasdiLog.debugLog("FileBufferResource.getStyles: invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 				return oResult;
 			}
@@ -125,14 +126,14 @@ public class FileBufferResource {
 
 
 			if (Utils.isNullOrEmpty(sOriginWorkspaceId)) {
-				Utils.debugLog("FileBufferResource.share: invalid origin workspace");
+				WasdiLog.debugLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
 			}
 
 			if (sOriginWorkspaceId.contains("/") || sOriginWorkspaceId.contains("\\")) {
-				Utils.debugLog("FileBufferResource.share( originWorkspaceId: " + sOriginWorkspaceId + " ): Injection attempt from users");
+				WasdiLog.debugLog("FileBufferResource.share( originWorkspaceId: " + sOriginWorkspaceId + " ): Injection attempt from users");
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
@@ -141,7 +142,7 @@ public class FileBufferResource {
 			Workspace oOriginWorkspace = oWorkspaceRepository.getWorkspace(sOriginWorkspaceId);
 
 			if (oOriginWorkspace == null) {
-				Utils.debugLog("FileBufferResource.share: invalid origin workspace");
+				WasdiLog.debugLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
@@ -152,14 +153,14 @@ public class FileBufferResource {
 
 
 			if (Utils.isNullOrEmpty(sDestinationWorkspaceId)) {
-				Utils.debugLog("FileBufferResource.share: invalid destination workspace");
+				WasdiLog.debugLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
 			}
 
 			if (sDestinationWorkspaceId.contains("/") || sDestinationWorkspaceId.contains("\\")) {
-				Utils.debugLog("FileBufferResource.share( destinationWorkspaceId: " + sDestinationWorkspaceId + " ): Injection attempt from users");
+				WasdiLog.debugLog("FileBufferResource.share( destinationWorkspaceId: " + sDestinationWorkspaceId + " ): Injection attempt from users");
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
@@ -168,7 +169,7 @@ public class FileBufferResource {
 			Workspace oDestinationWorkspace = oWorkspaceRepository.getWorkspace(sDestinationWorkspaceId);
 
 			if (oDestinationWorkspace == null) {
-				Utils.debugLog("FileBufferResource.share: invalid destination workspace");
+				WasdiLog.debugLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
@@ -182,14 +183,14 @@ public class FileBufferResource {
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
 			if (Utils.isNullOrEmpty(sProductName)) {
-				Utils.debugLog("FileBufferResource.share: invalid product name");
+				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
 			}
 
 			if (sProductName.contains("/") || sProductName.contains("\\")) {
-				Utils.debugLog("FileBufferResource.share( Product Name: " + sProductName + " ): Injection attempt from users");
+				WasdiLog.debugLog("FileBufferResource.share( Product Name: " + sProductName + " ): Injection attempt from users");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
@@ -199,7 +200,7 @@ public class FileBufferResource {
 			ProductWorkspace oProductOriginWorkspace = oProductWorkspaceRepository.getProductWorkspace(sOriginFilePath, sOriginWorkspaceId);
 
 			if (oProductOriginWorkspace == null) {
-				Utils.debugLog("FileBufferResource.share: invalid product name");
+				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
@@ -209,7 +210,7 @@ public class FileBufferResource {
 			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sProductName, sDestinationWorkspaceId);
 
 			if (oProductDestinationWorkspace != null) {
-				Utils.debugLog("FileBufferResource.share: product already present in the destination workspace");
+				WasdiLog.debugLog("FileBufferResource.share: product already present in the destination workspace");
 				oResult.setStringValue("The product is already present in the destination workspace.");
 
 				return oResult;
@@ -222,7 +223,7 @@ public class FileBufferResource {
 			List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(sProductName);
 
 			if (aoDownloadedFileList == null || aoDownloadedFileList.isEmpty()) {
-				Utils.debugLog("FileBufferResource.share: invalid product name");
+				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
@@ -247,14 +248,14 @@ public class FileBufferResource {
 			}
 
 			if (!bIsProductInOriginWorkspace) {
-				Utils.debugLog("FileBufferResource.share: invalid product name");
+				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
 			}
 
 			if (bIsProductInDestinationWorkspace) {
-				Utils.debugLog("FileBufferResource.share: product already present in the destination workspace");
+				WasdiLog.debugLog("FileBufferResource.share: product already present in the destination workspace");
 				oResult.setStringValue("The product is already present in the destination workspace.");
 
 				return oResult;
@@ -295,7 +296,7 @@ public class FileBufferResource {
 
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), /*sProvider.toUpperCase(),*/ sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		} catch (Exception oEx) {
-			Utils.debugLog("FileBufferResource.share: " + oEx);
+			WasdiLog.debugLog("FileBufferResource.share: " + oEx);
 		}
 
 		return oResult;
@@ -330,12 +331,12 @@ public class FileBufferResource {
 		oResult.setBoolValue(false);
 		try {
 			
-			Utils.debugLog("FileBufferResource.Download, session: " + sSessionId);
+			WasdiLog.debugLog("FileBufferResource.Download, session: " + sSessionId);
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.Download(): session is not valid");
+				WasdiLog.debugLog("FileBufferResource.Download(): session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -352,7 +353,7 @@ public class FileBufferResource {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
-			Utils.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
+			WasdiLog.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
 
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
@@ -374,9 +375,9 @@ public class FileBufferResource {
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
-			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
+			WasdiLog.debugLog("DownloadResource.Download: Error updating process list " + e);
 		} catch (Exception e) {
-			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
+			WasdiLog.debugLog("DownloadResource.Download: Error updating process list " + e);
 		}
 		
 		oResult.setIntValue(500);
@@ -408,18 +409,18 @@ public class FileBufferResource {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
-			Utils.debugLog("FileBufferResource.PublishBand");
+			WasdiLog.debugLog("FileBufferResource.PublishBand");
 			
 			// Check Authentication
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				Utils.debugLog("FileBufferResource.PublishBand: session " + sSessionId + " is invalid"); 
+				WasdiLog.debugLog("FileBufferResource.PublishBand: session " + sSessionId + " is invalid"); 
 				return oReturnValue;
 			}
 			
 			String sUserId = oUser.getUserId();
 			
-			Utils.debugLog("FileBufferResource.PublishBand, user: " + sUserId + ", workspace: " + sWorkspaceId);
+			WasdiLog.debugLog("FileBufferResource.PublishBand, user: " + sUserId + ", workspace: " + sWorkspaceId);
 			
 			// Get the full product path
 			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
@@ -433,7 +434,7 @@ public class FileBufferResource {
             }
 			
 			if (oDownloadedFile == null) {
-				Utils.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
+				WasdiLog.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
 				return oReturnValue;
 			}
 			
@@ -454,7 +455,7 @@ public class FileBufferResource {
 			if (oPublishBand != null)
 			{
 				String sProductName = Utils.getFileNameWithoutLastExtension(oPublishBand.getProductName());
-				Utils.debugLog("FileBufferResource.PublishBand: band already published: product Name : " + sProductName + " LayerId: " + oPublishBand.getLayerId());
+				WasdiLog.debugLog("FileBufferResource.PublishBand: band already published: product Name : " + sProductName + " LayerId: " + oPublishBand.getLayerId());
 				PublishBandResultViewModel oPublishBandResultViewModel = new PublishBandResultViewModel();
 				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishBandResultViewModel.setBandName(oPublishBand.getBandName());
@@ -472,7 +473,7 @@ public class FileBufferResource {
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishBandResultViewModel);
 				
-				Utils.debugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
+				WasdiLog.debugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
 				return oReturnValue;
 			}
 			
@@ -494,11 +495,11 @@ public class FileBufferResource {
 			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			oReturnValue.setPayload(sProcessObjId);
 		}catch (IOException e) {
-			Utils.debugLog("DownloadResource.PublishBand: " + e);
+			WasdiLog.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 
 		} catch (Exception e) {
-			Utils.debugLog("DownloadResource.PublishBand: " + e);
+			WasdiLog.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 		}
 
@@ -522,7 +523,7 @@ public class FileBufferResource {
 			@QueryParam("style") String sStyle)
 	{			
 
-		Utils.debugLog("FileBufferResource.downloadStyleByName( Style: " + sStyle + " )");
+		WasdiLog.debugLog("FileBufferResource.downloadStyleByName( Style: " + sStyle + " )");
 
 		try {
 
@@ -533,7 +534,7 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("FileBufferResource.downloadStyleByName( Session: " + sSessionId + ", Style: " + sStyle + " ): invalid session");
+				WasdiLog.debugLog("FileBufferResource.downloadStyleByName( Session: " + sSessionId + ", Style: " + sStyle + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -546,12 +547,12 @@ public class FileBufferResource {
 			ResponseBuilder oResponseBuilder = null;
 
 			if(oFile.exists()==false) {
-				Utils.debugLog("FileBufferResource.downloadStyleByName: file does not exists " + oFile.getPath());
+				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: file does not exists " + oFile.getPath());
 				oResponseBuilder = Response.serverError();	
 			} 
 			else {
 
-				Utils.debugLog("FileBufferResource.downloadStyleByName: returning file " + oFile.getPath());
+				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: returning file " + oFile.getPath());
 
 				FileStreamingOutput oStream;
 				oStream = new FileStreamingOutput(oFile);
@@ -565,7 +566,7 @@ public class FileBufferResource {
 
 		} 
 		catch (Exception oEx) {
-			Utils.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
+			WasdiLog.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
 		}
 
 		return null;
@@ -585,12 +586,12 @@ public class FileBufferResource {
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName)  {
 
-		Utils.debugLog("FileBufferResource.uploadStyle( Name: " + sName);
+		WasdiLog.debugLog("FileBufferResource.uploadStyle( Name: " + sName);
 
 		try {
 			// Check authorization
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Utils.debugLog("FileBufferResource.uploadStyle: invalid session");
+				WasdiLog.debugLog("FileBufferResource.uploadStyle: invalid session");
 				return Response.status(401).build();
 			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -610,7 +611,7 @@ public class FileBufferResource {
 			// Generate Workflow Id and file
 			File oStyleXmlFile = new File(sDownloadRootPath + "styles/" + sName + ".sld");
 
-			Utils.debugLog("FileBufferResource.uploadStyle: style file Path: " + oStyleXmlFile.getPath());
+			WasdiLog.debugLog("FileBufferResource.uploadStyle: style file Path: " + oStyleXmlFile.getPath());
 
 			// save uploaded file
 			int iRead = 0;
@@ -624,7 +625,7 @@ public class FileBufferResource {
 			}
 			
 		} catch (Exception oEx) {
-			Utils.debugLog("FileBufferResource.uploadStyle: " + oEx);
+			WasdiLog.debugLog("FileBufferResource.uploadStyle: " + oEx);
 			return Response.serverError().build();
 		}
 		
@@ -637,14 +638,14 @@ public class FileBufferResource {
 	public Response getStyles(@HeaderParam("x-session-token") String sSessionId)
 	{			
 
-		Utils.debugLog("FileBufferResource.getStyles");
+		WasdiLog.debugLog("FileBufferResource.getStyles");
 
 		try {
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				Utils.debugLog("FileBufferResource.getStyles: invalid session");
+				WasdiLog.debugLog("FileBufferResource.getStyles: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -680,7 +681,7 @@ public class FileBufferResource {
 			return Response.ok(asStyles).build();
 		} 
 		catch (Exception oEx) {
-			Utils.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
+			WasdiLog.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
 		}
 
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();

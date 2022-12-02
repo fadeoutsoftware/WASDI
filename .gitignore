@@ -982,3 +982,21 @@ libraries/c#wasdilib/WasdiLib/obj/
 
 
 .DS_Store
+processorTypes/wasdiPython37Docker/venv/
+libraries/matlabwasdilib/jwasdilib-0.7.4.jar
+*/.pydevproject
+processorTypes/eoepcaDocker/.pydevproject
+processorTypes/wasdiCondaDocker/.pydevproject
+processorTypes/wasdiCSharpDocker/.pydevproject
+processorTypes/wasdiIDLDocker/.pydevproject
+processorTypes/wasdiOctaveDocker/.pydevproject
+processorTypes/wasdiPython27Docker/.pydevproject
+processorTypes/wasdiPython27Docker/config.json
+processorTypes/wasdiPython37Docker/.pydevproject
+processorTypes/wasdiPython37Docker/config.json
+wrappersnap/wasdishared/src/test/java/resources/config.properties
+wrappersnap/wasdishared/src/test/java/resources/log4j.properties
+wrappersnap/wasdishared/src/test/java/resources/parameters.properties
+wrappersnap/wasdishared/src/test/java/resources/test.properties
+wrappersnap/wasdishared/src/test/java/resources/images/lux1.tif
+wrappersnap/wasdishared/src/test/java/resources/images/lux2.tif

@@ -19,6 +19,7 @@ import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Trigger {
 	
@@ -68,7 +69,7 @@ public class Trigger {
 			System.exit(-1);
 		}
 
-		s_oLogger.debug("Trigger Start");
+		WasdiLog.debugLog("Trigger Start");
 
 
 		// create the parser
@@ -93,7 +94,7 @@ public class Trigger {
 				sScheduleId  = oLine.getOptionValue("scheduleid");
 			}
 			else {
-				s_oLogger.debug("No Schedule ID No party. Bye");
+				WasdiLog.debugLog("No Schedule ID No party. Bye");
 				System.exit(-1);
 			}
 			
@@ -110,21 +111,21 @@ public class Trigger {
 						
 			Trigger oTrigger = new Trigger();
 
-			s_oLogger.debug("Executing Schedule for " + sScheduleId);
+			WasdiLog.debugLog("Executing Schedule for " + sScheduleId);
 
 			// And Run
 			oTrigger.executeTrigger(sScheduleId);
 
-			s_oLogger.debug(new EndMessageProvider().getGood());
+			WasdiLog.debugLog(new EndMessageProvider().getGood());
 		}
 		catch( ParseException oEx ) {
-			s_oLogger.error("Trigger Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("Trigger Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			System.exit(-1);
 		}
 	}
 
 	public void executeTrigger(String sScheduleId) {
-		s_oLogger.debug("executeTrigger start ");
+		WasdiLog.debugLog("executeTrigger start ");
 		
 		// Create the Session and Schedule Repo
 		SessionRepository oSessionRepository = new SessionRepository();
@@ -134,11 +135,11 @@ public class Trigger {
 		Schedule oSchedule = oScheduleRepository.getSchedule(sScheduleId);
 		
 		if (oSchedule == null) {
-			s_oLogger.debug("schedule does not exists " + sScheduleId);
+			WasdiLog.debugLog("schedule does not exists " + sScheduleId);
 			return;
 		}
 		
-		s_oLogger.debug("got schedule id " + sScheduleId);
+		WasdiLog.debugLog("got schedule id " + sScheduleId);
 
 		// Create the session
 		UserSession oUserSession = new UserSession();
@@ -163,15 +164,15 @@ public class Trigger {
 		
 		// Init the lib
 		if (oWasdiLib.internalInit()) {
-			s_oLogger.debug("wasdi lib initialized");
+			WasdiLog.debugLog("wasdi lib initialized");
 			
 			// Trigger the processor
 			String sProcId = oWasdiLib.asynchExecuteProcessor(oSchedule.getProcessorName(), oSchedule.getParams());
 			
-			s_oLogger.debug("PROCESS SCHEDULED: got ProcId " + sProcId);
+			WasdiLog.debugLog("PROCESS SCHEDULED: got ProcId " + sProcId);
 		}
 		else {
-			s_oLogger.debug("Error Initializing the WASDI Lib. Exit without scheduling");
+			WasdiLog.debugLog("Error Initializing the WASDI Lib. Exit without scheduling");
 		}
 	}
 }

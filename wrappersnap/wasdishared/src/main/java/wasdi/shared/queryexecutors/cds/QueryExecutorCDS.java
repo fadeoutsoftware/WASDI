@@ -16,6 +16,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -80,7 +81,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 			return iCount;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorCDS.executeCount: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorCDS.executeCount: error " + oEx.toString());
 		}
 		
 		return -1;
@@ -112,13 +113,13 @@ public class QueryExecutorCDS extends QueryExecutor {
 			try {
 				iOffset = Integer.parseInt(sOffset);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
+				WasdiLog.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
 			}
 
 			try {
 				iLimit = Integer.parseInt(sLimit);
 			} catch (Exception oE) {
-				Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
+				WasdiLog.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
 			}
 
 			int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
@@ -174,7 +175,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 			return aoResults;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorCDS.executeAndRetrieve: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorCDS.executeAndRetrieve: error " + oEx.toString());
 		}
 		
 		return null;
@@ -194,7 +195,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		try {
 			sPayload = s_oMapper.writeValueAsString(aoPayload);
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorCDS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
+			WasdiLog.debugLog("QueryExecutorCDS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
 		}
 
 		return sPayload;

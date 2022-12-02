@@ -16,6 +16,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -53,7 +54,7 @@ public class QueryExecutorCM extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) {
-		Utils.debugLog("QueryExecutorCM.executeCount | sQuery: " + sQuery);
+		WasdiLog.debugLog("QueryExecutorCM.executeCount | sQuery: " + sQuery);
 
 		int iCount = 0;
 
@@ -83,7 +84,7 @@ public class QueryExecutorCM extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		Utils.debugLog("QueryExecutorCM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
+		WasdiLog.debugLog("QueryExecutorCM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
 
 		List<QueryResultViewModel> aoResults = new ArrayList<>();
 
@@ -136,7 +137,7 @@ public class QueryExecutorCM extends QueryExecutor {
 				oEndToDate = getDefaultEndDate();
 			} else {
 				if (oEndToDateProvided.before(oStartFromDateProvided)) {
-					Utils.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
+					WasdiLog.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
 
 					oStartFromDate = oEndToDateProvided;
 					oEndToDate = oStartFromDateProvided;

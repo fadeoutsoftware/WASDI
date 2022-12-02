@@ -19,9 +19,9 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
@@ -41,18 +41,13 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		super();
 		m_sDataProviderCode = "SOBLOO";
 	}
-	
-	public SOBLOOProviderAdapter(LoggerWrapper logger) {
-		super(logger);
-		m_sDataProviderCode = "SOBLOO";
-	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.GetDownloadSize: input URL is null");
 		Preconditions.checkArgument(!sFileURL.isEmpty(), "SOBLOOProviderAdapter.GetDownloadSize: input URL is empty");
 
-		m_oLogger.debug("SOBLOOProviderAdapter.GetDownloadSize: start " + sFileURL);
+		WasdiLog.debugLog("SOBLOOProviderAdapter.GetDownloadSize: start " + sFileURL);
 		long lLenght = 0L;
 		boolean bEstimate = false;
 		try {
@@ -64,19 +59,19 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 					bEstimate = true;
 				}
 			}catch (Exception oE) {
-				m_oLogger.warn("SOBLOOProviderAdapter.GetDownloadSize: cannot read file size via http due to " + oE + ", using rough value");
+				WasdiLog.warnLog("SOBLOOProviderAdapter.GetDownloadSize: cannot read file size via http due to " + oE + ", using rough value");
 				bEstimate = true;
 			}
 			if(bEstimate) {
 				try {
 					lLenght = extractSize(sFileURL);
-					m_oLogger.warn("SOBLOOProviderAdapter.GetDownloadSize: sobloo did not provide 'Content-Length' header, estimating content length from query result as " + lLenght + " B");
+					WasdiLog.warnLog("SOBLOOProviderAdapter.GetDownloadSize: sobloo did not provide 'Content-Length' header, estimating content length from query result as " + lLenght + " B");
 				} catch (Exception oEin) {
-					m_oLogger.error("SOBLOOProviderAdapter.GetDownloadFileSize: " + oEin);
+					WasdiLog.errorLog("SOBLOOProviderAdapter.GetDownloadFileSize: " + oEin);
 				}
 			}
 		} catch (Exception oE) {
-			m_oLogger.error("SOBLOOProviderAdapter.GetDownloadFileSize: " + oE);
+			WasdiLog.errorLog("SOBLOOProviderAdapter.GetDownloadFileSize: " + oE);
 		}
 
 		return lLenght;
@@ -163,8 +158,8 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
-		m_oLogger.debug("SOBLOOProviderAdapter.fileSizeViaHttp: sDownloadUser = " + m_sProviderUser);
-		m_oLogger.debug("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
+		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: sDownloadUser = " + m_sProviderUser);
+		WasdiLog.debugLog("SOBLOOProviderAdapter.fileSizeViaHttp: FileUrl = " + sFileURL);
 
 		URL oUrl = new URL(sFileURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -177,7 +172,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 			//lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
 			lLenght = oHttpConn.getContentLengthLong();
-			m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
+			WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
 
 			return lLenght;
 
@@ -193,7 +188,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	@Override
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
-		m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
+		WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile (" + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + ", " + sSaveDirOnServer + ", <ProcessWorkspace> )");
 		
 		Preconditions.checkNotNull(sFileURL, "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is null");
 		Preconditions.checkArgument(!sFileURL.isEmpty(), "SOBLOOProviderAdapter.ExecuteDownloadFile: URL is empty");
@@ -229,7 +224,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				
 				if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
 					
-					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: set process in READY State");
+					WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: set process in READY State");
 					
 					LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.READY, m_oProcessWorkspace.getProgressPerc());
 					
@@ -237,15 +232,15 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 					m_oProcessWorkspace.setStatus(sResumedStatus);
 					
 					if (sResumedStatus.equals(ProcessStatus.ERROR.name()) || sResumedStatus.equals(ProcessStatus.STOPPED.name()) ) {
-						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Process resumed with status ERROR or STOPPED: exit");
+						WasdiLog.errorLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Process resumed with status ERROR or STOPPED: exit");
 						break;
 					}
 					
 					
-					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Process Resumed, let's go!");
+					WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Process Resumed, let's go!");
 				}
 	
-				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Connected");
+				WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Connected");
 	
 				String sFileName = "";
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
@@ -254,18 +249,18 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				try {
 					lContentLength = getDownloadFileSize(sFileURL);
 				} catch (Exception oE) {
-					m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: " + oE);
+					WasdiLog.errorLog("SOBLOOProviderAdapter.ExecuteDownloadFile: " + oE);
 				}
 	
 	
-				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: ContentLenght: " + lContentLength);
+				WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: ContentLenght: " + lContentLength);
 				
 				sFileName = getFileName(sFileURL);
 	
-				m_oLogger.debug("Content-Type: " + sContentType);
-				m_oLogger.debug("Content-Disposition: " + sDisposition);
-				m_oLogger.debug("Content-Length: " + lContentLength);
-				m_oLogger.debug("fileName: " + sFileName);
+				WasdiLog.debugLog("Content-Type: " + sContentType);
+				WasdiLog.debugLog("Content-Disposition: " + sDisposition);
+				WasdiLog.debugLog("Content-Length: " + lContentLength);
+				WasdiLog.debugLog("fileName: " + sFileName);
 	
 				// opens input stream from the HTTP connection
 				InputStream oInputStream = oHttpConn.getInputStream();
@@ -274,7 +269,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 	
 				String sSaveFilePath = sSaveDirOnServer + sFileName;
 	
-				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Create Save File Path = " + sSaveFilePath);
+				WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Create Save File Path = " + sSaveFilePath);
 	
 				File oTargetFile = new File(sSaveFilePath);
 				File oTargetDir = oTargetFile.getParentFile();
@@ -285,26 +280,26 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 
 				iDownloadAttemp ++;
 				
-				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Download Attemp # " + iDownloadAttemp);
+				WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Download Attemp # " + iDownloadAttemp);
 				
 				boolean bCopyStreamResult = copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
 				
 				if (!bCopyStreamResult) {
-					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: error in the copy stream, try again if we have more attemps");
+					WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: error in the copy stream, try again if we have more attemps");
 					continue;
 				}
 				
 				try {
 					File oFile = new File(sSaveFilePath);
-					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: file size: expected/actual: " + lContentLength + "/" + oFile.length());
+					WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: file size: expected/actual: " + lContentLength + "/" + oFile.length());
 				} catch (Exception oE) {
-					m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: exception reading downloaded file " + oE.toString());
+					WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: exception reading downloaded file " + oE.toString());
 					continue;
 				}
 	
 				sReturnFilePath = sSaveFilePath;
 	
-				m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile File downloaded " + sReturnFilePath);
+				WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile File downloaded " + sReturnFilePath);
 				break;
 			} 
 			else {
@@ -313,20 +308,20 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 				if(503 == iResponseCode) {
 					try {
 						
-						m_oLogger.debug("SOBLOOProviderAdapter.ExecuteDownloadFile: Product in LTA, put this process in WAITING");
+						WasdiLog.debugLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Product in LTA, put this process in WAITING");
 						// Set this task in waiting state
 						LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.WAITING, m_oProcessWorkspace.getProgressPerc());
 						
 						String sInfo = "Waiting for the transfer of the image from Sobloo Long Term Archive, this may take up to 24 hours from the request";
 						LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),m_oProcessWorkspace.getWorkspaceId(), sInfo,m_oProcessWorkspace.getWorkspaceId());
-						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: LTA status: " + sError);
+						WasdiLog.infoLog("SOBLOOProviderAdapter.ExecuteDownloadFile: LTA status: " + sError);
 						
 						int iMinutesToSleep = 60 + SOBLOOProviderAdapter.s_iSLACKTOWAIT;
 						
-						m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: Going to sleep for: " + iMinutesToSleep);
+						WasdiLog.infoLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Going to sleep for: " + iMinutesToSleep);
 						TimeUnit.MINUTES.sleep(iMinutesToSleep);
 					} catch (InterruptedException oE) {
-						m_oLogger.error("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
+						WasdiLog.errorLog("SOBLOOProviderAdapter.ExecuteDownloadFile: Could not complete sleep: " + oE);
 						Thread.currentThread().interrupt();
 					}
 					
@@ -337,7 +332,7 @@ public class SOBLOOProviderAdapter extends ProviderAdapter{
 		}
 		
 		if (m_oProcessWorkspace.getStatus().equals(ProcessStatus.WAITING.name())) {
-			m_oLogger.info("SOBLOOProviderAdapter.ExecuteDownloadFile: process is still in waiting, attemps finished, set ERROR state ");
+			WasdiLog.infoLog("SOBLOOProviderAdapter.ExecuteDownloadFile: process is still in waiting, attemps finished, set ERROR state ");
 			LauncherMain.updateProcessStatus(new ProcessWorkspaceRepository(), m_oProcessWorkspace, ProcessStatus.ERROR, m_oProcessWorkspace.getProgressPerc());
 		}
 		

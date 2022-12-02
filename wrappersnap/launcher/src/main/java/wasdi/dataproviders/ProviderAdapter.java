@@ -25,7 +25,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 
-import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.io.WasdiProductReader;
@@ -37,9 +36,9 @@ import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Base Download Utility Class 
@@ -61,11 +60,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * Max number of zeros allowed to read during the read
 	 */
     protected final int MAX_NUM_ZEORES_DURING_READ = 20;
-    
-    /**
-     * Logger
-     */
-    protected LoggerWrapper m_oLogger;
     
     /**
      * Last error as returned by http operations
@@ -116,18 +110,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
      * Constructor: uses LauncerMain logger
      */
     public ProviderAdapter() {
-		this(LauncherMain.s_oLogger);	
-	}
-    
-    /**
-     * Constructor with user defined logger
-     * @param logger
-     */
-    public ProviderAdapter(LoggerWrapper logger) {
-		this.m_oLogger = logger;
 		m_aoSubscribers = new ArrayList<ProcessWorkspaceUpdateSubscriber>();
-	}    
-    
+	}
+        
     /**
      * Read base configuration
      */
@@ -147,9 +132,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     		internalReadConfig();
     	}
     	catch (Exception oEx) {
-    		if (m_oLogger != null) {
-    			m_oLogger.error("Exception reading Data Provider Config: " + oEx.toString());
-    		}
+    		WasdiLog.errorLog("Exception reading Data Provider Config: " + oEx.toString());
 		}
     }
     
@@ -203,7 +186,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
     		
     		if (Utils.isNullOrEmpty(sPlatformType)) {
-    			m_oLogger.debug("ProviderAdapter.getScoreForFile: platform not recognized");
+    			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized");
     			return -1;
     		}
     		
@@ -214,9 +197,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     		return internalGetScoreForFile(sFileName, sPlatformType);
     	}
     	catch (Exception oEx) {
-    		if (m_oLogger!=null) {
-    			m_oLogger.error("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
-    		}
+    		WasdiLog.errorLog("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
 		}
     	
     	return -1;
@@ -254,9 +235,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
         	}
     	}
     	catch (Exception oEx) {
-    		if (m_oLogger!=null) {
-    			m_oLogger.error("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
-    		}
+    		WasdiLog.errorLog("ProviderAdapter.getScoreForFile: exception " + oEx.toString());
 		}    	
     	
     	return "";
@@ -286,10 +265,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	    	if(null != oSubscriber) {
 	    		m_aoSubscribers.add(oSubscriber);
 	    	} else {
-	    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
+	    		WasdiLog.warnLog("ProviderAdapter.subscribe: null subscriber");
 	    	}
     	} catch (Exception oE) {
-    		m_oLogger.error("ProviderAdapter.subscribe: " + oE); 
+    		WasdiLog.errorLog("ProviderAdapter.subscribe: " + oE); 
 		}
 	}
 
@@ -297,10 +276,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	public void unsubscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
 		try {
 			if(!m_aoSubscribers.remove(oSubscriber)) {
-				m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
+				WasdiLog.warnLog("ProviderAdapter.subscribe: subscriber not found");
 			}
 		} catch (Exception oE) {
-    		m_oLogger.error("ProviderAdapter.unsubscribe: " + oE); 
+    		WasdiLog.errorLog("ProviderAdapter.unsubscribe: " + oE); 
 		}
 	}
 	
@@ -312,7 +291,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		if(null!=oProcessWorkspace) {
 			m_oProcessWorkspace = oProcessWorkspace;
 		} else {
-			m_oLogger.error("ProviderAdapter.setProcessWorkspace: oProcessWorkspace is null");
+			WasdiLog.errorLog("ProviderAdapter.setProcessWorkspace: oProcessWorkspace is null");
 			throw new NullPointerException();
 		}
 	}
@@ -368,7 +347,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		try {
 			// Domain check
 			if (Utils.isNullOrEmpty(sFileURL)) {
-				m_oLogger.error("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
+				WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
 				return null;
 			}
 
@@ -390,21 +369,21 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					try {
 						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
 					} catch (Exception oEx) {
-						m_oLogger.error("ProviderAdapter.getFileNameViaHttp: exception setting auth "
+						WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: exception setting auth "
 								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 					}
 					return null;
 				}
 			});
 
-			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
+			WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
 			
 			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
 			int iReadTimeOut = WasdiConfig.Current.readTimeout;
 			
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
-			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connection Created");
+			WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: Connection Created");
 			
 			//NOTE: the DhUS version did not set GET and Accept. ONDA did. TEST 
 			oHttpConn.setRequestMethod("GET");
@@ -412,12 +391,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 			oHttpConn.setConnectTimeout(iConnectionTimeOut);
 			oHttpConn.setReadTimeout(iReadTimeOut);
-			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
+			WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
 			int responseCode = oHttpConn.getResponseCode();
 
 			// always check HTTP response code first
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connected");
+				WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp: Connected");
 				String sFileName = "";
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 				String sContentType = oHttpConn.getContentType();
@@ -440,12 +419,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 				sReturnFilePath = sFileName;
 
-				m_oLogger.debug("Content-Type = " + sContentType);
-				m_oLogger.debug("Content-Disposition = " + sDisposition);
-				m_oLogger.debug("Content-Length = " + sContentLength);
-				m_oLogger.debug("fileName = " + sFileName);
+				WasdiLog.debugLog("Content-Type = " + sContentType);
+				WasdiLog.debugLog("Content-Disposition = " + sDisposition);
+				WasdiLog.debugLog("Content-Length = " + sContentLength);
+				WasdiLog.debugLog("fileName = " + sFileName);
 			} else {
-				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp No file to download. Server replied HTTP code: " + responseCode);
+				WasdiLog.debugLog("ProviderAdapter.getFileNameViaHttp No file to download. Server replied HTTP code: " + responseCode);
 				m_iLastError = responseCode;
 			}
 			oHttpConn.disconnect();
@@ -453,7 +432,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			return sReturnFilePath;
 			
 		} catch (Exception oEx) {
-			m_oLogger.error("ProviderAdapter.getFileNameViaHttp: general error: " + oEx);
+			WasdiLog.errorLog("ProviderAdapter.getFileNameViaHttp: general error: " + oEx);
 		}
 
 		return null;
@@ -473,7 +452,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				oSubscriber.notify(m_oProcessWorkspace);
 			}
     	} catch (Exception oE) {
-			m_oLogger.error("ProviderAdapter.UpdateProcessProgress: " + oE);
+			WasdiLog.errorLog("ProviderAdapter.UpdateProcessProgress: " + oE);
 		}
     }
 
@@ -508,7 +487,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		try {
 			// Basic HTTP Authentication
-			//m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+			//WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
 
 			if (sDownloadUser != null) {
 				Authenticator.setDefault(new Authenticator() {
@@ -517,7 +496,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 						try {
 							return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
 						} catch (Exception oEx) {
-							m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+							WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 						}
 						return null;
 					}
@@ -527,7 +506,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			sReturnFilePath = downloadViaHttp(sFileURL, Collections.emptyMap(), sSaveDirOnServer, sOutputFileName);
 		}
 		catch (Exception oEx) {
-			m_oLogger.error("ProviderAdapter.downloadViaHttp: Exception " + oEx);
+			WasdiLog.errorLog("ProviderAdapter.downloadViaHttp: Exception " + oEx);
 		}
 
 		return sReturnFilePath;
@@ -587,7 +566,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		// Return file path
 		String sReturnFilePath = null;
 
-		m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+		WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
 		URL oUrl = new URL(sFileURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -617,7 +596,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		// always check HTTP response code first
 		if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
+			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Connected");
 
 			String sFileName = "";
 			String sContentType = oHttpConn.getContentType();
@@ -627,12 +606,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 				boolean bFromDisposition = !Utils.isNullOrEmpty(sDisposition); 
 				if (bFromDisposition) {
-					m_oLogger.debug("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Content-Disposition = " + sDisposition);
 					// extracts file name from header field
 					String sFileNameKey = "filename=";
 					int iStart = sDisposition.indexOf(sFileNameKey);
 					if (iStart > 0) {
-						m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
+						WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from 'Content-Disposition'");
 						int iEnd = sDisposition.indexOf(' ', iStart);
 						if(iEnd < 0) {
 							iEnd = sDisposition.length();
@@ -654,17 +633,17 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				}
 				if(!bFromDisposition) {
 					// extracts file name from URL
-					m_oLogger.debug("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
+					WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: trying to extract filename from URL");
 					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1);
 				}				
 			}
 			else {
 				sFileName = sOutputFileName;
 			}
-			m_oLogger.debug("fileName = " + sFileName);
+			WasdiLog.debugLog("fileName = " + sFileName);
 			
-			m_oLogger.debug("Content-Type = " + sContentType);
-			m_oLogger.debug("Content-Length = " + lContentLength);
+			WasdiLog.debugLog("Content-Type = " + sContentType);
+			WasdiLog.debugLog("Content-Length = " + lContentLength);
 			
 
 			// opens input stream from the HTTP connection
@@ -674,7 +653,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			
 			String sSaveFilePath = sSaveDirOnServer + sFileName;
 
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
+			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
 
 			File oTargetFile = new File(sSaveFilePath);
 			File oTargetDir = oTargetFile.getParentFile();
@@ -686,21 +665,21 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			//Retry should be handled by the specific provider ExecuteDownloadingFile Method
 			if (copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream)) {
 				sReturnFilePath = sSaveFilePath;
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 			}
 			else {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp copy stream returned false, not setting return file path" );
 			}
 
 		} else {
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
+			WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: No file to download. Server replied HTTP code: " + iResponseCode);
 			//todo retrieve error
 			InputStream oErrorStream = oHttpConn.getErrorStream();
 			if(null != oErrorStream) {
 				InputStreamReader oReader = new InputStreamReader(oErrorStream);
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
 			} else {
-				m_oLogger.debug("ProviderAdapter.downloadViaHttp: provider did not send an error message");
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: provider did not send an error message");
 			}
 			m_iLastError = iResponseCode;
 		}
@@ -727,7 +706,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		// Percent of the completed download
 		int iFilePercent = 0;
 		
-		m_oLogger.debug("ProviderAdapter.copyStream: start copy");
+		WasdiLog.debugLog("ProviderAdapter.copyStream: start copy");
 
 		int iBytesRead = -1;
 		byte[] abBuffer = new byte[BUFFER_SIZE];
@@ -739,7 +718,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 				lTotalLen += (long)iBytesRead;
 				if (iBytesRead <= 0) {
-					m_oLogger.debug("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + iZeroes);
+					WasdiLog.debugLog("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + iZeroes);
 					iZeroes--;
 				} 
 				else {
@@ -749,7 +728,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				if (iZeroes <= 0) {
 					//do not break here: sobloo does not send the Content-Length header, so the forecasted length might be wrong
 					//instead, let the copy reach the end of the stream
-					m_oLogger.debug("ProviderAdapter.copyStream: o bytes have been read for " + MAX_NUM_ZEORES_DURING_READ + "times, which is too many times: aborting copy");
+					WasdiLog.debugLog("ProviderAdapter.copyStream: o bytes have been read for " + MAX_NUM_ZEORES_DURING_READ + "times, which is too many times: aborting copy");
 					break;
 					
 				}
@@ -780,11 +759,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				}
 			}
 			
-			m_oLogger.debug("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
+			WasdiLog.debugLog("ProviderAdapter.copyStream: EOF received, set process to 100% [was " + iFilePercent + "%]");
 			updateProcessProgress(100);			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("ProviderAdapter.copyStream: after reading " + lTotalLen + "/" + lContentLength + " an exception was caught: " + oEx);
+			WasdiLog.debugLog("ProviderAdapter.copyStream: after reading " + lTotalLen + "/" + lContentLength + " an exception was caught: " + oEx);
 			return false;
 		}
 		finally {
@@ -801,7 +780,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			
 		}
 
-		m_oLogger.debug("ProviderAdapter.copyStream: read " + lTotalLen + "/" + lContentLength + ", copy done");
+		WasdiLog.debugLog("ProviderAdapter.copyStream: read " + lTotalLen + "/" + lContentLength + ", copy done");
 		
 		return true;
 	}
@@ -813,7 +792,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
+            WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
             return lLenght;
         }
         
@@ -846,13 +825,13 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
                     return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                 }
                 catch (Exception oEx){
-                    m_oLogger.error("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }
         });
 
-        m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
+        WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
         URL oUrl = new URL(sFileURL);
         HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
@@ -866,12 +845,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
             lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
 
-            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
+            WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
 
             return lLenght;
 
         } else {
-            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
+            WasdiLog.debugLog("ProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
             m_iLastError = responseCode;
         }
         oHttpConn.disconnect();
@@ -893,9 +872,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_iLastError = oHttpConn.getResponseCode();
 			InputStream oErrorStream = oHttpConn.getErrorStream();
 			sError = CharStreams.toString(new InputStreamReader(oErrorStream, Charsets.UTF_8));
-			m_oLogger.warn("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + m_iLastError + " and message is: \n" + sError);
+			WasdiLog.warnLog("ProviderAdapter.handleConnectionError: Server replied HTTP code: " + m_iLastError + " and message is: \n" + sError);
 		} catch (Exception oE) {
-			m_oLogger.error("ProviderAdapter.handleConnectionError: " + oE);
+			WasdiLog.errorLog("ProviderAdapter.handleConnectionError: " + oE);
 		}
 		
 		return sError;
@@ -986,7 +965,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		int iStart = sFileURL.indexOf(sPrefix) + sPrefix.length();
 		String sPath = sFileURL.substring(iStart);
 
-		m_oLogger.debug("ProviderAdapter.removeFilePrefix: full path " + sPath);
+		WasdiLog.debugLog("ProviderAdapter.removeFilePrefix: full path " + sPath);
 
 		return sPath;
 	}
@@ -1033,16 +1012,16 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		}
 		
 		if (!oSourceFile.exists()) {
-			m_oLogger.debug("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
+			WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
 		}
-		m_oLogger.debug("ProviderAdapter.getSourceFileLength: Found length " + lLenght);
+		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: Found length " + lLenght);
 
 		return lLenght;
 	}
 
 	protected String localFileCopy(String sFileURL, String sSaveDirOnServer, int iMaxRetry) throws Exception {
 		//  file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value		
-		m_oLogger.debug("ProviderAdapter.localFileCopy: this is a \"file:\" protocol, get file name");
+		WasdiLog.debugLog("ProviderAdapter.localFileCopy: this is a \"file:\" protocol, get file name");
 		
 		String sPath = removePrefixFile(sFileURL);
 		File oSourceFile = new File(sPath);
@@ -1054,7 +1033,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 		sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
 		
-		m_oLogger.debug("ProviderAdapter.localFileCopy: destination file: " + sDestinationFileName);
+		WasdiLog.debugLog("ProviderAdapter.localFileCopy: destination file: " + sDestinationFileName);
 		
 		InputStream oInputStream = null;
 		OutputStream oOutputStream = null;
@@ -1072,13 +1051,13 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			oInputStream = new FileInputStream(oSourceFile);
 			oOutputStream = new FileOutputStream(oDestionationFile);
 			
-			m_oLogger.debug("ProviderAdapter.localFileCopy: start copy stream");
+			WasdiLog.debugLog("ProviderAdapter.localFileCopy: start copy stream");
 			
 			int iAttempts = iMaxRetry;
 
 			while(iAttempts > 0) {
 				
-				m_oLogger.debug("ProviderAdapter.localFileCopy: Attemp #" + (iMaxRetry-iAttempts+1));
+				WasdiLog.debugLog("ProviderAdapter.localFileCopy: Attemp #" + (iMaxRetry-iAttempts+1));
 				
 				if (copyStream(m_oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream)) {
 					
@@ -1097,30 +1076,30 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 								break;							
 							}
 							else {
-								m_oLogger.debug("ProviderAdapter.localFileCopy: file not readable: " + oDestionationFile.getPath() + " try again");
+								WasdiLog.debugLog("ProviderAdapter.localFileCopy: file not readable: " + oDestionationFile.getPath() + " try again");
 								try {
 									String sDestination = oDestionationFile.getPath();
 									sDestination += ".attemp"+ (iMaxRetry-iAttempts+1);
 									FileUtils.copyFile(oDestionationFile, new File(sDestination));										
 								}
 								catch (Exception oEx) {
-									m_oLogger.debug("ProviderAdapter.localFileCopy: Exception making copy of attempt file " + oEx.toString());
+									WasdiLog.debugLog("ProviderAdapter.localFileCopy: Exception making copy of attempt file " + oEx.toString());
 								}
 							}								
 						}
 						catch (Exception oReadEx) {
-							m_oLogger.debug("ProviderAdapter.localFileCopy: exception reading file: " + oReadEx.toString() + " try again");
+							WasdiLog.debugLog("ProviderAdapter.localFileCopy: exception reading file: " + oReadEx.toString() + " try again");
 						}
 						
 						
 						try {
-							m_oLogger.debug("ProviderAdapter.localFileCopy: delete corrupted file");
+							WasdiLog.debugLog("ProviderAdapter.localFileCopy: delete corrupted file");
 							if (oDestionationFile.delete()== false) {
-								m_oLogger.debug("ProviderAdapter.localFileCopy: error deleting corrupted file");
+								WasdiLog.debugLog("ProviderAdapter.localFileCopy: error deleting corrupted file");
 							}
 						}
 						catch (Exception oDeleteEx) {
-							m_oLogger.debug("ProviderAdapter.localFileCopy: exception deleting not valid file ");
+							WasdiLog.debugLog("ProviderAdapter.localFileCopy: exception deleting not valid file ");
 						}
 					}
 					else {
@@ -1129,7 +1108,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					}						
 				}
 				else {
-					m_oLogger.debug("ProviderAdapter.localFileCopy: error in the copy stream.");
+					WasdiLog.debugLog("ProviderAdapter.localFileCopy: error in the copy stream.");
 				}
 				
 				iAttempts--;
@@ -1138,7 +1117,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			}
 
 		} catch (Exception e) {
-			m_oLogger.info("ProviderAdapter.localFileCopy: " + e);
+			WasdiLog.infoLog("ProviderAdapter.localFileCopy: " + e);
 		}
 		finally {
 			try {

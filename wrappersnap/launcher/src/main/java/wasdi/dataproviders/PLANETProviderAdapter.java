@@ -10,8 +10,9 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class PLANETProviderAdapter extends ProviderAdapter {
 	
@@ -32,11 +33,6 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 	
 	public PLANETProviderAdapter() {
 		super();
-		m_sDataProviderCode = "PLANET";
-	}
-	
-	public PLANETProviderAdapter(LoggerWrapper logger) {
-		super(logger);
 		m_sDataProviderCode = "PLANET";
 	}
 	
@@ -70,7 +66,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 				}
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("PLANETProviderAdapter.internalReadConfig: " + oEx.toString());
+				WasdiLog.debugLog("PLANETProviderAdapter.internalReadConfig: " + oEx.toString());
 			}
 		}
 	}
@@ -89,7 +85,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
+			WasdiLog.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
 		}
 		
 		return 0;
@@ -117,13 +113,13 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			
 			while (iAttemp<iMaxRetry) {
 				
-				m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: start attemp #"+iAttemp);
+				WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: start attemp #"+iAttemp);
 				
 				sDirectFileUrl = isAssetReady(sAssetUrl); 
 				// Check if it is ready
 				if (Utils.isNullOrEmpty(sDirectFileUrl)) {
 					
-					m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: asset not ready, try to activate it");
+					WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: asset not ready, try to activate it");
 					
 					// try to activate
 					activateAsset(sAssetUrl);
@@ -132,7 +128,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					for (int iWaitCycles = 0; iWaitCycles<m_iMaxActivationCycles; iWaitCycles++) {
 						
 						try {
-							m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: waiting for activation, going to sleep for " + m_lActivationCyclesSleepSeconds + " [s]");
+							WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: waiting for activation, going to sleep for " + m_lActivationCyclesSleepSeconds + " [s]");
 							
 							Thread.sleep(m_lActivationCyclesSleepSeconds*1000);
 							
@@ -154,7 +150,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 				// here we double check if it is ready
 				if (!Utils.isNullOrEmpty(sDirectFileUrl)) {
 					
-					m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: ok asset ready try to download file");
+					WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: ok asset ready try to download file");
 					
 					// Yeah, we can dowload finally!!
 					String sFile = downloadViaHttp(sDirectFileUrl, m_sProviderUser, "", sSaveDirOnServer);
@@ -164,7 +160,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					}
 				}
 				else {
-					m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: no, asset still not ready");
+					WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: no, asset still not ready");
 				}
 				
 				// or not ready, or not downlaoded. Let see if we have other try...
@@ -172,7 +168,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 				
 				// Take a nap before
 				try {
-					m_oLogger.debug("PLANETProviderAdapter.executeDownloadFile: retry cycle, going to sleep for " + m_lRetrySleepSeconds + " [s]");
+					WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: retry cycle, going to sleep for " + m_lRetrySleepSeconds + " [s]");
 					Thread.sleep(m_lRetrySleepSeconds*1000);	
 				}
 				catch (Exception oSleepEx) {
@@ -182,7 +178,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
+			WasdiLog.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
 		}
 		
 		return null;		
@@ -200,7 +196,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 			asHeaders.put("Authorization", sBasicAuth);
 		} catch (Exception oE) {
-			Utils.debugLog("PLANETProviderAdapter.getPlanetHeaders: " + oE);
+			WasdiLog.debugLog("PLANETProviderAdapter.getPlanetHeaders: " + oE);
 		}
 		
 		return asHeaders;
@@ -240,7 +236,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PLANETProviderAdapter.isAssetReady: " + oEx.toString());
+			WasdiLog.debugLog("PLANETProviderAdapter.isAssetReady: " + oEx.toString());
 		}	
 		
 		return null;
@@ -274,17 +270,17 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					// Post the request
 					HttpUtils.httpPost(sActivateLink, null, getPlanetHeaders());
 					
-					m_oLogger.debug("PLANETProviderAdapter.activateAsset: activation request sent");
+					WasdiLog.debugLog("PLANETProviderAdapter.activateAsset: activation request sent");
 					
 					return;
 				}
 			}
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PLANETProviderAdapter.activateAsset: " + oEx.toString());
+			WasdiLog.debugLog("PLANETProviderAdapter.activateAsset: " + oEx.toString());
 		}
 		
-		m_oLogger.debug("PLANETProviderAdapter.activateAsset: impossible to send the activation request");
+		WasdiLog.debugLog("PLANETProviderAdapter.activateAsset: impossible to send the activation request");
 	}
 
 	@Override
@@ -299,7 +295,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 			return asUrlParts[2] + ".tif";
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
+			WasdiLog.debugLog("PLANETProviderAdapter.getDownloadFileSize: " + oEx.toString());
 		}
 		
 		return null;

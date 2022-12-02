@@ -32,6 +32,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
@@ -65,12 +66,12 @@ public class AdminDashboardResource {
 	public Response findUsersByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
-		Utils.debugLog("AdminDashboardResource.findUsersByPartialName(" + " Partial name: " + sPartialName + " )");
+		WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName(" + " Partial name: " + sPartialName + " )");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -80,7 +81,7 @@ public class AdminDashboardResource {
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
 		}
 
@@ -106,12 +107,12 @@ public class AdminDashboardResource {
 	public Response findWorkspacesByPartialName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("partialName") String sPartialName) {
 
-		Utils.debugLog("AdminDashboardResource.findWorkspacesByPartialName(" + " Partial name: " + sPartialName + " )");
+		WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName(" + " Partial name: " + sPartialName + " )");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("WorkspaceResource.shareWorkspace: invalid session");
+			WasdiLog.debugLog("WorkspaceResource.shareWorkspace: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -121,7 +122,7 @@ public class AdminDashboardResource {
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			Utils.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
 		}
 
@@ -149,13 +150,13 @@ public class AdminDashboardResource {
 			@QueryParam("resourceId") String sResourceId,
 			@QueryParam("userId") String sUserId) {
 
-		Utils.debugLog("AdminDashboardResource.findResourcePermissions(" + " ResourceType: " + sResourceType
+		WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sUserId + " )");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("WorkspaceResource.findResourcePermissions: invalid session");
+			WasdiLog.debugLog("WorkspaceResource.findResourcePermissions: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -165,7 +166,7 @@ public class AdminDashboardResource {
 		}
 
 		if (Utils.isNullOrEmpty(sResourceType) && Utils.isNullOrEmpty(sResourceId) && Utils.isNullOrEmpty(sUserId)) {
-			Utils.debugLog("AdminDashboardResource.findResourcePermissions: insufficient search criteria");
+			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: insufficient search criteria");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA)).build();
 		}
 
@@ -194,11 +195,11 @@ public class AdminDashboardResource {
 			@QueryParam("resourceId") String sResourceId,
 			@QueryParam("userId") String sDestinationUserId) {
 
-		Utils.debugLog("AdminDashboardResource.addResourcePermission(" + " ResourceType: " + sResourceType
+		WasdiLog.debugLog("AdminDashboardResource.addResourcePermission(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sDestinationUserId + " )");
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
-			Utils.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
+			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
@@ -258,7 +259,7 @@ public class AdminDashboardResource {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
 		} else {
-			Utils.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
+			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
@@ -272,11 +273,11 @@ public class AdminDashboardResource {
 			@QueryParam("resourceId") String sResourceId,
 			@QueryParam("userId") String sUserId) {
 
-		Utils.debugLog("AdminDashboardResource.removeResourcePermission(" + " ResourceType: " + sResourceType
+		WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sUserId + " )");
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
-			Utils.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
+			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
@@ -335,7 +336,7 @@ public class AdminDashboardResource {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
 		} else {
-			Utils.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
+			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 	}
@@ -384,12 +385,12 @@ public class AdminDashboardResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
-//		Utils.debugLog("AdminDashboardResource.updateMetricsEntry()");
+//		WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry()");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("AdminDashboardResource.addMetricsEntry: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -401,7 +402,7 @@ public class AdminDashboardResource {
 
 
 		if (oMetricsEntry == null) {
-			Utils.debugLog("AdminDashboardResource.addMetricsEntry: invalid payload");
+			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: invalid payload");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_METRICS_ENTRY)).build();
 		}
 
@@ -410,7 +411,7 @@ public class AdminDashboardResource {
 			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
 			oMetricsEntryRepository.updateMetricsEntry(oMetricsEntry);
 		} catch (Exception oEx) {
-			Utils.debugLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
+			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
@@ -423,12 +424,12 @@ public class AdminDashboardResource {
 	public Response getLatestMetricsEntry(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("nodeCode") String sNodeCode) {
 
-		Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry()");
+		WasdiLog.debugLog("AdminDashboardResource.getLatestMetricsEntry()");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.getLatestMetricsEntry: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -446,7 +447,7 @@ public class AdminDashboardResource {
 
 			return Response.ok(oGenericEntity).build();
 		} catch (Exception oEx) {
-			Utils.debugLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
+			WasdiLog.debugLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_SEARCH_PROCESS)).build();
 		}
 	}

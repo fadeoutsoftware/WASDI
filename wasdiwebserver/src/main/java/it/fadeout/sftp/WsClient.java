@@ -12,7 +12,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Web Socket client. Used to talk with the mini web-socket server
@@ -66,8 +66,8 @@ public class WsClient extends Semaphore {
    @OnOpen
     public void onOpen(Session oUserSession) {
 	   
-        Utils.debugLog("opening websocket...");
-        Utils.debugLog("WsClient.onOpen: userSession = " + oUserSession.getId() );
+        WasdiLog.debugLog("opening websocket...");
+        WasdiLog.debugLog("WsClient.onOpen: userSession = " + oUserSession.getId() );
         // Send the message
         oUserSession.getAsyncRemote().sendText(m_sMessage);	        
    }
@@ -79,7 +79,7 @@ public class WsClient extends Semaphore {
     */
 	@OnClose
 	public void onClose(Session oUserSession, CloseReason oReason) {
-	    Utils.debugLog("closing websocket");		    
+	    WasdiLog.debugLog("closing websocket");		    
 	}
 
     /**
@@ -90,7 +90,7 @@ public class WsClient extends Semaphore {
     @OnMessage
     public void onMessage(String sMessage) {
     	
-    	Utils.debugLog(sMessage);
+    	WasdiLog.debugLog(sMessage);
     	
     	m_bOk = sMessage.startsWith("OK;");
     	String[] toks = sMessage.split(",|;");

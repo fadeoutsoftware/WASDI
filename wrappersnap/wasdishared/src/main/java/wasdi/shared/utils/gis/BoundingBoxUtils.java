@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.regex.PatternSyntaxException;
 
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Utility class for BoundingBox related operations.
@@ -80,7 +81,7 @@ public class BoundingBoxUtils {
 					return Arrays.asList(dNorth, dWest, dSouth, dEast);
 				}
 			} catch(PatternSyntaxException | NullPointerException | NumberFormatException oE) {
-				Utils.log("ERROR", "BoundingBoxUtils.parseBoundingBox: issue with the bounding box: " + sBoundingBox + ": " + oE);
+				WasdiLog.log("ERROR", "BoundingBoxUtils.parseBoundingBox: issue with the bounding box: " + sBoundingBox + ": " + oE);
 			}
 		}
 

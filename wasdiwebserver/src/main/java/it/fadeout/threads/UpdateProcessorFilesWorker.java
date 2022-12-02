@@ -7,7 +7,7 @@ import java.util.Map;
 
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Thread that calls all the computing nodes to ask to update the files of a processor
@@ -56,7 +56,7 @@ public class UpdateProcessorFilesWorker extends Thread {
 	@Override
 	public void run() {
 		
-		Utils.debugLog("UpdateProcessorFilesWorker.run: start nodes update for processor " + m_sProcessorId);
+		WasdiLog.debugLog("UpdateProcessorFilesWorker.run: start nodes update for processor " + m_sProcessorId);
 		
 		for (Node oNode : m_aoNodes) {
 			
@@ -77,15 +77,15 @@ public class UpdateProcessorFilesWorker extends Thread {
 				Map<String, String> asHeaders = new HashMap<String, String>();
 				asHeaders.put("x-session-token", m_sSessionId);
 				
-				Utils.debugLog("UpdateProcessorFilesWorker.run: calling url: " + sUrl);
+				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: calling url: " + sUrl);
 				
 				HttpUtils.httpPostFile(sUrl, m_sFilePath, asHeaders);
 				
-				Utils.debugLog("UpdateProcessorFilesWorker.run: node updated " + oNode.getNodeCode());
+				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: node updated " + oNode.getNodeCode());
 				
 			}
 			catch (Exception oEx) {
-				Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
+				WasdiLog.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
 			}
 		}
 		
@@ -95,18 +95,18 @@ public class UpdateProcessorFilesWorker extends Thread {
 			
 			if (oZipFile.getName().toUpperCase().endsWith(".ZIP")) {
 				try {
-					Utils.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
+					WasdiLog.debugLog("UpdateProcessorFilesWorker.run: deleting zip file ");
 					if (!oZipFile.delete()) {
-						Utils.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
+						WasdiLog.debugLog("UpdateProcessorFilesWorker.run: error deleting zip file ");
 					}
 				}
 				catch (Exception oEx) {
-					Utils.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
+					WasdiLog.debugLog("UpdateProcessorFilesWorker.run: Exception " + oEx.toString());
 				}
 			}			
 		}
 		
-		Utils.debugLog("UpdateProcessorFilesWorker.run: distribuited update done");
+		WasdiLog.debugLog("UpdateProcessorFilesWorker.run: distribuited update done");
 	}
 
 }

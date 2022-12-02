@@ -14,6 +14,7 @@ import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class UserResourcePermissionRepository extends MongoRepository {
 
@@ -210,7 +211,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.getPermissionByUserIdAndResourceId( " + sUserId + ", "
+			WasdiLog.debugLog("UserResourcePermissionRepository.getPermissionByUserIdAndResourceId( " + sUserId + ", "
 					+ sResourceId + "): error: " + oE);
 		}
 
@@ -236,7 +237,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId( " + sUserId
+			WasdiLog.debugLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId( " + sUserId
 					+ ", " + sResourceId + "): error: " + oE);
 		}
 
@@ -272,7 +273,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.getPermissionsByTypeAndUserIdAndResourceId( " + sUserId
+			WasdiLog.debugLog("UserResourcePermissionRepository.getPermissionsByTypeAndUserIdAndResourceId( " + sUserId
 					+ ", " + sResourceId + "): error: " + oE);
 		}
 
@@ -566,7 +567,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.isResourceSharedWithUser( " + sUserId + ", "
+			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceSharedWithUser( " + sUserId + ", "
 					+ sResourceId + "): error: " + oE);
 		}
 
@@ -584,7 +585,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			Utils.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType
+			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType
 					+ ", " + sUserId + ", " + sResourceId + "): error: " + oE);
 		}
 

@@ -10,6 +10,7 @@ import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -166,7 +167,7 @@ public abstract class QueryExecutor {
 			return "";					
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutor.getUriFromProductName: exception " + oEx.toString());
 		}
 		
 		return "";
@@ -216,7 +217,7 @@ public abstract class QueryExecutor {
 	}
 
 	protected String standardHttpGETQuery(String sUrl) {
-		Utils.debugLog("QueryExecutor.standardHttpGETQuery start");
+		WasdiLog.debugLog("QueryExecutor.standardHttpGETQuery start");
 
 		HashMap<String, String> asHeaders = new HashMap<String, String>();
 
@@ -227,7 +228,7 @@ public abstract class QueryExecutor {
 					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 					asHeaders.put("Authorization", sBasicAuth);
 				} catch (UnsupportedEncodingException oE) {
-					Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
+					WasdiLog.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
 				}
 			}
 		}
@@ -242,7 +243,7 @@ public abstract class QueryExecutor {
 	}
 	
 	protected String standardHttpPOSTQuery(String sUrl, String sPayload) {
-		Utils.debugLog("QueryExecutor.standardHttpPOSTQuery( " + sUrl + " )");
+		WasdiLog.debugLog("QueryExecutor.standardHttpPOSTQuery( " + sUrl + " )");
 
 		HashMap<String, String> asHeaders = new HashMap<String, String>();
 		asHeaders.put("Content-Type", "application/xml");
@@ -254,7 +255,7 @@ public abstract class QueryExecutor {
 					String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 					asHeaders.put("Authorization", sBasicAuth);
 				} catch (UnsupportedEncodingException oE) {
-					Utils.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
+					WasdiLog.debugLog("QueryExecutor.standardHttpGETQuery: " + oE);
 				}
 			}
 		}

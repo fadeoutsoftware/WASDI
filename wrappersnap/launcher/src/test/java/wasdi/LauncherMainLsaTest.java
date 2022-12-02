@@ -13,7 +13,7 @@ import org.junit.runners.MethodSorters;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -33,7 +33,7 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 	@BeforeClass
     public static void setUp() throws Exception {
 		s_sClassName = "LauncherMainLsaTest";
-		Utils.debugLog(s_sClassName + ".setUp");
+		WasdiLog.debugLog(s_sClassName + ".setUp");
 		
 		m_oLSAConfig = WasdiConfig.Current.getDataProviderConfig("LSA");
 
@@ -149,8 +149,8 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 	private String parseHttpsUrlToFilePath(String sHttpsURL) {
 		String filesystemPath = m_sProviderBasePath + sHttpsURL.replace(m_sProviderUrlDomain, "");
 
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
-		Utils.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+		WasdiLog.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: HTTPS URL: " + sHttpsURL);
+		WasdiLog.debugLog(s_sClassName + ".extractFilePathFromHttpsUrl: file path: " + filesystemPath);
 
 		return filesystemPath;
 	}

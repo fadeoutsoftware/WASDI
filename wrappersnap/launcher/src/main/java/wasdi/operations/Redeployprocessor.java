@@ -1,6 +1,5 @@
 package wasdi.operations;
 
-import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
@@ -12,21 +11,22 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Redeployprocessor extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 		
-		m_oLocalLogger.debug("Redeployprocessor.executeOperation");
+		WasdiLog.debugLog("Redeployprocessor.executeOperation");
 		
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 		
@@ -43,14 +43,14 @@ public class Redeployprocessor extends Operation {
 
             // Check processor
             if (oProcessor == null) {
-                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: oProcessor is null [" + sProcessorId + "]");
+                WasdiLog.errorLog("Redeployprocessor.executeOperation: oProcessor is null [" + sProcessorId + "]");
                 return false;
             }
 
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
-                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
+                WasdiLog.errorLog("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
                 return true;	        	
 	        }
 	        
@@ -101,13 +101,13 @@ public class Redeployprocessor extends Operation {
 	        	
 	        }
 	        catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Redeployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
+				WasdiLog.errorLog("Redeployprocessor.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
             
             return bRet;	        
 		}
 		catch (Exception oEx) {
-			m_oLocalLogger.error("Redeployprocessor.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Redeployprocessor.executeOperation: exception", oEx);
 		}
 		
 		return false;        

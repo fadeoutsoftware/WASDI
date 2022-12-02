@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.LauncherMain;
-import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.CondaPackageManagerImpl;
+import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CondaProcessorEngine extends DockerProcessorEngine {
 	
@@ -43,21 +44,21 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 		super.onAfterUnzipProcessor(sProcessorFolder);
 		
 		try {
-			LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: adjust env.yml");
+			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: adjust env.yml");
 			
 			// Check the pip file
 			File oEnvFile = new File(sProcessorFolder+"env.yml");
 			
 			if (!oEnvFile.exists()) {
-				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: env file not present, done");
+				WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: env file not present, done");
 				return;
 			}
 						
 			String sEnvFileEncoding = UniversalDetector.detectCharset(oEnvFile);
 			if (sEnvFileEncoding != null) {
-				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: detected encoding " + sEnvFileEncoding);
+				WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: detected encoding " + sEnvFileEncoding);
 			} else {
-				LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: no encoding detected");
+				WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: no encoding detected");
 				sEnvFileEncoding = StandardCharsets.UTF_8.toString();
 			}			
 			
@@ -74,7 +75,7 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 			    }
 			}
 			
-			LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: writing new env.yml file");
+			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: writing new env.yml file");
 			
 			FileOutputStream oNewEnvFile = new FileOutputStream(oEnvFile);
 			 
@@ -85,11 +86,11 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 				String sRow = asEnvRows.get(iRows);
 								
 				if (sRow.contains("name: ")) {
-					LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: changing name");
+					WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing name");
 					sRow = "name: base";
 				}
 				else if (sRow.startsWith("prefix:")) {
-					LauncherMain.s_oLogger.info("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
+					WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
 					sRow = "prefix: /home/tomcat/miniconda";
 				}
 								
@@ -102,7 +103,7 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 			oNewEnvFile.close();			
 		}
 		catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("CondaProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
+			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
 		}		
 	}
 	

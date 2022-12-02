@@ -11,28 +11,27 @@ import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
-import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Environmentupdate extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		m_oLocalLogger.debug("Environmentupdate.executeOperation");
+		WasdiLog.debugLog("Environmentupdate.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -48,7 +47,7 @@ public class Environmentupdate extends Operation {
 
 			// Check processor
 			if (oProcessor == null) {
-				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: oProcessor is null [" + sProcessorId + "]");
+				WasdiLog.errorLog("Environmentupdate.executeOperation: oProcessor is null [" + sProcessorId + "]");
 				return false;
 			}
 						
@@ -58,7 +57,7 @@ public class Environmentupdate extends Operation {
 			
 			// If we are not on node, nothing to do
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
-                LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
+                WasdiLog.errorLog("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
                 return true;	        	
 	        }
 	        
@@ -69,7 +68,7 @@ public class Environmentupdate extends Operation {
 				// Should really not happen. But we love safe programming
 				sProcessorName = oProcessor.getProcessorId();
 				
-				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: The processor does not have a name, we use Id " + sProcessorName);
+				WasdiLog.errorLog("Environmentupdate.executeOperation: The processor does not have a name, we use Id " + sProcessorName);
 			}	        
 	        
 			oEngine.setSendToRabbit(m_oSendToRabbit);
@@ -81,7 +80,7 @@ public class Environmentupdate extends Operation {
 			boolean bRet = oEngine.environmentUpdate(oParameter);
 			
 			if (bRet) {
-				LauncherMain.s_oLogger.info("Environmentupdate.executeOperation: update done with success");
+				WasdiLog.infoLog("Environmentupdate.executeOperation: update done with success");
 				
 				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
 				
@@ -102,7 +101,7 @@ public class Environmentupdate extends Operation {
 					Object oUpdateCommand = oJsonItem.get("updateCommand");
 
 					if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
-						LauncherMain.s_oLogger.debug("Environmentupdate.executeOperation: refresh of the list of libraries.");
+						WasdiLog.debugLog("Environmentupdate.executeOperation: refresh of the list of libraries.");
 					} else {
 						String sUpdateCommand = (String) oUpdateCommand;
 					
@@ -118,7 +117,7 @@ public class Environmentupdate extends Operation {
 				}
 			}
 			else {
-				LauncherMain.s_oLogger.error("Environmentupdate.executeOperation: we got an error updating the environment");
+				WasdiLog.errorLog("Environmentupdate.executeOperation: we got an error updating the environment");
 			}
 
 			try {
@@ -141,12 +140,12 @@ public class Environmentupdate extends Operation {
 				}							
 
 			} catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
+				WasdiLog.errorLog("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
 
 			return bRet;
 		} catch (Exception oEx) {
-			m_oLocalLogger.error("Environmentupdate.executeOperation: exception", oEx);
+			WasdiLog.errorLog("Environmentupdate.executeOperation: exception", oEx);
 		}
 
 		return false;

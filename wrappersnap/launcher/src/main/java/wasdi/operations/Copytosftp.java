@@ -11,6 +11,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Copy to SFTP Operation.
@@ -33,15 +34,15 @@ public class Copytosftp extends Operation {
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-        m_oLocalLogger.debug("Copytosftp.executeOperation");
+        WasdiLog.debugLog("Copytosftp.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			WasdiLog.errorLog("Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Process Workspace is null");
+			WasdiLog.errorLog("Process Workspace is null");
 			return false;
 		}
 
@@ -56,7 +57,7 @@ public class Copytosftp extends Operation {
             // It must exists and be readable
             if (!oFileToMovePath.canRead()) {
                 String sMsg = "Copytosftp.executeOperation: ERROR: unable to access file to Move " + oFileToMovePath.getAbsolutePath();
-                m_oLocalLogger.error(sMsg);
+                WasdiLog.errorLog(sMsg);
                 
                 return false;
             }
@@ -111,7 +112,7 @@ public class Copytosftp extends Operation {
             }
 
             if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
-                m_oLocalLogger.error("Copytosftp.executeOperation: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+                WasdiLog.errorLog("Copytosftp.executeOperation: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
                 return false;
             }
 
@@ -119,10 +120,10 @@ public class Copytosftp extends Operation {
 
             // copy file to workspace directory
             if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
-                m_oLocalLogger.debug("Copytosftp.executeOperation: File in another folder make a copy");
+                WasdiLog.debugLog("Copytosftp.executeOperation: File in another folder make a copy");
                 FileUtils.copyFileToDirectory(oFileToMovePath, oDstDir);
             } else {
-                m_oLocalLogger.debug("Copytosftp.executeOperation: File already in place");
+                WasdiLog.debugLog("Copytosftp.executeOperation: File already in place");
             }
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -131,10 +132,10 @@ public class Copytosftp extends Operation {
 
         } catch (Throwable e) {
         	
-            m_oLocalLogger.error("Copytosftp.executeOperation: ERROR: Throwable occurrend moving the file to sftp server");
+            WasdiLog.errorLog("Copytosftp.executeOperation: ERROR: Throwable occurrend moving the file to sftp server");
             
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
-            m_oLocalLogger.error("Copytosftp.executeOperation: " + sError);
+            WasdiLog.errorLog("Copytosftp.executeOperation: " + sError);
 
             oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.COPYTOSFTP.name(), oParam.getWorkspace(), sError, oParam.getExchange());

@@ -22,24 +22,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * @author c.nattero
  *
  */
 public class WasdiFileUtils {
-
-	/**
-	 * Static logger reference
-	 */
-	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(WasdiFileUtils.class));
 	
 	static List<String> asShapeFileExtensions;
 	static{
@@ -74,7 +69,7 @@ public class WasdiFileUtils {
 	 */
 	public static String getFileNameWithoutExtensionsAndTrailingDots(String sInputFile) {
 			if(Utils.isNullOrEmpty(sInputFile)) {
-				Utils.debugLog("Utils.GetFileNameExtension: input null or empty");
+				WasdiLog.debugLog("Utils.GetFileNameExtension: input null or empty");
 				return sInputFile;
 			}
 			String sReturn = sInputFile;
@@ -109,9 +104,9 @@ public class WasdiFileUtils {
 			JSONTokener oTokener = new JSONTokener(oReader);
 			oJson = new JSONObject(oTokener);
 		} catch (FileNotFoundException oFnf) {
-			s_oLogger.error("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
+			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: file " + sFileFullPath + " was not found: " + oFnf);
 		} catch (Exception oE) {
-			s_oLogger.error("WasdiFileUtils.loadJsonFromFile: " + oE);
+			WasdiLog.errorLog("WasdiFileUtils.loadJsonFromFile: " + oE);
 		}
 		return oJson;
 	}
@@ -151,7 +146,7 @@ public class WasdiFileUtils {
 	 */
 	public static boolean fileExists(File oFile) {
 		if (oFile == null) {
-			s_oLogger.error("WasdiFileUtils.doesFileExist: file is null");
+			WasdiLog.errorLog("WasdiFileUtils.doesFileExist: file is null");
 			return false;
 		}
 
@@ -165,7 +160,7 @@ public class WasdiFileUtils {
 	 */
 	public static boolean fileExists(String sFileFullPath) {
 		if (sFileFullPath == null) {
-			s_oLogger.error("WasdiFileUtils.doesFileExist: filePath is null");
+			WasdiLog.errorLog("WasdiFileUtils.doesFileExist: filePath is null");
 			return false;
 		}
 
@@ -182,12 +177,12 @@ public class WasdiFileUtils {
 	 */
 	public static boolean filesAreTheSame(File oFile1, File oFile2) {
 		if (!fileExists(oFile1)) {
-			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file1 does not exist");
+			WasdiLog.debugLog("WasdiLog.debugLog | WasdiFileUtils.filesAreTheSame: file1 does not exist");
 			return false;
 		}
 
 		if (!fileExists(oFile2)) {
-			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file2 does not exist");
+			WasdiLog.debugLog("WasdiLog.debugLog | WasdiFileUtils.filesAreTheSame: file2 does not exist");
 			return false;
 		}
 
@@ -197,8 +192,7 @@ public class WasdiFileUtils {
 			return lFile1Checksum == lFile2Checksum;
 			
 		} catch (IOException e) {
-			s_oLogger.error("s_oLogger.error | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
-			Utils.debugLog("Utils.debugLog | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
+			WasdiLog.errorLog("WasdiLog.errorLog | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
 
 			return false;
 		}
@@ -263,7 +257,7 @@ public class WasdiFileUtils {
 	public static boolean writeFile(String sContent, File oFile, boolean bAppend) throws FileNotFoundException, IOException {
 
 		if (sContent == null) {
-			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
+			WasdiLog.errorLog("WasdiFileUtils.writeFile: sContent is null");
 			return false;
 		}
 
@@ -291,13 +285,13 @@ public class WasdiFileUtils {
 	public static boolean writeFile(String sContent, String sFileFullPath) throws FileNotFoundException, IOException {
 
 		if (sContent == null) {
-			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
+			WasdiLog.errorLog("WasdiFileUtils.writeFile: sContent is null");
 
 			return false;
 		}
 
 		if (Utils.isNullOrEmpty(sFileFullPath)) {
-			s_oLogger.error("WasdiFileUtils.writeFile: sFileFullPath is null");
+			WasdiLog.errorLog("WasdiFileUtils.writeFile: sFileFullPath is null");
 
 			return false;
 		}
@@ -310,13 +304,13 @@ public class WasdiFileUtils {
 	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
 
 		if (aoJSONMap == null) {
-			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
+			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");
 
 			return false;
 		}
 
 		if (Utils.isNullOrEmpty(sFileFullPath)) {
-			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
+			WasdiLog.errorLog("WasdiFileUtils.writeMapAsJsonFile: sFileFullPath is null");
 
 			return false;
 		}
@@ -334,18 +328,18 @@ public class WasdiFileUtils {
 	 */
 	public static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
 		if (sourcePath == null) {
-			s_oLogger.error("WasdiFileUtils.moveFile: sourcePath is null");
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourcePath is null");
 			return false;
 		}
 
 		if (destinationDirectoryPath == null) {
-			s_oLogger.error("WasdiFileUtils.moveFile: destinationDirectoryPath is null");
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: destinationDirectoryPath is null");
 			return false;
 		}
 
 		File sourceFile = new File(sourcePath);
 		if (!fileExists(sourceFile)) {
-			s_oLogger.error("WasdiFileUtils.moveFile: sourceFile does not exist");
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourceFile does not exist");
 			return false;
 		}
 
@@ -370,18 +364,18 @@ public class WasdiFileUtils {
 
 	public static String renameFile(String sOldFileFullName, String sNewFileSimpleName) {
 		if (sOldFileFullName == null) {
-			s_oLogger.error("WasdiFileUtils.renameFile: sSourceAbsoluteFullName is null");
+			WasdiLog.errorLog("WasdiFileUtils.renameFile: sSourceAbsoluteFullName is null");
 			return null;
 		}
 
 		if (sNewFileSimpleName == null) {
-			s_oLogger.error("WasdiFileUtils.renameFile: sNewFileName is null");
+			WasdiLog.errorLog("WasdiFileUtils.renameFile: sNewFileName is null");
 			return null;
 		}
 
 		File oSourceFile = new File(sOldFileFullName);
 		if (!fileExists(oSourceFile)) {
-			s_oLogger.error("WasdiFileUtils.renameFile: sourceFile does not exist");
+			WasdiLog.errorLog("WasdiFileUtils.renameFile: sourceFile does not exist");
 			return null;
 		}
 
@@ -398,10 +392,10 @@ public class WasdiFileUtils {
 	 */
 	public static boolean deleteFile(String sFileFullPath) {
 		if (sFileFullPath == null) {
-			s_oLogger.error("WasdiFileUtils.deleteFile: filePath is null");
+			WasdiLog.errorLog("WasdiFileUtils.deleteFile: filePath is null");
 			return false;
 		} else if (!fileExists(sFileFullPath)) {
-			s_oLogger.error("WasdiFileUtils.deleteFile: file does not exist: " + sFileFullPath);
+			WasdiLog.errorLog("WasdiFileUtils.deleteFile: file does not exist: " + sFileFullPath);
 			return false;
 		}
 
@@ -437,20 +431,20 @@ public class WasdiFileUtils {
 	 */
 	public static String fileToText(String sFilePath) {
 		if (sFilePath == null) {
-			s_oLogger.error("WasdiFileUtils.fileToText: filePath is null");
+			WasdiLog.errorLog("WasdiFileUtils.fileToText: filePath is null");
 			return null;
 		}
 
 		File file = new File(sFilePath);
 		if (!fileExists(file)) {
-			s_oLogger.error("WasdiFileUtils.fileToText: file does not exist");
+			WasdiLog.errorLog("WasdiFileUtils.fileToText: file does not exist");
 			return null;
 		}
 
 		try {
 			return new String(Files.readAllBytes(Paths.get(sFilePath)));
 		} catch (IOException e) {
-			s_oLogger.error("WasdiFileUtils.fileToText: cannot read file");
+			WasdiLog.errorLog("WasdiFileUtils.fileToText: cannot read file");
 			return null;
 		}
 	}
@@ -463,7 +457,7 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isHelpFile(File oFile) {
 		if (!fileExists(oFile)) {
-			s_oLogger.error("WasdiFileUtils.isHelpFile: file is null");
+			WasdiLog.errorLog("WasdiFileUtils.isHelpFile: file is null");
 			return false;
 		}
 
@@ -478,13 +472,13 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isHelpFile(String sFileName) {
 		if (sFileName == null) {
-			s_oLogger.error("WasdiFileUtils.isHelpFile: fileName is null");
+			WasdiLog.errorLog("WasdiFileUtils.isHelpFile: fileName is null");
 			return false;
 		}
 
 		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
 		if (asTokens.length != 2) {
-			s_oLogger.error("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
+			WasdiLog.errorLog("WasdiFileUtils.isHelpFile: " + sFileName + " is not a help file-name");
 			return false;
 		}
 
@@ -503,7 +497,7 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isPackagesInfoFile(File oFile) {
 		if (!fileExists(oFile)) {
-			s_oLogger.error("WasdiFileUtils.isPackagesInfoFile: file is null");
+			WasdiLog.errorLog("WasdiFileUtils.isPackagesInfoFile: file is null");
 			return false;
 		}
 
@@ -518,13 +512,13 @@ public class WasdiFileUtils {
 	 */
 	public static boolean isPackagesInfoFile(String sFileName) {
 		if (sFileName == null) {
-			s_oLogger.error("WasdiFileUtils.isPackagesInfoFile: fileName is null");
+			WasdiLog.errorLog("WasdiFileUtils.isPackagesInfoFile: fileName is null");
 			return false;
 		}
 
 		String[] asTokens = sFileName.split("\\.(?=[^\\.]+$)");
 		if (asTokens.length != 2) {
-			s_oLogger.debug("WasdiFileUtils.isPackagesInfoFile: " + sFileName + " is not a packagesInfo file-name");
+			WasdiLog.debugLog("WasdiFileUtils.isPackagesInfoFile: " + sFileName + " is not a packagesInfo file-name");
 			return false;
 		}
 
@@ -551,7 +545,7 @@ public class WasdiFileUtils {
 				}
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isShapeFile( String ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isShapeFile( String ): " + oE);
 		}
 		return false;
 	}
@@ -563,7 +557,7 @@ public class WasdiFileUtils {
 			}
 			return isShapeFile(oFile.getName());
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isShapeFile( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isShapeFile( File ): " + oE);
 		}
 		return false;
 	}
@@ -581,7 +575,7 @@ public class WasdiFileUtils {
 			}
 			
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel5PFile( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel5PFile( File ): " + oE);
 		}
 		return false;
 	}
@@ -600,7 +594,7 @@ public class WasdiFileUtils {
 			}
 			
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isGpmZipFile( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isGpmZipFile( File ): " + oE);
 		}
 
 		return false;
@@ -615,7 +609,7 @@ public class WasdiFileUtils {
 				return true;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
 		}
 		return false;
 	}
@@ -627,7 +621,7 @@ public class WasdiFileUtils {
 			}
 			return isSentinel3ZippedFile(oFile.getName());
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
 		}
 		return false;
 	}
@@ -641,7 +635,7 @@ public class WasdiFileUtils {
 				return true;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
 		}
 		return false;
 	}
@@ -653,7 +647,7 @@ public class WasdiFileUtils {
 			}
 			return isSentinel3Name(oFile.getName());
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
 		}
 		return false;
 	}
@@ -667,7 +661,7 @@ public class WasdiFileUtils {
 				return true;
 			}
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( String): " + oE);
 		}
 		return false;
 	}
@@ -679,7 +673,7 @@ public class WasdiFileUtils {
 			}
 			return isSentinel3Directory(oFile.getName());
 		} catch (Exception oE) {
-			Utils.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isSentinel3File( File ): " + oE);
 		}
 		return false;
 	}
@@ -753,7 +747,7 @@ public class WasdiFileUtils {
 			return null;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("WasdiFileUtils.getPlatformFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getPlatformFromFileName: exception " + oEx.toString());
 		}
 		
 		return null;
@@ -815,7 +809,7 @@ public class WasdiFileUtils {
 			// For CMEMS, ERA5 are Not relevant 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
 		}
 		
 		return new Date();
@@ -857,7 +851,7 @@ public class WasdiFileUtils {
 			// For Others are Not relevant 
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiFileUtils.getDateFromFileName: exception " + oEx.toString());
 		}
 		
 		return "";

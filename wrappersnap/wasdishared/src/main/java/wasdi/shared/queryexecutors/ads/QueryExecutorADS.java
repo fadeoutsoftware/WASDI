@@ -15,6 +15,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -73,7 +74,7 @@ public class QueryExecutorADS extends QueryExecutor {
 			return 1;
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorADS.executeCount: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorADS.executeCount: error " + oEx.toString());
 		}
 		
 		return -1;
@@ -137,7 +138,7 @@ public class QueryExecutorADS extends QueryExecutor {
 			return aoResults;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("QueryExecutorADS.executeAndRetrieve: error " + oEx.toString());
+			WasdiLog.debugLog("QueryExecutorADS.executeAndRetrieve: error " + oEx.toString());
 		}
 		
 		return null;
@@ -156,7 +157,7 @@ public class QueryExecutorADS extends QueryExecutor {
 		try {
 			sPayload = s_oMapper.writeValueAsString(aoPayload);
 		} catch (Exception oE) {
-			Utils.debugLog("QueryExecutorADS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
+			WasdiLog.debugLog("QueryExecutorADS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
 		}
 
 		return sPayload;

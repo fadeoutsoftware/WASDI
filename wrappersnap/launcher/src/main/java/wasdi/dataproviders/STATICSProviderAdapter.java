@@ -2,18 +2,13 @@ package wasdi.dataproviders;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.LoggerWrapper;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class STATICSProviderAdapter extends ProviderAdapter {
 	
 	public STATICSProviderAdapter() {
 		super();
-		m_sDataProviderCode = "STATICS";
-	}
-
-	public STATICSProviderAdapter(LoggerWrapper logger) {
-		super(logger);
 		m_sDataProviderCode = "STATICS";
 	}
 	
@@ -37,7 +32,7 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	public String executeDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
-		m_oLogger.debug("STATICSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
+		WasdiLog.debugLog("STATICSProviderAdapter.executeDownloadFile: try to get " + sFileURL);
 		
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 		
@@ -65,12 +60,12 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	    	sUrl += "&subset=Long(" + asBboxParts[0] + "," + asBboxParts[2] +")";
 	    	sUrl += "&FORMAT=image/tiff;application=geotiff&GEOTIFF:COMPRESSION=LZW";
 	    	
-	    	m_oLogger.debug("STATICSProviderAdapter.executeDownloadFile: Generated URL: " + sUrl);
+	    	WasdiLog.debugLog("STATICSProviderAdapter.executeDownloadFile: Generated URL: " + sUrl);
 	    	
 	    	return downloadViaHttp(sUrl, sDownloadUser, sDownloadPassword, sSaveDirOnServer, sOutputFileName);			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("STATICSProviderAdapter.executeDownloadFile: exception: " + oEx.toString());
+			WasdiLog.debugLog("STATICSProviderAdapter.executeDownloadFile: exception: " + oEx.toString());
 		}
 		
 		return "";
@@ -86,7 +81,7 @@ public class STATICSProviderAdapter extends ProviderAdapter {
 	    	return sOutputFileName;			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("STATICSProviderAdapter.getFileName: exception: " + oEx.toString());
+			WasdiLog.debugLog("STATICSProviderAdapter.getFileName: exception: " + oEx.toString());
 		}
 		
 		return "";

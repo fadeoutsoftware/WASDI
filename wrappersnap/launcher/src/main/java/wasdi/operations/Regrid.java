@@ -14,21 +14,22 @@ import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.settings.RegridSetting;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class Regrid extends Operation {
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
 
-		m_oLocalLogger.debug("Regrid.executeOperation");
+		WasdiLog.debugLog("Regrid.executeOperation");
         
 		if (oParam == null) {
-			m_oLocalLogger.error("Regrid.executeOperation: Parameter is null");
+			WasdiLog.errorLog("Regrid.executeOperation: Parameter is null");
 			return false;
 		}
 		
 		if (oProcessWorkspace == null) {
-			m_oLocalLogger.error("Regrid.executeOperation: Process Workspace is null");
+			WasdiLog.errorLog("Regrid.executeOperation: Process Workspace is null");
 			return false;
 		}        
         
@@ -49,7 +50,7 @@ public class Regrid extends Operation {
 			GdalInfoResult oGdalInfoResult = GdalUtils.getGdalInfoResult(oReferenceFile);
 			
 			if (oGdalInfoResult == null) {
-				m_oLocalLogger.error("Regrid.executeOperation: impossible to get images gdal info");
+				WasdiLog.errorLog("Regrid.executeOperation: impossible to get images gdal info");
 				m_oProcessWorkspaceLogger.log("Impossible to get reference image info, sorry");
 				return false;				
 			}            
@@ -109,7 +110,7 @@ public class Regrid extends Operation {
                 sCommand += sArg + " ";
             }
 
-            m_oLocalLogger.debug("Regrid.executeOperation: Command Line " + sCommand);
+            WasdiLog.debugLog("Regrid.executeOperation: Command Line " + sCommand);
 
             oProcess = oProcessBuidler.start();
 
@@ -129,7 +130,7 @@ public class Regrid extends Operation {
             
             return true;
         } catch (Exception oEx) {
-            m_oLocalLogger.error("Regrid.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("Regrid.executeOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             
             String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
             

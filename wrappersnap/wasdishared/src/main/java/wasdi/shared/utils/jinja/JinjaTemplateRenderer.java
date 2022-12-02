@@ -4,8 +4,8 @@ import java.util.Map;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.RunTimeUtils;
-import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * Utility class to translate a Jinja Template in a valorized file
@@ -59,7 +59,7 @@ public class JinjaTemplateRenderer {
 			return bRet;			
 		}
 		catch (Exception oEx) {
-			Utils.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
 		}
 		
 		return false;

@@ -12,7 +12,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -29,6 +28,7 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -191,7 +191,7 @@ public class Utils {
 		try {
 			return SIMPLE_DATE_FORMAT_yyyyMMdd.get().parse(sDate);
 		} catch (ParseException oE) {
-			Utils.debugLog("Utils.getYyyyMMddDate( " + sDate + "  ): could not be parsed due to " + oE);
+			WasdiLog.debugLog("Utils.getYyyyMMddDate( " + sDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
@@ -201,7 +201,7 @@ public class Utils {
 		try {
 			return SIMPLE_DATE_FORMAT_yyyyMMddTZ.get().parse(sDate);
 		} catch (ParseException oE) {
-			Utils.debugLog("Utils.getYyyyMMddTZDate( " + sDate + "  ): could not be parsed due to " + oE);
+			WasdiLog.debugLog("Utils.getYyyyMMddTZDate( " + sDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
@@ -322,7 +322,7 @@ public class Utils {
 
 	        return false;
 	    } catch (Exception oEx) {
-	    	Utils.debugLog("Got exception using system command [{}] " + sCommand);
+	    	WasdiLog.debugLog("Got exception using system command [{}] " + sCommand);
 	        return true;
 	    }
 	}
@@ -381,7 +381,7 @@ public class Utils {
 			String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
 			asAreaPoints = sCleanedArea.split(",");
 		} catch (Exception oE) {
-			Utils.debugLog("Utils.convertPolygonToArray( " + sArea + "  ): could not extract area points due to " + oE); 
+			WasdiLog.debugLog("Utils.convertPolygonToArray( " + sArea + "  ): could not extract area points due to " + oE); 
 		}
 		return asAreaPoints;
 	}
@@ -437,33 +437,6 @@ public class Utils {
 
 	}
 	
-	//////////////////////// All about log
-	
-
-	public static void debugLog(int iValue) {
-		debugLog("" + iValue);
-	}
-	
-	/**
-	 * Debug Log
-	 * 
-	 * @param sMessage
-	 */
-	public static void debugLog(String sMessage) {
-		log("", sMessage);
-	}
-	
-	public static void log(String sLevel, String sMessage) {
-		String sPrefix = "";
-		if(!Utils.isNullOrEmpty(sLevel)) {
-			sPrefix = "[" + sLevel + "] ";
-		}
-		LocalDateTime oNow = LocalDateTime.now();
-		System.out.println( sPrefix + oNow + ": " + sMessage);
-	}
-	
-	///////// end log
-	
 	
 	
 	///////// units conversion
@@ -475,7 +448,7 @@ public class Utils {
 				return getNormalizedSize(dSize, i);
 			}
 		}
-		Utils.log("WARNING", "Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
+		WasdiLog.log("WARNING", "Utils.getNormalizedSize( " + dSize + ", " + sInputUnit + " ): could not find requested unit");
 		return "";
 	}
 	
