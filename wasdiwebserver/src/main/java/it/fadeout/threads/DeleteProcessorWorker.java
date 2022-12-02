@@ -39,6 +39,10 @@ public class DeleteProcessorWorker extends Thread  {
 	 * Processor Type
 	 */
 	String m_sProcessorType;
+	/**
+	 * Version
+	 */
+	String m_sVersion;
 	
 	/**
 	 * Initializes the thread members' varialbes.
@@ -49,13 +53,14 @@ public class DeleteProcessorWorker extends Thread  {
 	 * @param sProcessorName Processor Name
 	 * @param sProcessorType Processor Type
 	 */
-	public void init(List<Node> aoNodes, String sSessionId, String sWorkspaceId, String sProcessorId, String sProcessorName, String sProcessorType) {
+	public void init(List<Node> aoNodes, String sSessionId, String sWorkspaceId, String sProcessorId, String sProcessorName, String sProcessorType, String sVersion) {
 		m_aoNodes = aoNodes;
 		m_sSessionId = sSessionId;
 		m_sWorkspaceId = sWorkspaceId;
 		m_sProcessorId = sProcessorId;
 		m_sProcessorName = sProcessorName;
 		m_sProcessorType = sProcessorType;
+		m_sVersion = sVersion;
 	}
 	
 	/**
@@ -86,7 +91,7 @@ public class DeleteProcessorWorker extends Thread  {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 				
 				// Compose the API string
-				sUrl += "processors/nodedelete?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&processorName="+m_sProcessorName+"&processorType="+m_sProcessorType;
+				sUrl += "processors/nodedelete?processorId="+m_sProcessorId+"&workspace="+m_sWorkspaceId+"&processorName="+m_sProcessorName+"&processorType="+m_sProcessorType+"&version="+m_sVersion;
 				
 				// Add the auth header
 				Map<String, String> asHeaders = new HashMap<String, String>();

@@ -12,6 +12,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
@@ -165,9 +166,16 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			// Did we used all the avaialbe options?
 			if (iAvailableRegisters<aoRegisters.size()) {
+				
 				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
 				oPushDockerImagesThread.setProcessor(oProcessor);
-				oPushDockerImagesThread.setDockerImageName(m_sDockerImageName);
+				
+				for (int iOtherRegisters = 0; iOtherRegisters<aoRegisters.size(); iOtherRegisters++) {
+					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+				}
+				
+				WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: staring thread to push on other regitries");
+				oPushDockerImagesThread.start();
 			}
 			
 			return sPushedImageAddress;
@@ -309,6 +317,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
 		try {
+			// Login in the docker
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
@@ -316,6 +325,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				return "";
 			}
 			
+			// Push the image
 			boolean bPushed = oDockerUtils.push(sImageName);
 			
 			if (!bPushed) {
@@ -351,12 +361,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
 		
 		if (aoRegisters == null) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.delete: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.delete: registers list is empty, return false.");
 			return false;			
 		}
 
@@ -402,6 +412,20 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// And we work with our main register
 		m_sDockerRegistry = aoRegisters.get(0).address;
 		
+		// Get Processor Name and Id
+		String sProcessorId = oParameter.getProcessorID();		
+		
+		// Read the processor from the db
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		// Increment the version of the processor
+		String sNewVersion = oProcessor.getVersion();
+		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
+		oProcessor.setVersion(sNewVersion);
+		// Save it
+		oProcessorRepository.updateProcessor(oProcessor);
+		
 		boolean bResult = super.redeploy(oParameter);
 		
 		if (!bResult) {
@@ -409,14 +433,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
-		
-		// Get Processor Name and Id
-		String sProcessorId = oParameter.getProcessorID();
-		
-		// Read the processor from the db
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-		
+						
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		

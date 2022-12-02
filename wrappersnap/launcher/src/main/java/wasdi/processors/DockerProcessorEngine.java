@@ -648,7 +648,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (oProcessor == null) {
                 processWorkspaceLog("Processor in the db is already null, try to delete docker and folder ");
                 WasdiLog.errorLog("DockerProcessorEngine.delete: oProcessor in the db is already null [" + sProcessorId + "], try to delete docker and folder");
-                //return false;
             } else {
                 if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
                     WasdiLog.errorLog("DockerProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() + "]. Exit");
@@ -667,7 +666,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
-            oDockerUtils.delete(sProcessorName, oProcessor.getVersion());
+            oDockerUtils.delete(sProcessorName, oParameter.getVersion());
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
 
