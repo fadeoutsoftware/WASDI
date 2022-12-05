@@ -4,11 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -420,7 +423,8 @@ public class DockerUtils {
             // docker ps -a | awk '{ print $1,$2 }' | grep <imagename> | awk '{print $1 }' | xargs -I {} docker rm -f {}
             // docker rmi -f <imagename>
 
-            String sDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
+            String sBaseDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
+            String sDockerName = sBaseDockerName;
             
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	sDockerName = m_sDockerRegistry + "/" + sDockerName;
@@ -468,6 +472,17 @@ public class DockerUtils {
 
             // Wait for docker to finish
             Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
+            
+            if (WasdiConfig.Current.nodeCode.equals("wasdi")) {            	
+                if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                	WasdiLog.infoLog("This is a registry stored docker: clean all our registers");
+                	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.eoepca.registers) {
+                		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
+    				}
+                }
+            }
+            
+            
         } catch (Exception oEx) {
         	WasdiLog.errorLog("DockerUtils.delete: " + oEx.toString());
             return false;
@@ -524,16 +539,7 @@ public class DockerUtils {
             asArgs.add(sServerImage);
             
             String sCommand = "docker";
-            
-			String sCommandLine = sCommand + " ";
 			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}			
-		
-			WasdiLog.debugLog("RunTimeUtils.ShellExec CommandLine: " + sCommandLine);
-
-
             RunTimeUtils.shellExec(sCommand, asArgs, true);    		
     		
     	} catch (Exception oEx) {
@@ -542,6 +548,64 @@ public class DockerUtils {
         }
     	
     	return true;
+    }
+    
+    public void removeImageFromRegistry(String sImageName, String sVersion, DockerRegistryConfig oRegistry) {
+    	try {
+    		
+    		if (sImageName.contains(":")) {
+    			sImageName = sImageName.split(":")[0];
+    			WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Image Name contains version, cleaned to " + sImageName);
+    		}
+    		
+    		// Get the layer manifest
+    		Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(oRegistry.user, oRegistry.password);
+    		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v1+json");
+    		String sUrl = oRegistry.apiAddress;
+    		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+    		sUrl += sImageName;
+    		sUrl += "/manifests/" + sVersion;
+    		
+    		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v2+json");
+    		
+    		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Get Manifest with registry url " + sUrl);
+    		
+    		Map<String, List<String>> aoOuputHeaders = new HashMap<>(); 
+    		
+    		String sManifest = HttpUtils.httpGet(sUrl, asHeaders, aoOuputHeaders);
+    		//Manifest oManifest = MongoRepository.s_oMapper.readValue(sManifest, Manifest.class);
+    		
+    		//WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: got manifest " + sManifest);
+    		
+    		String sDigest = "";
+    		
+    		if (aoOuputHeaders != null) {
+    			if (aoOuputHeaders.containsKey("Docker-Content-Digest")) {
+    				if (aoOuputHeaders.get("Docker-Content-Digest").size()>0) {
+    					sDigest = aoOuputHeaders.get("Docker-Content-Digest").get(0);
+    					WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: found digest " + sDigest);
+    				}
+    			}
+    		}
+    		
+    		if (!Utils.isNullOrEmpty(sDigest)) {
+        		sUrl = oRegistry.apiAddress;
+        		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+        		sUrl += sImageName;
+        		sUrl += "/manifests/" + sDigest;
+        		
+        		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Delete Layer with Digest " + sUrl);
+        		
+        		HttpUtils.httpDelete(sUrl, asHeaders);    			
+    		}
+    		else {
+    			WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Delete Layer digest is null, nothing to do ");
+    		}
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.removeImageFromRegistry: error " + oEx.toString());
+		}
     }
 
 }

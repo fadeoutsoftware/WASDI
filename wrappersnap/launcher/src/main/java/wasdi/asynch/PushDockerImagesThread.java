@@ -19,10 +19,6 @@ public class PushDockerImagesThread extends Thread {
 	 * Processor to push
 	 */
 	private Processor m_oProcessor;
-	/**
-	 * Docker image name
-	 */
-	private String m_sDockerImageName;
 	
 	public ArrayList<DockerRegistryConfig> getRegisters() {
 		return m_aoRegisters;
@@ -34,14 +30,6 @@ public class PushDockerImagesThread extends Thread {
 
 	public void setProcessor(Processor oProcessor) {
 		this.m_oProcessor = oProcessor;
-	}
-
-	public String getDockerImageName() {
-		return m_sDockerImageName;
-	}
-
-	public void setDockerImageName(String sDockerImageName) {
-		this.m_sDockerImageName = sDockerImageName;
 	}
 
 	@Override
@@ -62,23 +50,26 @@ public class PushDockerImagesThread extends Thread {
 					
 					DockerRegistryConfig oDockerRegistryConfig = m_aoRegisters.get(iRegisters);
 					
-					WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
+					WasdiLog.debugLog("PushDockerImagesThread.run: try to push to " + oDockerRegistryConfig.id);
+					
+					String sDockerImageName = oDockerRegistryConfig.address + "/wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
+					
 					
 					// Try to login and push
-					String sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
+					String sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sDockerImageName, sProcessorFolder);
 					
 					if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-						WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: error in the push");
+						WasdiLog.debugLog("PushDockerImagesThread.run: error in the push");
 					}
 				}
 			}
 			catch (Exception oEx) {
-				WasdiLog.errorLog("EoepcaProcessorEngine.pushImageInRegisters: error " + oEx.toString());
+				WasdiLog.errorLog("PushDockerImagesThread.run: error " + oEx.toString());
 			}
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("SaveMetadataThread.run: exception " + oEx.toString());
+			WasdiLog.errorLog("PushDockerImagesThread.run: exception " + oEx.toString());
 		}
 	}
 	
@@ -94,21 +85,21 @@ public class PushDockerImagesThread extends Thread {
 			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
+				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error logging in, return false.");
 				return "";
 			}
 			
 			boolean bPushed = oDockerUtils.push(sImageName);
 			
 			if (!bPushed) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
+				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error in push, return false.");
 				return "";				
 			}
 			
 			return sImageName;
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
+			WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: Exception " + oEx.toString());
 		}
 		
 		return "";

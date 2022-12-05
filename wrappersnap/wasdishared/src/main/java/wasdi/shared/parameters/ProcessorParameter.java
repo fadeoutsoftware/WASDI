@@ -25,6 +25,10 @@ public class ProcessorParameter extends BaseParameter {
 	 */
 	private String processorID;
 	/**
+	 * Processor Version
+	 */
+	private String version;	
+	/**
 	 * Json with the parameters
 	 */
 	private String json;
@@ -57,7 +61,12 @@ public class ProcessorParameter extends BaseParameter {
 	public void setProcessorID(String processorID) {
 		this.processorID = processorID;
 	}
-	
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
+	}	
 	
 	
 	/**
@@ -78,4 +87,5 @@ public class ProcessorParameter extends BaseParameter {
 		
 		return LauncherOperations.RUNPROCESSOR.name();
 	}
+
 }

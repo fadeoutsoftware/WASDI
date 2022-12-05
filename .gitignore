@@ -1000,3 +1000,4 @@ wrappersnap/wasdishared/src/test/java/resources/parameters.properties
 wrappersnap/wasdishared/src/test/java/resources/test.properties
 wrappersnap/wasdishared/src/test/java/resources/images/lux1.tif
 wrappersnap/wasdishared/src/test/java/resources/images/lux2.tif
+wrappersnap/launcher/src/main/java/MyMain.java

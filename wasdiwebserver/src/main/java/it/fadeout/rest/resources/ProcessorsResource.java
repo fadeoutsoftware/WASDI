@@ -1213,7 +1213,8 @@ public class ProcessorsResource  {
 			@QueryParam("processorId") String sProcessorId,
 			@QueryParam("workspace") String sWorkspaceId,
 			@QueryParam("processorName") String sProcessorName,
-			@QueryParam("processorType") String sProcessorType) {
+			@QueryParam("processorType") String sProcessorType,
+			@QueryParam("version") String sVersion) {
 		WasdiLog.debugLog("ProcessorResources.nodeDeleteProcessor( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " )");
 		
 		try {
@@ -1231,7 +1232,7 @@ public class ProcessorsResource  {
 			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
 				WasdiLog.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
-			}			
+			}
 
 			String sUserId = oUser.getUserId();
 			
@@ -1261,6 +1262,8 @@ public class ProcessorsResource  {
 				oProcessorParameter.setProcessorType(sProcessorType);
 				oProcessorParameter.setSessionID(sSessionId);
 				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+				oProcessorParameter.setVersion(sVersion);
+
 				
 				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), sProcessorName, sPath, oProcessorParameter);		
 			}
@@ -1354,7 +1357,7 @@ public class ProcessorsResource  {
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
 				
-				oDeleteWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, oProcessorToDelete.getName(), oProcessorToDelete.getType());
+				oDeleteWorker.init(aoNodes, sSessionId, sWorkspaceId, sProcessorId, oProcessorToDelete.getName(), oProcessorToDelete.getType(), oProcessorToDelete.getVersion());
 				oDeleteWorker.start();
 				
 				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: Worker started");						
@@ -1385,6 +1388,7 @@ public class ProcessorsResource  {
 				oProcessorParameter.setProcessorType(oProcessorToDelete.getType());
 				oProcessorParameter.setSessionID(sSessionId);
 				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
+				oProcessorParameter.setVersion(oProcessorToDelete.getVersion());
 				
 				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), oProcessorToDelete.getName(), sPath, oProcessorParameter);		
 			}

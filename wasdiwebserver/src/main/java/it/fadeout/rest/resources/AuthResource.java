@@ -102,7 +102,6 @@ public class AuthResource {
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel login(LoginInfo oLoginInfo) {
-		WasdiLog.debugLog("AuthResource.Login");
 
 		try {
 			// Validate inputs
