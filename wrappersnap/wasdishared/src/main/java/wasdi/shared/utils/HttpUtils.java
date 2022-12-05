@@ -830,8 +830,13 @@ public final class HttpUtils {
 		}
 	}
 	
+	/**
+	 * Read http response stream
+	 * @param oConnection Http Connection
+	 * @return
+	 */
 	public static String readHttpResponse(HttpURLConnection oConnection) {
-		return readHttpResponse(oConnection);
+		return readHttpResponse(oConnection, null);
 	}
 
 	/**

@@ -2122,8 +2122,6 @@ public class dbUtils {
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
 
             boolean bExit = false;
-            
-            testOGC();
 
             s_oScanner = new Scanner(System.in);
 
@@ -2193,27 +2191,6 @@ public class dbUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    
-    public static void testOGC() {
-    	OgcProcessesClient oAPI = new OgcProcessesClient("https://gp-ades-03.terradue.com/wasdi/wps3/");
-    	
-    	LandingPage oLandingPage = oAPI.getLandingPage();
-    	WasdiLog.debugLog(oLandingPage.toString());
-    	
-    	Conformance oConformance = oAPI.getConformance();
-    	WasdiLog.debugLog(oConformance.toString());
-    	
-    	ProcessList oProcessList = oAPI.getProcesses();
-    	
-    	for (int iProcs = 0; iProcs < oProcessList.getProcesses().size(); iProcs++) {
-    		ProcessSummary oProcSum = oProcessList.getProcesses().get(iProcs);
-    		
-    		if (oProcSum != null)  {
-    			WasdiLog.debugLog(oProcSum.getId());
-    		}
-    	}
-    	
     }
 
 	private static void ecoStress() {

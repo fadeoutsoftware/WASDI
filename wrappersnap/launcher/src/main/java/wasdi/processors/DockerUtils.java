@@ -562,9 +562,11 @@ public class DockerUtils {
     		Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(oRegistry.user, oRegistry.password);
     		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v1+json");
     		String sUrl = oRegistry.apiAddress;
-    		sUrl += "/repository/docker-wasdi-processor/v2/";
+    		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
+    		
+    		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v2+json");
     		
     		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Get Manifest with registry url " + sUrl);
     		
@@ -573,7 +575,7 @@ public class DockerUtils {
     		String sManifest = HttpUtils.httpGet(sUrl, asHeaders, aoOuputHeaders);
     		//Manifest oManifest = MongoRepository.s_oMapper.readValue(sManifest, Manifest.class);
     		
-    		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: got manifest " + sManifest);
+    		//WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: got manifest " + sManifest);
     		
     		String sDigest = "";
     		
@@ -588,9 +590,9 @@ public class DockerUtils {
     		
     		if (!Utils.isNullOrEmpty(sDigest)) {
         		sUrl = oRegistry.apiAddress;
-        		sUrl += "/repository/docker-wasdi-processor/v2/";
+        		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
         		sUrl += sImageName;
-        		sUrl += "/blobs/" + sDigest;
+        		sUrl += "/manifests/" + sDigest;
         		
         		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Delete Layer with Digest " + sUrl);
         		
