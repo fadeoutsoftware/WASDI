@@ -686,7 +686,7 @@ public class WasdiFileUtils {
 	public static String getPlatformFromSatelliteImageFileName(String sFileName) {
 		try {
 			if (Utils.isNullOrEmpty(sFileName)) return null;
-			
+
 			if (sFileName.toUpperCase().startsWith("S1A_") || sFileName.toUpperCase().startsWith("S1B_")) {
 				return Platforms.SENTINEL1;
 			}
@@ -742,6 +742,9 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toLowerCase().contains("dataset") || sFileName.toLowerCase().contains("med") || sFileName.toLowerCase().contains("global-analysis-forecast") || sFileName.toUpperCase().contains("-GLO-")) {
 				return Platforms.CM;
+			}
+			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
+				return Platforms.EARTHCACHE;
 			}
 			
 			return null;

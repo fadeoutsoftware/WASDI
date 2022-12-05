@@ -451,7 +451,8 @@ public abstract class LauncherMainTest {
 				
 				String sUser = oConfig.user;
 				String sPassword = oConfig.password;
-				oCredentials = new AuthenticationCredentials(sUser, sPassword);
+				String sApiKey = oConfig.apiKey;
+				oCredentials = new AuthenticationCredentials(sUser, sPassword, sApiKey);
 				m_aoCredentials.put(sProvider, oCredentials);
 			}
 		} catch (Exception oE) {

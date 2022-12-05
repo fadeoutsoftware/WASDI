@@ -26,6 +26,7 @@ import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
 import wasdi.shared.queryexecutors.planet.QueryExecutorPLANET;
 import wasdi.shared.queryexecutors.probav.QueryExecutorPROBAV;
 import wasdi.shared.queryexecutors.sentinelhub.QueryExecutorSENTINEL;
+import wasdi.shared.queryexecutors.skywatch.QueryExecutorSkywatch;
 import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
 import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
@@ -60,6 +61,7 @@ public class QueryExecutorFactory {
 		aoMap.put("GPM", QueryExecutorGPM::new);
 		aoMap.put("COPERNICUSMARINE", QueryExecutorCM::new);
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);
+		aoMap.put("SKYWATCH", QueryExecutorSkywatch::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
 		
@@ -156,7 +158,7 @@ public class QueryExecutorFactory {
 		try {
 			DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(sProvider);
 			
-			oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password);
+			oCredentials = new AuthenticationCredentials(oDataProviderConfig.user, oDataProviderConfig.password, oDataProviderConfig.apiKey);
 			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("QueryExecutorFactory.getCredentials( " + sProvider + " ): " + oE);
