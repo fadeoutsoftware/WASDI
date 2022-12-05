@@ -560,9 +560,9 @@ public class DockerUtils {
     		
     		// Get the layer manifest
     		Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(oRegistry.user, oRegistry.password);
-    		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v1+json");
+    		
     		String sUrl = oRegistry.apiAddress;
-    		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+    		sUrl += "/repository/docker-wasdi-processor/v2/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
     		
@@ -590,7 +590,7 @@ public class DockerUtils {
     		
     		if (!Utils.isNullOrEmpty(sDigest)) {
         		sUrl = oRegistry.apiAddress;
-        		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+        		sUrl += "/repository/docker-wasdi-processor/v2/";
         		sUrl += sImageName;
         		sUrl += "/manifests/" + sDigest;
         		
