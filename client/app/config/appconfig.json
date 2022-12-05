@@ -934,6 +934,29 @@
                     "indexvalue":""
                 }
             ]
+        },
+        {
+            "name": "Earthcache",
+            "indexname": "platformname",
+            "indexvalue": "Earthcache",
+            "filters": [
+                {
+                    "indexname": "resolution",
+                    "indexlabel": "Resolution",
+                    "indexvalues":"low|medium|high|very_high",
+                    "regex": ".*",
+                    "indexvalue":"low"
+                },
+                {
+                    "indexname": "coverage",
+                    "indexlabel": "Coverage (%)",
+                    "indexhint" : "e.g. 30.0",
+                    "indexvalues":"",
+                    "indexmin":"0",
+                    "indexmax":"100",
+                    "regex": ".*"
+                }
+            ]
         }
     ],
     "orbitsearch":{

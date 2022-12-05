@@ -36,4 +36,6 @@ public class Platforms {
 
 	public static String ECOSTRESS = "ECOSTRESS";
 
+	public static String EARTHCACHE = "Earthcache";
+
 }

@@ -132,6 +132,11 @@ public abstract class QueryTranslator {
 	private static final String s_sPLATFORMNAME_ECOSTRESS = "platformname:ECOSTRESS";
 
 	/**
+	 * Token of ERA5 platform
+	 */
+	private static final String S_SPLATFORMNAME_EARTHCACHE = "platformname:Earthcache";
+
+	/**
 	 * Token of product type
 	 */
 	private static final String s_sPRODUCTTYPE = "producttype:";
@@ -536,6 +541,9 @@ public abstract class QueryTranslator {
 
 			// Try get Info about ECOSTRESS
 			parseECOSTRESS(sQuery, oResult);
+			
+			// Try get Info about Earthcache
+			parseEarthcache(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -807,7 +815,7 @@ public abstract class QueryTranslator {
 	}
 
 	/**
-	 * Fills the Query View Model with ERA5 info
+	 * Fills the Query View Model with CAMS info
 	 * 
 	 * @param sQuery the query
 	 * @param oResult the resulting Query View Model
@@ -823,6 +831,33 @@ public abstract class QueryTranslator {
 			oResult.sensorMode = extractValue(sQuery, "variables");
 //			oResult.productLevel = extractValue(sQuery, "pressureLevels");
 			oResult.timeliness = extractValue(sQuery, "format");
+		}
+	}
+
+	/**
+	 * Fills the Query View Model with Earthcache info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseEarthcache(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_EARTHCACHE)) {
+			sQuery = removePlatformToken(sQuery, S_SPLATFORMNAME_EARTHCACHE);
+
+			oResult.platformName = Platforms.EARTHCACHE;
+
+			oResult.productType = extractValue(sQuery, "resolution");
+
+			if (sQuery.contains("coverage")) {
+				String sCoverage = extractValue(sQuery, "coverage");
+				try {
+					double dCoverage = Double.parseDouble(sCoverage);
+					oResult.cloudCoverageFrom = dCoverage;
+					oResult.cloudCoverageTo = dCoverage;
+				} catch (Exception oE) {
+					WasdiLog.debugLog("QueryTranslator.parseEarthcache( " + sQuery  + " ): error while parsing coverage: " + sCoverage);
+				}
+			}
 		}
 	}
 

@@ -62,6 +62,10 @@ public class DataProviderConfig {
 	 */
 	public String password;
 	/**
+	 * API Key of the Data Provider
+	 */
+	public String apiKey;
+	/**
 	 * Local base folder where the data archive is.
 	 * It can be used by Data Providers that allows direct file access
 	 * when the defaultProtocol is file://

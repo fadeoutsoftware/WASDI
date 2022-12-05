@@ -41,6 +41,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("GPM", GPMProviderAdapter::new);
 		aoDownloaders.put("COPERNICUSMARINE", CMProviderAdapter::new);
 		aoDownloaders.put("CLOUDFERRO", CloudferroProviderAdapter::new);
+		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

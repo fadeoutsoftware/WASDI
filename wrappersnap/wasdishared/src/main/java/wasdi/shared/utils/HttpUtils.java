@@ -427,6 +427,63 @@ public final class HttpUtils {
 
 
 
+	public static HttpCallResponse newStandardHttpDelete(String sUrl, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
+
+		String sResult = null;
+
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+			// optional default is GET
+			oConnection.setRequestMethod("DELETE");
+			oConnection.setRequestProperty("Accept", "*/*");
+
+			if (asHeaders != null) {
+				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
+					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
+				}
+			}
+
+			s_oLogger.debug("Sending 'DELETE' request to URL : " + sUrl);
+
+			try {
+				int iResponseCode = oConnection.getResponseCode();
+				s_oLogger.debug("HttpUtils.newStandardHttpDelete: Response Code : " + iResponseCode);
+
+				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+
+				if (200 <= iResponseCode && 299 >= iResponseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					if (null != oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpCallResponse.setResponseBody(sResult);
+					}
+				} else {
+					s_oLogger.debug("HttpUtils.standardHttpDelete: provider did not return 20x but "
+							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
+
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+
+					sResult = oBytearrayOutputStream.toString();
+					oHttpCallResponse.setResponseBody(sResult);
+				}
+			} catch (Exception oEint) {
+				s_oLogger.debug("HttpUtils.newStandardHttpDelete: " + oEint);
+			} finally {
+				oConnection.disconnect();
+			}
+		} catch (Exception oE) {
+			s_oLogger.debug("HttpUtils.newStandardHttpDelete: " + oE);
+		}
+
+		return oHttpCallResponse;
+	}
+
 	public static String standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
 
 		String sResult = null;
@@ -536,7 +593,7 @@ public final class HttpUtils {
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 
-				if (200 == iResponseCode) {
+				if (200 <= iResponseCode && 299 >= iResponseCode) {
 					InputStream oInputStream = oConnection.getInputStream();
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 
