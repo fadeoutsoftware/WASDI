@@ -50,13 +50,13 @@ pipeline {
 
     stage('MAVEN - BUILD') {
       steps {
-        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots clean package", label: "Create packages"
+        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots clean package", label: "Create packages"
       }
     }
 
     stage('MAVEN - EXECUTE TEST') {
       steps {
-        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --update-snapshots test", label: "Execute unit test"
+        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --define currentEnvironment=${env.targetedEnvironment} --update-snapshots test", label: "Execute unit test"
       }
     }
 
@@ -64,9 +64,9 @@ pipeline {
       steps {
         script {
           if ( env.targetedEnvironment.toLowerCase() == 'prod' ) {
-            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
           } else {
-            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
           }
         }
       }
