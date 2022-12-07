@@ -18,6 +18,7 @@ import org.jsoup.nodes.Element;
 
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CMHttpUtils {
 
@@ -304,7 +305,10 @@ public class CMHttpUtils {
 
 				if (sResponse.contains("You are registered but have forgotten your login/password?")
 						|| sResponse.contains("For security reasons, please Exit your web browser when you quit services requiring authentication!")) {
+					WasdiLog.debugLog("CMHttpUtils.callGetAndObtainResponse: " + sResponse);
 					resetCookies();
+
+					sResponse = null;
 				}
 			}
 

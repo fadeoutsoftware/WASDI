@@ -402,6 +402,12 @@ public final class HttpUtils {
 				
 				File oTargetFile = new File(sOutputFilePath);
 				File oTargetDir = oTargetFile.getParentFile();
+
+				// If the targetDir exists but it is not a directory, delete it as it prevents the creation of the actual directory
+				if (oTargetDir != null && oTargetDir.exists() && !oTargetDir.isDirectory()) {
+					oTargetDir.delete();
+				}
+
 				oTargetDir.mkdirs();
 
 
