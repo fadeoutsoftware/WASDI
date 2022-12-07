@@ -66,13 +66,23 @@ public class CMProviderAdapter extends ProviderAdapter {
 		String sLinks = m_oDataProviderConfig.link;
 		String[] asLinks = sLinks.split(" ");
 
-		for (String sDomainUrl : asLinks) {
-			String sDownloadProductResult = CMHttpUtils.downloadProduct(sService, sProduct, sQuery, sDomainUrl, m_sProviderUser, m_sProviderPassword, sSaveDirOnServer);
+		for (int iAttemp = 0; iAttemp < iMaxRetry; iAttemp ++) {
+			WasdiLog.debugLog("CMProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 
-			if (sDownloadProductResult != null) {
-				return sDownloadProductResult;
+			for (String sDomainUrl : asLinks) {
+				String sDownloadProductResult = CMHttpUtils.downloadProduct(sService, sProduct, sQuery, sDomainUrl, m_sProviderUser, m_sProviderPassword, sSaveDirOnServer);
+
+				if (sDownloadProductResult != null) {
+					return sDownloadProductResult;
+				}
+				
 			}
-			
+
+			try {
+				Thread.sleep(1_000);
+			} catch (Exception oEx) {
+				WasdiLog.debugLog("CMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+			}
 		}
 
 		return null;
