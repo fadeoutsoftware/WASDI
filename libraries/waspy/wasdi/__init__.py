@@ -61,6 +61,7 @@ import getpass
 import sys
 import os.path
 import inspect
+from datetime import datetime
 
 # Initialize "Members"
 m_sUser = None
@@ -1311,12 +1312,16 @@ def waitProcesses(asProcIdList):
 
     while not bAllDone:
 
+        oResult = None
         try:
             oResult = requests.post(sUrl, data=json.dumps(asProcIdList), headers=asHeaders, timeout=m_iRequestsTimeout)
-        except Exception as oEx:
-            wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
 
-        if (oResult is not None) and (oResult.ok is True):
+        except Exception as oEx:
+            wasdiLog("[ERROR] waitProcesses: there was an error contacting the API " + str(oEx))
+            # nothing else we can do
+            return asReturnStatus
+
+        if (oResult is not None) and oResult.ok:
             asResultStatus = oResult.json()
             asReturnStatus = asResultStatus
 
@@ -1326,6 +1331,16 @@ def waitProcesses(asProcIdList):
                 if not (sProcStatus == "DONE" or sProcStatus == "ERROR" or sProcStatus == "STOPPED"):
                     bAllDone = False
                     break
+        else:
+            iReturn = None
+            try:
+                iReturn = oResult.status_code
+            except Exception as oEx:
+                wasdiLog("[ERROR] waitProcesses: return status was not ok but cannot read it due to: " + str(type(oEx)) + ": " + str(oEx))
+            else:
+                wasdiLog("[ERROR] waitProcesses: return status was " + str(iReturn))
+            # nothing else we can do
+            return asReturnStatus
 
         if not bAllDone:
             # Sleep a little bit
@@ -1742,11 +1757,11 @@ def deleteProduct(sProduct):
         return oResult.ok
 
 
-def searchEOImages(sPlatform, sDateFrom, sDateTo,
+def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
                    fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
                    sProductType=None, iOrbitNumber=None,
                    sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=None, oBoundingBox=None, aoParams=None):
+                   sProvider=None, oBoundingBox=None, aoParams=None, sFileName=None):
     """
     Search EO images
 
@@ -1777,6 +1792,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param oBoundingBox: alternative to the float lat-lon corners: an object expected to have these attributes: oBoundingBox["northEast"]["lat"], oBoundingBox["southWest"]["lng"], oBoundingBox["southWest"]["lat"], oBoundingBox["northEast"]["lng"]
     
     :param aoParams: dictionary of search keys to add to the query. The system will add key=value to the query sent to WASDI. The parameters for each collection can be found on the on line documentation
+    
+    :param sFileName: name of a specific file to search
 
     :return: a list of results represented as a Dictionary with many properties. The dictionary has the "fileName" and "relativeOrbit" properties among the others 
     """
@@ -1828,9 +1845,10 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
                     '  ******************************************************************************')
 
     if sDateFrom is None:
-        wasdiLog("[ERROR] waspy.searchEOImages: sDateFrom cannot be None" +
+        wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 01/01/1900" +
                  '  ******************************************************************************')
-        return aoReturnList
+        sDateFrom = "1900-01-01"
+        
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
@@ -1839,9 +1857,11 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         return aoReturnList
 
     if sDateTo is None:
-        wasdiLog("[ERROR] waspy.searchEOImages: sDateTo cannot be None" +
+        wasdiLog("[WARNING] waspy.searchEOImages: sDateTo is None, assume today" +
                  '  ******************************************************************************')
-        return aoReturnList
+        oToday = datetime.today()
+        sDateTo = oToday.strftime("%Y-%m-%d")
+        
 
     # if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateTo)):
@@ -1890,9 +1910,14 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sCloudCoverage = sCloudCoverage.upper()
 
     # create query string:
+    
+    sQuery = ""
+    
+    if sFileName is not None:
+        sQuery += sFileName
 
     # platform name
-    sQuery = "( platformname:"
+    sQuery += "( platformname:"
     if sPlatform == "S2":
         sQuery += "Sentinel-2 "
     elif sPlatform == "S1":

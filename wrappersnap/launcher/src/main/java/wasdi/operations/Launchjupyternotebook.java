@@ -71,6 +71,9 @@ public class Launchjupyternotebook extends Operation {
 
 							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
 									oParam.getExchange(), sInfo, oParam.getExchange());
+
+							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), oParam.getExchange(), "", oParam.getExchange());
+							
 						}
 
 					}

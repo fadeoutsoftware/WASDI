@@ -1,6 +1,9 @@
 package wasdi.shared.utils.jinja;
 
+import java.util.Map;
+
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
 
@@ -11,6 +14,19 @@ import wasdi.shared.utils.Utils;
  */
 public class JinjaTemplateRenderer {
 
+	
+	/**
+	 * Apply the values of a JSON file to a Jinja template.
+	 * @param sTemplateFile Full Path of the template file
+	 * @param sOutputFile Full Path of the output file
+	 * @param aoParams Map<String, Object> with the parameters to use to render the template
+	 * @return
+	 */
+	public boolean translate(String sTemplateFile, String sOutputFile, Map<String, Object> aoParams) {
+		String sJsonInputs = JsonUtils.stringify(aoParams);
+		return translate(sTemplateFile,sOutputFile, sJsonInputs, false);
+	}
+	
 	/**
 	 * Apply the values of a JSON file to a Jinja template.
 	 * @param sTemplateFile Full Path of the template file

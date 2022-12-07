@@ -1,12 +1,11 @@
 <div class="editor-view">
 
     <!--Operation bar-->
-    <div class="row-v4 justify-content-end toolbar">
-
-        <div class="col-v4-auto mr-auto filter-search-wrapper">
+    <div class="row-v4 d-flex flex-row justify-content-end toolbar">
+        <div class="col-v4-auto mr-auto mr-0 filter-search-wrapper">
             <!--mr-auto-->
-            <div class="row-v4">
-                <div class="col-v4-auto" style="padding-right: 0px">
+            <div class="row-v4 d-flex flex-nowrap">
+                <div class="col-v4-auto pr-0">
                     <input type="text" name="name" class="wasdi-input" value="" title=""
                         ng-model="m_oController.m_sTextQueryFilterInTree" required="required"
                         placeholder="{{'EDITOR_PRODUCTS_FILTER'|translate}}">
@@ -45,16 +44,18 @@
 
         </div>
 
-        <div class="col-v4-auto button-menu-with-icons pl-1" ng-repeat="button in m_oController.m_aoNavBarMenu"
-            ng-class="{'ml-auto' : $index === 0}" ng-hide="m_oController.isHiddenOperationMainBar();">
+        <div class="col-v4-auto button-menu-with-icons pl-1" ng-repeat="button in m_oController.m_aoNavBarMenu"  ng-hide="m_oController.isHiddenOperationMainBar();">
 
 
             <div class="button-container">
                 <button class="btn btn-outline-primary no-border btn-wasdi"
                     ng-if="m_oController.isToolbarBtnDropdown(button) == false"
-                    ng-click="button.onClick(m_oController)">
+                    ng-click="button.onClick(m_oController)"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="{{button.name}}">
                     <em class="custom-icon" ng-class="button.icon"></em>
-                    <span>{{button.name}}</span>
+                    <span class="lg-screen">{{button.name}}</span>
                 </button>
 
                 <div class="dropdown" ng-if="m_oController.isToolbarBtnDropdown(button) == true">
@@ -303,13 +304,13 @@
                 </div>
 
                 <!-- 2D map -->
-                <div class="map" id="wasdiMap"
+                <div class="map h-100" id="wasdiMap"
                     ng-show="m_oController.m_b2DMapModeOn == true">
                 </div>
                 <!---->
 
                 <!-- 3D map -->
-                <div id="cesiumContainer" class="map"
+                <div id="cesiumContainer" class="map h-100"
                     ng-show="m_oController.m_b2DMapModeOn == false">
                 </div>
                 <!--cesium layers map dropdown menu  https://cesiumjs.org/Cesium/Build/Documentation/BaseLayerPicker.html -->

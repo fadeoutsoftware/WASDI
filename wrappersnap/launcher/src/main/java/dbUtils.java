@@ -20,7 +20,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -59,6 +58,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -2190,7 +2190,7 @@ public class dbUtils {
 	private static void ecoStress() {
 
 		try {
-			S3BucketHelper.parseS3Bucket();
+			S3BucketUtils.parseS3Bucket();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

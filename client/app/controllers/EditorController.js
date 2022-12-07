@@ -108,6 +108,15 @@
         oMapService.initGeoSearchPluginForOpenStreetMap({ "position": 'bottomRight' });
         oMapService.removeLayersFromMap();
 
+        //RabbitStomp Service Call
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "LAUNCHJUPYTERNOTEBOOK",
+            this,
+            this.rabbitMessageHook
+        )
+        
+        
+
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
 
@@ -151,9 +160,9 @@
         // Hook to Rabbit WebStomp Service
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
-
-        //set default navbar menu
-        this.generateDefaultNavBarMenu();
+        
+        this.m_bNotebookIsReady = false;
+       
 
         // Go in geographic mode
         this.switchToGeographicMode();
@@ -170,26 +179,24 @@
             $scope.$digest();
         });
 
-        this.m_bNotebookIsReady = false;
 
         if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
-
+           
             this.m_oConsoleService.isConsoleReady(this.m_oActiveWorkspace.workspaceId).then(function (data, status) {
-
+               
                 if (utilsIsObjectNullOrUndefined(data.data) == false) {
                     oThat.m_bNotebookIsReady = data.data.boolValue;
-                    if (oThat.m_bNotebookIsReady) {
-                        console.log("Console Ready")
-                    }
-                    else {
-                        console.log("Console NOT Ready")
-                    }
                 }
+                 
+                oThat.generateDefaultNavBarMenu();
             }, (function (data, status) {
                 var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
                 utilsVexDialogAlertBottomRightCorner(sMessage);
             }));        
         }
+        //set default navbar menu
+        this.generateDefaultNavBarMenu();
+        
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
@@ -229,8 +236,8 @@
 
             // --- Jupyter Notebook ---
             {
-                name: "Jupyter Notebook", // Jupyter Notebook
-                caption_i18n: "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK",
+                name: "", // Jupyter Notebook
+                caption_i18n: "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE",
                 subMenu: [],
                 onClick: this.openJupyterNotebookPage,
                 icon: "fa fa-laptop",
@@ -251,8 +258,11 @@
                 icon: "fa fa-share-alt fa-lg",
             },
         ];
-
-        this.translateToolbarMenuList(this.m_aoNavBarMenu);
+        
+        let oJupyterButton =  this.m_aoNavBarMenu.find(iIndex => iIndex.caption_i18n ==="EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE")
+        this.filterNotebookButtons(oJupyterButton);
+        this.translateToolbarMenuList(this.m_aoNavBarMenu)
+      
     };
 
     EditorController.prototype.isToolbarBtnDropdown = function (btn) {
@@ -1290,7 +1300,7 @@
                                 sMessage = sMessage + "<BR>" + data.data.stringValue;
                             }
                         }
-        
+                        oController.m_bNotebookIsReady = true;
                         utilsVexDialogAlertTop(sMessage);
                     }
                 } else {
@@ -2485,13 +2495,21 @@
                 function (response) {
                     var _contentType = response.headers('Content-Type');
 
+                    var sHeaderContentDisposition = response.headers('Content-Disposition');
+
+                    let sDownloadedFilename = sFileName;
+
+                    if (!utilsIsStrNullOrEmpty(sHeaderContentDisposition)) {
+                        sDownloadedFilename = sHeaderContentDisposition.split(';')[1].split('=')[1].replace(/\"/g, '');
+                    }
+
                     var blob = new Blob([ response.data ], { type : _contentType });
                     var url = (window.URL || window.webkitURL).createObjectURL(blob);
                     var anchor = angular.element('<a/>');
                     anchor.attr({
                         href : url,
                         target : '_blank',
-                        download : sFileName
+                        download : sDownloadedFilename
                     })[0].click();
                 },
                 function (error) {
@@ -2647,6 +2665,25 @@
         }
 
         oController.getProductListByWorkspace();
+    }
+
+    EditorController.prototype.filterNotebookButtons = function (oNotebookBtn) {
+        let oController = this; 
+        
+        if(oController.m_bNotebookIsReady === false) {
+            oNotebookBtn.caption_i18n = "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE"
+            
+        } else {
+            oNotebookBtn.caption_i18n = "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_OPEN"
+        }
+    
+    }
+  
+    EditorController.prototype.rabbitMessageHook = function (
+        oRabbitMessage, 
+        oController
+    ) {
+        oController.generateDefaultNavBarMenu(); 
     }
 
     EditorController.$inject = [

@@ -910,6 +910,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
             oConnection.disconnect();
 
+
+            waitForApplicationToStart(oParameter);
+
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				refreshPackagesInfo(oParameter);
+			}
+
             LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: lib updated");
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -981,14 +988,20 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
 			JSONObject oJsonItem = new JSONObject(sJson);
 
-			String sUpdateCommand = (String) oJsonItem.get("updateCommand");
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
+			Object oUpdateCommand = oJsonItem.get("updateCommand");
 
-			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-			int iPort = oProcessor.getPort();
+			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
+			} else {
+				String sUpdateCommand = (String) oUpdateCommand;
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
-			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
-			oPackageManager.operatePackageChange(sUpdateCommand);
+				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+				int iPort = oProcessor.getPort();
+
+				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+				oPackageManager.operatePackageChange(sUpdateCommand);
+			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 

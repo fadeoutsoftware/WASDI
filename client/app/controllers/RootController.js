@@ -127,6 +127,7 @@ var RootController = (function() {
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
+            /*
             if(utilsIsObjectNullOrUndefined(newValue) === false)
             {
                 if(newValue.name.includes("Untitled Workspace"))
@@ -135,6 +136,7 @@ var RootController = (function() {
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
                 }
             }
+            */
         });
 
 
@@ -627,12 +629,29 @@ var RootController = (function() {
             //     value = oController.forcedChangeNameWorkspace();
             // }
             var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
-            oWorkspace.name = value;
-
-            oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
-                oWorkspace.name = data.data.name
-                oController.m_bIsEditModelWorkspaceNameActive = false;
-            }); // no error handling in this case
+            let sNewName = value; 
+            let aoWorkspaceNames = []; 
+            oController.m_oWorkspaceService.getWorkspacesInfoListByUser().then(data => {
+                data.data.forEach(oWorkspace => {
+                    aoWorkspaceNames.push(oWorkspace.workspaceName)
+                });
+                
+                if(!aoWorkspaceNames.includes(sNewName)){
+                     oWorkspace.name = value;
+                     oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
+                        oWorkspace.name = data.data.name
+                        oController.m_oRootScope.title = data.data.name
+                        oController.m_bIsEditModelWorkspaceNameActive = false;
+                        utilsVexDialogAlertTop("Name successfully changed.")
+                    }); // no error handling in this case
+                }
+                if(aoWorkspaceNames.includes(sNewName) && oWorkspace.name !== sNewName) {
+                    utilsVexDialogAlertTop("You already have a workspace with this name.")
+                } 
+            });
+            
+            
+            // 
         };
 
         var sMessage = this.m_oTranslate.instant("MSG_INSERT_WS_NAME");

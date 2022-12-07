@@ -99,16 +99,22 @@ public class Environmentupdate extends Operation {
 					// Extract the command we just executed
 					String sJson = oParameter.getJson();
 					JSONObject oJsonItem = new JSONObject(sJson);
-					String sUpdateCommand = (String) oJsonItem.get("updateCommand");
+					Object oUpdateCommand = oJsonItem.get("updateCommand");
+
+					if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+						LauncherMain.s_oLogger.debug("Environmentupdate.executeOperation: refresh of the list of libraries.");
+					} else {
+						String sUpdateCommand = (String) oUpdateCommand;
 					
-					// Add carriage return
-					sUpdateCommand += "\n";
+						// Add carriage return
+						sUpdateCommand += "\n";
 					
-					// Add this action to the list
-					try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
-						byte[] ayBytes = sUpdateCommand.getBytes();
-						oOutStream.write(ayBytes);
-					}		
+						// Add this action to the list
+						try (OutputStream oOutStream = new FileOutputStream(oActionsLogFile, true)) {
+							byte[] ayBytes = sUpdateCommand.getBytes();
+							oOutStream.write(ayBytes);
+						}
+					}
 				}
 			}
 			else {
@@ -121,45 +127,21 @@ public class Environmentupdate extends Operation {
 				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
 					Thread.sleep(2000);
 					oEngine.refreshPackagesInfo(oParameter);
-				}
+					
+					// Notify the user
+					String sInfo = sProcessorName + " application<br>Environment Updated";
 
-				// In the exchange we should have the workspace from there the user requested the environment update
-				String sOriginalWorkspaceId = oParam.getExchange();				
-				
-				// Check if it is a valid workspace
-				if (Utils.isNullOrEmpty(sOriginalWorkspaceId) == false) {
-
-					// Read the workspace
-					WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-					Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sOriginalWorkspaceId);
-
-					if (oWorkspace != null) {
-
-						String sNodeCode = "wasdi";
-
-						if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
-							sNodeCode = oWorkspace.getNodeCode();
-						}
-
-						// This is the computing node where the request came from?
-						if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
-
-							// Notify the user
-							String sInfo = sProcessorName + " application<br>Environment Updated";
-
-							if (!bRet) {
-								sInfo = "GURU MEDITATION<br>Error updating " + sProcessorName + " Environment";
-							}
-
-							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(),
-									oParam.getExchange(), sInfo, oParam.getExchange());
-						}
+					if (!bRet) {
+						sInfo = "GURU MEDITATION<br>Error updating " + sProcessorName + " Environment";
 					}
-				}				
+
+					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(),
+							oParam.getExchange(), sInfo, oParam.getExchange());
+					
+				}							
 
 			} catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Environmentupdate.executeOperation: exception sending Rabbit Message",
-						oRabbitException);
+				m_oLocalLogger.error("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
 
 			return bRet;

@@ -4,28 +4,30 @@
  * Fadeout software
  *
  */
-package wasdi.shared.utils;
+package wasdi.shared.business;
+
+import wasdi.shared.utils.Utils;
 
 /**
  * @author c.nattero
  *
  */
 public class AuthenticationCredentials {
-	String sUser;
-	String sPassword;
+	String m_sUser;
+	String m_sPassword;
 	
 	public AuthenticationCredentials(String sUser, String sPassword) {
 		if(!Utils.isNullOrEmpty(sUser) && !Utils.isNullOrEmpty(sPassword)) {
-			this.sUser = sUser;
-			this.sPassword = sPassword;
+			this.m_sUser = sUser;
+			this.m_sPassword = sPassword;
 		} 
 	}
 	
 	public String getUser() {
-		return sUser;
+		return m_sUser;
 	}
 	public String getPassword() {
-		return sPassword;
+		return m_sPassword;
 	}
 	
 }

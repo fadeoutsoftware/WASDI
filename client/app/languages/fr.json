@@ -75,7 +75,9 @@
     "WORKSPACE_DETAILS_BOX": "Propriétés",
 	"WORKSPACES_CLOUD": "Cloud:",
 	"WORKSPACES_OWNER": "Propriétaire:",
+	"WORKSPACES_NODE_CODE": "Code nœud:",
 	"WORKSPACES_PRODUCTS": "Produits:",
+	"WORKSPACES_ID": "ID de l'espace de travail :",
 	"WORKSPACES_PROC_COUNT": "Processus exécutés :",
 	"WORKSPACES_SHARED_WITH": "Partagé avec :",
 	"WORKSPACES_SHOW_SATS": "Afficher les satellites",
@@ -669,10 +671,11 @@
 	"DIALOG_PACKAGE_MANAGER_VERSION": "Version du package",
 	"DIALOG_PACKAGE_MANAGER_ADD": "Ajouter le forfait", 
 	"DIALOG_PACKAGE_MANAGER_UPDATE": "Mise à jour",
+	"DIALOG_PACKAGE_MANAGER_REFRESH_LIST": "Rafraîchir la liste",
 	"DIALOG_PACKAGE_MANAGER_CLEAR": "Effacer la sélection", 
 	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Version actuelle",  
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Dernière version",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Actions",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Error contacting the JupyterLab service"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Erreur de contact avec le service JupyterLab"
 }

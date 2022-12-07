@@ -1,0 +1,19 @@
+<div class="wapsTable-directive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col" ng-repeat="column in tableVariables[0]">{{column}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in tableVariables[1] track by $index">
+                <th scope="row">{{row}}</th>
+                <td ng-repeat="column in tableVariables[0] track by $index">
+                    <input type="text" placeholder="column {{$index}}" ng-model="value"
+                        ng-change="addValue(value, $index, $parent.$index)">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

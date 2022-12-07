@@ -68,16 +68,12 @@ var HomeController = (function () {
     HomeController.prototype.checkKeycloakAuthStatus = function (oController) {
 
         if (oKeycloak.authenticated) {
-            console.log("HomeController: authenticated = true")
-
             if (oKeycloak.idToken) {
                 var aoDataTokens = {
                     'access_token': oKeycloak.idToken,
                     'refresh_token': oKeycloak.refreshToken
                 };
             }
-
-            console.log("HomeController: move to marketplace")
             oController.callbackLogin(aoDataTokens, null, oController);
         }
         else {

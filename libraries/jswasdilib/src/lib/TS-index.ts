@@ -32,7 +32,7 @@ export class Wasdi {
   _m_sWorkspaceId = "";
 
   /**
-   * Constructor method: init an instance of the library object. 
+   * Constructor method: init an instance of the library object.
    * As convention the name "wasdi" is used, both for Javascript and Typescript.
    */
   constructor() {
@@ -182,7 +182,7 @@ export class Wasdi {
 
   /**
    * Loads configuration and parameters. If no filename is specified,
-   * the method attempts to load config.json and parameters.json files from the root level 
+   * the method attempts to load config.json and parameters.json files from the root level
    * URL of the developed application.
    * The config file can be also hosted on an external URL.
    * @param configFile a JSON containing all the required information to login to WASDI, please check repository for a complete example
@@ -258,6 +258,8 @@ export class Wasdi {
     if (request.status === 200) {
       let jsondata = JSON.parse(request.responseText);
       this._m_aoParamsDictionary = jsondata;
+    } else {
+      this._m_aoParamsDictionary = {};
     }
   }
 

@@ -2,14 +2,9 @@ package wasdi.operations;
 
 import wasdi.processors.JupyterNotebookProcessorEngine;
 import wasdi.processors.WasdiProcessorEngine;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.Utils;
 
 public class Terminatejupyternotebook extends Operation {
 
@@ -18,7 +13,7 @@ public class Terminatejupyternotebook extends Operation {
 		m_oLocalLogger.debug("Terminatejupyternotebook.executeOperation");
 
 		if (oParam == null) {
-			m_oLocalLogger.error("Parameter is null");
+			m_oLocalLogger.error("Parameter is null");	
 			return false;
 		}
 
@@ -37,51 +32,11 @@ public class Terminatejupyternotebook extends Operation {
 			oEngine.setProcessWorkspace(oProcessWorkspace);
 
 			boolean bRet = oEngine.terminateJupyterNotebook(oParameter);
-
-			try {
-				// In the exchange we should have the workspace on which the user requested
-				// the termination of the Jupyter Notebook
-				String sOriginalWorkspaceId = oParam.getExchange();
-
-				// Check if it is valid
-				if (!Utils.isNullOrEmpty(sOriginalWorkspaceId)) {
-					// Read the workspace
-					WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-					Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sOriginalWorkspaceId);
-
-					if (oWorkspace != null) {
-						String sNodeCode = "wasdi";
-
-						if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
-							sNodeCode = oWorkspace.getNodeCode();
-						}
-
-						// This is the computing node where the request came from?
-						if (sNodeCode.equals(WasdiConfig.Current.nodeCode)) {
-							// Notify the user
-							String sName = oParameter.getName();
-
-							if (Utils.isNullOrEmpty(sName))
-								sName = "Your Jupyter Notebook";
-
-							String sInfo = "Jupyter Notebook Terminated<br>" + sName + " is no longer available";
-
-							if (!bRet)
-								sInfo = "GURU MEDITATION<br>There was an error terminating Jupyter Notebook " + sName + " :(";
-
-							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
-									oParam.getExchange(), sInfo, oParam.getExchange());
-						}
-
-					}
-
-				}
-
-			} catch (Exception oRabbitException) {
-				m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: exception sending Rabbit Message",
-						oRabbitException);
-			}
-
+			
+			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: delete result " + bRet);
+			
+			return true;
+			
 		} catch (Exception oEx) {
 			m_oLocalLogger.error("Terminatejupyternotebook.executeOperation: exception", oEx);
 		}

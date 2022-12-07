@@ -514,7 +514,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
                 }
@@ -574,33 +574,17 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|INSITU_MED_NRT_OBSERVATIONS_013_035|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
+                    "indexvalues": "OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
                     "regex": ".*",
-                    "indexvalue":"OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS"
+                    "indexvalue": "OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS"
                 },
                 {
                     "indexname": "protocol",
                     "indexlabel": "Protocol",
-                    "indexvalues": "SUBS|FTP",
+                    "indexvalues": "SUBS",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS|producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
-                    "indexvalue":"SUBS"
-                },
-                {
-                    "indexname": "protocol",
-                    "indexlabel": "Protocol",
-                    "indexvalues": "FTP",
-                    "regex": ".*",
-                    "visibilityConditions": "producttype:INSITU_MED_NRT_OBSERVATIONS_013_035",
-                    "indexvalue":"FTP"
-                },
-                {
-                    "indexname": "dataset",
-                    "indexlabel": "Dataset",
-                    "indexvalues": "dataset-oc-med-chl-multi-l4-chl_1km_monthly-rt-v02|dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02|dataset-oc-med-chl-olci_a-l4-chl_1km_monthly-rt-v02|dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt",
-                    "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_CHL_L4_NRT_OBSERVATIONS_009_041-TDS",
-                    "indexvalue":"dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt"
+                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
+                    "indexvalue": "SUBS"
                 },
                 {
                     "indexname": "dataset",
@@ -608,15 +592,23 @@
                     "indexvalues": "c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M",
                     "regex": ".*",
                     "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS",
-                    "indexvalue":"c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
+                    "indexvalue": "c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
                 },
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b",
+                    "indexvalues": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS",
-                    "indexvalue":"SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a"
+                    "visibilityConditions": "producttype:OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
+                    "indexvalue": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "med-cmcc-cur-an-fc-d|med-cmcc-cur-an-fc-h|med-cmcc-cur-an-fc-hts|med-cmcc-cur-an-fc-m|med-cmcc-cur-an-fc-qm|med-cmcc-mld-an-fc-d|med-cmcc-mld-an-fc-hts|med-cmcc-mld-an-fc-m|med-cmcc-sal-an-fc-d|med-cmcc-sal-an-fc-h|med-cmcc-sal-an-fc-hts|med-cmcc-sal-an-fc-m|med-cmcc-ssh-an-fc-d|med-cmcc-ssh-an-fc-hts|med-cmcc-ssh-an-fc-m|med-cmcc-ssh-an-fc-qm|med-cmcc-tem-an-fc-d|med-cmcc-tem-an-fc-h|med-cmcc-tem-an-fc-hts|med-cmcc-tem-an-fc-m",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS",
+                    "indexvalue": "med-cmcc-cur-an-fc-d"
                 },
                 {
                     "indexname": "dataset",
@@ -624,71 +616,47 @@
                     "indexvalues": "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2|SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b|SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d",
                     "regex": ".*",
                     "visibilityConditions": "producttype:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS",
-                    "indexvalue":"SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"
+                    "indexvalue": "SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2"
+                },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "med-ogs-bio-an-fc-d|med-ogs-bio-an-fc-m|med-ogs-car-an-fc-d|med-ogs-car-an-fc-m|med-ogs-co2-an-fc-d|med-ogs-co2-an-fc-m|med-ogs-nut-an-fc-d|med-ogs-nut-an-fc-m|med-ogs-pft-an-fc-d|med-ogs-pft-an-fc-m",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS",
+                    "indexvalue": "med-ogs-bio-an-fc-d"
                 },
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
                     "indexvalues": "global-analysis-forecast-wav-001-027",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS&protocol:SUBS",
-                    "indexvalue":"global-analysis-forecast-wav-001-027"
+                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS",
+                    "indexvalue": "global-analysis-forecast-wav-001-027"
                 },
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "global-analysis-forecast-wav-001-027|global-analysis-forecast-wav-001-027-statics",
+                    "indexvalues": "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS&protocol:FTP",
-                    "indexvalue":"global-analysis-forecast-wav-001-027"
+                    "visibilityConditions": "producttype:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS",
+                    "indexvalue": "SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a"
                 },
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "med_multiparameter_nrt",
+                    "indexvalues": "cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|global-analysis-forecast-phy-001-024|global-analysis-forecast-phy-001-024-3dinst-so|global-analysis-forecast-phy-001-024-3dinst-thetao|global-analysis-forecast-phy-001-024-3dinst-uovo|global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh|global-analysis-forecast-phy-001-024-monthly",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:INSITU_MED_NRT_OBSERVATIONS_013_035&protocol:FTP",
-                    "indexvalue":"med_multiparameter_nrt"
-                },
-                {
-                    "indexname": "dataset",
-                    "indexlabel": "Dataset",
-                    "indexvalues": "dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt",
-                    "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_CHL_L3_NRT_OBSERVATIONS_009_032-TDS",
-                    "indexvalue":"dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt"
+                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
+                    "indexvalue": "cmems_mod_glo_phy_anfc_merged-uv_PT1H-i"
                 },
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "CHL+CHL_count+CHL_error|CHL|CHL_count|CHL_error",
+                    "indexvalues": "mlotst",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:dataset-oc-med-chl-multi-l4-chl_1km_monthly-rt-v02|dataset:dataset-oc-med-chl-olci_a-l4-chl_1km_monthly-rt-v02|dataset:dataset-oc-med-chl-olci-l4-chl_300m_monthly-rt)&protocol:SUBS",
-                    "indexvalue":"CHL+CHL_count+CHL_error"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
-                    "indexvalues": "CHL",
-                    "regex": ".*",
-                    "visibilityConditions": "dataset:dataset-oc-med-chl-multi-l4-interp_1km_daily-rt-v02&protocol:SUBS",
-                    "indexvalue":"CHL"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
-                    "indexvalues": "CHL+CHL_count+CHL_error+grid_mapping|CHL|CHL_count|CHL_error|grid_mapping",
-                    "regex": ".*",
-                    "visibilityConditions": "dataset:c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M&protocol:SUBS",
-                    "indexvalue":"CHL+CHL_count+CHL_error+grid_mapping"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
-                    "indexvalues": "adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst|adjusted_sea_surface_temperature|quality_level|sea_surface_temperature|source_of_sst",
-                    "regex": ".*",
-                    "visibilityConditions": "(dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b)&protocol:SUBS",
-                    "indexvalue":"adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst"
+                    "visibilityConditions": "(dataset:med-cmcc-mld-an-fc-d|dataset:med-cmcc-mld-an-fc-hts|dataset:med-cmcc-mld-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "mlotst"
                 },
                 {
                     "indexname": "variables",
@@ -696,15 +664,23 @@
                     "indexvalues": "analysed_sst+analysis_error|analysed_sst|analysis_error",
                     "regex": ".*",
                     "visibilityConditions": "(dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2|dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2)&protocol:SUBS",
-                    "indexvalue":"analysed_sst+analysis_error"
+                    "indexvalue": "analysed_sst+analysis_error"
                 },
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "sst_anomaly",
+                    "indexvalues": "thetao",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b|dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d)&protocol:SUBS",
-                    "indexvalue":"sst_anomaly"
+                    "visibilityConditions": "dataset:global-analysis-forecast-phy-001-024-3dinst-thetao&protocol:SUBS",
+                    "indexvalue": "thetao"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "zos+zos_detided|zos|zos_detided",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-ssh-an-fc-d|dataset:med-cmcc-ssh-an-fc-hts|dataset:med-cmcc-ssh-an-fc-qm)&protocol:SUBS",
+                    "indexvalue": "zos+zos_detided"
                 },
                 {
                     "indexname": "variables",
@@ -712,15 +688,215 @@
                     "indexvalues": "VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK|VHM0|VHM0_SW1|VHM0_SW2|VHM0_WW|VMDR|VMDR_SW1|VMDR_SW2|VMDR_WW|VPED|VSDX|VSDY|VTM01_SW1|VTM01_SW2|VTM01_WW|VTM02|VTM10|VTPK",
                     "regex": ".*",
                     "visibilityConditions": "dataset:global-analysis-forecast-wav-001-027&protocol:SUBS",
-                    "indexvalue":"VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK"
+                    "indexvalue": "VHM0+VHM0_SW1+VHM0_SW2+VHM0_WW+VMDR+VMDR_SW1+VMDR_SW2+VMDR_WW+VPED+VSDX+VSDY+VTM01_SW1+VTM01_SW2+VTM01_WW+VTM02+VTM10+VTPK"
                 },
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "CHL+CHL_error+CHL_flags|CHL|CHL_error|CHL_flags",
+                    "indexvalues": "CHL+CHL_count+CHL_error+grid_mapping|CHL|CHL_count|CHL_error|grid_mapping",
                     "regex": ".*",
-                    "visibilityConditions": "dataset:dataset-oc-glo-bio-multi-l3-chl_300m_daily-rt&protocol:SUBS",
-                    "indexvalue":"CHL+CHL_error+CHL_flags"
+                    "visibilityConditions": "dataset:c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M&protocol:SUBS",
+                    "indexvalue": "CHL+CHL_count+CHL_error+grid_mapping"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst|adjusted_sea_surface_temperature|quality_level|sea_surface_temperature|source_of_sst",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_a|dataset:SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012_b)&protocol:SUBS",
+                    "indexvalue": "adjusted_sea_surface_temperature+quality_level+sea_surface_temperature+source_of_sst"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "uo+utide+utotal+vo+vsdx+vsdy+vtide+vtotal|uo|utide|utotal|vo|vsdx|vsdy|vtide|vtotal",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i&protocol:SUBS",
+                    "indexvalue": "uo+utide+utotal+vo+vsdx+vsdy+vtide+vtotal"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "bottomT+thetao|bottomT|thetao",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-hts|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "bottomT+thetao"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "chl+phyc+zooc|chl|phyc|zooc",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-pft-an-fc-d|dataset:med-ogs-pft-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "chl+phyc+zooc"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL+SPM+TUR|CHL|SPM|TUR",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m&protocol:SUBS",
+                    "indexvalue": "CHL+SPM+TUR"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "sst_anomaly",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_b|dataset:SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d)&protocol:SUBS",
+                    "indexvalue": "sst_anomaly"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "thetao+uo+vo+zos|thetao|uo|vo|zos",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh&protocol:SUBS",
+                    "indexvalue": "thetao+uo+vo+zos"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "bottomT+mlotst+siconc+sithick+so+thetao+uo+usi+vo+vsi+zos|bottomT|mlotst|siconc|sithick|so|thetao|uo|usi|vo|vsi|zos",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
+                    "indexvalue": "bottomT+mlotst+siconc+sithick+so+thetao+uo+usi+vo+vsi+zos"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "nppv+o2|nppv|o2",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-bio-an-fc-d|dataset:med-ogs-bio-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "nppv+o2"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "fpco2+spco2|fpco2|spco2",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-co2-an-fc-d|dataset:med-ogs-co2-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "fpco2+spco2"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "nh4+no3+po4+si|nh4|no3|po4|si",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-nut-an-fc-d|dataset:med-ogs-nut-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "nh4+no3+po4+si"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "so",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-sal-an-fc-m|dataset:global-analysis-forecast-phy-001-024-3dinst-so)&protocol:SUBS",
+                    "indexvalue": "so"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "uo+vo|uo|vo",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-cur-an-fc-qm|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo)&protocol:SUBS",
+                    "indexvalue": "uo+vo"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "dissic+ph+talk|dissic|ph|talk",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-car-an-fc-d|dataset:med-ogs-car-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "dissic+ph+talk"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "zos",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:med-cmcc-ssh-an-fc-m&protocol:SUBS",
+                    "indexvalue": "zos"
+                },
+                {
+                    "indexname": "startDepth",
+                    "indexlabel": "Depth From",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-bio-an-fc-d|dataset:med-ogs-bio-an-fc-m|dataset:med-ogs-car-an-fc-d|dataset:med-ogs-car-an-fc-m|dataset:med-ogs-nut-an-fc-d|dataset:med-ogs-nut-an-fc-m|dataset:med-ogs-pft-an-fc-d|dataset:med-ogs-pft-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "1.0182366371154785"
+                },
+                {
+                    "indexname": "endDepth",
+                    "indexlabel": "Depth To",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-ogs-bio-an-fc-d|dataset:med-ogs-bio-an-fc-m|dataset:med-ogs-car-an-fc-d|dataset:med-ogs-car-an-fc-m|dataset:med-ogs-nut-an-fc-d|dataset:med-ogs-nut-an-fc-m|dataset:med-ogs-pft-an-fc-d|dataset:med-ogs-pft-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "4152.89599609375"
+                },
+                {
+                    "indexname": "startDepth",
+                    "indexlabel": "Depth From",
+                    "indexvalues": "0.49402499198913574",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh)&protocol:SUBS",
+                    "indexvalue": "0.49402499198913574"
+                },
+                {
+                    "indexname": "endDepth",
+                    "indexlabel": "Depth To",
+                    "indexvalues": "0.49402499198913574",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh)&protocol:SUBS",
+                    "indexvalue": "0.49402499198913574"
+                },
+                {
+                    "indexname": "startDepth",
+                    "indexlabel": "Depth From",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375|4244.80419921875|4337.84765625|4432.017578125|4527.30419921875|4623.69873046875|4721.19140625|4819.77099609375|4919.42724609375|5020.1494140625|5121.92578125|5224.74462890625|5328.59375|5433.4609375|5539.33349609375|5646.19921875|5754.0439453125",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-m|dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "1.0182366371154785"
+                },
+                {
+                    "indexname": "endDepth",
+                    "indexlabel": "Depth To",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375|4244.80419921875|4337.84765625|4432.017578125|4527.30419921875|4623.69873046875|4721.19140625|4819.77099609375|4919.42724609375|5020.1494140625|5121.92578125|5224.74462890625|5328.59375|5433.4609375|5539.33349609375|5646.19921875|5754.0439453125",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-m|dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "indexvalue": "5754.0439453125"
+                },
+                {
+                    "indexname": "startDepth",
+                    "indexlabel": "Depth From",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|19.398210525512695|29.885643005371094|51.379859924316406|72.62368774414062|97.92872619628906|153.43284606933594|203.17044067382812|249.9158477783203|303.5613098144531|398.5447082519531",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-tem-an-fc-hts)&protocol:SUBS",
+                    "indexvalue": "1.0182366371154785"
+                },
+                {
+                    "indexname": "endDepth",
+                    "indexlabel": "Depth To",
+                    "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|19.398210525512695|29.885643005371094|51.379859924316406|72.62368774414062|97.92872619628906|153.43284606933594|203.17044067382812|249.9158477783203|303.5613098144531|398.5447082519531",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-tem-an-fc-hts)&protocol:SUBS",
+                    "indexvalue": "398.5447082519531"
+                },
+                {
+                    "indexname": "startDepth",
+                    "indexlabel": "Depth From",
+                    "indexvalues": "0.49402499198913574|1.5413750410079956|2.6456689834594727|3.8194949626922607|5.078224182128906|6.440614223480225|7.92956018447876|9.572997093200684|11.404999732971191|13.467140197753906|15.810070037841797|18.495559692382812|21.598819732666016|25.211410522460938|29.444730758666992|34.43415069580078|40.344051361083984|47.37369155883789|55.76428985595703|65.80726623535156|77.85385131835938|92.3260726928711|109.72930145263672|130.66600036621094|155.85069274902344|186.12559509277344|222.47520446777344|266.0403137207031|318.1274108886719|380.2130126953125|453.9377136230469|541.0889282226562|643.5667724609375|763.3331298828125|902.3392944335938|1062.43994140625|1245.291015625|1452.2509765625|1684.2840576171875|1941.8929443359375|2225.077880859375|2533.3359375|2865.702880859375|3220.820068359375|3597.031982421875|3992.48388671875|4405.22412109375|4833.291015625|5274.7841796875|5727.9169921875",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-3dinst-so|dataset:global-analysis-forecast-phy-001-024-3dinst-thetao|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
+                    "indexvalue": "0.49402499198913574"
+                },
+                {
+                    "indexname": "endDepth",
+                    "indexlabel": "Depth To",
+                    "indexvalues": "0.49402499198913574|1.5413750410079956|2.6456689834594727|3.8194949626922607|5.078224182128906|6.440614223480225|7.92956018447876|9.572997093200684|11.404999732971191|13.467140197753906|15.810070037841797|18.495559692382812|21.598819732666016|25.211410522460938|29.444730758666992|34.43415069580078|40.344051361083984|47.37369155883789|55.76428985595703|65.80726623535156|77.85385131835938|92.3260726928711|109.72930145263672|130.66600036621094|155.85069274902344|186.12559509277344|222.47520446777344|266.0403137207031|318.1274108886719|380.2130126953125|453.9377136230469|541.0889282226562|643.5667724609375|763.3331298828125|902.3392944335938|1062.43994140625|1245.291015625|1452.2509765625|1684.2840576171875|1941.8929443359375|2225.077880859375|2533.3359375|2865.702880859375|3220.820068359375|3597.031982421875|3992.48388671875|4405.22412109375|4833.291015625|5274.7841796875|5727.9169921875",
+                    "regex": ".*",
+                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-3dinst-so|dataset:global-analysis-forecast-phy-001-024-3dinst-thetao|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
+                    "indexvalue": "5727.9169921875"
                 }
             ]
         },

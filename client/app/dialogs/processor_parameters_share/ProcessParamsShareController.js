@@ -26,8 +26,7 @@ let ProcessParamsShareController = (function () {
         this.m_sUserEmail = null;
         this.m_sTemplateId = this.m_oExtras.template.templateId;
         this.m_sOwnerEmail = this.m_oExtras.template.userId;
-
-        console.log(this.m_oExtras.template);
+        
         this.findParametersPermissions(this.m_oExtras.template.templateId);
     }
     //Return list of users with whom the parameters have been shared

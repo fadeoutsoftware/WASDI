@@ -59,7 +59,6 @@ var WorkspaceController = (function () {
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
-            console.log("Update Sat Position");
             $scope.m_oController.updatePositionsSatellites();
         }, 15000);
 
@@ -180,9 +179,6 @@ var WorkspaceController = (function () {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             //data.data = []; // DEBUG
-                            if(utilsIsObjectNullOrUndefined(data.data.creationDate)) {
-                                console.log("no creation date")
-                            }
                             oController.m_aoWorkspaceList = data.data;
                             oController.m_aoWorkspaceList.forEach(oWorkspace => {
                                 if(utilsIsObjectNullOrUndefined(oWorkspace.creationDate)) {
@@ -252,7 +248,6 @@ var WorkspaceController = (function () {
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(oWorkspaceId).then(function (data, status) {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data.data;
-               
             }
         },(function (data, status) {
             utilsVexDialogAlertTop(sError);
@@ -465,7 +460,6 @@ var WorkspaceController = (function () {
                                 if (_.isEqual(oActiveWorkspace, oWorkspaceViewModel)) {
                                 //clear workspace data from View Model
                                 oWorkspaceViewModel = null;
-                                console.log(oWorkspaceViewModel)
                                 //set active workspace to null
                                 oController.m_oConstantsService.setActiveWorkspace(
                                     oWorkspaceViewModel

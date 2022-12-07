@@ -181,6 +181,9 @@ class Wasdi {
     let sUrl = configFile;
     if (configFile == undefined) {
       // default value
+      console.log(
+        '[jswasdilib] No configuration file location specified, loading from default location ("./config.json")'
+      );
       sUrl = "./config.json";
     }
     var request = new XMLHttpRequest();
@@ -238,6 +241,9 @@ class Wasdi {
     let sUrl = filename;
     if (filename == undefined) {
       // default value
+      console.log(
+        '[jswasdilib] No parameters file location specified, loading from default location ("./parameters.json")'
+      );
       sUrl = "./parameters.json";
     }
     var request = new XMLHttpRequest();
@@ -247,6 +253,11 @@ class Wasdi {
     if (request.status === 200) {
       let jsondata = JSON.parse(request.responseText);
       this._m_aoParamsDictionary = jsondata;
+    } else {
+      console.log(
+        "[jswasdilib] Parameters file not found: empty dictionary of parameters initialized"
+      );
+      this._m_aoParamsDictionary = {};
     }
   }
 

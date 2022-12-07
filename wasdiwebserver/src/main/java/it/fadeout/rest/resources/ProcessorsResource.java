@@ -861,6 +861,12 @@ public class ProcessorsResource  {
 			if (Utils.isNullOrEmpty(sEncodedJson)) {
 				sEncodedJson = "%7B%7D";
 			}
+			
+			if (sEncodedJson.contains("+")) {
+				// The + char is not encoded but then in the launcher, when is decode, become a space. Replace the char with the correct representation
+				sEncodedJson = sEncodedJson.replaceAll("\\+", "%2B");
+				Utils.debugLog("ProcessorsResource.internalRun: replaced + with %2B in encoded JSON " + sEncodedJson);
+			}
 
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
@@ -1540,8 +1546,13 @@ public class ProcessorsResource  {
 			}
 			
 			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
-				Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
+
+				if (oSharing == null) {
+					Utils.debugLog("ProcessorsResource.libraryUpdate: processor not of user " + oProcessorToForceUpdate.getUserId() + " and not shared either.");
+					return Response.status(Status.UNAUTHORIZED).build();
+				}
 			}
 
 

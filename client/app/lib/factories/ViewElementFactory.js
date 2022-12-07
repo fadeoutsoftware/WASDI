@@ -136,7 +136,20 @@ function ViewElementFactory() {
             for (; iValues < oControl.values.length; iValues++) {
                 oViewElement.aoElements.push(oControl.values[iValues]);
             }
-        }        
+        } else if (oControl.type === 'table'){
+            
+            oViewElement = new Table();
+
+            for (let sColHeader = 0; sColHeader < oControl.columns; sColHeader++) {
+                const sElement = oControl.col_headers[sColHeader];
+                oViewElement.aoTableVariables[0].push(sElement)
+            }
+
+            for(let sRowHeader = 0; sRowHeader < oControl.rows; sRowHeader++){
+                const sElement = oControl.row_headers[sRowHeader];
+                oViewElement.aoTableVariables[1].push(sElement);
+           }
+        }
         else {
             oViewElement = new TextBox();
         }
@@ -636,4 +649,13 @@ class Slider extends UIComponent {
         }
 
     };
+}
+
+class Table extends UIComponent {
+    constructor() {
+        super();
+
+        this.aoTableVariables = [[],[]];
+
+    }
 }

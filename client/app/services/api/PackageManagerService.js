@@ -65,16 +65,18 @@ angular
                 if (utilsIsObjectNullOrUndefined(oWorkspace) == false) {
                     sWorkspaceId = oWorkspace.workspaceId;
                 }
-                return this.m_oHttp.get(
-                    this.APIURL + this.m_sResource +
-                        "/environmentupdate?processorId=" +
-                        sProcessorId +
-                        "&workspace=" +
-                        sWorkspaceId +
-                        "&updateCommand=addPackage/" +
-                        sLibraryName +
-                        "/"
-                );
+
+                let sUrl = this.APIURL + this.m_sResource +
+                    "/environmentupdate?processorId=" +
+                    sProcessorId +
+                    "&workspace=" +
+                    sWorkspaceId;
+
+                if (utilsIsObjectNullOrUndefined(sLibraryName) == false) {
+                    sUrl += "&updateCommand=addPackage/" + sLibraryName + "/";
+                }
+
+                return this.m_oHttp.get(sUrl);
             };
             /*
             Update a Package

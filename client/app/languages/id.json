@@ -80,7 +80,9 @@
     "WORKSPACE_DETAILS_BOX": "Properti",
 	"WORKSPACES_CLOUD":  "Cloud:",
 	"WORKSPACES_OWNER":  "Pemilik:",
+	"WORKSPACES_NODE_CODE": "Kode Node:",
 	"WORKSPACES_PRODUCTS": "Produk:",
+	"WORKSPACES_ID": "ID ruang kerja:",
 	"WORKSPACES_PROC_COUNT": "Proses Dijalankan:",
 	"WORKSPACES_SHARED_WITH": "Bagikan Kepada:",
 	"WORKSPACES_SHOW_SATS": "Tampilkan Satelit",
@@ -718,10 +720,11 @@
 	"DIALOG_PACKAGE_MANAGER_VERSION": "Versi Paket",
 	"DIALOG_PACKAGE_MANAGER_ADD": "Tambahkan Paket", 
 	"DIALOG_PACKAGE_MANAGER_UPDATE": "Perbarui Paket",
+	"DIALOG_PACKAGE_MANAGER_REFRESH_LIST": "Segarkan Daftar",
 	"DIALOG_PACKAGE_MANAGER_CLEAR": "Paket Jelas", 
 	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Paket saat ini",  
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Versi terbaru",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "tindakan",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Error contacting the JupyterLab service"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Kesalahan saat menghubungi layanan JupyterLab"
 }

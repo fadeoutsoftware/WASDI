@@ -245,8 +245,15 @@
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
                                     <waplistbox options="viewElement.aoElements" selected="viewElement.aoSelected"
                                         tooltip="viewElement.tooltip"></waplistbox>
-                                </div>                                
-
+                                </div> 
+                                <!-- table  -->
+                                <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"
+                                    ng-if="viewElement.type === 'table'">
+                                    <div class="input-text-label pt-2">{{viewElement.label}}</div>
+                                    <waptable
+                                        table-variables="viewElement.aoTableVariables"
+                                        row-headers="viewElement.aoTableVariables[1]"></waptable>
+                                </div> 
                             </div>
 
                         </div>

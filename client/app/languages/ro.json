@@ -80,7 +80,9 @@
     "WORKSPACE_DETAILS_BOX": "Proprietăți",
 	"WORKSPACES_CLOUD": "Cloud:",
 	"WORKSPACES_OWNER": "Proprietar:",
+	"WORKSPACES_NODE_CODE": "Codul nodului:",
 	"WORKSPACES_PRODUCTS": "Produse:",
+	"WORKSPACES_ID": "ID spațiu de lucru :",
 	"WORKSPACES_PROC_COUNT": "Procese executate :",
 	"WORKSPACES_SHARED_WITH": "Partajat cu :",
 	"WORKSPACES_SHOW_SATS": "Afișați sateliți",
@@ -717,10 +719,11 @@
 	"DIALOG_PACKAGE_MANAGER_VERSION": "Versiunea pachetului",
 	"DIALOG_PACKAGE_MANAGER_ADD": "Adăugați pachet", 
 	"DIALOG_PACKAGE_MANAGER_UPDATE": "Actualizați pachetul",
+	"DIALOG_PACKAGE_MANAGER_REFRESH_LIST": "Actualizați lista",
 	"DIALOG_PACKAGE_MANAGER_CLEAR": "Selecție clară", 
 	"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION": "Versiune curentă",  
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Ultima versiune",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Acțiuni",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Error contacting the JupyterLab service"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Eroare la contactarea serviciului JupyterLab"
 }

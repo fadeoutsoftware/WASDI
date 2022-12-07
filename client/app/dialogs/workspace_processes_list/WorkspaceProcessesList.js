@@ -199,8 +199,8 @@ var WorkspaceProcessesList = (function () {
      */
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
 
-        if (!oProcess.operationStartDate.endsWith(" Z"))   {
-            oProcess.operationStartDate += " Z";
+        if (!oProcess.operationStartDate.endsWith("Z"))   {
+            oProcess.operationStartDate += "Z";
         }
 
         // start time by server
@@ -210,8 +210,8 @@ var WorkspaceProcessesList = (function () {
         // reassign in case the process is already ended
         if(utilsIsObjectNullOrUndefined(oProcess.operationEndDate)==false){
 
-            if (!oProcess.operationEndDate.endsWith(" Z"))   {
-                oProcess.operationEndDate += " Z";
+            if (!oProcess.operationEndDate.endsWith("Z"))   {
+                oProcess.operationEndDate += "Z";
             }
 
             oEndTime = new Date(oProcess.operationEndDate);
@@ -227,6 +227,7 @@ var WorkspaceProcessesList = (function () {
 
         //pick time
         let iMilliseconds = Math.abs(oEndTime - oStartTime);
+        
         //approximate result
         let iSecondsTimeSpan = Math.ceil(iMilliseconds / 1000);
 
