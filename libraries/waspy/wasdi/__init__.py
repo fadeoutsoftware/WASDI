@@ -3915,7 +3915,7 @@ def asynchPublishBand(sFileName, sBand):
     try:
         sUrl = getBaseUrl() + '/filebuffer/publishband?' + \
                'fileUrl=' + sFileName + \
-               '&workspaceName=' + getActiveWorkspaceId() + \
+               '&workspace=' + getActiveWorkspaceId() + \
                '&band=' + sBand
         asHeaders = _getStandardHeaders()
         global m_iRequestsTimeout
