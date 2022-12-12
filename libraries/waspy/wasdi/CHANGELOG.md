@@ -3,6 +3,13 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.7.5.2] - 2022-11-29
+### Added
+- publishBand
+### Fixed
+- waitProcesses: now it handles POST returns status different from 200 (so it's safe no matter how you mess up your list of processes) 
+
+
 ## [0.7.5.1] - 2022-10-12
 ### Added
 - searchEOImages: date are no more mandatory. If not present WASDI will assume from 01/01/1900 to the actual Day
