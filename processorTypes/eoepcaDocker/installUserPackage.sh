@@ -158,7 +158,7 @@ function installPackagePip() {
     fi
 
     echo "[INFO] Install package..."
-    pip3 install $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
+    pip3 install --no-cache-dir --no-compile $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
     returnCode=${?}
 
     if [[ ${returnCode} -eq 0 ]]
