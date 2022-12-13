@@ -173,12 +173,14 @@ public class DockerUtils {
             // Prepare the name of the docker
             String sDockerBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
             
+            sDockerName = sDockerBaseName;
+            
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
             	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
             }
-
+            
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
 
