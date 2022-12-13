@@ -3,14 +3,14 @@
         <thead>
             <tr>
                 <th scope="col"></th>
-                <th scope="col" ng-repeat="column in tableVariables[0]">{{column}}</th>
+                <th scope="col" ng-repeat="column in tableVariables[0] track by $index">{{cols[$index]}}</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="row in tableVariables[1] track by $index">
-                <th scope="row">{{row}}</th>
+            <tr ng-repeat="row in tableVariables track by $index">
+                <th scope="row">{{rows[$index]}}</th>
                 <td ng-repeat="column in tableVariables[0] track by $index">
-                    <input type="text" placeholder="column {{$index}}" ng-model="value"
+                    <input type="text" placeholder="" ng-model="value"
                         ng-change="addValue(value, $index, $parent.$index)">
                 </td>
             </tr>
