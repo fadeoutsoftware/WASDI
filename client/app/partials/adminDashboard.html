@@ -854,31 +854,43 @@
                 <div class="spacer"></div>
     
                 <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                    <table class="table table-hover">
+                    <table class="table table-hover text-right">
                         <thead>
                             <tr>
-                                <th>Node Code</th>
-                                <th>Timestamp</th>
-                                <th>Licenses</th>
+                                <th class="text-left">Node Code</th>
+                                <th class="text-left">Timestamp</th>
+                                <th class="text-left">Licenses</th>
                                 <th>Processes</th>
                                 <th>Disk Used</th>
                                 <th>Disk Available</th>
                                 <th>Disk Total</th>
                                 <th>Disk Used</th>
                                 <th>Disk Available</th>
+
+                                <th>RAM Used</th>
+                                <th>RAM Available</th>
+                                <th>RAM Total</th>
+                                <th>RAM Used</th>
+                                <th>RAM Available</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="oNode in m_oController.m_aoAvailableNodesSortedByScoreList">
-                                <td>{{oNode.nodeCode}}</td>
-                                <td>{{oNode.timestampAsString}}</td>
-                                <td>{{oNode.licenses}}</td>
+                                <td class="text-left">{{oNode.nodeCode}}</td>
+                                <td class="text-left">{{oNode.timestampAsString}}</td>
+                                <td class="text-left">{{oNode.licenses}}</td>
                                 <td>{{oNode.numberOfProcesses}}</td>
                                 <td>{{oNode.diskPercentageUsed + " %"}}</td>
                                 <td>{{oNode.diskPercentageAvailable + " %"}}</td>
-                                <td>{{oNode.diskAbsoluteTotal | formatFileSize:2}}</td>
-                                <td>{{oNode.diskAbsoluteUsed | formatFileSize:2}}</td>
-                                <td>{{oNode.diskAbsoluteAvailable | formatFileSize:2}}</td>
+                                <td>{{oNode.diskAbsoluteTotal | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.diskAbsoluteUsed | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.diskAbsoluteAvailable | convertBytesToHigherUnit:2}}</td>
+
+                                <td>{{oNode.memoryPercentageUsed + " %"}}</td>
+                                <td>{{oNode.memoryPercentageAvailable + " %"}}</td>
+                                <td>{{oNode.memoryAbsoluteTotal | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.memoryAbsoluteUsed | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.memoryAbsoluteAvailable | convertBytesToHigherUnit:2}}</td>
                             </tr>
                         </tbody>
                     </table>

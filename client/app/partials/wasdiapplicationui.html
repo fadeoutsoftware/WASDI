@@ -250,10 +250,12 @@
                                 <div class="col-xs-12 col-md-10 col-lg-8 border-bottom py-2"
                                     ng-if="viewElement.type === 'table'">
                                     <div class="input-text-label pt-2">{{viewElement.label}}</div>
-                                    <waptable
-                                        table-variables="viewElement.aoTableVariables"
-                                        row-headers="viewElement.aoTableVariables[1]"></waptable>
-                                </div> 
+                                    <waptable table-variables="viewElement.aoTableVariables"
+                                        row-headers="viewElement.aoTableVariables[1]"
+                                        value="viewElement.aoTableVariables"
+                                        rows="viewElement.rowHeaders"
+                                        cols="viewElement.colHeaders"></waptable>
+                                </div>
                             </div>
 
                         </div>

@@ -75,6 +75,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.monitoring.Disk;
 import wasdi.shared.viewmodels.monitoring.License;
+import wasdi.shared.viewmodels.monitoring.Memory;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
@@ -1355,7 +1356,25 @@ public class Wasdi extends ResourceConfig {
 						oViewModel.setDiskAbsoluteUsed(oDisk.getAbsoluteUsed());
 						oViewModel.setDiskAbsoluteTotal(oDisk.getAbsoluteTotal());						
 					}
-					
+
+
+					// Get the memory info to estimate memory availability
+					Memory oMemory = oMetricsEntry.getMemory();
+
+					if (oMemory == null) {
+						oViewModel.setMemoryPercentageAvailable(0.0);
+						oViewModel.setMemoryPercentageUsed(0.0);
+						oViewModel.setMemoryAbsoluteAvailable(0L);
+						oViewModel.setMemoryAbsoluteUsed(0L);
+						oViewModel.setMemoryAbsoluteTotal(0L);
+					}
+					else {
+						oViewModel.setMemoryPercentageAvailable(oMemory.getPercentageAvailable());
+						oViewModel.setMemoryPercentageUsed(oPercentageUsed);
+						oViewModel.setMemoryAbsoluteAvailable(oMemory.getAbsoluteAvailable());
+						oViewModel.setMemoryAbsoluteUsed(oMemory.getAbsoluteUsed());
+						oViewModel.setMemoryAbsoluteTotal(oMemory.getAbsoluteTotal());						
+					}
 					
 					if (oPercentageUsed != null && oPercentageUsed.doubleValue() <= WasdiConfig.Current.loadBalancer.diskOccupiedSpaceMaxPercentage) {
 						aoOrderedNodeList.add(oViewModel);

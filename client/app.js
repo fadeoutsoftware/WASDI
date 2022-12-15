@@ -71,6 +71,8 @@ var wasdiApp = angular.module('wasdi', [
 
     //FILTERS
     'wasdi.stringUtils',
+    'wasdi.stringUtilsTime',
+    'wasdi.stringUtilsFileSize',
 
     //EXTERNAL LIBS
     'ui.bootstrap',
