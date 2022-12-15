@@ -92,6 +92,12 @@ public class CMProviderAdapter extends ProviderAdapter {
 	public String getFileName(String sFileURL) throws Exception {
 		WasdiLog.debugLog("CMProviderAdapter.getFileName | sFileURL: " + sFileURL);
 
+		if (sFileURL.contains("&product=")) {
+			String sProduct = sFileURL.substring(sFileURL.indexOf("&product=") + 9, sFileURL.indexOf("&", sFileURL.indexOf("&product=") + 9));
+
+			return sProduct + "_" + Utils.nowInMillis().longValue() + ".nc";
+		}
+
 		return "dataset";
 	}
 
