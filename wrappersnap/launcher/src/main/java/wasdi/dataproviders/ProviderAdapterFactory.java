@@ -54,7 +54,7 @@ public class ProviderAdapterFactory {
 		}
 
 		if (!s_aoDownloaderSuppliers.containsKey(sProviderAdapterType)) {
-			throw new IllegalArgumentException("ProviderAdapterSupplier.validateProviderAdapterType: Provider Adapter is null. Check the provider name");
+			throw new IllegalArgumentException("ProviderAdapterSupplier.validateProviderAdapterType: Provider Adapter with name " + sProviderAdapterType + " is null. Check the provider name");
 		}
 	}
 
