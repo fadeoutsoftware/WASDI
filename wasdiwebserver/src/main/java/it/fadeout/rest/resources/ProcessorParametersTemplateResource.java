@@ -502,6 +502,16 @@ public class ProcessorParametersTemplateResource {
 			return oResult;
 		}
 
+
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(oProcessorParametersTemplate.getProcessorId());
+
+		String sProcessorName = "unknown";
+
+		if (oProcessor != null) {
+			sProcessorName = oProcessor.getName();
+		}
+
 		try {
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
@@ -527,7 +537,7 @@ public class ProcessorParametersTemplateResource {
 			return oResult;
 		}
 
-		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oProcessorParametersTemplate.getName());
+		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oProcessorParametersTemplate.getName(), sProcessorName);
 
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
@@ -535,7 +545,7 @@ public class ProcessorParametersTemplateResource {
 		return oResult;
 	}
 
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sProcessorParametersTemplateName) {
+	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sProcessorParametersTemplateName, String sProcessorName) {
 		try {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 			
@@ -549,7 +559,7 @@ public class ProcessorParametersTemplateResource {
 				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 				Message oMessage = new Message();
 				
-				String sTitle = "ProcessorParametersTemplate " + sProcessorParametersTemplateName + " Shared";
+				String sTitle = "WASDI " + sProcessorName + " Parameter " + sProcessorParametersTemplateName + " shared with you";
 				
 				oMessage.setTilte(sTitle);
 				
@@ -560,8 +570,8 @@ public class ProcessorParametersTemplateResource {
 				
 				oMessage.setSender(sSender);
 				
-				String sMessage = "The user " + sRequesterUserId +  " shared with you the processorParametersTemplate: " + sProcessorParametersTemplateName;
-								
+				String sMessage = "The user " + sRequesterUserId + " shared with you the parameters " + sProcessorParametersTemplateName + " of " + sProcessorName + " WASDI Application.";
+
 				oMessage.setMessage(sMessage);
 		
 				Integer iPositiveSucceded = 0;
