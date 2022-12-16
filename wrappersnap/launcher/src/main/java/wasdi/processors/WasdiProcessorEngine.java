@@ -422,6 +422,50 @@ public abstract class WasdiProcessorEngine {
             try {
                 ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
                 oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+
+                // fix https://github.com/fadeoutsoftware/WASDI/issues/635
+                // New application: zip file with a folder containing the actual data does not work
+                File oProcessorFolder = new File(sProcessorFolder);
+                if (oProcessorFolder.exists()) {
+                    if (oProcessorFolder.isDirectory()) {
+                         String[] asFileNames = oProcessorFolder.list();
+
+                         if (asFileNames != null) {
+                             if (asFileNames.length == 2) {
+                                 if (asFileNames[0].equalsIgnoreCase(sZipFileName)
+                                         || asFileNames[1].equalsIgnoreCase(sZipFileName)) {
+                                     for (String sFileName : asFileNames) {
+                                         if (sFileName.equalsIgnoreCase(sZipFileName)) {
+                                             continue;
+                                         } else {
+                                             String sExtractedFilePath = sProcessorFolder + sFileName;
+                                             File oExtractedFile = new File(sExtractedFilePath);
+
+                                             if (oExtractedFile.exists()) {
+                                                 if (oExtractedFile.isDirectory()) {
+                                                     sExtractedFilePath += File.separator;
+
+                                                    String[] asExtractedFileNames = oExtractedFile.list();
+
+                                                    if (asExtractedFileNames != null) {
+                                                        for (String sExtractedFileName : asExtractedFileNames) {
+                                                            WasdiFileUtils.moveFile(sExtractedFilePath + sExtractedFileName, sProcessorFolder);
+                                                        }
+
+                                                        asExtractedFileNames = oExtractedFile.list();
+                                                        if (asExtractedFileNames != null && asExtractedFileNames.length == 0) {
+                                                            WasdiFileUtils.deleteFile(sExtractedFilePath);
+                                                        }
+                                                    }
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                    }
+                }
             } catch (Exception oE) {
                 WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
                 return false;
