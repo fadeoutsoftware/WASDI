@@ -23,17 +23,20 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
             sProtocol = 'file';
         }
 
-        if (utilsIsStrNullOrEmpty(sBounds) == false) {
-            if (sBounds.length > 1000) {
-                sBounds =""
-            }
-        }
-
         var sTest = sUrl.substring(iCut, sUrl.length);
         var sEncodedUri = encodeURIComponent(sTest);
         sEncodedUri = sProtocol + sEncodedUri;
 
-        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?fileUrl='+sEncodedUri+"&name="+sFileName+"&workspace="+sWorkspaceId+"&bbox="+sBounds+'&provider='+sProvider);
+        let oImageImportViewModel = {
+            fileUrl : sEncodedUri,
+            name: sFileName,
+            provider: sProvider,
+            workspace: sWorkspaceId,
+            bbox: sBounds,
+            parent: null
+        };
+
+        return this.m_oHttp.post(this.APIURL + '/filebuffer/download', oImageImportViewModel);
     }
 
     this.share = function(sOriginWorkspaceId, sDestinationWorkspaceId, sProductName) {

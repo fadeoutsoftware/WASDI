@@ -2445,15 +2445,26 @@ public class WasdiLib {
 			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 
-			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
-					sProvider +"&workspace="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
-			
-			if (sName != null) {
-				sUrl = sUrl + "&name="+sName;
+			String sUrl = m_sBaseUrl + "/filebuffer/download";
+
+			Map<String, String> asPayload = new HashMap<>();
+			asPayload.put("fileUrl", sEncodedFileLink);
+			asPayload.put("name", sName);
+			asPayload.put("provider", sProvider);
+			asPayload.put("workspace", m_sActiveWorkspace);
+			asPayload.put("bbox", sEncodedBoundingBox);
+			asPayload.put("parent", null);
+
+			String sPayload = null;
+			try {
+				sPayload = s_oMapper.writeValueAsString(asPayload);
+			} catch (Exception oE) {
+				log("WasdiLib.asynchImportProduct: could not serialize payload due to " + oE + ", aborting");
+				return null;
 			}
 
 			// Call the server
-			String sResponse = httpGet(sUrl, getStandardHeaders());
+			String sResponse = httpPost(sUrl, sPayload, getStandardHeaders());
 
 			// Read the Primitive Result response
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});

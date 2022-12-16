@@ -6,6 +6,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
+import wasdi.shared.viewmodels.processors.ImageImportViewModel;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
 
 
@@ -327,16 +330,44 @@ public class FileBufferResource {
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException
 	{
+		WasdiLog.debugLog("FileBufferResource.Download, session: " + sSessionId);
+
+		ImageImportViewModel oImageImportViewModel = new ImageImportViewModel();
+
+		oImageImportViewModel.setFileUrl(sFileUrl);
+		oImageImportViewModel.setName(sFileName);
+		oImageImportViewModel.setProvider(sProvider);
+		oImageImportViewModel.setWorkspace(sWorkspaceId);
+		oImageImportViewModel.setBbox(sBoundingBox);
+		oImageImportViewModel.setParent(sParentProcessWorkspaceId);
+
+		return this.imageImport(sSessionId, oImageImportViewModel);
+	}
+
+	/**
+	 * Trigger a new import of an image in WASDI.
+	 * The method checks the input, create the parameter and call WASDI.runProcess
+	 * 
+	 * @param sSessionId User Session
+	 * @param oImageImportViewModel the details of the request
+	 * @return a primitive result containing the outcome of the operation
+	 * @throws IOException in case of IO issues
+	 */
+	@POST
+	@Path("download")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult imageImport(@HeaderParam("x-session-token") String sSessionId, ImageImportViewModel oImageImportViewModel)
+			throws IOException {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		try {
 			
-			WasdiLog.debugLog("FileBufferResource.Download, session: " + sSessionId);
+			WasdiLog.debugLog("FileBufferResource.imageImport, session: " + sSessionId);
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("FileBufferResource.Download(): session is not valid");
+				WasdiLog.debugLog("FileBufferResource.imageImport(): session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -344,6 +375,28 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 			
 			String sProcessObjId = Utils.getRandomName();
+
+
+			if (oImageImportViewModel == null) {
+				WasdiLog.debugLog("FileBufferResource.imageImport(): request is not valid");
+				oResult.setIntValue(401);
+				return oResult;
+			}
+
+			String sFileUrl = null;
+			if (oImageImportViewModel.getFileUrl() != null) {
+				try {
+					sFileUrl = java.net.URLDecoder.decode(oImageImportViewModel.getFileUrl(), StandardCharsets.UTF_8.name());
+				} catch (UnsupportedEncodingException e) {
+					WasdiLog.debugLog("FileBufferResource.imageImport excepion decoding the fileUrl");
+				}
+			}
+
+			String sFileName = oImageImportViewModel.getName();
+			String sProvider = oImageImportViewModel.getProvider();
+			String sWorkspaceId = oImageImportViewModel.getWorkspace();
+			String sBoundingBox = oImageImportViewModel.getBbox();
+			String sParentProcessWorkspaceId = oImageImportViewModel.getParent();
 
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
@@ -353,7 +406,7 @@ public class FileBufferResource {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}
 
-			WasdiLog.debugLog("FileBufferResource.Download, provider: " + oProvider.getName());
+			WasdiLog.debugLog("FileBufferResource.imageImport, provider: " + oProvider.getName());
 
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
@@ -375,15 +428,15 @@ public class FileBufferResource {
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, sPath, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException e) {
-			WasdiLog.debugLog("DownloadResource.Download: Error updating process list " + e);
+			WasdiLog.debugLog("DownloadResource.imageImport: Error updating process list " + e);
 		} catch (Exception e) {
-			WasdiLog.debugLog("DownloadResource.Download: Error updating process list " + e);
+			WasdiLog.debugLog("DownloadResource.imageImport: Error updating process list " + e);
 		}
 		
 		oResult.setIntValue(500);
 		return oResult;
 	}
-	
+
 	/**
 	 * Publish band: if the band had already been published, it returns immediatly the View Model required by rabbit.
 	 * If it is not, it creates the parameter and call Wasdi.runProcess to publish the band
