@@ -740,7 +740,7 @@ public class WasdiFileUtils {
 					|| sFileName.toUpperCase().startsWith("EEHTSEB")) {
 				return Platforms.ECOSTRESS;
 			}
-			else if (sFileName.toLowerCase().contains("dataset") || sFileName.toLowerCase().contains("med") || sFileName.toLowerCase().contains("global-analysis-forecast") || sFileName.toUpperCase().contains("-GLO-")) {
+			else if (sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.CM;
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
