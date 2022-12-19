@@ -59,6 +59,7 @@ public class JavaWasdiLibTest {
 	private static Integer iOrbitNumber;
 	private static String sSensorOperationalMode;
 	private static String sCloudCoverage;
+	private static Map<String, Object> aoParams;
 
 	@BeforeClass
 	public static void setup() throws IOException {
@@ -100,6 +101,7 @@ public class JavaWasdiLibTest {
 
 		sCloudCoverage = "[0 TO " + parametersProperties.getProperty("test.max.cloud") + "]";
 
+		aoParams = new HashMap<>();
 		
 		wasdi = new WasdiLib();
 		String absoluteFilePath = FileUtils.getAbsoluteFilePath("config.properties");
@@ -166,7 +168,7 @@ public class JavaWasdiLibTest {
 		LOGGER.info("searchEOImages");
 
 		List<Map<String, Object>> images = wasdi.searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat,
-				dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+				dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, aoParams);
 
 		List<String> imageNames = images.stream().map(t -> (String) t.get("title")).collect(Collectors.toList());
 
@@ -179,7 +181,7 @@ public class JavaWasdiLibTest {
 		LOGGER.info("importProductListWithMaps");
 
 		List<Map<String, Object>> images = wasdi.searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat,
-				dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+				dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, aoParams);
 
 		List<String> alreadyExistingImages = wasdi.getProductsByActiveWorkspace();
 

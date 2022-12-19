@@ -170,6 +170,7 @@ public class WasdiLibTest {
 		Integer iOrbitNumber = null;
 		String sSensorOperationalMode = null;
 		String sCloudCoverage = "[0 TO 30]";
+		Map<String, Object> aoParams = new HashMap<>();
 
 		String sUrl = wasdiLib.getBaseUrl() + "/search/querylist?providers=LSA";
 		String sPayload = "[\"( footprint:\\\"intersects(POLYGON(( 8.5 45.7,8.5 45.9,8.7 45.9,8.7 45.7,8.5 45.7)))\\\") AND ( platformname:Sentinel-2  AND producttype:S2MSI1C) AND ( beginPosition:[2020-10-05T00:00:00.000Z TO 2020-10-25T23:59:59.999Z]AND ( endPosition:[2020-10-05T00:00:00.000Z TO 2020-10-25T23:59:59.999Z]) \"]";
@@ -183,7 +184,7 @@ public class WasdiLibTest {
 		List<Map<String, Object>> expectedResponse = WasdiLib.s_oMapper.readValue(searchEOImagesResponse, new TypeReference<List<Map<String,Object>>>(){});
 
 		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon,
-				sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage);
+				sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage, aoParams);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -197,7 +198,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages(null, null, null, null, null, null, null, null, null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages(null, null, null, null, null, null, null, null, null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -209,7 +210,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S3", null, null, null, null, null, null, null, null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S3", null, null, null, null, null, null, null, null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -221,7 +222,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, null, null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, null, null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -233,7 +234,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", null, null, null, null, null, null, null, null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", null, null, null, null, null, null, null, null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -245,7 +246,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, "UnknownProductType", null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", null, null, null, null, null, null, "UnknownProductType", null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -257,7 +258,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "Invalid", null, null, null, null, null, "SLC", null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "Invalid", null, null, null, null, null, "SLC", null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -269,7 +270,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", null, null, null, null, null, "GRD", null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", null, null, null, null, null, "GRD", null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -281,7 +282,7 @@ public class WasdiLibTest {
 		WasdiLib wasdiLib = spy(WasdiLib.class);
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "Invalid", null, null, null, null, "OCN", null, null, null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "Invalid", null, null, null, null, "OCN", null, null, null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -296,7 +297,7 @@ public class WasdiLibTest {
 		doReturn(fixedPostResponse).when(wasdiLib).httpPost(any(String.class), any(String.class), anyMap());
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "2020-10-25", 0D, null, null, null, "S2MSI1C", 1, "SensorOperationalMode", null);
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S1", "2020-10-05", "2020-10-25", 0D, null, null, null, "S2MSI1C", 1, "SensorOperationalMode", null, null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
@@ -311,7 +312,7 @@ public class WasdiLibTest {
 		doReturn(fixedPostResponse).when(wasdiLib).httpPost(any(String.class), any(String.class), anyMap());
 
 		List<Map<String, Object>> expectedResponse = new ArrayList<>();
-		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", "2020-10-05", "2020-10-25", null, 0D, null, null, "S2MSI2Ap", 1, null, "CloudCoverage");
+		List<Map<String, Object>> actualResponse = wasdiLib.searchEOImages("S2", "2020-10-05", "2020-10-25", null, 0D, null, null, "S2MSI2Ap", 1, null, "CloudCoverage", null);
 
 		Assert.assertNotNull(actualResponse);
 		Assert.assertEquals(expectedResponse, actualResponse);
