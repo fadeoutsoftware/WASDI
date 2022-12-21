@@ -1,5 +1,6 @@
+
 '''
-Unit Test class
+Unit Integration class
 A config file is required in the current directory
 The test case are executed in the same order as they are implemented on this file.
 The scenario tested follows the tutorial of wasdi till test number 7, after that
@@ -19,6 +20,7 @@ from pathlib import Path
 import wasdi
 from os.path import exists
 from shutil import copyfile
+import json
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -363,6 +365,7 @@ class WaspyIntegrationTests(unittest.TestCase):
         wasdi.openWorkspaceById(sCurrentWorkspaceId)
 
     def test_publishBand_good(self):
+        #wasdi.init("./resources/config.json")
         sCurrentWorkspaceId = wasdi.getActiveWorkspaceId()
         sWsToOpen = wasdi.getParameter('wsWithBandsToPublish')
         wasdi.openWorkspaceById(sWsToOpen)
@@ -377,6 +380,21 @@ class WaspyIntegrationTests(unittest.TestCase):
 
         # reset to initial workspace
         wasdi.openWorkspaceById(sCurrentWorkspaceId)
+
+    def test_getLayerWMS_good(self):
+        #wasdi.init("./resources/config.json")
+        sCurrentWorkspaceId = wasdi.getActiveWorkspaceId()
+        sWsToOpen = wasdi.getParameter('wsWithBandsToPublish')
+        wasdi.openWorkspaceById(sWsToOpen)
+
+        sProductName = wasdi.getParameter('fileName')
+        sBand = wasdi.getParameter('bandName')
+
+        oWMSResponse = json.loads(wasdi.getlayerWMS(sProductName, sBand))
+        print(oWMSResponse)
+        self.assertIsNotNone(oWMSResponse)
+        self.assertTrue("server" in oWMSResponse)
+        self.assertTrue("layerId" in oWMSResponse)
 
 
     #

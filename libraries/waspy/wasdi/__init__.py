@@ -3859,7 +3859,7 @@ def _getDefaultCRS():
     )
 
 
-def asynchPublishBand(sFileName, sBand):
+def asynchPublishBand(sProduct, sBand):
     """
     publishes a band of a given product
 
@@ -3870,8 +3870,8 @@ def asynchPublishBand(sFileName, sBand):
     """
 
     # validate input
-    if sFileName is None or sFileName == '':
-        wasdiLog('[ERROR] asynchPublishBand: ' + sFileName + ' is not a valid file name, aborting')
+    if sProduct is None or sProduct == '':
+        wasdiLog('[ERROR] asynchPublishBand: ' + sProduct + ' is not a valid file name, aborting')
         return None
 
     if sBand is None or sBand == '':
@@ -3880,11 +3880,11 @@ def asynchPublishBand(sFileName, sBand):
 
     aoProducts = getDetailedProductsByWorkspaceId()
     asProducts = [oProduct['fileName'] for oProduct in aoProducts]
-    if sFileName not in asProducts:
-        wasdiLog('[ERROR] asynchPublishBand: ' + sFileName + ' not found in workspace, aborting')
+    if sProduct not in asProducts:
+        wasdiLog('[ERROR] asynchPublishBand: ' + sProduct + ' not found in workspace, aborting')
         return None
 
-    aoCandidates = [oProd for oProd in aoProducts if oProd['fileName']==sFileName]
+    aoCandidates = [oProd for oProd in aoProducts if oProd['fileName'] == sProduct]
     if len(aoCandidates) < 1:
         wasdiLog('[ERROR] asynchPublishBand: could not find product on WASDI, aborting')
         return None
@@ -3914,7 +3914,7 @@ def asynchPublishBand(sFileName, sBand):
     oResult = None
     try:
         sUrl = getBaseUrl() + '/filebuffer/publishband?' + \
-               'fileUrl=' + sFileName + \
+               'fileUrl=' + sProduct + \
                '&workspace=' + getActiveWorkspaceId() + \
                '&band=' + sBand
         asHeaders = _getStandardHeaders()
@@ -3943,6 +3943,28 @@ def publishBand(sProduct, sBand):
 
     return waitProcess(asynchPublishBand(sProduct, sBand))
 
+def getlayerWMS(sProduct, sBand):
+    iCountRetries = 10
+    oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
+    while not ('payload' in oPublishedBandResponse and 'layerId' in oPublishedBandResponse['payload']):
+        if (iCountRetries == 0):
+            wasdiLog('[ERROR] getlayerWMS: reached the maximum number of attempt ( ' + str(type(iCountRetries)) + ') Aborting operation')
+            return
+        oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
+        time.sleep(3)
+        iCountRetries -= 1
+        wasdiLog('[INFO] getlayerWMS: waiting for the band to be available... (' + str(type(iCountRetries)) + ' attempts left before aborting)')
+    oPayload = oPublishedBandResponse["payload"]
+    oResult = dict()
+    oResult["server"] = oPayload["geoserverUrl"]
+    oResult["layerId"] = oPayload["layerId"]
+    return json.dumps(oResult);
+
+
+    """    if oResult is not None and oResult.ok:
+        oJsonResult = oResult.json()
+        return oJsonResult
+        """
 
 if __name__ == '__main__':
     _log(
