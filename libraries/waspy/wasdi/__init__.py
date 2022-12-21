@@ -3944,6 +3944,15 @@ def publishBand(sProduct, sBand):
     return waitProcess(asynchPublishBand(sProduct, sBand))
 
 def getlayerWMS(sProduct, sBand):
+    """
+    Starts a publish band process and wait for the result to be available.
+    The function then return a JSON containing the geoServerUrl and the LayerId to be used on external application/
+    mpa visualizations
+    Waits for a total of 10 attempts waiting 3 seconds each.
+    :param sProduct: The product to of which the WMS layers details are required
+    :param sBand: The band required
+    :return: A JSON string with the following structure { server : [GeoServerUrl] , layerId : [LayerId] }
+    """
     iCountRetries = 10
     oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
     while not ('payload' in oPublishedBandResponse and 'layerId' in oPublishedBandResponse['payload']):
