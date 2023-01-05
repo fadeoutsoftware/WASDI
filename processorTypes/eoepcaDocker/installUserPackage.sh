@@ -119,7 +119,7 @@ function installPackageConda() {
     fi
 
     echo "[INFO] Install package..."
-    conda env update --file ${fileToParse}
+    conda env update --quiet --file ${fileToParse}
     returnCode=${?}
 
     if [[ ${returnCode} -eq 0 ]]

@@ -12,9 +12,17 @@ function showHelp() {
     echo -e "\t- conda package: you have to provide '--package-conda' on the command line"
     echo -e "\t- pip package: you have to provide '--package-pip' on the command line"
     echo
-    echo "Usage: /bin/bash ${0} --home-directory <directory> [--package-apt] [--package-conda] [--package-pip]"
+    echo "Usage: /bin/bash ${0} --home-directory <directory> [--package-apt] [--package-conda] [--package-pip] [--failure-is-ok]"
     echo
-    echo "If no --package-* argument are provided, the script exit with a return code 0"
+    echo "Return code:"
+    echo -e "\t- if no --package-* argument are provided: the script exit with a return code 0"
+    echo -e "\t- if at least one --package-* argument is provided:"
+    echo -e "\t\t- if the package file to read is missing: the script exit with a return code 0"
+    echo -e "\t\t- if the pakcage file to read is present, the script read it and tries to install packages:"
+    echo -e "\t\t\t- in case of success, it exit with a return code 0"
+    echo -e "\t\t\t- in case of failure:"
+    echo -e "\t\t\t\t- if --failure-is-ok is provided: it exit with a return code 0"
+    echo -e "\t\t\t\t- if --failure-is-ok is not provided: it exit with the return code of the command which failed"
 
     if [[ -n "${_exitCode}" ]]
     then
@@ -111,7 +119,7 @@ function installPackageConda() {
     fi
 
     echo "[INFO] Install package..."
-    conda env update --file ${fileToParse}
+    conda env update --quiet --file ${fileToParse}
     returnCode=${?}
 
     if [[ ${returnCode} -eq 0 ]]
@@ -150,7 +158,7 @@ function installPackagePip() {
     fi
 
     echo "[INFO] Install package..."
-    pip3 install $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
+    pip3 install --no-cache-dir --no-compile $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
     returnCode=${?}
 
     if [[ ${returnCode} -eq 0 ]]
@@ -200,6 +208,11 @@ do
             installUserPackagePip="true"
             shift
         ;;
+
+        --failure-is-ok)
+            failureIsOk="true"
+            shift
+        ;;
     esac
 done
 #### ARGUMENT MANAGEMENT ####
@@ -241,6 +254,12 @@ then
     echo "==== APT ===="
     installPackageApt
     returnCodeApt=${?}
+
+    if [[ "${failureIsOk}" == "true" ]]
+    then
+        returnCodeApt=0
+    fi
+
     echo "==== /APT ===="
 fi
 
@@ -249,6 +268,12 @@ then
     echo "==== CONDA ===="
     installPackageConda
     returnCodeConda=${?}
+
+    if [[ "${failureIsOk}" == "true" ]]
+    then
+        returnCodeConda=0
+    fi
+
     echo "==== /CONDA ===="
 fi
 
@@ -257,6 +282,12 @@ then
     echo "==== PIP ===="
     installPackagePip
     returnCodePip=${?}
+
+    if [[ "${failureIsOk}" == "true" ]]
+    then
+        returnCodePip=0
+    fi
+
     echo "==== /PIP ===="
 fi
 
