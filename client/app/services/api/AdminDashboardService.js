@@ -17,6 +17,10 @@ service('AdminDashboardService', ['$http',  'ConstantsService', function ($http,
         return this.m_oHttp.get(this.APIURL + '/admin/workspacesByPartialName?partialName=' + sPartialName);
     };
 
+    this.findProcessorsByPartialName = function(sPartialName) {
+        return this.m_oHttp.get(this.APIURL + '/admin/processorsByPartialName?partialName=' + sPartialName);
+    };
+
     this.findResourcePermissions = function(sResourceType, sResourceId, sUserId) {
         let sUrl = this.APIURL + '/admin/resourcePermissions?';
 
