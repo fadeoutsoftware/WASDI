@@ -33,6 +33,9 @@ var AdminDashboardController = (function () {
         this.m_sWorkspacePartialName = "";
         this.m_aoWorkspacesList = [];
 
+        this.m_sProcessorPartialName = "";
+        this.m_aoProcessorsList = [];
+
         this.m_aoResourceTypeList = [
             "NODE",
             "PROCESSORPARAMETERSTEMPLATE",
@@ -258,6 +261,60 @@ var AdminDashboardController = (function () {
                 function (error) {
                     console.log(
                         "AdminDashboardController.findWorkspacesByPartialName | error.data.message: ",
+                        error.data.message
+                    );
+
+                    let errorMessage = oController.m_oTranslate.instant(
+                        error.data.message
+                    );
+
+                    utilsVexDialogAlertTop(errorMessage);
+                }
+            );
+    };
+
+    AdminDashboardController.prototype.findProcessorsByPartialName = function (sProcessorPartialName) {
+        this.m_aoProcessorsList = [];
+
+        if (utilsIsStrNullOrEmpty(sProcessorPartialName) === true) {
+            utilsVexDialogAlertTop(
+                "GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED"
+            );
+
+            return false;
+        }
+
+        utilsRemoveSpaces(sProcessorPartialName);
+
+        if (sProcessorPartialName.length < 3) {
+            utilsVexDialogAlertTop(
+                "GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED"
+            );
+
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oAdminDashboardService
+            .findProcessorsByPartialName(sProcessorPartialName)
+            .then(
+                function (data) {
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        oController.m_aoProcessorsList = data.data;
+                    } else {
+                        utilsVexDialogAlertTop(
+                            "GURU MEDITATION<br>ERROR IN FINDING PROCESSORS"
+                        );
+                    }
+
+                    // oController.clearForm();
+
+                    return true;
+                },
+                function (error) {
+                    console.log(
+                        "AdminDashboardController.findProcessorsByPartialName | error.data.message: ",
                         error.data.message
                     );
 

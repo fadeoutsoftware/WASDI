@@ -3,12 +3,14 @@ package wasdi.shared.data;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -126,6 +128,35 @@ public class ProcessorRepository extends  MongoRepository {
 
         return aoReturnList;
     }
+
+	public List<Processor> findProcessorsByPartialName(String sPartialName) {
+		List<Processor> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			return aoReturnList;
+		}
+
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+
+		Bson oFilterLikeProcessorId = Filters.eq("processorId", regex);
+		Bson oFilterLikeName = Filters.eq("name", regex);
+		Bson oFilterLikeFriendlyName = Filters.eq("friendlyName", regex);
+		Bson oFilterLikeDescription = Filters.eq("description", regex);
+
+		Bson oFilter = Filters.or(oFilterLikeProcessorId, oFilterLikeName, oFilterLikeFriendlyName, oFilterLikeDescription);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("name", 1));
+
+			fillList(aoReturnList, oWSDocuments, Processor.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
     
     /**
      * Get the next http port available for a processor
