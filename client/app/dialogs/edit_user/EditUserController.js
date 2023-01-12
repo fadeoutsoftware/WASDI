@@ -3,9 +3,9 @@
  */
 
 
-var EditUserController = (function() {
+var EditUserController = (function () {
 
-    function EditUserController ($scope, oClose,oExtras,oAuthService,oConstantsService, oProcessWorkspaceService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -20,8 +20,9 @@ var EditUserController = (function() {
         this.m_lTotalRuntime = null; 
         this.initializeEditUserInfo();
         this.initializeUserRuntimeInfo();
-
-        $scope.close = function(result) {
+        this.m_sSelectedTab = "UserInfo";
+           
+        $scope.close = function (result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
