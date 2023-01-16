@@ -222,11 +222,11 @@
                 {
                     "id": "{{ sCurrentDockerRegistry }}",
                     "address": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].address }}",
+                    "apiAddress": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].apiAddress }}",
                     "user": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].user }}",
                     "password": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].password }}",
                     "priority": {{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].priority }}
                 }{% if not loop.last %},
-            ]
 {% endif %}
 {% endfor %}
 
