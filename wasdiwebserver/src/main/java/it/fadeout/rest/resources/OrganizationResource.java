@@ -31,6 +31,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.OrganizationEditorViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationSharingViewModel;
@@ -250,11 +251,16 @@ public class OrganizationResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationViewModel oOrganizationViewModel) {
-		WasdiLog.debugLog("OrganizationResource.createOrganization( Organization: " + oOrganizationViewModel.toString() + ")");
+	public PrimitiveResult createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+		WasdiLog.debugLog("OrganizationResource.createOrganization( Organization: " + oOrganizationEditorViewModel.toString() + ")");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+
+		if (sSessionId != null) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(oOrganizationEditorViewModel.getName());
+		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -266,7 +272,7 @@ public class OrganizationResource {
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationViewModel.getName());
+		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
 		if (oExistingOrganization != null) {
 			WasdiLog.debugLog("OrganizationResource.createOrganization: organization already exists");
@@ -274,12 +280,14 @@ public class OrganizationResource {
 			return oResult;
 		}
 
-		Organization oOrganization = convert(oOrganizationViewModel);
+		Organization oOrganization = convert(oOrganizationEditorViewModel);
+		oOrganization.setUserId(oUser.getUserId());
+		oOrganization.setOrganizationId(Utils.getRandomName());
 
 		if (oOrganizationRepository.insertOrganization(oOrganization)) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oOrganization.getOrganizationId());
-		} else {WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationViewModel.getName() + " ): insertion failed");
+		} else {WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
 			oResult.setStringValue("The creation of the organization failed.");
 		}
 
@@ -295,11 +303,16 @@ public class OrganizationResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationViewModel oOrganizationViewModel) {
-		WasdiLog.debugLog("OrganizationResource.updateOrganization( Organization: " + oOrganizationViewModel.toString() + ")");
+	public PrimitiveResult upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+		WasdiLog.debugLog("OrganizationResource.updateOrganization( Organization: " + oOrganizationEditorViewModel.toString() + ")");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+
+		if (sSessionId != null) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(oOrganizationEditorViewModel.getName());
+		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -311,21 +324,60 @@ public class OrganizationResource {
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationViewModel.getName());
+		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
-		if (oExistingOrganization != null) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: organization already exists");
-			oResult.setStringValue("An organization with the same name already exists.");
+		if (oExistingOrganization == null) {
+			WasdiLog.debugLog("OrganizationResource.updateOrganization: organization does not exist");
+			oResult.setStringValue("No organization with the name already exists.");
 			return oResult;
 		}
 
-		Organization oOrganization = convert(oOrganizationViewModel);
+		Organization oOrganization = convert(oOrganizationEditorViewModel);
 
-		if (oOrganizationRepository.insertOrganization(oOrganization)) {
+		if (oOrganizationRepository.updateOrganization(oOrganization)) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oOrganization.getOrganizationId());
-		} else {WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationViewModel.getName() + " ): insertion failed");
-			oResult.setStringValue("The creation of the organization failed.");
+		} else {
+			WasdiLog.debugLog("OrganizationResource.updateOrganization( " + oOrganizationEditorViewModel.getName() + " ): update failed");
+			oResult.setStringValue("The update of the organization failed.");
+		}
+
+		return oResult;
+	}
+
+	@DELETE
+	@Path("/delete")
+	public PrimitiveResult deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("organization") String sOrganizationId) {
+		WasdiLog.debugLog("OrganizationResource.deleteOrganization( Organization: " + sOrganizationId + " )");
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: invalid session");
+			oResult.setStringValue("Invalid session.");
+			return oResult;
+		}
+
+		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+
+		Organization oExistingOrganization = oOrganizationRepository.getById(sOrganizationId);
+
+		if (oExistingOrganization == null) {
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: organization does not exist");
+			oResult.setStringValue("No organization with the name already exists.");
+			return oResult;
+		}
+
+		if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(sOrganizationId);
+		} else {
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
+			oResult.setStringValue("The deletion of the organization failed.");
 		}
 
 		return oResult;
@@ -345,7 +397,7 @@ public class OrganizationResource {
 	public PrimitiveResult shareOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId) {
 
-		WasdiLog.debugLog("OrganizationResource.ShareOrganization( WS: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
+		WasdiLog.debugLog("OrganizationResource.ShareOrganization( Organization: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -401,7 +453,7 @@ public class OrganizationResource {
 			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 				// A user that has Admin rights should be able to auto-share the resource.
 			} else {
-				WasdiLog.debugLog("OrganizationResource.ShareOrganization: auto sharing not so smart");
+				WasdiLog.debugLog("OrganizationResource.shareOrganization: auto sharing not so smart");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
@@ -412,7 +464,7 @@ public class OrganizationResource {
 
 		// Cannot share with the owner
 		if (sDestinationUserId.equals(oOrganization.getUserId())) {
-			WasdiLog.debugLog("OrganizationResource.ShareOrganization: sharing with the owner not so smart");
+			WasdiLog.debugLog("OrganizationResource.shareOrganization: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
@@ -425,7 +477,7 @@ public class OrganizationResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			WasdiLog.debugLog("OrganizationResource.ShareOrganization: Destination user does not exists");
+			WasdiLog.debugLog("OrganizationResource.shareOrganization: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
@@ -442,7 +494,7 @@ public class OrganizationResource {
 
 				oUserResourcePermissionRepository.insertPermission(oOrganizationSharing);				
 			} else {
-				WasdiLog.debugLog("OrganizationResource.ShareOrganization: already shared!");
+				WasdiLog.debugLog("OrganizationResource.shareOrganization: already shared!");
 				oResult.setStringValue("Already Shared.");
 				oResult.setBoolValue(true);
 				oResult.setIntValue(Status.OK.getStatusCode());
@@ -450,7 +502,7 @@ public class OrganizationResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.ShareOrganization: " + oEx);
+			WasdiLog.debugLog("OrganizationResource.shareOrganization: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -471,11 +523,11 @@ public class OrganizationResource {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("OrganizationResource.ShareOrganization: sMercuriusAPIAddress is null");
+				WasdiLog.debugLog("OrganizationResource.shareOrganization: sMercuriusAPIAddress is null");
 			}
 			else {
 
-				WasdiLog.debugLog("OrganizationResource.ShareOrganization: send notification");
+				WasdiLog.debugLog("OrganizationResource.shareOrganization: send notification");
 
 				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 				Message oMessage = new Message();
@@ -504,7 +556,7 @@ public class OrganizationResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.ShareOrganization: notification exception " + oEx.toString());
+			WasdiLog.debugLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
 		}
 	}
 
@@ -520,7 +572,7 @@ public class OrganizationResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<OrganizationSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
 
-		WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedWorksace( WS: " + sOrganizationId + " )");
+		WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedWorksace( Organization: " + sOrganizationId + " )");
 
 	
 		List<UserResourcePermission> aoOrganizationSharing = null;
@@ -563,7 +615,7 @@ public class OrganizationResource {
 	public PrimitiveResult deleteUserSharedOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sUserId) {
 
-		WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization( WS: " + sOrganizationId + ", User:" + sUserId + " )");
+		WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization( Organization: " + sOrganizationId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		// Validate Session
@@ -636,14 +688,28 @@ public class OrganizationResource {
 
 	private static Organization convert(OrganizationViewModel oOrganizationViewModel) {
 		Organization oOrganization = new Organization();
-		oOrganization.setOrganizationId(oOrganization.getOrganizationId());
-		oOrganization.setUserId(oOrganization.getUserId());
-		oOrganization.setName(oOrganization.getName());
-		oOrganization.setDescription(oOrganization.getDescription());
-		oOrganization.setAddress(oOrganization.getAddress());
-		oOrganization.setEmail(oOrganization.getEmail());
-		oOrganization.setUrl(oOrganization.getUrl());
-//		oOrganization.setlogo(oOrganization.getLogo());
+		oOrganization.setOrganizationId(oOrganizationViewModel.getOrganizationId());
+		oOrganization.setUserId(oOrganizationViewModel.getUserId());
+		oOrganization.setName(oOrganizationViewModel.getName());
+		oOrganization.setDescription(oOrganizationViewModel.getDescription());
+		oOrganization.setAddress(oOrganizationViewModel.getAddress());
+		oOrganization.setEmail(oOrganizationViewModel.getEmail());
+		oOrganization.setUrl(oOrganizationViewModel.getUrl());
+//		oOrganization.setlogo(oOrganizationViewModel.getLogo());
+
+		return oOrganization;
+	}
+
+	private static Organization convert(OrganizationEditorViewModel oOrganizationEditorViewModel) {
+		Organization oOrganization = new Organization();
+//		oOrganization.setOrganizationId(oOrganizationEditorViewModel.getOrganizationId());
+//		oOrganization.setUserId(oOrganizationEditorViewModel.getUserId());
+		oOrganization.setName(oOrganizationEditorViewModel.getName());
+		oOrganization.setDescription(oOrganizationEditorViewModel.getDescription());
+		oOrganization.setAddress(oOrganizationEditorViewModel.getAddress());
+		oOrganization.setEmail(oOrganizationEditorViewModel.getEmail());
+		oOrganization.setUrl(oOrganizationEditorViewModel.getUrl());
+//		oOrganization.setlogo(oOrganizationEditorViewModel.getLogo());
 
 		return oOrganization;
 	}

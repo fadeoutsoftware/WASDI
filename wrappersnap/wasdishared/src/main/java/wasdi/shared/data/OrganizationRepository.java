@@ -114,6 +114,35 @@ public class OrganizationRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get an organization by its Id.
+	 * @param sOrganizationId the Id of the organization
+	 * @return the organization if found, null otherwise
+	 */
+	public Organization getById(String sOrganizationId) {
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.eq("organizationId", sOrganizationId)).first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+
+				Organization oOrganization = null;
+				try {
+					oOrganization = s_oMapper.readValue(sJSON, Organization.class);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				return oOrganization;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("OrganizationRepository.getById( " + sOrganizationId + "): error: " + oE);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get an organization by its name.
 	 * @param sName the name of the organization
 	 * @return the organization if found, null otherwise

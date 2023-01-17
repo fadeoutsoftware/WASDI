@@ -1,3 +1,60 @@
-<div>
-    User Subscriptions Tab
+<div class="row-v4 mt-2">
+    <div class="col-v4">
+        <legend>Subscriptions</legend>
+        <p class="mr-2 text-uppercase">
+            ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
+        </p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Subscription</th>
+                    <th scope="col">Organization</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Time</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <!-- Subscription name -->
+                    <td></td>
+                    <!-- Organization name -->
+                    <td></td>
+                    <!-- Processing time used by this subscription -->
+                    <td></td>
+                    <!-- Status of Subscription (active or inactive) -->
+                    <td></td>
+                    <!-- Button to show projects in subscription -->
+                    <td>
+                        <button class="btn btn-primary btn-wasdi">
+                            <i class="fa fa-file"></i>
+
+                            <span class="ng-binding">
+                                Show Projects
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
+                convertMsToTime}}</span>
+        </p>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <td>Name</td>
+                    <td>Description</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Project Name</td>
+                    <td>Project Description blah blah</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
