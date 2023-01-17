@@ -25,6 +25,10 @@ var EditUserController = (function () {
 
         this.m_aoOrganizations = [];
         this.m_aoUsersList = [];
+        this.m_oEditOrganization = {};
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_sSelectedOrganizationId = null;
 
         this.initializeOrganizationsInfo();
 
@@ -208,25 +212,26 @@ var EditUserController = (function () {
 
         this.m_oOrganizationService.getOrganizationListByUser().then(
             function (data) {
-                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                            oController.m_aoOrganizations = data.data;
-                        } else {
-                            utilsVexDialogAlertTop(
-                                "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
-                            );
-                        }
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                    oController.m_aoOrganizations = data.data;
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
+                    );
+                }
 
-                        return true;
+                return true;
                     }
         );
     }
 
     EditUserController.prototype.showUsersByOrganization = function(sUserId, sOrganizationId) {
-        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sOrganizationId) === true))
-        {
+        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sOrganizationId) === true)) {
             //TODO THROW ERROR ?
             return false;
         }
+
+        this.m_sSelectedOrganizationId = sOrganizationId;
 
         if (sOrganizationId === "org-1") {
             this.m_aoUsersList = [
@@ -240,6 +245,10 @@ var EditUserController = (function () {
             ];
         }
 
+        this.m_oShowOrganizationUsersList = true;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_oEditOrganization = {}
+
         var oController = this;
 
 
@@ -247,6 +256,123 @@ var EditUserController = (function () {
 
     EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
         this.m_aoUsersList = [];
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_sSelectedOrganizationId = null;
+        this.m_oEditOrganization = {}
+    }
+
+    EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId) {
+        console.log("EditUserController.showOrganizationEditForm | sOrganizationId: ", sOrganizationId);
+        
+        if (utilsIsStrNullOrEmpty(sOrganizationId) === true) {
+            this.m_oEditOrganization = {};
+        } else if (sOrganizationId === "org-1") {
+            this.m_aoUsersList = [
+                {"name":"Petru","role":"Developer","sessionId":null,"surname":"Petrescu","userId":"petru.petrescu@wasdi.cloud"},
+                {"name":"Betty","role":"Developer","sessionId":null,"surname":"Spurgeon","userId":"betty.spurgeon@wasdi.cloud"}
+            ];
+
+            this.m_oEditOrganization = {organizationId: "org-1", name: "WASDI", ownerUserId: "p.campanella@fadeout.it", description: "A Luxembourgish company", address: "Luxembourg", email: "info@wasdi.cloud", url: "wasdi.net"};
+        } else if (sOrganizationId === "org-2") {
+            this.m_aoUsersList = [
+                {"name":"Marco","role":"Developer","sessionId":null,"surname":"Menapace","userId":"m.menapace@fadeout.it"},
+                {"name":"Cristiano","role":"Developer","sessionId":null,"surname":"Nattero","userId":"c.nattero@fadeout.it"}
+            ];
+
+            this.m_oEditOrganization = {organizationId: "org-2", name: "Fadeout Software", ownerUserId: "p.campanella@fadeout.it", description: "An Italian company", address: "Genoa", email: "info@fadeout.it", url: "fadeout.it"};
+        }
+
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = true;
+        this.m_sSelectedOrganizationId = sOrganizationId;
+    }
+
+    EditUserController.prototype.deleteOrganization = function(sUserId, sOrganizationId) {
+        console.log("EditUserController.deleteOrganization | sOrganizationId: ", sOrganizationId);
+
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_sSelectedOrganizationId = null;
+
+        // if (sOrganizationId === "org-1") {
+        //     this.m_aoOrganizations = [
+        //         {organizationId: "org-2", name: "Fadeout Software", ownerUserId: "p.campanella@fadeout.it"}
+        //     ];
+        // } else if (sOrganizationId === "org-2") {
+        //     this.m_aoOrganizations = [
+        //         {organizationId: "org-1", name: "WASDI", ownerUserId: "p.campanella@fadeout.it"}
+        //     ];
+        // }
+
+        var oController = this;
+        this.m_oOrganizationService.deleteOrganization(sOrganizationId)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    //TODO Organization Deleted
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
+                }
+
+                oController.initializeOrganizationsInfo();
+
+            },function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
+        });
+
+    }
+
+    EditUserController.prototype.saveOrganization = function() {
+        console.log("EditUserController.saveOrganization | m_oEditOrganization: ", this.m_oEditOrganization);
+
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_sSelectedOrganizationId = null;
+
+        // var oJsonToSend = this.getUserInfo();
+        // var oController = this;
+
+        // this.m_bEditingUserInfo = true;
+        // this.m_oAuthService.changeUserInfo(oJsonToSend)
+        //     .then(function (data) {
+        //         if(utilsIsObjectNullOrUndefined(data.data) === false ||  data.data.userId !== "" )
+        //         {
+        //             if(data.data.boolValue ===  false)
+        //             {
+        //                 utilsVexDialogAlertTop("GURU MEDITATION<br>IMPOSSIBLE TO CHANGE USER INFO");
+        //             }
+        //             else
+        //             {
+        //                 var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED USER INFO");
+        //                 utilsVexCloseDialogAfter(3000,oVexWindow);
+        //                 oController.m_oUser = data.data;
+        //                 oController.m_oConstantsService.setUser(data.data);//save in cookie
+        //             }
+
+
+        //         }
+        //         else
+        //         {
+        //             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE USER INFO");
+        //         }
+        //         oController.m_bEditingUserInfo = false;
+        //         oController.initializeEditUserInfo();
+
+        //     },(function (error)
+        //     {
+        //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE USER INFO");
+        //         oController.m_bEditingUserInfo = false;
+        //         oController.initializeEditUserInfo();
+        //     }));
+    }
+
+    EditUserController.prototype.cancelEditOrganizationForm = function() {
+        console.log("EditUserController.cancelEditOrganizationForm");
+
+        this.m_oShowOrganizationUsersList = false;
+        this.m_oShowEditOrganizationForm = false;
+        this.m_oEditOrganization = {}
+        this.m_sSelectedOrganizationId = null;
     }
 
     EditUserController.$inject = [
