@@ -1,13 +1,14 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessSummary extends DescriptionType {
 	private String id = null;
 	private String version = null;
-	private List<JobControlOptions> jobControlOptions = null;
-	private List<TransmissionMode> outputTransmission = null;
-	private List<Link> links = null;
+	private List<JobControlOptions> jobControlOptions = new ArrayList<JobControlOptions>();
+	private List<TransmissionMode> outputTransmission = new ArrayList<TransmissionMode>();
+	private List<Link> links = new ArrayList<Link>();
 	
 	public String getId() {
 		return id;

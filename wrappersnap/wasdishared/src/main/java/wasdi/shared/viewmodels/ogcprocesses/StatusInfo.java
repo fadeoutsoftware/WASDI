@@ -1,5 +1,6 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class StatusInfo {
 	private Integer progress = null;
 
 	@JsonProperty("links")
-	private List<Link> links = null;
+	private List<Link> links = new ArrayList<Link>();
 
 	public String getProcessID() {
 		return processID;
