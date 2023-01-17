@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -13,6 +13,7 @@ var EditUserController = (function () {
         this.m_oAuthService = oAuthService;
         this.m_oConstantsService = oConstantsService;
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
+        this.m_oOrganizationService = oOrganizationService;
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
         this.m_bEditingUserInfo = false;
@@ -21,7 +22,12 @@ var EditUserController = (function () {
         this.initializeEditUserInfo();
         this.initializeUserRuntimeInfo();
         this.m_sSelectedTab = "UserInfo";
-           
+
+        this.m_aoOrganizations = [];
+        this.m_aoUsersList = [];
+
+        this.initializeOrganizationsInfo();
+
         $scope.close = function (result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
@@ -190,7 +196,58 @@ var EditUserController = (function () {
                         return true;
                     }
         );
-    }; 
+    };
+
+    EditUserController.prototype.initializeOrganizationsInfo = function() {
+        // this.m_aoOrganizations = [
+        //     {organizationId: "org-1", name: "WASDI", ownerUserId: "p.campanella@fadeout.it"},
+        //     {organizationId: "org-2", name: "Fadeout Software", ownerUserId: "p.campanella@fadeout.it"}
+        // ];
+
+        var oController = this;
+
+        this.m_oOrganizationService.getOrganizationListByUser().then(
+            function (data) {
+                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                            oController.m_aoOrganizations = data.data;
+                        } else {
+                            utilsVexDialogAlertTop(
+                                "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
+                            );
+                        }
+
+                        return true;
+                    }
+        );
+    }
+
+    EditUserController.prototype.showUsersByOrganization = function(sUserId, sOrganizationId) {
+        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sOrganizationId) === true))
+        {
+            //TODO THROW ERROR ?
+            return false;
+        }
+
+        if (sOrganizationId === "org-1") {
+            this.m_aoUsersList = [
+                {"name":"Petru","role":"Developer","sessionId":null,"surname":"Petrescu","userId":"petru.petrescu@wasdi.cloud"},
+                {"name":"Betty","role":"Developer","sessionId":null,"surname":"Spurgeon","userId":"betty.spurgeon@wasdi.cloud"}
+            ];
+        } else if (sOrganizationId === "org-2") {
+            this.m_aoUsersList = [
+                {"name":"Marco","role":"Developer","sessionId":null,"surname":"Menapace","userId":"m.menapace@fadeout.it"},
+                {"name":"Cristiano","role":"Developer","sessionId":null,"surname":"Nattero","userId":"c.nattero@fadeout.it"}
+            ];
+        }
+
+        var oController = this;
+
+
+    }
+
+    EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
+        this.m_aoUsersList = [];
+    }
 
     EditUserController.$inject = [
         '$scope',
@@ -198,7 +255,8 @@ var EditUserController = (function () {
         'extras',
         'AuthService',
         'ConstantsService',
-        'ProcessWorkspaceService'
+        'ProcessWorkspaceService',
+        'OrganizationService'
     ];
     return EditUserController ;
 })();

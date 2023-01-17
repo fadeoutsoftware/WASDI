@@ -85,6 +85,16 @@ public class User {
 	private String description;
 
 	/**
+	 * Active subscription Id
+	 */
+	private String activeSubscriptionId;
+
+	/**
+	 * Active project Id
+	 */
+	private String activeProjectId;
+
+	/**
 	 * User role
 	 */
 	private String role = UserApplicationRole.USER.name();
@@ -252,6 +262,22 @@ public class User {
 		this.type = type;
 	}
 	
+	public String getActiveSubscriptionId() {
+		return activeSubscriptionId;
+	}
+
+	public void setActiveSubscriptionId(String activeSubscriptionId) {
+		this.activeSubscriptionId = activeSubscriptionId;
+	}
+
+	public String getActiveProjectId() {
+		return activeProjectId;
+	}
+
+	public void setActiveProjectId(String activeProjectId) {
+		this.activeProjectId = activeProjectId;
+	}
+
 	/**
 	 * Return true if the user is professional
 	 * False if is Free or Standard

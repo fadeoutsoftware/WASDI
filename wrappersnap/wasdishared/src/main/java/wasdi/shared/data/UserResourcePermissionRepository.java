@@ -67,6 +67,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public List<UserResourcePermission> getOrganizationSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("organization", sUserId);
+	}
+
+	public List<UserResourcePermission> getSubscriptionSharingsByOwnerId(String sUserId) {
+		return getPermissionsByTypeAndOwnerId("subscription", sUserId);
+	}
+
 	public List<UserResourcePermission> getWorkspaceSharingsByOwnerId(String sUserId) {
 		return getPermissionsByTypeAndOwnerId("workspace", sUserId);
 	}
@@ -113,6 +121,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return aoReturnList;
+	}
+
+	public List<UserResourcePermission> getOrganizationSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("organization", sUserId);
+	}
+
+	public List<UserResourcePermission> getSubscriptionSharingsByUserId(String sUserId) {
+		return getPermissionsByTypeAndUserId("subscription", sUserId);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByUserId(String sUserId) {
@@ -169,6 +185,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public List<UserResourcePermission> getNodeSharingsByNodeCode(String sNodeCode) {
 		return getPermissionsByTypeAndResourceId("node", sNodeCode);
+	}
+
+	public List<UserResourcePermission> getOrganizationSharingsByOrganizationId(String sOrganizationId) {
+		return getPermissionsByTypeAndResourceId("organization", sOrganizationId);
+	}
+
+	public List<UserResourcePermission> getSubscriptionSharingsBySubscriptionId(String sSubscriptionId) {
+		return getPermissionsByTypeAndResourceId("subscription", sSubscriptionId);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByWorkspaceId(String sWorkspaceId) {
@@ -280,6 +304,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public UserResourcePermission getOrganizationSharingByUserIdAndOrganizationId(String sUserId, String sOrganizationId) {
+		return getPermissionByTypeAndUserIdAndResourceId("organization", sUserId, sOrganizationId);
+	}
+
+	public UserResourcePermission getSubscriptionSharingByUserIdAndSubscriptionId(String sUserId, String sSubscriptionId) {
+		return getPermissionByTypeAndUserIdAndResourceId("subscription", sUserId, sSubscriptionId);
+	}
+
 	public UserResourcePermission getWorkspaceSharingByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
 		return getPermissionByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
 	}
@@ -333,6 +365,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public List<UserResourcePermission> getNodeSharings() {
 		return getPermissionsByType("node");
+	}
+
+	public List<UserResourcePermission> getOrganizationSharings() {
+		return getPermissionsByType("organization");
+	}
+
+	public List<UserResourcePermission> getSubscriptionSharings() {
+		return getPermissionsByType("subscription");
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharings() {
@@ -403,6 +443,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return deletePermissionsByTypeAndResourceId("node", sNodeCode);
 	}
 
+	public int deletePermissionsByOrganizationId(String sOrganizationId) {
+		return deletePermissionsByTypeAndResourceId("organization", sOrganizationId);
+	}
+
+	public int deletePermissionsBySubscriptionId(String sSubscriptionId) {
+		return deletePermissionsByTypeAndResourceId("subscription", sSubscriptionId);
+	}
+
 	public int deletePermissionsByWorkspaceId(String sWorkspaceId) {
 		return deletePermissionsByTypeAndResourceId("workspace", sWorkspaceId);
 	}
@@ -461,6 +509,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		}
 
 		return 0;
+	}
+
+	public int deleteOrganizationPermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("organization", sUserId);
+	}
+
+	public int deleteSubscriptionPermissionsByUserId(String sUserId) {
+		return deletePermissionsByTypeAndResourceId("subscription", sUserId);
 	}
 
 	public int deleteWorkspacePermissionsByUserId(String sUserId) {
@@ -535,6 +591,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return deletePermissionsByTypeAndUserIdAndResourceId("node", sUserId, sNodeCode);
 	}
 
+	public int deletePermissionsByUserIdAndOrganizationId(String sUserId, String sOrganizationId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("organization", sUserId, sOrganizationId);
+	}
+
+	public int deletePermissionsByUserIdAndSubscriptionId(String sUserId, String sSubscriptionId) {
+		return deletePermissionsByTypeAndUserIdAndResourceId("subscription", sUserId, sSubscriptionId);
+	}
+
 	public int deletePermissionsByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
 		return deletePermissionsByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
 	}
@@ -594,6 +658,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public boolean isNodeSharedWithUser(String sUserId, String sNodeCode) {
 		return isResourceOfTypeSharedWithUser("node", sUserId, sNodeCode);
+	}
+
+	public boolean isOrganizationSharedWithUser(String sUserId, String sOrganizationId) {
+		return isResourceOfTypeSharedWithUser("organization", sUserId, sOrganizationId);
+	}
+
+	public boolean isSubscriptionSharedWithUser(String sUserId, String sSubscriptionId) {
+		return isResourceOfTypeSharedWithUser("subscription", sUserId, sSubscriptionId);
 	}
 
 	public boolean isWorkspaceSharedWithUser(String sUserId, String sWorkspaceId) {

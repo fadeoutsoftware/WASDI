@@ -4,9 +4,13 @@ public enum UserApplicationPermission {
 
 	ADMIN_DASHBOARD("admin:dashboard"),
 	NODE_READ("node:read"),
+	ORGANIZATION_READ("organization:read"),
+	ORGANIZATION_WRITE("organization:write"),
 	NODE_WRITE("node:write"),
 	STYLE_READ("style:read"),
 	STYLE_WRITE("style:write"),
+	SUBSCRIPTION_READ("subscription:read"),
+	SUBSCRIPTION_WRITE("subscription:write"),
 	USER_READ("user:read"),
 	USER_WRITE("user:write"),
 	WORKSPACE_READ("workspace:read"),

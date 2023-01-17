@@ -3,6 +3,8 @@ package wasdi.shared.business;
 import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.NODE_READ;
 import static wasdi.shared.business.UserApplicationPermission.NODE_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.ORGANIZATION_READ;
+import static wasdi.shared.business.UserApplicationPermission.ORGANIZATION_WRITE;
 import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_READ;
 import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_WRITE;
 import static wasdi.shared.business.UserApplicationPermission.STYLE_READ;
@@ -26,9 +28,11 @@ public enum UserApplicationRole {
 
 	ADMIN(new HashSet<UserApplicationPermission>(
 			Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, STYLE_READ, STYLE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ,
+					ORGANIZATION_READ, ORGANIZATION_WRITE,
 					WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
 
 	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE,
+			ORGANIZATION_READ, ORGANIZATION_WRITE,
 			WORKSPACE_READ, WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
 
 	USER(new HashSet<UserApplicationPermission>(Arrays.asList(WORKSPACE_READ, WORKSPACE_WRITE)));
