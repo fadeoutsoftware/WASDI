@@ -1,3 +1,82 @@
 <div>
-    User Organizations Tab
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Organization Name</th>
+                <th>Organization Owner</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="oOrganization in m_oController.m_aoOrganizations" >
+                <td>{{oOrganization.name}}</td>
+                <td>{{oOrganization.ownerUserId}}</td>
+                <td class="over-icon" ng-show="m_oController.m_aoUsersList.length == 0">
+                    <button
+                        class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.showUsersByOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
+                    >
+                        <!--Remove Sharing-->
+                        <i
+                            class="fa fa-users fa-lg"
+                            aria-hidden="true"
+                            style="margin-right: 0px"
+                        ></i>
+                        <span class="ng-binding"
+                            >{{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}</span
+                        >
+                    </button>
+                </td>
+                <td class="over-icon" ng-show="m_oController.m_aoUsersList.length > 0">
+                    <button
+                        class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.hideUsersByOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
+                    >
+                        <!--Remove Sharing-->
+                        <i
+                            class="fa fa-users fa-lg"
+                            aria-hidden="true"
+                            style="margin-right: 0px"
+                        ></i>
+                        <span class="ng-binding"
+                            >{{"USER_ORGANIZATIONS_HIDE_USERS"|translate}}</span
+                        >
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-hover">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div ng-show="m_oController.m_aoUsersList.length > 0">
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>UserId</th>
+                                        <th>Name</th>
+                                        <th>Surname</th>
+                                        <th>Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="oUser in m_oController.m_aoUsersList">
+                                        <td>{{oUser.userId}}</td>
+                                        <td>{{oUser.name}}</td>
+                                        <td>{{oUser.surname}}</td>
+                                        <td>{{oUser.role}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

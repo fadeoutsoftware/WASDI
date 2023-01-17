@@ -6,9 +6,11 @@
  */
 package wasdi.shared.utils;
 
+import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.StyleRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.log.WasdiLog;
@@ -65,6 +67,58 @@ public class PermissionsUtils {
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			WasdiLog.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param sUserId a valid userId
+	 * @param sOrganizationId a valid organizationId
+	 * @return true if the user owns the organization, or if the owner shared the organization with the user, false otherwise
+	 */
+	public static boolean canUserAccessOrganization(String sUserId, String sOrganizationId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sOrganizationId)) {
+				return false;
+			}
+
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			if (oOrganizationRepository.isOwnedByUser(sUserId, sOrganizationId)) {
+				return true;
+			}
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isOrganizationSharedWithUser(sUserId, sOrganizationId);
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessOrganization( " + sUserId + ", " + sOrganizationId + " ): error: " + oE);
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param sUserId a valid userId
+	 * @param sSubscriptionId a valid subscriptionId
+	 * @return true if the user owns the subscription, or if the owner shared the subscription with the user, false otherwise
+	 */
+	public static boolean canUserAccessSubscription(String sUserId, String sSubscriptionId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sSubscriptionId)) {
+				return false;
+			}
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			if (oSubscriptionRepository.isOwnedByUser(sUserId, sSubscriptionId)) {
+				return true;
+			}
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
+			return oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId);
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
 		}
 
 		return false;

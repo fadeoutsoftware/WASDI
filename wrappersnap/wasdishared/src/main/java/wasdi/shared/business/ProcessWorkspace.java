@@ -97,7 +97,13 @@ public class ProcessWorkspace {
     /**
      * Id of an eventual sub process started from launcher
      */
-	private int subprocessPid;
+	private int subprocessPid;  
+
+	/**
+	 * Project Id
+	 */
+	private String projectId;
+
 
 	public String getProductName() {
         return productName;
@@ -249,6 +255,14 @@ public class ProcessWorkspace {
 
 	public void setOperationSubType(String operationSubType) {
 		this.operationSubType = operationSubType;
+	}
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
 	}
 
 }

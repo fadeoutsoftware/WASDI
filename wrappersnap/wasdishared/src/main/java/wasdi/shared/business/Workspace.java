@@ -30,6 +30,11 @@ public class Workspace {
      * Code of the WASDI node where the workspace is located
      */
     private String nodeCode = "wasdi";    
+
+	/**
+	 * Project Id
+	 */
+	private String projectId;
     
 
     public String getNodeCode() {
@@ -79,6 +84,14 @@ public class Workspace {
     public void setLastEditDate(Double lastEditDate) {
         this.lastEditDate = lastEditDate;
     }
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
 
 	@Override
 	public String toString() {
