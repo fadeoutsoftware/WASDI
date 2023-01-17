@@ -19,19 +19,22 @@
             <div class="modal-body no-ale-style">
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs" role="tablist">
-                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserInfo'}" ng-click="m_oController.m_sSelectedTab = 'UserInfo'">
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserInfo'}"
+                        ng-click="m_oController.m_sSelectedTab = 'UserInfo'">
                         <a href="" role="tab" data-toggle="tab">
                             <i class="fa fa-rocket"></i>
                             Edit User Info
                         </a>
                     </li>
-                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserSubscriptions'}" ng-click="m_oController.m_sSelectedTab = 'UserSubscriptions'">
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserSubscriptions'}"
+                        ng-click="m_oController.m_sSelectedTab = 'UserSubscriptions'">
                         <a href="" role="tab" data-toggle="tab">
                             <i class="fa fa-credit-card"></i>
                             User Subscriptions
                         </a>
                     </li>
-                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}" ng-click="m_oController.m_sSelectedTab = 'UserOrganizations'">
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"
+                        ng-click="m_oController.m_sSelectedTab = 'UserOrganizations'">
                         <a href="" role="tab" data-toggle="tab">
                             <i class="fa fa-users"></i>
                             User Organizations
@@ -39,25 +42,26 @@
                     </li>
                 </ul>
                 <!-- Tab Content -->
-                <div class="tab-content pt-5">
+                <div class="tab-content">
                     <div class="tab-pane fade in" id="UserInfo"
                         ng-class="{'active':m_oController.m_sSelectedTab === 'UserInfo'}"
                         ng-hide="m_oController.m_sSelectedTab !== 'UserInfo'">
                         <ng-include src="'dialogs/edit_user/TabUserInfo.html'"></ng-include>
                     </div>
                 </div>
-
-                <div class="tab-pane fade in" id="UserSubscriptions"
-                    ng-class="{'active':m_oController.m_sSelectedTab === 'UserSubscriptions'}"
-                    ng-hide="m_oController.m_sSelectedTab !== 'UserSubscriptions'">
-                    <ng-include src="'dialogs/edit_user/TabUserSubscriptions.html'"></ng-include>
+                <div class="tab-content">
+                    <div class="tab-pane fade in" id="UserSubscriptions"
+                        ng-class="{'active':m_oController.m_sSelectedTab === 'UserSubscriptions'}"
+                        ng-hide="m_oController.m_sSelectedTab !== 'UserSubscriptions'">
+                        <ng-include src="'dialogs/edit_user/TabUserSubscriptions.html'"></ng-include>
+                    </div>
                 </div>
-
-
-                <div class="tab-pane fade in" id="UserOrganizations"
-                    ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"
-                    ng-hide="m_oController.m_sSelectedTab !== 'UserOrganizations'">
-                    <ng-include src="'dialogs/edit_user/TabUserOrganizations.html'"></ng-include>
+                <div class="tab-content">
+                    <div class="tab-pane fade in" id="UserOrganizations"
+                        ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"
+                        ng-hide="m_oController.m_sSelectedTab !== 'UserOrganizations'">
+                        <ng-include src="'dialogs/edit_user/TabUserOrganizations.html'"></ng-include>
+                    </div>
                 </div>
 
             </div>
