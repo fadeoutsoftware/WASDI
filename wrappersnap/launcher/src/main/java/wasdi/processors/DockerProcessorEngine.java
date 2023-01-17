@@ -639,7 +639,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sProcessorName = oParameter.getName();
             String sProcessorId = oParameter.getProcessorID();
 
-            processWorkspaceLog("Delete Processor " + sProcessorName + " ID: " + sProcessorId);
+            WasdiLog.infoLog("Delete Processor " + sProcessorName + " ID: " + sProcessorId);
 
             ProcessorRepository oProcessorRepository = new ProcessorRepository();
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
