@@ -204,7 +204,7 @@
 
     "DIALOG_PROCESSES_LOGS_TITLE":"Lista proceselor spațiului de lucru",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"Niciun spațiu de lucru selectat, nu se pot încărca date. Dacă ați actualizat pagina, accesați secțiunea Spațiu de lucru și selectați unul.",
-	"DIALOG_PROCESSES_LOGS_NONE":"Nu există înregistrări",
+	"DIALOG_PROCESSES_LOGS_NONE":"ORICE",
 	"DIALOG_PROCESSES_LOGS_CREATED":"CREATĂ",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"ÎN EXECUȚIE",
 	"DIALOG_PROCESSES_LOGS_WAITING":"ÎN AȘTEPTARE",

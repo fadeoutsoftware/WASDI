@@ -201,7 +201,7 @@
 
     "DIALOG_PROCESSES_LOGS_TITLE":"Workspace Processes List",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"No workspace selected, cannot loading data. If you refreshed the page please go to Workspace section and select one.",
-	"DIALOG_PROCESSES_LOGS_NONE":"None",
+	"DIALOG_PROCESSES_LOGS_NONE":"Any",
 	"DIALOG_PROCESSES_LOGS_CREATED":"CREATED",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"RUNNING",
 	"DIALOG_PROCESSES_LOGS_WAITING":"WAITING",
