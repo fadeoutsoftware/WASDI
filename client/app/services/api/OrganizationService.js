@@ -37,4 +37,20 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
         return this.m_oHttp.delete(this.APIURL + '/organizations/delete?organization=' + sOrganizationId);
     };
 
+    // Get list of shared users by organization id
+    this.getUsersBySharedOrganization = function (sOrganizationId) {
+        return this.m_oHttp.get(this.APIURL + '/organizations/share/byorganization?organization=' + sOrganizationId);
+    }
+
+    // Add sharing
+    this.addOrganizationSharing = function (sOrganizationId, sUserId) {
+        return this.m_oHttp.post(this.APIURL + '/organizations/share/add?organization=' + sOrganizationId + '&userId=' + sUserId);
+    }
+
+    // Remove sharing
+    this.removeOrganizationSharing = function (sOrganizationId, sUserId) {
+        return this.m_oHttp.delete(this.APIURL + '/organizations/share/delete?organization=' + sOrganizationId + '&userId=' + sUserId);
+
+    }
+
 }]);

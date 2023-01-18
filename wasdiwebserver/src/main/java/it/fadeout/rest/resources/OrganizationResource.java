@@ -88,8 +88,8 @@ public class OrganizationResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get Organization List
-//			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationByUser(oUser.getUserId());
-			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationsList();
+			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationByUser(oUser.getUserId());
+//			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationsList();
 
 			// For each
 			for (Organization oOrganization : aoOrganizations) {
@@ -379,7 +379,7 @@ public class OrganizationResource {
 	 * @param sDestinationUserId User id that will receive the organization in sharing.
 	 * @return Primitive Result with boolValue = true and stringValue = Done if ok. False and error description otherwise
 	 */
-	@PUT
+	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult shareOrganization(@HeaderParam("x-session-token") String sSessionId,
@@ -389,7 +389,6 @@ public class OrganizationResource {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
@@ -498,7 +497,8 @@ public class OrganizationResource {
 			return oResult;
 		}
 
-		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
+		//TODO - uncomment the line below
+		// sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
 
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
@@ -549,7 +549,7 @@ public class OrganizationResource {
 	}
 
 	/**
-	 * Get the list of users that has a Organization in sharing.
+	 * Get the list of users that have an Organization in sharing.
 	 *
 	 * @param sSessionId User Session
 	 * @param sOrganizationId Organization Id
@@ -564,7 +564,7 @@ public class OrganizationResource {
 
 	
 		List<UserResourcePermission> aoOrganizationSharing = null;
-		List<OrganizationSharingViewModel> aoOrganizationSharingViewModels = new ArrayList<OrganizationSharingViewModel>();
+		List<OrganizationSharingViewModel> aoOrganizationSharingViewModels = new ArrayList<>();
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
@@ -606,6 +606,7 @@ public class OrganizationResource {
 		WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization( Organization: " + sOrganizationId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+
 		// Validate Session
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
