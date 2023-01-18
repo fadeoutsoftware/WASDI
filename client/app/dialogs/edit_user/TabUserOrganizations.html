@@ -35,11 +35,11 @@
                 <td>{{oOrganization.name}}</td>
                 <td>{{oOrganization.ownerUserId}}</td>
 
-                <td class="over-icon" ng-show="m_oController.m_oShowOrganizationUsersList === false">
+                <td class="over-icon" ng-show="m_oController.m_oSharingOrganization.organizationId !== oOrganization.organizationId">
                     <button
                         class="btn btn-primary btn-wasdi"
                         title={{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}
-                        ng-click="m_oController.showUsersByOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
+                        ng-click="m_oController.showUsersByOrganization(oOrganization.organizationId)"
                     >
                         <!--Show Users-->
                         <i
@@ -54,9 +54,9 @@
                         -->
                     </button>
                 </td>
-                <td class="over-icon" ng-show="m_oController.m_oShowOrganizationUsersList === true">
+                <td class="over-icon" ng-show="m_oController.m_oSharingOrganization.organizationId === oOrganization.organizationId">
                     <button
-                        class="btn btn-primary btn-wasdi"
+                        class="btn btn-secondary btn-wasdi"
                         title={{"USER_ORGANIZATIONS_HIDE_USERS"|translate}}
                         ng-click="m_oController.hideUsersByOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
                     >
@@ -126,7 +126,10 @@
         <tbody>
             <tr>
                 <td>
-                    <div ng-show="m_oController.m_aoUsersList.length > 0">
+                    <div ng-show="m_oController.m_aoUsersList.length >= 0">
+                        <div class="spacer"></div>
+                        <div class="spacer"></div>
+                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">{{"DIALOG_SHARE_ORGANIZATION"|translate}}</legend>
                         <div class="spacer"></div>
 
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -134,17 +137,57 @@
                                 <thead>
                                     <tr>
                                         <th>UserId</th>
-                                        <th>Name</th>
+                                        <!-- <th>Name</th>
                                         <th>Surname</th>
-                                        <th>Role</th>
+                                        <th>Role</th> -->
+
+                                        <th>
+                                            <button
+                                                class="btn btn-primary btn-wasdi"
+                                                title={{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
+                                                ng-click="m_oController.showOrganizationSharingForm(m_oController.m_sSelectedOrganizationId)"
+                                            >
+                                                <!--Share Organization-->
+                                                <i
+                                                    class="fa fa-plus"
+                                                    aria-hidden="true"
+                                                    style="margin-right: 0px"
+                                                ></i>
+                                                <!--
+                                                <span class="ng-binding"
+                                                    >{{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}</span
+                                                >
+                                                -->
+                                            </button>
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-show="m_oController.m_aoUsersList.length > 0">
                                     <tr ng-repeat="oUser in m_oController.m_aoUsersList">
                                         <td>{{oUser.userId}}</td>
-                                        <td>{{oUser.name}}</td>
+                                        <!-- <td>{{oUser.name}}</td>
                                         <td>{{oUser.surname}}</td>
-                                        <td>{{oUser.role}}</td>
+                                        <td>{{oUser.role}}</td> -->
+
+                                        <td class="over-icon" ng-show="oOrganization.organizationId === oOrganization.organizationId">
+                                            <button
+                                                class="btn btn-primary btn-wasdi"
+                                                title={{"DIALOG_EDIT_ORGANIZATION_UNSHARE"|translate}}
+                                                ng-click="m_oController.unshareOrganization(m_oController.m_sSelectedOrganizationId, oUser.userId)"
+                                            >
+                                                <!--Unshare Organization-->
+                                                <i
+                                                    class="fa fa-times"
+                                                    aria-hidden="true"
+                                                    style="margin-right: 0px"
+                                                ></i>
+                                                <!--
+                                                <span class="ng-binding"
+                                                    >{{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}</span
+                                                >
+                                                -->
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -158,6 +201,7 @@
 
 <!-- Add/Edit Organization form -->
 <div class="row-v4" ng-show="m_oController.m_oShowEditOrganizationForm === true">
+    <div class="spacer"></div>
     <div class="col-v4">
         <legend ng-show="m_oController.m_oEditOrganization.organizationId == null">{{"DIALOG_ADD_ORGANIZATION"|translate}}</legend>
         <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">{{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend>
@@ -214,5 +258,84 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Share Organization form -->
+<div class="row-v4" ng-show="m_oController.m_oShowSharingOrganizationForm === true">
+    <div class="col-v4">
+        <legend>{{"DIALOG_SHARE_ORGANIZATION"|translate}}</legend>
+        <form name="shareOrganizationForm">
+
+
+            <h3>{{"DIALOG_SHARE_ORGANIZATION_SEARCH_USER" | translate}}</h3>
+            <div class="spacer"></div>
+
+            <div class="form-v4-group row">
+                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_MANAGE_USERS_USER_PARTIAL_NAME'|translate}}</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="userPartialName"
+                        ng-model="m_oController.m_sUserPartialName" required />
+                </div>
+            </div>
+
+            <div class="col-12 text-right">
+                <button type="button" class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.cancelSharingOrganizationForm()">
+                    {{"DIALOG_EDIT_ORGANIZATION_CANCEL"|translate}}
+                </button>
+                <button type="button" class="btn btn-primary btn-wasdi"
+                        ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">
+                    {{"DIALOG_EDIT_ORGANIZATION_SEARCH"|translate}}
+                </button>
+            </div>
+        </form>
+
+        <div class="row" ng-show="m_oController.m_aoMatchingUsersList.length >= 0">
+            <div class="spacer"></div>
+
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>UserId</th>
+                            <th>Name</th>
+                            <th>Surname</th>
+                            <!-- <th>Role</th> -->
+                            <th>Add to Orgnization</th>
+                        </tr>
+                    </thead>
+                    <tbody ng-show="m_oController.m_aoMatchingUsersList.length > 0">
+                        <tr ng-repeat="oUser in m_oController.m_aoMatchingUsersList">
+                            <td>{{oUser.userId}}</td>
+                            <td>{{oUser.name}}</td>
+                            <td>{{oUser.surname}}</td>
+                            <!-- <td>{{oUser.role}}</td> -->
+
+                            <td class="over-icon">
+                                <button
+                                    class="btn btn-primary btn-wasdi"
+                                    title={{"DIALOG_SHARE_ORGANIZATION_ADD_USER"|translate}}
+                                    ng-click="m_oController.shareOrganization(m_oController.m_sSelectedOrganizationId, oUser.userId)"
+                                >
+                                    <!--Share Organization-->
+                                    <i
+                                        class="fa fa-plus"
+                                        aria-hidden="true"
+                                        style="margin-right: 0px"
+                                    ></i>
+                                    <!--
+                                    <span class="ng-binding"
+                                        >{{"DIALOG_SHARE_ORGANIZATION_ADD_USER"|translate}}</span
+                                    >
+                                    -->
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>

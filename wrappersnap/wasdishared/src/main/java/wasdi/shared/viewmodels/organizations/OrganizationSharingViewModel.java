@@ -21,12 +21,19 @@ public class OrganizationSharingViewModel {
 	private String organizationId;
 	private String userId;
 	private String ownerId;
+	private String role;
 
 	public OrganizationSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.organizationId = oSharing.getResourceId();
 		this.userId = oSharing.getUserId();
 		this.ownerId = oSharing.getOwnerId();
+
+		if (oSharing.getPermissions() != null && oSharing.getPermissions().contains("organization:write")) {
+			role = "MANAGER";
+		} else {
+			role = "USER";
+		}
 	}
 
 }
