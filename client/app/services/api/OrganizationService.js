@@ -8,8 +8,20 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
-    this.getOrganizationListByUser = function () {
+    this.getOrganizationsListByUser = function () {
         return this.m_oHttp.get(this.APIURL + '/organizations/byuser');
+    };
+
+    this.getOrganizationById = function (sOrganizationId) {
+        return this.m_oHttp.get(this.APIURL + '/organizations/byId?organization=' + sOrganizationId);
+    };
+
+    this.saveOrganization = function (oOrganization) {
+        if (utilsIsStrNullOrEmpty(oOrganization.organizationId)) {
+            return this.createOrganization(oOrganization);
+        } else {
+            return this.updateOrganization(oOrganization);
+        }
     };
 
     this.createOrganization = function (oOrganization) {

@@ -66,10 +66,6 @@ public class OrganizationResource {
 
 		WasdiLog.debugLog("OrganizationResource.getListByUser()");
 
-		if (sSessionId != null) {
-			return mockListByUser();
-		}
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		List<OrganizationListViewModel> aoOrganizationList = new ArrayList<>();
@@ -92,7 +88,8 @@ public class OrganizationResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get Organization List
-			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationByUser(oUser.getUserId());
+//			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationByUser(oUser.getUserId());
+			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationsList();
 
 			// For each
 			for (Organization oOrganization : aoOrganizations) {
@@ -156,27 +153,27 @@ public class OrganizationResource {
 		return aoOrganizationList;
 	}
 
-	public List<OrganizationListViewModel> mockListByUser() {
-		List<OrganizationListViewModel> list = new ArrayList<>();
-
-		OrganizationListViewModel wasdi = new OrganizationListViewModel();
-		wasdi.setOrganizationId("org-1");
-		wasdi.setName("WASDI");
-		wasdi.setOwnerUserId("p.campanella@fadeout.it");
-		wasdi.setAdminRole(true);
-
-		list.add(wasdi);
-
-		OrganizationListViewModel fadeout = new OrganizationListViewModel();
-		fadeout.setOrganizationId("org-2");
-		fadeout.setName("Fadeout Software");
-		fadeout.setOwnerUserId("p.campanella@fadeout.it");
-		fadeout.setAdminRole(false);
-
-		list.add(fadeout);
-
-		return list;
-	}
+//	public List<OrganizationListViewModel> mockListByUser() {
+//		List<OrganizationListViewModel> list = new ArrayList<>();
+//
+//		OrganizationListViewModel wasdi = new OrganizationListViewModel();
+//		wasdi.setOrganizationId("org-1");
+//		wasdi.setName("WASDI");
+//		wasdi.setOwnerUserId("p.campanella@fadeout.it");
+//		wasdi.setAdminRole(true);
+//
+//		list.add(wasdi);
+//
+//		OrganizationListViewModel fadeout = new OrganizationListViewModel();
+//		fadeout.setOrganizationId("org-2");
+//		fadeout.setName("Fadeout Software");
+//		fadeout.setOwnerUserId("p.campanella@fadeout.it");
+//		fadeout.setAdminRole(false);
+//
+//		list.add(fadeout);
+//
+//		return list;
+//	}
 
 	/**
 	 * Get an organization by its Id.
@@ -257,11 +254,6 @@ public class OrganizationResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		if (sSessionId != null) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oOrganizationEditorViewModel.getName());
-		}
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -309,11 +301,6 @@ public class OrganizationResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
-		if (sSessionId != null) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oOrganizationEditorViewModel.getName());
-		}
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -333,6 +320,7 @@ public class OrganizationResource {
 		}
 
 		Organization oOrganization = convert(oOrganizationEditorViewModel);
+		oOrganization.setUserId(oUser.getUserId());
 
 		if (oOrganizationRepository.updateOrganization(oOrganization)) {
 			oResult.setBoolValue(true);
@@ -702,7 +690,7 @@ public class OrganizationResource {
 
 	private static Organization convert(OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		Organization oOrganization = new Organization();
-//		oOrganization.setOrganizationId(oOrganizationEditorViewModel.getOrganizationId());
+		oOrganization.setOrganizationId(oOrganizationEditorViewModel.getOrganizationId());
 //		oOrganization.setUserId(oOrganizationEditorViewModel.getUserId());
 		oOrganization.setName(oOrganizationEditorViewModel.getName());
 		oOrganization.setDescription(oOrganizationEditorViewModel.getDescription());
