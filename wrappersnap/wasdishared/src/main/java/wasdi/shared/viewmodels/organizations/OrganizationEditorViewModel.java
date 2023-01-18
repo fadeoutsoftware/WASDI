@@ -25,6 +25,6 @@ public class OrganizationEditorViewModel {
 	private String url;
 //	private String logo;
 
-	private List<String> sharedUsers = new ArrayList<>();
+//	private List<String> sharedUsers = new ArrayList<>();
 
 }
