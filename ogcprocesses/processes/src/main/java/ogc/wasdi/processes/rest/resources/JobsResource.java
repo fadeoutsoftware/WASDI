@@ -31,11 +31,8 @@ public class JobsResource {
     		return Response.status(Status.OK).entity(oJobList).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.debugLog("");
-    		
-    		ApiException oApiException = new ApiException();
-    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oApiException).build();
+    		WasdiLog.errorLog("JobsResource.getJobsList: exception " + oEx.toString());
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an error getting the job list")).build();    		
 		}
     }		
 	
@@ -53,11 +50,8 @@ public class JobsResource {
     		return Response.status(Status.OK).entity(oStatusInfo).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.debugLog("");
-    		
-    		ApiException oApiException = new ApiException();
-    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oApiException).build();
+    		WasdiLog.errorLog("JobsResource.getJobStatus: exception " + oEx.toString());
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an error getting the job status")).build();    		
 		}
     }	
     
@@ -75,11 +69,8 @@ public class JobsResource {
     		return Response.status(Status.OK).entity(oStatusInfo).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.debugLog("");
-    		
-    		ApiException oApiException = new ApiException();
-    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oApiException).build();
+    		WasdiLog.errorLog("JobsResource.deleteJob: exception " + oEx.toString());
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an error deleting the job")).build();    		
 		}
     }
     
@@ -97,11 +88,8 @@ public class JobsResource {
     		return Response.status(Status.OK).entity(oResults).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.debugLog("");
-    		
-    		ApiException oApiException = new ApiException();
-    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oApiException).build();
+    		WasdiLog.errorLog("JobsResource.getJobResults: exception " + oEx.toString());
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an error getting the job results")).build();    		
 		}
     }	    
 

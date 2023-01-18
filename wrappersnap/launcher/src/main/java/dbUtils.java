@@ -58,15 +58,10 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.ogcprocesses.Conformance;
-import wasdi.shared.viewmodels.ogcprocesses.LandingPage;
-import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
-import wasdi.shared.viewmodels.ogcprocesses.ProcessSummary;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 

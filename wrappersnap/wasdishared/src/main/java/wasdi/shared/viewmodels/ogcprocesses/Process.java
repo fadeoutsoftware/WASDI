@@ -1,10 +1,11 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Process extends ProcessSummary {
-	private Map<String, InputDescription> inputs = null;
-	private Map<String, OutputDescription> outputs = null;
+	private Map<String, InputDescription> inputs = new HashMap<String, InputDescription>();
+	private Map<String, OutputDescription> outputs = new HashMap<String, OutputDescription>();
 	
 	public Map<String, InputDescription> getInputs() {
 		return inputs;

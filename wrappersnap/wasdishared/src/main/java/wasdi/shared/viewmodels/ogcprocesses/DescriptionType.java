@@ -1,12 +1,13 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DescriptionType {
 	private String title = null;
 	private String description = null;
-	private List<String> keywords = null;
-	private List<Metadata> metadata = null;
+	private List<String> keywords = new ArrayList<String>();
+	private List<Metadata> metadata = new ArrayList<Metadata>();
 	private AllOfdescriptionTypeAdditionalParameters additionalParameters = null;
 	
 	public String getTitle() {

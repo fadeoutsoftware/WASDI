@@ -1,13 +1,14 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public class Execute {
-	private Map<String, Object> inputs = null;
-	private Map<String, Output> outputs = null;
+	private Map<String, Object> inputs = new HashMap<String, Object>();
+	private Map<String, Output> outputs = new HashMap<String, Output>();
 	private ResponseEnum response = ResponseEnum.RAW;
 	private Subscriber subscriber = null;
 	
