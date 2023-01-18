@@ -188,7 +188,7 @@
 	"DIALOG_IMPORT_SFTP": "SFTP",
 	"DIALOG_PROCESSES_LOGS_TITLE": "Lista dei processi nel Workspace",
 	"DIALOG_PROCESSES_LOGS_NO_WS": "Nessun workspace selezionato, impossibile caricare i dati. Se è stata aggiornata la pagina, procedere all'apertura di un workspace.",
-	"DIALOG_PROCESSES_LOGS_NONE": "Nessuno",
+	"DIALOG_PROCESSES_LOGS_NONE": "QUALUNQUE",
 	"DIALOG_PROCESSES_LOGS_CREATED": "CREATO",
 	"DIALOG_PROCESSES_LOGS_RUNNING": "IN ESECUZIONE",
 	"DIALOG_PROCESSES_LOGS_WAITING": "IN ATTESA",
