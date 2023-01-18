@@ -477,7 +477,6 @@ var EditUserController = (function () {
         this.m_oShowOrganizationUsersList = false;
         this.m_oShowEditOrganizationForm = false;
         this.m_sSelectedOrganizationId = null;
-        this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
         this.m_aoMatchingUsersList = [];
         this.m_oShowSharingOrganizationForm = false;
@@ -498,6 +497,8 @@ var EditUserController = (function () {
             },function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
         });
+    
+        this.m_oEditOrganization = {}
     }
 
     EditUserController.prototype.cancelEditOrganizationForm = function() {
