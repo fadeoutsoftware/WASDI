@@ -788,7 +788,7 @@ public class ProcessWorkspaceResource {
 			}
 
 			// check that the user can access the processWorkspace
-			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
+			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
 				return Response.status(403).build();
 			}
@@ -918,7 +918,7 @@ public class ProcessWorkspaceResource {
 				return null;
 			}
 			
-			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+			if(PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
 			}
@@ -1164,7 +1164,7 @@ public class ProcessWorkspaceResource {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: invalid session" );
 				return null;
 			}
-			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+			if(PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
 			} else {

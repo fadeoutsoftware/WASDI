@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
@@ -34,6 +35,7 @@ public class OgcProcesses extends ResourceConfig {
 	
 	public OgcProcesses() {
 		packages(true, "ogc.wasdi.processes.rest.resources");
+		register(JacksonFeature.class);
 	}
 
 	/**
@@ -75,11 +77,22 @@ public class OgcProcesses extends ResourceConfig {
 	 * @param sSessionId
 	 * @return
 	 */
-	public static User getUserFromSession(String sSessionId) {
+	public static User getUserFromSession(String sSessionId, String sAuthorization) {
 		
 		User oUser = null;
 		
-		try {			
+		try {
+			
+    		// Check if we have our session header
+    		if (Utils.isNullOrEmpty(sSessionId)) {
+    			// Try to get it from the basic http auth
+    			sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+    		}
+    		
+    		if (Utils.isNullOrEmpty(sSessionId)) {
+    			return null;
+    		}
+    		
 			// Check The Session with Keycloak
 			String sUserId = null;
 			

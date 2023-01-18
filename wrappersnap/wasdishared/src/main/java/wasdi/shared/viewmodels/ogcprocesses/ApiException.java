@@ -69,5 +69,20 @@ public class ApiException extends HashMap<String, Object>  {
 		
 		return oApiException;
 	}
+	
+	/**
+	 * Utility method to get the Unauthorized exception
+	 * @return Unauthorized exception
+	 */
+	public static ApiException getUnauthorized() {
+		
+		ApiException oApiException = new ApiException();
+		oApiException.setType("Unauhtorized");
+		oApiException.setTitle("Unauthorized");
+		oApiException.setDetail("The user is not valid or the authentication data is not provided. You can use wasdi auth header or http basic auth passing userId:sessionId");
+		oApiException.setInstance("");
+		
+		return oApiException;
+	}
 
 }
