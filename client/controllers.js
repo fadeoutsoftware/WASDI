@@ -44,3 +44,4 @@ require('./app/dialogs/send_feedback/SendFeedbackController.js');
 require('./app/dialogs/package_manager/PackageManagerController.js')
 require('./app/dialogs/processor_parameters_share/ProcessParamsShareController.js')
 require('./app/dialogs/organization-edit/OrganizationEditorController.js'); 
+require('./app/dialogs/org-users-edit/OrgUsersEditController.js'); 
