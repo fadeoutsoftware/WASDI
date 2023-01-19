@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oAdminDashboardService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oAdminDashboardService, oModalService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -15,6 +15,7 @@ var EditUserController = (function () {
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oOrganizationService = oOrganizationService;
         this.m_oAdminDashboardService = oAdminDashboardService;
+        this.m_oModalService = oModalService;
 
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
@@ -426,12 +427,30 @@ var EditUserController = (function () {
         this.m_oShowSharingOrganizationForm = false;
         this.m_sUserPartialName = "";
 
-        var oController = this;
+        let oController = this;
+
 
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditOrganization = data.data;
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/organization-edit/OrganizationEditDialog.html",
+                        controller: 'OrganizationEditorController',
+                        inputs: {
+                            extras: {
+                                organization: data.data
+                            }
+                        }
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function () {
+                            oController.initializeOrganizationsInfo();
+                        })
+
+                    })
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE ORGANIZATION BY ID"
@@ -534,7 +553,8 @@ var EditUserController = (function () {
         'ConstantsService',
         'ProcessWorkspaceService',
         'OrganizationService',
-        "AdminDashboardService"
+        'AdminDashboardService',
+        'ModalService'
     ];
     return EditUserController ;
 })();
