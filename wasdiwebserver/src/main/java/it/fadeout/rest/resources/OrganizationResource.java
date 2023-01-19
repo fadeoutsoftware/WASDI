@@ -267,7 +267,7 @@ public class OrganizationResource {
 		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
 		if (oExistingOrganization != null) {
-			WasdiLog.debugLog("OrganizationResource.createOrganization: organization already exists");
+			WasdiLog.debugLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
 			oResult.setStringValue("An organization with the same name already exists.");
 			return oResult;
 		}
@@ -311,13 +311,24 @@ public class OrganizationResource {
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
+		Organization oExistingOrganization = oOrganizationRepository.getById(oOrganizationEditorViewModel.getOrganizationId());
 
 		if (oExistingOrganization == null) {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization: organization does not exist");
-			oResult.setStringValue("No organization with the name already exists.");
+			oResult.setStringValue("No organization with the Id exists.");
 			return oResult;
 		}
+
+		Organization oExistingOrganizationWithTheSameName = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
+
+		if (oExistingOrganizationWithTheSameName != null
+				&& oExistingOrganizationWithTheSameName.getOrganizationId() != oExistingOrganization.getOrganizationId()) {
+			WasdiLog.debugLog("OrganizationResource.updateOrganization: a different organization with the same name already exists");
+			oResult.setStringValue("An organization with the same name already exists.");
+			return oResult;
+		}
+
+
 
 		Organization oOrganization = convert(oOrganizationEditorViewModel);
 		oOrganization.setUserId(oUser.getUserId());

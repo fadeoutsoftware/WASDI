@@ -134,6 +134,35 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get an subscription by its Id.
+	 * @param sSubscriptionId the Id of the subscription
+	 * @return the subscription if found, null otherwise
+	 */
+	public Subscription getById(String sSubscriptionId) {
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.eq("subscriptionId", sSubscriptionId)).first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+
+				Subscription oSubscription = null;
+				try {
+					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				return oSubscription;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("SubscriptionRepository.getById( " + sSubscriptionId + "): error: " + oE);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get an subscription by its name.
 	 * @param sName the name of the subscription
 	 * @return the subscription if found, null otherwise

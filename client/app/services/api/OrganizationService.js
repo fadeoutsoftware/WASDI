@@ -36,7 +36,6 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     };
 
     this.deleteOrganization = function (sOrganizationId) {
-
         return this.m_oHttp.delete(this.APIURL + '/organizations/delete?organization=' + sOrganizationId);
     };
 
@@ -53,7 +52,6 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     // Remove sharing
     this.removeOrganizationSharing = function (sOrganizationId, sUserId) {
         return this.m_oHttp.delete(this.APIURL + '/organizations/share/delete?organization=' + sOrganizationId + '&userId=' + sUserId);
-
     }
 
 }]);
