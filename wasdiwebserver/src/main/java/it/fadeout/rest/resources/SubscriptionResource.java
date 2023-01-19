@@ -33,7 +33,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
-import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
+//import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 
 @Path("/subscriptions")
 public class SubscriptionResource {
@@ -243,12 +243,14 @@ public class SubscriptionResource {
 		Subscription oExistingSubscription = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
 
 		if (oExistingSubscription != null) {
-			WasdiLog.debugLog("SubscriptionResource.createSubscription: subscription already exists");
+			WasdiLog.debugLog("SubscriptionResource.createSubscription: a different subscription with the same name already exists");
 			oResult.setStringValue("An subscription with the same name already exists.");
 			return oResult;
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
+		oSubscription.setUserId(oUser.getUserId());
+		oSubscription.setOrganizationId(Utils.getRandomName());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			oResult.setBoolValue(true);
@@ -285,304 +287,351 @@ public class SubscriptionResource {
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-		Subscription oExistingSubscription = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
+		Subscription oExistingSubscription = oSubscriptionRepository.getById(oSubscriptionViewModel.getSubscriptionId());
 
-		if (oExistingSubscription != null) {
-			WasdiLog.debugLog("SubscriptionResource.updateSubscription: subscription already exists");
-			oResult.setStringValue("An subscription with the same name already exists.");
+		if (oExistingSubscription == null) {
+			WasdiLog.debugLog("SubscriptionResource.updateSubscription: subscription does not exist");
+			oResult.setStringValue("No subscription with the Id exists.");
+			return oResult;
+		}
+
+		Subscription oExistingSubscriptionWithTheSameName = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
+
+		if (oExistingSubscriptionWithTheSameName != null
+				&& oExistingSubscriptionWithTheSameName.getSubscriptionId() != oExistingSubscription.getSubscriptionId()) {
+			WasdiLog.debugLog("SubscriptionResource.updateSubscription: a different subscription with the same name already exists");
+			oResult.setStringValue("A subscription with the same name already exists.");
 			return oResult;
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 
-		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
+		if (oSubscriptionRepository.updateSubscription(oSubscription)) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oSubscription.getSubscriptionId());
-		} else {WasdiLog.debugLog("SubscriptionResource.createSubscription( " + oSubscriptionViewModel.getName() + " ): insertion failed");
-			oResult.setStringValue("The creation of the subscription failed.");
+		} else {WasdiLog.debugLog("SubscriptionResource.updateSubscription( " + oSubscriptionViewModel.getName() + " ): update failed");
+			oResult.setStringValue("The update of the subscription failed.");
 		}
 
 		return oResult;
-	}
-
-	/**
-	 * Share a subscription with another user.
-	 *
-	 * @param sSessionId User Session Id
-	 * @param sSubscriptionId Subscription Id
-	 * @param sDestinationUserId User id that will receive the subscription in sharing.
-	 * @return Primitive Result with boolValue = true and stringValue = Done if ok. False and error description otherwise
-	 */
-	@PUT
-	@Path("share/add")
-	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult shareSubscription(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sDestinationUserId) {
-
-		WasdiLog.debugLog("SubscriptionResource.ShareSubscription( WS: " + sSubscriptionId + ", User: " + sDestinationUserId + " )");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
-
-
-		// Validate Session
-		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
-		if (oRequesterUser == null) {
-			WasdiLog.debugLog("SubscriptionResource.shareSubscription: invalid session");
-
-			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
-
-			return oResult;
-		}
-		
-		// Check if the subscription exists
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-		Subscription oSubscription = oSubscriptionRepository.getSubscription(sSubscriptionId);
-		
-		if (oSubscription == null) {
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: invalid subscription");
-
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SUBSCRIPTION);
-
-			return oResult;
-		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), SUBSCRIPTION_READ)) {
-			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_SUBSCRIPTION);
-
-			return oResult;
-		}
-
-		// Can the user access this resource?
-		if (!PermissionsUtils.canUserAccessSubscription(oRequesterUser.getUserId(), sSubscriptionId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + sSubscriptionId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION);
-
-			return oResult;
-		}
-
-		// Cannot Autoshare
-		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-				// A user that has Admin rights should be able to auto-share the resource.
-			} else {
-				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: auto sharing not so smart");
-
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
-
-				return oResult;
-			}
-		}
-
-		// Cannot share with the owner
-		if (sDestinationUserId.equals(oSubscription.getUserId())) {
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sharing with the owner not so smart");
-
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
-
-			return oResult;
-		}
-
-		UserRepository oUserRepository = new UserRepository();
-		User oDestinationUser = oUserRepository.getUser(sDestinationUserId);
-
-		if (oDestinationUser == null) {
-			//No. So it is neither the owner or a shared one
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: Destination user does not exists");
-
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
-
-			return oResult;
-		}
-
-		try {
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
-			if (!oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sDestinationUserId, sSubscriptionId)) {
-				UserResourcePermission oSubscriptionSharing =
-						new UserResourcePermission("subscription", sSubscriptionId, sDestinationUserId, oSubscription.getUserId(), oRequesterUser.getUserId(), "write");
-
-				oUserResourcePermissionRepository.insertPermission(oSubscriptionSharing);				
-			} else {
-				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: already shared!");
-				oResult.setStringValue("Already Shared.");
-				oResult.setBoolValue(true);
-				oResult.setIntValue(Status.OK.getStatusCode());
-
-				return oResult;
-			}
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: " + oEx);
-
-			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
-
-			return oResult;
-		}
-
-		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oSubscription.getName());
-
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
-
-		return oResult;
-	}
-
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sSubscriptionName) {
-		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sMercuriusAPIAddress is null");
-			}
-			else {
-
-				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: send notification");
-
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-				Message oMessage = new Message();
-
-				String sTitle = "Subscription " + sSubscriptionName + " Shared";
-
-				oMessage.setTilte(sTitle);
-
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-
-				oMessage.setSender(sSender);
-
-				String sMessage = "The user " + sRequesterUserId + " shared with you the subscription: " + sSubscriptionName;
-
-				oMessage.setMessage(sMessage);
-
-				Integer iPositiveSucceded = 0;
-
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-				
-				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification sent with result " + iPositiveSucceded);
-			}
-
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification exception " + oEx.toString());
-		}
-	}
-
-	/**
-	 * Get the list of users that has a Subscription in sharing.
-	 *
-	 * @param sSessionId User Session
-	 * @param sSubscriptionId Subscription Id
-	 * @return list of Subscription Sharing View Models
-	 */
-	@GET
-	@Path("share/bysubscription")
-	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<SubscriptionSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
-
-		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace( WS: " + sSubscriptionId + " )");
-
-	
-		List<UserResourcePermission> aoSubscriptionSharing = null;
-		List<SubscriptionSharingViewModel> aoSubscriptionSharingViewModels = new ArrayList<SubscriptionSharingViewModel>();
-
-		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
-		if (oOwnerUser == null) {
-			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: invalid session");
-			return aoSubscriptionSharingViewModels;
-		}
-
-		try {
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			aoSubscriptionSharing = oUserResourcePermissionRepository.getSubscriptionSharingsBySubscriptionId(sSubscriptionId);
-
-			if (aoSubscriptionSharing != null) {
-				for (UserResourcePermission oSubscriptionSharing : aoSubscriptionSharing) {
-					SubscriptionSharingViewModel oSubscriptionSharingViewModel = new SubscriptionSharingViewModel();
-					oSubscriptionSharingViewModel.setOwnerId(oSubscriptionSharing.getUserId());
-					oSubscriptionSharingViewModel.setUserId(oSubscriptionSharing.getUserId());
-					oSubscriptionSharingViewModel.setSubscriptionId(oSubscriptionSharing.getResourceId());
-
-					aoSubscriptionSharingViewModels.add(oSubscriptionSharingViewModel);
-				}
-
-			}
-
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: " + oEx);
-			return aoSubscriptionSharingViewModels;
-		}
-
-		return aoSubscriptionSharingViewModels;
-
 	}
 
 	@DELETE
-	@Path("share/delete")
-	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sUserId) {
+	@Path("/delete")
+	public PrimitiveResult deleteSubscription(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("subscription") String sSubscriptionId) {
+		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
 
-		WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription( WS: " + sSubscriptionId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		// Validate Session
-		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oRequestingUser == null) {
-			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid session");
+		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
-
+		if (oUser == null) {
+			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: invalid session");
+			oResult.setStringValue("Invalid session.");
 			return oResult;
 		}
 
-		try {
+		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-			UserRepository oUserRepository = new UserRepository();
-			User oDestinationUser = oUserRepository.getUser(sUserId);
+		Subscription oExistingSubscription = oSubscriptionRepository.getById(sSubscriptionId);
 
-			if (oDestinationUser == null) {
-				WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid destination user");
-
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
-
-				return oResult;
-			}
-
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(sUserId, sSubscriptionId);
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
-
-			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
-
+		if (oExistingSubscription == null) {
+			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: subscription does not exist");
+			oResult.setStringValue("No subscription with the name already exists.");
 			return oResult;
 		}
 
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
-		oResult.setIntValue(Status.OK.getStatusCode());
+		if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(sSubscriptionId);
+		} else {
+			WasdiLog.debugLog("SubscriptionResource.deleteSubscription( " + sSubscriptionId + " ): deletion failed");
+			oResult.setStringValue("The deletion of the subscription failed.");
+		}
 
 		return oResult;
 	}
+
+//	/**
+//	 * Share a subscription with another user.
+//	 *
+//	 * @param sSessionId User Session Id
+//	 * @param sSubscriptionId Subscription Id
+//	 * @param sDestinationUserId User id that will receive the subscription in sharing.
+//	 * @return Primitive Result with boolValue = true and stringValue = Done if ok. False and error description otherwise
+//	 */
+//	@PUT
+//	@Path("share/add")
+//	@Produces({ "application/xml", "application/json", "text/xml" })
+//	public PrimitiveResult shareSubscription(@HeaderParam("x-session-token") String sSessionId,
+//			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sDestinationUserId) {
+//
+//		WasdiLog.debugLog("SubscriptionResource.ShareSubscription( WS: " + sSubscriptionId + ", User: " + sDestinationUserId + " )");
+//
+//		PrimitiveResult oResult = new PrimitiveResult();
+//		oResult.setBoolValue(false);
+//
+//
+//		// Validate Session
+//		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+//		if (oRequesterUser == null) {
+//			WasdiLog.debugLog("SubscriptionResource.shareSubscription: invalid session");
+//
+//			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+//
+//			return oResult;
+//		}
+//		
+//		// Check if the subscription exists
+//		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+//		Subscription oSubscription = oSubscriptionRepository.getSubscription(sSubscriptionId);
+//		
+//		if (oSubscription == null) {
+//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: invalid subscription");
+//
+//			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_INVALID_SUBSCRIPTION);
+//
+//			return oResult;
+//		}
+//
+//		// Can the user access this section?
+//		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), SUBSCRIPTION_READ)) {
+//			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
+//
+//			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_SUBSCRIPTION);
+//
+//			return oResult;
+//		}
+//
+//		// Can the user access this resource?
+//		if (!PermissionsUtils.canUserAccessSubscription(oRequesterUser.getUserId(), sSubscriptionId)
+//				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+//			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + sSubscriptionId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
+//
+//			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION);
+//
+//			return oResult;
+//		}
+//
+//		// Cannot Autoshare
+//		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
+//			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+//				// A user that has Admin rights should be able to auto-share the resource.
+//			} else {
+//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: auto sharing not so smart");
+//
+//				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+//				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+//
+//				return oResult;
+//			}
+//		}
+//
+//		// Cannot share with the owner
+//		if (sDestinationUserId.equals(oSubscription.getUserId())) {
+//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sharing with the owner not so smart");
+//
+//			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+//
+//			return oResult;
+//		}
+//
+//		UserRepository oUserRepository = new UserRepository();
+//		User oDestinationUser = oUserRepository.getUser(sDestinationUserId);
+//
+//		if (oDestinationUser == null) {
+//			//No. So it is neither the owner or a shared one
+//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: Destination user does not exists");
+//
+//			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
+//
+//			return oResult;
+//		}
+//
+//		try {
+//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+//
+//			if (!oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sDestinationUserId, sSubscriptionId)) {
+//				UserResourcePermission oSubscriptionSharing =
+//						new UserResourcePermission("subscription", sSubscriptionId, sDestinationUserId, oSubscription.getUserId(), oRequesterUser.getUserId(), "write");
+//
+//				oUserResourcePermissionRepository.insertPermission(oSubscriptionSharing);				
+//			} else {
+//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: already shared!");
+//				oResult.setStringValue("Already Shared.");
+//				oResult.setBoolValue(true);
+//				oResult.setIntValue(Status.OK.getStatusCode());
+//
+//				return oResult;
+//			}
+//		} catch (Exception oEx) {
+//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: " + oEx);
+//
+//			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
+//
+//			return oResult;
+//		}
+//
+//		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oSubscription.getName());
+//
+//		oResult.setStringValue("Done");
+//		oResult.setBoolValue(true);
+//
+//		return oResult;
+//	}
+//
+//	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sSubscriptionName) {
+//		try {
+//			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
+//
+//			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sMercuriusAPIAddress is null");
+//			}
+//			else {
+//
+//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: send notification");
+//
+//				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+//				Message oMessage = new Message();
+//
+//				String sTitle = "Subscription " + sSubscriptionName + " Shared";
+//
+//				oMessage.setTilte(sTitle);
+//
+//				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
+//				if (sSender==null) {
+//					sSender = "wasdi@wasdi.net";
+//				}
+//
+//				oMessage.setSender(sSender);
+//
+//				String sMessage = "The user " + sRequesterUserId + " shared with you the subscription: " + sSubscriptionName;
+//
+//				oMessage.setMessage(sMessage);
+//
+//				Integer iPositiveSucceded = 0;
+//
+//				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
+//				
+//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification sent with result " + iPositiveSucceded);
+//			}
+//
+//		}
+//		catch (Exception oEx) {
+//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification exception " + oEx.toString());
+//		}
+//	}
+//
+//	/**
+//	 * Get the list of users that has a Subscription in sharing.
+//	 *
+//	 * @param sSessionId User Session
+//	 * @param sSubscriptionId Subscription Id
+//	 * @return list of Subscription Sharing View Models
+//	 */
+//	@GET
+//	@Path("share/bysubscription")
+//	@Produces({ "application/xml", "application/json", "text/xml" })
+//	public List<SubscriptionSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
+//
+//		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace( WS: " + sSubscriptionId + " )");
+//
+//	
+//		List<UserResourcePermission> aoSubscriptionSharing = null;
+//		List<SubscriptionSharingViewModel> aoSubscriptionSharingViewModels = new ArrayList<SubscriptionSharingViewModel>();
+//
+//		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
+//		if (oOwnerUser == null) {
+//			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: invalid session");
+//			return aoSubscriptionSharingViewModels;
+//		}
+//
+//		try {
+//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+//			aoSubscriptionSharing = oUserResourcePermissionRepository.getSubscriptionSharingsBySubscriptionId(sSubscriptionId);
+//
+//			if (aoSubscriptionSharing != null) {
+//				for (UserResourcePermission oSubscriptionSharing : aoSubscriptionSharing) {
+//					SubscriptionSharingViewModel oSubscriptionSharingViewModel = new SubscriptionSharingViewModel();
+//					oSubscriptionSharingViewModel.setOwnerId(oSubscriptionSharing.getUserId());
+//					oSubscriptionSharingViewModel.setUserId(oSubscriptionSharing.getUserId());
+//					oSubscriptionSharingViewModel.setSubscriptionId(oSubscriptionSharing.getResourceId());
+//
+//					aoSubscriptionSharingViewModels.add(oSubscriptionSharingViewModel);
+//				}
+//
+//			}
+//
+//		} catch (Exception oEx) {
+//			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: " + oEx);
+//			return aoSubscriptionSharingViewModels;
+//		}
+//
+//		return aoSubscriptionSharingViewModels;
+//
+//	}
+//
+//	@DELETE
+//	@Path("share/delete")
+//	@Produces({ "application/xml", "application/json", "text/xml" })
+//	public PrimitiveResult deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
+//			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sUserId) {
+//
+//		WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription( WS: " + sSubscriptionId + ", User:" + sUserId + " )");
+//		PrimitiveResult oResult = new PrimitiveResult();
+//		oResult.setBoolValue(false);
+//		// Validate Session
+//		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
+//
+//		if (oRequestingUser == null) {
+//			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid session");
+//
+//			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+//
+//			return oResult;
+//		}
+//
+//		try {
+//
+//			UserRepository oUserRepository = new UserRepository();
+//			User oDestinationUser = oUserRepository.getUser(sUserId);
+//
+//			if (oDestinationUser == null) {
+//				WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid destination user");
+//
+//				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+//				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+//
+//				return oResult;
+//			}
+//
+//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+//			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(sUserId, sSubscriptionId);
+//		} catch (Exception oEx) {
+//			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
+//
+//			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
+//
+//			return oResult;
+//		}
+//
+//		oResult.setStringValue("Done");
+//		oResult.setBoolValue(true);
+//		oResult.setIntValue(Status.OK.getStatusCode());
+//
+//		return oResult;
+//	}
 
 	private static SubscriptionViewModel convert(Subscription oSubscription) {
 		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();
@@ -605,6 +654,7 @@ public class SubscriptionResource {
 		SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
 		oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 		oSubscriptionListViewModel.setName(oSubscription.getName());
+		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
 
 		return oSubscriptionListViewModel;

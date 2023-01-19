@@ -12,6 +12,7 @@ import lombok.Setter;
 public class SubscriptionListViewModel {
 
 	private String subscriptionId;
+	private String ownerUserId;
 	private String name;
 //	private String description;
 //	private String type;

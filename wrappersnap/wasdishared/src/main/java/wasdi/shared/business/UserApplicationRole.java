@@ -9,6 +9,8 @@ import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETE
 import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_WRITE;
 import static wasdi.shared.business.UserApplicationPermission.STYLE_READ;
 import static wasdi.shared.business.UserApplicationPermission.STYLE_WRITE;
+import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_READ;
+import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_WRITE;
 import static wasdi.shared.business.UserApplicationPermission.USER_READ;
 import static wasdi.shared.business.UserApplicationPermission.USER_WRITE;
 import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_READ;
@@ -28,14 +30,15 @@ public enum UserApplicationRole {
 
 	ADMIN(new HashSet<UserApplicationPermission>(
 			Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE, STYLE_READ, STYLE_WRITE, USER_READ, USER_WRITE, WORKSPACE_READ,
-					ORGANIZATION_READ, ORGANIZATION_WRITE,
+					ORGANIZATION_READ, ORGANIZATION_WRITE, SUBSCRIPTION_READ, SUBSCRIPTION_WRITE,
 					WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
 
 	DEVELOPER(new HashSet<UserApplicationPermission>(Arrays.asList(ADMIN_DASHBOARD, NODE_READ, NODE_WRITE,
-			ORGANIZATION_READ, ORGANIZATION_WRITE,
+			ORGANIZATION_READ, ORGANIZATION_WRITE, SUBSCRIPTION_READ, SUBSCRIPTION_WRITE,
 			WORKSPACE_READ, WORKSPACE_WRITE, PROCESSOR_PARAMETERS_TEMPLATE_READ, PROCESSOR_PARAMETERS_TEMPLATE_WRITE))),
 
-	USER(new HashSet<UserApplicationPermission>(Arrays.asList(WORKSPACE_READ, WORKSPACE_WRITE)));
+	USER(new HashSet<UserApplicationPermission>(Arrays.asList(WORKSPACE_READ, WORKSPACE_WRITE,
+			ORGANIZATION_READ, ORGANIZATION_WRITE, SUBSCRIPTION_READ, SUBSCRIPTION_WRITE)));
 
 	private static final Map<String, UserApplicationRole> ENUM_MAP;
 

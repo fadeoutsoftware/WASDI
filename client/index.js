@@ -29,6 +29,7 @@ require('./app/services/api/NodeService.js');
 require('./app/services/api/OpenSearchService.js');
 require('./app/services/api/OpportunitySearchService.js');
 require('./app/services/api/OrganizationService.js');
+require('./app/services/api/SubscriptionService.js');
 require('./app/services/api/WorkspaceService.js');
 require('./app/services/api/ProcessingService');
 require('./app/services/api/ProcessorMediaService.js');
