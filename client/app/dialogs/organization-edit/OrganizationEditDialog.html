@@ -1,0 +1,86 @@
+<div class="modal fade edit-user-dialog-catalog">
+    <div class="modal-dialog modal-wasdi">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+            </div>
+            <!-- BODY -->
+            <div class="modal-body no-ale-style">
+                <div class="row-v4 pb-3">
+                    <div class="spacer"></div>
+                    <div class="col-v4">
+                        <legend>
+                            {{"DIALOG_ADD_ORGANIZATION"|translate}}</legend>
+                        <!-- <legend >
+                            {{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend> -->
+                        <form name="editOrganizationForm" ng-submit="m_oController.saveOrganization()"
+                            ng-hide="m_oController.isUserLoggedWithGoogle()">
+
+                            <div class="form-v4-group row">
+                                <label
+                                    class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_NAME'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"
+                                        ng-model="m_oController.m_oEditOrganization.name" required />
+                                </div>
+                            </div>
+
+                            <div class="form-v4-group row">
+                                <label
+                                    class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_DESCRIPTION'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input"
+                                        ng-model="m_oController.m_oEditOrganization.description" required />
+                                </div>
+                            </div>
+
+                            <div class="form-v4-group row">
+                                <label
+                                    class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_ADDRESS'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input"
+                                        ng-model="m_oController.m_oEditOrganization.address" required />
+                                </div>
+                            </div>
+
+                            <div class="form-v4-group row">
+                                <label
+                                    class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_EMAIL'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input"
+                                        ng-model="m_oController.m_oEditOrganization.email" required />
+                                </div>
+                            </div>
+
+                            <div class="form-v4-group row">
+                                <label
+                                    class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_URL'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input"
+                                        ng-model="m_oController.m_oEditOrganization.url" required />
+                                </div>
+                            </div>
+
+                            <div class="col-12 text-right">
+                                <button type="button" class="btn btn-primary btn-wasdi" ng-click="close(null)" data-dismiss="modal">
+                                    {{"DIALOG_EDIT_ORGANIZATION_CANCEL"|translate}}
+                                </button>
+
+                                <button type="submit" class="btn btn-primary btn-wasdi"
+                                    ng-click="m_oController.saveOrganizationInfo()">
+                                    {{"DIALOG_EDIT_ORGANIZATION_SAVE"|translate}}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
+                        {{"DIALOG_CLOSE_BUTTON"|translate}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
