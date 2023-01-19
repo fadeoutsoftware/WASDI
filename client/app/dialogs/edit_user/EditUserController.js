@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oAdminDashboardService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oAdminDashboardService, oModalService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -16,6 +16,7 @@ var EditUserController = (function () {
         this.m_oOrganizationService = oOrganizationService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oAdminDashboardService = oAdminDashboardService;
+        this.m_oModalService = oModalService;
 
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
@@ -41,6 +42,11 @@ var EditUserController = (function () {
         this.initializeOrganizationsInfo();
 
 
+        this.m_asTypes = [];
+        this.m_aoTypesMap = [];
+        this.m_oType = {};
+        this.m_bLoadingTypes = true;
+
         this.m_aoSubscriptions = [];
         this.m_aoOrganizationsList = [];
         this.m_oEditSubscription = {};
@@ -59,7 +65,6 @@ var EditUserController = (function () {
         $scope.close = function (result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
-
     }
     /*
         getUserAuthProvider
@@ -444,12 +449,30 @@ var EditUserController = (function () {
         this.m_oShowSharingOrganizationForm = false;
         this.m_sUserPartialName = "";
 
-        var oController = this;
+        let oController = this;
+
 
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditOrganization = data.data;
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/organization-edit/OrganizationEditDialog.html",
+                        controller: 'OrganizationEditorController',
+                        inputs: {
+                            extras: {
+                                organization: data.data
+                            }
+                        }
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function () {
+                            oController.initializeOrganizationsInfo();
+                        })
+
+                    })
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE ORGANIZATION BY ID"
@@ -580,10 +603,44 @@ var EditUserController = (function () {
 
         var oController = this;
 
+
         this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditSubscription = data.data;
+
+
+                    oController.m_oSubscriptionService.getSubscriptionTypes().then(
+                        function (data) {
+                            if (data.status !== 200) {
+                                var oDialog = utilsVexDialogAlertBottomRightCorner(
+                                    "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
+                                );
+                                utilsVexCloseDialogAfter(5000, oDialog);
+                            } else {
+                                oController.m_asTypes = data.data.map((item) => item.name);
+                                oController.m_aoTypesMap = oController.m_asTypes.map(
+                                    (name) => ({ name })
+                                );
+
+                                oController.m_aoTypesMap.forEach((oValue, sKey) => {
+                                    if (oValue.name == oController.m_oEditSubscription.type) {
+                                        oController.m_oType = oValue;
+                                    }
+                                });
+                            }
+
+                            oController.m_bLoadingTypes = false;
+                        },
+                        function (data) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner(
+                                "GURU MEDITATION<br>ERROR GETTING TYPES"
+                            );
+                            utilsVexCloseDialogAfter(5000, oDialog);
+                            oController.m_bLoadingTypes = false;
+                        }
+                    );
+
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
@@ -634,6 +691,14 @@ var EditUserController = (function () {
         // this.m_oShowSharingSubscriptionForm = false;
         // this.m_sOrganizationPartialName = "";
 
+        var sType = "";
+
+        if (!utilsIsObjectNullOrUndefined(this.m_oType)) {
+            sType = this.m_oType.name;
+        }
+
+        this.m_oEditSubscription.type = sType;
+
         var oController = this;
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription)
             .then(function (data) {
@@ -651,6 +716,7 @@ var EditUserController = (function () {
         });
     
         this.m_oEditSubscription = {}
+        this.m_oType = {};
     }
 
     EditUserController.prototype.cancelEditSubscriptionForm = function() {
@@ -725,7 +791,8 @@ var EditUserController = (function () {
         'ProcessWorkspaceService',
         'OrganizationService',
         'SubscriptionService',
-        "AdminDashboardService"
+        'AdminDashboardService',
+        'ModalService'
     ];
     return EditUserController ;
 })();

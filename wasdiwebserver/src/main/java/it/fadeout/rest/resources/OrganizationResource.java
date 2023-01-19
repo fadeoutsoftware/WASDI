@@ -322,7 +322,7 @@ public class OrganizationResource {
 		Organization oExistingOrganizationWithTheSameName = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
 		if (oExistingOrganizationWithTheSameName != null
-				&& oExistingOrganizationWithTheSameName.getOrganizationId() != oExistingOrganization.getOrganizationId()) {
+				&& !oExistingOrganizationWithTheSameName.getOrganizationId().equalsIgnoreCase(oExistingOrganization.getOrganizationId())) {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization: a different organization with the same name already exists");
 			oResult.setStringValue("An organization with the same name already exists.");
 			return oResult;
