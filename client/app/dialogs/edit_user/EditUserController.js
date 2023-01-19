@@ -42,6 +42,11 @@ var EditUserController = (function () {
         this.initializeOrganizationsInfo();
 
 
+        this.m_asTypes = [];
+        this.m_aoTypesMap = [];
+        this.m_oType = {};
+        this.m_bLoadingTypes = true;
+
         this.m_aoSubscriptions = [];
         this.m_aoOrganizationsList = [];
         this.m_oEditSubscription = {};
@@ -60,7 +65,6 @@ var EditUserController = (function () {
         $scope.close = function (result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
-
     }
     /*
         getUserAuthProvider
@@ -599,10 +603,44 @@ var EditUserController = (function () {
 
         var oController = this;
 
+
         this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditSubscription = data.data;
+
+
+                    oController.m_oSubscriptionService.getSubscriptionTypes().then(
+                        function (data) {
+                            if (data.status !== 200) {
+                                var oDialog = utilsVexDialogAlertBottomRightCorner(
+                                    "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
+                                );
+                                utilsVexCloseDialogAfter(5000, oDialog);
+                            } else {
+                                oController.m_asTypes = data.data.map((item) => item.name);
+                                oController.m_aoTypesMap = oController.m_asTypes.map(
+                                    (name) => ({ name })
+                                );
+
+                                oController.m_aoTypesMap.forEach((oValue, sKey) => {
+                                    if (oValue.name == oController.m_oEditSubscription.type) {
+                                        oController.m_oType = oValue;
+                                    }
+                                });
+                            }
+
+                            oController.m_bLoadingTypes = false;
+                        },
+                        function (data) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner(
+                                "GURU MEDITATION<br>ERROR GETTING TYPES"
+                            );
+                            utilsVexCloseDialogAfter(5000, oDialog);
+                            oController.m_bLoadingTypes = false;
+                        }
+                    );
+
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
@@ -653,6 +691,14 @@ var EditUserController = (function () {
         // this.m_oShowSharingSubscriptionForm = false;
         // this.m_sOrganizationPartialName = "";
 
+        var sType = "";
+
+        if (!utilsIsObjectNullOrUndefined(this.m_oType)) {
+            sType = this.m_oType.name;
+        }
+
+        this.m_oEditSubscription.type = sType;
+
         var oController = this;
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription)
             .then(function (data) {
@@ -670,6 +716,7 @@ var EditUserController = (function () {
         });
     
         this.m_oEditSubscription = {}
+        this.m_oType = {};
     }
 
     EditUserController.prototype.cancelEditSubscriptionForm = function() {

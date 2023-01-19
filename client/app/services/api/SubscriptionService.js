@@ -54,4 +54,9 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
     //     return this.m_oHttp.delete(this.APIURL + '/subscriptions/share/delete?subscription=' + sSubscriptionId + '&userId=' + sUserId);
     // }
 
+    // Get Subscription Types list
+    this.getSubscriptionTypes = function () {
+        return this.m_oHttp.get(this.APIURL + '/subscriptions/types');
+    };
+
 }]);
