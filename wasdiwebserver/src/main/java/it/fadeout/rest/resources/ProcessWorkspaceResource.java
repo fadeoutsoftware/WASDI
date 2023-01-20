@@ -188,7 +188,7 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byusr")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ogc") Boolean bOgcOnly) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser()");
 
@@ -209,9 +209,22 @@ public class ProcessWorkspaceResource {
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			boolean bOgc = false;
+
+			if (bOgcOnly!=null) bOgc = (boolean) bOgcOnly;
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.getProcessByUser(oUser.getUserId());
+			List<ProcessWorkspace> aoProcess = null;
+
+			if (bOgc) {
+				// Get Process List
+				aoProcess = oRepository.getOGCProcessByUser(oUser.getUserId());				
+			}
+			else {
+				// Get Process List
+				aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+			}
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
@@ -255,11 +268,6 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid session, aborting");
-				return aoProcessList;
-			}
-			
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication session invalid aborting");
 				return aoProcessList;
 			}
 			
@@ -571,6 +579,9 @@ public class ProcessWorkspaceResource {
 			oViewModel.setProgressPerc(oProcess.getProgressPerc());
 			oViewModel.setProcessObjId(oProcess.getProcessObjId());
 			oViewModel.setPayload(oProcess.getPayload());
+			
+			oViewModel.setWorkspaceId(oProcess.getWorkspaceId());
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel: " + oEx);
 		}

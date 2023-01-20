@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import ogc.wasdi.processes.OgcProcesses;
@@ -28,7 +29,7 @@ public class CoreResource {
 	 * @return LandingPage View Model
 	 */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getLandingPage() {
     	try {
     		// Create the output view model
@@ -138,8 +139,26 @@ public class CoreResource {
     		oLandingPage.getLinks().add(oConformanceLink);
     		oLandingPage.getLinks().add(oProcessesLink);
     		
+    		// Self link
+    		Link oSelfLink = new Link();
+    		oSelfLink.setHref(OgcProcesses.s_sBaseAddress);
+    		oSelfLink.setRel("self");
+    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
     		
-    		return Response.status(Status.OK).entity(oLandingPage).build();
+    		oLandingPage.getLinks().add(oSelfLink);
+    		
+    		// Alternate html link
+    		Link oHtmlLink = new Link();
+    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress);
+    		oHtmlLink.setRel("alternate");
+    		oHtmlLink.setType("text/html");
+    		
+    		oLandingPage.getLinks().add(oHtmlLink);    		
+    		
+    		
+    		ResponseBuilder oResponse = Response.status(Status.OK).entity(oLandingPage);
+    		oResponse = OgcProcesses.addLinkHeaders(oResponse, oLandingPage.getLinks());
+    		return oResponse.build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("CoreResource.getLandingPage: exception " + oEx.toString());
@@ -153,7 +172,7 @@ public class CoreResource {
      */
     @GET
     @Path("conformance")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getConformance() {
     	try {
     		Conformance oConformance = new Conformance();
@@ -164,7 +183,9 @@ public class CoreResource {
     			oConformance.getConformsTo().add(sConformsTo);
 			}
     		
-    		return Response.status(Status.OK).entity(oConformance).build();
+    		ResponseBuilder oResponse = Response.status(Status.OK).entity(oConformance);
+    		oResponse = OgcProcesses.addLinkHeaders(oResponse, null);
+    		return oResponse.build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("CoreResource.getConformance: exception " + oEx.toString());

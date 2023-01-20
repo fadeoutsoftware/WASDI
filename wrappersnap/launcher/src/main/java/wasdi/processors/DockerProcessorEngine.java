@@ -411,7 +411,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oOutputStream.flush();
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
                     printErrorMessageFromConnection(oConnection);
-                    throw new Exception("DockerProcessorEngine.printErrorMessageFromConnection: response code is: " + oConnection.getResponseCode());
+                    throw new Exception("DockerProcessorEngine.run: response code is: " + oConnection.getResponseCode());
                 }
             } catch (Exception oE) {
                 WasdiLog.debugLog("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");

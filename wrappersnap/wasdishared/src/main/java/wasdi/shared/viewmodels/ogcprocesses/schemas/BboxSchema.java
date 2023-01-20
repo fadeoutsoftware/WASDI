@@ -8,7 +8,7 @@ import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
 public class BboxSchema extends Schema {
 	public BboxSchema() {
-		type = "";
+		type = "object";
 		
 		HashMap<String, String> aoSchema = new HashMap<>();
 		aoSchema.put("format", "ogc-bbox");

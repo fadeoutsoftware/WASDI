@@ -1,11 +1,14 @@
 package ogc.wasdi.processes.rest.resources;
 
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import ogc.wasdi.processes.OgcProcesses;
@@ -41,6 +45,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ogcprocesses.ApiException;
+import wasdi.shared.viewmodels.ogcprocesses.Bbox;
 import wasdi.shared.viewmodels.ogcprocesses.Execute;
 import wasdi.shared.viewmodels.ogcprocesses.InputDescription;
 import wasdi.shared.viewmodels.ogcprocesses.JobControlOptions;
@@ -99,6 +104,9 @@ public class ProcessesResource {
 			// Create an instance of the return View Model
     		ProcessList oProcessList = new ProcessList();
     		
+    		// Here we keep copy of all links
+    		ArrayList<Link> aoAllLinks = new ArrayList<>();
+    		
     		// Self link
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes");
@@ -106,6 +114,17 @@ public class ProcessesResource {
     		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
     		
     		oProcessList.getLinks().add(oSelfLink);
+    		aoAllLinks.add(oSelfLink);
+    		
+    		// Alternate html link
+    		Link oHtmlLink = new Link();
+    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes");
+    		oHtmlLink.setRel("alternate");
+    		oHtmlLink.setType("text/html");
+    		
+    		oProcessList.getLinks().add(oHtmlLink);
+    		aoAllLinks.add(oHtmlLink);
+
 			
     		// Take all the processors
     		ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -154,6 +173,7 @@ public class ProcessesResource {
 		    		oProcessorLink.setTitle("Process " + oProcessor.getName() + "  Description");
 		    		
 		    		oSummary.getLinks().add(oProcessorLink);
+		    		aoAllLinks.add(oProcessorLink);
 					
 		    		// Add the processor to our return list
 					oProcessList.getProcesses().add(oSummary);
@@ -175,6 +195,7 @@ public class ProcessesResource {
 	    		oNextLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
 	    		
 	    		oProcessList.getLinks().add(oNextLink);
+	    		aoAllLinks.add(oNextLink);
 	    		
 	    		// Prev link
 	    		Link oPrevLink = new Link();
@@ -182,10 +203,14 @@ public class ProcessesResource {
 	    		oPrevLink.setRel("prev");
 	    		oPrevLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
 	    		
-	    		oProcessList.getLinks().add(oPrevLink);	    		
+	    		oProcessList.getLinks().add(oPrevLink);
+	    		aoAllLinks.add(oPrevLink);
 			}
     		
-    		return Response.status(Status.OK).entity(oProcessList).build();
+			
+    		ResponseBuilder oResponse = Response.status(Status.OK).entity(oProcessList);
+    		oResponse = OgcProcesses.addLinkHeaders(oResponse, aoAllLinks);
+    		return oResponse.build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("ProcessesResource.getProcesses: exception " + oEx.toString());
@@ -202,7 +227,6 @@ public class ProcessesResource {
      * @param sProcessID
      * @return
      */
-    @SuppressWarnings("unchecked")
 	@GET
     @Path("/{processID}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -266,54 +290,58 @@ public class ProcessesResource {
     		// Add the link to the view model
     		oProcessViewModel.getLinks().add(oExeLink);
     		
-    		// Check if we have an UI: this can drive a better Input Description
-			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
-			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(oProcessor.getProcessorId());
-			
+    		// Self link
+    		Link oSelfLink = new Link();
+    		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID);
+    		oSelfLink.setRel("self");
+    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		
+    		oProcessViewModel.getLinks().add(oSelfLink);
+    		
+    		// Alternate html link
+    		Link oHtmlLink = new Link();
+    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID);
+    		oHtmlLink.setRel("alternate");
+    		oHtmlLink.setType("text/html");
+    		
+    		oProcessViewModel.getLinks().add(oHtmlLink);
+
+    		
+    		// Check if we have an UI: this can drive a better Input Description			
+			Map<String,Object> aoAppUi = getAppUI(oProcessor.getProcessorId());
 			boolean bGenerateInputsFromSample = true;
 			
-			if (oUI != null) {
-				try {
-					String sJsonUI = "";
-					sJsonUI = URLDecoder.decode(oUI.getUi(), StandardCharsets.UTF_8.toString());
-					
-					Map<String,Object> aoAppUi = JsonUtils.jsonToMapOfObjects(sJsonUI);
-					
+			if (aoAppUi!= null) {
+				try {					
+					// Check the render as strings flag
 					Boolean bRenderAsStrings = false;
 					
 					if (aoAppUi.containsKey("renderAsStrings")) {
 						bRenderAsStrings = (Boolean) aoAppUi.get("renderAsStrings");
 					}
 					
-					Object oTabs = aoAppUi.get("tabs");					
-					ArrayList<Map<String, Object>> aoTabs = (ArrayList<Map<String, Object>>) oTabs;
+					// Now we get the full list of controls					
+					List<Map<String, Object>> aoAllControls = getAllControls(aoAppUi);
 					
-					ArrayList<Map<String, Object>> aoAllControls = new ArrayList<Map<String, Object>>(); 
-					
-					for (int iTabs = 0; iTabs<aoTabs.size(); iTabs++) {
-						Map<String, Object> oTab = aoTabs.get(iTabs);
-						
-						ArrayList<Map<String, Object>> aoControls = (ArrayList<Map<String, Object>>) oTab.get("controls");
-						
-						for (int iControls = 0; iControls<aoControls.size(); iControls++) {
-							Map<String, Object> oControl = aoControls.get(iControls);
-							aoAllControls.add(oControl);
-						}
-					}
-					
+					// If we found something
 					if (aoAllControls.size()>0) {
-						
+						// For each control
 						for (Map<String, Object> oControl : aoAllControls) {
+							// Get the relative Input Description
 							InputDescription oInputDescription = getInputDescriptionFromWasdiControl(oControl, bRenderAsStrings);
 							
 							if (oInputDescription != null) {
+								// Add it to the return view model
 								String sKey = (String) oControl.get("param");
 								oProcessViewModel.getInputs().put(sKey, oInputDescription);
 							}
 						}
 						
-						if (oProcessViewModel.getInputs().size()>0) bGenerateInputsFromSample = false;
-
+						// Do we have controls at the end?
+						if (oProcessViewModel.getInputs().size()>0) {
+							// Yes! So we rely on this and we do not need to extract from the paramters sample
+							bGenerateInputsFromSample = false;
+						}
 					}
 				}
 				catch (Exception oUiEx) {
@@ -322,6 +350,7 @@ public class ProcessesResource {
 				
 			}
 			
+			// Did we managed to extract the inputs from the UI?
 			if (bGenerateInputsFromSample) {
 				// No: we need to work with the Json Params Sample
 	    		String sParamSampleJson = oProcessor.getParameterSample();
@@ -398,7 +427,9 @@ public class ProcessesResource {
 			oProcessViewModel.getOutputs().put("workspaceId", oWorkspaceIdOutputDescription);
 			oProcessViewModel.getOutputs().put("files", oFilesOutputDescription);
 
-    		return Response.status(Status.OK).entity(oProcessViewModel).build();
+    		ResponseBuilder oResponse = Response.status(Status.OK).entity(oProcessViewModel);
+    		oResponse = OgcProcesses.addLinkHeaders(oResponse, oProcessViewModel.getLinks());
+    		return oResponse.build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("ProcessesResource.getProcessDescription: exception " + oEx.toString());
@@ -434,6 +465,7 @@ public class ProcessesResource {
 			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessID);
 						
 			if (!bFound) {
+				// No, return the not found Exception
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("no-such-process");
 				oApiException.setType("http://www.opengis.net/def/exceptions/ogcapi-processes-1/1.0/no-such-process");
@@ -444,6 +476,11 @@ public class ProcessesResource {
 				oApiException.setDetail(sDetail);
 				oApiException.setStatus(404);
 				return Response.status(Status.NOT_FOUND).entity(oApiException).build();				
+			}
+			
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				// We need to valorize the sessionId
+				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
 			}
 			
 			// Read the processor entity
@@ -476,9 +513,88 @@ public class ProcessesResource {
 			oParameter.setSessionID(sSessionId);
 			oParameter.setUserId(oUser.getUserId());
 			oParameter.setVersion(oProcessor.getVersion());
+			oParameter.setOGCProcess(true);
 			
-			// TODO Convert the inputs to the WASDI Input
-			oParameter.setJson("");
+			// We need to convert the inputs to the WASDI format
+			Map<String, Object> aoInputs = oExecute.getInputs();
+			
+			// Start with a default one
+			String sJson = JsonUtils.stringify(aoInputs);
+			
+			// Check if we have the app ui
+			Map<String, Object> oAppUi = getAppUI(sProcessID);
+			
+			if (oAppUi!=null) {
+				// Yes we have it: and we render all as strings ?
+				Boolean bRenderAsStrings= false;
+				if (oAppUi.containsKey("renderAsStrings")) {
+					bRenderAsStrings = (Boolean) oAppUi.get("renderAsStrings");
+				}
+					
+				try {
+		    		// Convert our inputs
+					List<Map<String,Object>> aoControls = getAllControls(oAppUi);
+					
+					Map<String, Object> oWASDIInput = new HashMap<>();
+					
+					for (Map<String, Object> oControl : aoControls) {
+						
+						boolean bErrorOnValue = false;
+						
+						// And the key/name of the parameter
+						String sKey = (String) oControl.get("param");
+						
+						// Is this parameter available?
+						if (aoInputs.containsKey(sKey)) {
+							// Yes try parse and add it to WASDI Inputs
+							bErrorOnValue = convertOGCInputToWasdiInput(oWASDIInput, aoInputs, oControl, bRenderAsStrings);
+						}
+						else {
+							// No it is not: we need to check if it was required
+							if (oControl.containsKey("required")) {
+								// Search the required flag
+								Boolean bRequired = (Boolean) oControl.get("required");
+								
+								if (bRequired) {
+									
+									// If it was required maybe it has a default value?
+									if (oControl.containsKey("default")) {
+										Object oDefault = oControl.get("default");
+										oWASDIInput.put(sKey, oDefault);
+									}
+									else {
+										// It is required, and we do not have neither an input neither a default value
+										bErrorOnValue = true;	
+									}
+								}
+							}
+						}
+						
+						if (bErrorOnValue) {
+							// We have an error, return the client error
+							ApiException oApiException = new ApiException();
+							oApiException.setTitle("error in parameters");
+							oApiException.setType("http://www.opengis.net/def/exceptions/ogcapi-processes-1/1.0/no-such-process");
+							
+							if (Utils.isNullOrEmpty(sProcessID)) sProcessID = "";
+							
+							String sDetail = "Processor with id \"" + sProcessID + "\" error in parameter " + sKey;
+							oApiException.setDetail(sDetail);
+							oApiException.setStatus(400);
+							return Response.status(Status.BAD_REQUEST).entity(oApiException).build();				
+
+						}
+					}
+					
+					// Replace the json
+					sJson = JsonUtils.stringify(oWASDIInput);
+				}
+				catch (Exception oInEx) {
+					WasdiLog.errorLog("ProcessesResource.executeApplication: error converting inputs, will use the default " + oInEx.toString());
+				}
+			}
+			
+			oParameter.setJson(sJson);
 			
 			// Serialize the parameters
 			String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
@@ -521,7 +637,29 @@ public class ProcessesResource {
         		oStatusInfo.setMessage(oProcessor.getName()+" " + " could not be scheduled.");    			
     		}
     		
-    		return Response.status(Status.CREATED).entity(oStatusInfo).build();
+    		// Self link
+    		Link oSelfLink = new Link();
+    		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+    		oSelfLink.setRel("self");
+    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		
+    		oStatusInfo.getLinks().add(oSelfLink);
+    		
+    		// Alternate html link
+    		Link oHtmlLink = new Link();
+    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+    		oHtmlLink.setRel("alternate");
+    		oHtmlLink.setType("text/html");
+    		
+    		oStatusInfo.getLinks().add(oHtmlLink);    		
+    		
+    		ResponseBuilder oResponse = Response.status(Status.CREATED).entity(oStatusInfo);
+    		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
+    		
+    		String sLocationLink = OgcProcesses.s_sBaseAddress + "/jobs/" + oPrimitiveResult.getStringValue();
+    		oResponse = oResponse.header("Location", sLocationLink);
+    				
+    		return oResponse.build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("ProcessesResource.executeApplication: exception " + oEx.toString());
@@ -686,13 +824,13 @@ public class ProcessesResource {
     		
     		String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId));
     		
-    		ArrayList<NodeScoreByProcessWorkspaceViewModel> oGetClass = new ArrayList<>();
+    		ArrayList<LinkedHashMap<String, Object>> oGetClass = new ArrayList<>();
     		
-    		List<NodeScoreByProcessWorkspaceViewModel> aoCandidates = (List<NodeScoreByProcessWorkspaceViewModel>) MongoRepository.s_oMapper.readValue(sResponse,oGetClass.getClass());
+    		List<LinkedHashMap<String, Object>> aoCandidates = (List<LinkedHashMap<String, Object>>) MongoRepository.s_oMapper.readValue(sResponse,oGetClass.getClass());
     		
     		if (aoCandidates!=null) {
     			if (aoCandidates.size()>0) {
-    				sNodeCode = aoCandidates.get(0).getNodeCode();
+    				sNodeCode = (String) aoCandidates.get(0).get("nodeCode");
     			}
     		}
     		
@@ -720,10 +858,288 @@ public class ProcessesResource {
     		}    		
     	}
     	catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessesResource.createWorkspaceForAppliction: exception creating the worksapce " + oEx.toString());
+			WasdiLog.errorLog("ProcessesResource.createWorkspaceForAppliction: exception creating the workspace " + oEx.toString());
 		}
     	return null;
 		    	
     }
+    
+    /**
+     * Extracts a list of controls from an App UI.
+     * Both app ui and controls are deserialized in a generic Map
+     * @param aoAppUi Application User Interface
+     * @return List of controls
+     */
+    @SuppressWarnings("unchecked")
+	public List<Map<String, Object>> getAllControls(Map<String, Object> aoAppUi) {
+    	ArrayList<Map<String, Object>> aoAllControls = new ArrayList<Map<String, Object>>();
+    	
+    	try {
+			// Now we loop all the tabs to have the full list of controls
+			Object oTabs = aoAppUi.get("tabs");					
+			
+			// Get the list of tabs
+			ArrayList<Map<String, Object>> aoTabs = (ArrayList<Map<String, Object>>) oTabs;
+			
+			for (int iTabs = 0; iTabs<aoTabs.size(); iTabs++) {
+				Map<String, Object> oTab = aoTabs.get(iTabs);
+				
+				// Get the list of controls
+				ArrayList<Map<String, Object>> aoControls = (ArrayList<Map<String, Object>>) oTab.get("controls");
+				
+				for (int iControls = 0; iControls<aoControls.size(); iControls++) {
+					// Add to the list
+					Map<String, Object> oControl = aoControls.get(iControls);
+					aoAllControls.add(oControl);
+				}
+			}
+    		
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessesResource.getAllControls: exception extracting controls list from app ui " + oEx.toString());
+		}
+    	
+    	return aoAllControls;
+    }
+    
+    /**
+     * Retrive the app UI of the specific application
+     * @param sProcessorId
+     * @return
+     */
+    public Map<String,Object> getAppUI(String sProcessorId) {
+    	try {
+    		// Check if we have an UI: this can drive a better Input Description
+			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
+			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(sProcessorId);
+			
+			if (oUI != null) {
+				// Try to read the ui of the app
+				String sJsonUI = "";
+				sJsonUI = URLDecoder.decode(oUI.getUi(), StandardCharsets.UTF_8.toString());
+				
+				// Convert to a Java Object
+				Map<String,Object> aoAppUi = JsonUtils.jsonToMapOfObjects(sJsonUI);
+				return aoAppUi;
+			}
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessesResource.getAppUI: exception getting app ui " + oEx.toString());
+		}
+    	
+    	return null;
+    }
+    
+    
+    /**
+     * Converts an OGC API Input View Model in a WASDI Parameter and add it to the representing Map
+     * @param oWASDIInput Map represeting the WASDI inputs
+     * @param aoInputs OGC Input
+     * @param oControl WASDI Parameter User Interface Definition
+     * @param bRenderAsStrings Flag to detemine if this params are all strings or objects
+     * @return True if ok and the parameter is added to oWASDIInput, false in case of any problem
+     */
+    public boolean convertOGCInputToWasdiInput(Map<String,Object> oWASDIInput, Map<String,Object> aoInputs, Map<String, Object> oControl, boolean bRenderAsStrings) {
+    	
+    	boolean bErrorOnValue = false;
+    	
+    	String sKey = "";
+    	
+		try {
+			// Get the type
+			String sWasdiControlType = (String) oControl.get("type");
+			// And the key/name of the parameter
+			sKey = (String) oControl.get("param");
 
+			if (sWasdiControlType.equals("textbox") || sWasdiControlType.equals("hidden") || sWasdiControlType.equals("productscombo")) {
+				// These are simple strings
+				oWASDIInput.put(sKey, aoInputs.get(sKey));
+			}
+			else if (sWasdiControlType.equals("date")) {
+				//Date should be in format YYYY-MM-DDTHH:MM:SS
+				String sDate = (String) aoInputs.get(sKey);
+				
+				// Split time
+				sDate = sDate.split("T")[0];
+				// Split "-"
+				String [] asParts = sDate.split("-");
+				
+				// Assume we have a problem: we will reset only if all ok
+				bErrorOnValue = true;
+				
+				// Check not null
+				if (asParts != null) {
+					// We need 3 parts
+					if (asParts.length == 3) {
+						// that must be YYYY MM DD
+						if (asParts[0].length()==4 && asParts[1].length()==2 && asParts[2].length()==2 ) {
+							// Ok good for WASDI
+							oWASDIInput.put(sKey, sDate);
+							// Reset the flag
+							bErrorOnValue = false;
+						}
+					}
+				}
+			}
+			else if (sWasdiControlType.equals("dropdown") || sWasdiControlType.equals("listbox")) {
+				// This is a string that must match a set of allowed values
+				String sValue = (String) aoInputs.get(sKey);
+				// Get the values from the ui
+				@SuppressWarnings("unchecked")
+				List<String> asValues = (List<String>) oControl.get("values");
+				
+				if (asValues.contains(sValue)) {
+					// Of good
+					oWASDIInput.put(sKey, sValue);
+				}
+				else {
+					WasdiLog.infoLog("ProcessesResource.executeApplication: the parameter " + sKey + " has a not allowed string");
+					bErrorOnValue = true;
+				}
+			}
+			else if (sWasdiControlType.equals("slider")) {
+				// This is an integer
+				Integer iValue = (Integer) aoInputs.get(sKey);
+				
+				// If we have min check
+				if (oControl.containsKey("min")) {
+					if (iValue< (Integer) oControl.get("min")) {
+						bErrorOnValue = true;
+					}
+				}
+				
+				// If we have max check
+				if (oControl.containsKey("max")) {
+					if (iValue > (Integer) oControl.get("max")) {
+						bErrorOnValue = true;
+					} 
+				}
+				
+				if (!bErrorOnValue) {
+					// Ok add it
+					if (bRenderAsStrings) {
+						oWASDIInput.put(sKey, aoInputs.get(sKey).toString());
+					}
+					else {
+						oWASDIInput.put(sKey, aoInputs.get(sKey));
+					}
+				}
+			}
+			else if (sWasdiControlType.equals("numeric")) {
+				// This is a double
+				Double iValue = (Double) aoInputs.get(sKey);
+				
+				// If we have min check
+				if (oControl.containsKey("min")) {
+					if (iValue< (Double) oControl.get("min")) {
+						bErrorOnValue = true;
+					}
+				}
+				
+				// If we have max check
+				if (oControl.containsKey("max")) {
+					if (iValue > (Double) oControl.get("max")) {
+						bErrorOnValue = true;
+					} 
+				}
+				
+				if (!bErrorOnValue) {
+					// Ok add it
+					if (bRenderAsStrings) {
+						oWASDIInput.put(sKey, aoInputs.get(sKey).toString());
+					}
+					else {
+						oWASDIInput.put(sKey, aoInputs.get(sKey));
+					}
+				}
+			}
+			else if (sWasdiControlType.equals("boolean")) {
+				// Just cast: in case of problem we will finish in the catch
+				Boolean bValue = (Boolean) aoInputs.get(sKey);
+				
+				// Ok add it
+				if (bRenderAsStrings) {
+					if (bValue) {
+						oWASDIInput.put(sKey, "1");
+					}
+					else {
+						oWASDIInput.put(sKey, "0");
+					}
+				}
+				else {
+					oWASDIInput.put(sKey, bValue);
+				}									
+			}
+			else if (sWasdiControlType.equals("bbox")) {
+				// The bounding box is provided as four or six numbers, depending on whether the
+				// coordinate reference system includes a vertical axis (height or depth):
+				//* Lower left corner, coordinate axis 1
+				//* Lower left corner, coordinate axis 2
+				//* Minimum value, coordinate axis 3 (optional)
+				//* Upper right corner, coordinate axis 1
+				//* Upper right corner, coordinate axis 2
+				//* Maximum value, coordinate axis 3 (optional)
+				//If the value consists of four numbers, the coordinate reference system is
+				//WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84)
+				//unless a different coordinate reference system is specified in the parameter `bbox-crs`.
+				//
+				// In WASDI it is supported:
+				// "N,W,S,E" 
+				// or
+				// { "northEast": {"lat:","lng"}, "southWest": {"lat:","lng"} }
+				
+				Bbox oBbox = MongoRepository.s_oMapper.convertValue(aoInputs.get(sKey), Bbox.class);
+
+				double dNorth = 0.0;
+				double dWest = 0.0;
+				double dSouth = 0.0;
+				double dEast = 0.0;
+
+				if (oBbox.getBbox().size()==4) {										
+					dNorth = oBbox.getBbox().get(3).doubleValue();
+					dWest = oBbox.getBbox().get(0).doubleValue();
+					dSouth = oBbox.getBbox().get(1).doubleValue();
+					dEast = oBbox.getBbox().get(2).doubleValue();
+				}
+				else if (oBbox.getBbox().size()==6) {
+					dNorth = oBbox.getBbox().get(4).doubleValue();
+					dWest = oBbox.getBbox().get(0).doubleValue();
+					dSouth = oBbox.getBbox().get(1).doubleValue();
+					dEast = oBbox.getBbox().get(3).doubleValue();
+				}
+				else {
+					bErrorOnValue = true;
+				}
+				
+				if (!bErrorOnValue) {
+					if (bRenderAsStrings) {
+						String sWasdiBbox = "" + dNorth + "," + dWest+ "," + dSouth + "," + dEast;
+						oWASDIInput.put(sKey, sWasdiBbox);
+					}
+					else {
+						Map<String, Object> oNEWasdiBbox = new HashMap<>();
+						Map<String, Object> oSWWasdiBbox = new HashMap<>();
+						
+						oNEWasdiBbox.put("lat", dNorth);
+						oNEWasdiBbox.put("lng", dEast);
+						
+						oSWWasdiBbox.put("lat", dSouth);
+						oSWWasdiBbox.put("lng", dWest);
+						
+						Map<String, Object> oWasdiBbox = new HashMap<>();
+						oWasdiBbox.put("northEast", oNEWasdiBbox);
+						oWasdiBbox.put("southWest", oSWWasdiBbox);
+						
+						oWASDIInput.put(sKey, oWasdiBbox);
+					}							
+				}
+			}									
+		}
+		catch (Exception oInEx) {
+			WasdiLog.infoLog("ProcessesResource.executeApplication: the parsing of parameter " + sKey + " created an exception " + oInEx.toString());
+			bErrorOnValue = true;
+		} 
+		
+		return bErrorOnValue;
+    }
 }

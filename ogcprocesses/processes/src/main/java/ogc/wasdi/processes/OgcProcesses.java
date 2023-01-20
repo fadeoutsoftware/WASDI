@@ -2,11 +2,13 @@ package ogc.wasdi.processes;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -19,8 +21,10 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ogcprocesses.Link;
 
 public class OgcProcesses extends ResourceConfig {
 	
@@ -151,16 +155,98 @@ public class OgcProcesses extends ResourceConfig {
 	 */
 	public static String getSessionIdFromBasicAuthentication(String sAuthorization) {
 		try {
+			if (Utils.isNullOrEmpty(sAuthorization)) return "";
 			sAuthorization = sAuthorization.replace("Basic ", "");
 			byte[] ayDecodedBytes = Base64.getDecoder().decode(sAuthorization);
+			
+			if (ayDecodedBytes==null) return "";
+			
 			String sDecodedString = new String(ayDecodedBytes);
 			String [] asParts = sDecodedString.split(":");
 			return asParts[1];
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("OgcProcesses.getSessionIdFromBasicAuthentication: something bad happened: " + oEx);
+			WasdiLog.errorLog("OgcProcesses.getSessionIdFromBasicAuthentication: something bad happened: " + oEx);
 		}
 		
 		return "";
+	}
+	
+	/**
+	 * Adds Link Headers to http response
+	 * @param oResponse Response Builder
+	 * @param aoLinks List of links to add
+	 */
+	public static ResponseBuilder addLinkHeaders(ResponseBuilder oResponse, List<Link> aoLinks) {
+		
+		try {
+			// Safe check
+			if (oResponse == null) return oResponse;
+			if (aoLinks == null) return oResponse;
+			if (aoLinks.size()==0) return oResponse;
+			
+			String sLinkHeaderContent = "";
+			
+			// For all the links
+			for (Link oLink : aoLinks) {
+				// Get the url				
+				String sUri = oLink.getHref();
+				
+				String sFinalLink = "";
+				
+				// Check if there is something
+				if (!Utils.isNullOrEmpty(sUri)) {
+					
+					// Get the address
+					String [] asUriParts = sUri.split("?");
+					
+					if (asUriParts != null) {
+						if (asUriParts.length>0) {
+							
+							// Set the encoded address
+							sFinalLink = "<" + StringUtils.encodeUrl(sUri) + ">";
+							
+							// Let see if there are also Query parameters
+							String sParams = "";
+							
+							for (int iParts = 1; iParts<asUriParts.length; iParts++) {
+								sParams += asUriParts[iParts];
+							}
+							
+							// Split parameters
+							String [] asParams = sParams.split("&");
+							
+							if (asParams != null) {
+								if (asParams.length>0) {
+									// Add the parameter
+									sFinalLink += "; ";
+									for (String sParam : asParams) {
+										sFinalLink += sParam + ";";
+									}
+									
+									// Drop Last char
+									sFinalLink = sFinalLink.substring(0, sFinalLink.length()-1);
+								}
+							}
+							
+						}
+					}
+					
+					if (!Utils.isNullOrEmpty(sFinalLink)) {
+						sLinkHeaderContent += sFinalLink + ", ";
+					}
+				}
+			}
+			
+			if (!Utils.isNullOrEmpty(sLinkHeaderContent)) {
+				sLinkHeaderContent=sLinkHeaderContent.substring(0, sLinkHeaderContent.length()-2);
+				oResponse = oResponse.header("Link", sLinkHeaderContent);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcesses.addLinkHeaders: something bad happened: " + oEx);
+		}
+		
+		return oResponse;
 	}
 }

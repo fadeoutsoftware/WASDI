@@ -21,6 +21,7 @@ public class ProcessWorkspaceViewModel {
     private String processObjId;
     private int pid;
     private String payload;
+    private String workspaceId;
 
     public String getPayload() {
 		return payload;
@@ -133,6 +134,14 @@ public class ProcessWorkspaceViewModel {
 
 	public void setOperationSubType(String operationSubType) {
 		this.operationSubType = operationSubType;
+	}
+
+	public String getWorkspaceId() {
+		return workspaceId;
+	}
+
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
 	}
 
 }

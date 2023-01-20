@@ -326,7 +326,7 @@ public class ProcessingResources {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             // Is valid?
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
+            if (oUser==null) {
 
                 // Not authorised
                 oResult.setIntValue(401);

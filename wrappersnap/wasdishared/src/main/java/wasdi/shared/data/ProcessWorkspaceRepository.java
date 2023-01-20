@@ -593,6 +593,26 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
+    /**
+     * Get the list of the OGC Processes API triggered processworkspaces for a user
+     * @param sUserId User Identifier
+     * @return List of OGC Process Workspace of this user
+     */
+    public List<ProcessWorkspace> getOGCProcessByUser(String sUserId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
     
     /**
      * Get the list of created processes NOT Download or IDL
