@@ -278,7 +278,8 @@ var EditUserController = (function () {
                         controller: 'OrgUsersEditController',
                         inputs: {
                             extras: {
-                                users: data.data
+                                users: data.data,
+                                organizationId: oController.m_sSelectedOrganizationId
                             }
                         }
                     }).then(function (modal) {

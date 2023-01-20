@@ -6,22 +6,21 @@ let OrgUsersEditController = (function () {
 
         this.m_oOrganizationService = oOrganizationService;
 
+        this.m_sSelectedOrganizationId = this.oExtras.organizationId; 
         this.m_aoUsersList = oExtras.users;
 
-        console.log(oExtras);
         $scope.close = function (result) {
             oClose(result, 500)
         }
     }
     OrgUsersEditController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
         let oController = this;
-
+        
         this.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_aoUsersList = data.data;
+                    // oController.m_aoUsersList = data.data;
                     console.log("EditUserController.unshareOrganization | data.data: ", data.data);
-
                     if (data.data.boolValue) {
                         oController.showUsersByOrganization(sOrganizationId);
                     }
