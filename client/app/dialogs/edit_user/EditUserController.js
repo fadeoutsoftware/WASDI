@@ -273,6 +273,23 @@ var EditUserController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoUsersList = data.data;
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/org-users-edit/OrgUsersEditDialog.html",
+                        controller: 'OrgUsersEditController',
+                        inputs: {
+                            extras: {
+                                users: data.data
+                            }
+                        }
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function () {
+                            oController.initializeOrganizationsInfo();
+                        })
+
+                    })
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
