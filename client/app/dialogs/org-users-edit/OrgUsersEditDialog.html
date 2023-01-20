@@ -9,7 +9,19 @@
                 <div class="row-v4 p-3">
                     <div style="width: 100%">
                         <legend>
-                            {{"DIALOG_SHARE_ORGANIZATION"|translate}}</legend>
+                            {{"DIALOG_SHARE_ORGANIZATION"|translate}}
+                        </legend>
+                        <div>
+                            <!-- Add users to Organization -->
+                            <button class="btn btn-primary btn-wasdi"
+                                title={{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
+                                ng-click="m_oController.openShareUsersModal(m_oController.m_sSelectedOrganizationId)">
+                                <span class="ng-binding">
+                                    {{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
+                                </span>
+
+                            </button>
+                        </div>
                         <div>
                             <table class="table table-hover">
                                 <thead>
@@ -21,17 +33,6 @@
                                             <th>Role</th> 
                                         -->
                                         <th>
-                                            <!-- <button class="btn btn-primary btn-wasdi"
-                                                title={{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
-                                                ng-click="m_oController.showOrganizationSharingForm(m_oController.m_sSelectedOrganizationId)"> -->
-                                                <!--Share Organization-->
-                                                <!-- <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i> -->
-                                                <!--
-                                                <span class="ng-binding">
-                                                    {{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
-                                                </span>
-                                                -->
-                                            <!-- </button> -->
                                         </th>
                                     </tr>
                                 </thead>
