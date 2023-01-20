@@ -277,6 +277,7 @@ wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("OrgUsersEditController", window.OrgUsersEditController); 
+wasdiApp.controller("ShareOrganizationController", window.ShareOrganizationController)
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {
