@@ -32,6 +32,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
+import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
 //import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 
@@ -298,7 +299,7 @@ public class SubscriptionResource {
 		Subscription oExistingSubscriptionWithTheSameName = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
 
 		if (oExistingSubscriptionWithTheSameName != null
-				&& oExistingSubscriptionWithTheSameName.getSubscriptionId() != oExistingSubscription.getSubscriptionId()) {
+				&& !oExistingSubscriptionWithTheSameName.getSubscriptionId().equalsIgnoreCase(oExistingSubscription.getSubscriptionId())) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: a different subscription with the same name already exists");
 			oResult.setStringValue("A subscription with the same name already exists.");
 			return oResult;
@@ -352,6 +353,27 @@ public class SubscriptionResource {
 		}
 
 		return oResult;
+	}
+
+
+	/**
+	 * Get the list of subscription types.
+	 * @param sSessionId User Session Id
+	 * @return a list of Subscription types
+	 */
+	@GET
+	@Path("/types")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public List<SubscriptionTypeViewModel> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
+		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
+
+		List<SubscriptionTypeViewModel> aoTypes = new ArrayList<SubscriptionTypeViewModel>();
+
+		aoTypes.add(new SubscriptionTypeViewModel("OneDayStandard", "OneDayStandard", "OneDayStandard"));
+		aoTypes.add(new SubscriptionTypeViewModel("OneWeekStandard", "OneWeekStandard", "OneWeekStandard"));
+		aoTypes.add(new SubscriptionTypeViewModel("OneMonthStandard", "OneMonthStandard", "OneMonthStandard"));
+
+		return aoTypes;
 	}
 
 //	/**
@@ -654,6 +676,7 @@ public class SubscriptionResource {
 		SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
 		oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 		oSubscriptionListViewModel.setName(oSubscription.getName());
+		oSubscriptionListViewModel.setType(oSubscription.getType());
 		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
 
