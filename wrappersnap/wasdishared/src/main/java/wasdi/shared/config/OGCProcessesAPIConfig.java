@@ -39,6 +39,10 @@ public class OGCProcessesAPIConfig {
 	 */	
 	public String landingLinkProcesses;
 	/**
+	 * Link to the jobs api: has the format relativepath;relationtype;title
+	 */	
+	public String landingLinkJobs;	
+	/**
 	 * List of links to add to the conforms to api response, separated by ;
 	 */
 	public String conformsTo;

@@ -1,5 +1,9 @@
 package wasdi.shared.viewmodels.processworkspace;
 
+import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
+
 /**
  * Represents a Process Workspace
  * 
@@ -143,5 +147,48 @@ public class ProcessWorkspaceViewModel {
 	public void setWorkspaceId(String workspaceId) {
 		this.workspaceId = workspaceId;
 	}
+	 
+	public static ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
+		//WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
+		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
+		try {
+			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
+			if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
+			}
+			else {
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
+			}
+			
+			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeTimestamp())) {
+				oViewModel.setLastChangeDate(Utils.getFormatDate(oProcess.getLastStateChangeTimestamp()));
+			}
+			
+			oViewModel.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
+			oViewModel.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
+			oViewModel.setOperationType(oProcess.getOperationType());
+			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
+				oViewModel.setOperationSubType(oProcess.getOperationSubType());
+			}
+			else {
+				oViewModel.setOperationSubType("");
+			}
+			
+			oViewModel.setProductName(oProcess.getProductName());
+			oViewModel.setUserId(oProcess.getUserId());
+			oViewModel.setFileSize(oProcess.getFileSize() == null ? "" : oProcess.getFileSize());
+			oViewModel.setPid(oProcess.getPid());
+			oViewModel.setStatus(oProcess.getStatus());
+			oViewModel.setProgressPerc(oProcess.getProgressPerc());
+			oViewModel.setProcessObjId(oProcess.getProcessObjId());
+			oViewModel.setPayload(oProcess.getPayload());
+			
+			oViewModel.setWorkspaceId(oProcess.getWorkspaceId());
+			
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel: " + oEx);
+		}
+		return oViewModel;
+	}	
 
 }

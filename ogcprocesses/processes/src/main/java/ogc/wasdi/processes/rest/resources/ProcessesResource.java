@@ -1,6 +1,5 @@
 package ogc.wasdi.processes.rest.resources;
 
-import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +25,7 @@ import javax.ws.rs.core.Response.Status;
 
 import ogc.wasdi.processes.OgcProcesses;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
@@ -33,6 +33,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -66,7 +67,6 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.DoubleSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.NumericSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringListSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringSchema;
-import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 
 @Path("processes")
 public class ProcessesResource {
@@ -87,6 +87,7 @@ public class ProcessesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProcesses(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @QueryParam("limit") Integer oiLimit, @QueryParam("offset") Integer oiOffset) {
     	try {
+    		WasdiLog.debugLog("ProcessesResource.getProcesses");
     		
 			// Check User 
 			User oUser = OgcProcesses.getUserFromSession(sSessionId, sAuthorization);
@@ -232,6 +233,8 @@ public class ProcessesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProcessDescription(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID) {
     	try {
+    		if (sProcessID==null) sProcessID = "";
+    		WasdiLog.debugLog("ProcessesResource.getProcesses processID="+sProcessID);
     		
 			// Check User 
 			User oUser = OgcProcesses.getUserFromSession(sSessionId, sAuthorization);
@@ -452,6 +455,9 @@ public class ProcessesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response executeApplication(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID, Execute oExecute) {
     	try {
+    		if (sProcessID==null) sProcessID = "";
+    		WasdiLog.debugLog("ProcessesResource.executeApplication processID="+sProcessID);
+    		
 			// Check User 
 			User oUser = OgcProcesses.getUserFromSession(sSessionId, sAuthorization);
 
@@ -609,7 +615,7 @@ public class ProcessesResource {
 			
         	// Get back the primitive result: it does not work right to go in the catch 
             PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
-
+            
 			// We need the creation date
 			Date oCreationDate = new Date(); 
 
@@ -624,7 +630,16 @@ public class ProcessesResource {
         		oStatusInfo.setStatus(StatusCode.ACCEPTED);
         		oStatusInfo.setProcessID(sProcessID);
         		oStatusInfo.setUpdated(oCreationDate);
-        		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + oPrimitiveResult.getStringValue());    			
+        		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + oPrimitiveResult.getStringValue());
+        		
+        		// Create the ogc processes task
+                OgcProcessesTask oOgcProcessesTask = new OgcProcessesTask();
+                oOgcProcessesTask.setProcessWorkspaceId(oPrimitiveResult.getStringValue());
+                oOgcProcessesTask.setWorkspaceId(oWorkspace.getWorkspaceId());
+                oOgcProcessesTask.setUserId(oUser.getUserId());
+                // Insert it in the db 
+                OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
+                oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
     		}
     		else {
         		oStatusInfo.setCreated(oCreationDate);

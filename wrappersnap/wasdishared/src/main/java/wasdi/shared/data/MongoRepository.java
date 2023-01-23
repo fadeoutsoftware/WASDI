@@ -21,6 +21,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -133,8 +134,7 @@ public class MongoRepository {
     	}
     	catch (Exception e) 
     	{
-    		WasdiLog.debugLog("MongoRepository.addMongoConnection: exception " + e.getMessage());
-			e.printStackTrace();
+    		WasdiLog.errorLog("MongoRepository.addMongoConnection: exception " + e.getMessage());
     	}    	
     }
     
@@ -175,8 +175,7 @@ public class MongoRepository {
     	}
     	catch (Exception e) 
     	{
-    		WasdiLog.debugLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
-			e.printStackTrace();
+    		WasdiLog.errorLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
     	}
         return null;
     }
@@ -211,24 +210,30 @@ public class MongoRepository {
         			oConnection.m_oMongoClient.close();
         		}
         		catch (Exception e) {
-    				WasdiLog.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
-    				e.printStackTrace();
+    				WasdiLog.errorLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
     			}
 			}
     	}
     	catch (Exception e) {
-			WasdiLog.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
-			e.printStackTrace();
+			WasdiLog.errorLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
 		}    	
     }
     
+	/**
+	 * Set the repo db
+	 * @param sRepoDb
+	 */
+	public void setRepoDb(String sRepoDb) {	
+			this.m_sRepoDb = sRepoDb;
+	}
+    
+    
     /**
      * Fill a list of entities from the result of a Query.
-     * @param <T>
-     * @param aoReturnList
-     * @param oMongoDocuments
-     * @param sCollectionName
-     * @param oClass
+     * @param <T> Type of the output entity
+     * @param aoReturnList List of T-elements to fill
+     * @param oMongoDocuments List of the mongo documents returned by the query
+     * @param oClass Class object of Type T
      */
     public <T> void fillList(List<T> aoReturnList, MongoIterable<Document> oMongoDocuments, Class<T> oClass) {
     	
@@ -243,7 +248,7 @@ public class MongoRepository {
                 	oEntity = s_oMapper.readValue(sJSON,oClass);
                     aoReturnList.add(oEntity);
                 } catch (Exception oEx) {
-                	WasdiLog.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                	WasdiLog.errorLog(m_sThisCollection + ".fillList: " + oEx);
                 }            		
         	}
         }
@@ -252,6 +257,13 @@ public class MongoRepository {
 		}
 	}
     
+    /**
+     * Fill a list of entities from the result of a Query.
+     * @param <T> Type of the output entity
+     * @param aoReturnList Set of T-elements to fill
+     * @param oMongoDocuments List of the mongo documents returned by the query
+     * @param oClass Class object of Type T
+     */
     public <T> void fillList(Set<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
     	
         MongoCursor<Document> oCursor = oMongoDocuments.iterator();
@@ -265,7 +277,7 @@ public class MongoRepository {
                 	oEntity = s_oMapper.readValue(sJSON,oClass);
                     aoReturnList.add(oEntity);
                 } catch (Exception oEx) {
-                	WasdiLog.debugLog(m_sThisCollection + ".fillList: " + oEx);
+                	WasdiLog.errorLog(m_sThisCollection + ".fillList: " + oEx);
                 }            		
         	}
         }
@@ -274,7 +286,33 @@ public class MongoRepository {
 		}
 	}
     
-	public String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
+    /**
+     * Add a new document to the default repo collection
+     * @param oNewDocument Object to add
+     * @return Mongo Object id (_id)
+     */
+    protected String add(Object oNewDocument) {
+		return add(oNewDocument, m_sThisCollection, "MongoRepository.add");
+	}
+    
+    /**
+     * Add a new document to a collection
+     * @param oNewDocument Object to add
+     * @param sCollection Name of the collection
+     * @return Mongo Object id (_id)
+     */
+	protected String add(Object oNewDocument, String sCollection) {
+		return add(oNewDocument, sCollection, "MongoRepository.add");
+	}
+    
+    /**
+     * Adds a New Document to a collection
+     * @param oNewDocument Object to add
+     * @param sCollection Name of the collection
+     * @param sRepositoryCommand Text prefix to log exceptions
+     * @return Mongo Object id (_id)
+     */
+	protected String add(Object oNewDocument, String sCollection, String sRepositoryCommand) {
 		String sResult = "";
 		if(oNewDocument != null) {
 			try {
@@ -284,13 +322,36 @@ public class MongoRepository {
 				sResult = oDocument.getObjectId("_id").toHexString();
 	
 			} catch (Exception oEx) {
-				WasdiLog.debugLog(sRepositoryCommand + ": " + oEx);
+				String sText = "";
+				
+				if (Utils.isNullOrEmpty(sRepositoryCommand)) {
+					sText = oEx.toString();
+				}
+				else {
+					sText = sRepositoryCommand + ": " + oEx.toString();
+				}
+				WasdiLog.errorLog(sText);
 			}
 		}
 		return sResult;
 	}
+
+	/**
+	 * Deletes an object that match the criteria in the repo default collection
+	 * @param oCriteria Mongo db Criteria
+	 * @return number of elements deleted
+	 */
+	protected int delete(BasicDBObject oCriteria){
+		return delete(oCriteria,m_sThisCollection);
+	}
 	
-	public int delete(BasicDBObject oCriteria, String sCollectionName ){
+	/**
+	 * Deletes an object that match the criteria in Collection
+	 * @param oCriteria Mongo db Criteria
+	 * @param sCollectionName Name of the collection
+	 * @return number of elements deleted
+	 */
+	protected int delete(BasicDBObject oCriteria, String sCollectionName ){
         try {
             DeleteResult oDeleteResult = getCollection(sCollectionName).deleteOne(oCriteria);
             if (oDeleteResult != null)
@@ -298,13 +359,28 @@ public class MongoRepository {
                 return (int) oDeleteResult.getDeletedCount();
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("MongoRepository.delete: excetpion " + oEx.toString());
         }
 
         return 0;
 	}
-
-	public int deleteMany(BasicDBObject oCriteria, String sCollectionName){
+	
+	/**
+	 * Delete a set of objects matching the criteria in the repo default collection
+	 * @param oCriteria Mongo db Criteria
+	 * @return number of elements deleted
+	 */	
+	protected int deleteMany(BasicDBObject oCriteria){
+		return deleteMany(oCriteria, m_sThisCollection);
+	}
+	
+	/**
+	 * Delete a set of objects matching the criteria in Collection
+	 * @param oCriteria Mongo db Criteria
+	 * @param sCollectionName Name of the collection
+	 * @return number of elements deleted
+	 */
+	protected int deleteMany(BasicDBObject oCriteria, String sCollectionName){
         try {
             DeleteResult oDeleteResult = getCollection(sCollectionName).deleteMany(oCriteria);
             if (oDeleteResult != null)
@@ -312,17 +388,30 @@ public class MongoRepository {
                 return (int) oDeleteResult.getDeletedCount();
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("MongoRepository.deleteMany: excetpion " + oEx.toString());
         }
 
         return 0;
 	}
 	
-	public void setRepoDb(String sRepoDb) {	
-			this.m_sRepoDb = sRepoDb;
+	/**
+	 * Update an object matching the criteria in the repo default collection collection
+	 * @param oCriteria Criteria to find the object to update
+	 * @param oNewDocument Updated document
+	 * @return True if updated, false otherwise
+	 */
+	protected boolean update(BasicDBObject oCriteria, Object oNewDocument) {
+		return update(oCriteria,oNewDocument,m_sThisCollection);
 	}
-	
-	public boolean update(BasicDBObject oCriteria, Object oNewDocument, String sCollectionName) {
+		
+	/**
+	 * Update an object matching the criteria in collection
+	 * @param oCriteria Criteria to find the object to update
+	 * @param oNewDocument Updated document
+	 * @param sCollectionName Name of the collection
+	 * @return True if updated, false otherwise
+	 */
+	protected boolean update(BasicDBObject oCriteria, Object oNewDocument, String sCollectionName) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oNewDocument);
             
@@ -333,7 +422,7 @@ public class MongoRepository {
             if (oResult.getModifiedCount()==1) return true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("MongoRepository.update: excetpion " + oEx.toString());
         }
 
         return  false;

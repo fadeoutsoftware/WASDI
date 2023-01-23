@@ -32,6 +32,9 @@ public class CoreResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getLandingPage() {
     	try {
+    		
+    		WasdiLog.debugLog("CoreResource.getLandingPage");
+    		
     		// Create the output view model
     		LandingPage oLandingPage = new LandingPage();
     		
@@ -135,9 +138,42 @@ public class CoreResource {
     		oProcessesLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
     		oProcessesLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
     		
+    		// Link 3: Processes
+    		String sJobsLink = WasdiConfig.Current.ogcpProcessesApi.landingLinkProcesses;
+    		
+    		Link oJobsLink = new Link();
+    		
+    		// Default Values
+    		oJobsLink.setHref(OgcProcesses.s_sBaseAddress + "processes");
+    		oJobsLink.setRel("http://www.opengis.net/def/rel/ogc/1.0/processes");
+    		oJobsLink.setTitle("Metadata about the processes");
+    		
+    		if (!Utils.isNullOrEmpty(sJobsLink)) {    			
+    			// Take what we have from config
+        		String [] asLinkParts = sJobsLink.split(";");
+        		
+        		if (asLinkParts != null) {
+        			if (asLinkParts.length>0) {
+        				oJobsLink.setHref(OgcProcesses.s_sBaseAddress + asLinkParts[0]);
+        			}
+        			
+        			if (asLinkParts.length>1) {
+        				oJobsLink.setRel(asLinkParts[1]);
+        			}
+        			
+        			if (asLinkParts.length>2) {
+        				oJobsLink.setTitle(asLinkParts[2]);
+        			}    			
+        		}
+    		}
+    		    		
+    		oJobsLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
+    		oJobsLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);    		
+    		
     		oLandingPage.getLinks().add(oAPIDefinitionLink);
     		oLandingPage.getLinks().add(oConformanceLink);
     		oLandingPage.getLinks().add(oProcessesLink);
+    		oLandingPage.getLinks().add(oJobsLink);
     		
     		// Self link
     		Link oSelfLink = new Link();
@@ -175,6 +211,8 @@ public class CoreResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getConformance() {
     	try {
+    		WasdiLog.debugLog("CoreResource.getConformance");
+    		
     		Conformance oConformance = new Conformance();
     		
     		String [] asConforms = WasdiConfig.Current.ogcpProcessesApi.conformsTo.split(";");
