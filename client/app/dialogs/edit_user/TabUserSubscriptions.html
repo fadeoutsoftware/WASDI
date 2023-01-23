@@ -1,4 +1,13 @@
-<div class="subscriptions-view">
+<div class="subscriptions-view pt-3">
+    <legend>Subscriptions</legend>
+    <p class="mr-2 text-uppercase">
+        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
+    </p>
+    <p>
+        TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
+            convertMsToTime}}</span>
+    </p>
+    <!-- Subscriptions Table -->
     <table class="table table-hover subscriptions-list">
         <thead>
             <tr>
@@ -7,17 +16,10 @@
                 <th>Subscription Owner</th>
 
                 <th>
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)"
-                    >
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
+                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)">
                         <!--Add Subscription-->
-                        <i
-                            class="fa fa-plus"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span
@@ -30,24 +32,17 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions"
-                    ng-class="{'selected-row':m_oController.m_sSelectedSubscriptionId === oSubscription.subscriptionId}" >
-                    <td>{{oSubscription.name}}</td>
-                    <td>{{oSubscription.type}}</td>
-                    <td>{{oSubscription.ownerUserId}}</td>
+            <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index"
+                ng-class="{'selected-row':m_oController.m_sSelectedSubscriptionId === oSubscription.subscriptionId}">
+                <td>{{oSubscription.name}}</td>
+                <td>{{oSubscription.type}}</td>
+                <td>{{oSubscription.ownerUserId}}</td>
 
-                <td class="over-icon" ng-show="m_oController.m_oEditSubscription.subscriptionId !== oSubscription.subscriptionId">
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId)"
-                    >
+                <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
+                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId)">
                         <!--Edit Subscription-->
-                        <i
-                            class="fa fa-edit"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
@@ -55,22 +50,17 @@
                         -->
                     </button>
                 </td>
-                <td class="over-icon" ng-show="m_oController.m_oEditSubscription.subscriptionId === oSubscription.subscriptionId">
+                <!-- <td class="over-icon"
+                    ng-show="m_oController.m_oEditSubscription.subscriptionId === oSubscription.subscriptionId">
                     <span></span>
-                </td>
+                </td> -->
 
-                <td class="over-icon" ng-show="m_oController.m_oEditSubscription.subscriptionId === m_oController.m_oEditSubscription.subscriptionId">
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}
-                        ng-click="m_oController.deleteSubscription(m_oController.m_oUser.userId, oSubscription.subscriptionId)"
-                    >
+                <td class="over-icon"
+                    ng-show="m_oController.m_oEditSubscription.subscriptionId === m_oController.m_oEditSubscription.subscriptionId">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}
+                        ng-click="m_oController.deleteSubscription(m_oController.m_oUser.userId, oSubscription.subscriptionId)">
                         <!--Delete Subscription-->
-                        <i
-                            class="fa fa-times"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}</span
@@ -84,7 +74,7 @@
 </div>
 
 <!-- Add/Edit Subscription form -->
-<div class="row-v4" ng-show="m_oController.m_oShowEditSubscriptionForm === true">
+<!-- <div class="row-v4" ng-show="m_oController.m_oShowEditSubscriptionForm === true">
     <div class="spacer"></div>
     <div class="col-v4">
         <legend ng-show="m_oController.m_oEditSubscription.subscriptionId == null">{{"DIALOG_ADD_SUBSCRIPTION"|translate}}</legend>
@@ -106,9 +96,9 @@
                     <input type="text" class="form-v4-control-plaintext wasdi-input"
                         ng-model="m_oController.m_oEditSubscription.description" />
                 </div>
-            </div>
+            </div> -->
 
-            <!--
+<!--
             <div class="form-v4-group row">
                 <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_TYPE'|translate}}</label>
                 <div class="col-sm-10">
@@ -118,7 +108,7 @@
             </div>
             -->
 
-            <div class="form-v4-group row">
+<!-- <div class="form-v4-group row">
                 <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_TYPE'|translate}}</label>
                 <div class="col-sm-10">
                     <div ng-show="!m_oController.m_bLoadingTypes">
@@ -156,26 +146,10 @@
             </div>
         </form>
     </div>
-</div>
+</div> -->
 
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-
-<div class="row-v4 mt-2">
+<!-- <div class="row-v4 mt-2">
     <div class="col-v4">
-        <legend>Subscriptions</legend>
-        <p class="mr-2 text-uppercase">
-            ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
-        </p>
 
         <table class="table">
             <thead>
@@ -189,44 +163,41 @@
             </thead>
             <tbody>
                 <tr>
-                    <!-- Subscription name -->
+                   
+                   <td></td>
+         
                     <td></td>
-                    <!-- Organization name -->
+   
                     <td></td>
-                    <!-- Processing time used by this subscription -->
-                    <td></td>
-                    <!-- Status of Subscription (active or inactive) -->
-                    <td></td>
-                    <!-- Button to show projects in subscription -->
-                    <td>
-                        <button class="btn btn-primary btn-wasdi">
-                            <i class="fa fa-file"></i>
+                    
+<td></td>
 
-                            <span class="ng-binding">
-                                Show Projects
-                            </span>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <p>
-            TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
-                convertMsToTime}}</span>
-        </p>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <td>Name</td>
-                    <td>Description</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Project Name</td>
-                    <td>Project Description blah blah</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<td>
+    <button class="btn btn-primary btn-wasdi">
+        <i class="fa fa-file"></i>
+
+        <span class="ng-binding">
+            Show Projects
+        </span>
+    </button>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Project Name</td>
+            <td>Project Description blah blah</td>
+        </tr>
+    </tbody>
+</table>
 </div>
+</div> -->
