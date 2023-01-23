@@ -21,6 +21,12 @@ let EditSubscriptionsController = (function () {
         console.log(this.m_oExtras)
         this.getSubscriptionTypes();
 
+
+        $scope.close = function (result) {
+            oClose(result, 500)
+            console.log(result)
+        }
+
     }
     EditSubscriptionsController.prototype.getSubscriptionById = function (sSubscriptionId) {
 
@@ -51,6 +57,7 @@ let EditSubscriptionsController = (function () {
 
         this.m_oEditSubscription = {};
         this.m_oType = {};
+        this.m_oScope.close();
     }
 
     EditSubscriptionsController.prototype.getSubscriptionTypes = function () {
