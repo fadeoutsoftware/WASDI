@@ -24,7 +24,6 @@ let EditSubscriptionsController = (function () {
 
         $scope.close = function (result) {
             oClose(result, 500)
-            console.log(result)
         }
 
     }

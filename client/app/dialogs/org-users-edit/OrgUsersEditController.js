@@ -72,7 +72,6 @@ let OrgUsersEditController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function (result) {
-                            console.log(result)
                             oController.showUsersByOrganization(result); 
                         })
                     })
@@ -86,7 +85,6 @@ let OrgUsersEditController = (function () {
             }
         )
     }
-
 
     OrgUsersEditController.$inject = [
         "$scope",

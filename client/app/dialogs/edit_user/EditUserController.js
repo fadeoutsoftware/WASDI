@@ -639,7 +639,6 @@ var EditUserController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function (result) {
-                            console.log(result)
                             oController.initializeSubscriptionsInfo();
 
                         })
