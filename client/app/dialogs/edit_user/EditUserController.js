@@ -626,48 +626,74 @@ var EditUserController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditSubscription = data.data;
-
-
-                    oController.m_oSubscriptionService.getSubscriptionTypes().then(
-                        function (data) {
-                            if (data.status !== 200) {
-                                var oDialog = utilsVexDialogAlertBottomRightCorner(
-                                    "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
-                                );
-                                utilsVexCloseDialogAfter(5000, oDialog);
-                            } else {
-                                oController.m_asTypes = data.data.map((item) => item.name);
-                                oController.m_aoTypesMap = oController.m_asTypes.map(
-                                    (name) => ({ name })
-                                );
-
-                                oController.m_aoTypesMap.forEach((oValue, sKey) => {
-                                    if (oValue.name == oController.m_oEditSubscription.type) {
-                                        oController.m_oType = oValue;
-                                    }
-                                });
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/edit-subscriptions/EditSubscriptionsDialog.html",
+                        controller: "EditSubscriptionsController",
+                        inputs: {
+                            extras: {
+                                subscriptions: data.data
                             }
-
-                            oController.m_bLoadingTypes = false;
-                        },
-                        function (data) {
-                            var oDialog = utilsVexDialogAlertBottomRightCorner(
-                                "GURU MEDITATION<br>ERROR GETTING TYPES"
-                            );
-                            utilsVexCloseDialogAfter(5000, oDialog);
-                            oController.m_bLoadingTypes = false;
                         }
-                    );
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function (result) {
+                            console.log(result)
+                            oController.initializeSubscriptionsInfo();
 
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
-                    );
+                        })
+                    })
+
+
                 }
-
-                return true;
             }
-        );
+        )
+
+        // this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
+        //     function (data) {
+        //         if (utilsIsObjectNullOrUndefined(data.data) === false) {
+        //             
+        //             oController.m_oSubscriptionService.getSubscriptionTypes().then(
+        //                 function (data) {
+        //                     if (data.status !== 200) {
+        //                         var oDialog = utilsVexDialogAlertBottomRightCorner(
+        //                             "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
+        //                         );
+        //                         utilsVexCloseDialogAfter(5000, oDialog);
+        //                     } else {
+        //                         oController.m_asTypes = data.data.map((item) => item.name);
+        //                         oController.m_aoTypesMap = oController.m_asTypes.map(
+        //                             (name) => ({ name })
+        //                         );
+
+        //                         oController.m_aoTypesMap.forEach((oValue, sKey) => {
+        //                             if (oValue.name == oController.m_oEditSubscription.type) {
+        //                                 oController.m_oType = oValue;
+        //                             }
+        //                         });
+        //                     }
+
+        //                     oController.m_bLoadingTypes = false;
+        //                 },
+        //                 function (data) {
+        //                     var oDialog = utilsVexDialogAlertBottomRightCorner(
+        //                         "GURU MEDITATION<br>ERROR GETTING TYPES"
+        //                     );
+        //                     utilsVexCloseDialogAfter(5000, oDialog);
+        //                     oController.m_bLoadingTypes = false;
+        //                 }
+        //             );
+
+        //         } else {
+        //             utilsVexDialogAlertTop(
+        //                 "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
+        //             );
+        //         }
+
+        //         return true;
+        //     }
+        // );
     }
 
     EditUserController.prototype.deleteSubscription = function(sUserId, sSubscriptionId) {
@@ -749,52 +775,52 @@ var EditUserController = (function () {
         this.m_sOrganizationPartialName = "";
     }
 
-/*
-    EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
-        console.log("EditUserController.showUsersByOrganization | sOrganizationId: ", sOrganizationId);
-
-        this.m_sSelectedOrganizationId = sOrganizationId;
-        console.log("EditUserController.showUsersByOrganization | this.m_sSelectedOrganizationId: ", this.m_sSelectedOrganizationId);
-        this.m_oShowOrganizationUsersList = true;
-        this.m_oShowEditOrganizationForm = false;
-        this.m_oEditOrganization = {};
-        this.m_oSharingOrganization = {organizationId: sOrganizationId}
-        this.m_aoMatchingUsersList = [];
-        this.m_oShowSharingOrganizationForm = false;
-        this.m_sUserPartialName = "";
-
-        if (utilsIsStrNullOrEmpty(sOrganizationId) === true) {
-            return false;
-        }
-
-        var oController = this;
-
-        this.m_oOrganizationService.getUsersBySharedOrganization(sOrganizationId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_aoUsersList = data.data;
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
-                    );
-                }
-
-                return true;
+    /*
+        EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
+            console.log("EditUserController.showUsersByOrganization | sOrganizationId: ", sOrganizationId);
+    
+            this.m_sSelectedOrganizationId = sOrganizationId;
+            console.log("EditUserController.showUsersByOrganization | this.m_sSelectedOrganizationId: ", this.m_sSelectedOrganizationId);
+            this.m_oShowOrganizationUsersList = true;
+            this.m_oShowEditOrganizationForm = false;
+            this.m_oEditOrganization = {};
+            this.m_oSharingOrganization = {organizationId: sOrganizationId}
+            this.m_aoMatchingUsersList = [];
+            this.m_oShowSharingOrganizationForm = false;
+            this.m_sUserPartialName = "";
+    
+            if (utilsIsStrNullOrEmpty(sOrganizationId) === true) {
+                return false;
             }
-        );
-    }
-    EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
-        this.m_aoUsersList = [];
-        this.m_oShowOrganizationUsersList = false;
-        this.m_oShowEditOrganizationForm = false;
-        this.m_sSelectedOrganizationId = null;
-        this.m_oEditOrganization = {}
-        this.m_oSharingOrganization = {}
-        this.m_aoMatchingUsersList = [];
-        this.m_oShowSharingOrganizationForm = false;
-        this.m_sUserPartialName = "";
-    }
-*/
+    
+            var oController = this;
+    
+            this.m_oOrganizationService.getUsersBySharedOrganization(sOrganizationId).then(
+                function (data) {
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        oController.m_aoUsersList = data.data;
+                    } else {
+                        utilsVexDialogAlertTop(
+                            "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
+                        );
+                    }
+    
+                    return true;
+                }
+            );
+        }
+        EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
+            this.m_aoUsersList = [];
+            this.m_oShowOrganizationUsersList = false;
+            this.m_oShowEditOrganizationForm = false;
+            this.m_sSelectedOrganizationId = null;
+            this.m_oEditOrganization = {}
+            this.m_oSharingOrganization = {}
+            this.m_aoMatchingUsersList = [];
+            this.m_oShowSharingOrganizationForm = false;
+            this.m_sUserPartialName = "";
+        }
+    */
 
 
 
