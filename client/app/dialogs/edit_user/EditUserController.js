@@ -512,22 +512,31 @@ var EditUserController = (function () {
         this.m_oShowSharingOrganizationForm = false;
         this.m_sUserPartialName = "";
 
+        let sConfirmMsg = "Delete this Organization?"
+
         var oController = this;
 
-        this.m_oOrganizationService.deleteOrganization(sOrganizationId)
-            .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
-                }
 
-                oController.initializeOrganizationsInfo();
+        let oCallbackFunction = function(value) {
+            if(value) {
+                this.m_oOrganizationService.deleteOrganization(sOrganizationId).then(function (data) {
+                    if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
+                        utilsVexCloseDialogAfter(4000, oDialog);
+                    } else {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
+                    }
 
-            },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
-        });
+                    oController.initializeOrganizationsInfo();
+
+                },function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
+            })
+            }
+                
+        };
+
+        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
 
     EditUserController.prototype.saveOrganization = function() {
