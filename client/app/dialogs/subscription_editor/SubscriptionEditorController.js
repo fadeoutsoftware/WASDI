@@ -3,13 +3,15 @@ SubscriptionEditorController = (function () {
         $scope,
         oClose,
         oExtras,
-        oSubscriptionService
+        oSubscriptionService,
+        oOrganizationService
     ) {
         this.m_oScope = $scope;
         this.m_oExtras = oExtras;
         this.m_oScope.m_oController = this;
 
-        this.m_oSubscriptionService = oSubscriptionService
+        this.m_oSubscriptionService = oSubscriptionService;
+        this.m_oOrganizationService = oOrganizationService;
         this.m_bEditSubscription = false;
         this.m_oEditSubscription = oExtras.subscription;
 
@@ -18,44 +20,52 @@ SubscriptionEditorController = (function () {
         this.m_oType = {};
         this.m_bLoadingTypes = true;
 
-        console.log(this.m_oExtras)
+        this.m_asOrganizations = [];
+        this.m_aoOrganizationsMap = [];
+        this.m_oOrganization = {};
+        this.m_bLoadingOrganization = true;
+
         this.getSubscriptionTypes();
 
+        this.getOrganizationsListByUser();
 
         $scope.close = function (result) {
             oClose(result, 500)
         }
-
     }
-    SubscriptionEditorController.prototype.getSubscriptionById = function (sSubscriptionId) {
 
-    }
     SubscriptionEditorController.prototype.saveSubscription = function () {
-        console.log("EditUserController.saveSubscription | m_oEditSubscription: ", this.m_oEditSubscription);
-
-        let sType = "";
-
-        if (!utilsIsObjectNullOrUndefined(this.m_oType)) {
-            sType = this.m_oType.name;
+        if (utilsIsObjectNullOrUndefined(this.m_oType)) {
+            this.m_oEditSubscription.type = "";
+        } else {
+            this.m_oEditSubscription.type = this.m_oType.name;
         }
 
-        this.m_oEditSubscription.type = sType;
+        if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
+            this.m_oEditSubscription.organizationId = "";
+        } else {
+            this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
+        }
 
-        let oController = this;
+
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
+                oController.m_oScope.close();
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
+                utilsVexCloseDialogAfter(3000, oDialog);
             }
 
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
+            utilsVexCloseDialogAfter(3000, oDialog);
         });
 
         this.m_oEditSubscription = {};
         this.m_oType = {};
+        this.m_oOrganization = {};
         this.m_oScope.close();
     }
 
@@ -69,13 +79,13 @@ SubscriptionEditorController = (function () {
                     );
                     utilsVexCloseDialogAfter(5000, oDialog);
                 } else {
-                    oController.m_asTypes = data.data.map((item) => item.name);
+                    oController.m_asTypes = data.data;
                     oController.m_aoTypesMap = oController.m_asTypes.map(
-                        (name) => ({ name })
+                        (item) => ({ name: item.name, typeId: item.typeId })
                     );
 
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {
-                        if (oValue.name == oController.m_oEditSubscription.type) {
+                        if (oValue.typeId == oController.m_oEditSubscription.type) {
                             oController.m_oType = oValue;
                         }
                     });
@@ -92,11 +102,47 @@ SubscriptionEditorController = (function () {
         );
     }
 
+    SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
+        let oController = this;
+
+        this.m_oOrganizationService.getOrganizationsListByUser().then(
+            function (data) {
+                if (data.status !== 200) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(
+                        "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
+                    );
+                    utilsVexCloseDialogAfter(5000, oDialog);
+                } else {
+                    oController.m_asOrganizations = data.data;
+                    oController.m_aoOrganizationsMap = oController.m_asOrganizations.map(
+                        (item) => ({ name: item.name, organizationId: item.organizationId })
+                    );
+
+                    oController.m_aoOrganizationsMap.forEach((oValue, sKey) => {
+                        if (oValue.organizationId == oController.m_oEditSubscription.organizationId) {
+                            oController.m_oOrganization = oValue;
+                        }
+                    });
+                }
+
+                oController.m_bLoadingOrganization = false;
+            },
+            function (data) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner(
+                    "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
+                );
+                utilsVexCloseDialogAfter(5000, oDialog);
+                oController.m_bLoadingOrganization = false;
+            }
+        );
+    }
+
     SubscriptionEditorController.$inject = [
         '$scope',
         'close',
         'extras',
-        'SubscriptionService'
+        'SubscriptionService',
+        'OrganizationService'
     ];
     return SubscriptionEditorController
 })();

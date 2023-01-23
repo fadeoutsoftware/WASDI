@@ -26,11 +26,15 @@ let OrganizationEditorController = (function () {
         this.m_oOrganizationService.saveOrganization(this.m_oEditOrganization).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION SAVED<br>READY");
-                utilsVexCloseDialogAfter(4000, oDialog)
+                utilsVexCloseDialogAfter(4000, oDialog);
                 oController.m_oScope.close();
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
+                utilsVexCloseDialogAfter(3000, oDialog);
             }
+        }, function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
+            utilsVexCloseDialogAfter(3000, oDialog);
         });
 
     }
