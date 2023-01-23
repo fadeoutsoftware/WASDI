@@ -640,7 +640,7 @@ var EditUserController = (function () {
                         controller: "SubscriptionEditorController",
                         inputs: {
                             extras: {
-                                subscriptions: data.data
+                                subscription: data.data
                             }
                         }
                     }).then(function (modal) {

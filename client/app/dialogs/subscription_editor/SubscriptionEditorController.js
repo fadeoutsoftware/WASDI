@@ -11,7 +11,7 @@ SubscriptionEditorController = (function () {
 
         this.m_oSubscriptionService = oSubscriptionService
         this.m_bEditSubscription = false;
-        this.m_oEditSubscription = {};
+        this.m_oEditSubscription = oExtras.subscription;
 
         this.m_asTypes = [];
         this.m_aoTypesMap = [];
