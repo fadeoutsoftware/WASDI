@@ -519,7 +519,7 @@ var EditUserController = (function () {
 
         let oCallbackFunction = function(value) {
             if(value) {
-                this.m_oOrganizationService.deleteOrganization(sOrganizationId).then(function (data) {
+                oController.m_oOrganizationService.deleteOrganization(sOrganizationId).then(function (data) {
                     if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                         var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
