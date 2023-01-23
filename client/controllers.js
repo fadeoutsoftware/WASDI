@@ -46,4 +46,4 @@ require('./app/dialogs/processor_parameters_share/ProcessParamsShareController.j
 require('./app/dialogs/organization-edit/OrganizationEditorController.js'); 
 require('./app/dialogs/org-users-edit/OrgUsersEditController.js'); 
 require('./app/dialogs/share-organization/ShareOrganizationController.js'); 
-require('./app/dialogs/edit-subscriptions/EditSubscriptionsController.js'); 
+require('./app/dialogs/subscription_editor/SubscriptionEditorController.js'); 

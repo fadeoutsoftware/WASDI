@@ -1,5 +1,5 @@
-let EditSubscriptionsController = (function () {
-    function EditSubscriptionsController(
+SubscriptionEditorController = (function () {
+    function SubscriptionEditorController(
         $scope,
         oClose,
         oExtras,
@@ -11,7 +11,7 @@ let EditSubscriptionsController = (function () {
 
         this.m_oSubscriptionService = oSubscriptionService
         this.m_bEditSubscription = false;
-        this.m_oEditSubscription = {};
+        this.m_oEditSubscription = oExtras.subscription;
 
         this.m_asTypes = [];
         this.m_aoTypesMap = [];
@@ -21,11 +21,16 @@ let EditSubscriptionsController = (function () {
         console.log(this.m_oExtras)
         this.getSubscriptionTypes();
 
-    }
-    EditSubscriptionsController.prototype.getSubscriptionById = function (sSubscriptionId) {
+
+        $scope.close = function (result) {
+            oClose(result, 500)
+        }
 
     }
-    EditSubscriptionsController.prototype.saveSubscription = function () {
+    SubscriptionEditorController.prototype.getSubscriptionById = function (sSubscriptionId) {
+
+    }
+    SubscriptionEditorController.prototype.saveSubscription = function () {
         console.log("EditUserController.saveSubscription | m_oEditSubscription: ", this.m_oEditSubscription);
 
         let sType = "";
@@ -51,9 +56,10 @@ let EditSubscriptionsController = (function () {
 
         this.m_oEditSubscription = {};
         this.m_oType = {};
+        this.m_oScope.close();
     }
 
-    EditSubscriptionsController.prototype.getSubscriptionTypes = function () {
+    SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
         let oController = this;
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
             function (data) {
@@ -86,12 +92,12 @@ let EditSubscriptionsController = (function () {
         );
     }
 
-    EditSubscriptionsController.$inject = [
+    SubscriptionEditorController.$inject = [
         '$scope',
         'close',
         'extras',
         'SubscriptionService'
     ];
-    return EditSubscriptionsController
+    return SubscriptionEditorController
 })();
-window.EditSubscriptionsController = EditSubscriptionsController
+window.SubscriptionEditorController = SubscriptionEditorController

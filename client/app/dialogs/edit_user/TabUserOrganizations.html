@@ -3,9 +3,8 @@
         ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, null)">
         <!--Add Organization-->
         <!-- <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i> -->
-            <span class="ng-binding"
-                >{{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}
-            </span>
+        <span class="ng-binding">{{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}
+        </span>
     </button>
     <table class="table table-hover organizations-list">
         <thead>
@@ -15,16 +14,7 @@
                 <th></th>
 
                 <th>
-                    <!-- <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}
-                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, null)">
-                        Add Organization
-                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i> -->
-                        <!--
-                        <span class="ng-binding"
-                            >{{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}</span
-                        > -->
-
-                    <!-- </button> -->
+                    Actions
                 </th>
 
                 <th></th>
@@ -32,22 +22,15 @@
         </thead>
         <tbody>
             <tr ng-repeat="oOrganization in m_oController.m_aoOrganizations"
-                    ng-class="{'selected-row':m_oController.m_sSelectedOrganizationId === oOrganization.organizationId}" >
+                ng-class="{'selected-row':m_oController.m_sSelectedOrganizationId === oOrganization.organizationId}">
                 <td>{{oOrganization.name}}</td>
                 <td>{{oOrganization.ownerUserId}}</td>
 
-                <td class="over-icon" ng-show="m_oController.m_oSharingOrganization.organizationId !== oOrganization.organizationId">
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}
-                        ng-click="m_oController.showUsersByOrganization(oOrganization.organizationId)"
-                    >
+                <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}
+                        ng-click="m_oController.showUsersByOrganization(oOrganization.organizationId)">
                         <!--Show Users-->
-                        <i
-                            class="fa fa-users fa-lg"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}</span
@@ -55,38 +38,12 @@
                         -->
                     </button>
                 </td>
-                <td class="over-icon" ng-show="m_oController.m_oSharingOrganization.organizationId === oOrganization.organizationId">
-                    <button
-                        class="btn btn-secondary btn-wasdi"
-                        title={{"USER_ORGANIZATIONS_HIDE_USERS"|translate}}
-                        ng-click="m_oController.hideUsersByOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
-                    >
-                        <!--Hide Users-->
-                        <i
-                            class="fa fa-users fa-lg"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
-                        <!--
-                        <span class="ng-binding"
-                            >{{"USER_ORGANIZATIONS_HIDE_USERS"|translate}}</span
-                        >
-                        -->
-                    </button>
-                </td>
 
                 <td class="over-icon">
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}
-                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, oOrganization.organizationId)"
-                    >
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}
+                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, oOrganization.organizationId)">
                         <!--Edit Organization-->
-                        <i
-                            class="fa fa-edit"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}</span
@@ -94,22 +51,13 @@
                         -->
                     </button>
                 </td>
-                <!-- <td class="over-icon" ng-show="m_oController.m_oEditOrganization.organizationId === oOrganization.organizationId">
-                    <span></span>
-                </td> -->
 
-                <td class="over-icon" ng-show="m_oController.m_oEditOrganization.organizationId === m_oController.m_oEditOrganization.organizationId">
-                    <button
-                        class="btn btn-primary btn-wasdi"
-                        title={{"DIALOG_EDIT_ORGANIZATION_DELETE"|translate}}
-                        ng-click="m_oController.deleteOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)"
-                    >
+                <td class="over-icon"
+                    ng-show="m_oController.m_oEditOrganization.organizationId === m_oController.m_oEditOrganization.organizationId">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_DELETE"|translate}}
+                        ng-click="m_oController.deleteOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)">
                         <!--Delete Organization-->
-                        <i
-                            class="fa fa-times"
-                            aria-hidden="true"
-                            style="margin-right: 0px"
-                        ></i>
+                        <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_ORGANIZATION_DELETE"|translate}}</span
@@ -121,222 +69,4 @@
             </tr>
         </tbody>
     </table>
-
-    <!-- <table class="table table-hover" ng-show="m_oController.m_oShowOrganizationUsersList === true">
-        <thead></thead>
-        <tbody>
-            <tr>
-                <td>
-                    <div ng-show="m_oController.m_aoUsersList.length >= 0">
-                        <div class="spacer"></div>
-                        <div class="spacer"></div>
-                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">{{"DIALOG_SHARE_ORGANIZATION"|translate}}</legend>
-                        <div class="spacer"></div>
-
-                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr> -->
-                                        <!-- <th>UserId</th> -->
-                                        <!-- <th>Name</th>
-                                        <th>Surname</th>
-                                        <th>Role</th> -->
-
-                                        <!-- <th>
-                                            <button
-                                                class="btn btn-primary btn-wasdi"
-                                                title={{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}
-                                                ng-click="m_oController.showOrganizationSharingForm(m_oController.m_sSelectedOrganizationId)"
-                                            > -->
-                                                <!--Share Organization-->
-                                                <!-- <i
-                                                    class="fa fa-plus"
-                                                    aria-hidden="true"
-                                                    style="margin-right: 0px"
-                                                ></i> -->
-                                                <!--
-                                                <span class="ng-binding"
-                                                    >{{"DIALOG_EDIT_ORGANIZATION_SHARE"|translate}}</span
-                                                >
-                                                -->
-                                            <!-- </button>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody ng-show="m_oController.m_aoUsersList.length > 0">
-                                    <tr ng-repeat="oUser in m_oController.m_aoUsersList">
-                                        <td>{{oUser.userId}}</td> -->
-                                        <!-- <td>{{oUser.name}}</td>
-                                        <td>{{oUser.surname}}</td>
-                                        <td>{{oUser.role}}</td> -->
-
-                                        <!-- <td class="over-icon" ng-show="oOrganization.organizationId === oOrganization.organizationId">
-                                            <button
-                                                class="btn btn-primary btn-wasdi"
-                                                title={{"DIALOG_EDIT_ORGANIZATION_UNSHARE"|translate}}
-                                                ng-click="m_oController.unshareOrganization(m_oController.m_sSelectedOrganizationId, oUser.userId)"
-                                            > -->
-                                                <!--Unshare Organization-->
-                                                <!-- <i
-                                                    class="fa fa-times"
-                                                    aria-hidden="true"
-                                                    style="margin-right: 0px"
-                                                ></i> -->
-                                                <!--
-                                                <span class="ng-binding"
-                                                    >{{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}</span
-                                                >
-                                                -->
-                                            <!-- </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table> -->
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- Add/Edit Organization form -->
-<!-- <div class="row-v4" ng-show="m_oController.m_oShowEditOrganizationForm === true">
-    <div class="spacer"></div>
-    <div class="col-v4">
-        <legend ng-show="m_oController.m_oEditOrganization.organizationId == null">{{"DIALOG_ADD_ORGANIZATION"|translate}}</legend>
-        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">{{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend>
-        <form name="editOrganizationForm" ng-submit="m_oController.saveOrganization()"
-            ng-hide="m_oController.isUserLoggedWithGoogle()">
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_NAME'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"
-                        ng-model="m_oController.m_oEditOrganization.name" required />
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_DESCRIPTION'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditOrganization.description" required />
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_ADDRESS'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditOrganization.address" required />
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_EMAIL'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditOrganization.email" required />
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_ORGANIZATION_URL'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditOrganization.url" required />
-                </div>
-            </div>
-
-            <div class="col-12 text-right">
-                <button type="button" class="btn btn-primary btn-wasdi"
-                    ng-click="m_oController.cancelEditOrganizationForm()">
-                    {{"DIALOG_EDIT_ORGANIZATION_CANCEL"|translate}}
-                </button>
-                <button type="submit" class="btn btn-primary btn-wasdi">
-                    {{"DIALOG_EDIT_ORGANIZATION_SAVE"|translate}}
-                </button>
-            </div>
-        </form>
-    </div>
-</div> -->
-
-<!-- Share Organization form -->
-<div class="row-v4" ng-show="m_oController.m_oShowSharingOrganizationForm === true">
-    <div class="col-v4">
-        <legend>{{"DIALOG_SHARE_ORGANIZATION"|translate}}</legend>
-        <form name="shareOrganizationForm">
-
-
-            <h3>{{"DIALOG_SHARE_ORGANIZATION_SEARCH_USER" | translate}}</h3>
-            <div class="spacer"></div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_MANAGE_USERS_USER_PARTIAL_NAME'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="userPartialName"
-                        ng-model="m_oController.m_sUserPartialName" required />
-                </div>
-            </div>
-
-            <div class="col-12 text-right">
-                <button type="button" class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.cancelSharingOrganizationForm()">
-                    {{"DIALOG_EDIT_ORGANIZATION_CANCEL"|translate}}
-                </button>
-                <button type="button" class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">
-                    {{"DIALOG_EDIT_ORGANIZATION_SEARCH"|translate}}
-                </button>
-            </div>
-        </form>
-
-        <div class="row" ng-show="m_oController.m_aoMatchingUsersList.length >= 0">
-            <div class="spacer"></div>
-
-            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>UserId</th>
-                            <th>Name</th>
-                            <th>Surname</th>
-                            <!-- <th>Role</th> -->
-                            <th>Add to Orgnization</th>
-                        </tr>
-                    </thead>
-                    <tbody ng-show="m_oController.m_aoMatchingUsersList.length > 0">
-                        <tr ng-repeat="oUser in m_oController.m_aoMatchingUsersList">
-                            <td>{{oUser.userId}}</td>
-                            <td>{{oUser.name}}</td>
-                            <td>{{oUser.surname}}</td>
-                            <!-- <td>{{oUser.role}}</td> -->
-
-                            <td class="over-icon">
-                                <button
-                                    class="btn btn-primary btn-wasdi"
-                                    title={{"DIALOG_SHARE_ORGANIZATION_ADD_USER"|translate}}
-                                    ng-click="m_oController.shareOrganization(m_oController.m_sSelectedOrganizationId, oUser.userId)"
-                                >
-                                    <!--Share Organization-->
-                                    <i
-                                        class="fa fa-plus"
-                                        aria-hidden="true"
-                                        style="margin-right: 0px"
-                                    ></i>
-                                    <!--
-                                    <span class="ng-binding"
-                                        >{{"DIALOG_SHARE_ORGANIZATION_ADD_USER"|translate}}</span
-                                    >
-                                    -->
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
 </div>

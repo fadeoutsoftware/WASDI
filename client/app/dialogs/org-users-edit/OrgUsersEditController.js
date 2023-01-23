@@ -17,22 +17,28 @@ let OrgUsersEditController = (function () {
     OrgUsersEditController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
         let oController = this;
         
-        this.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    // oController.m_aoUsersList = data.data;
-                    console.log("EditUserController.unshareOrganization | data.data: ", data.data);
-                    if (data.data.boolValue) {
-                        oController.showUsersByOrganization(sOrganizationId);
+        let sConfirmMsg = `Confirm unsharing with ${sUserId}`
+        
+        let oUnshareReviewCallback = function (value) {
+                oController.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
+                function (data) {
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        // oController.m_aoUsersList = data.data;
+                        console.log("EditUserController.unshareOrganization | data.data: ", data.data);
+                        if (data.data.boolValue) {
+                            oController.showUsersByOrganization(sOrganizationId);
+                        }
+                    } else {
+                        utilsVexDialogAlertTop(
+                            "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
+                        );
                     }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
-                    );
+                    return true;
                 }
-                return true;
-            }
-        );
+           );
+        }
+        
+        utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
     }
     OrgUsersEditController.prototype.showUsersByOrganization = function (sOrganizationId) {
         var oController = this;
@@ -72,7 +78,6 @@ let OrgUsersEditController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function (result) {
-                            console.log(result)
                             oController.showUsersByOrganization(result); 
                         })
                     })
@@ -86,7 +91,6 @@ let OrgUsersEditController = (function () {
             }
         )
     }
-
 
     OrgUsersEditController.$inject = [
         "$scope",
