@@ -1,5 +1,10 @@
 <div class="subscriptions-view pt-3">
-    <legend>Subscriptions</legend>
+    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
+        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)">
+        <!--Add Subscription-->
+        <span class="ng-binding">{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span>
+
+    </button>
     <p class="mr-2 text-uppercase">
         ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
     </p>
@@ -15,19 +20,7 @@
                 <th>Subscription Type</th>
                 <th>Subscription Owner</th>
 
-                <th>
-                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)">
-                        <!--Add Subscription-->
-                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i>
-                        <!--
-                        <span class="ng-binding"
-                            >{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span
-                        >
-                        -->
-                    </button>
-                </th>
-
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -50,10 +43,6 @@
                         -->
                     </button>
                 </td>
-                <!-- <td class="over-icon"
-                    ng-show="m_oController.m_oEditSubscription.subscriptionId === oSubscription.subscriptionId">
-                    <span></span>
-                </td> -->
 
                 <td class="over-icon"
                     ng-show="m_oController.m_oEditSubscription.subscriptionId === m_oController.m_oEditSubscription.subscriptionId">
@@ -72,132 +61,3 @@
         </tbody>
     </table>
 </div>
-
-<!-- Add/Edit Subscription form -->
-<!-- <div class="row-v4" ng-show="m_oController.m_oShowEditSubscriptionForm === true">
-    <div class="spacer"></div>
-    <div class="col-v4">
-        <legend ng-show="m_oController.m_oEditSubscription.subscriptionId == null">{{"DIALOG_ADD_SUBSCRIPTION"|translate}}</legend>
-        <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null">{{"DIALOG_EDIT_SUBSCRIPTION"|translate}}</legend>
-        <form name="editSubscriptionForm" ng-submit="m_oController.saveSubscription()"
-            ng-hide="m_oController.isUserLoggedWithGoogle()">
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_NAME'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"
-                        ng-model="m_oController.m_oEditSubscription.name" required />
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_DESCRIPTION'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditSubscription.description" />
-                </div>
-            </div> -->
-
-<!--
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_TYPE'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditSubscription.type" required />
-                </div>
-            </div>
-            -->
-
-<!-- <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_TYPE'|translate}}</label>
-                <div class="col-sm-10">
-                    <div ng-show="!m_oController.m_bLoadingTypes">
-                        <wapdropdown
-                            list-of-values="m_oController.m_aoTypesMap"
-                            selected-value="m_oController.m_oType"
-                            enable-search-filter="true"
-                            dropdown-name="Type"
-                            ng-model="m_oController.m_oType" required
-                        >
-                        </wapdropdown>
-                    </div>
-                    <div ng-show="m_oController.m_bLoadingTypes">
-                        <invader></invader>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-v4-group row">
-                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_ORGANIZATION'|translate}}</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-v4-control-plaintext wasdi-input"
-                        ng-model="m_oController.m_oEditSubscription.organizationId" />
-                </div>
-            </div>
-
-            <div class="col-12 text-right">
-                <button type="button" class="btn btn-primary btn-wasdi"
-                        ng-click="m_oController.cancelEditSubscriptionForm()">
-                    {{"DIALOG_EDIT_SUBSCRIPTION_CANCEL"|translate}}
-                </button>
-                <button type="submit" class="btn btn-primary btn-wasdi">
-                    {{"DIALOG_EDIT_SUBSCRIPTION_SAVE"|translate}}
-                </button>
-            </div>
-        </form>
-    </div>
-</div> -->
-
-<!-- <div class="row-v4 mt-2">
-    <div class="col-v4">
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Subscription</th>
-                    <th scope="col">Organization</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Time</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                   
-                   <td></td>
-         
-                    <td></td>
-   
-                    <td></td>
-                    
-<td></td>
-
-<td>
-    <button class="btn btn-primary btn-wasdi">
-        <i class="fa fa-file"></i>
-
-        <span class="ng-binding">
-            Show Projects
-        </span>
-    </button>
-</td>
-</tr>
-</tbody>
-</table>
-
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <td>Name</td>
-            <td>Description</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Project Name</td>
-            <td>Project Description blah blah</td>
-        </tr>
-    </tbody>
-</table>
-</div>
-</div> -->
