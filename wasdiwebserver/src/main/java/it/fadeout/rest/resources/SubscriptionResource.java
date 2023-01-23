@@ -251,7 +251,7 @@ public class SubscriptionResource {
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
-		oSubscription.setOrganizationId(Utils.getRandomName());
+		oSubscription.setSubscriptionId(Utils.getRandomName());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			oResult.setBoolValue(true);
