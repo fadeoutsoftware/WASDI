@@ -273,6 +273,24 @@ var EditUserController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoUsersList = data.data;
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/org-users-edit/OrgUsersEditDialog.html",
+                        controller: 'OrgUsersEditController',
+                        inputs: {
+                            extras: {
+                                users: data.data,
+                                organizationId: oController.m_sSelectedOrganizationId
+                            }
+                        }
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function () {
+                            oController.initializeOrganizationsInfo();
+                        })
+
+                    })
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
@@ -312,47 +330,47 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.findUsersByPartialName = function (sUserPartialName) {
-        this.m_aoMatchingUsersList = [];
+    // EditUserController.prototype.findUsersByPartialName = function (sUserPartialName) {
+    //     this.m_aoMatchingUsersList = [];
 
-        if (utilsIsStrNullOrEmpty(sUserPartialName) === true) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
+    //     if (utilsIsStrNullOrEmpty(sUserPartialName) === true) {
+    //         utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
-            return false;
-        }
+    //         return false;
+    //     }
 
-        utilsRemoveSpaces(sUserPartialName);
+    //     utilsRemoveSpaces(sUserPartialName);
 
-        if (sUserPartialName.length < 3) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
+    //     if (sUserPartialName.length < 3) {
+    //         utilsVexDialogAlertTop("GURU MEDITATION<br>AT LEAST THREE CHARACTERS MUST BE PROVIDED");
 
-            return false;
-        }
+    //         return false;
+    //     }
 
-        var oController = this;
+    //     var oController = this;
 
-        this.m_oAdminDashboardService.findUsersByPartialName(sUserPartialName)
-            .then(
-                function (data) {
-                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                        oController.m_aoMatchingUsersList = data.data;
-                    } else {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
-                    }
+    //     this.m_oAdminDashboardService.findUsersByPartialName(sUserPartialName)
+    //         .then(
+    //             function (data) {
+    //                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
+    //                     oController.m_aoMatchingUsersList = data.data;
+    //                 } else {
+    //                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
+    //                 }
 
-                    // oController.clearForm();
+    //                 // oController.clearForm();
 
-                    return true;
-                },
-                function (error) {
-                    console.log("EditUserController.findUsersByPartialName | error.data.message: ", error.data.message);
+    //                 return true;
+    //             },
+    //             function (error) {
+    //                 console.log("EditUserController.findUsersByPartialName | error.data.message: ", error.data.message);
 
-                    let errorMessage = oController.m_oTranslate.instant(error.data.message);
+    //                 let errorMessage = oController.m_oTranslate.instant(error.data.message);
 
-                    utilsVexDialogAlertTop(errorMessage);
-                }
-            );
-    };
+    //                 utilsVexDialogAlertTop(errorMessage);
+    //             }
+    //         );
+    // };
 
     EditUserController.prototype.shareOrganization = function(sOrganizationId, sUserId) {
         console.log("EditUserController.shareOrganization | sOrganizationId: ", sOrganizationId);
