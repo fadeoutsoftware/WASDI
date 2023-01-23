@@ -636,8 +636,8 @@ var EditUserController = (function () {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_oEditSubscription = data.data;
                     oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/edit-subscriptions/EditSubscriptionsDialog.html",
-                        controller: "EditSubscriptionsController",
+                        templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+                        controller: "SubscriptionEditorController",
                         inputs: {
                             extras: {
                                 subscriptions: data.data

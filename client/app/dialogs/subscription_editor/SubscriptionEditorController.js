@@ -1,5 +1,5 @@
-let EditSubscriptionsController = (function () {
-    function EditSubscriptionsController(
+SubscriptionEditorController = (function () {
+    function SubscriptionEditorController(
         $scope,
         oClose,
         oExtras,
@@ -27,10 +27,10 @@ let EditSubscriptionsController = (function () {
         }
 
     }
-    EditSubscriptionsController.prototype.getSubscriptionById = function (sSubscriptionId) {
+    SubscriptionEditorController.prototype.getSubscriptionById = function (sSubscriptionId) {
 
     }
-    EditSubscriptionsController.prototype.saveSubscription = function () {
+    SubscriptionEditorController.prototype.saveSubscription = function () {
         console.log("EditUserController.saveSubscription | m_oEditSubscription: ", this.m_oEditSubscription);
 
         let sType = "";
@@ -59,7 +59,7 @@ let EditSubscriptionsController = (function () {
         this.m_oScope.close();
     }
 
-    EditSubscriptionsController.prototype.getSubscriptionTypes = function () {
+    SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
         let oController = this;
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
             function (data) {
@@ -92,12 +92,12 @@ let EditSubscriptionsController = (function () {
         );
     }
 
-    EditSubscriptionsController.$inject = [
+    SubscriptionEditorController.$inject = [
         '$scope',
         'close',
         'extras',
         'SubscriptionService'
     ];
-    return EditSubscriptionsController
+    return SubscriptionEditorController
 })();
-window.EditSubscriptionsController = EditSubscriptionsController
+window.SubscriptionEditorController = SubscriptionEditorController
