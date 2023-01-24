@@ -8,7 +8,6 @@ let OrganizationEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
-        this.oClose = oClose;
 
         this.m_oOrganizationService = oOrganizationService;
 
@@ -27,7 +26,7 @@ let OrganizationEditorController = (function () {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_oScope.close();
+
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
                 utilsVexCloseDialogAfter(3000, oDialog);

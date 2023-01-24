@@ -9,7 +9,6 @@ SubscriptionEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oExtras = oExtras;
         this.m_oScope.m_oController = this;
-        this.oClose = oClose;
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
