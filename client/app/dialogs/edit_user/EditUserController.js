@@ -647,13 +647,15 @@ var EditUserController = (function () {
                         modal.element.modal({
                             backdrop: 'static'
                         })
-                        modal.close.then(function (result) {
+                        modal.close.then(function () {
                             oController.initializeSubscriptionsInfo();
 
                         })
                     })
-
-
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
+                    );
                 }
             }
         )
