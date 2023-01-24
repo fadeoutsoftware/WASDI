@@ -8,7 +8,6 @@ let OrganizationEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
-        this.oClose = oClose;
 
         this.m_oOrganizationService = oOrganizationService;
 
@@ -17,27 +16,27 @@ let OrganizationEditorController = (function () {
         $scope.close = function (result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
-
-
     };
 
-    OrganizationEditorController.prototype.saveOrganizationInfo = function () {
-        let oController = this;
+    OrganizationEditorController.prototype.saveOrganization = function () {
+        console.log(" OrganizationEditorController.saveOrganization");
+
         this.m_oOrganizationService.saveOrganization(this.m_oEditOrganization).then(function (data) {
+            console.log(" OrganizationEditorController.saveOrganizationInfo | data.data: ", data.data);
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_oScope.close();
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
-                utilsVexCloseDialogAfter(3000, oDialog);
             }
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
-            utilsVexCloseDialogAfter(3000, oDialog);
         });
 
+        this.m_oEditOrganization = {};
+        this.m_oScope.close();
     }
+
     OrganizationEditorController.$inject = [
         "$scope",
         "close",

@@ -9,11 +9,12 @@
                 <div class="row-v4 pb-3">
                     <div class="spacer"></div>
                     <div class="col-v4">
-                        <legend>
+                        <legend ng-show="m_oController.m_oEditOrganization.organizationId == null">
                             {{"DIALOG_ADD_ORGANIZATION"|translate}}</legend>
-                        <!-- <legend >
-                            {{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend> -->
-                        <form name="editOrganizationForm" ng-submit="m_oController.saveOrganization()"
+                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">
+                            {{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend>
+
+                        <form name="editOrganizationForm"
                             ng-hide="m_oController.isUserLoggedWithGoogle()">
 
                             <div class="form-v4-group row">
@@ -63,7 +64,7 @@
 
                             <div class="col-12 text-right">
                                 <button type="submit" class="btn btn-primary btn-wasdi"
-                                    ng-click="m_oController.saveOrganizationInfo()">
+                                    ng-click="m_oController.saveOrganization()" data-dismiss="modal">
                                     {{"DIALOG_EDIT_ORGANIZATION_SAVE"|translate}}
                                 </button>
                             </div>

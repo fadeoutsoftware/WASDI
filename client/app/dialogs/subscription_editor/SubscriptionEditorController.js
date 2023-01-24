@@ -7,13 +7,12 @@ SubscriptionEditorController = (function () {
         oOrganizationService
     ) {
         this.m_oScope = $scope;
-        this.m_oExtras = oExtras;
         this.m_oScope.m_oController = this;
-        this.oClose = oClose;
+        this.m_oExtras = oExtras;
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
-        this.m_bEditSubscription = false;
+
         this.m_oEditSubscription = oExtras.subscription;
 
         this.m_asTypes = [];
@@ -36,6 +35,8 @@ SubscriptionEditorController = (function () {
     }
 
     SubscriptionEditorController.prototype.saveSubscription = function () {
+        console.log("SubscriptionEditorController.saveSubscription");
+
         if (utilsIsObjectNullOrUndefined(this.m_oType)) {
             this.m_oEditSubscription.type = "";
         } else {
@@ -48,21 +49,17 @@ SubscriptionEditorController = (function () {
             this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
         }
 
-        let oController = this;
-
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
+            console.log(" SubscriptionEditorController.saveSubscription | data.data: ", data.data);
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
+                let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_oScope.close();
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
-                utilsVexCloseDialogAfter(3000, oDialog);
             }
 
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
-            utilsVexCloseDialogAfter(3000, oDialog);
         });
 
         this.m_oEditSubscription = {};
@@ -79,7 +76,7 @@ SubscriptionEditorController = (function () {
                     var oDialog = utilsVexDialogAlertBottomRightCorner(
                         "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
                     );
-                    utilsVexCloseDialogAfter(5000, oDialog);
+                    utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
                     oController.m_asTypes = data.data;
                     oController.m_aoTypesMap = oController.m_asTypes.map(
@@ -98,7 +95,7 @@ SubscriptionEditorController = (function () {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(
                     "GURU MEDITATION<br>ERROR GETTING TYPES"
                 );
-                utilsVexCloseDialogAfter(5000, oDialog);
+                utilsVexCloseDialogAfter(4000, oDialog);
                 oController.m_bLoadingTypes = false;
             }
         );
@@ -113,7 +110,7 @@ SubscriptionEditorController = (function () {
                     let oDialog = utilsVexDialogAlertBottomRightCorner(
                         "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
                     );
-                    utilsVexCloseDialogAfter(5000, oDialog);
+                    utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
                     oController.m_asOrganizations = data.data;
                     oController.m_aoOrganizationsMap = oController.m_asOrganizations.map(
@@ -133,7 +130,7 @@ SubscriptionEditorController = (function () {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(
                     "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
                 );
-                utilsVexCloseDialogAfter(5000, oDialog);
+                utilsVexCloseDialogAfter(4000, oDialog);
                 oController.m_bLoadingOrganization = false;
             }
         );
