@@ -9,6 +9,7 @@ SubscriptionEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oExtras = oExtras;
         this.m_oScope.m_oController = this;
+        this.oClose = oClose;
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
@@ -30,7 +31,7 @@ SubscriptionEditorController = (function () {
         this.getOrganizationsListByUser();
 
         $scope.close = function (result) {
-            oClose(result, 500)
+            oClose(result, 500);
         }
     }
 
@@ -47,6 +48,7 @@ SubscriptionEditorController = (function () {
             this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
         }
 
+        let oController = this;
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
@@ -108,7 +110,7 @@ SubscriptionEditorController = (function () {
         this.m_oOrganizationService.getOrganizationsListByUser().then(
             function (data) {
                 if (data.status !== 200) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(
+                    let oDialog = utilsVexDialogAlertBottomRightCorner(
                         "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
                     );
                     utilsVexCloseDialogAfter(5000, oDialog);
