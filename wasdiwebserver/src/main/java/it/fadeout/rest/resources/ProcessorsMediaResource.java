@@ -1079,7 +1079,7 @@ public class ProcessorsMediaResource {
 		oListViewModel.setCommentId(oComment.getCommentId());
 		oListViewModel.setReviewId(oComment.getReviewId());
 		oListViewModel.setUserId(oComment.getUserId());
-		oListViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
+		oListViewModel.setDate(new Date(oComment.getDate().longValue()));
 		oListViewModel.setText(oComment.getText());
 
 		return oListViewModel;
@@ -1099,7 +1099,7 @@ public class ProcessorsMediaResource {
 		oDetailViewModel.setCommentId(oComment.getCommentId());
 		oDetailViewModel.setReviewId(oComment.getReviewId());
 		oDetailViewModel.setUserId(oComment.getUserId());
-		oDetailViewModel.setDate(Utils.getDate(oComment.getDate().longValue()));
+		oDetailViewModel.setDate(new Date(oComment.getDate().longValue()));
 		oDetailViewModel.setText(oComment.getText());
 
 		return oDetailViewModel;

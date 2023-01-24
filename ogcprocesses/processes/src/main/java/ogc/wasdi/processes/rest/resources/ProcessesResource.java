@@ -1008,7 +1008,7 @@ public class ProcessesResource {
 					oWASDIInput.put(sKey, sValue);
 				}
 				else {
-					WasdiLog.infoLog("ProcessesResource.executeApplication: the parameter " + sKey + " has a not allowed string");
+					WasdiLog.infoLog("ProcessesResource.convertOGCInputToWasdiInput: the parameter " + sKey + " has a not allowed string");
 					bErrorOnValue = true;
 				}
 			}
@@ -1103,27 +1103,40 @@ public class ProcessesResource {
 				// or
 				// { "northEast": {"lat:","lng"}, "southWest": {"lat:","lng"} }
 				
-				Bbox oBbox = MongoRepository.s_oMapper.convertValue(aoInputs.get(sKey), Bbox.class);
-
 				double dNorth = 0.0;
 				double dWest = 0.0;
 				double dSouth = 0.0;
-				double dEast = 0.0;
+				double dEast = 0.0;				
+				
+				try {
+					Bbox oBbox = MongoRepository.s_oMapper.convertValue(aoInputs.get(sKey), Bbox.class);
 
-				if (oBbox.getBbox().size()==4) {										
-					dNorth = oBbox.getBbox().get(3).doubleValue();
-					dWest = oBbox.getBbox().get(0).doubleValue();
-					dSouth = oBbox.getBbox().get(1).doubleValue();
-					dEast = oBbox.getBbox().get(2).doubleValue();
+
+					if (oBbox.getBbox().size()==4) {										
+						dNorth = oBbox.getBbox().get(3).doubleValue();
+						dWest = oBbox.getBbox().get(0).doubleValue();
+						dSouth = oBbox.getBbox().get(1).doubleValue();
+						dEast = oBbox.getBbox().get(2).doubleValue();
+					}
+					else if (oBbox.getBbox().size()==6) {
+						dNorth = oBbox.getBbox().get(4).doubleValue();
+						dWest = oBbox.getBbox().get(0).doubleValue();
+						dSouth = oBbox.getBbox().get(1).doubleValue();
+						dEast = oBbox.getBbox().get(3).doubleValue();
+					}
+					else {
+						bErrorOnValue = true;
+					}					
 				}
-				else if (oBbox.getBbox().size()==6) {
-					dNorth = oBbox.getBbox().get(4).doubleValue();
-					dWest = oBbox.getBbox().get(0).doubleValue();
-					dSouth = oBbox.getBbox().get(1).doubleValue();
-					dEast = oBbox.getBbox().get(3).doubleValue();
-				}
-				else {
-					bErrorOnValue = true;
+				catch (Exception oBboxEx) {
+					WasdiLog.errorLog("ProcessesResource.convertOGCInputToWasdiInput: exception parsing the bbox, try with a WASDI String " + oBboxEx.toString());
+					
+					String sBbox = aoInputs.get(sKey).toString();
+					String [] asParts = sBbox.split(",");
+					dNorth = Double.parseDouble(asParts[0]);
+					dWest = Double.parseDouble(asParts[1]);
+					dSouth = Double.parseDouble(asParts[2]);
+					dEast = Double.parseDouble(asParts[3]);
 				}
 				
 				if (!bErrorOnValue) {
@@ -1151,7 +1164,7 @@ public class ProcessesResource {
 			}									
 		}
 		catch (Exception oInEx) {
-			WasdiLog.infoLog("ProcessesResource.executeApplication: the parsing of parameter " + sKey + " created an exception " + oInEx.toString());
+			WasdiLog.errorLog("ProcessesResource.convertOGCInputToWasdiInput: the parsing of parameter " + sKey + " created an exception " + oInEx.toString());
 			bErrorOnValue = true;
 		} 
 		
