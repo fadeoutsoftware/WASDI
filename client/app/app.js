@@ -250,9 +250,9 @@ wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
 
 wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
-wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController); 
 wasdiApp.controller("OrgUsersEditController", window.OrgUsersEditController);
 wasdiApp.controller("ShareOrganizationController", window.ShareOrganizationController);
+wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 

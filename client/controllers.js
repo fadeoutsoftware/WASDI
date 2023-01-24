@@ -43,7 +43,7 @@ require('./app/dialogs/processor_parameters_template/ProcessorParametersTemplate
 require('./app/dialogs/send_feedback/SendFeedbackController.js');
 require('./app/dialogs/package_manager/PackageManagerController.js')
 require('./app/dialogs/processor_parameters_share/ProcessParamsShareController.js')
-require('./app/dialogs/organization-edit/OrganizationEditorController.js'); 
-require('./app/dialogs/org-users-edit/OrgUsersEditController.js'); 
-require('./app/dialogs/share-organization/ShareOrganizationController.js'); 
-require('./app/dialogs/subscription_editor/SubscriptionEditorController.js'); 
+require('./app/dialogs/org-users-edit/OrgUsersEditController.js');
+require('./app/dialogs/share-organization/ShareOrganizationController.js');
+require('./app/dialogs/organization_editor/OrganizationEditorController.js');
+require('./app/dialogs/subscription_editor/SubscriptionEditorController.js');

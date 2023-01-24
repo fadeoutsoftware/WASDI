@@ -1,10 +1,5 @@
 <div class="subscriptions-view pt-3">
-    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
-        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)">
-        <!--Add Subscription-->
-        <span class="ng-binding">{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span>
 
-    </button>
     <p class="mr-2 text-uppercase">
         ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
     </p>
@@ -12,6 +7,15 @@
         TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
             convertMsToTime}}</span>
     </p>
+
+    <br>
+
+    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
+        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null)">
+        <!--Add Subscription-->
+        <span class="ng-binding">{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span>
+    </button>
+
     <!-- Subscriptions Table -->
     <table class="table table-hover subscriptions-list">
         <thead>
