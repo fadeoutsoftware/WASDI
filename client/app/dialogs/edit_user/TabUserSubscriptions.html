@@ -23,6 +23,7 @@
                 <th>Subscription Name</th>
                 <th>Subscription Type</th>
                 <th>Subscription Owner</th>
+                <th>Origin</th>
 
                 <th></th>
                 <th></th>
@@ -32,8 +33,9 @@
             <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index"
                 ng-class="{'selected-row':m_oController.m_sSelectedSubscriptionId === oSubscription.subscriptionId}">
                 <td>{{oSubscription.name}}</td>
-                <td>{{oSubscription.type}}</td>
+                <td>{{oSubscription.typeName}}</td>
                 <td>{{oSubscription.ownerUserId}}</td>
+                <td>{{oSubscription.organizationName}}</td>
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}

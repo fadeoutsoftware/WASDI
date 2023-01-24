@@ -3,7 +3,9 @@ package it.fadeout.rest.resources;
 import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_READ;
 
 import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,7 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
 
@@ -93,7 +96,7 @@ public class SubscriptionResource {
 			// For each
 			for (Subscription oSubscription : aoDirectSubscriptions) {
 				// Create View Model
-				SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
+				SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), "owned");
 
 				aoSubscriptionList.add(oSubscriptionViewModel);
 			}
@@ -111,11 +114,14 @@ public class SubscriptionResource {
 					.map(OrganizationListViewModel::getOrganizationId)
 					.collect(Collectors.toList());
 
+			Map<String, String> asOrganizationNames = aoOrganizationLVMs.stream()
+				      .collect(Collectors.toMap(OrganizationListViewModel::getOrganizationId, OrganizationListViewModel::getName));
+
 			List<Subscription> aoOrganizationalSubscriptions = oSubscriptionRepository.getSubscriptionsByOrganizations(asOrganizationIds);
 
 			aoOrganizationalSubscriptions.forEach((Subscription oSubscription) -> {
 				if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
+					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), "shared by " + asOrganizationNames.get(oSubscription.getOrganizationId()));
 					aoSubscriptionList.add(oSubscriptionViewModel);
 
 					asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());
@@ -136,7 +142,7 @@ public class SubscriptionResource {
 					}
 
 					if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
+						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), "shared by " + oSharedSubscription.getOwnerId());
 
 						aoSubscriptionList.add(oSubscriptionViewModel);
 						asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());
@@ -359,6 +365,15 @@ public class SubscriptionResource {
 	 * @param sSessionId User Session Id
 	 * @return a list of Subscription types
 	 */
+//	@GET
+//	@Path("/types")
+//	@Produces({ "application/xml", "application/json", "text/xml" })
+//	public List<SubscriptionType> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
+//		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
+//
+//		return Arrays.asList(SubscriptionType.values());
+//	}
+
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -670,11 +685,13 @@ public class SubscriptionResource {
 		return oSubscriptionViewModel;
 	}
 
-	private static SubscriptionListViewModel convert(Subscription oSubscription, String sCurrentUserId) {
+	private static SubscriptionListViewModel convert(Subscription oSubscription, String sCurrentUserId, String sOrganizationName) {
 		SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
 		oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 		oSubscriptionListViewModel.setName(oSubscription.getName());
-		oSubscriptionListViewModel.setType(oSubscription.getType());
+//		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
+		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
+		oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
 
