@@ -183,12 +183,31 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public List<UserResourcePermission> getPermissionsByTypeAndResourceIds(String sType, List<String> asResourceIds) {
+		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.and(Filters.eq("resourceType", sType), Filters.in("resourceId", asResourceIds)));
+
+			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
 	public List<UserResourcePermission> getNodeSharingsByNodeCode(String sNodeCode) {
 		return getPermissionsByTypeAndResourceId("node", sNodeCode);
 	}
 
 	public List<UserResourcePermission> getOrganizationSharingsByOrganizationId(String sOrganizationId) {
 		return getPermissionsByTypeAndResourceId("organization", sOrganizationId);
+	}
+
+	public List<UserResourcePermission> getOrganizationSharingsByOrganizationIds(List<String> asOrganizationIds) {
+		return getPermissionsByTypeAndResourceIds("organization", asOrganizationIds);
 	}
 
 	public List<UserResourcePermission> getSubscriptionSharingsBySubscriptionId(String sSubscriptionId) {

@@ -94,11 +94,11 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an subscription by its owner.
-	 * @param sUserId the owner of the subscription
-	 * @return the subscription if found, null otherwise
+	 * Get the subscriptions by owner.
+	 * @param sUserId the owner of the subscriptions
+	 * @return the list of subscriptions found
 	 */
-	public List<Subscription> getSubscriptionByUser(String sUserId) {
+	public List<Subscription> getSubscriptionsByUser(String sUserId) {
 		final List<Subscription> aoReturnList = new ArrayList<>();
 
 		try {
@@ -114,16 +114,36 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an subscription by its organization.
-	 * @param sOrganizationId the organization of the subscription
-	 * @return the subscription if found, null otherwise
+	 * Get the subscriptions of an organization.
+	 * @param sOrganizationId the organizationId of the subscriptions
+	 * @return the list of subscriptions found
 	 */
-	public List<Subscription> getSubscriptionByOrganization(String sOrganizationId) {
+	public List<Subscription> getSubscriptionsByOrganization(String sOrganizationId) {
 		final List<Subscription> aoReturnList = new ArrayList<>();
 
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
 					.find(new Document("organizationId", sOrganizationId));
+
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	/**
+	 * Get the subscription of many organizations.
+	 * @param asOrganizationIds the list of organizationIds
+	 * @return the subscription if found, null otherwise
+	 */
+	public List<Subscription> getSubscriptionsByOrganizations(List<String> asOrganizationIds) {
+		final List<Subscription> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.in("organizationId", asOrganizationIds));
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {

@@ -1,10 +1,11 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_READ;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,27 +15,22 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SubscriptionRepository;
-import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
-//import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 
 @Path("/subscriptions")
 public class SubscriptionResource {
@@ -87,31 +83,44 @@ public class SubscriptionResource {
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-			// Get Subscription List
-			List<Subscription> aoSubscriptions = oSubscriptionRepository.getSubscriptionByUser(oUser.getUserId());
+			// Get Subscription List directly owned by the user
+			List<Subscription> aoDirectSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
+
+			Set<String> asUniqueSubscriptionIds = aoDirectSubscriptions.stream()
+					.map(Subscription::getSubscriptionId)
+					.collect(Collectors.toSet());
 
 			// For each
-			for (Subscription oSubscription : aoSubscriptions) {
+			for (Subscription oSubscription : aoDirectSubscriptions) {
 				// Create View Model
 				SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
 
-//				// Get Sharings
-//				List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository
-//						.getSubscriptionSharingsBySubscriptionId(oSubscription.getSubscriptionId());
-//
-//				// Add Sharings to View Model
-//				if (aoPermissions != null) {
-//					for (UserResourcePermission oUserResourcePermission : aoPermissions) {
-//						if (oSubscriptionViewModel.getSharedUsers() == null) {
-//							oSubscriptionViewModel.setSharedUsers(new ArrayList<String>());
-//						}
-//
-//						oSubscriptionViewModel.getSharedUsers().add(oUserResourcePermission.getUserId());
-//					}
-//				}
-
 				aoSubscriptionList.add(oSubscriptionViewModel);
 			}
+
+			//TODO
+			// 1. subscriptions directly owned by the user
+			// 2. subscriptions belonging to organizations owned by the user
+			// 3. subscriptions belonging to organizations shared with the user
+			// 4. subscriptions shared with the user on individual basis
+
+
+			List<OrganizationListViewModel> aoOrganizationLVMs = new OrganizationResource().getListByUser(sSessionId);
+
+			List<String> asOrganizationIds = aoOrganizationLVMs.stream()
+					.map(OrganizationListViewModel::getOrganizationId)
+					.collect(Collectors.toList());
+
+			List<Subscription> aoOrganizationalSubscriptions = oSubscriptionRepository.getSubscriptionsByOrganizations(asOrganizationIds);
+
+			aoOrganizationalSubscriptions.forEach((Subscription oSubscription) -> {
+				if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
+					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
+					aoSubscriptionList.add(oSubscriptionViewModel);
+
+					asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());
+				}
+			});
 
 			// Get the list of subscriptions shared with this user
 			List<UserResourcePermission> aoSharedSubscriptions = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
@@ -126,23 +135,12 @@ public class SubscriptionResource {
 						continue;
 					}
 
-					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
+					if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
+						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId());
 
-//					// Get Sharings
-//					List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getSubscriptionSharingsBySubscriptionId(oSubscription.getSubscriptionId());
-//
-//					// Add Sharings to View Model
-//					if (aoSharings != null) {
-//						for (UserResourcePermission oSharing : aoSharings) {
-//							if (oSubscriptionViewModel.getSharedUsers() == null) {
-//								oSubscriptionViewModel.setSharedUsers(new ArrayList<String>());
-//							}
-//
-//							oSubscriptionViewModel.getSharedUsers().add(oSharing.getUserId());
-//						}
-//					}
-
-					aoSubscriptionList.add(oSubscriptionViewModel);
+						aoSubscriptionList.add(oSubscriptionViewModel);
+						asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());
+					}
 				}
 			}
 		} catch (Exception oEx) {
