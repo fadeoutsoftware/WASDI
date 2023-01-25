@@ -1,0 +1,72 @@
+<div class="modal fade edit-user-dialog-catalog">
+    <div class="modal-dialog modal-wasdi">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+            </div>
+            <!-- BODY -->
+            <div class="modal-body no-ale-style">
+                <div class="row-v4 p-3">
+                    <div style="width: 100%">
+                        <legend>
+                            {{"DIALOG_SHARE_SUBSCRIPTION"|translate}}
+                        </legend>
+                        <div>
+                            <!-- Add users to Subscription -->
+                            <button class="btn btn-primary btn-wasdi"
+                                title={{"DIALOG_EDIT_SUBSCRIPTION_SHARE"|translate}}
+                                ng-click="m_oController.openShareUsersModal(m_oController.m_sSelectedSubscriptionId)">
+                                <span class="ng-binding">
+                                    {{"DIALOG_EDIT_SUBSCRIPTION_SHARE"|translate}}
+                                </span>
+
+                            </button>
+                        </div>
+                        <div>
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>UserId</th>
+                                        <!-- 
+                                            <th>Name</th>
+                                            <th>Surname</th>
+                                            <th>Role</th> 
+                                        -->
+                                        <th>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="oUser in m_oController.m_aoUsersList">
+                                        <td>{{oUser.userId}}</td>
+                                        <!-- <td>{{oUser.name}}</td>
+                                                        <td>{{oUser.surname}}</td>
+                                                        <td>{{oUser.role}}</td> -->
+
+                                        <td class="over-icon">
+                                            <button class="btn btn-primary btn-wasdi"
+                                                title={{"DIALOG_EDIT_SUBSCRIPTION_UNSHARE"|translate}}
+                                                ng-click="m_oController.unshareSubscription(m_oController.m_sSelectedSubscriptionId, oUser.userId)">
+                                                <!--Unshare Subscription-->
+                                                <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
+                                                <!-- <span class="ng-binding">
+                                                    {{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
+                                                </span>-->
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- FOOTER -->
+                        <div class="modal-footer">
+                            <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi"
+                                data-dismiss="modal">
+                                {{"DIALOG_CLOSE_BUTTON"|translate}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

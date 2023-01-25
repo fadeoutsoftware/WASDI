@@ -23,19 +23,32 @@
                 <th>Subscription Name</th>
                 <th>Subscription Type</th>
                 <th>Subscription Owner</th>
-                <th>Origin</th>
+                <th>Reason</th>
 
                 <th></th>
+                <th>Actions</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index"
-                ng-class="{'selected-row':m_oController.m_sSelectedSubscriptionId === oSubscription.subscriptionId}">
+            <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index">
                 <td>{{oSubscription.name}}</td>
                 <td>{{oSubscription.typeName}}</td>
                 <td>{{oSubscription.ownerUserId}}</td>
                 <td>{{oSubscription.organizationName}}</td>
+
+                <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}
+                        ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId)">
+                        <!--Show Users-->
+                        <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}</span
+                        >
+                        -->
+                    </button>
+                </td>
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}

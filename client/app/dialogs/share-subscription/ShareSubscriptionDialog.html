@@ -1,0 +1,59 @@
+<div class="modal fade share-subscription-dialog">
+    <div class="modal-dialog modal-wasdi">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body no-ale-style">
+                <div class="row-v4 p3">
+                    <div class="w-100 p-3">
+                        <legend>
+                            Add Users
+                        </legend>
+                    </div>
+                    <div class="w-100 p-3">
+                        <legend>
+                            Search Users
+                        </legend>
+                        <!-- Input form for search user -->
+                        <div class="form-v4-group">
+                            <input type="text" name="" id="" class="form-control"
+                                placeholder="Search Username or Email" ng-model="m_oController.m_sUserPartialName" reqired>
+                            <button ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">Search</button>
+                        </div>
+                    </div>
+                    <div class="table-container w-100 p-3">
+                        <!-- Display results from user search -->
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">User ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Surname</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Repeat Row for each user found -->
+                                <tr ng-repeat="oUser in m_oController.m_aoMatchingUsersList">
+                                    <td>{{oUser.userId}}</td>
+                                    <td>{{oUser.name}}</td>
+                                    <td>{{oUser.surname}}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-wasdi"
+                                        ng-click="m_oController.shareSubscription(oUser.userId)">
+                                            Add
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(m_oController.m_sSelectedSubscriptionId)" class="btn btn-primary btn-wasdi"
+                    data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+            </div>
+        </div>
