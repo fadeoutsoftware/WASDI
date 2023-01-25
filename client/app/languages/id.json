@@ -204,7 +204,7 @@
 
     "DIALOG_PROCESSES_LOGS_TITLE":"Daftar Proses Area Kerja",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"Tidak ada area kerja yang dipilih, data tidak dapat dimuat. Jika anda ingin memperbaharui halaman, silahkan buka bagian Area Kerja dan pilih salah satu.",
-	"DIALOG_PROCESSES_LOGS_NONE": "Tidak ada",
+	"DIALOG_PROCESSES_LOGS_NONE": "SETIAP",
 	"DIALOG_PROCESSES_LOGS_CREATED":"MEMBUAT",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"MENJALANKAN",
 	"DIALOG_PROCESSES_LOGS_WAITING":"MENUNGGU",

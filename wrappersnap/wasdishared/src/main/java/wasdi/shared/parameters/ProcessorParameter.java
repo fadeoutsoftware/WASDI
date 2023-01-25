@@ -36,6 +36,12 @@ public class ProcessorParameter extends BaseParameter {
 	 * Processor Type
 	 */
 	private String processorType;
+	/**
+	 * Flag to know if the process have been triggered using OGC Processes API endpoints.
+	 * By default is false => WASDI native processes.
+	 * The flag is mainly used to filter the list of jobs in the OGC Processes Endpoint.
+	 */
+	private boolean isOGCProcess = false;
 	
 	public String getProcessorType() {
 		return processorType;
@@ -67,6 +73,12 @@ public class ProcessorParameter extends BaseParameter {
 	public void setVersion(String version) {
 		this.version = version;
 	}	
+	public boolean getOGCProcess() {
+		return isOGCProcess;
+	}
+	public void setOGCProcess(boolean isOGCProcess) {
+		this.isOGCProcess = isOGCProcess;
+	}
 	
 	
 	/**
@@ -87,5 +99,5 @@ public class ProcessorParameter extends BaseParameter {
 		
 		return LauncherOperations.RUNPROCESSOR.name();
 	}
-
+	
 }

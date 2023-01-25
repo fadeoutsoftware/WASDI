@@ -40,6 +40,10 @@
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>ogc.wasdi.processes.OgcProcesses</param-value>
 		</init-param>		
+         <init-param>
+            <param-name>ConfigFilePath</param-name>
+            <param-value>C:\\temp\\wasdi\\wasdiLocalTESTConfig.json</param-value>
+         </init-param>		
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>

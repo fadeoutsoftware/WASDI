@@ -187,7 +187,7 @@
 	"DIALOG_IMPORT_SFTP":"SFTP",
     "DIALOG_PROCESSES_LOGS_TITLE":"Liste des processus de l'espace de travail",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"Aucun espace de travail sélectionné: impossible de charger les données. Si vous avez actualisé la page, veuillez vous rendre dans la section Espace de travail et en sélectionner un.",
-	"DIALOG_PROCESSES_LOGS_NONE":"Rien",
+	"DIALOG_PROCESSES_LOGS_NONE":"QUELCONQUE",
 	"DIALOG_PROCESSES_LOGS_CREATED":"CRÉÉ",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"EN COURS",
 	"DIALOG_PROCESSES_LOGS_WAITING":"EN ATTENTE",

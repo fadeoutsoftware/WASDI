@@ -188,7 +188,7 @@
     "DIALOG_IMPORT_SFTP": "SFTP",
     "DIALOG_PROCESSES_LOGS_TITLE": "Danh sách Quy trình không gian làm việc",
     "DIALOG_PROCESSES_LOGS_NO_WS": "Không có không gian làm việc nào được chọn, không thể tải dữ liệu. Nếu bạn đã làm mới trang, vui lòng chuyển đến phần Không gian làm việc và chọn.",
-    "DIALOG_PROCESSES_LOGS_NONE": "Không",
+    "DIALOG_PROCESSES_LOGS_NONE": "BẤT KỲ",
     "DIALOG_PROCESSES_LOGS_CREATED": "ĐÃ TẠO",
     "DIALOG_PROCESSES_LOGS_RUNNING": "ĐANG CHẠY",
     "DIALOG_PROCESSES_LOGS_WAITING": "ĐANG CHỜ",

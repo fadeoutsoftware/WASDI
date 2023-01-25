@@ -204,7 +204,7 @@
 
     "DIALOG_PROCESSES_LOGS_TITLE":"Liste der Arbeitsbereichsprozesse",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"Kein Arbeitsbereich ausgewählt, Daten können nicht geladen werden. Wenn Sie die Seite aktualisiert haben, gehen Sie bitte zum Abschnitt Arbeitsbereich und wählen Sie einen aus.",
-	"DIALOG_PROCESSES_LOGS_NONE":"None",
+	"DIALOG_PROCESSES_LOGS_NONE":"BELIEBIG",
 	"DIALOG_PROCESSES_LOGS_CREATED":"ERSTELLT",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"LAUFEN",
 	"DIALOG_PROCESSES_LOGS_WAITING":"WARTEN",

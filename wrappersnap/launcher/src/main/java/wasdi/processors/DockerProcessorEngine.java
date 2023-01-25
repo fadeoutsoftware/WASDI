@@ -411,7 +411,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oOutputStream.flush();
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
                     printErrorMessageFromConnection(oConnection);
-                    throw new Exception("DockerProcessorEngine.printErrorMessageFromConnection: response code is: " + oConnection.getResponseCode());
+                    throw new Exception("DockerProcessorEngine.run: response code is: " + oConnection.getResponseCode());
                 }
             } catch (Exception oE) {
                 WasdiLog.debugLog("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
@@ -639,7 +639,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sProcessorName = oParameter.getName();
             String sProcessorId = oParameter.getProcessorID();
 
-            processWorkspaceLog("Delete Processor " + sProcessorName + " ID: " + sProcessorId);
+            WasdiLog.infoLog("Delete Processor " + sProcessorName + " ID: " + sProcessorId);
 
             ProcessorRepository oProcessorRepository = new ProcessorRepository();
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
