@@ -46,4 +46,8 @@ public class OGCProcessesAPIConfig {
 	 * List of links to add to the conforms to api response, separated by ;
 	 */
 	public String conformsTo;
+	/**
+	 * Link to the service description: has the format httplink;relationtype;title
+	 */
+	public String landingLinkServiceDescription;
 }

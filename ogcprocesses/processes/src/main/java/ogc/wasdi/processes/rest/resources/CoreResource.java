@@ -29,7 +29,7 @@ public class CoreResource {
 	 * @return LandingPage View Model
 	 */
     @GET
-    @Produces({MediaType.APPLICATION_JSON}) //, MediaType.TEXT_HTML
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getLandingPage() {
     	try {
     		
@@ -57,9 +57,9 @@ public class CoreResource {
 	    		String []asLinkParts = sAPIDefinitionLink.split(";");
 	    		
 	    		if (asLinkParts != null) {
-//	    			if (asLinkParts.length>0) {
-//	    				oAPIDefinitionLink.setHref(OgcProcesses.s_sBaseAddress + asLinkParts[0]);
-//	    			}
+	    			if (asLinkParts.length>0) {
+	    				oAPIDefinitionLink.setHref(asLinkParts[0]);
+	    			}
 	    			
 	    			if (asLinkParts.length>1) {
 	    				oAPIDefinitionLink.setRel(asLinkParts[1]);
@@ -184,12 +184,45 @@ public class CoreResource {
     		oLandingPage.getLinks().add(oSelfLink);
     		
     		// Alternate html link
-//    		Link oHtmlLink = new Link();
-//    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress);
-//    		oHtmlLink.setRel("alternate");
-//    		oHtmlLink.setType("text/html");
-//    		
-//    		oLandingPage.getLinks().add(oHtmlLink);    		
+    		Link oHtmlLink = new Link();
+    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress);
+    		oHtmlLink.setRel("alternate");
+    		oHtmlLink.setType("text/html");
+    		
+    		oLandingPage.getLinks().add(oHtmlLink);
+    		
+    		// Link service-desc: while the specification states service-doc OR service-desc, the 
+    		String sAPIDescriptionLink = WasdiConfig.Current.ogcProcessesApi.landingLinkServiceDefinition;
+    		
+    		Link oAPIDescriptionLink = new Link();
+    		
+    		// Default Values
+    		oAPIDescriptionLink.setHref("https://developer.ogc.org/api/processes/swaggerui.html");
+    		oAPIDescriptionLink.setRel("service-doc");
+    		oAPIDescriptionLink.setTitle("APIDefinition");
+			
+			if (!Utils.isNullOrEmpty(sAPIDescriptionLink)) {
+				// Take what we have from config
+	    		String []asLinkParts = sAPIDescriptionLink.split(";");
+	    		
+	    		if (asLinkParts != null) {
+	    			if (asLinkParts.length>0) {
+	    				oAPIDefinitionLink.setHref(asLinkParts[0]);
+	    			}
+	    			
+	    			if (asLinkParts.length>1) {
+	    				oAPIDescriptionLink.setRel(asLinkParts[1]);
+	    			}
+	    			
+	    			if (asLinkParts.length>2) {
+	    				oAPIDescriptionLink.setTitle(asLinkParts[2]);
+	    			}    			
+	    		}				
+			}
+    		    		
+			oAPIDescriptionLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+			oAPIDescriptionLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+			oLandingPage.getLinks().add(oAPIDescriptionLink);
     		
     		
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oLandingPage);
