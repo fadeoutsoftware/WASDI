@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -91,6 +92,26 @@ public class OrganizationRepository extends MongoRepository {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get organizations by their ids.
+	 * @param asOrganizationIds the ids of the organizations
+	 * @return the list of organizations corresponding to the ids
+	 */
+	public List<Organization> getOrganizations(Collection<String> asOrganizationIds) {
+		final List<Organization> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.in("organizationId", asOrganizationIds));
+
+			fillList(aoReturnList, oWSDocuments, Organization.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
 	}
 
 	/**

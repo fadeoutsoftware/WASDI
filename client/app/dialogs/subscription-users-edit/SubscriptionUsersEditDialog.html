@@ -22,7 +22,11 @@
 
                             </button>
                         </div>
-                        <div>
+                        <div ng-show="m_oController.m_aoUsersList.length == 0">
+                            <br>
+                            <p>Not shared with users, yet</p>
+                        </div>
+                        <div ng-show="m_oController.m_aoUsersList.length > 0">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>

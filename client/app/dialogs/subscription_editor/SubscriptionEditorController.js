@@ -81,7 +81,6 @@ SubscriptionEditorController = (function () {
                     oController.m_asTypes = data.data;
                     oController.m_aoTypesMap = oController.m_asTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
-                        // (item) => ({ name: item.typeName, typeId: item.typeId })
                     );
 
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {
@@ -113,7 +112,8 @@ SubscriptionEditorController = (function () {
                     );
                     utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
-                    oController.m_asOrganizations = data.data;
+                    const oFirstElement = { name: "No Organization", organizationId: null };
+                    oController.m_asOrganizations = [oFirstElement].concat(data.data);
                     oController.m_aoOrganizationsMap = oController.m_asOrganizations.map(
                         (item) => ({ name: item.name, organizationId: item.organizationId })
                     );
