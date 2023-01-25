@@ -39,20 +39,20 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
         return this.m_oHttp.delete(this.APIURL + '/subscriptions/delete?subscription=' + sSubscriptionId);
     };
 
-    // // Get list of shared users by subscription id
-    // this.getUsersBySharedSubscription = function (sSubscriptionId) {
-    //     return this.m_oHttp.get(this.APIURL + '/subscriptions/share/bysubscription?subscription=' + sSubscriptionId);
-    // }
+    // Get list of shared users by subscription id
+    this.getUsersBySharedSubscription = function (sSubscriptionId) {
+        return this.m_oHttp.get(this.APIURL + '/subscriptions/share/bysubscription?subscription=' + sSubscriptionId);
+    }
 
-    // // Add sharing
-    // this.addSubscriptionSharing = function (sSubscriptionId, sUserId) {
-    //     return this.m_oHttp.post(this.APIURL + '/subscriptions/share/add?subscription=' + sSubscriptionId + '&userId=' + sUserId);
-    // }
+    // Add sharing
+    this.addSubscriptionSharing = function (sSubscriptionId, sUserId) {
+        return this.m_oHttp.post(this.APIURL + '/subscriptions/share/add?subscription=' + sSubscriptionId + '&userId=' + sUserId);
+    }
 
-    // // Remove sharing
-    // this.removeSubscriptionSharing = function (sSubscriptionId, sUserId) {
-    //     return this.m_oHttp.delete(this.APIURL + '/subscriptions/share/delete?subscription=' + sSubscriptionId + '&userId=' + sUserId);
-    // }
+    // Remove sharing
+    this.removeSubscriptionSharing = function (sSubscriptionId, sUserId) {
+        return this.m_oHttp.delete(this.APIURL + '/subscriptions/share/delete?subscription=' + sSubscriptionId + '&userId=' + sUserId);
+    }
 
     // Get Subscription Types list
     this.getSubscriptionTypes = function () {

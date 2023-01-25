@@ -81,6 +81,7 @@ SubscriptionEditorController = (function () {
                     oController.m_asTypes = data.data;
                     oController.m_aoTypesMap = oController.m_asTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
+                        // (item) => ({ name: item.typeName, typeId: item.typeId })
                     );
 
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {

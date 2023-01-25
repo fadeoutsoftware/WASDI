@@ -21,8 +21,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="oOrganization in m_oController.m_aoOrganizations"
-                ng-class="{'selected-row':m_oController.m_sSelectedOrganizationId === oOrganization.organizationId}">
+            <tr ng-repeat="oOrganization in m_oController.m_aoOrganizations">
                 <td>{{oOrganization.name}}</td>
                 <td>{{oOrganization.ownerUserId}}</td>
 

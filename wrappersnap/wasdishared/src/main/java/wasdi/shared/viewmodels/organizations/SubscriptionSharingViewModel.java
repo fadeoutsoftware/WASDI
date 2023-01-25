@@ -21,12 +21,19 @@ public class SubscriptionSharingViewModel {
 	private String subscriptionId;
 	private String userId;
 	private String ownerId;
+	private String role;
 
 	public SubscriptionSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.subscriptionId = oSharing.getResourceId();
 		this.userId = oSharing.getUserId();
 		this.ownerId = oSharing.getOwnerId();
+
+		if (oSharing.getPermissions() != null && oSharing.getPermissions().contains("subscription:write")) {
+			role = "MANAGER";
+		} else {
+			role = "USER";
+		}
 	}
 
 }
