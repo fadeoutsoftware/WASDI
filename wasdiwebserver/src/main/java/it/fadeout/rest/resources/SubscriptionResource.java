@@ -344,11 +344,25 @@ public class SubscriptionResource {
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-		Subscription oExistingSubscription = oSubscriptionRepository.getById(sSubscriptionId);
+		Subscription oSubscription = oSubscriptionRepository.getById(sSubscriptionId);
 
-		if (oExistingSubscription == null) {
+		if (oSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: subscription does not exist");
 			oResult.setStringValue("No subscription with the name already exists.");
+			return oResult;
+		}
+
+		String sSubscriptionOwner = oSubscription.getUserId();
+
+		if (!sSubscriptionOwner.equals(oUser.getUserId())) {
+			// The current uses is not the owner of the subscription
+			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: user " + oUser.getUserId() + " is not the owner [" + sSubscriptionOwner + "]: delete the sharing, not the subscription");
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
+
+			oResult.setBoolValue(true);
+			oResult.setStringValue(sSubscriptionId);
+
 			return oResult;
 		}
 

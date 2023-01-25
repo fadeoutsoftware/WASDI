@@ -363,11 +363,25 @@ public class OrganizationResource {
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		Organization oExistingOrganization = oOrganizationRepository.getById(sOrganizationId);
+		Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
-		if (oExistingOrganization == null) {
+		if (oOrganization == null) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: organization does not exist");
 			oResult.setStringValue("No organization with the name already exists.");
+			return oResult;
+		}
+
+		String sOrganizationOwner = oOrganization.getUserId();
+
+		if (!sOrganizationOwner.equals(oUser.getUserId())) {
+			// The current uses is not the owner of the organization
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
+
+			oResult.setBoolValue(true);
+			oResult.setStringValue(sOrganizationId);
+
 			return oResult;
 		}
 
