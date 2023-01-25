@@ -2045,7 +2045,8 @@ public class ProcessorsResource  {
 	}		
 	
 	/**
-	 * Zip a full processor
+	 * Zip a full processor excluding the files contained in the relative type template folder
+	 * and 
 	 * @param oInitialFile
 	 * @return
 	 */

@@ -112,7 +112,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes");
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oProcessList.getLinks().add(oSelfLink);
     		aoAllLinks.add(oSelfLink);
@@ -170,7 +170,7 @@ public class ProcessesResource {
 		    		Link oProcessorLink = new Link();
 		    		oProcessorLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+oSummary.getId());
 		    		oProcessorLink.setRel("self");
-		    		oProcessorLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+		    		oProcessorLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 		    		oProcessorLink.setTitle("Process " + oProcessor.getName() + "  Description");
 		    		
 		    		oSummary.getLinks().add(oProcessorLink);
@@ -193,7 +193,7 @@ public class ProcessesResource {
 	    		Link oNextLink = new Link();
 	    		oNextLink.setHref(OgcProcesses.s_sBaseAddress+"processes?offset="+ iNextOffset +"&limit="+oiLimit.toString());
 	    		oNextLink.setRel("next");
-	    		oNextLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+	    		oNextLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 	    		
 	    		oProcessList.getLinks().add(oNextLink);
 	    		aoAllLinks.add(oNextLink);
@@ -202,7 +202,7 @@ public class ProcessesResource {
 	    		Link oPrevLink = new Link();
 	    		oPrevLink.setHref(OgcProcesses.s_sBaseAddress+"processes?offset="+ oiOffset.toString() +"&limit="+oiLimit.toString());
 	    		oPrevLink.setRel("prev");
-	    		oPrevLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+	    		oPrevLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 	    		
 	    		oProcessList.getLinks().add(oPrevLink);
 	    		aoAllLinks.add(oPrevLink);
@@ -297,7 +297,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID);
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oProcessViewModel.getLinks().add(oSelfLink);
     		
@@ -656,7 +656,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oStatusInfo.getLinks().add(oSelfLink);
     		

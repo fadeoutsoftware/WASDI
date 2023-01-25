@@ -59,7 +59,7 @@ public class OgcProcesses extends ResourceConfig {
 			WasdiLog.errorLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
 		
-		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcpProcessesApi.baseAddress;
+		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		
 		if (!OgcProcesses.s_sBaseAddress.endsWith("/")) OgcProcesses.s_sBaseAddress += "/";
 		
