@@ -29,7 +29,7 @@ public class CoreResource {
 	 * @return LandingPage View Model
 	 */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+    @Produces({MediaType.APPLICATION_JSON}) //, MediaType.TEXT_HTML
     public Response getLandingPage() {
     	try {
     		
@@ -184,12 +184,12 @@ public class CoreResource {
     		oLandingPage.getLinks().add(oSelfLink);
     		
     		// Alternate html link
-    		Link oHtmlLink = new Link();
-    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress);
-    		oHtmlLink.setRel("alternate");
-    		oHtmlLink.setType("text/html");
-    		
-    		oLandingPage.getLinks().add(oHtmlLink);    		
+//    		Link oHtmlLink = new Link();
+//    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress);
+//    		oHtmlLink.setRel("alternate");
+//    		oHtmlLink.setType("text/html");
+//    		
+//    		oLandingPage.getLinks().add(oHtmlLink);    		
     		
     		
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oLandingPage);
