@@ -163,7 +163,7 @@ public class JobsResource {
         		
         		oNextLink.setHref(sAddress);
         		oNextLink.setRel("self");
-        		oNextLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+        		oNextLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
         		
         		oJobList.getLinks().add(oNextLink);
         		
@@ -175,7 +175,7 @@ public class JobsResource {
             		
             		oPrevLink.setHref(sPrevAddress);
             		oPrevLink.setRel("self");
-            		oPrevLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+            		oPrevLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
             		
             		oJobList.getLinks().add(oPrevLink);        			
         		}
@@ -185,7 +185,7 @@ public class JobsResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/");
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oJobList.getLinks().add(oSelfLink);
     		
@@ -312,7 +312,7 @@ public class JobsResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"jobs/"+sJobId);
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oStatusInfo.getLinks().add(oSelfLink);
     		
@@ -418,7 +418,7 @@ public class JobsResource {
     		Link oUpLink = new Link();
     		oUpLink.setHref(OgcProcesses.s_sBaseAddress+"jobs");
     		oUpLink.setRel("up");
-    		oUpLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oUpLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		oUpLink.setTitle("Server job list");
     		
     		
