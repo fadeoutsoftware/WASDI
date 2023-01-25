@@ -183,6 +183,19 @@ public class UserResourcePermissionRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public boolean isResourceShared(String sType, String sResourceId) {
+		try {
+			long lCounter = getCollection(m_sThisCollection)
+					.countDocuments(Filters.and(Filters.eq("resourceType", sType), Filters.eq("resourceId", sResourceId)));
+
+			return lCounter > 0;
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return true;
+	}
+
 	public List<UserResourcePermission> getPermissionsByTypeAndResourceIds(String sType, List<String> asResourceIds) {
 		final List<UserResourcePermission> aoReturnList = new ArrayList<>();
 
@@ -681,6 +694,14 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 	public boolean isOrganizationSharedWithUser(String sUserId, String sOrganizationId) {
 		return isResourceOfTypeSharedWithUser("organization", sUserId, sOrganizationId);
+	}
+
+	public boolean isOrganizationShared(String sOrganizationId) {
+		return isResourceShared("organization", sOrganizationId);
+	}
+
+	public boolean isSubscriptionShared(String sSubscriptionId) {
+		return isResourceShared("subscription", sSubscriptionId);
 	}
 
 	public boolean isSubscriptionSharedWithUser(String sUserId, String sSubscriptionId) {

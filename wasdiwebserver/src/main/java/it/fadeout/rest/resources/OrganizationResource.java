@@ -25,6 +25,7 @@ import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.OrganizationRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
@@ -371,17 +372,32 @@ public class OrganizationResource {
 			return oResult;
 		}
 
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+
 		String sOrganizationOwner = oOrganization.getUserId();
 
 		if (!sOrganizationOwner.equals(oUser.getUserId())) {
 			// The current uses is not the owner of the organization
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
 
 			oResult.setBoolValue(true);
 			oResult.setStringValue(sOrganizationId);
 
+			return oResult;
+		}
+
+		if (oUserResourcePermissionRepository.isOrganizationShared(sOrganizationId)) {
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization is shared with users");
+			oResult.setStringValue("The organization cannot be removed as it has users. Before deleting the organization, please remove the users.");
+			return oResult;
+		}
+
+		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+
+		if (oSubscriptionRepository.organizationHasSubscriptions(sOrganizationId)) {
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization shares subscriptions");
+			oResult.setStringValue("The organization cannot be removed as it shares subscriptions. Before deleting the organization, please remove the sharings.");
 			return oResult;
 		}
 
