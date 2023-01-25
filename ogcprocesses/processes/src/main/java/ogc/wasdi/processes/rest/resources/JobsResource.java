@@ -535,10 +535,10 @@ public class JobsResource {
     			
     			if (oNode!=null) sBaseUrl = oNode.getNodeBaseAddress();
     			
-    			String[] asFiles = aoFiles.toArray(new String[0]);
+    			String[] asFiles = new String[aoFiles.size()];
     			
-    			for (int iFiles = 0; iFiles<asFiles.length; iFiles++) {
-					String sLink = sBaseUrl + "/catalog/downloadbyname?token=" + sSessionId + "&filename=" + asFiles[iFiles] + "&workspace=" + oWorkspace.getWorkspaceId();
+    			for (int iFiles = 0; iFiles<aoFiles.size(); iFiles++) {
+					String sLink = sBaseUrl + "/catalog/downloadbyname?token=" + sSessionId + "&filename=" + aoFiles.get(iFiles).getFileName() + "&workspace=" + oWorkspace.getWorkspaceId();
 					asFiles[iFiles] = sLink;
 				}
     			
