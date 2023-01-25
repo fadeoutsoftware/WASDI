@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -156,7 +157,7 @@ public class SubscriptionRepository extends MongoRepository {
 	 * @param asOrganizationIds the list of organizationIds
 	 * @return the subscription if found, null otherwise
 	 */
-	public List<Subscription> getSubscriptionsByOrganizations(List<String> asOrganizationIds) {
+	public List<Subscription> getSubscriptionsByOrganizations(Collection<String> asOrganizationIds) {
 		final List<Subscription> aoReturnList = new ArrayList<>();
 
 		try {
