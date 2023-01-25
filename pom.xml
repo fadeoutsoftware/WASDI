@@ -18,6 +18,7 @@
         <module>wasdiwebserver</module>
         <module>libraries/jwasdilib/jwasdilib</module>
         <module>wasditrigger</module>
+        <module>ogcprocesses/processes</module>
     </modules>
 
     <properties>
