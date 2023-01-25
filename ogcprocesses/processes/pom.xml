@@ -82,7 +82,6 @@
                 <configuration>
                     <warSourceDirectory>WebContent</warSourceDirectory>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webXml>${warWasdiWebServerXmlFile}</webXml>
                 </configuration>
             </plugin>
             <plugin>
