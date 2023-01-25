@@ -1,5 +1,7 @@
 package ogc.wasdi.processes;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +46,10 @@ public class OgcProcesses extends ResourceConfig {
 
 	/**
 	 * Web Server intialization: it loads the main web-server configuration
+	 * @throws URISyntaxException 
 	 */
 	@PostConstruct
-	public void initOgcProcesses() {
+	public void initOgcProcesses() throws URISyntaxException {
 		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 		
 		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
@@ -58,6 +61,10 @@ public class OgcProcesses extends ResourceConfig {
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.errorLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
+		
+		
+//		String sPath = new File(WasdiConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+//		WasdiLog.debugLog(sPath);
 		
 		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		

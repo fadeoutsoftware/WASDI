@@ -57,9 +57,9 @@ public class CoreResource {
 	    		String []asLinkParts = sAPIDefinitionLink.split(";");
 	    		
 	    		if (asLinkParts != null) {
-	    			if (asLinkParts.length>0) {
-	    				oAPIDefinitionLink.setHref(OgcProcesses.s_sBaseAddress + asLinkParts[0]);
-	    			}
+//	    			if (asLinkParts.length>0) {
+//	    				oAPIDefinitionLink.setHref(OgcProcesses.s_sBaseAddress + asLinkParts[0]);
+//	    			}
 	    			
 	    			if (asLinkParts.length>1) {
 	    				oAPIDefinitionLink.setRel(asLinkParts[1]);
