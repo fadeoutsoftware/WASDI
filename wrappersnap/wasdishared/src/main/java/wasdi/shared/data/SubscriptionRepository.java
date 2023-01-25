@@ -134,6 +134,24 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
+	 * Check whether or not the organization has subscriptions.
+	 * @param sOrganizationId the organizationId of the subscriptions
+	 * @return true if the organization has associated subscriptions
+	 */
+	public boolean organizationHasSubscriptions(String sOrganizationId) {
+		try {
+			long lCounter = getCollection(m_sThisCollection)
+					.countDocuments(new Document("organizationId", sOrganizationId));
+
+			return lCounter > 0;
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the subscription of many organizations.
 	 * @param asOrganizationIds the list of organizationIds
 	 * @return the subscription if found, null otherwise

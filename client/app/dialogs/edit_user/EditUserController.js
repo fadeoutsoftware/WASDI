@@ -477,6 +477,9 @@ var EditUserController = (function () {
                     if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                         var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
+                    } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
+                        utilsVexCloseDialogAfter(5000, oDialog);
                     } else {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
                     }
@@ -588,6 +591,9 @@ var EditUserController = (function () {
                 if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION DELETED<br>READY");
                     utilsVexCloseDialogAfter(4000, oDialog);
+                } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
+                    utilsVexCloseDialogAfter(5000, oDialog);
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
                 }
