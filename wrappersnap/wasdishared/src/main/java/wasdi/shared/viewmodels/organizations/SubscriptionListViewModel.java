@@ -15,7 +15,7 @@ public class SubscriptionListViewModel {
 	private String ownerUserId;
 	private String name;
 //	private String description;
-//	private String typeId;
+	private String typeId;
 	private String typeName;
 //	private Double buyDate;
 //	private Double startDate;

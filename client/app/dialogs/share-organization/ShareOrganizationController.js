@@ -93,7 +93,7 @@ let ShareOrganizationController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({userId: sUserId})
+                        oController.m_aoUsersList.push({ userId: sUserId })
                     }
                 } else {
                     utilsVexDialogAlertTop(
@@ -104,6 +104,12 @@ let ShareOrganizationController = (function () {
             }
         )
 
+    }
+    ShareOrganizationController.prototype.findUser = function (sUserId) {
+        let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
+        let index = this.m_aoUsersList.indexOf(oSearchedUser);
+
+        return index;
     }
 
     ShareOrganizationController.$inject = [

@@ -30,8 +30,8 @@ public enum SubscriptionType {
 				.collect(Collectors.toMap(SubscriptionType::name, Function.identity()));
 	}
 
-	public static SubscriptionType get(String name) {
-		return ENUM_MAP.get(name);
+	public static SubscriptionType get(String typeId) {
+		return ENUM_MAP.get(typeId);
 	}
 
 }

@@ -215,7 +215,16 @@ public class SubscriptionResource {
 			// Get requested subscription
 			Subscription oSubscription = oSubscriptionRepository.getSubscription(sSubscriptionId);
 
-			oVM = convert(oSubscription);
+			String sOrganizationName = null;
+
+			if (oSubscription.getOrganizationId() != null) {
+				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+				Organization oOrganization = oOrganizationRepository.getOrganization(oSubscription.getOrganizationId());
+
+				sOrganizationName = oOrganization.getName();
+			}
+
+			oVM = convert(oSubscription, sOrganizationName);
 
 //			// Get Sharings
 //			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
@@ -428,9 +437,9 @@ public class SubscriptionResource {
 
 		List<SubscriptionTypeViewModel> aoTypes = new ArrayList<SubscriptionTypeViewModel>();
 
-		aoTypes.add(new SubscriptionTypeViewModel("OneDayStandard", "OneDayStandard", "OneDayStandard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneWeekStandard", "OneWeekStandard", "OneWeekStandard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneMonthStandard", "OneMonthStandard", "OneMonthStandard"));
+		aoTypes.add(new SubscriptionTypeViewModel("OneDayStandard", "One Day Standard", "One Day Standard"));
+		aoTypes.add(new SubscriptionTypeViewModel("OneWeekStandard", "One Week Standard", "One Week Standard"));
+		aoTypes.add(new SubscriptionTypeViewModel("OneMonthStandard", "One Month Standard", "One Month Standard"));
 
 		return aoTypes;
 	}
@@ -715,18 +724,20 @@ public class SubscriptionResource {
 		return oResult;
 	}
 
-	private static SubscriptionViewModel convert(Subscription oSubscription) {
+	private static SubscriptionViewModel convert(Subscription oSubscription, String sOrganizationName) {
 		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();
 		oSubscriptionViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 		oSubscriptionViewModel.setName(oSubscription.getName());
 		oSubscriptionViewModel.setDescription(oSubscription.getDescription());
-		oSubscriptionViewModel.setType(oSubscription.getType());
+		oSubscriptionViewModel.setTypeId(oSubscription.getType());
+		oSubscriptionViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
 		oSubscriptionViewModel.setBuyDate(oSubscription.getBuyDate());
 		oSubscriptionViewModel.setStartDate(oSubscription.getStartDate());
 		oSubscriptionViewModel.setEndDate(oSubscription.getEndDate());
 		oSubscriptionViewModel.setDurationDays(oSubscription.getDurationDays());
 		oSubscriptionViewModel.setUserId(oSubscription.getUserId());
 		oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
+		oSubscriptionViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionViewModel.setBuySuccess(oSubscription.isBuySuccess());
 
 		return oSubscriptionViewModel;
@@ -736,7 +747,7 @@ public class SubscriptionResource {
 		SubscriptionListViewModel oSubscriptionListViewModel = new SubscriptionListViewModel();
 		oSubscriptionListViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 		oSubscriptionListViewModel.setName(oSubscription.getName());
-//		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
+		oSubscriptionListViewModel.setTypeId(oSubscription.getType());
 		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
 		oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionListViewModel.setReason(sReason);
@@ -751,7 +762,7 @@ public class SubscriptionResource {
 		oSubscription.setSubscriptionId(oSubscriptionViewModel.getSubscriptionId());
 		oSubscription.setName(oSubscriptionViewModel.getName());
 		oSubscription.setDescription(oSubscriptionViewModel.getDescription());
-		oSubscription.setType(oSubscriptionViewModel.getType());
+		oSubscription.setType(oSubscriptionViewModel.getTypeId());
 		oSubscription.setBuyDate(oSubscriptionViewModel.getBuyDate());
 		oSubscription.setStartDate(oSubscriptionViewModel.getStartDate());
 		oSubscription.setEndDate(oSubscriptionViewModel.getEndDate());

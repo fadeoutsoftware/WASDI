@@ -15,9 +15,10 @@
                         </legend>
                         <!-- Input form for search user -->
                         <div class="form-v4-group">
-                            <input type="text" name="" id="" class="form-control"
-                                placeholder="Search Username or Email" ng-model="m_oController.m_sUserPartialName" reqired>
-                            <button ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">Search</button>
+                            <input type="text" name="" id="" class="form-control" placeholder="Search Username or Email"
+                                ng-model="m_oController.m_sUserPartialName" reqired>
+                            <button
+                                ng-click="m_oController.findUsersByPartialName(m_oController.m_sUserPartialName)">Search</button>
                         </div>
                     </div>
                     <div class="table-container w-100 p-3">
@@ -39,7 +40,8 @@
                                     <td>{{oUser.surname}}</td>
                                     <td>
                                         <button class="btn btn-success btn-wasdi"
-                                        ng-click="m_oController.shareOrganization(oUser.userId)">
+                                            ng-click="m_oController.shareOrganization(oUser.userId)"
+                                            ng-show="m_oController.findUser(oUser.userId) === -1">
                                             Add
                                         </button>
                                     </td>
@@ -49,10 +51,10 @@
                     </div>
                 </div>
             </div>
-             <!-- FOOTER -->
-             <div class="modal-footer">
-                <button type="button" ng-click="close(m_oController.m_sSelectedOrganizationId)" class="btn btn-primary btn-wasdi"
-                    data-dismiss="modal">
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(m_oController.m_sSelectedOrganizationId)"
+                    class="btn btn-primary btn-wasdi" data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
             </div>

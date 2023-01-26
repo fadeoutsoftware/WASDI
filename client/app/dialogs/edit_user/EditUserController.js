@@ -540,7 +540,7 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showSubscriptionEditForm = function(sUserId, sSubscriptionId) {
+    EditUserController.prototype.showSubscriptionEditForm = function(sUserId, sSubscriptionId, sEditMode) {
         console.log("EditUserController.showSubscriptionEditForm | sSubscriptionId: ", sSubscriptionId);
 
         // this.m_oShowEditSubscriptionForm = true;
@@ -558,7 +558,8 @@ var EditUserController = (function () {
                         controller: "SubscriptionEditorController",
                         inputs: {
                             extras: {
-                                subscription: data.data
+                                subscription: data.data,
+                                editMode: sEditMode
                             }
                         }
                     }).then(function (modal) {

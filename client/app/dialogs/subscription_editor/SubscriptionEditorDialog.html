@@ -7,8 +7,10 @@
             <div class="modal-body no-ale-style" style="height: 400px">
                 <legend ng-show="m_oController.m_oEditSubscription.subscriptionId == null">
                     {{"DIALOG_ADD_SUBSCRIPTION"|translate}}</legend>
-                <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null">
+                <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null && m_oController.m_bEditMode">
                     {{"DIALOG_EDIT_SUBSCRIPTION"|translate}}</legend>
+                <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null && !m_oController.m_bEditMode">
+                    {{"DIALOG_VIEW_SUBSCRIPTION"|translate}}</legend>
 
                 <form name="editSubscriptionForm"
                     ng-hide="m_oController.isUserLoggedWithGoogle()">
@@ -17,6 +19,7 @@
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_NAME'|translate}}</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"
+                                ng-readonly="!m_oController.m_bEditMode"
                                 ng-model="m_oController.m_oEditSubscription.name" required />
                         </div>
                     </div>
@@ -26,27 +29,35 @@
                             class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_DESCRIPTION'|translate}}</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-v4-control-plaintext wasdi-input"
+                                ng-readonly="!m_oController.m_bEditMode"
                                 ng-model="m_oController.m_oEditSubscription.description" />
                         </div>
                     </div>
                     <div class="form-v4-group row">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_TYPE'|translate}}</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-10" ng-show="m_oController.m_bEditMode">
                             <div ng-show="!m_oController.m_bLoadingTypes">
                                 <wapdropdown list-of-values="m_oController.m_aoTypesMap"
                                     selected-value="m_oController.m_oType" enable-search-filter="true"
-                                    dropdown-name="Type" ng-model="m_oController.m_oType" required>
+                                    dropdown-name="Type" ng-model="m_oController.m_oType"
+                                    ng-readonly="!m_oController.m_bEditMode" required>
                                 </wapdropdown>
                             </div>
                             <div ng-show="m_oController.m_bLoadingTypes">
                                 <invader></invader>
                             </div>
                         </div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-v4-control-plaintext wasdi-input"  name="typeName"
+                                ng-readonly="true"
+                                ng-show="!m_oController.m_bEditMode"
+                                ng-model="m_oController.m_oEditSubscription.typeName" />
+                        </div>
                     </div>
 
                     <div class="form-v4-group row">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_ORGANIZATION'|translate}}</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-10" ng-show="m_oController.m_bEditMode">
                             <div ng-show="!m_oController.m_bLoadingOrganization" >
                                 <wapdropdown
                                     list-of-values="m_oController.m_aoOrganizationsMap"
@@ -54,17 +65,24 @@
                                     enable-search-filter="true"
                                     dropdown-name="Organization"
                                     ng-model="m_oController.m_oOrganization"
-                                >
+                                    ng-readonly="!m_oController.m_bEditMode">
                                 </wapdropdown>
                             </div>
                             <div ng-show="m_oController.m_bLoadingOrganization">
                                 <invader></invader>
                             </div>
                         </div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-v4-control-plaintext wasdi-input" name="organizationName"
+                                ng-readonly="true"
+                                ng-show="!m_oController.m_bEditMode"
+                                ng-model="m_oController.m_oEditSubscription.organizationName" />
+                        </div>
                     </div>
 
                     <div class="col-12 text-right">
                         <button type="submit" class="btn btn-primary btn-wasdi"
+                            ng-show="m_oController.m_bEditMode"
                             ng-click="m_oController.saveSubscription()" data-dismiss="modal">
                             {{"DIALOG_EDIT_SUBSCRIPTION_SAVE"|translate}}
                         </button>

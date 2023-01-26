@@ -70,7 +70,8 @@ let SubscriptionUsersEditController = (function () {
                         controller: "ShareSubscriptionController", 
                         inputs: {
                             extras: {
-                                subscription: data.data
+                                subscription: data.data,
+                                usersList: oController.m_aoUsersList
                             }
                         }
                     }).then(function (modal) {
