@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class StatusInfo {
+public class StatusInfo extends OgcProcessesViewModel {
 	/**
 	 * Gets or Sets type
 	 */

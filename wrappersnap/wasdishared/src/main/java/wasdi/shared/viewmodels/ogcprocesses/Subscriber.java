@@ -1,9 +1,9 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-public class Subscriber {
-	private String successUri = null;
-	private String inProgressUri = null;
-	private String failedUri = null;
+public class Subscriber extends OgcProcessesViewModel {
+	private String successUri = "";
+	private String inProgressUri = "";
+	private String failedUri = "";
 	
 	public String getSuccessUri() {
 		return successUri;
@@ -23,5 +23,4 @@ public class Subscriber {
 	public void setFailedUri(String failedUri) {
 		this.failedUri = failedUri;
 	}
-
 }

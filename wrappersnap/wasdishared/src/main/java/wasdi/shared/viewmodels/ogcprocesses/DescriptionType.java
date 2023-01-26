@@ -3,7 +3,7 @@ package wasdi.shared.viewmodels.ogcprocesses;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DescriptionType {
+public class DescriptionType extends OgcProcessesViewModel {
 	private String title = null;
 	private String description = null;
 	private List<String> keywords = new ArrayList<String>();

@@ -8,7 +8,7 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.DoubleSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.NumericSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringSchema;
 
-public class Schema {
+public class Schema extends OgcProcessesViewModel {
 	
 	public String type;
 	

@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-public class Output {
+public class Output extends OgcProcessesViewModel {
 	private Format format = null;
 	private TransmissionMode transmissionMode = null;
 	

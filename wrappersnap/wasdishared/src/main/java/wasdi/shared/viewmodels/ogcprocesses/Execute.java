@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class Execute {
+public class Execute extends OgcProcessesViewModel  {
 	private Map<String, Object> inputs = new HashMap<String, Object>();
 	private Map<String, Output> outputs = new HashMap<String, Output>();
 	private ResponseEnum response = ResponseEnum.RAW;
