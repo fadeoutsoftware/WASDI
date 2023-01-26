@@ -4,7 +4,7 @@ let ShareSubscriptionController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oSubscriptionService
+        oSubscriptionService, oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -12,12 +12,15 @@ let ShareSubscriptionController = (function () {
 
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oSubscriptionService = oSubscriptionService;
+        this.m_oTranslate = oTranslate;
+
         this.m_sSelectedSubscriptionId = oExtras.subscription.subscriptionId;
         this.m_aoUsersList = oExtras.usersList;
 
         //Input Model for search
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
+        this.m_bLoadingUsers = true;
 
         console.log(this.m_sSelectedSubscriptionId);
 
@@ -50,6 +53,8 @@ let ShareSubscriptionController = (function () {
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
                 }
+
+                oController.m_bLoadingUsers = false;
                 // oController.clearForm();
                 return true;
             },
@@ -59,6 +64,8 @@ let ShareSubscriptionController = (function () {
                 let errorMessage = oController.m_oTranslate.instant(error.data.message);
 
                 utilsVexDialogAlertTop(errorMessage);
+
+                oController.m_bLoadingUsers = false;
             }
         )
     }
@@ -95,6 +102,9 @@ let ShareSubscriptionController = (function () {
                         utilsVexCloseDialogAfter(4000, oDialog);
 
                         oController.m_aoUsersList.push({userId: sUserId})
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
                     }
                 } else {
                     utilsVexDialogAlertTop(
@@ -108,10 +118,10 @@ let ShareSubscriptionController = (function () {
     }
 
     ShareSubscriptionController.prototype.findUser = function(sUserId) {
-       let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
-       let index = this.m_aoUsersList.indexOf(oSearchedUser); 
+        let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
+        let index = this.m_aoUsersList.indexOf(oSearchedUser); 
 
-       return index;
+        return index;
     }
 
     ShareSubscriptionController.$inject = [
@@ -119,7 +129,8 @@ let ShareSubscriptionController = (function () {
         "close",
         "extras",
         "AdminDashboardService",
-        "SubscriptionService"
+        "SubscriptionService",
+        '$translate'
     ];
     return ShareSubscriptionController;
 })();

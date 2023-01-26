@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oAdminDashboardService, oModalService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oAdminDashboardService, oModalService, oTranslate) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -17,6 +17,7 @@ var EditUserController = (function () {
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oModalService = oModalService;
+        this.m_oTranslate = oTranslate;
 
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
@@ -45,7 +46,7 @@ var EditUserController = (function () {
         this.m_asTypes = [];
         this.m_aoTypesMap = [];
         this.m_oType = {};
-        this.m_bLoadingTypes = true;
+        // this.m_bLoadingTypes = true;
 
         this.m_aoSubscriptions = [];
         this.m_aoOrganizationsList = [];
@@ -56,6 +57,9 @@ var EditUserController = (function () {
         // this.m_oShowEditSubscriptionForm = false;
         // this.m_oShowSharingSubscriptionForm = false;
         this.m_sSelectedSubscriptionId = null;
+
+        this.m_bLoadingOrganizations = true;
+        this.m_bLoadingSubscriptions = true;
 
         // this.m_sOrganizationPartialName = "";
         // this.m_aoMatchingOrganizationsList = [];
@@ -245,6 +249,8 @@ var EditUserController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
                     );
                 }
+
+                oController.m_bLoadingOrganizations = false;
 
                 return true;
             }
@@ -479,7 +485,7 @@ var EditUserController = (function () {
                         var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
                     } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
-                        var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
                         utilsVexCloseDialogAfter(5000, oDialog);
                     } else {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
@@ -534,6 +540,8 @@ var EditUserController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
                     );
                 }
+
+                oController.m_bLoadingSubscriptions = false;
 
                 return true;
             }
@@ -800,7 +808,8 @@ var EditUserController = (function () {
         'OrganizationService',
         'SubscriptionService',
         'AdminDashboardService',
-        'ModalService'
+        'ModalService',
+        '$translate'
     ];
     return EditUserController ;
 })();

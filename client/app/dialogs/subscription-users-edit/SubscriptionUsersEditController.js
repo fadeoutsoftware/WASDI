@@ -10,6 +10,8 @@ let SubscriptionUsersEditController = (function () {
         this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
         this.m_aoUsersList = oExtras.users;
 
+        this.m_bLoadingUsers = true;
+
         $scope.close = function (result) {
             oClose(result, 500)
         }
@@ -52,6 +54,8 @@ let SubscriptionUsersEditController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE SUBSCRIPTION"
                     );
                 }
+
+                oController.m_bLoadingUsers = false;
 
                 return true;
             }

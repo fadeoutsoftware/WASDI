@@ -9,6 +9,7 @@ let OrgUsersEditController = (function () {
 
         this.m_sSelectedOrganizationId = this.oExtras.organizationId;
         this.m_aoUsersList = oExtras.users;
+        this.m_bLoadingUsers = true;
 
         $scope.close = function (result) {
             oClose(result, 500)
@@ -21,21 +22,21 @@ let OrgUsersEditController = (function () {
         
         let oUnshareReviewCallback = function (value) {
                 oController.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
-                function (data) {
-                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                        // oController.m_aoUsersList = data.data;
-                        console.log("EditUserController.unshareOrganization | data.data: ", data.data);
-                        if (data.data.boolValue) {
-                            oController.showUsersByOrganization(sOrganizationId);
+                    function (data) {
+                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                            // oController.m_aoUsersList = data.data;
+                            console.log("EditUserController.unshareOrganization | data.data: ", data.data);
+                            if (data.data.boolValue) {
+                                oController.showUsersByOrganization(sOrganizationId);
+                            }
+                        } else {
+                            utilsVexDialogAlertTop(
+                                "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
+                            );
                         }
-                    } else {
-                        utilsVexDialogAlertTop(
-                            "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
-                        );
+                        return true;
                     }
-                    return true;
-                }
-           );
+            );
         }
         
         utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
@@ -52,6 +53,8 @@ let OrgUsersEditController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
                     );
                 }
+
+                oController.m_bLoadingUsers = false;
 
                 return true;
             }
