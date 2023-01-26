@@ -4,7 +4,7 @@ let ShareSubscriptionController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oSubscriptionService
+        oSubscriptionService, oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -12,6 +12,8 @@ let ShareSubscriptionController = (function () {
 
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oSubscriptionService = oSubscriptionService;
+        this.m_oTranslate = oTranslate;
+
         this.m_sSelectedSubscriptionId = oExtras.subscription.subscriptionId;
         this.m_aoUsersList = oExtras.usersList;
 
@@ -100,6 +102,9 @@ let ShareSubscriptionController = (function () {
                         utilsVexCloseDialogAfter(4000, oDialog);
 
                         oController.m_aoUsersList.push({userId: sUserId})
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
                     }
                 } else {
                     utilsVexDialogAlertTop(
@@ -113,10 +118,10 @@ let ShareSubscriptionController = (function () {
     }
 
     ShareSubscriptionController.prototype.findUser = function(sUserId) {
-       let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
-       let index = this.m_aoUsersList.indexOf(oSearchedUser); 
+        let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
+        let index = this.m_aoUsersList.indexOf(oSearchedUser); 
 
-       return index;
+        return index;
     }
 
     ShareSubscriptionController.$inject = [
@@ -124,7 +129,8 @@ let ShareSubscriptionController = (function () {
         "close",
         "extras",
         "AdminDashboardService",
-        "SubscriptionService"
+        "SubscriptionService",
+        '$translate'
     ];
     return ShareSubscriptionController;
 })();

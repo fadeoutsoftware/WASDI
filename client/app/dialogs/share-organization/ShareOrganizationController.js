@@ -4,7 +4,7 @@ let ShareOrganizationController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oOrganizationService
+        oOrganizationService, oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -12,6 +12,8 @@ let ShareOrganizationController = (function () {
 
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oOrganizationService = oOrganizationService;
+        this.m_oTranslate = oTranslate;
+
         this.m_sSelectedOrganizationId = oExtras.organization.organizationId;
         this.m_aoUsersList = oExtras.usersList
 
@@ -99,6 +101,9 @@ let ShareOrganizationController = (function () {
                         utilsVexCloseDialogAfter(4000, oDialog);
 
                         oController.m_aoUsersList.push({ userId: sUserId })
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
                     }
                 } else {
                     utilsVexDialogAlertTop(
@@ -122,7 +127,8 @@ let ShareOrganizationController = (function () {
         "close",
         "extras",
         "AdminDashboardService",
-        "OrganizationService"
+        "OrganizationService",
+        '$translate'
     ];
     return ShareOrganizationController;
 })();
