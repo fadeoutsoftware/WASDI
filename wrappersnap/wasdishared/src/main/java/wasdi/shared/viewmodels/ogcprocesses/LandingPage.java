@@ -12,6 +12,10 @@ public class LandingPage   {
 	private String description = null;
 	private List<Link> links = new ArrayList<Link>();
 	
+	public LandingPage() {
+		
+	}
+	
 	public String getTitle() {
 		return title;
 	}
