@@ -45,7 +45,7 @@ var EditUserController = (function () {
         this.m_asTypes = [];
         this.m_aoTypesMap = [];
         this.m_oType = {};
-        this.m_bLoadingTypes = true;
+        // this.m_bLoadingTypes = true;
 
         this.m_aoSubscriptions = [];
         this.m_aoOrganizationsList = [];
@@ -56,6 +56,9 @@ var EditUserController = (function () {
         // this.m_oShowEditSubscriptionForm = false;
         // this.m_oShowSharingSubscriptionForm = false;
         this.m_sSelectedSubscriptionId = null;
+
+        this.m_bLoadingOrganizations = true;
+        this.m_bLoadingSubscriptions = true;
 
         // this.m_sOrganizationPartialName = "";
         // this.m_aoMatchingOrganizationsList = [];
@@ -245,6 +248,8 @@ var EditUserController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
                     );
                 }
+
+                oController.m_bLoadingOrganizations = false;
 
                 return true;
             }
@@ -534,6 +539,8 @@ var EditUserController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
                     );
                 }
+
+                oController.m_bLoadingSubscriptions = false;
 
                 return true;
             }

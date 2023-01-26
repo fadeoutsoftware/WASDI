@@ -18,6 +18,7 @@ let ShareOrganizationController = (function () {
         //Input Model for search
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
+        this.m_bLoadingUsers = true;
 
         console.log(this.m_sSelectedOrganizationId);
 
@@ -50,6 +51,8 @@ let ShareOrganizationController = (function () {
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
                 }
+
+                oController.m_bLoadingUsers = false;
                 // oController.clearForm();
                 return true;
             },
@@ -59,6 +62,8 @@ let ShareOrganizationController = (function () {
                 let errorMessage = oController.m_oTranslate.instant(error.data.message);
 
                 utilsVexDialogAlertTop(errorMessage);
+
+                oController.m_bLoadingUsers = false;
             }
         )
     }
