@@ -107,6 +107,13 @@ let ShareSubscriptionController = (function () {
 
     }
 
+    ShareSubscriptionController.prototype.findUser = function(sUserId) {
+       let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
+       let index = this.m_aoUsersList.indexOf(oSearchedUser); 
+
+       return index;
+    }
+
     ShareSubscriptionController.$inject = [
         "$scope",
         "close",

@@ -39,7 +39,8 @@
                                     <td>{{oUser.surname}}</td>
                                     <td>
                                         <button class="btn btn-success btn-wasdi"
-                                        ng-click="m_oController.shareSubscription(oUser.userId)">
+                                        ng-click="m_oController.shareSubscription(oUser.userId)"
+                                        ng-show="m_oController.findUser(oUser.userId) === -1">
                                             Add
                                         </button>
                                     </td>
