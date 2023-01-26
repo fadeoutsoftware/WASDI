@@ -10,6 +10,8 @@ let SubscriptionUsersEditController = (function () {
         this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
         this.m_aoUsersList = oExtras.users;
 
+        this.m_bLoadingUsers = true;
+
         $scope.close = function (result) {
             oClose(result, 500)
         }
@@ -53,6 +55,8 @@ let SubscriptionUsersEditController = (function () {
                     );
                 }
 
+                oController.m_bLoadingUsers = false;
+
                 return true;
             }
         );
@@ -70,7 +74,8 @@ let SubscriptionUsersEditController = (function () {
                         controller: "ShareSubscriptionController", 
                         inputs: {
                             extras: {
-                                subscription: data.data
+                                subscription: data.data,
+                                usersList: oController.m_aoUsersList
                             }
                         }
                     }).then(function (modal) {

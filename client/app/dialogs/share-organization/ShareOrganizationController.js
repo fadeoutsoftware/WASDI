@@ -4,7 +4,7 @@ let ShareOrganizationController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oOrganizationService
+        oOrganizationService, oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -12,12 +12,15 @@ let ShareOrganizationController = (function () {
 
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oOrganizationService = oOrganizationService;
+        this.m_oTranslate = oTranslate;
+
         this.m_sSelectedOrganizationId = oExtras.organization.organizationId;
         this.m_aoUsersList = oExtras.usersList
 
         //Input Model for search
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
+        this.m_bLoadingUsers = true;
 
         console.log(this.m_sSelectedOrganizationId);
 
@@ -50,6 +53,8 @@ let ShareOrganizationController = (function () {
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN FINDING USERS");
                 }
+
+                oController.m_bLoadingUsers = false;
                 // oController.clearForm();
                 return true;
             },
@@ -59,6 +64,8 @@ let ShareOrganizationController = (function () {
                 let errorMessage = oController.m_oTranslate.instant(error.data.message);
 
                 utilsVexDialogAlertTop(errorMessage);
+
+                oController.m_bLoadingUsers = false;
             }
         )
     }
@@ -93,7 +100,10 @@ let ShareOrganizationController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({userId: sUserId})
+                        oController.m_aoUsersList.push({ userId: sUserId })
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
                     }
                 } else {
                     utilsVexDialogAlertTop(
@@ -105,13 +115,20 @@ let ShareOrganizationController = (function () {
         )
 
     }
+    ShareOrganizationController.prototype.findUser = function (sUserId) {
+        let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
+        let index = this.m_aoUsersList.indexOf(oSearchedUser);
+
+        return index;
+    }
 
     ShareOrganizationController.$inject = [
         "$scope",
         "close",
         "extras",
         "AdminDashboardService",
-        "OrganizationService"
+        "OrganizationService",
+        '$translate'
     ];
     return ShareOrganizationController;
 })();

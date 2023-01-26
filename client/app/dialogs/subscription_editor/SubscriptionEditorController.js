@@ -14,6 +14,7 @@ SubscriptionEditorController = (function () {
         this.m_oOrganizationService = oOrganizationService;
 
         this.m_oEditSubscription = oExtras.subscription;
+        this.m_bEditMode = oExtras.editMode;
 
         this.m_asTypes = [];
         this.m_aoTypesMap = [];
@@ -38,9 +39,11 @@ SubscriptionEditorController = (function () {
         console.log("SubscriptionEditorController.saveSubscription");
 
         if (utilsIsObjectNullOrUndefined(this.m_oType)) {
-            this.m_oEditSubscription.type = "";
+            this.m_oEditSubscription.typeId = "";
+            this.m_oEditSubscription.typeName = "";
         } else {
-            this.m_oEditSubscription.type = this.m_oType.name;
+            this.m_oEditSubscription.typeId = this.m_oType.typeId;
+            this.m_oEditSubscription.typeName = this.m_oType.name;
         }
 
         if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
@@ -84,7 +87,7 @@ SubscriptionEditorController = (function () {
                     );
 
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {
-                        if (oValue.typeId == oController.m_oEditSubscription.type) {
+                        if (oValue.typeId == oController.m_oEditSubscription.typeId) {
                             oController.m_oType = oValue;
                         }
                     });
