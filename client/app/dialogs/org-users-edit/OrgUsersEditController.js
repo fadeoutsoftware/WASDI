@@ -70,7 +70,8 @@ let OrgUsersEditController = (function () {
                         controller: "ShareOrganizationController", 
                         inputs: {
                             extras: {
-                                organization: data.data
+                                organization: data.data,
+                                usersList: oController.m_aoUsersList
                             }
                         }
                     }).then(function (modal) {

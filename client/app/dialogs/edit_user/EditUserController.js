@@ -410,7 +410,7 @@ var EditUserController = (function () {
         this.m_sUserPartialName = "";
     }
 
-    EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId) {
+    EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId, sEditMode) {
         console.log("EditUserController.showOrganizationEditForm | sOrganizationId: ", sOrganizationId);
 
         // this.m_oShowOrganizationUsersList = false;
@@ -433,7 +433,8 @@ var EditUserController = (function () {
                         controller: 'OrganizationEditorController',
                         inputs: {
                             extras: {
-                                organization: data.data
+                                organization: data.data,
+                                editMode: sEditMode
                             }
                         }
                     }).then(function (modal) {

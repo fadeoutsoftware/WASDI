@@ -13,6 +13,7 @@ let ShareOrganizationController = (function () {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oOrganizationService = oOrganizationService;
         this.m_sSelectedOrganizationId = oExtras.organization.organizationId;
+        this.m_aoUsersList = oExtras.usersList
 
         //Input Model for search
         this.m_sUserPartialName = "";
@@ -67,21 +68,32 @@ let ShareOrganizationController = (function () {
         console.log("EditUserController.shareOrganization | sOrganizationId: ", sOrganizationId);
         console.log("EditUserController.shareOrganization | sUserId: ", sUserId);
 
+        let oController = this;
         if (utilsIsObjectNullOrUndefined(sUserId) === true) {
             return false;
         }
 
-        let oController = this;
+        if (oController.m_aoUsersList.some(user => user.userId === sUserId)) {
+            utilsVexDialogAlertTop(
+                `${sUserId} IS ALREADY PART OF THIS ORGANIZATION`
+            );
+            return false;
+        }
 
         this.m_oOrganizationService.addOrganizationSharing(this.m_sSelectedOrganizationId, sUserId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    // oController.m_aoUsersList = data.data;
+
                     console.log("EditUserController.shareOrganization | data.data: ", data.data);
 
                     if (data.data.boolValue) {
-                        // oController.showUsersByOrganization(sOrganizationId);
-                        console.log('User added')
+                        console.log(data.data)
+                        let oDialog = utilsVexDialogAlertBottomRightCorner(
+                            `${sUserId} WAS SUCCESSFULLY ADDED`
+                        );
+                        utilsVexCloseDialogAfter(4000, oDialog);
+
+                        oController.m_aoUsersList.push({userId: sUserId})
                     }
                 } else {
                     utilsVexDialogAlertTop(
