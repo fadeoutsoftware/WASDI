@@ -1,4 +1,4 @@
-package ogc.wasdi.processes;
+package ogc.wasdi.processes.providers;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;

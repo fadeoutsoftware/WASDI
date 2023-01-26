@@ -2,7 +2,7 @@ package wasdi.shared.viewmodels.ogcprocesses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Metadata {
+public class Metadata extends OgcProcessesViewModel {
 	@JsonProperty("title")
 	private String title = null;
 

@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-public class Link {
+public class Link extends OgcProcessesViewModel {
 	private String href = "";
 	private String rel = "";
 	private String type = "";

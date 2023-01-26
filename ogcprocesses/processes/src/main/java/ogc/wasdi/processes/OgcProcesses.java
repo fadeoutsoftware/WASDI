@@ -1,6 +1,5 @@
 package ogc.wasdi.processes;
 
-import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -16,6 +15,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import ogc.wasdi.processes.providers.OgcProcessesViewModelBodyWriter;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
@@ -42,6 +42,7 @@ public class OgcProcesses extends ResourceConfig {
 	public OgcProcesses() {
 		packages(true, "ogc.wasdi.processes.rest.resources");
 		register(JacksonFeature.class);
+		register(OgcProcessesViewModelBodyWriter.class);
 	}
 
 	/**
