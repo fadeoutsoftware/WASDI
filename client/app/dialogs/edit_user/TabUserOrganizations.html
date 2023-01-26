@@ -1,6 +1,6 @@
 <div class="organizations-view">
     <button class="btn btn-primary btn-wasdi mt-4" title={{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}
-        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, null)">
+        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, null, true)">
         <!--Add Organization-->
         <!-- <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0px"></i> -->
         <span class="ng-binding">{{"DIALOG_EDIT_ORGANIZATION_ADD"|translate}}
@@ -26,7 +26,8 @@
                 <td>{{oOrganization.ownerUserId}}</td>
 
                 <td class="over-icon">
-                    <button class="btn btn-primary btn-wasdi" title={{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}
+                    <span ng-show="oOrganization.adminRole === false">&nbsp;</span>
+                    <button ng-show="oOrganization.adminRole === true" class="btn btn-primary btn-wasdi" title={{"USER_ORGANIZATIONS_SHOW_USERS"|translate}}
                         ng-click="m_oController.showUsersByOrganization(oOrganization.organizationId)">
                         <!--Show Users-->
                         <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
@@ -39,8 +40,20 @@
                 </td>
 
                 <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_VIEW"|translate}}
+                        ng-show="oOrganization.adminRole === false"
+                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, oOrganization.organizationId, false)">
+                        <!--Edit Organization-->
+                        <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"DIALOG_EDIT_ORGANIZATION_VIEW"|translate}}</span
+                        >
+                        -->
+                    </button>
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}
-                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, oOrganization.organizationId)">
+                        ng-show="oOrganization.adminRole === true"
+                        ng-click="m_oController.showOrganizationEditForm(m_oController.m_oUser.userId, oOrganization.organizationId, true)">
                         <!--Edit Organization-->
                         <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--

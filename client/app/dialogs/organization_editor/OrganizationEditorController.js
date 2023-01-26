@@ -12,6 +12,7 @@ let OrganizationEditorController = (function () {
         this.m_oOrganizationService = oOrganizationService;
 
         this.m_oEditOrganization = oExtras.organization;
+        this.m_bEditMode = oExtras.editMode;
 
         $scope.close = function (result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
