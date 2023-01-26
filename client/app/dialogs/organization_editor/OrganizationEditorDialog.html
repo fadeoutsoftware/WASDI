@@ -11,8 +11,10 @@
                     <div class="col-v4">
                         <legend ng-show="m_oController.m_oEditOrganization.organizationId == null">
                             {{"DIALOG_ADD_ORGANIZATION"|translate}}</legend>
-                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null">
-                            {{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend>
+                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null && m_oController.m_bEditMode">
+                                {{"DIALOG_EDIT_ORGANIZATION"|translate}}</legend>
+                        <legend ng-show="m_oController.m_oEditOrganization.organizationId != null && !m_oController.m_bEditMode">
+                                {{"DIALOG_VIEW_ORGANIZATION"|translate}}</legend>
 
                         <form name="editOrganizationForm"
                             ng-hide="m_oController.isUserLoggedWithGoogle()">

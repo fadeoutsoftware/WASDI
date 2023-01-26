@@ -799,6 +799,7 @@
 
 	"DIALOG_ADD_ORGANIZATION": "Add Organization",
 	"DIALOG_EDIT_ORGANIZATION": "Edit Organization",
+	"DIALOG_VIEW_ORGANIZATION": "View Organization",
 	"DIALOG_SHARE_ORGANIZATION": "Share Organization",
 
 	"DIALOG_EDIT_ORGANIZATION_NAME": "Name",
@@ -829,6 +830,7 @@
 
 	"DIALOG_ADD_SUBSCRIPTION": "Add Subscription",
 	"DIALOG_EDIT_SUBSCRIPTION": "Edit Subscription",
+	"DIALOG_VIEW_SUBSCRIPTION": "View Subscription",
 	"DIALOG_SHARE_SUBSCRIPTION": "Share Subscription",
 
 	"DIALOG_EDIT_SUBSCRIPTION_NAME": "Name",
