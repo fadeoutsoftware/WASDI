@@ -59,6 +59,25 @@
                         </div>
                     </div>
 
+                    <div class="form-v4-group row">
+                        <label
+                            class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_PROJECT_DEFAULT_PROJECT'|translate}}</label>
+                        <div class="col-sm-10">
+                            <i
+                                class="fa fa-square"
+                                aria-hidden="true"
+                                ng-hide="m_oController.m_oDefaultProject === true"
+                                ng-click="m_oController.m_oDefaultProject = !m_oController.m_oDefaultProject"
+                            ></i>
+                            <i
+                                class="fa fa-check-square"
+                                aria-hidden="true"
+                                ng-hide="m_oController.m_oDefaultProject === false"
+                                ng-click="m_oController.m_oDefaultProject = !m_oController.m_oDefaultProject"
+                            ></i>
+                        </div>
+                    </div>
+
                     <div class="col-12 text-right">
                         <button type="submit" class="btn btn-primary btn-wasdi"
                             ng-show="m_oController.m_bEditMode"

@@ -23,6 +23,18 @@ ProjectEditorController = (function () {
 
         this.getSubscriptionsListByUser();
 
+        /**
+         * DefaultProject flag
+         * @type {boolean}
+         */
+        this.m_oDefaultProject = true;
+
+        if (this.m_oEditProject.defaultProject) {
+            this.m_oDefaultProject = true;
+        } else {
+            this.m_oDefaultProject = false;
+        }
+
         $scope.close = function (result) {
             oClose(result, 500);
         }
@@ -36,6 +48,8 @@ ProjectEditorController = (function () {
         } else {
             this.m_oEditProject.subscriptionId = this.m_oSubscription.subscriptionId;
         }
+
+            this.m_oEditProject.defaultProject = this.m_oDefaultProject;
 
         this.m_oProjectService.saveProject(this.m_oEditProject).then(function (data) {
             console.log("ProjectEditorController.saveProject | data.data: ", data.data);

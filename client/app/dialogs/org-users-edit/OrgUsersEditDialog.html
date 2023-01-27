@@ -48,14 +48,12 @@
                                                         <td>{{oUser.role}}</td> -->
 
                                         <td class="over-icon">
-                                            <button class="btn btn-primary btn-wasdi"
+                                            <button class="btn btn-danger btn-wasdi"
                                                 title={{"DIALOG_EDIT_ORGANIZATION_UNSHARE"|translate}}
                                                 ng-click="m_oController.unshareOrganization(m_oController.m_sSelectedOrganizationId, oUser.userId)">
                                                 <!--Unshare Organization-->
-                                                <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
-                                                <!-- <span class="ng-binding">
-                                                    {{"DIALOG_EDIT_ORGANIZATION_EDIT"|translate}}
-                                                </span>-->
+                                                <i class="fa fa-trash fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                                                <span class="ng-binding">{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span>
                                             </button>
                                         </td>
                                     </tr>

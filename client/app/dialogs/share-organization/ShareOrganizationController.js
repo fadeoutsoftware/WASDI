@@ -4,7 +4,9 @@ let ShareOrganizationController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oOrganizationService, oTranslate
+        oOrganizationService, 
+        oTranslate,
+        oConstantsService
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -21,6 +23,7 @@ let ShareOrganizationController = (function () {
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
         this.m_bLoadingUsers = true;
+        this.m_sOwnerId = oExtras.organization.userId
 
         console.log(this.m_sSelectedOrganizationId);
 
@@ -128,7 +131,8 @@ let ShareOrganizationController = (function () {
         "extras",
         "AdminDashboardService",
         "OrganizationService",
-        '$translate'
+        '$translate', 
+        "ConstantsService"
     ];
     return ShareOrganizationController;
 })();
