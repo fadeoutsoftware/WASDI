@@ -41,7 +41,7 @@
                                     <td>
                                         <button class="btn btn-success btn-wasdi"
                                             ng-click="m_oController.shareOrganization(oUser.userId)"
-                                            ng-show="m_oController.findUser(oUser.userId) === -1">
+                                            ng-show="m_oController.findUser(oUser.userId) === -1 && m_oController.m_sOwnerId !== oUser.userId">
                                             Add
                                         </button>
                                     </td>
