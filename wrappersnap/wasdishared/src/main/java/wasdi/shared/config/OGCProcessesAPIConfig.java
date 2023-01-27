@@ -50,4 +50,16 @@ public class OGCProcessesAPIConfig {
 	 * Link to the service description: has the format httplink;relationtype;title
 	 */
 	public String landingLinkServiceDescription;
+	/**
+	 * Flat to activate the validation mode. DANGEROUS: it can disable authentication 
+	 */
+	public boolean validationModeOn = false;
+	/**
+	 * User Id to use for validation
+	 */
+	public String validationUserId = "";
+	/**
+	 * Session Id to use for validation
+	 */
+	public String validationSessionId = "";
 }

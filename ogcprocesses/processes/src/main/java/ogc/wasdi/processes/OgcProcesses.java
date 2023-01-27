@@ -24,6 +24,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.StringUtils;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.Link;
@@ -102,6 +103,39 @@ public class OgcProcesses extends ResourceConfig {
     		}
     		
     		if (Utils.isNullOrEmpty(sSessionId)) {
+    			
+    			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
+    				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
+    					if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
+    						WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
+    						
+    						UserRepository oUserRepo = new UserRepository();
+    						oUser = oUserRepo.getUser(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+    						
+    						if (oUser == null) {
+    							WasdiLog.errorLog("OgcProcesses.getUserFromSession: VALIDATION MODE Invalid validation user");
+    							return null;
+    						}
+    						
+    						SessionRepository oSessionRepository = new SessionRepository();
+    						UserSession oSession = oSessionRepository.getSession(sSessionId);
+    						
+    						if (oSession == null) {
+    							oSession = new UserSession();
+    							oSession.setLoginDate(Utils.nowInMillis());
+    							oSession.setLastTouch(Utils.nowInMillis());
+    							oSession.setSessionId(sSessionId);
+    							oSession.setUserId(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+    							
+    							oSessionRepository.insertSession(oSession);
+    						}
+    						
+    						return oUser;
+    					}
+    					
+    				}
+    			}
+    			
     			return null;
     		}
     		
