@@ -75,9 +75,7 @@ public class ImageResourceUtils {
 			WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: sPath "+ sPath);
 			
 			if (sPath.endsWith("."+sLogoExtension) == false) {
-				WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: entro nell'if ");
 				sPath = sPathLogoFolder + "." + sLogoExtension ;
-				WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: new logo");
 			}
 			
 			oImage = new ImageFile(sPath);
