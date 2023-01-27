@@ -4,7 +4,9 @@ let ShareSubscriptionController = (function () {
         oClose,
         oExtras,
         oAdminDashboardService,
-        oSubscriptionService, oTranslate
+        oSubscriptionService, 
+        oTranslate, 
+        oConstantsService
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -13,6 +15,7 @@ let ShareSubscriptionController = (function () {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oTranslate = oTranslate;
+        this.m_oConstantsService = oConstantsService; 
 
         this.m_sSelectedSubscriptionId = oExtras.subscription.subscriptionId;
         this.m_aoUsersList = oExtras.usersList;
@@ -21,8 +24,7 @@ let ShareSubscriptionController = (function () {
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
         this.m_bLoadingUsers = true;
-
-        console.log(this.m_sSelectedSubscriptionId);
+        this.m_sOwnerId = oExtras.subscription.userId
 
         $scope.close = function (result) {
             console.log()
@@ -81,13 +83,13 @@ let ShareSubscriptionController = (function () {
             return false;
         }
 
-        if(oController.m_aoUsersList.some(user => user.userId === sUserId)) {
+        if (oController.m_aoUsersList.some(user => user.userId === sUserId)) {
             utilsVexDialogAlertTop(
                 `THIS SUBSCRIPTION HAS ALREADY BEEN SHARED WITH ${sUserId}`
-            ); 
-            return false; 
+            );
+            return false;
         }
-        
+
         this.m_oSubscriptionService.addSubscriptionSharing(this.m_sSelectedSubscriptionId, sUserId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
@@ -101,7 +103,7 @@ let ShareSubscriptionController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({userId: sUserId})
+                        oController.m_aoUsersList.push({ userId: sUserId })
                     } else {
                         var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
                         utilsVexCloseDialogAfter(5000, oDialog);
@@ -117,9 +119,9 @@ let ShareSubscriptionController = (function () {
 
     }
 
-    ShareSubscriptionController.prototype.findUser = function(sUserId) {
+    ShareSubscriptionController.prototype.findUser = function (sUserId) {
         let oSearchedUser = this.m_aoUsersList.find(oUser => oUser.userId === sUserId);
-        let index = this.m_aoUsersList.indexOf(oSearchedUser); 
+        let index = this.m_aoUsersList.indexOf(oSearchedUser);
 
         return index;
     }
@@ -130,7 +132,8 @@ let ShareSubscriptionController = (function () {
         "extras",
         "AdminDashboardService",
         "SubscriptionService",
-        '$translate'
+        '$translate', 
+        "ConstantsService"
     ];
     return ShareSubscriptionController;
 })();
