@@ -66,12 +66,24 @@ public class ImageResourceUtils {
 	public static ImageFile getImageInFolder(String sPathLogoFolder, String[] asEnableExtension){
 		ImageFile oImage = null;
 		String sLogoExtension = getExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
+		
+		WasdiLog.debugLog("ImageResourceUtils.getImageInFolder " + sLogoExtension);
+		
 		if(sLogoExtension.isEmpty() == false){
 			String sPath = sPathLogoFolder;
+			
+			WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: sPath "+ sPath);
+			
 			if (sPath.endsWith("."+sLogoExtension) == false) {
+				WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: entro nell'if ");
 				sPath = sPathLogoFolder + "." + sLogoExtension ;
+				WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: new logo");
 			}
+			
 			oImage = new ImageFile(sPath);
+		}
+		else {
+			WasdiLog.debugLog("ImageResourceUtils.getImageInFolder: logo empty ");
 		}
 		return oImage;
 		
