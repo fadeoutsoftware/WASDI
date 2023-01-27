@@ -272,9 +272,7 @@ public class ProcessorsMediaResource {
 		}
 		
 		String sPathLogoFolder = ImageResourceUtils.getProcessorLogoRelativePath(oProcessor);
-		WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: sPathLogoFolder " + sPathLogoFolder);
 		String sAbsolutePath = ImageResourceUtils.s_sWebAppBasePath + sPathLogoFolder;
-		WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: sAbsolutePath " + sAbsolutePath);
 		
 		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsolutePath, IMAGE_PROCESSORS_EXTENSIONS );
 		

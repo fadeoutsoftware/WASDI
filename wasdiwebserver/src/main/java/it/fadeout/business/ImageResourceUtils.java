@@ -67,7 +67,11 @@ public class ImageResourceUtils {
 		ImageFile oImage = null;
 		String sLogoExtension = getExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
 		if(sLogoExtension.isEmpty() == false){
-			oImage = new ImageFile(sPathLogoFolder + "." + sLogoExtension );
+			String sPath = sPathLogoFolder;
+			if (sPath.endsWith("."+sLogoExtension) == false) {
+				sPath = sPathLogoFolder + "." + sLogoExtension ;
+			}
+			oImage = new ImageFile(sPath);
 		}
 		return oImage;
 		
