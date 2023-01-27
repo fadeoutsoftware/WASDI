@@ -274,10 +274,16 @@ public class ProcessorsMediaResource {
 		String sPathLogoFolder = ImageResourceUtils.getProcessorLogoRelativePath(oProcessor);
 		String sAbsolutePath = ImageResourceUtils.s_sWebAppBasePath + sPathLogoFolder;
 		
-		ImageFile oLogo = null;
+		WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: sAbsolutePath " + sAbsolutePath);
 		
-		if (new File(sAbsolutePath).exists()) {
+		ImageFile oLogo = null;
+		File oFile = new File(sAbsolutePath);
+		
+		if (oFile.exists()) {
 			oLogo = new ImageFile(sAbsolutePath);
+		}
+		else {
+			WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: sAbsolutePath does not exists");
 		}
 		
 		//Check the logo and extension
