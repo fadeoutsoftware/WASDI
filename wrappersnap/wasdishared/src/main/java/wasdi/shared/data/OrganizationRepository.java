@@ -74,21 +74,48 @@ public class OrganizationRepository extends MongoRepository {
 	 * @param sOrganizationId the id of the organization
 	 * @return the organization if found, null otherwise
 	 */
-	public Organization getOrganization(String sOrganizationId) {
-
+	public Organization getOrganizationById(String sOrganizationId) {
 		try {
-			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("organizationId", sOrganizationId))
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(new Document("organizationId", sOrganizationId))
 					.first();
 
 			if (oWSDocument != null) {
 				String sJSON = oWSDocument.toJson();
 
-				Organization oOrganization = s_oMapper.readValue(sJSON, Organization.class);
-
-				return oOrganization;
+				return s_oMapper.readValue(sJSON, Organization.class);
 			}
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get an organization by its Id.
+	 * @param sOrganizationId the Id of the organization
+	 * @return the organization if found, null otherwise
+	 */
+	public Organization getById(String sOrganizationId) {
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.eq("organizationId", sOrganizationId)).first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+
+				Organization oOrganization = null;
+				try {
+					oOrganization = s_oMapper.readValue(sJSON, Organization.class);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				return oOrganization;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("OrganizationRepository.getById( " + sOrganizationId + "): error: " + oE);
 		}
 
 		return null;
@@ -132,35 +159,6 @@ public class OrganizationRepository extends MongoRepository {
 		}
 
 		return aoReturnList;
-	}
-
-	/**
-	 * Get an organization by its Id.
-	 * @param sOrganizationId the Id of the organization
-	 * @return the organization if found, null otherwise
-	 */
-	public Organization getById(String sOrganizationId) {
-		try {
-			Document oWSDocument = getCollection(m_sThisCollection)
-					.find(Filters.eq("organizationId", sOrganizationId)).first();
-
-			if (null != oWSDocument) {
-				String sJSON = oWSDocument.toJson();
-
-				Organization oOrganization = null;
-				try {
-					oOrganization = s_oMapper.readValue(sJSON, Organization.class);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				return oOrganization;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("OrganizationRepository.getById( " + sOrganizationId + "): error: " + oE);
-		}
-
-		return null;
 	}
 
 	/**

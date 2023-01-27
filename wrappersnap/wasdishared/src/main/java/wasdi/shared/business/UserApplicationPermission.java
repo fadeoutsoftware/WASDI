@@ -7,6 +7,8 @@ public enum UserApplicationPermission {
 	ORGANIZATION_READ("organization:read"),
 	ORGANIZATION_WRITE("organization:write"),
 	NODE_WRITE("node:write"),
+	PROJECT_READ("project:read"),
+	PROJECT_WRITE("project:write"),
 	STYLE_READ("style:read"),
 	STYLE_WRITE("style:write"),
 	SUBSCRIPTION_READ("subscription:read"),

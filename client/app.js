@@ -23,6 +23,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.OpenSearchService',
     'wasdi.OrganizationService',
     'wasdi.SubscriptionService',
+    'wasdi.ProjectService',
     'wasdi.RabbitStompService',
     'wasdi.ResultsOfSearchService',
     'wasdi.CatalogService',
@@ -280,7 +281,8 @@ wasdiApp.controller("SubscriptionUsersEditController", window.SubscriptionUsersE
 wasdiApp.controller("ShareOrganizationController", window.ShareOrganizationController);
 wasdiApp.controller("ShareSubscriptionController", window.ShareSubscriptionController);
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
-wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController); 
+wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
+wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {

@@ -24,7 +24,7 @@ SubscriptionEditorController = (function () {
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
-        this.m_bLoadingOrganization = true;
+        this.m_bLoadingOrganizations = true;
 
         this.getSubscriptionTypes();
 
@@ -128,14 +128,14 @@ SubscriptionEditorController = (function () {
                     });
                 }
 
-                oController.m_bLoadingOrganization = false;
+                oController.m_bLoadingOrganizations = false;
             },
             function (data) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(
                     "GURU MEDITATION<br>ERROR GETTING ORGANIZATIONS"
                 );
                 utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_bLoadingOrganization = false;
+                oController.m_bLoadingOrganizations = false;
             }
         );
     }

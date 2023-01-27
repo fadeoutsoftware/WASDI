@@ -70,22 +70,20 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an subscription by its id.
+	 * Get a subscription by its id.
 	 * @param sSubscriptionId the id of the subscription
 	 * @return the subscription if found, null otherwise
 	 */
-	public Subscription getSubscription(String sSubscriptionId) {
-
+	public Subscription getSubscriptionById(String sSubscriptionId) {
 		try {
-			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("subscriptionId", sSubscriptionId))
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(new Document("subscriptionId", sSubscriptionId))
 					.first();
 
 			if (oWSDocument != null) {
 				String sJSON = oWSDocument.toJson();
 
-				Subscription oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
-
-				return oSubscription;
+				return s_oMapper.readValue(sJSON, Subscription.class);
 			}
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -153,9 +151,9 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get the subscription of many organizations.
+	 * Get the subscriptions related to many organizations.
 	 * @param asOrganizationIds the list of organizationIds
-	 * @return the subscription if found, null otherwise
+	 * @return the list of subscriptions associated with the organizations
 	 */
 	public List<Subscription> getSubscriptionsByOrganizations(Collection<String> asOrganizationIds) {
 		final List<Subscription> aoReturnList = new ArrayList<>();
@@ -170,35 +168,6 @@ public class SubscriptionRepository extends MongoRepository {
 		}
 
 		return aoReturnList;
-	}
-
-	/**
-	 * Get an subscription by its Id.
-	 * @param sSubscriptionId the Id of the subscription
-	 * @return the subscription if found, null otherwise
-	 */
-	public Subscription getById(String sSubscriptionId) {
-		try {
-			Document oWSDocument = getCollection(m_sThisCollection)
-					.find(Filters.eq("subscriptionId", sSubscriptionId)).first();
-
-			if (null != oWSDocument) {
-				String sJSON = oWSDocument.toJson();
-
-				Subscription oSubscription = null;
-				try {
-					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				return oSubscription;
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("SubscriptionRepository.getById( " + sSubscriptionId + "): error: " + oE);
-		}
-
-		return null;
 	}
 
 	/**
