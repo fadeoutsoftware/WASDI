@@ -373,10 +373,56 @@ class WaspyIntegrationTests(unittest.TestCase):
         sFileName = wasdi.getParameter('fileName')
         sBand = wasdi.getParameter('bandName')
 
-        sId = wasdi.asynchPublishBand(sFileName, sBand)
-        #todo write test
-        print(sId)
-        print('bu')
+        oReturnedObject = wasdi.asynchPublishBand(sFileName, sBand)
+        self.assertTrue("payload" in oReturnedObject)
+        self.assertTrue(oReturnedObject["payload"] is not None)
+
+        if isinstance(oReturnedObject["payload"], str):
+            # then the publish band API returned a processObjId and we can wait on it
+            sStatus = wasdi.waitProcess(oReturnedObject["payload"])
+            self.assertEqual("DONE", sStatus)
+            # let's do it again to get the JSON
+            oReturnedObject = wasdi.asynchPublishBand(sFileName, sBand)
+
+            # at this point the API should have returned a json, and we can try to see if the band is published
+            self.assertTrue(isinstance(oReturnedObject["payload"], dict))
+            # bandName
+            self.assertTrue("bandName" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["bandName"])
+            self.assertTrue(oReturnedObject["payload"]["bandName"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["bandName"]) > 0)
+            # boundingBox
+            self.assertTrue("boundingBox" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["boundingBox"])
+            self.assertTrue(oReturnedObject["payload"]["boundingBox"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["boundingBox"]) > 0)
+            # geoserverBoundingBox
+            self.assertTrue("geoserverBoundingBox" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverBoundingBox"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverBoundingBox"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["geoserverBoundingBox"]) > 0)
+            # geoserverUrl
+            self.assertTrue("geoserverUrl" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverUrl"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverUrl"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["geoserverUrl"]) > 0)
+            # productName
+            self.assertTrue("productName" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["productName"])
+            self.assertTrue(oReturnedObject["payload"]["productName"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["productName"]) > 0)
+            # workspaceId
+            self.assertTrue("workspaceId" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["workspaceId"])
+            self.assertTrue(oReturnedObject["payload"]["workspaceId"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["workspaceId"]) > 0)
+            # layerId
+            self.assertTrue("layerId" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["layerId"])
+            self.assertTrue(oReturnedObject["payload"]["layerId"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["layerId"]) > 0)
+
+        print(oReturnedObject)
 
         # reset to initial workspace
         wasdi.openWorkspaceById(sCurrentWorkspaceId)
