@@ -3,9 +3,11 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
 ## [0.7.5.2] - 2022-11-29
 ### Added
 - publishBand
+- getLayerWms
 ### Fixed
 - waitProcesses: now it handles POST returns status different from 200 (so it's safe no matter how you mess up your list of processes) 
 
