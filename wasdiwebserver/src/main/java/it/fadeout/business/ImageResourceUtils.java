@@ -90,7 +90,7 @@ public class ImageResourceUtils {
 	 * @return
 	 */
 	public static String getProcessorImagesBasePath(String sProcessorName, boolean bRelative) {
-		String sPath = "assets/img/processors/" + sProcessorName + "/";
+		String sPath = sProcessorName + "/";
 		
 		if (!bRelative) sPath = s_sWebAppBasePath + sPath;
 		

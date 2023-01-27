@@ -63,11 +63,7 @@ public class OgcProcesses extends ResourceConfig {
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.errorLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
-		
-		
-//		String sPath = new File(WasdiConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-//		WasdiLog.debugLog(sPath);
-		
+				
 		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		
 		if (!OgcProcesses.s_sBaseAddress.endsWith("/")) OgcProcesses.s_sBaseAddress += "/";

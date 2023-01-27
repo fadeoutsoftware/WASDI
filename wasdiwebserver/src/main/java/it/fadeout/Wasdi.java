@@ -220,8 +220,9 @@ public class Wasdi extends ResourceConfig {
 			String sLocalTomcatWebAppFolder = WasdiConfig.Current.paths.tomcatWebAppPath;
 			if (!Utils.isNullOrEmpty(sLocalTomcatWebAppFolder)) {
 				
-				ImageResourceUtils.s_sWebAppBasePath = sLocalTomcatWebAppFolder;
+				ImageResourceUtils.s_sWebAppBasePath = WasdiConfig.Current.paths.downloadRootPath;
 				if (!ImageResourceUtils.s_sWebAppBasePath.endsWith("/")) ImageResourceUtils.s_sWebAppBasePath += "/";
+				ImageResourceUtils.s_sWebAppBasePath += "images/"; 
 			}
 		}
 		catch (Throwable e) {

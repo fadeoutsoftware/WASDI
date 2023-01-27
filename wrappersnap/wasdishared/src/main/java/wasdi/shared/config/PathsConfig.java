@@ -19,6 +19,7 @@ public class PathsConfig {
 	 * 	.styles
 	 * 	.workflows
 	 * 	.processors
+	 *  .images
 	 */
 	public String downloadRootPath;
 	/**

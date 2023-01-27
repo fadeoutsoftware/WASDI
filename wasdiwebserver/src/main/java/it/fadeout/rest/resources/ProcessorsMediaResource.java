@@ -46,6 +46,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -112,11 +113,12 @@ public class ProcessorsMediaResource {
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.uploadProcessorLogo( ProcId: " + sProcessorId + ")");
 		
-		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+		if (oUser==null) {
+			WasdiLog.debugLog("ProcessorsMediaResource.uploadProcessorLogo: invalid user or session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
 		
 		WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -127,22 +129,11 @@ public class ProcessorsMediaResource {
 			return Response.serverError().build();
 		}
 		
-		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
-			
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			
-			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
-			
-			if (oSharing == null) {
-				WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: processor not of user " + oUser.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();					
-			}
-			else {
-				WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
-			}
-			
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+			WasdiLog.debugLog("ProcessorsResource.uploadProcessorLogo: processor not accesable by user " + oUser.getUserId());
+			return Response.status(Status.UNAUTHORIZED).build();								
 		}
-
+		
 		String sExt;
 		String sFileName;
 		
@@ -257,13 +248,14 @@ public class ProcessorsMediaResource {
 	@Path("/logo/get")
 	public Response getProcessorLogo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId ) {
 		
-		WasdiLog.debugLog("ProcessorsMediaResource.getProcessorLogo ( ProcId: " + sProcessorId + " )");
+		WasdiLog.debugLog("ProcessorsMediaResource.getProcessorLogo ( processorId: " + sProcessorId + " )");
 		
-		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+		if (oUser==null) {
+			WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: no valid user or session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
 		
 		WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: get Processor " + sProcessorId);	
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -274,29 +266,19 @@ public class ProcessorsMediaResource {
 			return Response.serverError().build();
 		}
 		
-		if (!oProcessor.getUserId().equals(oUser.getUserId())) {
-			
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			
-			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), sProcessorId);
-			
-			if (oSharing == null) {
-				WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: processor not of user " + oUser.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();					
-			}
-			else {
-				WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: processor of user " + oProcessor.getUserId() + " is shared with " + oUser.getUserId());
-			}
-			
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+			WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: user " + oUser.getUserId() + " cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();								
 		}
 		
-		String sPathLogoFolder = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
+		String sPathLogoFolder = ImageResourceUtils.getProcessorLogoRelativePath(oProcessor);
+		String sAbsolutePath = ImageResourceUtils.s_sWebAppBasePath + sPathLogoFolder;
 		
-		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
-		String sLogoExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPathLogoFolder,IMAGE_PROCESSORS_EXTENSIONS );
+		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsolutePath, IMAGE_PROCESSORS_EXTENSIONS );
 		
 		//Check the logo and extension
-		if(oLogo == null || sLogoExtension.isEmpty() ){
+		if(oLogo == null){
+			WasdiLog.debugLog("ProcessorsResource.getProcessorLogo: unable to find image in " + sAbsolutePath);
 			return Response.status(Status.NO_CONTENT).build();
 		}
 		//prepare buffer and send the logo to the client 

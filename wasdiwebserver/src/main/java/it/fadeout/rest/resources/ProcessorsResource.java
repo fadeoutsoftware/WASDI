@@ -78,6 +78,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -510,15 +511,9 @@ public class ProcessorsResource  {
 				float fScore = -1.0f;
 				
 				if (!oProcessor.getShowInStore()) continue;
-
-				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
 				// See if this is a processor the user can access to
-				if (oProcessor.getIsPublic() != 1) {
-					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
-						if (oSharing == null) continue;
-					}
-				}
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
 				
 				// Check and apply name filter taking in account both friendly and app name.
 				// Friendly name was added on the check to have a coherent behaviour for the users
@@ -603,6 +598,7 @@ public class ProcessorsResource  {
 				
 				iAvailableApps++;
 				
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				if (oSharing != null || oProcessor.getUserId().equals(oUser.getUserId())) oAppListViewModel.setIsMine(true);
 				else oAppListViewModel.setIsMine(false);
 				
