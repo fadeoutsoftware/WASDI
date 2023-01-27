@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oAdminDashboardService, oModalService, oTranslate) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -15,6 +15,7 @@ var EditUserController = (function () {
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
         this.m_oOrganizationService = oOrganizationService;
         this.m_oSubscriptionService = oSubscriptionService;
+        this.m_oProjectService = oProjectService;
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oModalService = oModalService;
         this.m_oTranslate = oTranslate;
@@ -32,45 +33,46 @@ var EditUserController = (function () {
         this.m_aoUsersList = [];
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {};
-        // this.m_oShowOrganizationUsersList = false;
-        // this.m_oShowEditOrganizationForm = false;
-        // this.m_oShowSharingOrganizationForm = false;
         this.m_sSelectedOrganizationId = null;
 
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
 
+        this.m_bLoadingOrganizations = true;
+
         this.initializeOrganizationsInfo();
 
 
-        this.m_asTypes = [];
-        this.m_aoTypesMap = [];
-        this.m_oType = {};
-        // this.m_bLoadingTypes = true;
+        // this.m_asTypes = [];
+        // this.m_aoTypesMap = [];
+        // this.m_oType = {};
 
         this.m_aoSubscriptions = [];
-        this.m_aoOrganizationsList = [];
+        // this.m_aoOrganizationsList = [];
         this.m_oEditSubscription = {};
         this.m_oSharingSubscription = {};
-        // this.m_oSharingOrganization = {};
-        // this.m_oShowSubscriptionOrganizationsList = false;
-        // this.m_oShowEditSubscriptionForm = false;
-        // this.m_oShowSharingSubscriptionForm = false;
         this.m_sSelectedSubscriptionId = null;
 
-        this.m_bLoadingOrganizations = true;
         this.m_bLoadingSubscriptions = true;
 
-        // this.m_sOrganizationPartialName = "";
-        // this.m_aoMatchingOrganizationsList = [];
-
         this.initializeSubscriptionsInfo();
+
+
+        this.m_aoProjects = [];
+        // this.m_aoSubscriptionsList = [];
+        this.m_oEditProject = {};
+        this.m_sSelectedProjectId = null;
+
+        this.m_bLoadingProjects = true;
+
+        this.initializeProjectsInfo();
 
 
         $scope.close = function (result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
     }
+
     /*
         getUserAuthProvider
      */
@@ -798,6 +800,109 @@ var EditUserController = (function () {
         this.m_sUserPartialName = "";
     }
 
+
+
+
+
+
+    EditUserController.prototype.initializeProjectsInfo = function() {
+        var oController = this;
+
+        this.m_oProjectService.getProjectsListByUser().then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                    oController.m_aoProjects = data.data;
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
+                    );
+                }
+
+                oController.m_bLoadingProjects = false;
+
+                return true;
+            }
+        );
+    }
+
+    EditUserController.prototype.showProjectEditForm = function(sUserId, sProjectId, sEditMode) {
+        console.log("EditUserController.showProjectEditForm | sProjectId: ", sProjectId);
+
+        this.m_sSelectedProjectId = sProjectId;
+
+        var oController = this;
+
+
+        this.m_oProjectService.getProjectById(sProjectId).then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                    oController.m_oEditProject = data.data;
+                    oController.m_oModalService.showModal({
+                        templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
+                        controller: "ProjectEditorController",
+                        inputs: {
+                            extras: {
+                                project: data.data,
+                                editMode: sEditMode
+                            }
+                        }
+                    }).then(function (modal) {
+                        modal.element.modal({
+                            backdrop: 'static'
+                        })
+                        modal.close.then(function () {
+                            oController.initializeProjectsInfo();
+
+                        })
+                    })
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN GETTING THE PROJECT BY ID"
+                    );
+                }
+            }
+        )
+    }
+
+    EditUserController.prototype.deleteProject = function(sUserId, sProjectId) {
+        console.log("EditUserController.deleteProject | sProjectId: ", sProjectId);
+
+        this.m_sSelectedProjectId = null;
+
+        var oController = this;
+
+        this.m_oProjectService.deleteProject(sProjectId)
+            .then(function (data) {
+                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
+                    utilsVexCloseDialogAfter(4000, oDialog);
+                } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
+                    utilsVexCloseDialogAfter(5000, oDialog);
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
+                }
+
+                oController.initializeProjectsInfo();
+
+            },function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
+        });
+    }
+
+    EditUserController.prototype.cancelEditProjectForm = function() {
+        console.log("EditUserController.cancelEditProjectForm");
+
+        this.m_oEditProject = {}
+        this.m_sSelectedProjectId = null;
+        this.m_aoMatchingOrganizationsList = [];
+        this.m_sOrganizationPartialName = "";
+    }
+
+
+
+
+
     EditUserController.$inject = [
         '$scope',
         'close',
@@ -807,6 +912,7 @@ var EditUserController = (function () {
         'ProcessWorkspaceService',
         'OrganizationService',
         'SubscriptionService',
+        'ProjectService',
         'AdminDashboardService',
         'ModalService',
         '$translate'

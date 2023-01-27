@@ -33,6 +33,13 @@
                             User Subscriptions
                         </a>
                     </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserProjects'}"
+                        ng-click="m_oController.m_sSelectedTab = 'UserProjects'">
+                        <a href="" role="tab" data-toggle="tab">
+                            <i class="fa fa-briefcase"></i>
+                            User Projects
+                        </a>
+                    </li>
                     <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"
                         ng-click="m_oController.m_sSelectedTab = 'UserOrganizations'">
                         <a href="" role="tab" data-toggle="tab">
@@ -54,6 +61,13 @@
                         ng-class="{'active':m_oController.m_sSelectedTab === 'UserSubscriptions'}"
                         ng-hide="m_oController.m_sSelectedTab !== 'UserSubscriptions'">
                         <ng-include src="'dialogs/edit_user/TabUserSubscriptions.html'"></ng-include>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade in" id="UserProjects"
+                        ng-class="{'active':m_oController.m_sSelectedTab === 'UserProjects'}"
+                        ng-hide="m_oController.m_sSelectedTab !== 'UserProjects'">
+                        <ng-include src="'dialogs/edit_user/TabUserProjects.html'"></ng-include>
                     </div>
                 </div>
                 <div class="tab-content">

@@ -151,7 +151,7 @@ public class SubscriptionResource {
 			if (aoSharedSubscriptions.size() > 0) {
 				// For each
 				for (UserResourcePermission oSharedSubscription : aoSharedSubscriptions) {
-					Subscription oSubscription = oSubscriptionRepository.getSubscription(oSharedSubscription.getResourceId());
+					Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(oSharedSubscription.getResourceId());
 
 					if (oSubscription == null) {
 						WasdiLog.debugLog("SubscriptionResource.getListByUser: Subscription Shared not available " + oSharedSubscription.getResourceId());
@@ -213,13 +213,13 @@ public class SubscriptionResource {
 //			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get requested subscription
-			Subscription oSubscription = oSubscriptionRepository.getSubscription(sSubscriptionId);
+			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
 			String sOrganizationName = null;
 
 			if (oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-				Organization oOrganization = oOrganizationRepository.getOrganization(oSubscription.getOrganizationId());
+				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
 
 				sOrganizationName = oOrganization.getName();
 			}
@@ -318,7 +318,7 @@ public class SubscriptionResource {
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-		Subscription oExistingSubscription = oSubscriptionRepository.getById(oSubscriptionViewModel.getSubscriptionId());
+		Subscription oExistingSubscription = oSubscriptionRepository.getSubscriptionById(oSubscriptionViewModel.getSubscriptionId());
 
 		if (oExistingSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: subscription does not exist");
@@ -366,7 +366,7 @@ public class SubscriptionResource {
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-		Subscription oSubscription = oSubscriptionRepository.getById(sSubscriptionId);
+		Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
 		if (oSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: subscription does not exist");
@@ -477,7 +477,7 @@ public class SubscriptionResource {
 		
 		// Check if the subscription exists
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-		Subscription oSubscription = oSubscriptionRepository.getSubscription(sSubscriptionId);
+		Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 		
 		if (oSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: invalid subscription");

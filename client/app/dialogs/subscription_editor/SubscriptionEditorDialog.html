@@ -58,7 +58,7 @@
                     <div class="form-v4-group row">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_ORGANIZATION'|translate}}</label>
                         <div class="col-sm-10" ng-show="m_oController.m_bEditMode">
-                            <div ng-show="!m_oController.m_bLoadingOrganization" >
+                            <div ng-show="!m_oController.m_bLoadingOrganizations" >
                                 <wapdropdown
                                     list-of-values="m_oController.m_aoOrganizationsMap"
                                     selected-value="m_oController.m_oOrganization"
@@ -68,7 +68,7 @@
                                     ng-readonly="!m_oController.m_bEditMode">
                                 </wapdropdown>
                             </div>
-                            <div class="loadIcon" ng-show="m_oController.m_bLoadingOrganization">
+                            <div class="loadIcon" ng-show="m_oController.m_bLoadingOrganizations">
                                 <invader></invader>
                             </div>
                         </div>

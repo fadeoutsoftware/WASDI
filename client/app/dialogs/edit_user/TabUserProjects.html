@@ -1,0 +1,62 @@
+<div class="projects-view pt-3">
+
+    <br>
+
+    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}
+        ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, null, true)">
+        <!--Add Project-->
+        <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_ADD"|translate}}</span>
+    </button>
+
+    <!-- Projects Table -->
+    <table class="table table-hover projects-list">
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Subscription</th>
+                <th>Default</th>
+
+                <th></th>
+                <th>Actions</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="oProject in m_oController.m_aoProjects track by $index">
+                <td>{{oProject.name}}</td>
+                <td>{{oProject.subscriptionName}}</td>
+                <td>{{oProject.defaultProject}}</td>
+
+                <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}
+                        ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, oProject.projectId, true)">
+                        <!--Edit Project-->
+                        <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"DIALOG_EDIT_PROJECT_EDIT"|translate}}</span
+                        >
+                        -->
+                    </button>
+                </td>
+
+                <td class="over-icon"
+                    ng-show="m_oController.m_oEditProject.projectId === m_oController.m_oEditProject.projectId">
+                    <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_DELETE"|translate}}
+                        ng-click="m_oController.deleteProject(m_oController.m_oUser.userId, oProject.projectId)">
+                        <!--Delete Project-->
+                        <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"DIALOG_EDIT_PROJECT_DELETE"|translate}}</span
+                        >
+                        -->
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+        <invader></invader>
+    </div>
+</div>

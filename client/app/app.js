@@ -256,6 +256,7 @@ wasdiApp.controller("ShareOrganizationController", window.ShareOrganizationContr
 wasdiApp.controller("ShareSubscriptionController", window.ShareSubscriptionController);
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
+wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){

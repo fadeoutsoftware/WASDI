@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -44,7 +45,7 @@ public class ProjectRepository extends MongoRepository {
 	}
 
 	/**
-	 * Update an project.
+	 * Update a project.
 	 * 
 	 * @param oProject the project to be updated
 	 * @return true if the operation succeeded, false otherwise
@@ -69,22 +70,20 @@ public class ProjectRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an project by its id.
+	 * Get a project by its id.
 	 * @param sProjectId the id of the project
 	 * @return the project if found, null otherwise
 	 */
-	public Project getProject(String sProjectId) {
-
+	public Project getProjectById(String sProjectId) {
 		try {
-			Document oWSDocument = getCollection(m_sThisCollection).find(new Document("projectId", sProjectId))
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(new Document("projectId", sProjectId))
 					.first();
 
 			if (oWSDocument != null) {
 				String sJSON = oWSDocument.toJson();
 
-				Project oProject = s_oMapper.readValue(sJSON, Project.class);
-
-				return oProject;
+				return s_oMapper.readValue(sJSON, Project.class);
 			}
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -94,7 +93,7 @@ public class ProjectRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an project by its subscription.
+	 * Get a project by its subscription.
 	 * @param sSubscriptionId the subscription of the project
 	 * @return the project if found, null otherwise
 	 */
@@ -114,7 +113,27 @@ public class ProjectRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an project by its name.
+	 * Get the projects related to many subscriptions.
+	 * @param asSubscriptionIds the list of subscriptionIds
+	 * @return the list of projects associated with the subscriptions
+	 */
+	public List<Project> getProjectsBySubscriptions(Collection<String> asSubscriptionIds) {
+		final List<Project> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.in("subscriptionId", asSubscriptionIds));
+
+			fillList(aoReturnList, oWSDocuments, Project.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	/**
+	 * Get a project by its name.
 	 * @param sName the name of the project
 	 * @return the project if found, null otherwise
 	 */
