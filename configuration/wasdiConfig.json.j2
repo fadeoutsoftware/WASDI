@@ -93,7 +93,10 @@
         "landingLinkProcesses": "{{ dictWasdiConfiguration.ogcProcessesApi.landingLinkProcesses }}",
         "landingLinkServiceDefinition": "{{ dictWasdiConfiguration.ogcProcessesApi.landingLinkServiceDefinition }}",
         "landingLinkServiceDescription": "{{ dictWasdiConfiguration.ogcProcessesApi.landingLinkServiceDescription }}",
-        "landingTitle": "{{ dictWasdiConfiguration.ogcProcessesApi.landingTitle }}"
+        "landingTitle": "{{ dictWasdiConfiguration.ogcProcessesApi.landingTitle }}",
+        "validationModeOn": {{ dictWasdiConfiguration.ogcProcessesApi.validationModeOn | lower }},
+        "validationSessionId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationSessionId }}",
+        "validationUserId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationUserId }}"
     },
     "paths": {
         "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
