@@ -3949,7 +3949,7 @@ def getlayerWMS(sProduct, sBand):
     The function then return a JSON containing the geoServerUrl and the LayerId to be used on external application/
     mpa visualizations
     Waits for a total of 10 attempts waiting 3 seconds each.
-    :param sProduct: The product to of which the WMS layers details are required
+    :param sProduct: The product for which the WMS layers details are required
     :param sBand: The band required
     :return: A JSON string with the following structure { server : [GeoServerUrl] , layerId : [LayerId] }
     """
@@ -3967,7 +3967,7 @@ def getlayerWMS(sProduct, sBand):
     oResult = dict()
     oResult["server"] = oPayload["geoserverUrl"]
     oResult["layerId"] = oPayload["layerId"]
-    return json.dumps(oResult);
+    return json.dumps(oResult)
 
 
     """    if oResult is not None and oResult.ok:
