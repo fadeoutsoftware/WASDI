@@ -16,7 +16,7 @@ ProjectEditorController = (function () {
         this.m_oEditProject = oExtras.project;
         this.m_bEditMode = oExtras.editMode;
 
-        this.m_asSubscriptions = [];
+        this.m_aoSubscriptions = [];
         this.m_aoSubscriptionsMap = [];
         this.m_oSubscription = {};
         this.m_bLoadingSubscriptions = true;
@@ -55,7 +55,7 @@ ProjectEditorController = (function () {
             console.log("ProjectEditorController.saveProject | data.data: ", data.data);
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT SAVED<br>READY");
-                utilsVexCloseDialogAfter(4000, oDialog);
+                utilsVexCloseDialogAfter(2000, oDialog);
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING PROJECT");
             }
@@ -82,8 +82,8 @@ ProjectEditorController = (function () {
                     );
                     utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
-                    oController.m_asSubscriptions = data.data;
-                    oController.m_aoSubscriptionsMap = oController.m_asSubscriptions.map(
+                    oController.m_aoSubscriptions = data.data;
+                    oController.m_aoSubscriptionsMap = oController.m_aoSubscriptions.map(
                         (item) => ({ name: item.name, subscriptionId: item.subscriptionId })
                     );
 

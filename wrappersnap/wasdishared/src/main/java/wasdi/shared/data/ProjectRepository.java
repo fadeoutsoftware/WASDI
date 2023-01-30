@@ -60,7 +60,7 @@ public class ProjectRepository extends MongoRepository {
 
 			UpdateResult oResult = getCollection(m_sThisCollection).updateOne(oFilter, oUpdateOperationDocument);
 
-			if (oResult.getModifiedCount() == 1)
+			if (oResult.getMatchedCount() == 1)
 				return true;
 		} catch (Exception oEx) {
 			oEx.printStackTrace();

@@ -2,6 +2,36 @@
 
     <br>
 
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <h4>Default Project</h4>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <div ng-show="m_oController.m_aoProjects.length > 0">
+                <div ng-show="!m_oController.m_bLoadingProjects">
+                    <wapdropdown
+                        list-of-values="m_oController.m_aoProjectsMap"
+                        selected-value="m_oController.m_oProject"
+                        enable-search-filter="true"
+                        dropdown-name="Projects"
+                        ng-model="m_oController.m_oProject"
+                        on-click-function="m_oController.changeDefaultProject(oValue)">
+                    </wapdropdown>
+                </div>
+                <div class="loadIcon" ng-show="m_oController.m_bLoadingProjrcts">
+                    <invader></invader>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+
     <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}
         ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, null, true)">
         <!--Add Project-->
@@ -40,8 +70,7 @@
                     </button>
                 </td>
 
-                <td class="over-icon"
-                    ng-show="m_oController.m_oEditProject.projectId === m_oController.m_oEditProject.projectId">
+                <td class="over-icon">
                     <button class="btn btn-danger btn-wasdi" title={{"DIALOG_EDIT_PROJECT_DELETE"|translate}}
                         ng-click="m_oController.deleteProject(m_oController.m_oUser.userId, oProject.projectId)">
                         <!--Delete Project-->

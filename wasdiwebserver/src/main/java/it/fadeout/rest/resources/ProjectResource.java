@@ -21,6 +21,7 @@ import wasdi.shared.business.Project;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -56,6 +57,8 @@ public class ProjectResource {
 			return aoProjectList;
 		}
 
+		System.out.println(oUser.getUserId() + "'s active project is :" + oUser.getActiveProjectId());
+
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
 				return aoProjectList;
@@ -81,7 +84,7 @@ public class ProjectResource {
 			// For each
 			for (Project oProject : aoProjects) {
 				// Create View Model
-				ProjectListViewModel oProjectViewModel = convert(oProject, aoSubscriptionNames.get(oProject.getSubscriptionId()));
+				ProjectListViewModel oProjectViewModel = convert(oProject, aoSubscriptionNames.get(oProject.getSubscriptionId()), oUser.getActiveProjectId());
 
 				aoProjectList.add(oProjectViewModel);
 			}
@@ -138,7 +141,7 @@ public class ProjectResource {
 				return oVM;
 			}
 
-			oVM = convert(oProject);
+			oVM = convert(oProject, oUser.getActiveProjectId());
 
 //			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 //
@@ -201,6 +204,10 @@ public class ProjectResource {
 		if (oProjectRepository.insertProject(oProject)) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oProject.getProjectId());
+
+			if (oProjectEditorViewModel.isDefaultProject()) {
+				this.changeDefaultProject(sSessionId, oProject.getProjectId());
+			}
 		} else {WasdiLog.debugLog("ProjectResource.createProject( " + oProjectEditorViewModel.getName() + " ): insertion failed");
 			oResult.setStringValue("The creation of the project failed.");
 		}
@@ -253,14 +260,74 @@ public class ProjectResource {
 
 
 		Project oProject = convert(oProjectEditorViewModel);
-//		oProject.setUserId(oUser.getUserId());
 
 		if (oProjectRepository.updateProject(oProject)) {
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oProject.getProjectId());
+
+			if (oProjectEditorViewModel.isDefaultProject()) {
+				this.changeDefaultProject(sSessionId, oProject.getProjectId());
+			} else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
+				UserRepository oUserRepository = new UserRepository();
+
+				oUser.setActiveProjectId(null);
+
+				if (oUserRepository.updateUser(oUser)) {
+					WasdiLog.debugLog("ProjectResource.updateProject( " + "changing the default project of the user to null failed");
+					oResult.setStringValue("The removing of the default project failed.");
+				}
+			}
 		} else {
 			WasdiLog.debugLog("ProjectResource.updateProject( " + oProjectEditorViewModel.getName() + " ): update failed");
 			oResult.setStringValue("The update of the project failed.");
+		}
+
+		return oResult;
+	}
+
+	/**
+	 * Update an Project.
+	 * @param sSessionId User Session Id
+	 * @param oProjectViewModel the project to be updated
+	 * @return a primitive result containing the outcome of the operation
+	 */
+	@PUT
+	@Path("/default")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult changeDefaultProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId) {
+		WasdiLog.debugLog("ProjectResource.changeDefaultProject( ProjectId: " + sProjectId + ")");
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("ProjectResource.changeDefaultProject: invalid session");
+			oResult.setStringValue("Invalid session.");
+			return oResult;
+		}
+
+		ProjectRepository oProjectRepository = new ProjectRepository();
+
+		Project oProject = oProjectRepository.getProjectById(sProjectId);
+
+		if (oProject == null) {
+			WasdiLog.debugLog("ProjectResource.changeDefaultProject: project does not exist");
+			oResult.setStringValue("No project with the Id " + sProjectId + " exists.");
+			return oResult;
+		}
+
+		UserRepository oUserRepository = new UserRepository();
+
+		oUser.setActiveProjectId(sProjectId);
+
+		if (oUserRepository.updateUser(oUser)) {
+			oResult.setBoolValue(true);
+			oResult.setStringValue(oProject.getProjectId());
+		} else {
+			WasdiLog.debugLog("ProjectResource.changeDefaultProject( " + "changing the default project of the user to " + sProjectId + " failed");
+			oResult.setStringValue("The changing of the default project failed.");
 		}
 
 		return oResult;
@@ -339,30 +406,35 @@ public class ProjectResource {
 		oProject.setSubscriptionId(oProjectEVM.getSubscriptionId());
 		oProject.setName(oProjectEVM.getName());
 		oProject.setDescription(oProjectEVM.getDescription());
-		oProject.setDefaultProject(oProjectEVM.isDefaultProject());
 
 		return oProject;
 	}
 
-	private static ProjectListViewModel convert(Project oProject, String sSubscriptionName) {
+	private static ProjectListViewModel convert(Project oProject, String sSubscriptionName, String sDefaultProjectId) {
 		ProjectListViewModel oProjectListViewModel = new ProjectListViewModel();
 		oProjectListViewModel.setProjectId(oProject.getProjectId());
 //		oProjectListViewModel.setSubscriptionId(oProject.getSubscriptionId());
 		oProjectListViewModel.setSubscriptionName(sSubscriptionName);
 		oProjectListViewModel.setName(oProject.getName());
 		oProjectListViewModel.setDescription(oProject.getDescription());
-		oProjectListViewModel.setDefaultProject(oProject.isDefaultProject());
+
+		if (oProjectListViewModel.getProjectId() != null && sDefaultProjectId != null && oProjectListViewModel.getProjectId().equals(sDefaultProjectId)) {
+			oProjectListViewModel.setDefaultProject(true);
+		}
 
 		return oProjectListViewModel;
 	}
 
-	private static ProjectViewModel convert(Project oProject) {
+	private static ProjectViewModel convert(Project oProject, String sDefaultProjectId) {
 		ProjectViewModel oProjectViewModel = new ProjectViewModel();
 		oProjectViewModel.setProjectId(oProject.getProjectId());
 		oProjectViewModel.setSubscriptionId(oProject.getSubscriptionId());
 		oProjectViewModel.setName(oProject.getName());
 		oProjectViewModel.setDescription(oProject.getDescription());
-		oProjectViewModel.setDefaultProject(oProject.isDefaultProject());
+
+		if (oProjectViewModel.getProjectId() != null && sDefaultProjectId != null && oProjectViewModel.getProjectId().equals(sDefaultProjectId)) {
+			oProjectViewModel.setDefaultProject(true);
+		}
 
 		return oProjectViewModel;
 	}

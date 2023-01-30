@@ -104,6 +104,11 @@ public class ProcessWorkspace {
 	 */
 	private String projectId;
 
+	/**
+	 * Subscription Id
+	 */
+	private String subscriptionId;
+
 
 	public String getProductName() {
         return productName;
@@ -263,6 +268,14 @@ public class ProcessWorkspace {
 
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
+	}
+
+	public String getSubscriptionId() {
+		return subscriptionId;
+	}
+
+	public void setSubscriptionId(String subscriptionId) {
+		this.subscriptionId = subscriptionId;
 	}
 
 }

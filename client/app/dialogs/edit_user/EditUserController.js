@@ -59,9 +59,13 @@ var EditUserController = (function () {
 
 
         this.m_aoProjects = [];
+
+        this.m_aoProjectsMap = [];
+        this.m_oProject = {};
+
         // this.m_aoSubscriptionsList = [];
-        this.m_oEditProject = {};
-        this.m_sSelectedProjectId = null;
+//        this.m_oEditProject = {};
+//        this.m_sSelectedProjectId = null;
 
         this.m_bLoadingProjects = true;
 
@@ -803,7 +807,35 @@ var EditUserController = (function () {
 
 
 
+    EditUserController.prototype.changeDefaultProject = function(oProject) {
+        console.log("EditUserController.changeDefaultProject | oProject: ", oProject);
 
+        // console.log("EditUserController.changeDefaultProject | this: ", this);
+        // console.log("EditUserController.changeDefaultProject | this.m_oProject: ", this.m_oProject);
+
+        // var oController = this;
+        // console.log("EditUserController.changeDefaultProject | oController: ", oController);
+        // console.log("EditUserController.changeDefaultProject | oController.m_oProject: ", oController.m_oProject);
+
+        var oController = this;
+
+        if (!utilsIsObjectNullOrUndefined(oProject) && !utilsIsStrNullOrEmpty(oProject.projectId)) {
+            this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
+                console.log("EditUserController.changeDefaultProject | data.data: ", data.data);
+                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
+                    utilsVexCloseDialogAfter(2000, oDialog);
+
+                    oController.initializeProjectsInfo();
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+                }
+    
+            }, function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+            });
+        }
+    }
 
     EditUserController.prototype.initializeProjectsInfo = function() {
         var oController = this;
@@ -812,6 +844,17 @@ var EditUserController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoProjects = data.data;
+
+                    oController.m_aoProjectsMap = oController.m_aoProjects.map(
+                        (item) => ({ name: item.name, projectId: item.projectId })
+                    );
+
+                    oController.m_aoProjects.forEach((oValue) => {
+                        console.log("EditUserController.initializeProjectsInfo | oValue: ", oValue);
+                        if (oValue.defaultProject === true) {
+                            oController.m_oProject = oValue;
+                        }
+                    });
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
@@ -819,6 +862,7 @@ var EditUserController = (function () {
                 }
 
                 oController.m_bLoadingProjects = false;
+                console.log("EditUserController.initializeProjectsInfo | oController.m_oProject: ", oController.m_oProject);
 
                 return true;
             }
@@ -828,7 +872,7 @@ var EditUserController = (function () {
     EditUserController.prototype.showProjectEditForm = function(sUserId, sProjectId, sEditMode) {
         console.log("EditUserController.showProjectEditForm | sProjectId: ", sProjectId);
 
-        this.m_sSelectedProjectId = sProjectId;
+//        this.m_sSelectedProjectId = sProjectId;
 
         var oController = this;
 
@@ -836,7 +880,7 @@ var EditUserController = (function () {
         this.m_oProjectService.getProjectById(sProjectId).then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_oEditProject = data.data;
+//                    oController.m_oEditProject = data.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
                         controller: "ProjectEditorController",
@@ -851,8 +895,8 @@ var EditUserController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function () {
+                            console.log("EditUserController.showProjectEditForm | calling initializeProjectsInfo() ");
                             oController.initializeProjectsInfo();
-
                         })
                     })
                 } else {
@@ -867,7 +911,7 @@ var EditUserController = (function () {
     EditUserController.prototype.deleteProject = function(sUserId, sProjectId) {
         console.log("EditUserController.deleteProject | sProjectId: ", sProjectId);
 
-        this.m_sSelectedProjectId = null;
+//        this.m_sSelectedProjectId = null;
 
         var oController = this;
 
@@ -893,8 +937,8 @@ var EditUserController = (function () {
     EditUserController.prototype.cancelEditProjectForm = function() {
         console.log("EditUserController.cancelEditProjectForm");
 
-        this.m_oEditProject = {}
-        this.m_sSelectedProjectId = null;
+//        this.m_oEditProject = {}
+//        this.m_sSelectedProjectId = null;
         this.m_aoMatchingOrganizationsList = [];
         this.m_sOrganizationPartialName = "";
     }
