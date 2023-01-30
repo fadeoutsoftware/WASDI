@@ -15,6 +15,5 @@ public class Project {
 	private String subscriptionId;
 	private String name;
 	private String description;
-	private boolean defaultProject;
 
 }
