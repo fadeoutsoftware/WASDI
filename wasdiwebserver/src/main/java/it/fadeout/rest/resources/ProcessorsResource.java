@@ -729,7 +729,7 @@ public class ProcessorsResource  {
 			}
 			
 			oAppDetailViewModel.setImages(ImageResourceUtils.getProcessorImagesList(oProcessor));
-			oAppDetailViewModel.setMaxImages(ProcessorsMediaResource.IMAGE_NAMES.length);
+			oAppDetailViewModel.setMaxImages(ImageResourceUtils.s_asIMAGE_NAMES.length);
 			
 			// TODO: At the moment we do not have this data: put the number of run in the main server
 			// But this has to be changed

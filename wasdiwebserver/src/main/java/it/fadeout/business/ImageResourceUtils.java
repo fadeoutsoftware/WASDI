@@ -6,8 +6,12 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FilenameUtils;
 
-import it.fadeout.rest.resources.ProcessorsMediaResource;
+import com.google.common.io.Files;
+
+import it.fadeout.Wasdi;
+import it.fadeout.rest.resources.ImagesResource;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.Utils;
@@ -21,6 +25,38 @@ import wasdi.shared.utils.log.WasdiLog;
  */
 public class ImageResourceUtils {
 	
+	/**
+	 * List of extensions enabled to upload a user image
+	 */
+	public static String[] USER_IMAGE_ENABLED_EXTENSIONS = {"jpg", "png", "svg"};
+	
+	/**
+	 * Width of Thumbail images
+	 */
+	public static int s_iTHUMB_WIDTH = 44;
+	/**
+	 * Heigth of Thumbail images
+	 */
+	public static int s_iTHUMB_HEIGHT = 50;
+	
+	/**
+	 * Max image size in Mb
+	 */
+	public static int s_iMAX_IMAGE_MB_SIZE = 2;
+	/**
+	 * Default base name of the processor logo
+	 */
+	public static String s_sDEFAULT_LOGO_PROCESSOR_NAME = "logo";
+	/**
+	 * Size of the logo in pixels
+	 */
+	public static Integer s_iLOGO_SIZE = 540;
+	/**
+	 * Pre-defined names of images in the processor gallery
+	 */
+	public static String[] s_asIMAGE_NAMES = { "1", "2", "3", "4", "5", "6" };	
+
+	
 	private ImageResourceUtils() { 
 	}
 	
@@ -30,14 +66,14 @@ public class ImageResourceUtils {
 	public static String s_sWebAppBasePath = "/var/lib/tomcat8/webapps/wasdiwebserver/";
 	
 	/**
-	 * Check if the extension of a image is valid for WASDI
+	 * Check if the extension of an image is valid for WASDI
 	 * @param sExt extension to check
 	 * @param sValidExtensions List of accepted extensions
 	 * @return true if valid
 	 */
-	public static boolean isValidExtension(String sExt,String[] sValidExtensions){
+	public static boolean isValidExtension(String sExt){
 		//Check if the extension is valid
-		for (String sValidExtension : sValidExtensions) {
+		for (String sValidExtension : USER_IMAGE_ENABLED_EXTENSIONS) {
 			  if(sValidExtension.equals(sExt.toLowerCase()) ){
 				  return true;
 			  }
@@ -63,9 +99,9 @@ public class ImageResourceUtils {
 	 * @param asEnableExtension
 	 * @return
 	 */
-	public static ImageFile getImageInFolder(String sPathLogoFolder, String[] asEnableExtension){
+	public static ImageFile getImageInFolder(String sPathLogoFolder){
 		ImageFile oImage = null;
-		String sLogoExtension = getExtensionOfImageInFolder(sPathLogoFolder, asEnableExtension);
+		String sLogoExtension = getExtensionOfImageInFolder(sPathLogoFolder);
 		
 		WasdiLog.debugLog("ImageResourceUtils.getImageInFolder " + sLogoExtension);
 		
@@ -86,7 +122,31 @@ public class ImageResourceUtils {
 		return oImage;
 		
 	}
-
+	
+	/**
+	 * Get the base path of images in WASDI
+	 * @return
+	 */
+	public static String getImagesBasePath() {
+		String sWasdiBasePath = Wasdi.getDownloadPath();
+		String sImagesBasePath = sWasdiBasePath + "images/";
+		return sImagesBasePath;
+	}
+	
+	/**
+	 * Get the path of a subofolder of images in WASDI
+	 * @return
+	 */
+	public static String getImagesSubPath(String sCollection) {
+		String sPath = getImagesBasePath();
+		sPath += sCollection;
+		if (!sPath.endsWith("/")) sPath += "/";
+		
+		ImageResourceUtils.createDirectory(sPath);
+		
+		return sPath;
+	}
+	
 	/**
 	 * Get the base relative Path of the folder where processor images are stored
 	 * @param sProcessorName
@@ -123,7 +183,7 @@ public class ImageResourceUtils {
 		String sRelativeLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName);
 		String sAbsoluteLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName, false);
 				
-		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsoluteLogoPath + ProcessorsMediaResource.DEFAULT_LOGO_PROCESSOR_NAME, ProcessorsMediaResource.IMAGE_PROCESSORS_EXTENSIONS );
+		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsoluteLogoPath + ImageResourceUtils.s_sDEFAULT_LOGO_PROCESSOR_NAME);
 		
 		boolean bExistsLogo = false;
 		
@@ -159,10 +219,10 @@ public class ImageResourceUtils {
 	 * @param asEnableExtension
 	 * @return
 	 */
-	public static String getExtensionOfImageInFolder (String sPathLogoFolder, String[] asEnableExtension){
+	public static String getExtensionOfImageInFolder (String sPathLogoFolder){
 		File oLogo = null;
 		String sExtensionReturnValue = "";
-		for (String sValidExtension : asEnableExtension) {
+		for (String sValidExtension : USER_IMAGE_ENABLED_EXTENSIONS) {
 			oLogo = new File(sPathLogoFolder + "." + sValidExtension );
 		    if (oLogo.exists()){
 		    	sExtensionReturnValue = sValidExtension;
@@ -206,7 +266,7 @@ public class ImageResourceUtils {
 
 		String sReturnValueName = "";
 		boolean bIsAvaibleName = false; 
-		for (String sAvaibleFileName : ProcessorsMediaResource.IMAGE_NAMES){
+		for (String sAvaibleFileName : ImageResourceUtils.s_asIMAGE_NAMES){
 			bIsAvaibleName = true;
 			sReturnValueName = sAvaibleFileName;
 			
@@ -246,7 +306,7 @@ public class ImageResourceUtils {
 		
 		File[] aoListOfFiles = oFolder.listFiles();
 		
-		ArrayList<String> asValidNames = new ArrayList<String>(Arrays.asList(ProcessorsMediaResource.IMAGE_NAMES));
+		ArrayList<String> asValidNames = new ArrayList<String>(Arrays.asList(ImageResourceUtils.s_asIMAGE_NAMES));
 		
 		if ( aoListOfFiles != null) {
 			for (File oImage : aoListOfFiles){
@@ -262,5 +322,77 @@ public class ImageResourceUtils {
 		
 		
 		return asImages;
+	}
+	
+	/**
+	 * Create a thumb of the image in sAbsoluteImageFilePath
+	 * @param sAbsoluteImageFilePath path of the input image
+	 * @return Path of the thumbail or null in case of problems
+	 */
+	public static String createThumbOfImage(String sAbsoluteImageFilePath) {
+	    try {
+	    	
+	    	if (Utils.isNullOrEmpty(sAbsoluteImageFilePath)) {
+	    		WasdiLog.infoLog("ImageResourceUtils.createThumbOfImage: sAbsoluteImageFilePath null ");
+	    		return null;
+	    	}
+	    	
+	    	ImageFile oNewImage = new ImageFile(sAbsoluteImageFilePath);
+	    	
+	    	if (oNewImage.exists() == false) {
+	    		WasdiLog.infoLog("ImageResourceUtils.createThumbOfImage: oNewImage not found at " + sAbsoluteImageFilePath);
+	    		return null;
+	    	}
+	    	
+		    // Create the thumb:	    	
+	    	WasdiLog.debugLog("ImageResourceUtils.createThumbOfImage: creating thumb");
+	    	
+	    	String [] asSplit = sAbsoluteImageFilePath.split("\\.");
+	    	
+	    	String sThumbPath = asSplit[0] + "_thumb." + asSplit[1];	    	
+	    	
+	    	File oThumb = new File(sThumbPath);
+	    	
+	    	Files.copy(oNewImage, oThumb);
+	    	
+	    	WasdiLog.debugLog("ImageResourceUtils.createThumbOfImage: thumb file created " + sThumbPath);
+	    	
+	    	ImageFile oImageThumb = new ImageFile(sThumbPath);
+	    	
+	    	if (!oImageThumb.resizeImage(ImageResourceUtils.s_iTHUMB_HEIGHT, ImageResourceUtils.s_iTHUMB_WIDTH)) {
+	    		WasdiLog.debugLog("ImageResourceUtils.createThumbOfImage: error resizing the thumb");
+	    	}
+	    	
+	    	return sThumbPath;
+	    	
+	    }
+	    catch (Exception oEx) {
+	    	WasdiLog.debugLog("ImageResourceUtils.createThumbOfImage:  error creating the thumb " + oEx.toString());
+		}
+	    
+	    return null;
+	}
+	
+	/**
+	 * Get the http link to access an image
+	 * @param sCollection Image Collection 
+	 * @param sImage Image Name
+	 * @return Url to get the image or empty string
+	 */
+	public static String getImageLink(String sCollection, String sImage) {
+		try {
+			String sAddress = WasdiConfig.Current.baseUrl;
+			
+			if (!sAddress.endsWith("/")) sAddress += "/";
+			
+			sAddress +="images/get?collection="+sCollection+"&name="+sImage;
+			
+			return sAddress;
+		}
+	    catch (Exception oEx) {
+	    	WasdiLog.debugLog("ImageResourceUtils.getImageLink:  error " + oEx.toString());
+		}		
+		
+		return "";
 	}
 }

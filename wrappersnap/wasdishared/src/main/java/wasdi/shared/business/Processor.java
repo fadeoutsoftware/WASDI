@@ -116,6 +116,11 @@ public class Processor {
 	private int noLogoPlaceholderIndex = -1;
 	
 	/**
+	 * Name of the logo image if present
+	 */
+	private String logo = "";
+	
+	/**
 	 * List of associated categories
 	 */
 	private ArrayList<String> categories = new ArrayList<String>();
@@ -261,6 +266,12 @@ public class Processor {
 	}
 	public void setNoLogoPlaceholderIndex(int noLogoPlaceholderIndex) {
 		this.noLogoPlaceholderIndex = noLogoPlaceholderIndex;
+	}
+	public String getLogo() {
+		return logo;
+	}
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 	
 }
