@@ -75,7 +75,7 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sourceDirectory=${WORKSPACE}/client/dist currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Deploy the builded client"
+        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sourceDirectory=${WORKSPACE} currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Deploy the builded client"
       }
     }
   }
