@@ -52,7 +52,12 @@ pipeline {
       steps {
         script {
           if ( env.executeSonarqube.toBoolean() ) {
-            echo "Execute sonarqube ${SONARQUBE_TOKEN}"
+            withCredentials([
+                [string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN')],
+                [string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')],
+            ]) {
+                sh label: 'Test2', script: 'echo Execute sonarqube: ' + SONARQUBE_TOKEN
+            }
           } else {
             echo "Nothing to do"
           }
