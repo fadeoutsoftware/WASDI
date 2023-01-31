@@ -252,8 +252,6 @@ wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 wasdiApp.controller("PackageManagerController", window.PackageManagerController);
 wasdiApp.controller("OrgUsersEditController", window.OrgUsersEditController);
 wasdiApp.controller("SubscriptionUsersEditController", window.SubscriptionUsersEditController);
-wasdiApp.controller("ShareOrganizationController", window.ShareOrganizationController);
-wasdiApp.controller("ShareSubscriptionController", window.ShareSubscriptionController);
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);

@@ -1,11 +1,14 @@
 let OrgUsersEditController = (function () {
-    function OrgUsersEditController($scope, oClose, oExtras, oOrganizationService, oModalService) {
+    function OrgUsersEditController($scope, oClose, oExtras, oOrganizationService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
+        this.m_oTranslate = oTranslate;
 
         this.m_oOrganizationService = oOrganizationService;
-        this.m_oModalService = oModalService; 
+        this.m_oModalService = oModalService;
+
+        this.m_sUserEmail = "";
 
         this.m_sSelectedOrganizationId = this.oExtras.organizationId;
         this.m_aoUsersList = oExtras.users;
@@ -15,6 +18,53 @@ let OrgUsersEditController = (function () {
             oClose(result, 500)
         }
     }
+
+    OrgUsersEditController.prototype.shareOrganization = function (sUserId) {
+        let sOrganizationId = this.m_sSelectedOrganizationId;
+        console.log("OrgUsersEditController.shareOrganization | sOrganizationId: ", sOrganizationId);
+        console.log("OrgUsersEditController.shareOrganization | sUserId: ", sUserId);
+
+        let oController = this;
+        if (utilsIsObjectNullOrUndefined(sUserId) === true) {
+            return false;
+        }
+
+        if (oController.m_aoUsersList.some(user => user.userId === sUserId)) {
+            utilsVexDialogAlertTop(
+                `${sUserId} IS ALREADY PART OF THIS ORGANIZATION`
+            );
+            return false;
+        }
+
+        this.m_oOrganizationService.addOrganizationSharing(this.m_sSelectedOrganizationId, sUserId).then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+
+                    console.log("OrgUsersEditController.shareOrganization | data.data: ", data.data);
+
+                    if (data.data.boolValue) {
+                        console.log(data.data)
+                        let oDialog = utilsVexDialogAlertBottomRightCorner(
+                            `${sUserId} WAS SUCCESSFULLY ADDED`
+                        );
+                        utilsVexCloseDialogAfter(4000, oDialog);
+
+                        oController.m_aoUsersList.push({ userId: sUserId });
+                        oController.m_sUserEmail="";
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
+                    }
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN SHARING THE ORGANIZATION"
+                    );
+                }
+                return true;
+            }
+        )
+    }
+
     OrgUsersEditController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
         let oController = this;
         
@@ -41,6 +91,7 @@ let OrgUsersEditController = (function () {
         
         utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
     }
+
     OrgUsersEditController.prototype.showUsersByOrganization = function (sOrganizationId) {
         var oController = this;
 
@@ -60,48 +111,14 @@ let OrgUsersEditController = (function () {
             }
         );
     }
-    OrgUsersEditController.prototype.openShareUsersModal = function (sOrganizationId) {
-        console.log(sOrganizationId);
-
-        let oController = this;
-        this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log(data.data)
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/share-organization/ShareOrganizationDialog.html", 
-                        controller: "ShareOrganizationController", 
-                        inputs: {
-                            extras: {
-                                organization: data.data,
-                                usersList: oController.m_aoUsersList
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function (result) {
-                            oController.showUsersByOrganization(result); 
-                        })
-                    })
-                    
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE ORGANIZATION BY ID"
-                    );
-                }
-                return true;
-            }
-        )
-    }
 
     OrgUsersEditController.$inject = [
         "$scope",
         "close",
         "extras",
         "OrganizationService", 
-        "ModalService"
+        "ModalService",
+        '$translate'
     ];
     return OrgUsersEditController;
 })();
