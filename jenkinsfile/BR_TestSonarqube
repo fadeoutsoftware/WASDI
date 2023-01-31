@@ -56,7 +56,7 @@ pipeline {
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_URL')
             ]) {
-                bash /tmp/a.sh ${SONARQUBE_TOKEN} ${SONARQUBE_URL}
+                sh script: "bash /tmp/a.sh ${SONARQUBE_TOKEN} ${SONARQUBE_URL}"
             }
           } else {
             echo "Nothing to do"
