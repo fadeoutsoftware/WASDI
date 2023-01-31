@@ -1,11 +1,14 @@
 let SubscriptionUsersEditController = (function () {
-    function SubscriptionUsersEditController($scope, oClose, oExtras, oSubscriptionService, oModalService) {
+    function SubscriptionUsersEditController($scope, oClose, oExtras, oSubscriptionService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
+        this.m_oTranslate = oTranslate;
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oModalService = oModalService; 
+
+        this.m_sUserEmail = "";
 
         this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
         this.m_aoUsersList = oExtras.users;
@@ -16,6 +19,54 @@ let SubscriptionUsersEditController = (function () {
             oClose(result, 500)
         }
     }
+
+    SubscriptionUsersEditController.prototype.shareSubscription = function (sUserId) {
+        let sSubscriptionId = this.m_sSelectedSubscriptionId;
+        console.log("SubscriptionUsersEditController.shareSubscription | sSubscriptionId: ", sSubscriptionId);
+        console.log("SubscriptionUsersEditController.shareSubscription | sUserId: ", sUserId);
+
+        let oController = this;
+
+        if (utilsIsObjectNullOrUndefined(sUserId) === true) {
+            return false;
+        }
+
+        if (oController.m_aoUsersList.some(user => user.userId === sUserId)) {
+            utilsVexDialogAlertTop(
+                `THIS SUBSCRIPTION HAS ALREADY BEEN SHARED WITH ${sUserId}`
+            );
+            return false;
+        }
+
+        this.m_oSubscriptionService.addSubscriptionSharing(this.m_sSelectedSubscriptionId, sUserId).then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                    // oController.m_aoUsersList = data.data;
+                    console.log("SubscriptionUsersEditController.shareSubscription | data.data: ", data.data);
+
+                    if (data.data.boolValue) {
+                        // oController.showUsersBySubscription(sSubscriptionId);
+                        let oDialog = utilsVexDialogAlertBottomRightCorner(
+                            `SUBSCRIPTION SUCCESSFULLY SHARED WITH ${sUserId}`
+                        );
+                        utilsVexCloseDialogAfter(4000, oDialog);
+
+                        oController.m_aoUsersList.push({ userId: sUserId });
+                        oController.m_sUserEmail="";
+                    } else {
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
+                        utilsVexCloseDialogAfter(5000, oDialog);
+                    }
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN SHARING THE SUBSCRIPTION"
+                    );
+                }
+                return true;
+            }
+        )
+    }
+
     SubscriptionUsersEditController.prototype.unshareSubscription = function (sSubscriptionId, sUserId) {
         let oController = this;
         
@@ -42,6 +93,7 @@ let SubscriptionUsersEditController = (function () {
         
         utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
     }
+
     SubscriptionUsersEditController.prototype.showUsersBySubscription = function (sSubscriptionId) {
         var oController = this;
 
@@ -61,48 +113,14 @@ let SubscriptionUsersEditController = (function () {
             }
         );
     }
-    SubscriptionUsersEditController.prototype.openShareUsersModal = function (sSubscriptionId) {
-        console.log(sSubscriptionId);
-
-        let oController = this;
-        this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log(data.data)
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/share-subscription/ShareSubscriptionDialog.html", 
-                        controller: "ShareSubscriptionController", 
-                        inputs: {
-                            extras: {
-                                subscription: data.data,
-                                usersList: oController.m_aoUsersList
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function (result) {
-                            oController.showUsersBySubscription(result); 
-                        })
-                    })
-                    
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
-                    );
-                }
-                return true;
-            }
-        )
-    }
 
     SubscriptionUsersEditController.$inject = [
         "$scope",
         "close",
         "extras",
         "SubscriptionService", 
-        "ModalService"
+        "ModalService",
+        '$translate'
     ];
     return SubscriptionUsersEditController;
 })();

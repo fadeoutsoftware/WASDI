@@ -11,17 +11,44 @@
                         <legend>
                             {{"DIALOG_SHARE_SUBSCRIPTION"|translate}}
                         </legend>
-                        <div>
-                            <!-- Add users to Subscription -->
-                            <button class="btn btn-primary btn-wasdi"
-                                title={{"DIALOG_EDIT_SUBSCRIPTION_SHARE"|translate}}
-                                ng-click="m_oController.openShareUsersModal(m_oController.m_sSelectedSubscriptionId)">
-                                <span class="ng-binding">
-                                    {{"DIALOG_EDIT_SUBSCRIPTION_SHARE"|translate}}
-                                </span>
 
-                            </button>
+                        <div class="container-fluid">
+                            <div class="row give-permission-row">
+                                <form class="d-flex flex-row" novalidate>
+                                    <div class="form-group mr-3" style="width: 90%">
+                                        <h4 class="text-success">
+                                            {{"DIALOG_SHARE_SUBSCRIPTION_ADD_USER"|translate}}
+                                        </h4>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            id=""
+                                            class="form-control wasdi-input"
+                                            value=""
+                                            title=""
+                                            ng-model="m_oController.m_sUserEmail"
+                                            required="required"
+                                            placeholder='{{"DIALOG_SHARE_WS_MAIL"|translate}}'
+                                        />
+                                    </div>
+                                    <button
+                                        class="btn btn-primary btn-wasdi mb-4 align-self-end"
+                                        ng-click="m_oController.shareSubscription(m_oController.m_sUserEmail)"
+                                    >
+                                        <em
+                                            class="custom-icon fa fa-share-alt fa-lg"
+                                            ng-class="button.icon"
+                                        ></em>
+                                        <span class="ng-binding"
+                                            >{{"DIALOG_SHARE_WS_SHARE"|translate}}</span
+                                        >
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+    
+                        <hr class="divider-line-style1" />
+
                         <div ng-show="m_oController.m_aoUsersList.length == 0">
                             <br>
                             <p>Not shared with users, yet</p>
