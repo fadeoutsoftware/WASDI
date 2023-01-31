@@ -42,13 +42,8 @@ var EditUserController = (function () {
 
         this.initializeOrganizationsInfo();
 
-
-        // this.m_asTypes = [];
-        // this.m_aoTypesMap = [];
-        // this.m_oType = {};
-
         this.m_aoSubscriptions = [];
-        // this.m_aoOrganizationsList = [];
+
         this.m_oEditSubscription = {};
         this.m_oSharingSubscription = {};
         this.m_sSelectedSubscriptionId = null;
@@ -62,10 +57,6 @@ var EditUserController = (function () {
 
         this.m_aoProjectsMap = [];
         this.m_oProject = {};
-
-        // this.m_aoSubscriptionsList = [];
-//        this.m_oEditProject = {};
-//        this.m_sSelectedProjectId = null;
 
         this.m_bLoadingProjects = true;
 
@@ -810,16 +801,9 @@ var EditUserController = (function () {
     EditUserController.prototype.changeDefaultProject = function(oProject) {
         console.log("EditUserController.changeDefaultProject | oProject: ", oProject);
 
-        // console.log("EditUserController.changeDefaultProject | this: ", this);
-        // console.log("EditUserController.changeDefaultProject | this.m_oProject: ", this.m_oProject);
-
-        // var oController = this;
-        // console.log("EditUserController.changeDefaultProject | oController: ", oController);
-        // console.log("EditUserController.changeDefaultProject | oController.m_oProject: ", oController.m_oProject);
-
         var oController = this;
 
-        if (!utilsIsObjectNullOrUndefined(oProject) && !utilsIsStrNullOrEmpty(oProject.projectId)) {
+        if (!utilsIsObjectNullOrUndefined(oProject)) {
             this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
                 console.log("EditUserController.changeDefaultProject | data.data: ", data.data);
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
@@ -827,6 +811,7 @@ var EditUserController = (function () {
                     utilsVexCloseDialogAfter(2000, oDialog);
 
                     oController.initializeProjectsInfo();
+                    this.m_oProject = oProject;
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
                 }
@@ -845,9 +830,15 @@ var EditUserController = (function () {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoProjects = data.data;
 
-                    oController.m_aoProjectsMap = oController.m_aoProjects.map(
+                    const oFirstElement = { name: "No Default Project", projectId: null };
+                    let aoProjects = [oFirstElement].concat(data.data);
+
+                    oController.m_aoProjectsMap = aoProjects.map(
                         (item) => ({ name: item.name, projectId: item.projectId })
                     );
+
+
+                    oController.m_oProject = oFirstElement;
 
                     oController.m_aoProjects.forEach((oValue) => {
                         console.log("EditUserController.initializeProjectsInfo | oValue: ", oValue);
