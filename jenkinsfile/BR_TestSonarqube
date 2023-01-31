@@ -49,10 +49,14 @@ pipeline {
     }
 
     stage('ANALYZE THE CODE WITH SONARQUBE') {
-      if(env.executeSonarqube.toBoolean()) {
-        echo "Execute sonarqube"
-      } else {
-        echo "Nothing to do"
+      steps {
+        script {
+          if ( env.executeSonarqube.toBoolean() ) {
+            echo "Execute sonarqube"
+          } else {
+            echo "Nothing to do"
+          }
+        }
       }
     }
   }
