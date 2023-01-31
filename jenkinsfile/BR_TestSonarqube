@@ -1,0 +1,66 @@
+def getCurrentRevision(environmentName) {
+    if ( "PROD".equals(environmentName) ) {
+        return "0.0.${env.BUILD_ID}"
+    } else {
+        return "0.0.${env.BUILD_ID}-SNAPSHOT"
+    }
+}
+
+pipeline {
+  agent any
+
+  environment {
+    currentRevision = getCurrentRevision(env.targetedEnvironment)
+    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    maven "WASDI_MAVEN"
+  }
+  
+  stages {
+    stage('DEBUG') {
+      steps {
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.targetedEnvironment = " + env.targetedEnvironment
+        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
+        echo "env.WORKSPACE = " + env.WORKSPACE
+
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + DEPLOY THEM"
+        }
+      }
+    }
+
+    stage('ANALYZE THE CODE WITH SONARQUBE') {
+      if(env.executeSonarqube.toBoolean()) {
+        echo "Execute sonarqube"
+      } else {
+        echo "Nothing to do"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
+
