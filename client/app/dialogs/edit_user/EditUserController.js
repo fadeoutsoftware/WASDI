@@ -278,8 +278,8 @@ var EditUserController = (function () {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoUsersList = data.data;
                     oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/org-users-edit/OrgUsersEditDialog.html",
-                        controller: 'OrgUsersEditController',
+                        templateUrl: "dialogs/organization-users/OrganizationUsersDialog.html",
+                        controller: 'OrganizationUsersController',
                         inputs: {
                             extras: {
                                 users: data.data,
@@ -647,8 +647,8 @@ var EditUserController = (function () {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoUsersList = data.data;
                     oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/subscription-users-edit/SubscriptionUsersEditDialog.html",
-                        controller: 'SubscriptionUsersEditController',
+                        templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
+                        controller: 'SubscriptionUsersController',
                         inputs: {
                             extras: {
                                 users: data.data,

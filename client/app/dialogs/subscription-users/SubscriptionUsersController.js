@@ -1,5 +1,5 @@
-let SubscriptionUsersEditController = (function () {
-    function SubscriptionUsersEditController($scope, oClose, oExtras, oSubscriptionService, oModalService, oTranslate) {
+let SubscriptionUsersController = (function () {
+    function SubscriptionUsersController($scope, oClose, oExtras, oSubscriptionService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
@@ -20,10 +20,10 @@ let SubscriptionUsersEditController = (function () {
         }
     }
 
-    SubscriptionUsersEditController.prototype.shareSubscription = function (sUserId) {
+    SubscriptionUsersController.prototype.shareSubscription = function (sUserId) {
         let sSubscriptionId = this.m_sSelectedSubscriptionId;
-        console.log("SubscriptionUsersEditController.shareSubscription | sSubscriptionId: ", sSubscriptionId);
-        console.log("SubscriptionUsersEditController.shareSubscription | sUserId: ", sUserId);
+        console.log("SubscriptionUsersController.shareSubscription | sSubscriptionId: ", sSubscriptionId);
+        console.log("SubscriptionUsersController.shareSubscription | sUserId: ", sUserId);
 
         let oController = this;
 
@@ -42,7 +42,7 @@ let SubscriptionUsersEditController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     // oController.m_aoUsersList = data.data;
-                    console.log("SubscriptionUsersEditController.shareSubscription | data.data: ", data.data);
+                    console.log("SubscriptionUsersController.shareSubscription | data.data: ", data.data);
 
                     if (data.data.boolValue) {
                         // oController.showUsersBySubscription(sSubscriptionId);
@@ -67,7 +67,7 @@ let SubscriptionUsersEditController = (function () {
         )
     }
 
-    SubscriptionUsersEditController.prototype.unshareSubscription = function (sSubscriptionId, sUserId) {
+    SubscriptionUsersController.prototype.unshareSubscription = function (sSubscriptionId, sUserId) {
         let oController = this;
         
         let sConfirmMsg = `Confirm unsharing with ${sUserId}`
@@ -94,7 +94,7 @@ let SubscriptionUsersEditController = (function () {
         utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
     }
 
-    SubscriptionUsersEditController.prototype.showUsersBySubscription = function (sSubscriptionId) {
+    SubscriptionUsersController.prototype.showUsersBySubscription = function (sSubscriptionId) {
         var oController = this;
 
         this.m_oSubscriptionService.getUsersBySharedSubscription(sSubscriptionId).then(
@@ -114,7 +114,7 @@ let SubscriptionUsersEditController = (function () {
         );
     }
 
-    SubscriptionUsersEditController.$inject = [
+    SubscriptionUsersController.$inject = [
         "$scope",
         "close",
         "extras",
@@ -122,6 +122,6 @@ let SubscriptionUsersEditController = (function () {
         "ModalService",
         '$translate'
     ];
-    return SubscriptionUsersEditController;
+    return SubscriptionUsersController;
 })();
-window.SubscriptionUsersEditController = SubscriptionUsersEditController; 
+window.SubscriptionUsersController = SubscriptionUsersController; 
