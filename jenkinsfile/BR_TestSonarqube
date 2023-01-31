@@ -53,10 +53,11 @@ pipeline {
         script {
           if ( env.executeSonarqube.toBoolean() ) {
             withCredentials([
+                string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
-                string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_URL')
+                string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
             ]) {
-                sh script: "bash /tmp/a.sh ${SONARQUBE_TOKEN} ${SONARQUBE_URL}"
+                sh script: "bash /tmp/a.sh ${SONARQUBE_PROJECT_KEY} ${SONARQUBE_TOKEN} ${SONARQUBE_URL}"
             }
           } else {
             echo "Nothing to do"
