@@ -297,6 +297,12 @@ public class ProjectResource {
 	public PrimitiveResult changeDefaultProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.changeDefaultProject( ProjectId: " + sProjectId + ")");
 
+		if (sProjectId != null) {
+			if (sProjectId.isEmpty() || sProjectId.equals("null")) {
+				sProjectId = null;
+			}
+		}
+
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 
@@ -308,14 +314,16 @@ public class ProjectResource {
 			return oResult;
 		}
 
-		ProjectRepository oProjectRepository = new ProjectRepository();
+		if (sProjectId != null) {
+			ProjectRepository oProjectRepository = new ProjectRepository();
 
-		Project oProject = oProjectRepository.getProjectById(sProjectId);
+			Project oProject = oProjectRepository.getProjectById(sProjectId);
 
-		if (oProject == null) {
-			WasdiLog.debugLog("ProjectResource.changeDefaultProject: project does not exist");
-			oResult.setStringValue("No project with the Id " + sProjectId + " exists.");
-			return oResult;
+			if (oProject == null) {
+				WasdiLog.debugLog("ProjectResource.changeDefaultProject: project does not exist");
+				oResult.setStringValue("No project with the Id " + sProjectId + " exists.");
+				return oResult;
+			}
 		}
 
 		UserRepository oUserRepository = new UserRepository();
@@ -324,7 +332,7 @@ public class ProjectResource {
 
 		if (oUserRepository.updateUser(oUser)) {
 			oResult.setBoolValue(true);
-			oResult.setStringValue(oProject.getProjectId());
+			oResult.setStringValue(sProjectId);
 		} else {
 			WasdiLog.debugLog("ProjectResource.changeDefaultProject( " + "changing the default project of the user to " + sProjectId + " failed");
 			oResult.setStringValue("The changing of the default project failed.");
