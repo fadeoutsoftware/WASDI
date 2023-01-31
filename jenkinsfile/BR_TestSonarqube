@@ -53,14 +53,15 @@ pipeline {
         script {
           if ( env.executeSonarqube.toBoolean() ) {
             withCredentials([
+                string(credentialsId: 'SONARQUBE_JDK_HOME', variable: 'SONARQUBE_JDK_HOME'),
                 string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
                 string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
             ]) {
-                sh script: "bash /tmp/a.sh ${SONARQUBE_PROJECT_KEY} ${SONARQUBE_TOKEN} ${SONARQUBE_URL}"
+                sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} sonar:sonar --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
             }
           } else {
-            echo "Nothing to do"
+            echo "Nothing to do."
           }
         }
       }
