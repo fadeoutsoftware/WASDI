@@ -77,6 +77,25 @@ pipeline {
         sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
       }
     }
+
+    stage('ANALYZE THE CODE WITH SONARQUBE') {
+      steps {
+        script {
+          if ( env.executeSonarqube.toBoolean() ) {
+            withCredentials([
+                string(credentialsId: 'SONARQUBE_JDK_HOME', variable: 'SONARQUBE_JDK_HOME'),
+                string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
+                string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
+                string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
+            ]) {
+                sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} sonar:sonar --define revision=${currentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
+            }
+          } else {
+            echo "Nothing to do."
+          }
+        }
+      }
+    }
   }
 
   post {
