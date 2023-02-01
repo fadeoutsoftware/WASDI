@@ -1,6 +1,6 @@
 <div class="projects-view pt-3">
 
-    <br>
+    <div class="spacer"></div>
 
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
@@ -21,15 +21,14 @@
                         on-click-function="m_oController.changeDefaultProject(oValue)">
                     </wapdropdown>
                 </div>
-                <div class="loadIcon" ng-show="m_oController.m_bLoadingProjrcts">
-                    <invader></invader>
-                </div>
+            </div>
+            <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                <invader></invader>
             </div>
         </div>
     </div>
 
-    <br>
-    <div class="spacer"></div>
+    <hr class="divider-line-style1" />
     <div class="spacer"></div>
 
     <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}

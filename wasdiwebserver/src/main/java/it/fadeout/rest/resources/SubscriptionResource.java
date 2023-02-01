@@ -210,14 +210,13 @@ public class SubscriptionResource {
 
 			// Create repo
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get requested subscription
 			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
 			String sOrganizationName = null;
 
-			if (oSubscription.getOrganizationId() != null) {
+			if (oSubscription != null && oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
 

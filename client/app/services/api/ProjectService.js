@@ -12,6 +12,10 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(this.APIURL + '/projects/byuser');
     };
 
+    this.getProjectsListBySubscription = function (sSubscriptionId) {
+        return this.m_oHttp.get(this.APIURL + '/projects/bysubscription?subscription=' + sSubscriptionId);
+    };
+
     this.getProjectById = function (sProjectId) {
         return this.m_oHttp.get(this.APIURL + '/projects/byId?project=' + sProjectId);
     };
