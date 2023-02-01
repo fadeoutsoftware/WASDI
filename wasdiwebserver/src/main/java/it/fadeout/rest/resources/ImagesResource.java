@@ -331,10 +331,8 @@ public class ImagesResource {
 			if(oFileMetaData != null && Utils.isNullOrEmpty(oFileMetaData.getFileName()) == false){
 				
 				String sInputFileName = oFileMetaData.getFileName();
-				sFileName += FilenameUtils.getExtension(sInputFileName);
-			} 		
-			
-			
+				sFileName += "."+ FilenameUtils.getExtension(sInputFileName);
+			} 
 			
 			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, oProcessor.getName(), sFileName, true, true);
 			
@@ -399,7 +397,7 @@ public class ImagesResource {
 		if(oFileMetaData != null && Utils.isNullOrEmpty(oFileMetaData.getFileName()) == false){
 			
 			String sInputFileName = oFileMetaData.getFileName();
-			sAvaibleFileName += FilenameUtils.getExtension(sInputFileName);
+			sAvaibleFileName += "." + FilenameUtils.getExtension(sInputFileName);
 		} 		
 		
 		WasdiLog.debugLog("ImagesResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
