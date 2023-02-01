@@ -1,16 +1,17 @@
 <div class="subscriptions-view pt-3">
 
     <p class="mr-2 text-uppercase">
-        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
     </p>
     <p>
+        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
+        &nbsp;
         TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
             convertMsToTime}}</span>
     </p>
 
     <hr class="divider-line-style1" />
-    <div class="spacer"></div>
 
+    <!--
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <h4>{{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}</h4>
@@ -37,6 +38,45 @@
 
     <hr class="divider-line-style1" />
     <div class="spacer"></div>
+    -->
+
+
+    <div class="container-fluid">
+        <div class="row give-permission-row">
+            <form class="d-flex flex-row" novalidate>
+                <div class="form-group mr-3" style="width: 30%">
+                    <h4 class="text-success">
+                        {{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}
+                    </h4>
+                    
+                    <div ng-show="m_oController.m_aoProjects.length > 0">
+                        <div ng-show="!m_oController.m_bLoadingProjects">
+                            <wapdropdown
+                                list-of-values="m_oController.m_aoProjectsMap"
+                                selected-value="m_oController.m_oProject"
+                                enable-search-filter="true"
+                                dropdown-name="Projects2"
+                                ng-model="m_oController.m_oProject">
+                            </wapdropdown>
+                        </div>
+                    </div>
+                    <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                        <invader></invader>
+                    </div>
+                </div>
+
+                <button
+                        class="btn btn-primary btn-wasdi mb-4 align-self-end"
+                        ng-click="m_oController.changeDefaultProjectWithButton(m_oController.m_oProject)">
+                    <em class="custom-icon fa fa-star fa-lg"
+                            ng-class="button.icon"></em>
+                    <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_CHANGE_DEFAULT"|translate}}</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <hr class="divider-line-style1" />
 
     <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
         ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null, true)">
@@ -58,7 +98,7 @@
 
                 <th></th>
                 <th></th>
-                <th>Actions</th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -86,7 +126,7 @@
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
-                        ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId)">
+                        ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name)">
                         <!--Show Projects-->
                         <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
@@ -102,7 +142,7 @@
                         ng-show="oSubscription.adminRole === false"
                         ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId, false)">
                         <!--Edit Subscription-->
-                        <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 0px"></i>
+                        <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span

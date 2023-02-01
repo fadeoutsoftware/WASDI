@@ -2,20 +2,24 @@ let SubscriptionProjectsController = (function () {
     function SubscriptionProjectsController($scope, oClose, oExtras, oSubscriptionService, oProjectService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
-        this.oExtras = oExtras;
+        this.m_oExtras = oExtras;
         this.m_oTranslate = oTranslate;
+        console.log("SubscriptionProjectsController | oExtras: ",  oExtras);
+        console.log("SubscriptionProjectsController | this.m_oExtras: ",  this.m_oExtras);
+
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oProjectService = oProjectService;
-        this.m_oModalService = oModalService; 
+        this.m_oModalService = oModalService;
 
-        this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
-        console.log("SubscriptionProjectsController | this.m_sSelectedSubscriptionId: ", this.m_sSelectedSubscriptionId);
+        this.m_sSelectedSubscriptionId = this.m_oExtras.subscriptionId;
+        this.m_sSelectedSubscriptionName = this.m_oExtras.subscriptionName;
+        console.log("SubscriptionProjectsController | this.m_sSelectedSubscriptionId: " +  this.m_sSelectedSubscriptionId + " | m_sSelectedSubscriptionName:" + this.m_sSelectedSubscriptionName);
 
 
 
 
-        this.m_aoProjects = oExtras.projects;
+        this.m_aoProjects = this.m_oExtras.projects;
 
         this.m_aoProjectsMap = [];
         this.m_oProject = {};
@@ -35,7 +39,7 @@ let SubscriptionProjectsController = (function () {
 
 
 
-
+    /*
     SubscriptionProjectsController.prototype.changeDefaultProject = function(oProject) {
         console.log("SubscriptionProjectsController.changeDefaultProject | oProject: ", oProject);
 
@@ -59,6 +63,7 @@ let SubscriptionProjectsController = (function () {
             });
         }
     }
+    */
 
     SubscriptionProjectsController.prototype.initializeProjectsInfo = function() {
         var oController = this;
@@ -79,8 +84,8 @@ let SubscriptionProjectsController = (function () {
                     oController.m_oProject = oFirstElement;
 
                     oController.m_aoProjects.forEach((oValue) => {
-                        console.log("SubscriptionProjectsController.initializeProjectsInfo | oValue: ", oValue);
-                        if (oValue.defaultProject === true) {
+                        // console.log("SubscriptionProjectsController.initializeProjectsInfo | oValue: ", oValue);
+                        if (oValue.defaultProject) {
                             oController.m_oProject = oValue;
                         }
                     });
@@ -98,22 +103,24 @@ let SubscriptionProjectsController = (function () {
         );
     }
 
-
     SubscriptionProjectsController.prototype.showProjectEditForm = function(sUserId, sProjectId, sEditMode) {
         console.log("SubscriptionProjectsController.showProjectEditForm | sProjectId: ", sProjectId);
 
         var oController = this;
 
+        console.log("SubscriptionProjectsController.showProjectEditForm | oController.m_sSelectedSubscriptionId: ", oController.m_sSelectedSubscriptionId + " | oController.m_sSelectedSubscriptionName: " + oController.m_sSelectedSubscriptionName);
 
         this.m_oProjectService.getProjectById(sProjectId).then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data.data)) {
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
                         controller: "ProjectEditorController",
                         inputs: {
                             extras: {
                                 project: data.data,
+                                subscriptionId: oController.m_sSelectedSubscriptionId,
+                                subscriptionName: oController.m_sSelectedSubscriptionName,
                                 editMode: sEditMode
                             }
                         }

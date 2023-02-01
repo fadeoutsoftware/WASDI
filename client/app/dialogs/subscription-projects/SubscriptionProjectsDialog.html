@@ -9,11 +9,12 @@
                 <div class="row-v4 p-3">
 
                     <legend>
-                        {{"DIALOG_VIEW_SUBSCRIPTION_PROJECTS"|translate}}
+                        {{"DIALOG_VIEW_SUBSCRIPTION_PROJECTS"|translate}}: <span class="text-success">{{m_oController.m_sSelectedSubscriptionName}}</span>
                     </legend>
 
                     <div style="width: 100%">
 
+                        <!--
                         <div class="spacer"></div>
 
                         <div class="row">
@@ -43,12 +44,15 @@
                         </div>
 
                         <div class="spacer"></div>
+                        -->
 
                         <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}
                             ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, null, true)">
                             <!--Add Project-->
                             <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_ADD"|translate}}</span>
                         </button>
+
+                        <hr class="divider-line-style1" />
 
                         <!-- Projects Table -->
                         <table class="table table-hover projects-list">
@@ -59,7 +63,7 @@
                                     <th>Default</th>
 
                                     <th></th>
-                                    <th>Actions</th>
+                                    <th></th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -67,7 +71,7 @@
                                 <tr ng-repeat="oProject in m_oController.m_aoProjects track by $index">
                                     <td>{{oProject.name}}</td>
                                     <td>{{oProject.subscriptionName}}</td>
-                                    <td>{{oProject.defaultProject ? "Yes" : "No"}}</td>
+                                    <td><span class="text-success" ng-show="oProject.defaultProject">Yes</span><span ng-show="!oProject.defaultProject">No</span></td>
 
                                     <td class="over-icon">
                                         <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}

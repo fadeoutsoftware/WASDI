@@ -52,6 +52,8 @@ SubscriptionEditorController = (function () {
             this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
         }
 
+        let oController = this;
+
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
             console.log(" SubscriptionEditorController.saveSubscription | data.data: ", data.data);
             if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
@@ -61,14 +63,17 @@ SubscriptionEditorController = (function () {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
             }
 
+            oController.m_oScope.close();
+
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
+
+            oController.m_oScope.close();
         });
 
         this.m_oEditSubscription = {};
         this.m_oType = {};
         this.m_oOrganization = {};
-        this.m_oScope.close();
     }
 
     SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
