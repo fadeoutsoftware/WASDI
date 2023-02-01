@@ -814,7 +814,7 @@ var EditUserController = (function () {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoProjects = data.data;
 
-                    const oFirstElement = { name: "No Default Project", projectId: null };
+                    const oFirstElement = { name: "No Active Project", projectId: null };
                     let aoProjects = [oFirstElement].concat(data.data);
 
                     oController.m_aoProjectsMap = aoProjects.map(
@@ -826,7 +826,7 @@ var EditUserController = (function () {
 
                     oController.m_aoProjects.forEach((oValue) => {
                         console.log("EditUserController.initializeProjectsInfo | oValue: ", oValue);
-                        if (oValue.defaultProject === true) {
+                        if (oValue.activeProject) {
                             oController.m_oProject = oValue;
                         }
                     });
