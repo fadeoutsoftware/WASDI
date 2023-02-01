@@ -4,7 +4,7 @@
 
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}</h4>
+            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}</h4>
         </div>
 
         <div class="spacer"></div>
@@ -18,7 +18,7 @@
                         enable-search-filter="true"
                         dropdown-name="Projects"
                         ng-model="m_oController.m_oProject"
-                        on-click-function="m_oController.changeDefaultProject(oValue)">
+                        on-click-function="m_oController.changeActiveProject(oValue)">
                     </wapdropdown>
                 </div>
             </div>
@@ -43,7 +43,7 @@
             <tr>
                 <th>Project Name</th>
                 <th>Subscription</th>
-                <th>Default</th>
+                <th>Active</th>
 
                 <th></th>
                 <th></th>
@@ -54,7 +54,7 @@
             <tr ng-repeat="oProject in m_oController.m_aoProjects track by $index">
                 <td>{{oProject.name}}</td>
                 <td>{{oProject.subscriptionName}}</td>
-                <td>{{oProject.defaultProject ? "Yes" : "No"}}</td>
+                <td>{{oProject.activeProject ? "Yes" : "No"}}</td>
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}

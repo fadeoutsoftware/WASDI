@@ -14,7 +14,7 @@
     <!--
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}</h4>
+            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}</h4>
         </div>
 
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
@@ -26,7 +26,7 @@
                         enable-search-filter="true"
                         dropdown-name="Projects"
                         ng-model="m_oController.m_oProject"
-                        on-click-function="m_oController.changeDefaultProject(oValue)">
+                        on-click-function="m_oController.changeActiveProject(oValue)">
                     </wapdropdown>
                 </div>
             </div>
@@ -46,7 +46,7 @@
             <form class="d-flex flex-row" novalidate>
                 <div class="form-group mr-3" style="width: 30%">
                     <h4 class="text-success">
-                        {{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}
+                        {{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}
                     </h4>
                     
                     <div ng-show="m_oController.m_aoProjects.length > 0">
@@ -67,10 +67,10 @@
 
                 <button
                         class="btn btn-primary btn-wasdi mb-4 align-self-end"
-                        ng-click="m_oController.changeDefaultProjectWithButton(m_oController.m_oProject)">
+                        ng-click="m_oController.changeActiveProjectWithButton(m_oController.m_oProject)">
                     <em class="custom-icon fa fa-star fa-lg"
                             ng-class="button.icon"></em>
-                    <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_CHANGE_DEFAULT"|translate}}</span>
+                    <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_CHANGE_ACTIVE"|translate}}</span>
                 </button>
             </form>
         </div>

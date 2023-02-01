@@ -39,9 +39,9 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.put(this.APIURL + '/projects/update', oProject);
     };
 
-    this.changeDefaultProject = function (sProjectId) {
-        console.log("ProjectService.changeDefaultProject | sProjectId: ", sProjectId);
-        return this.m_oHttp.put(this.APIURL + '/projects/default' + (sProjectId == null ? "" : "?project=" + sProjectId));
+    this.changeActiveProject = function (sProjectId) {
+        console.log("ProjectService.changeActiveProject | sProjectId: ", sProjectId);
+        return this.m_oHttp.put(this.APIURL + '/projects/active' + (sProjectId == null ? "" : "?project=" + sProjectId));
     };
 
     this.deleteProject = function (sProjectId) {

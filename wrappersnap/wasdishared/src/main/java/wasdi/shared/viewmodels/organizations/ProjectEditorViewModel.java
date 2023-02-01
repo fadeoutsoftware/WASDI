@@ -17,6 +17,6 @@ public class ProjectEditorViewModel {
 	private String subscriptionId;
 	private String name;
 	private String description;
-	private boolean defaultProject;
+	private boolean activeProject;
 
 }
