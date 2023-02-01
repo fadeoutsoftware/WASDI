@@ -17,10 +17,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.business.Organization;
 import wasdi.shared.business.Project;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
+import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -37,8 +41,7 @@ public class ProjectResource {
 	/**
 	 * Get the list of projects associated to a user.
 	 * @param sSessionId User Session Id
-	 * @return a View Model with the Project Name and 
-	 * 	a flag to know if the user is admin or not of the project
+	 * @return a list of Project View Models
 	 */
 	@GET
 	@Path("/byuser")
@@ -56,8 +59,6 @@ public class ProjectResource {
 			WasdiLog.debugLog("ProjectResource.getListByUser: invalid session: " + sSessionId);
 			return aoProjectList;
 		}
-
-		System.out.println(oUser.getUserId() + "'s active project is :" + oUser.getActiveProjectId());
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
@@ -85,6 +86,69 @@ public class ProjectResource {
 			for (Project oProject : aoProjects) {
 				// Create View Model
 				ProjectListViewModel oProjectViewModel = convert(oProject, aoSubscriptionNames.get(oProject.getSubscriptionId()), oUser.getActiveProjectId());
+
+				aoProjectList.add(oProjectViewModel);
+			}
+		} catch (Exception oEx) {
+			oEx.toString();
+		}
+
+		return aoProjectList;
+	}
+
+	/**
+	 * Get the list of projects associated to a subscription.
+	 * @param sSessionId User Session Id
+	 * @param sSubscriptionId the subscription Id
+	 * @return a list of Project View Models
+	 */
+	@GET
+	@Path("/bysubscription")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public List<ProjectListViewModel> getListBySubscription(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("subscription") String sSubscriptionId) {
+		WasdiLog.debugLog("ProjectResource.getListBySubscription(Subscription: " + sSubscriptionId + ")");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		List<ProjectListViewModel> aoProjectList = new ArrayList<>();
+
+		// Domain Check
+		if (oUser == null) {
+			WasdiLog.debugLog("ProjectResource.getListBySubscription: invalid session: " + sSessionId);
+			return aoProjectList;
+		}
+
+		try {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
+				return aoProjectList;
+			}
+
+			WasdiLog.debugLog("ProjectResource.getListBySubscription: projects for " + oUser.getUserId());
+
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+
+			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+
+			String sOrganizationName = null;
+
+			if (oSubscription != null && oSubscription.getOrganizationId() != null) {
+				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
+
+				sOrganizationName = oOrganization.getName();
+			}
+
+			// Create repo
+			ProjectRepository oProjectRepository = new ProjectRepository();
+
+			List<Project> aoProjects = oProjectRepository.getProjectsBySubscription(sSubscriptionId);
+
+			// For each
+			for (Project oProject : aoProjects) {
+				// Create View Model
+				ProjectListViewModel oProjectViewModel = convert(oProject, sOrganizationName, oUser.getActiveProjectId());
 
 				aoProjectList.add(oProjectViewModel);
 			}

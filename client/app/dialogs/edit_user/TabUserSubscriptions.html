@@ -8,7 +8,35 @@
             convertMsToTime}}</span>
     </p>
 
-    <br>
+    <hr class="divider-line-style1" />
+    <div class="spacer"></div>
+
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT"|translate}}</h4>
+        </div>
+
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div ng-show="m_oController.m_aoProjects.length > 0">
+                <div ng-show="!m_oController.m_bLoadingProjects">
+                    <wapdropdown
+                        list-of-values="m_oController.m_aoProjectsMap"
+                        selected-value="m_oController.m_oProject"
+                        enable-search-filter="true"
+                        dropdown-name="Projects"
+                        ng-model="m_oController.m_oProject"
+                        on-click-function="m_oController.changeDefaultProject(oValue)">
+                    </wapdropdown>
+                </div>
+            </div>
+            <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                <invader></invader>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider-line-style1" />
+    <div class="spacer"></div>
 
     <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
         ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null, true)">
@@ -28,6 +56,7 @@
                 <th>Organization</th>
                 <th>Reason</th>
 
+                <th></th>
                 <th></th>
                 <th>Actions</th>
                 <th></th>
@@ -50,6 +79,19 @@
                         <!--
                         <span class="ng-binding"
                             >{{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}</span
+                        >
+                        -->
+                    </button>
+                </td>
+
+                <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
+                        ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId)">
+                        <!--Show Projects-->
+                        <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}</span
                         >
                         -->
                     </button>

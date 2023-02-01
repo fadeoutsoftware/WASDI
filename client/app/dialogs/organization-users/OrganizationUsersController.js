@@ -1,5 +1,5 @@
-let OrgUsersEditController = (function () {
-    function OrgUsersEditController($scope, oClose, oExtras, oOrganizationService, oModalService, oTranslate) {
+let OrganizationUsersController = (function () {
+    function OrganizationUsersController($scope, oClose, oExtras, oOrganizationService, oModalService, oTranslate) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.oExtras = oExtras;
@@ -19,10 +19,10 @@ let OrgUsersEditController = (function () {
         }
     }
 
-    OrgUsersEditController.prototype.shareOrganization = function (sUserId) {
+    OrganizationUsersController.prototype.shareOrganization = function (sUserId) {
         let sOrganizationId = this.m_sSelectedOrganizationId;
-        console.log("OrgUsersEditController.shareOrganization | sOrganizationId: ", sOrganizationId);
-        console.log("OrgUsersEditController.shareOrganization | sUserId: ", sUserId);
+        console.log("OrganizationUsersController.shareOrganization | sOrganizationId: ", sOrganizationId);
+        console.log("OrganizationUsersController.shareOrganization | sUserId: ", sUserId);
 
         let oController = this;
         if (utilsIsObjectNullOrUndefined(sUserId) === true) {
@@ -40,7 +40,7 @@ let OrgUsersEditController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
 
-                    console.log("OrgUsersEditController.shareOrganization | data.data: ", data.data);
+                    console.log("OrganizationUsersController.shareOrganization | data.data: ", data.data);
 
                     if (data.data.boolValue) {
                         console.log(data.data)
@@ -65,7 +65,7 @@ let OrgUsersEditController = (function () {
         )
     }
 
-    OrgUsersEditController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
+    OrganizationUsersController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
         let oController = this;
         
         let sConfirmMsg = `Confirm unsharing with ${sUserId}`
@@ -92,7 +92,7 @@ let OrgUsersEditController = (function () {
         utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
     }
 
-    OrgUsersEditController.prototype.showUsersByOrganization = function (sOrganizationId) {
+    OrganizationUsersController.prototype.showUsersByOrganization = function (sOrganizationId) {
         var oController = this;
 
         this.m_oOrganizationService.getUsersBySharedOrganization(sOrganizationId).then(
@@ -112,7 +112,7 @@ let OrgUsersEditController = (function () {
         );
     }
 
-    OrgUsersEditController.$inject = [
+    OrganizationUsersController.$inject = [
         "$scope",
         "close",
         "extras",
@@ -120,6 +120,6 @@ let OrgUsersEditController = (function () {
         "ModalService",
         '$translate'
     ];
-    return OrgUsersEditController;
+    return OrganizationUsersController;
 })();
-window.OrgUsersEditController = OrgUsersEditController; 
+window.OrganizationUsersController = OrganizationUsersController; 
