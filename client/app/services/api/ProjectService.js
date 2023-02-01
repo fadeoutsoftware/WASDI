@@ -17,7 +17,7 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.getProjectById = function (sProjectId) {
-        return this.m_oHttp.get(this.APIURL + '/projects/byId?project=' + (sProjectId == null ? "" : "?project=" + sProjectId));
+        return this.m_oHttp.get(this.APIURL + '/projects/byId' + (sProjectId == null ? "" : "?project=" + sProjectId));
     };
 
     this.saveProject = function (oProject) {
