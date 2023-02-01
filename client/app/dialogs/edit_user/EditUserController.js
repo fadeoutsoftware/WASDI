@@ -757,14 +757,14 @@ var EditUserController = (function () {
 
 
     /*
-    EditUserController.prototype.changeDefaultProject = function(oProject) {
-        console.log("EditUserController.changeDefaultProject | oProject: ", oProject);
+    EditUserController.prototype.changeActiveProject = function(oProject) {
+        console.log("EditUserController.changeActiveProject | oProject: ", oProject);
 
         var oController = this;
 
         if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
-                console.log("EditUserController.changeDefaultProject | data.data: ", data.data);
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
+                console.log("EditUserController.changeActiveProject | data.data: ", data.data);
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
                     utilsVexCloseDialogAfter(2000, oDialog);
@@ -782,14 +782,14 @@ var EditUserController = (function () {
     }
     */
 
-    EditUserController.prototype.changeDefaultProjectWithButton = function(oProject) {
-        console.log("EditUserController.changeDefaultProjectWithButton | oProject: ", oProject);
+    EditUserController.prototype.changeActiveProjectWithButton = function(oProject) {
+        console.log("EditUserController.changeActiveProjectWithButton | oProject: ", oProject);
 
         var oController = this;
 
         if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
-                console.log("EditUserController.changeDefaultProjectWithButton | data.data: ", data.data);
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
+                console.log("EditUserController.changeActiveProjectWithButton | data.data: ", data.data);
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
                     utilsVexCloseDialogAfter(2000, oDialog);
