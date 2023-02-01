@@ -40,14 +40,14 @@ let SubscriptionProjectsController = (function () {
 
 
     /*
-    SubscriptionProjectsController.prototype.changeDefaultProject = function(oProject) {
-        console.log("SubscriptionProjectsController.changeDefaultProject | oProject: ", oProject);
+    SubscriptionProjectsController.prototype.changeActiveProject = function(oProject) {
+        console.log("SubscriptionProjectsController.changeActiveProject | oProject: ", oProject);
 
         var oController = this;
 
         if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
-                console.log("SubscriptionProjectsController.changeDefaultProject | data.data: ", data.data);
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
+                console.log("SubscriptionProjectsController.changeActiveProject | data.data: ", data.data);
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
                     utilsVexCloseDialogAfter(2000, oDialog);
@@ -73,7 +73,7 @@ let SubscriptionProjectsController = (function () {
                 if (!utilsIsObjectNullOrUndefined(data.data)) {
                     oController.m_aoProjects = data.data;
 
-                    const oFirstElement = { name: "No Default Project", projectId: null };
+                    const oFirstElement = { name: "No Active Project", projectId: null };
                     let aoProjects = [oFirstElement].concat(data.data);
 
                     oController.m_aoProjectsMap = aoProjects.map(
@@ -85,7 +85,7 @@ let SubscriptionProjectsController = (function () {
 
                     oController.m_aoProjects.forEach((oValue) => {
                         // console.log("SubscriptionProjectsController.initializeProjectsInfo | oValue: ", oValue);
-                        if (oValue.defaultProject) {
+                        if (oValue.activeProject) {
                             oController.m_oProject = oValue;
                         }
                     });

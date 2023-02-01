@@ -35,6 +35,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
+import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -283,6 +284,14 @@ public class SubscriptionResource {
 		oSubscription.setSubscriptionId(Utils.getRandomName());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
+			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
+			oProjectEditorViewModel.setName(oSubscription.getName());
+			oProjectEditorViewModel.setDescription("automatically created project for the " + oSubscription.getName() + "subscription");
+			oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
+			oProjectEditorViewModel.setActiveProject(oUser.getActiveProjectId() == null);
+
+			new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
+
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oSubscription.getSubscriptionId());
 		} else {WasdiLog.debugLog("SubscriptionResource.createSubscription( " + oSubscriptionViewModel.getName() + " ): insertion failed");
