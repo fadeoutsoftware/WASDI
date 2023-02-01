@@ -863,7 +863,7 @@
 	"DIALOG_ADD_PROJECT": "Add Project",
 	"DIALOG_EDIT_PROJECT": "Edit Project",
 	"DIALOG_VIEW_PROJECT": "View Project",
-	"DIALOG_VIEW_SUBSCRIPTION_PROJECTS": "View Subscription's Projects",
+	"DIALOG_VIEW_SUBSCRIPTION_PROJECTS": "Projects of Subscription",
 	"DIALOG_SHARE_PROJECT": "Share Project",
 
 	"DIALOG_EDIT_PROJECT_NAME": "Name",
@@ -878,6 +878,7 @@
 	"DIALOG_EDIT_PROJECT_CANCEL": "Cancel",
 	"DIALOG_EDIT_PROJECT_SAVE": "Save",
 	"DIALOG_EDIT_PROJECT_SEARCH": "Search",
+	"DIALOG_EDIT_PROJECT_CHANGE_DEFAULT": "Change Default",
 
 	"DIALOG_EDIT_PROJECT_SELECT_DEFAULT_PROJECT": "Select the Default Project"
 }

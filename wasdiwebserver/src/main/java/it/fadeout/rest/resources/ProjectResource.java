@@ -17,12 +17,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.business.Organization;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -131,13 +129,10 @@ public class ProjectResource {
 
 			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
-			String sOrganizationName = null;
+			String sSubscriptionName = null;
 
 			if (oSubscription != null && oSubscription.getOrganizationId() != null) {
-				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
-
-				sOrganizationName = oOrganization.getName();
+				sSubscriptionName = oSubscription.getName();
 			}
 
 			// Create repo
@@ -148,7 +143,7 @@ public class ProjectResource {
 			// For each
 			for (Project oProject : aoProjects) {
 				// Create View Model
-				ProjectListViewModel oProjectViewModel = convert(oProject, sOrganizationName, oUser.getActiveProjectId());
+				ProjectListViewModel oProjectViewModel = convert(oProject, sSubscriptionName, oUser.getActiveProjectId());
 
 				aoProjectList.add(oProjectViewModel);
 			}

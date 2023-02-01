@@ -267,7 +267,7 @@ var EditUserController = (function () {
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
 
-        if (utilsIsStrNullOrEmpty(sOrganizationId) === true) {
+        if (utilsIsStrNullOrEmpty(sOrganizationId)) {
             return false;
         }
 
@@ -334,7 +334,7 @@ var EditUserController = (function () {
     /*
     EditUserController.prototype.shareOrganization = function(sOrganizationId, sUserId) {
 
-        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sOrganizationId) === true)) {
+        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sOrganizationId))) {
             return false;
         }
 
@@ -366,7 +366,7 @@ var EditUserController = (function () {
         console.log("EditUserController.unshareOrganization | sOrganizationId: ", sOrganizationId);
         console.log("EditUserController.unshareOrganization | sUserId: ", sUserId);
 
-        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sOrganizationId) === true)) {
+        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sOrganizationId))) {
             return false;
         }
 
@@ -608,7 +608,7 @@ var EditUserController = (function () {
 //        this.m_aoMatchingUsersList = [];
 //        this.m_sUserPartialName = "";
 
-        if (utilsIsStrNullOrEmpty(sSubscriptionId) === true) {
+        if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
         }
 
@@ -674,7 +674,7 @@ var EditUserController = (function () {
 /*
     EditUserController.prototype.shareSubscription = function(sSubscriptionId, sUserId) {
 
-        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sSubscriptionId) === true)) {
+        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sSubscriptionId))) {
             return false;
         }
 
@@ -706,7 +706,7 @@ var EditUserController = (function () {
         console.log("EditUserController.unshareSubscription | sSubscriptionId: ", sSubscriptionId);
         console.log("EditUserController.unshareSubscription | sUserId: ", sUserId);
 
-        if( (utilsIsObjectNullOrUndefined(sUserId) === true) || (utilsIsStrNullOrEmpty(sSubscriptionId) === true)) {
+        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sSubscriptionId))) {
             return false;
         }
 
@@ -756,7 +756,7 @@ var EditUserController = (function () {
 
 
 
-
+    /*
     EditUserController.prototype.changeDefaultProject = function(oProject) {
         console.log("EditUserController.changeDefaultProject | oProject: ", oProject);
 
@@ -765,6 +765,31 @@ var EditUserController = (function () {
         if (!utilsIsObjectNullOrUndefined(oProject)) {
             this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
                 console.log("EditUserController.changeDefaultProject | data.data: ", data.data);
+                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
+                    utilsVexCloseDialogAfter(2000, oDialog);
+
+                    oController.initializeProjectsInfo();
+                    this.m_oProject = oProject;
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+                }
+    
+            }, function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+            });
+        }
+    }
+    */
+
+    EditUserController.prototype.changeDefaultProjectWithButton = function(oProject) {
+        console.log("EditUserController.changeDefaultProjectWithButton | oProject: ", oProject);
+
+        var oController = this;
+
+        if (!utilsIsObjectNullOrUndefined(oProject)) {
+            this.m_oProjectService.changeDefaultProject(oProject.projectId).then(function (data) {
+                console.log("EditUserController.changeDefaultProjectWithButton | data.data: ", data.data);
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
                     utilsVexCloseDialogAfter(2000, oDialog);
@@ -824,14 +849,13 @@ var EditUserController = (function () {
 
 
 
-    EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId) {
-        console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: ", sSubscriptionId);
+    EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
+        console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: " + sSubscriptionId + " | sSubscriptionName:" + sSubscriptionName);
 
         this.m_sSelectedSubscriptionId = sSubscriptionId;
-        console.log("EditUserController.showProjectsBySubscription | this.m_sSelectedSubscriptionId: ", this.m_sSelectedSubscriptionId);
         this.m_oEditSubscription = {};
-        this.m_oSharingSubscription = {subscriptionId: sSubscriptionId}
-        this.m_aoMatchingUsersList = [];
+        // this.m_oSharingSubscription = {subscriptionId: sSubscriptionId}
+        // this.m_aoMatchingUsersList = [];
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
@@ -843,13 +867,15 @@ var EditUserController = (function () {
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoUsersList = data.data;
+                    console.log("EditUserController.showProjectsBySubscription | oController.sSubscriptionId: " + oController.sSubscriptionId + " | oController.sSubscriptionName:" + oController.sSubscriptionName);
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
                         controller: 'SubscriptionProjectsController',
                         inputs: {
                             extras: {
                                 projects: data.data,
-                                subscriptionId: oController.m_sSelectedSubscriptionId
+                                subscriptionId: sSubscriptionId,
+                                subscriptionName: sSubscriptionName
                             }
                         }
                     }).then(function (modal) {
@@ -858,6 +884,7 @@ var EditUserController = (function () {
                         })
                         modal.close.then(function () {
                             // oController.initializeSubscriptionsInfo();
+                            oController.initializeProjectsInfo();
                         })
 
                     })
