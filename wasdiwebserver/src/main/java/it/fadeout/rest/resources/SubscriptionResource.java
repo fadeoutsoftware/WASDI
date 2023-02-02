@@ -4,7 +4,7 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_READ;
 
 import java.util.ArrayList;
-//import java.util.Arrays;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -225,20 +225,6 @@ public class SubscriptionResource {
 			}
 
 			oVM = convert(oSubscription, sOrganizationName);
-
-//			// Get Sharings
-//			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-//					.getSubscriptionSharingsBySubscriptionId(oSubscription.getSubscriptionId());
-//			// Add Sharings to View Model
-//			if (aoSharings != null) {
-//				if (oVM.getSharedUsers() == null) {
-//					oVM.setSharedUsers(new ArrayList<String>());
-//				}
-//
-//				for (UserResourcePermission oSharing : aoSharings) {
-//					oVM.getSharedUsers().add(oSharing.getUserId());
-//				}
-//			}
 		} catch (Exception oEx) {
 			WasdiLog.debugLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
 		}
@@ -422,34 +408,21 @@ public class SubscriptionResource {
 		return oResult;
 	}
 
-
-	/**
-	 * Get the list of subscription types.
-	 * @param sSessionId User Session Id
-	 * @return a list of Subscription types
-	 */
-//	@GET
-//	@Path("/types")
-//	@Produces({ "application/xml", "application/json", "text/xml" })
-//	public List<SubscriptionType> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
-//		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
-//
-//		return Arrays.asList(SubscriptionType.values());
-//	}
-
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<SubscriptionTypeViewModel> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
 
-		List<SubscriptionTypeViewModel> aoTypes = new ArrayList<SubscriptionTypeViewModel>();
+		return convert(Arrays.asList(SubscriptionType.values()));
+	}
 
-		aoTypes.add(new SubscriptionTypeViewModel("OneDayStandard", "One Day Standard", "One Day Standard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneWeekStandard", "One Week Standard", "One Week Standard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneMonthStandard", "One Month Standard", "One Month Standard"));
+	private static List<SubscriptionTypeViewModel> convert(List<SubscriptionType> aoSubscriptionTypes) {
+		return aoSubscriptionTypes.stream().map(SubscriptionResource::convert).collect(Collectors.toList());
+	}
 
-		return aoTypes;
+	private static SubscriptionTypeViewModel convert(SubscriptionType oSubscriptionType) {
+		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
 	}
 
 	/**
