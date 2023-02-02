@@ -1,4 +1,4 @@
-package it.fadeout.business;
+package wasdi.shared.business;
 
 /**
  * Enum with the name of the different allowed Image Collections in WASDI

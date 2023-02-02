@@ -21,12 +21,12 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
-import it.fadeout.business.ImagesCollections;
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -63,29 +63,21 @@ public class ImagesResource {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			if (Utils.isNullOrEmpty(sCollection)) {
+			if (!ImageResourceUtils.isValidCollection(sCollection)) {
 				WasdiLog.debugLog("ImagesResource.uploadImage: invalid collection");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}
 			
-			boolean bValidCollection = false;
-			for (ImagesCollections oCollection : ImagesCollections.values()) {
-				if (oCollection.getFolder().equals(sCollection)) {
-					bValidCollection = true;
-					break;
-				}
-			}
-			
-			if (!bValidCollection) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: invalid collection");
-				return Response.status(Status.BAD_REQUEST).build();			
-			}
-
 			if (Utils.isNullOrEmpty(sImageName)) {
 				WasdiLog.debugLog("ImagesResource.uploadImage: invalid image name");
 				return Response.status(Status.BAD_REQUEST).build();			
-			}
+			}			
 			
+			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+				WasdiLog.debugLog("ImagesResource.uploadImage: invalid user or session");
+				return Response.status(Status.UNAUTHORIZED).build();				
+			}
+						
 			if (Utils.isNullOrEmpty(sFolder)) {
 				sFolder = "";			
 			}
@@ -216,14 +208,24 @@ public class ImagesResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
+				WasdiLog.debugLog("ImagesResource.getImage: no valid user or session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			if (Utils.isNullOrEmpty(sCollection)) {
-				WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
-				return Response.status(Status.BAD_REQUEST).build();				
+			if (!ImageResourceUtils.isValidCollection(sCollection)) {
+				WasdiLog.debugLog("ImagesResource.getImage: invalid collection");
+				return Response.status(Status.BAD_REQUEST).build();			
 			}
+			
+			if(Utils.isNullOrEmpty(sImageName)) {
+				WasdiLog.debugLog("ImagesResource.getImage: Image name is null" );
+				return Response.status(Status.BAD_REQUEST).build();
+			}			
+			
+			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+				WasdiLog.debugLog("ImagesResource.getImage: invalid user or session");
+				return Response.status(Status.UNAUTHORIZED).build();				
+			}			
 			
 			if (sFolder==null) sFolder="";
 			
@@ -282,10 +284,15 @@ public class ImagesResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		if (Utils.isNullOrEmpty(sCollection)) {
-			WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
-			return Response.status(Status.BAD_REQUEST).build();				
+		if (!ImageResourceUtils.isValidCollection(sCollection)) {
+			WasdiLog.debugLog("ImagesResource.deleteImage: invalid collection");
+			return Response.status(Status.BAD_REQUEST).build();			
 		}
+		
+		if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+			WasdiLog.debugLog("ImagesResource.deleteImage: invalid user or session");
+			return Response.status(Status.UNAUTHORIZED).build();				
+		}		
 		
 		if (sFolder==null) sFolder="";		
 

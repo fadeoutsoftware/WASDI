@@ -33,7 +33,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.google.common.io.Files;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Comment;
 import wasdi.shared.business.Processor;
@@ -47,6 +46,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
