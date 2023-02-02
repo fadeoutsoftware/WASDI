@@ -137,10 +137,15 @@ public class ImageResourceUtils {
 	 * Get the path of a subofolder of images in WASDI
 	 * @return
 	 */
-	public static String getImagesSubPath(String sCollection) {
+	public static String getImagesSubPath(String sCollection, String sFolder) {
 		String sPath = getImagesBasePath();
 		sPath += sCollection;
 		if (!sPath.endsWith("/")) sPath += "/";
+		
+		if (Utils.isNullOrEmpty(sFolder)==false) {
+			sPath += sFolder;
+			if (!sPath.endsWith("/")) sPath += "/";
+		}
 		
 		ImageResourceUtils.createDirectory(sPath);
 		
@@ -256,7 +261,7 @@ public class ImageResourceUtils {
 		
 		ArrayList<String> asImages = new ArrayList<String>();
 		
-		String sAbsoluteImagesPath = ImageResourceUtils.getImagesSubPath(oProcessor.getName());
+		String sAbsoluteImagesPath = ImageResourceUtils.getImagesSubPath(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName());
 						
 		File oFolder = new File(sAbsoluteImagesPath);
 		

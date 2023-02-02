@@ -22,6 +22,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import it.fadeout.business.ImageResourceUtils;
+import it.fadeout.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessorRepository;
@@ -49,7 +50,7 @@ public class ImagesResource {
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadImage(@FormDataParam("image") InputStream oInputFileStream, @FormDataParam("image") FormDataContentDisposition oFileMetaData,
-										@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("name") String sImageName,
+										@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName,
 										@QueryParam("resize") Boolean obResize, @QueryParam("thumbnail") Boolean obThumbnail) {
 		
 		try {
@@ -66,19 +67,34 @@ public class ImagesResource {
 				WasdiLog.debugLog("ImagesResource.uploadImage: invalid collection");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}
+			
+			boolean bValidCollection = false;
+			for (ImagesCollections oCollection : ImagesCollections.values()) {
+				if (oCollection.getFolder().equals(sCollection)) {
+					bValidCollection = true;
+					break;
+				}
+			}
+			
+			if (!bValidCollection) {
+				WasdiLog.debugLog("ImagesResource.uploadImage: invalid collection");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
 
 			if (Utils.isNullOrEmpty(sImageName)) {
 				WasdiLog.debugLog("ImagesResource.uploadImage: invalid image name");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}
 			
+			if (Utils.isNullOrEmpty(sFolder)) {
+				sFolder = "";			
+			}
+			
 			//sanity check: is sImageName safe? It must be a file name, not a path
-			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")) {
+			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\") || sFolder.contains("/") || sFolder.contains("\\") ) {
 				WasdiLog.debugLog("ImagesResource.uploadImage: Image or Collection name looks like a path" );
 				return Response.status(Status.BAD_REQUEST).build();
 			}
-
-
 			
 			String sExt;
 			String sFileName;
@@ -103,7 +119,7 @@ public class ImagesResource {
 			}
 
 			// Take path
-			String sPath = ImageResourceUtils.getImagesSubPath(sCollection);
+			String sPath = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
 			sPath += sImageName;
 			
 			WasdiLog.debugLog("ImagesResource.uploadImage: sPath: " + sPath);
@@ -179,14 +195,14 @@ public class ImagesResource {
 	
 	
 	/**
-	 * Gets the logo of a processor as a Byte Stream
+	 * Gets an image as a Byte Stream
 	 * @param sSessionId User Session Id
 	 * @param sCollection Processor Id
 	 * @return Logo byte stream
 	 */
 	@GET
 	@Path("/get")
-	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("name") String sImageName) {
+	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		try {
 			
@@ -204,13 +220,20 @@ public class ImagesResource {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			//sanity check: is sImageName safe? It must be a file name, not a path
-			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")) {
+			if (Utils.isNullOrEmpty(sCollection)) {
+				WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			if (sFolder==null) sFolder="";
+			
+			//sanity check: are the inputs safe? It must be a file name, not a path
+			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
 				WasdiLog.debugLog("ImagesResource.getImage: Image or Collection name looks like a path" );
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 					
-			String sPathLogoFolder = ImageResourceUtils.getImagesSubPath(sCollection);
+			String sPathLogoFolder = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
 			String sAbsolutePath = sPathLogoFolder + sImageName;
 			
 			WasdiLog.debugLog("ImagesResource.getImage: sAbsolutePath " + sAbsolutePath);
@@ -243,7 +266,7 @@ public class ImagesResource {
 	 */
 	@DELETE
 	@Path("/delete")
-	public Response deleteImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("name") String sImageName) {
+	public Response deleteImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("folder") String sFolder, @QueryParam("name") String sImageName) {
 		
 		WasdiLog.debugLog("ImagesResource.deleteImage( Collection: " + sCollection + ", Image Name: " + sImageName + " )");
 		
@@ -258,14 +281,21 @@ public class ImagesResource {
 			WasdiLog.debugLog("ImagesResource.deleteImage: Image name is null" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		if (Utils.isNullOrEmpty(sCollection)) {
+			WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
+			return Response.status(Status.BAD_REQUEST).build();				
+		}
+		
+		if (sFolder==null) sFolder="";		
 
 		//sanity check: is sImageName safe? It must be a file name, not a path
-		if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")) {
+		if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
 			WasdiLog.debugLog("ImagesResource.deleteImage: Image or Collection name looks like a path" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		String sPath = ImageResourceUtils.getImagesSubPath(sCollection);
+		String sPath = ImageResourceUtils.getImagesSubPath(sCollection, sFolder);
 		String sFilePath = sPath+sImageName;
 		
 		File oFile = new File(sFilePath);
@@ -340,7 +370,7 @@ public class ImagesResource {
 				sFileName += "."+ FilenameUtils.getExtension(sInputFileName);
 			} 
 			
-			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, oProcessor.getName(), sFileName, true, true);
+			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sFileName, true, true);
 			
 			if (oResponse.getStatus()==200) {
 				oProcessor.setLogo(ImageResourceUtils.getImageLink(oProcessor.getName(), sFileName));
@@ -396,7 +426,7 @@ public class ImagesResource {
 		}
 				
 		// Take path
-		String sAbsolutePathFolder = ImageResourceUtils.getImagesSubPath(oProcessor.getName());
+		String sAbsolutePathFolder = ImageResourceUtils.getImagesSubPath(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName());
 		String sAvaibleFileName = ImageResourceUtils.getAvaibleProcessorImageFileName(sAbsolutePathFolder);
 		
 		//get filename and extension 
@@ -414,7 +444,7 @@ public class ImagesResource {
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, oProcessor.getName(), sAvaibleFileName, null, true);
+		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sAvaibleFileName, null, true);
 		
 		if (oResponse.getStatus() == 200) {
 			String sImageLink = ImageResourceUtils.getImageLink(oProcessor.getName(), sAvaibleFileName);
