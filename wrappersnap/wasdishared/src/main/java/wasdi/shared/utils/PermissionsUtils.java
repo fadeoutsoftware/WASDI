@@ -6,6 +6,7 @@
  */
 package wasdi.shared.utils;
 
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -237,6 +238,49 @@ public class PermissionsUtils {
 		}
 
 		return false;		
+	}
+	
+	/**
+	 * Check if a user can access a specific image
+	 * @param sUserId User requesting the access
+	 * @param sCollection Image Collection 
+	 * @param sFolder Folder name
+	 * @param sImage Image name
+	 * @return
+	 */
+	public static boolean canUserAccessImage(String sUserId, String sCollection, String sFolder, String sImage) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sCollection)) {
+				return false;
+			}
+			
+			if (!ImageResourceUtils.isValidCollection(sCollection)) {
+				return false;
+			}
+			
+			if (sCollection.equals(ImagesCollections.PROCESSORS.getFolder())) {
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				Processor oProcessor = oProcessorRepository.getProcessorByName(sFolder);
+				
+				if (oProcessor == null) return false;
+				return canUserAccessProcessor(sUserId, oProcessor.getProcessorId());
+			}
+			else if (sCollection.equals(ImagesCollections.USERS.getFolder())) {
+				if (sUserId.equals(sFolder)) return true;
+				else return false;
+			}
+			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
+				//TODO: check if the user can manipulate the organization
+				return true;
+			}
+			
+			return false;
+			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessImage error: " + oE);
+		}
+
+		return false;			
 	}
 }
  

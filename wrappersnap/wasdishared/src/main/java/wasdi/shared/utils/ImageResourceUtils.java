@@ -1,4 +1,4 @@
-package it.fadeout.business;
+package wasdi.shared.utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,13 +8,10 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.google.common.io.Files;
 
-import it.fadeout.Wasdi;
-import it.fadeout.rest.resources.ImagesResource;
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -128,7 +125,8 @@ public class ImageResourceUtils {
 	 * @return
 	 */
 	public static String getImagesBasePath() {
-		String sWasdiBasePath = Wasdi.getDownloadPath();
+		String sWasdiBasePath = WasdiConfig.Current.paths.downloadRootPath;
+		if (!sWasdiBasePath.endsWith("/")) sWasdiBasePath+="/";
 		String sImagesBasePath = sWasdiBasePath + "images/";
 		return sImagesBasePath;
 	}
@@ -360,5 +358,33 @@ public class ImageResourceUtils {
 		}		
 		
 		return "";
+	}
+	
+	/**
+	 * Check if this is an accepted value for collection
+	 * @param sCollection Collection to check
+	 * @return True if it is allowed, False otherwise
+	 */
+	public static boolean isValidCollection(String sCollection) {
+		
+		if (Utils.isNullOrEmpty(sCollection)) {
+			return false;
+		}
+		
+		try {
+			boolean bValidCollection = false;
+			for (ImagesCollections oCollection : ImagesCollections.values()) {
+				if (oCollection.getFolder().equals(sCollection)) {
+					bValidCollection = true;
+					break;
+				}
+			}
+			return bValidCollection;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ImageResourceUtils.isValidCollection: error " + oEx.toString());
+		}
+		
+		return false;
 	}
 }

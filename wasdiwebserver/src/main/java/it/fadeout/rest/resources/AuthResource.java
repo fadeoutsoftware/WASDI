@@ -25,7 +25,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.AuthProviderService;
@@ -39,6 +38,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
