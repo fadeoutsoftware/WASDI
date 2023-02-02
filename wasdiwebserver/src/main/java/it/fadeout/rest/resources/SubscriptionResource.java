@@ -268,6 +268,7 @@ public class SubscriptionResource {
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
 		oSubscription.setSubscriptionId(Utils.getRandomName());
+		oSubscription.setBuyDate(Utils.nowInMillis());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
@@ -712,9 +713,9 @@ public class SubscriptionResource {
 		oSubscriptionViewModel.setDescription(oSubscription.getDescription());
 		oSubscriptionViewModel.setTypeId(oSubscription.getType());
 		oSubscriptionViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
-		oSubscriptionViewModel.setBuyDate(oSubscription.getBuyDate());
-		oSubscriptionViewModel.setStartDate(oSubscription.getStartDate());
-		oSubscriptionViewModel.setEndDate(oSubscription.getEndDate());
+		oSubscriptionViewModel.setBuyDate(Utils.getDate(oSubscription.getBuyDate()));
+		oSubscriptionViewModel.setStartDate(Utils.getDate(oSubscription.getStartDate()));
+		oSubscriptionViewModel.setEndDate(Utils.getDate(oSubscription.getEndDate()));
 		oSubscriptionViewModel.setDurationDays(oSubscription.getDurationDays());
 		oSubscriptionViewModel.setUserId(oSubscription.getUserId());
 		oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
@@ -744,9 +745,9 @@ public class SubscriptionResource {
 		oSubscription.setName(oSubscriptionViewModel.getName());
 		oSubscription.setDescription(oSubscriptionViewModel.getDescription());
 		oSubscription.setType(oSubscriptionViewModel.getTypeId());
-		oSubscription.setBuyDate(oSubscriptionViewModel.getBuyDate());
-		oSubscription.setStartDate(oSubscriptionViewModel.getStartDate());
-		oSubscription.setEndDate(oSubscriptionViewModel.getEndDate());
+		oSubscription.setBuyDate(Utils.getDateAsDouble(oSubscriptionViewModel.getBuyDate()));
+		oSubscription.setStartDate(Utils.getDateAsDouble(oSubscriptionViewModel.getStartDate()));
+		oSubscription.setEndDate(Utils.getDateAsDouble(oSubscriptionViewModel.getEndDate()));
 		oSubscription.setDurationDays(oSubscriptionViewModel.getDurationDays());
 		oSubscription.setUserId(oSubscriptionViewModel.getUserId());
 		oSubscription.setOrganizationId(oSubscriptionViewModel.getOrganizationId());
