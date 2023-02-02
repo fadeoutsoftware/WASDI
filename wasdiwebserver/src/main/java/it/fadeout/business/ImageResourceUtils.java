@@ -346,7 +346,12 @@ public class ImageResourceUtils {
 			
 			if (!sAddress.endsWith("/")) sAddress += "/";
 			
-			sAddress +="images/get?collection="+sCollection+"&name="+sImage;
+			sAddress +="images/get?collection="+sCollection;
+			if (!Utils.isNullOrEmpty(sFolder)) {
+				sAddress += "&folder=" + sFolder;
+			}
+			
+			sAddress += "&name="+sImage;
 			
 			return sAddress;
 		}
