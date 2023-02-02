@@ -78,12 +78,20 @@
 
     <hr class="divider-line-style1" />
 
-    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
-        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null, true)">
-        <!--Add Subscription-->
-        <span class="ng-binding">{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span>
-    </button>
-    
+    <table class="table table-hover subscriptions-list">
+        <tr>
+            <td ng-repeat="oSubscriptionType in m_oController.m_aoTypes">
+
+                <button class="btn btn-primary btn-wasdi mb-3" title='{{"DIALOG_BUY_SUBSCRIPTION"|translate}} {{oSubscriptionType.name}}'
+                    ng-class="{'btn-warning':oSubscriptionType.typeId.endsWith('Professional')}"
+                    ng-click="m_oController.showSubscriptionAddForm(oSubscriptionType.typeId, oSubscriptionType.name)">
+                    <!--Buy Subscription-->
+                    <span class="ng-binding">{{"DIALOG_BUY_SUBSCRIPTION"|translate}} {{oSubscriptionType.name}}</span>
+                </button>
+            </td>
+        </tr>
+    </table>
+
     <hr class="divider-line-style1" />
 
     <!-- Subscriptions Table -->
@@ -139,8 +147,8 @@
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-show="oSubscription.adminRole === false"
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId, false)">
+                        ng-show="!oSubscription.adminRole"
+                        ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                         <!--Edit Subscription-->
                         <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
@@ -150,8 +158,8 @@
                         -->
                     </button>
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-show="oSubscription.adminRole === true"
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId, true)">
+                        ng-show="oSubscription.adminRole"
+                        ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, true)">
                         <!--Edit Subscription-->
                         <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--

@@ -27,6 +27,7 @@ var EditUserController = (function () {
         this.m_lTotalRuntime = null;
 
 
+        this.m_bLoadingTypes = true;
         this.m_bLoadingOrganizations = true;
         this.m_bLoadingSubscriptions = true;
         this.m_bLoadingProjects = true;
@@ -35,11 +36,22 @@ var EditUserController = (function () {
         this.initializeUserRuntimeInfo();
         this.m_sSelectedTab = "UserInfo";
 
+
+
+
+
+        this.m_aoTypes = [];
+        this.m_aoTypesMap = [];
+        this.m_oType = {};
+
+        this.getSubscriptionTypes();
+
+
         this.m_aoOrganizations = [];
         this.m_aoUsersList = [];
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {};
-        this.m_sSelectedOrganizationId = null;
+        // this.m_sSelectedOrganizationId = null;
 
         this.m_sUserPartialName = "";
         this.m_aoMatchingUsersList = [];
@@ -52,7 +64,7 @@ var EditUserController = (function () {
 
         this.m_oEditSubscription = {};
         this.m_oSharingSubscription = {};
-        this.m_sSelectedSubscriptionId = null;
+        // this.m_sSelectedSubscriptionId = null;
 
         this.initializeSubscriptionsInfo();
 
@@ -259,8 +271,8 @@ var EditUserController = (function () {
     EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
         console.log("EditUserController.showUsersByOrganization | sOrganizationId: ", sOrganizationId);
 
-        this.m_sSelectedOrganizationId = sOrganizationId;
-        console.log("EditUserController.showUsersByOrganization | this.m_sSelectedOrganizationId: ", this.m_sSelectedOrganizationId);
+        // this.m_sSelectedOrganizationId = sOrganizationId;
+        // console.log("EditUserController.showUsersByOrganization | this.m_sSelectedOrganizationId: ", this.m_sSelectedOrganizationId);
 
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {organizationId: sOrganizationId}
@@ -283,7 +295,7 @@ var EditUserController = (function () {
                         inputs: {
                             extras: {
                                 users: data.data,
-                                organizationId: oController.m_sSelectedOrganizationId
+                                organizationId: sOrganizationId
                             }
                         }
                     }).then(function (modal) {
@@ -397,7 +409,7 @@ var EditUserController = (function () {
 
     EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
         this.m_aoUsersList = [];
-        this.m_sSelectedOrganizationId = null;
+        // this.m_sSelectedOrganizationId = null;
         this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
         this.m_aoMatchingUsersList = [];
@@ -407,7 +419,7 @@ var EditUserController = (function () {
     EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId, sEditMode) {
         console.log("EditUserController.showOrganizationEditForm | sOrganizationId: ", sOrganizationId);
 
-        this.m_sSelectedOrganizationId = sOrganizationId;
+        // this.m_sSelectedOrganizationId = sOrganizationId;
         this.m_oSharingOrganization = {}
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
@@ -451,7 +463,7 @@ var EditUserController = (function () {
     EditUserController.prototype.deleteOrganization = function(sUserId, sOrganizationId) {
         console.log("EditUserController.deleteOrganization | sOrganizationId: ", sOrganizationId);
 
-        this.m_sSelectedOrganizationId = null;
+        // this.m_sSelectedOrganizationId = null;
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
 
@@ -489,7 +501,7 @@ var EditUserController = (function () {
         console.log("EditUserController.cancelEditOrganizationForm");
 
         this.m_oEditOrganization = {}
-        this.m_sSelectedOrganizationId = null;
+        // this.m_sSelectedOrganizationId = null;
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
     }
@@ -499,7 +511,7 @@ var EditUserController = (function () {
 
         this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
-        this.m_sSelectedOrganizationId = null;
+        // this.m_sSelectedOrganizationId = null;
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
     }
@@ -524,10 +536,10 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showSubscriptionEditForm = function(sUserId, sSubscriptionId, sEditMode) {
+    EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
         console.log("EditUserController.showSubscriptionEditForm | sSubscriptionId: ", sSubscriptionId);
 
-        this.m_sSelectedSubscriptionId = sSubscriptionId;
+        // this.m_sSelectedSubscriptionId = sSubscriptionId;
 
         var oController = this;
 
@@ -551,7 +563,6 @@ var EditUserController = (function () {
                         })
                         modal.close.then(function () {
                             oController.initializeSubscriptionsInfo();
-
                         })
                     })
                 } else {
@@ -563,10 +574,39 @@ var EditUserController = (function () {
         )
     }
 
+    EditUserController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
+        console.log("EditUserController.showSubscriptionAddForm | typeId: " + typeId + " | typeName: " + typeName);
+
+        var oController = this;
+
+        let oNewSubscription = {
+            typeId: typeId,
+            typeName: typeName
+        };
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oNewSubscription,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        });
+    }
+
     EditUserController.prototype.deleteSubscription = function(sUserId, sSubscriptionId) {
         console.log("EditUserController.deleteSubscription | sSubscriptionId: ", sSubscriptionId);
 
-        this.m_sSelectedSubscriptionId = null;
+        // this.m_sSelectedSubscriptionId = null;
 
         var oController = this;
 
@@ -593,7 +633,7 @@ var EditUserController = (function () {
         console.log("EditUserController.cancelEditSubscriptionForm");
 
         this.m_oEditSubscription = {}
-        this.m_sSelectedSubscriptionId = null;
+        // this.m_sSelectedSubscriptionId = null;
         this.m_aoMatchingOrganizationsList = [];
         this.m_sOrganizationPartialName = "";
     }
@@ -601,10 +641,10 @@ var EditUserController = (function () {
     EditUserController.prototype.showUsersBySubscription = function(sSubscriptionId) {
         console.log("EditUserController.showUsersBySubscription | sSubscriptionId: ", sSubscriptionId);
 
-        this.m_sSelectedSubscriptionId = sSubscriptionId;
-        console.log("EditUserController.showUsersBySubscription | this.m_sSelectedSubscriptionId: ", this.m_sSelectedSubscriptionId);
+        // this.m_sSelectedSubscriptionId = sSubscriptionId;
+        // console.log("EditUserController.showUsersBySubscription | this.m_sSelectedSubscriptionId: ", this.m_sSelectedSubscriptionId);
         this.m_oEditSubscription = {};
-        this.m_oSharingSubscription = {subscriptionId: sSubscriptionId}
+        this.m_oSharingSubscription = {subscriptionId: sSubscriptionId};
 //        this.m_aoMatchingUsersList = [];
 //        this.m_sUserPartialName = "";
 
@@ -624,7 +664,7 @@ var EditUserController = (function () {
                         inputs: {
                             extras: {
                                 users: data.data,
-                                subscriptionId: oController.m_sSelectedSubscriptionId
+                                subscriptionId: sSubscriptionId
                             }
                         }
                     }).then(function (modal) {
@@ -737,7 +777,7 @@ var EditUserController = (function () {
 
     EditUserController.prototype.hideUsersBySubscription = function(sUserId, sSubscriptionId) {
         this.m_aoUsersList = [];
-        this.m_sSelectedSubscriptionId = null;
+        // this.m_sSelectedSubscriptionId = null;
         this.m_oEditSubscription = {}
         this.m_oSharingSubscription = {}
         this.m_aoMatchingUsersList = [];
@@ -749,7 +789,7 @@ var EditUserController = (function () {
 
         this.m_oEditSubscription = {}
         this.m_oSharingSubscription = {}
-        this.m_sSelectedSubscriptionId = null;
+        // this.m_sSelectedSubscriptionId = null;
         this.m_aoMatchingUsersList = [];
         this.m_sUserPartialName = "";
     }
@@ -852,7 +892,7 @@ var EditUserController = (function () {
     EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
         console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: " + sSubscriptionId + " | sSubscriptionName:" + sSubscriptionName);
 
-        this.m_sSelectedSubscriptionId = sSubscriptionId;
+        // this.m_sSelectedSubscriptionId = sSubscriptionId;
         this.m_oEditSubscription = {};
         // this.m_oSharingSubscription = {subscriptionId: sSubscriptionId}
         // this.m_aoMatchingUsersList = [];
@@ -970,6 +1010,42 @@ var EditUserController = (function () {
     }
 
 
+
+    EditUserController.prototype.getSubscriptionTypes = function () {
+        console.log("EditUserController.getSubscriptionTypes");
+        let oController = this;
+        oController.m_oSubscriptionService.getSubscriptionTypes().then(
+            function (data) {
+                if (data.status !== 200) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(
+                        "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
+                    );
+                    utilsVexCloseDialogAfter(4000, oDialog);
+                } else {
+                    oController.m_aoTypes = data.data;
+                    oController.m_aoTypesMap = oController.m_aoTypes.map(
+                        (item) => ({ name: item.name, typeId: item.typeId })
+                    );
+
+                    oController.m_aoTypesMap.forEach((oValue, sKey) => {
+                        if (oValue.typeId == oController.m_oEditSubscription.typeId) {
+                            oController.m_oType = oValue;
+                        }
+                    });
+
+                    console.log("EditUserController.getSubscriptionTypes | oController.m_aoTypes: ", oController.m_aoTypes);
+                }
+
+                oController.m_bLoadingTypes = false;
+            }, function (data) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner(
+                    "GURU MEDITATION<br>ERROR GETTING TYPES"
+                );
+                utilsVexCloseDialogAfter(4000, oDialog);
+                oController.m_bLoadingTypes = false;
+            }
+        );
+    }
 
 
 
