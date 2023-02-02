@@ -1,5 +1,12 @@
 /**
- *
+ * Images Service Client
+ * 
+ * Contains method to:
+ *  .Upload a generic image
+ *  .Get a generic image
+ *  .Delete a generic image
+ *  .Utility method to upload Processors' logo
+ *  .Utility method to upload Processors' gallery images
  */
 
 'use strict';
@@ -52,7 +59,7 @@ service('ImagesService', ['ConstantsService','$rootScope','$http', function (oCo
      * @returns {*}
      */
     this.removeProcessorImage = function (sProcessorName, sImage) {
-        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/delete?collection=' + encodeURI(sProcessorName) + "&folder=processors&name=" + sImage);
+        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/delete?collection=processors&folder=' + encodeURI(sProcessorName) + "&name=" + sImage);
     };
 
     /**
