@@ -276,7 +276,7 @@ public class ImageResourceUtils {
 				String sFileNameWithoutExtension = FilenameUtils.removeExtension(sImageFileName);
 				
 				if (asValidNames.contains(sFileNameWithoutExtension)) {
-					asImages.add(ImageResourceUtils.getImageLink(oProcessor.getName(), sImageFileName));
+					asImages.add(ImageResourceUtils.getImageLink(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName(), sImageFileName));
 				}
 			}			
 		}
@@ -340,7 +340,7 @@ public class ImageResourceUtils {
 	 * @param sImage Image Name
 	 * @return Url to get the image or empty string
 	 */
-	public static String getImageLink(String sCollection, String sImage) {
+	public static String getImageLink(String sCollection, String sFolder, String sImage) {
 		try {
 			String sAddress = WasdiConfig.Current.baseUrl;
 			
