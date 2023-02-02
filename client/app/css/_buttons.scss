@@ -87,6 +87,32 @@
             }
         }
 
+        &.btn-warning {
+            border-color: $color-btn-warning-bg;
+            background-color: $color-btn-warning-bg;
+            color: $color-btn-warning-text;
+    
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-warning-bg-hover;
+                    background-color: $color-btn-warning-bg-hover;
+                }
+            }
+        }
+        &.btn-outline-warning{
+            border-color: $color-btn-warning-bg;
+            background: transparent;
+            color: $color-btn-warning-bg;
+    
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-warning-bg;
+                    background-color: $color-btn-warning-bg;
+                    color: $color-btn-warning-text;
+                }
+            }
+        }
+
 
         &:disabled, &.disabled{
             opacity: .65;

@@ -24,8 +24,8 @@ ProjectEditorController = (function () {
 
         this.m_bEditMode = this.m_oExtras.editMode;
 
-        this.m_aoSubscriptions = [];
-        this.m_aoSubscriptionsMap = [];
+        // this.m_aoSubscriptions = [];
+        // this.m_aoSubscriptionsMap = [];
         this.m_oSubscription = {subscriptionId: this.m_oExtras.subscriptionId, name: this.m_oExtras.subscriptionName};
         console.log("ProjectEditorController | this.m_oSubscription: ",  this.m_oSubscription);
 
