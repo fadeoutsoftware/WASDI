@@ -52,7 +52,7 @@ service('ImagesService', ['ConstantsService','$rootScope','$http', function (oCo
      * @returns {*}
      */
     this.removeProcessorImage = function (sProcessorName, sImage) {
-        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/delete?collection=' + encodeURI(sProcessorName) + "&name=" + sImage);
+        return this.m_oHttp.delete(this.APIURL + this.m_sResource + '/delete?collection=' + encodeURI(sProcessorName) + "&folder=processors&name=" + sImage);
     };
 
     /**

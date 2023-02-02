@@ -373,7 +373,7 @@ public class ImagesResource {
 			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sFileName, true, true);
 			
 			if (oResponse.getStatus()==200) {
-				oProcessor.setLogo(ImageResourceUtils.getImageLink(oProcessor.getName(), sFileName));
+				oProcessor.setLogo(ImageResourceUtils.getImageLink(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName(), sFileName));
 				oProcessorRepository.updateProcessor(oProcessor);
 				oProcessorRepository.updateProcessorDate(oProcessor);
 			}
@@ -447,7 +447,7 @@ public class ImagesResource {
 		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, "processors", oProcessor.getName(), sAvaibleFileName, null, true);
 		
 		if (oResponse.getStatus() == 200) {
-			String sImageLink = ImageResourceUtils.getImageLink(oProcessor.getName(), sAvaibleFileName);
+			String sImageLink = ImageResourceUtils.getImageLink(ImagesCollections.PROCESSORS.getFolder(), oProcessor.getName(), sAvaibleFileName);
 			
 			PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 			oPrimitiveResult.setStringValue(sImageLink);

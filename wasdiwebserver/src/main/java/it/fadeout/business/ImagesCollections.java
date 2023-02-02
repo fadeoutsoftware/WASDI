@@ -7,7 +7,7 @@ package it.fadeout.business;
  *
  */
 public enum ImagesCollections {	
-	PROCESSORS("processor"),
+	PROCESSORS("processors"),
 	USERS("users"),
 	ORGANIZATIONS("organizations");
 	
