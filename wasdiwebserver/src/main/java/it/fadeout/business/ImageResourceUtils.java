@@ -148,68 +148,25 @@ public class ImageResourceUtils {
 	}
 	
 	/**
-	 * Get the base relative Path of the folder where processor images are stored
-	 * @param sProcessorName
-	 * @return
-	 */
-	public static String getProcessorImagesBasePath(String sProcessorName) {
-		
-		return ImageResourceUtils.getProcessorImagesBasePath(sProcessorName, true);
-	}
-	
-	/**
-	 * Get the path, relative or absolute, of the folder where processor images are stored
-	 * @param sProcessorName
-	 * @param bRelative
-	 * @return
-	 */
-	public static String getProcessorImagesBasePath(String sProcessorName, boolean bRelative) {
-		String sPath = sProcessorName + "/";
-		
-		if (!bRelative) sPath = s_sWebAppBasePath + sPath;
-		
-		return sPath;
-	}
-	
-	/**
 	 * Get the relative path of the processor Logo
 	 * @param oProcessor
 	 * @return
 	 */
-	public static String getProcessorLogoRelativePath(Processor oProcessor) {
+	public static String getProcessorLogoPlaceholderPath(Processor oProcessor) {
 		
-		String sProcessorName = oProcessor.getName();
+		int iPlaceHolderIndex = oProcessor.getNoLogoPlaceholderIndex();
 		
-		String sRelativeLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName);
-		String sAbsoluteLogoPath = ImageResourceUtils.getProcessorImagesBasePath(sProcessorName, false);
-				
-		ImageFile oLogo = ImageResourceUtils.getImageInFolder(sAbsoluteLogoPath + ImageResourceUtils.s_sDEFAULT_LOGO_PROCESSOR_NAME);
-		
-		boolean bExistsLogo = false;
-		
-		if (oLogo!=null) {
-			if (oLogo.exists()) bExistsLogo = true;
+		if (iPlaceHolderIndex == -1) {
+			// If we do not have a logo, and a random placeholder has not been assigned, assign it.
+			iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
+			oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			oProcessorRepository.updateProcessor(oProcessor);
 		}
 		
-		if (bExistsLogo) {
-			return sRelativeLogoPath + oLogo.getName();
-		}
-		else {
-			
-			int iPlaceHolderIndex = oProcessor.getNoLogoPlaceholderIndex();
-			
-			if (iPlaceHolderIndex == -1) {
-				// If we do not have a logo, and a random placeholder has not been assigned, assign it.
-				iPlaceHolderIndex = Utils.getRandomNumber(1, 8);
-				oProcessor.setNoLogoPlaceholderIndex(iPlaceHolderIndex);
-				ProcessorRepository oProcessorRepository = new ProcessorRepository();
-				oProcessorRepository.updateProcessor(oProcessor);
-			}
-			
-			String sPlaceHolder = "assets/img/placeholder/placeholder_" + iPlaceHolderIndex + ".jpg";
-			
-			return sPlaceHolder;
-		}
+		String sPlaceHolder = "assets/img/placeholder/placeholder_" + iPlaceHolderIndex + ".jpg";
+		
+		return sPlaceHolder;
 	}
 	
 	
@@ -291,7 +248,7 @@ public class ImageResourceUtils {
 	}	
 	
 	/**
-	 * Get the list of relative path of images available for the processor
+	 * Get the list of links of images available for the processor
 	 * @param oProcessor
 	 * @return
 	 */
@@ -299,8 +256,7 @@ public class ImageResourceUtils {
 		
 		ArrayList<String> asImages = new ArrayList<String>();
 		
-		String sAbsoluteImagesPath = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName(), false);
-		String sRelativeImagesPath = ImageResourceUtils.getProcessorImagesBasePath(oProcessor.getName());
+		String sAbsoluteImagesPath = ImageResourceUtils.getImagesSubPath(oProcessor.getName());
 						
 		File oFolder = new File(sAbsoluteImagesPath);
 		
@@ -315,7 +271,7 @@ public class ImageResourceUtils {
 				String sFileNameWithoutExtension = FilenameUtils.removeExtension(sImageFileName);
 				
 				if (asValidNames.contains(sFileNameWithoutExtension)) {
-					asImages.add(sRelativeImagesPath+sImageFileName);
+					asImages.add(ImageResourceUtils.getImageLink(oProcessor.getName(), sImageFileName));
 				}
 			}			
 		}

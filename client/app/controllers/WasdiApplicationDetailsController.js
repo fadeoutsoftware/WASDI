@@ -18,7 +18,8 @@ var WasdiApplicationDetailsController = (function() {
      * @param oTranslate
      * @constructor
      */
-    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oModalService, oProcessWorkspaceService, oTranslate) {
+    function WasdiApplicationDetailsController($scope, $state, oConstantsService, oAuthService, oProcessorService,
+        oProcessorMediaService, oModalService, oProcessWorkspaceService, oTranslate, oImagesService) {
         /**
          * Angular Scope
          */
@@ -59,6 +60,11 @@ var WasdiApplicationDetailsController = (function() {
          * Process Workspaces service
          */
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
+
+        /**
+         * Reference to images service
+         */
+        this.m_oImagesService = oImagesService;
 
         /**
          * Flat to decide to show or not more reviews link
@@ -226,9 +232,21 @@ var WasdiApplicationDetailsController = (function() {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
                 oController.m_oApplication = data.data;
-                oController.m_asImages.push(oController.m_oApplication.imgLink)
+                if (utilsIsStrNullOrEmpty(oController.m_oApplication.logo)) {
+                    oController.m_asImages.push(oController.m_oApplication.imgLink);
+                }
+                else {
+                    var sUrl = oController.m_oImagesService.getImageLink(oController.m_oApplication.logo);
+                    oController.m_asImages.push(sUrl);
+                }
+                
                 if (oController.m_oApplication.images.length>0) {
-                    oController.m_asImages = oController.m_asImages.concat(oController.m_oApplication.images);
+
+                    for (var iImage = 0; iImage < oController.m_oApplication.images.length; iImage++) {
+                        var sImageUrl = oController.m_oApplication.images[iImage];
+                        var sUrl = oController.m_oImagesService.getImageLink(sImageUrl);
+                        oController.m_asImages.push(sUrl);
+                    }                    
                 }
             }
             else
@@ -658,10 +676,26 @@ var WasdiApplicationDetailsController = (function() {
     WasdiApplicationDetailsController.prototype.getThumbFileNameFromImageName = function (sImageName) {
 
         try {
-            let asSplit = sImageName.split('.')
-            let sThumbFile = asSplit[0];
-            sThumbFile= sThumbFile + "_thumb." + asSplit[1];
-            return sThumbFile;
+            let asSplit = sImageName.split('&')
+            
+            for (var iLinkParts = 0; iLinkParts<asSplit.length; iLinkParts++) {
+                if (asSplit[iLinkParts].includes("name=")) {
+                    let asResplit = asSplit[iLinkParts].split("=");
+                    let asFileNameParts = asResplit[1].split(".");
+                    let sThumbFile = asFileNameParts[0];
+                    sThumbFile= sThumbFile + "_thumb." + asFileNameParts[1];
+                    asSplit[iLinkParts] = "name="+sThumbFile;
+                    break;
+                }
+            }
+
+            var sNewLink = asSplit[0];
+
+            for (var iNewLink = 1; iNewLink<asSplit.length; iNewLink++) {
+                sNewLink = sNewLink + "&" + asSplit[iNewLink];
+            }
+
+            return sNewLink;
         }
         catch (error) {
             return  sImageName;
@@ -715,6 +749,7 @@ var WasdiApplicationDetailsController = (function() {
         'ModalService',
         'ProcessWorkspaceService',
         '$translate',
+        'ImagesService'
     ];
 
     return WasdiApplicationDetailsController;

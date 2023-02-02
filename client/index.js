@@ -40,7 +40,7 @@ require('./app/services/api/StyleService.js');
 require('./app/services/api/FeedbackService.js');
 require('./app/services/api/AdminDashboardService.js');
 require('./app/services/api/PackageManagerService.js');
-
+require('./app/services/api/ImagesService.js');
 
 
 

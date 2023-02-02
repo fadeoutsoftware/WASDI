@@ -45,6 +45,7 @@ require('./app/services/api/StyleService.js');
 require('./app/services/api/ProcessorParametersTemplateService.js');
 require('./app/services/api/AdminDashboardService.js');
 require('./app/services/api/PackageManagerService');
+require('./app/services/api/ImagesService.js');
 
 
 
