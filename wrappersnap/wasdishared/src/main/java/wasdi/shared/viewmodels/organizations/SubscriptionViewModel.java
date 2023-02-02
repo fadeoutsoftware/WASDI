@@ -1,5 +1,7 @@
 package wasdi.shared.viewmodels.organizations;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +20,9 @@ public class SubscriptionViewModel {
 	private String description;
 	private String typeId;
 	private String typeName;
-	private Double buyDate;
-	private Double startDate;
-	private Double endDate;
+	private Date buyDate;
+	private Date startDate;
+	private Date endDate;
 	private int durationDays;
 	private String userId;
 	private String organizationId;
