@@ -186,12 +186,18 @@ public class ImagesResource {
 	 */
 	@GET
 	@Path("/get")
-	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("collection") String sCollection, @QueryParam("name") String sImageName) {
+	public Response getImage(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("collection") String sCollection, @QueryParam("name") String sImageName) {
 		
 		try {
+			
+			// Check session
+			if( Utils.isNullOrEmpty(sSessionId) == false) {
+				sTokenSessionId = sSessionId;
+			}
+
 			WasdiLog.debugLog("ImagesResource.getImage( collection: " + sCollection + " sImageName: " + sImageName +")");
 			
-			User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser==null) {
 				WasdiLog.debugLog("ImagesResource.getProcessorLogo: no valid user or session");
@@ -331,10 +337,8 @@ public class ImagesResource {
 			if(oFileMetaData != null && Utils.isNullOrEmpty(oFileMetaData.getFileName()) == false){
 				
 				String sInputFileName = oFileMetaData.getFileName();
-				sFileName += FilenameUtils.getExtension(sInputFileName);
-			} 		
-			
-			
+				sFileName += "."+ FilenameUtils.getExtension(sInputFileName);
+			} 
 			
 			Response oResponse = uploadImage(oInputFileStream, oFileMetaData, sSessionId, oProcessor.getName(), sFileName, true, true);
 			
@@ -399,7 +403,7 @@ public class ImagesResource {
 		if(oFileMetaData != null && Utils.isNullOrEmpty(oFileMetaData.getFileName()) == false){
 			
 			String sInputFileName = oFileMetaData.getFileName();
-			sAvaibleFileName += FilenameUtils.getExtension(sInputFileName);
+			sAvaibleFileName += "." + FilenameUtils.getExtension(sInputFileName);
 		} 		
 		
 		WasdiLog.debugLog("ImagesResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
@@ -410,7 +414,7 @@ public class ImagesResource {
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, oProcessor.getName(), sAvaibleFileName, null, null);
+		Response oResponse = uploadImage(oFileInputStream, oFileMetaData, sSessionId, oProcessor.getName(), sAvaibleFileName, null, true);
 		
 		if (oResponse.getStatus() == 200) {
 			String sImageLink = ImageResourceUtils.getImageLink(oProcessor.getName(), sAvaibleFileName);

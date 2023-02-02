@@ -609,7 +609,8 @@ public class ProcessorsResource  {
 				oAppListViewModel.setBuyed(false);
 				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
 
-				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+				oAppListViewModel.setLogo(oProcessor.getLogo());
 				
 				// Set the friendly name, same of name if null
 				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -699,7 +700,11 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setShowInStore(oProcessor.getShowInStore());
 			oAppDetailViewModel.setLongDescription(oProcessor.getLongDescription());
 			
-			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+			
+			if (!Utils.isNullOrEmpty(oProcessor.getLogo())) {
+				oAppDetailViewModel.setLogo(oProcessor.getLogo());
+			}
 			
 			// Set the friendly name, same of name if null
 			if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
