@@ -31,6 +31,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.gpf.graph.Graph;
@@ -38,6 +40,9 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
@@ -145,7 +150,10 @@ public class WorkflowsResource {
                 oWorkflow.setNodeCode(Wasdi.getActualNode().getNodeCode());
                 oWorkflow.setNodeUrl(Wasdi.getActualNode().getNodeBaseAddress());
             }
+            
+            fillWorkflowIONodes(oWorkflowXmlFile, oWorkflow);
 
+            /*
             try (FileReader oFileReader = new FileReader(oWorkflowXmlFile)) {
                 // Read the graph
                 Graph oGraph;
@@ -180,6 +188,7 @@ public class WorkflowsResource {
                 WasdiLog.debugLog("WorkflowsResource.uploadFile: " + oEx);
                 return Response.serverError().build();
             }
+            */
 
 
         } catch (Exception oEx2) {
@@ -1100,4 +1109,54 @@ public class WorkflowsResource {
         return null;
     }    
 
+    protected void fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
+		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
+		
+		DocumentBuilder oDocBuilder;
+		try {
+			
+			oDocBuilder = oDocBuildFactory.newDocumentBuilder();
+			Document oWorkflowXml = oDocBuilder.parse(oFile);
+			oWorkflowXml.getDocumentElement().normalize();
+			WasdiLog.debugLog("fillWorkflowIONodes.Root element: " + oWorkflowXml.getDocumentElement().getNodeName());
+			// loop through each item
+			NodeList aoItems = oWorkflowXml.getChildNodes().item(0).getChildNodes();
+			
+			for (int iItem = 0; iItem < aoItems.getLength(); iItem++)
+			{
+				if (aoItems.item(iItem).getNodeName().equals("node"))
+				{
+					Element oElement = (Element) aoItems.item(iItem);
+					
+					if (oElement.hasAttribute("id")) {
+						
+						NodeList aoOperatorItems = oElement.getChildNodes();
+						
+						for (int iOpItems =0; iOpItems < aoOperatorItems.getLength(); iOpItems++) {
+							Element oOperatorElement = (Element) aoOperatorItems.item(iOpItems);
+							
+							if (oOperatorElement.getNodeName().equals("operator")) {
+								String sOperator = oOperatorElement.getNodeValue();
+								
+								if (sOperator.equals("Write")) {
+									oSnapWorflow.getOutputNodeNames().add(oElement.getAttribute("id"));
+									
+									WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Write Node");
+								}
+								else if (sOperator.equals("Read")) {
+									oSnapWorflow.getInputNodeNames().add(oElement.getAttribute("id"));
+									WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Read Node");
+								}
+							}
+						}								
+					}
+			
+				}
+			}
+
+		} catch (Exception oE1) {
+			
+			WasdiLog.errorLog("WorkflowsResource.fillWorkflowIONodes: " + oE1);
+		}	
+    }
 }
