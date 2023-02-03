@@ -16,6 +16,6 @@ public class ProjectListViewModel {
 	private String subscriptionName;
 	private String name;
 	private String description;
-	private boolean defaultProject;
+	private boolean activeProject;
 
 }

@@ -1,15 +1,15 @@
 <div class="projects-view pt-3">
 
-    <br>
+    <div class="spacer"></div>
 
     <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-            <h4>Default Project</h4>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}</h4>
         </div>
 
         <div class="spacer"></div>
 
-        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <div ng-show="m_oController.m_aoProjects.length > 0">
                 <div ng-show="!m_oController.m_bLoadingProjects">
                     <wapdropdown
@@ -18,18 +18,17 @@
                         enable-search-filter="true"
                         dropdown-name="Projects"
                         ng-model="m_oController.m_oProject"
-                        on-click-function="m_oController.changeDefaultProject(oValue)">
+                        on-click-function="m_oController.changeActiveProject(oValue)">
                     </wapdropdown>
                 </div>
-                <div class="loadIcon" ng-show="m_oController.m_bLoadingProjrcts">
-                    <invader></invader>
-                </div>
+            </div>
+            <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                <invader></invader>
             </div>
         </div>
     </div>
 
-    <br>
-    <div class="spacer"></div>
+    <hr class="divider-line-style1" />
     <div class="spacer"></div>
 
     <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}
@@ -44,10 +43,10 @@
             <tr>
                 <th>Project Name</th>
                 <th>Subscription</th>
-                <th>Default</th>
+                <th>Active</th>
 
                 <th></th>
-                <th>Actions</th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -55,7 +54,7 @@
             <tr ng-repeat="oProject in m_oController.m_aoProjects track by $index">
                 <td>{{oProject.name}}</td>
                 <td>{{oProject.subscriptionName}}</td>
-                <td>{{oProject.defaultProject ? "Yes" : "No"}}</td>
+                <td>{{oProject.activeProject ? "Yes" : "No"}}</td>
 
                 <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}

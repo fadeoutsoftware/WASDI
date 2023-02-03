@@ -105,9 +105,25 @@ public class Utils {
 	 * @return Corresponding date
 	 */
 	public static Date getDate(Double oDouble) {
+		if (oDouble == null) {
+			return null;
+		}
+
 		double dDate = oDouble;
 		long lLong = (long) dDate;
 		return new Date(lLong);
+	}
+
+	public static Double getDateAsDouble(Date oDate) {
+		if (oDate == null) {
+			return null;
+		}
+
+		return (double) (oDate.getTime());
+	}
+
+	public static Date getDate(Long oLong) {
+		return new Date(oLong);
 	}
 
 	/**

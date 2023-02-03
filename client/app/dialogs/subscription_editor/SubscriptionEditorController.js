@@ -9,6 +9,8 @@ SubscriptionEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        console.log("SubscriptionEditorController | oExtras: ",  oExtras);
+        console.log("SubscriptionEditorController | this.m_oExtras: ",  this.m_oExtras);
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
@@ -16,17 +18,24 @@ SubscriptionEditorController = (function () {
         this.m_oEditSubscription = oExtras.subscription;
         this.m_bEditMode = oExtras.editMode;
 
-        this.m_asTypes = [];
-        this.m_aoTypesMap = [];
-        this.m_oType = {};
-        this.m_bLoadingTypes = true;
+
+        this.m_sBuyDate = null;
+        this.m_sStartDate = null;
+        this.m_sStartDate = null;
+
+        this.initializeDates();
+
+        // this.m_aoTypes = [];
+        // this.m_aoTypesMap = [];
+        // this.m_oType = {};
+        // this.m_bLoadingTypes = true;
 
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
-        this.getSubscriptionTypes();
+        // this.getSubscriptionTypes();
 
         this.getOrganizationsListByUser();
 
@@ -35,16 +44,52 @@ SubscriptionEditorController = (function () {
         }
     }
 
-    SubscriptionEditorController.prototype.saveSubscription = function () {
-        console.log("SubscriptionEditorController.saveSubscription");
+    SubscriptionEditorController.prototype.initializeDates = function () {
+        console.log("SubscriptionEditorController.initializeDates | this.m_oEditSubscription.startDate: ", this.m_oEditSubscription.startDate);
 
-        if (utilsIsObjectNullOrUndefined(this.m_oType)) {
-            this.m_oEditSubscription.typeId = "";
-            this.m_oEditSubscription.typeName = "";
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.buyDate)) {
+            this.m_sBuyDate = null;
         } else {
-            this.m_oEditSubscription.typeId = this.m_oType.typeId;
-            this.m_oEditSubscription.typeName = this.m_oType.name;
+            this.m_sBuyDate = new Date(this.m_oEditSubscription.buyDate);
         }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
+            this.m_sStartDate = new Date();
+        } else {
+            this.m_sStartDate = new Date(this.m_oEditSubscription.startDate);
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.endDate)) {
+            this.m_sEndDate = new Date();
+
+            if (this.m_oEditSubscription.typeId.toLowerCase().includes("day")) {
+                this.m_sEndDate.setDate(this.m_sStartDate.getDate() + 1);
+            } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("week")) {
+                this.m_sEndDate.setDate(this.m_sStartDate.getDate() + 7);
+            } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("month")) {
+                this.m_sEndDate.setMonth(this.m_sStartDate.getMonth() + 1);
+            } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("year")) {
+                this.m_sEndDate.setFullYear(this.m_sStartDate.getFullYear() + 1);
+            }
+        } else {
+            this.m_sEndDate = new Date(this.m_oEditSubscription.endDate);
+        }
+
+        console.log("SubscriptionEditorController.initializeDates | this.m_sStartDate: ", this.m_sStartDate);
+    }
+
+    SubscriptionEditorController.prototype.saveSubscription = function (sStartDate) {
+        console.log("SubscriptionEditorController.saveSubscription | this.m_oEditSubscription: ", this.m_oEditSubscription);
+        console.log("SubscriptionEditorController.saveSubscription | this.m_sStartDate: ", this.m_sStartDate);
+        console.log("SubscriptionEditorController.saveSubscription | sStartDate: ", sStartDate);
+
+        // if (utilsIsObjectNullOrUndefined(this.m_oType)) {
+        //     this.m_oEditSubscription.typeId = "";
+        //     this.m_oEditSubscription.typeName = "";
+        // } else {
+        //     this.m_oEditSubscription.typeId = this.m_oType.typeId;
+        //     this.m_oEditSubscription.typeName = this.m_oType.name;
+        // }
 
         if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
             this.m_oEditSubscription.organizationId = "";
@@ -52,25 +97,31 @@ SubscriptionEditorController = (function () {
             this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
         }
 
+        let oController = this;
+
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
             console.log(" SubscriptionEditorController.saveSubscription | data.data: ", data.data);
-            if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+            if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
             }
 
+            oController.m_oScope.close();
+
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
+
+            oController.m_oScope.close();
         });
 
         this.m_oEditSubscription = {};
         this.m_oType = {};
         this.m_oOrganization = {};
-        this.m_oScope.close();
     }
 
+    /*
     SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
         let oController = this;
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
@@ -81,8 +132,8 @@ SubscriptionEditorController = (function () {
                     );
                     utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
-                    oController.m_asTypes = data.data;
-                    oController.m_aoTypesMap = oController.m_asTypes.map(
+                    oController.m_aoTypes = data.data;
+                    oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
                     );
 
@@ -103,6 +154,7 @@ SubscriptionEditorController = (function () {
             }
         );
     }
+    */
 
     SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
         let oController = this;

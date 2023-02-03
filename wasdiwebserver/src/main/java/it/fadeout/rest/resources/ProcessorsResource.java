@@ -40,7 +40,6 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
@@ -78,6 +77,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -609,7 +609,8 @@ public class ProcessorsResource  {
 				oAppListViewModel.setBuyed(false);
 				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
 
-				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+				oAppListViewModel.setLogo(oProcessor.getLogo());
 				
 				// Set the friendly name, same of name if null
 				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -699,7 +700,11 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setShowInStore(oProcessor.getShowInStore());
 			oAppDetailViewModel.setLongDescription(oProcessor.getLongDescription());
 			
-			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+			
+			if (!Utils.isNullOrEmpty(oProcessor.getLogo())) {
+				oAppDetailViewModel.setLogo(oProcessor.getLogo());
+			}
 			
 			// Set the friendly name, same of name if null
 			if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -729,7 +734,7 @@ public class ProcessorsResource  {
 			}
 			
 			oAppDetailViewModel.setImages(ImageResourceUtils.getProcessorImagesList(oProcessor));
-			oAppDetailViewModel.setMaxImages(ProcessorsMediaResource.IMAGE_NAMES.length);
+			oAppDetailViewModel.setMaxImages(ImageResourceUtils.s_asIMAGE_NAMES.length);
 			
 			// TODO: At the moment we do not have this data: put the number of run in the main server
 			// But this has to be changed

@@ -93,11 +93,11 @@ public class ProjectRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get a project by its subscription.
-	 * @param sSubscriptionId the subscription of the project
-	 * @return the project if found, null otherwise
+	 * Get the list of projects by subscriptions.
+	 * @param sSubscriptionId the subscription of the projects
+	 * @return the list of projects found
 	 */
-	public List<Project> getProjectBySubscription(String sSubscriptionId) {
+	public List<Project> getProjectsBySubscription(String sSubscriptionId) {
 		final List<Project> aoReturnList = new ArrayList<>();
 
 		try {

@@ -1,5 +1,5 @@
 <div class="modal fade edit-user-dialog-catalog">
-    <div class="modal-dialog modal-wasdi">
+    <div class="modal-dialog" style="width: 65vw">
         <div class="modal-content">
             <!-- HEADER -->
             <div class="modal-header">
@@ -33,6 +33,7 @@
                             User Subscriptions
                         </a>
                     </li>
+                    <!--
                     <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserProjects'}"
                         ng-click="m_oController.m_sSelectedTab = 'UserProjects'">
                         <a href="" role="tab" data-toggle="tab">
@@ -40,6 +41,7 @@
                             User Projects
                         </a>
                     </li>
+                    -->
                     <li ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"
                         ng-click="m_oController.m_sSelectedTab = 'UserOrganizations'">
                         <a href="" role="tab" data-toggle="tab">
@@ -63,6 +65,7 @@
                         <ng-include src="'dialogs/edit_user/TabUserSubscriptions.html'"></ng-include>
                     </div>
                 </div>
+                <!--
                 <div class="tab-content">
                     <div class="tab-pane fade in" id="UserProjects"
                         ng-class="{'active':m_oController.m_sSelectedTab === 'UserProjects'}"
@@ -70,6 +73,7 @@
                         <ng-include src="'dialogs/edit_user/TabUserProjects.html'"></ng-include>
                     </div>
                 </div>
+                -->
                 <div class="tab-content">
                     <div class="tab-pane fade in" id="UserOrganizations"
                         ng-class="{'active':m_oController.m_sSelectedTab === 'UserOrganizations'}"

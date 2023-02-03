@@ -41,6 +41,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.NodeService',
     'wasdi.AdminDashboardService',
     'wasdi.PackageManagerService',
+    'wasdi.ImagesService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -276,8 +277,9 @@ wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
 
 wasdiApp.controller("PackageManagerController", window.PackageManagerController);
-wasdiApp.controller("OrgUsersEditController", window.OrgUsersEditController);
-wasdiApp.controller("SubscriptionUsersEditController", window.SubscriptionUsersEditController); 
+wasdiApp.controller("OrganizationUsersController", window.OrganizationUsersController);
+wasdiApp.controller("SubscriptionUsersController", window.SubscriptionUsersController);
+wasdiApp.controller("SubscriptionProjectsController", window.SubscriptionProjectsController);
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);

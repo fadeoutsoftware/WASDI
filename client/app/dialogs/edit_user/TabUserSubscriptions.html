@@ -1,21 +1,97 @@
 <div class="subscriptions-view pt-3">
 
     <p class="mr-2 text-uppercase">
-        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
     </p>
     <p>
+        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
+        &nbsp;
         TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
             convertMsToTime}}</span>
     </p>
 
-    <br>
+    <hr class="divider-line-style1" />
 
-    <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}
-        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, null, true)">
-        <!--Add Subscription-->
-        <span class="ng-binding">{{"DIALOG_EDIT_SUBSCRIPTION_ADD"|translate}}</span>
-    </button>
-    
+    <!--
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h4>{{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}</h4>
+        </div>
+
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div ng-show="m_oController.m_aoProjects.length > 0">
+                <div ng-show="!m_oController.m_bLoadingProjects">
+                    <wapdropdown
+                        list-of-values="m_oController.m_aoProjectsMap"
+                        selected-value="m_oController.m_oProject"
+                        enable-search-filter="true"
+                        dropdown-name="Projects"
+                        ng-model="m_oController.m_oProject"
+                        on-click-function="m_oController.changeActiveProject(oValue)">
+                    </wapdropdown>
+                </div>
+            </div>
+            <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                <invader></invader>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider-line-style1" />
+    <div class="spacer"></div>
+    -->
+
+
+    <div class="container-fluid">
+        <div class="row give-permission-row">
+            <form class="d-flex flex-row" novalidate>
+                <div class="form-group mr-3" style="width: 30%">
+                    <h4 class="text-success">
+                        {{"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT"|translate}}
+                    </h4>
+                    
+                    <div ng-show="m_oController.m_aoProjects.length > 0">
+                        <div ng-show="!m_oController.m_bLoadingProjects">
+                            <wapdropdown
+                                list-of-values="m_oController.m_aoProjectsMap"
+                                selected-value="m_oController.m_oProject"
+                                enable-search-filter="true"
+                                dropdown-name="Projects2"
+                                ng-model="m_oController.m_oProject">
+                            </wapdropdown>
+                        </div>
+                    </div>
+                    <div class="loadIcon" ng-show="m_oController.m_bLoadingProjects">
+                        <invader></invader>
+                    </div>
+                </div>
+
+                <button
+                        class="btn btn-primary btn-wasdi mb-4 align-self-end"
+                        ng-click="m_oController.changeActiveProjectWithButton(m_oController.m_oProject)">
+                    <em class="custom-icon fa fa-star fa-lg"
+                            ng-class="button.icon"></em>
+                    <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_CHANGE_ACTIVE"|translate}}</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <hr class="divider-line-style1" />
+
+    <table class="table">
+        <tr>
+            <td ng-repeat="oSubscriptionType in m_oController.m_aoTypes">
+
+                <button class="btn btn-primary btn-wasdi mb-3" title='{{"DIALOG_BUY_SUBSCRIPTION"|translate}} {{oSubscriptionType.name}}'
+                    ng-class="{'btn-warning':oSubscriptionType.typeId.endsWith('Professional')}"
+                    ng-click="m_oController.showSubscriptionAddForm(oSubscriptionType.typeId, oSubscriptionType.name)">
+                    <!--Buy Subscription-->
+                    <span class="ng-binding">{{"DIALOG_BUY_SUBSCRIPTION"|translate}} {{oSubscriptionType.name}}</span>
+                </button>
+            </td>
+        </tr>
+    </table>
+
     <hr class="divider-line-style1" />
 
     <!-- Subscriptions Table -->
@@ -29,7 +105,8 @@
                 <th>Reason</th>
 
                 <th></th>
-                <th>Actions</th>
+                <th></th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -56,11 +133,24 @@
                 </td>
 
                 <td class="over-icon">
+                    <button class="btn btn-primary btn-wasdi" title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
+                        ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name)">
+                        <!--Show Projects-->
+                        <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                        <!--
+                        <span class="ng-binding"
+                            >{{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}</span
+                        >
+                        -->
+                    </button>
+                </td>
+
+                <td class="over-icon">
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-show="oSubscription.adminRole === false"
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId, false)">
+                        ng-show="!oSubscription.adminRole"
+                        ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                         <!--Edit Subscription-->
-                        <i class="fa fa-info-circle" aria-hidden="true" style="margin-right: 0px"></i>
+                        <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--
                         <span class="ng-binding"
                             >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
@@ -68,8 +158,8 @@
                         -->
                     </button>
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-show="oSubscription.adminRole === true"
-                        ng-click="m_oController.showSubscriptionEditForm(m_oController.m_oUser.userId, oSubscription.subscriptionId, true)">
+                        ng-show="oSubscription.adminRole"
+                        ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, true)">
                         <!--Edit Subscription-->
                         <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--

@@ -25,7 +25,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.AuthProviderService;
@@ -39,6 +38,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.ImageFile;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -77,20 +77,7 @@ public class AuthResource {
 	 * Credential Policy
 	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-	
-	/**
-	 * List of extensions enabled to upload a user image
-	 */
-	final String[] USER_IMAGE_ENABLED_EXTENSIONS = {"jpg", "png", "svg"};
-	/**
-	 * default folder where user image is saved
-	 */
-	final String USER_IMAGE_FOLDER_NAME = "userImage";
-	/**
-	 * Default name for the user image
-	 */
-	final String DEFAULT_USER_IMAGE_NAME = "userimage";
-	
+		
 	/**
 	 * Login API
 	 * The system will try to login with Keycloak first. Then with the old WASDI login.
@@ -507,100 +494,6 @@ public class AuthResource {
 		return Response.ok().build();
 	}
 	
-	/**
-	 * Upload user image
-	 * @param fileInputStream input stream with the image
-	 * @param fileMetaData Metadata of the file
-	 * @param sSessionId User Session
-	 * @return std http response
-	 */
-	@POST
-	@Path("/media/userimage")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadUserImage(@FormDataParam("image") InputStream fileInputStream, @FormDataParam("image") FormDataContentDisposition fileMetaData,
-			@HeaderParam("x-session-token") String sSessionId ) {
-
-		String sExt;
-		String sFileName;
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-
-		//get filename and extension 
-		if(fileMetaData != null && Utils.isNullOrEmpty(fileMetaData.getFileName()) == false){
-			sFileName = fileMetaData.getFileName();
-			sExt = FilenameUtils.getExtension(sFileName);
-		} else {
-			return Response.status(400).build();
-		}
-
-		if (!ImageResourceUtils.isValidExtension(sExt, USER_IMAGE_ENABLED_EXTENSIONS)) {
-			return Response.status(400).build();
-		}
-		String sPath = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "/" + USER_IMAGE_FOLDER_NAME;
-		ImageResourceUtils.createDirectory(sPath);
-		String sOutputFilePath = sPath + "/" + DEFAULT_USER_IMAGE_NAME + "." + sExt.toLowerCase();
-		ImageFile oOutputLogo = new ImageFile(sOutputFilePath);
-		boolean bIsSaved = oOutputLogo.saveImage(fileInputStream);
-		if(bIsSaved == false ){
-			return Response.status(400).build();
-		}
-		return Response.status(200).build();
-	}
-	
-	/**
-	 * Get user image
-	 * @param sSessionId User Session
-	 * @return std http response
-	 */
-	@GET
-	@Path("/media/userimage")
-	public Response getUserImage(@HeaderParam("x-session-token") String sSessionId ) {
-
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-
-		String sPath = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME + "\\" + DEFAULT_USER_IMAGE_NAME;
-		ImageFile oUserImage = ImageResourceUtils.getImageInFolder(sPath, USER_IMAGE_ENABLED_EXTENSIONS);
-		String sImageExtension = ImageResourceUtils.getExtensionOfImageInFolder(sPath  , USER_IMAGE_ENABLED_EXTENSIONS);
-
-		//Check the image and extension
-		if(oUserImage == null || sImageExtension.isEmpty() ){
-			return Response.status(204).build();
-		}
-		//prepare buffer and send the logo to the client 
-		ByteArrayInputStream abImageLogo = oUserImage.getByteArrayImage();
-
-		return Response.ok(abImageLogo).build();
-
-	}
-	
-	/**
-	 * Delete user image
-	 * @param sSessionId User Session
-	 * @return sdt http response
-	 */
-	@DELETE
-	@Path("/media/userimage")
-	public Response deleteUserImage(@HeaderParam("x-session-token") String sSessionId ) {
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		// Check the user session
-		if(oUser == null){
-			return Response.status(401).build();
-		}
-
-		String sPathFolder = WasdiConfig.Current.paths.downloadRootPath + oUser.getUserId() + "\\" + USER_IMAGE_FOLDER_NAME;
-		ImageResourceUtils.deleteFileInFolder(sPathFolder,DEFAULT_USER_IMAGE_NAME);
-		return Response.status(200).build();
-	}
-		
 	/**
 	 * Register a new user
 	 * @param oRegistrationInfoViewModel Registration Informations

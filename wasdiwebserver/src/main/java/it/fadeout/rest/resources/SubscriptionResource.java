@@ -4,7 +4,7 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.SUBSCRIPTION_READ;
 
 import java.util.ArrayList;
-//import java.util.Arrays;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +35,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
+import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -210,14 +211,13 @@ public class SubscriptionResource {
 
 			// Create repo
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get requested subscription
 			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
 			String sOrganizationName = null;
 
-			if (oSubscription.getOrganizationId() != null) {
+			if (oSubscription != null && oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
 
@@ -225,20 +225,6 @@ public class SubscriptionResource {
 			}
 
 			oVM = convert(oSubscription, sOrganizationName);
-
-//			// Get Sharings
-//			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-//					.getSubscriptionSharingsBySubscriptionId(oSubscription.getSubscriptionId());
-//			// Add Sharings to View Model
-//			if (aoSharings != null) {
-//				if (oVM.getSharedUsers() == null) {
-//					oVM.setSharedUsers(new ArrayList<String>());
-//				}
-//
-//				for (UserResourcePermission oSharing : aoSharings) {
-//					oVM.getSharedUsers().add(oSharing.getUserId());
-//				}
-//			}
 		} catch (Exception oEx) {
 			WasdiLog.debugLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
 		}
@@ -282,8 +268,17 @@ public class SubscriptionResource {
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
 		oSubscription.setSubscriptionId(Utils.getRandomName());
+		oSubscription.setBuyDate(Utils.nowInMillis());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
+			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
+			oProjectEditorViewModel.setName(oSubscription.getName());
+			oProjectEditorViewModel.setDescription("automatically created project for the " + oSubscription.getName() + "subscription");
+			oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
+			oProjectEditorViewModel.setActiveProject(oUser.getActiveProjectId() == null);
+
+			new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
+
 			oResult.setBoolValue(true);
 			oResult.setStringValue(oSubscription.getSubscriptionId());
 		} else {WasdiLog.debugLog("SubscriptionResource.createSubscription( " + oSubscriptionViewModel.getName() + " ): insertion failed");
@@ -414,34 +409,21 @@ public class SubscriptionResource {
 		return oResult;
 	}
 
-
-	/**
-	 * Get the list of subscription types.
-	 * @param sSessionId User Session Id
-	 * @return a list of Subscription types
-	 */
-//	@GET
-//	@Path("/types")
-//	@Produces({ "application/xml", "application/json", "text/xml" })
-//	public List<SubscriptionType> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
-//		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
-//
-//		return Arrays.asList(SubscriptionType.values());
-//	}
-
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<SubscriptionTypeViewModel> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
 
-		List<SubscriptionTypeViewModel> aoTypes = new ArrayList<SubscriptionTypeViewModel>();
+		return convert(Arrays.asList(SubscriptionType.values()));
+	}
 
-		aoTypes.add(new SubscriptionTypeViewModel("OneDayStandard", "One Day Standard", "One Day Standard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneWeekStandard", "One Week Standard", "One Week Standard"));
-		aoTypes.add(new SubscriptionTypeViewModel("OneMonthStandard", "One Month Standard", "One Month Standard"));
+	private static List<SubscriptionTypeViewModel> convert(List<SubscriptionType> aoSubscriptionTypes) {
+		return aoSubscriptionTypes.stream().map(SubscriptionResource::convert).collect(Collectors.toList());
+	}
 
-		return aoTypes;
+	private static SubscriptionTypeViewModel convert(SubscriptionType oSubscriptionType) {
+		return new SubscriptionTypeViewModel(oSubscriptionType.name(), oSubscriptionType.getTypeName(), oSubscriptionType.getTypeDescription());
 	}
 
 	/**
@@ -731,9 +713,9 @@ public class SubscriptionResource {
 		oSubscriptionViewModel.setDescription(oSubscription.getDescription());
 		oSubscriptionViewModel.setTypeId(oSubscription.getType());
 		oSubscriptionViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
-		oSubscriptionViewModel.setBuyDate(oSubscription.getBuyDate());
-		oSubscriptionViewModel.setStartDate(oSubscription.getStartDate());
-		oSubscriptionViewModel.setEndDate(oSubscription.getEndDate());
+		oSubscriptionViewModel.setBuyDate(Utils.getDate(oSubscription.getBuyDate()));
+		oSubscriptionViewModel.setStartDate(Utils.getDate(oSubscription.getStartDate()));
+		oSubscriptionViewModel.setEndDate(Utils.getDate(oSubscription.getEndDate()));
 		oSubscriptionViewModel.setDurationDays(oSubscription.getDurationDays());
 		oSubscriptionViewModel.setUserId(oSubscription.getUserId());
 		oSubscriptionViewModel.setOrganizationId(oSubscription.getOrganizationId());
@@ -763,9 +745,9 @@ public class SubscriptionResource {
 		oSubscription.setName(oSubscriptionViewModel.getName());
 		oSubscription.setDescription(oSubscriptionViewModel.getDescription());
 		oSubscription.setType(oSubscriptionViewModel.getTypeId());
-		oSubscription.setBuyDate(oSubscriptionViewModel.getBuyDate());
-		oSubscription.setStartDate(oSubscriptionViewModel.getStartDate());
-		oSubscription.setEndDate(oSubscriptionViewModel.getEndDate());
+		oSubscription.setBuyDate(Utils.getDateAsDouble(oSubscriptionViewModel.getBuyDate()));
+		oSubscription.setStartDate(Utils.getDateAsDouble(oSubscriptionViewModel.getStartDate()));
+		oSubscription.setEndDate(Utils.getDateAsDouble(oSubscriptionViewModel.getEndDate()));
 		oSubscription.setDurationDays(oSubscriptionViewModel.getDurationDays());
 		oSubscription.setUserId(oSubscriptionViewModel.getUserId());
 		oSubscription.setOrganizationId(oSubscriptionViewModel.getOrganizationId());
