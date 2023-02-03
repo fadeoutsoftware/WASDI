@@ -18,10 +18,9 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <snap.version>8.0.8</snap.version>
-        <s1tbx.version>8.0.4</s1tbx.version>
-        <s2tbx.version>8.0.4</s2tbx.version>
-        <s3tbx.version>8.0.4</s3tbx.version>
+        <snap.version>9.0.4</snap.version>
+        <s1tbx.version>9.0.2</s1tbx.version>
+        <s3tbx.version>9.0.3</s3tbx.version>
         <probav.version>2.2.0</probav.version>
     </properties>
 
@@ -182,6 +181,16 @@
             <artifactId>snap-ndvi</artifactId>
             <version>${snap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-jp2-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-land-cover</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
@@ -222,67 +231,62 @@
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot6-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <!-- dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-jp2-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>5.0.0</version>
         </dependency> -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-writer</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-mosaic</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-cache</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-biophysical</artifactId>
-            <version>${s2tbx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>lib-gdal</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-forest-cover-change</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <!-- S3 -->
         <dependency>

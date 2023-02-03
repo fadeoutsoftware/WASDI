@@ -18,10 +18,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.14.1</jackson.version>
-        <snap.version>8.0.8</snap.version>
-        <s1tbx.version>8.0.4</s1tbx.version>
-        <s2tbx.version>8.0.4</s2tbx.version>
-        <s3tbx.version>8.0.4</s3tbx.version>
+        <s1tbx.version>9.0.2</s1tbx.version>
+        <s3tbx.version>9.0.3</s3tbx.version>
         <probav.version>2.2.0</probav.version>
     </properties>
 
@@ -32,6 +30,7 @@
             <url>http://download.java.net/maven/2/</url>
             <layout>default</layout>
         </repository>
+<!--
         <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
@@ -45,6 +44,7 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
+-->
     </repositories>
 
     <pluginRepositories>
@@ -140,37 +140,6 @@
             <artifactId>wasdishared</artifactId>
             <version>${revision}</version>
         </dependency>
-        <!-- SNAP -->
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-core</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-engine-utilities</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-bigtiff</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-rcp</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-raster</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-ndvi</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
@@ -201,62 +170,62 @@
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot6-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <!-- dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-jp2-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>5.0.0</version>
         </dependency> -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-reader</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-writer</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-mosaic</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-cache</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-biophysical</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>lib-gdal</artifactId>
-            <version>${s2tbx.version}</version>
+            <version>9.0.0</version>
         </dependency>
         <!-- S3 -->
         <dependency>

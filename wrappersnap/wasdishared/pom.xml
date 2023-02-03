@@ -17,6 +17,7 @@
 
     <properties>
         <jackson.version>2.14.1</jackson.version>
+        <probav.version>2.2.0</probav.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
@@ -112,32 +113,32 @@
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>8.0.3</version>
+            <version>9.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-calibration</artifactId>
-            <version>8.0.3</version>
+            <version>9.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>8.0.3</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
-            <version>8.0.3</version>
+            <version>9.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-kit</artifactId>
-            <version>2.2.0</version>
+            <version>${probav.version}</version>
         </dependency>
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-reader</artifactId>
-            <version>2.2.0</version>
+            <version>${probav.version}</version>
         </dependency>
         <!-- END OF ESA SNAP -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
@@ -203,12 +204,11 @@
             <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
-		<dependency>
-		    <groupId>com.amazonaws</groupId>
-		    <artifactId>aws-java-sdk-s3</artifactId>
-		    <version>1.12.392</version>
-		</dependency>
-
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.392</version>
+        </dependency>
     </dependencies>
 
     <repositories>
