@@ -268,8 +268,13 @@ public class WorkflowsResource {
 
             oWorkflow.getInputNodeNames().clear();
             oWorkflow.getOutputNodeNames().clear();
+            
+            fillWorkflowIONodes(oWorkflowXmlFileTemp, oWorkflow);
+            
             // checks that the graph field is valid by checking the nodes
             try (FileReader oFileReader = new FileReader(oWorkflowXmlFileTemp)) {
+            	
+            	/*
                 // Read the graph
                 Graph oGraph;
                 try {
@@ -297,6 +302,8 @@ public class WorkflowsResource {
                     Files.delete(oWorkflowXmlFileTemp.toPath());
                     return Response.status(Status.NOT_MODIFIED).build();
                 }
+                */
+            	
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
                 // Delete the temp file
@@ -634,16 +641,10 @@ public class WorkflowsResource {
             oResult.setStringValue("Invalid session.");
             return oResult;
         }
-
-        if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
-            oResult.setStringValue("Invalid user.");
-            return oResult;
-        }
-
+        
         try {
 
             // Check if the processor exists and is of the user calling this API
-            oWorkflowRepository = new SnapWorkflowRepository();
             SnapWorkflow oWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
             if (oWorkflow == null) {
@@ -655,11 +656,6 @@ public class WorkflowsResource {
                 oResult.setStringValue("Impossible to autoshare.");
                 return oResult;
             }
-            /* This was ONLY THE OWNER CAN ADD SHARE
-            if (!oWorkflow.getUserId().equals(oRequesterUser.getUserId())) {
-                oResult.setStringValue("Unauthorized");
-                return oResult;
-            }*/
 
             // Check the destination user
             UserRepository oUserRepository = new UserRepository();
@@ -1109,7 +1105,7 @@ public class WorkflowsResource {
         return null;
     }    
 
-    protected void fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
+    protected boolean fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
 		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
 		
 		DocumentBuilder oDocBuilder;
@@ -1153,10 +1149,12 @@ public class WorkflowsResource {
 			
 				}
 			}
+			
+			return true;
 
 		} catch (Exception oE1) {
-			
 			WasdiLog.errorLog("WorkflowsResource.fillWorkflowIONodes: " + oE1);
+			return false;
 		}	
     }
 }
