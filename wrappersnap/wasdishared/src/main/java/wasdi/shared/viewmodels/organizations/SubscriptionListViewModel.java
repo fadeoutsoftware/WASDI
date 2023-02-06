@@ -25,7 +25,7 @@ public class SubscriptionListViewModel {
 //	private String organizationId;
 	private String organizationName;
 	private String reason;
-//	private boolean buySuccess;
+	private boolean buySuccess;
 	private boolean adminRole;
 
 }

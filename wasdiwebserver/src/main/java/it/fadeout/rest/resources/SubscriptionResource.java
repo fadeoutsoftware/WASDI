@@ -215,9 +215,15 @@ public class SubscriptionResource {
 			// Get requested subscription
 			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
+			if (oSubscription == null) {
+				WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: the subscription cannot be found, aborting");
+
+				return oVM;
+			}
+
 			String sOrganizationName = null;
 
-			if (oSubscription != null && oSubscription.getOrganizationId() != null) {
+			if (oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
 
@@ -268,7 +274,7 @@ public class SubscriptionResource {
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
 		oSubscription.setSubscriptionId(Utils.getRandomName());
-		oSubscription.setBuyDate(Utils.nowInMillis());
+//		oSubscription.setBuyDate(Utils.nowInMillis());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
@@ -733,6 +739,7 @@ public class SubscriptionResource {
 		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
 		oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionListViewModel.setReason(sReason);
+		oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
 		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
 
