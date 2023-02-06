@@ -102,6 +102,7 @@
                 <th>Subscription Type</th>
                 <th>Subscription Owner</th>
                 <th>Organization</th>
+                <th>Status</th>
                 <th>Reason</th>
 
                 <th></th>
@@ -116,6 +117,7 @@
                 <td>{{oSubscription.typeName}}</td>
                 <td>{{oSubscription.ownerUserId}}</td>
                 <td>{{oSubscription.organizationName}}</td>
+                <td><span class="text-success" ng-show="oSubscription.buySuccess">Paid</span><span class="text-warning" ng-show="!oSubscription.buySuccess">Draft</span></td>
                 <td>{{oSubscription.reason}}</td>
 
                 <td class="over-icon">

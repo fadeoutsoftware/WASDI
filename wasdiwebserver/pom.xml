@@ -170,8 +170,14 @@
             <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
-    </dependencies>
 
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>22.0.0</version>
+		</dependency>
+
+    </dependencies>
     <build>
         <finalName>wasdiwebserver</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>

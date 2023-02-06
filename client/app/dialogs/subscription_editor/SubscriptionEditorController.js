@@ -1,12 +1,14 @@
 SubscriptionEditorController = (function () {
     function SubscriptionEditorController(
         $scope,
+        $window,
         oClose,
         oExtras,
         oSubscriptionService,
         oOrganizationService
     ) {
         this.m_oScope = $scope;
+        this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         console.log("SubscriptionEditorController | oExtras: ",  oExtras);
@@ -100,15 +102,34 @@ SubscriptionEditorController = (function () {
         let oController = this;
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
-            console.log(" SubscriptionEditorController.saveSubscription | data.data: ", data.data);
+            console.log("SubscriptionEditorController.saveSubscription | data.data: ", data.data);
             if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
+
+                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.stringValue).then(function (data) {
+                    console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | data.data: ", data.data);
+                    if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
+                        let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
+                        utilsVexCloseDialogAfter(4000, oDialog);
+
+                        let sUrl = data.data.stringValue;
+                        console.log(" SubscriptionEditorController.saveSubscription | getStripePaymentUrl | sUrl: ", sUrl);
+
+                        oController.m_oWindow.open(sUrl, '_blank');
+                    }
+
+                    oController.m_oScope.close();
+                }, function (error) {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN RETRIEVING THE PAYMENT URL");
+
+                    oController.m_oScope.close();
+                });
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
-            }
 
-            oController.m_oScope.close();
+                oController.m_oScope.close();
+            }
 
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
@@ -194,6 +215,7 @@ SubscriptionEditorController = (function () {
 
     SubscriptionEditorController.$inject = [
         '$scope',
+        '$window',
         'close',
         'extras',
         'SubscriptionService',

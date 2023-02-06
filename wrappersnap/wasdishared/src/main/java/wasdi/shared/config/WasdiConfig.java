@@ -112,6 +112,11 @@ public class WasdiConfig {
 	public SftpConfig sftp;
 	
 	/**
+	 * Stripe configuration
+	 */
+	public StripeConfig stripe;
+	
+	/**
 	 * Notifications configuration (mails sent from WASDI to users)
 	 */
 	public NotificationsConfig notifications;
