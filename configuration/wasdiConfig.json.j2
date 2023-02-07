@@ -276,6 +276,9 @@
 
         ]
     },
+    "stripe": {
+        "apiKey": "{{ dictWasdiConfiguration.stripe.apiKey }}"
+    },
     "traefik": {
 {% if dictWasdiConfiguration.traefik.firewallWhiteList == [] %}
         "firewallWhiteList": [],
