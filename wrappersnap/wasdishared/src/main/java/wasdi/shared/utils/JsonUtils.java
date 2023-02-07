@@ -24,26 +24,41 @@ public final class JsonUtils {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 
+	/**
+	 * Convert a Map<String, Object> to a string JSON representation
+	 * @param aoJSONMap Map to render in Json
+	 * @return String with the JSON
+	 */
 	public static String stringify(Map<String, Object> aoJSONMap) {
 		try {
 			return s_oMapper.writeValueAsString(aoJSONMap);
 		} catch (JsonProcessingException oE) {
-			WasdiLog.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
+			WasdiLog.errorLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
 		return "";
 	}
-
+	
+	/**
+	 * Obtains the string representation of an object
+	 * @param object Object to render as JSON
+	 * @return String with the JSON
+	 */
 	public static String stringify(Object object) {
 		try {
 			return s_oMapper.writeValueAsString(object);
 		} catch (JsonProcessingException oE) {
-			WasdiLog.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
+			WasdiLog.errorLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
 		return "";
 	}
-
+	
+	/**
+	 * Converts a JSON to a Map<String Object>
+	 * @param sJson String with the JSON
+	 * @return Corresponding Java Map Object
+	 */
 	public static Map<String, Object> jsonToMapOfObjects(String sJson) {
 
 		Map<String, Object> aoJSONMap;
@@ -57,7 +72,12 @@ public final class JsonUtils {
 
 		return null;
 	}
-
+	
+	/**
+	 * Converts a JSON in a Map of strings
+	 * @param sJson String with the JSON
+	 * @return Corresponding Java Map Object
+	 */
 	public static Map<String, String> jsonToMapOfStrings(String sJson) {
 
 		Map<String, String> aoJSONMap;
@@ -66,12 +86,17 @@ public final class JsonUtils {
 
 			return aoJSONMap;
 		} catch (JsonProcessingException oE) {
-			WasdiLog.debugLog("JsonUtils.jsonToMapOfStrings: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.errorLog("JsonUtils.jsonToMapOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;
 	}
-
+	
+	/**
+	 * Converts a JSON to a list of strings 
+	 * @param sJson String with the JSON
+	 * @return Corresponding Java Map Object
+	 */
 	public static List<String> jsonToListOfStrings(String sJson) {
 
 		List<String> aoJSONList = new ArrayList<>();
@@ -80,12 +105,17 @@ public final class JsonUtils {
 
 			return aoJSONList;
 		} catch (JsonProcessingException oE) {
-			WasdiLog.debugLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.errorLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return aoJSONList;
 	}
 
+	/**
+	 * Converts a JSON to a list of Maps
+	 * @param sJson String with the JSON
+	 * @return Corresponding Java Map Object
+	 */
 	public static List<Map<String, Object>> jsonToListOfMapOfObjects(String sJson) {
 
 		List<Map<String, Object>> aoJSONList;
@@ -94,12 +124,18 @@ public final class JsonUtils {
 
 			return aoJSONList;
 		} catch (JsonProcessingException oE) {
-			WasdiLog.debugLog("JsonUtils.jsonToListOfMapOfObjects: could not parse the JSON payload due to " + oE + ".");
+			WasdiLog.errorLog("JsonUtils.jsonToListOfMapOfObjects: could not parse the JSON payload due to " + oE + ".");
 		}
 
 		return null;
 	}
-
+	
+	/**
+	 * Get a property of the map
+	 * @param aoJSONMap Java Map
+	 * @param sKey Key
+	 * @return corresponding object
+	 */
 	public static String getProperty(Map<String, String> aoJSONMap, String sKey) {
 		if (aoJSONMap == null) {
 			return null;
@@ -107,7 +143,13 @@ public final class JsonUtils {
 
 		return aoJSONMap.get(sKey);
 	}
-
+	
+	/**
+	 * Get a nested property from a map 
+	 * @param aoJSONMap Java Map
+	 * @param sPath keys, splitted by "."
+	 * @return corresponding object
+	 */
 	public static Object getPropertyByPath(Map<String, Object> aoJSONMap, String sPath) {
 		if (aoJSONMap == null) {
 			return null;
@@ -127,7 +169,13 @@ public final class JsonUtils {
 
 		return oTarget;
 	}
-
+	
+	/**
+	 * Get a nested property from an Object
+	 * @param oObject
+	 * @param sPath
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public static Object getProperty(Object oObject, String sPath) {
 		if (oObject == null || sPath == null) {
@@ -137,30 +185,62 @@ public final class JsonUtils {
 		String[] aoTokens = sPath.split("\\.");
 
 		if (oObject instanceof Map<?, ?>) {
-			Map<String, Object> map = (Map<String, Object>) oObject;
+			Map<String, Object> aoMap = (Map<String, Object>) oObject;
 
 			if (aoTokens.length == 1) {
-				return map.get(sPath);
+				return aoMap.get(sPath);
 			}
 
-			return getProperty(map.get(aoTokens[0]), sPath.substring(sPath.indexOf(".") + 1));
+			return getProperty(aoMap.get(aoTokens[0]), sPath.substring(sPath.indexOf(".") + 1));
 		} else if (oObject instanceof List<?>) {
-			List<?> list = (List<?>) oObject;
+			List<?> aoList = (List<?>) oObject;
 
-			int ordinal = Integer.parseInt(aoTokens[0]);
+			int iOrdinal = Integer.parseInt(aoTokens[0]);
 
-			if (list.size() <= ordinal) {
+			if (aoList.size() <= iOrdinal) {
 				return null;
 			}
 
 			if (aoTokens.length == 1) {
-				return list.get(ordinal);
+				return aoList.get(iOrdinal);
 			}
 
-			return getProperty(list.get(ordinal), sPath.substring(sPath.indexOf(".") + 1));
+			return getProperty(aoList.get(iOrdinal), sPath.substring(sPath.indexOf(".") + 1));
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Get the Json Schema compatible type description from a Java Object
+	 * @param oValue
+	 * @return
+	 */
+	public static String getTypeDescriptionString(Object oValue) {
+		try {
+			
+			if (oValue instanceof String) {
+				return "string";
+			}
+			else if (oValue instanceof Integer) {
+				return "number";
+			}
+			else if (oValue instanceof Float || oValue instanceof Double) {
+				return "double";
+			}			
+			else if (oValue.getClass().isArray()) {
+				return "array";
+			}
+			else if (oValue instanceof Boolean) {
+				return "boolean";
+			}			
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("JsonUtils.getTypeDescriptionString: " + oEx + ".");
+		}
+		
+		return "";
 	}
 
 }

@@ -167,7 +167,7 @@ public class ProcessWorkspaceResource {
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 
 		}
@@ -188,7 +188,7 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byusr")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ogc") Boolean bOgcOnly) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser()");
 
@@ -209,15 +209,28 @@ public class ProcessWorkspaceResource {
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			boolean bOgc = false;
+
+			if (bOgcOnly!=null) bOgc = (boolean) bOgcOnly;
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.getProcessByUser(oUser.getUserId());
+			List<ProcessWorkspace> aoProcess = null;
+
+			if (bOgc) {
+				// Get Process List
+				aoProcess = oRepository.getOGCProcessByUser(oUser.getUserId());				
+			}
+			else {
+				// Get Process List
+				aoProcess = oRepository.getProcessByUser(oUser.getUserId());				
+			}
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 		}
 		catch (Exception oEx) {
@@ -255,11 +268,6 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid session, aborting");
-				return aoProcessList;
-			}
-			
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication session invalid aborting");
 				return aoProcessList;
 			}
 			
@@ -532,50 +540,6 @@ public class ProcessWorkspaceResource {
 		return oReturnStats;
 	}
 	
-	/**
-	 * Convert a ProcessWorkspace entity in the corresponding View Model
-	 * @param oProcess ProcessWorkspace Entity
-	 * @return ProcessWorkspaceViewModel
-	 */
-	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
-		//WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
-		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
-		try {
-			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
-			if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
-				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
-			}
-			else {
-				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
-			}
-			
-			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeTimestamp())) {
-				oViewModel.setLastChangeDate(Utils.getFormatDate(oProcess.getLastStateChangeTimestamp()));
-			}
-			
-			oViewModel.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
-			oViewModel.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
-			oViewModel.setOperationType(oProcess.getOperationType());
-			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
-				oViewModel.setOperationSubType(oProcess.getOperationSubType());
-			}
-			else {
-				oViewModel.setOperationSubType("");
-			}
-			
-			oViewModel.setProductName(oProcess.getProductName());
-			oViewModel.setUserId(oProcess.getUserId());
-			oViewModel.setFileSize(oProcess.getFileSize() == null ? "" : oProcess.getFileSize());
-			oViewModel.setPid(oProcess.getPid());
-			oViewModel.setStatus(oProcess.getStatus());
-			oViewModel.setProgressPerc(oProcess.getProgressPerc());
-			oViewModel.setProcessObjId(oProcess.getProcessObjId());
-			oViewModel.setPayload(oProcess.getPayload());
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel: " + oEx);
-		}
-		return oViewModel;
-	}
 	
 	/**
 	 * Get the last 5 process workspaces of a workspace. The limit 5 is hard coded in the repository query.
@@ -621,7 +585,7 @@ public class ProcessWorkspaceResource {
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 
 		}
@@ -670,7 +634,7 @@ public class ProcessWorkspaceResource {
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+				aoProcessList.add(ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcess));
 			}
 
 		}
@@ -788,7 +752,7 @@ public class ProcessWorkspaceResource {
 			}
 
 			// check that the user can access the processWorkspace
-			if(!PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sToKillProcessObjId)) {
+			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
 				return Response.status(403).build();
 			}
@@ -846,7 +810,7 @@ public class ProcessWorkspaceResource {
 
 			// Get Process List
 			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessWorkspaceId);
-			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			oProcess = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
 
 		}
 		catch (Exception oEx) {
@@ -918,7 +882,7 @@ public class ProcessWorkspaceResource {
 				return null;
 			}
 			
-			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+			if(PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
 			}
@@ -983,7 +947,7 @@ public class ProcessWorkspaceResource {
 
 			oRepository.updateProcess(oProcessWorkspace);
 			
-			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			oProcess = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
 			
 			WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", Status updated : " +  oProcess.getStatus());
 
@@ -1075,7 +1039,7 @@ public class ProcessWorkspaceResource {
 			oRepository.updateProcess(oProcessWorkspace);
 			
 			// Create return object
-			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			oProcess = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
 
 		}
 		catch (Exception oEx) {
@@ -1130,7 +1094,7 @@ public class ProcessWorkspaceResource {
 
 			oRepository.updateProcess(oProcessWorkspace);
 			
-			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+			oProcess = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
 
 		}
 		catch (Exception oEx) {
@@ -1164,7 +1128,7 @@ public class ProcessWorkspaceResource {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: invalid session" );
 				return null;
 			}
-			if(PermissionsUtils.canUserAccessProcess(oUser.getUserId(), sProcessObjId)) {
+			if(PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 				return oProcessWorkspaceRepository.getPayload(sProcessObjId);
 			} else {
