@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
-public class StringListSchema extends Schema {
-	public StringListSchema() {
+public class StringInListSchema extends Schema {
+	public StringInListSchema() {
 		type = "string";
 	}
 	
