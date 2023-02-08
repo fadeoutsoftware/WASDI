@@ -1,5 +1,6 @@
 package ogc.wasdi.processes;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.StringUtils;
-import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.Link;
@@ -52,6 +52,9 @@ public class OgcProcesses extends ResourceConfig {
 	 */
 	@PostConstruct
 	public void initOgcProcesses() throws URISyntaxException {
+		
+		String sPath = new File(WasdiLog.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+		System.out.println(sPath);
 		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 		
 		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
