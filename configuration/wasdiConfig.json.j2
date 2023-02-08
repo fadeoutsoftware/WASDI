@@ -277,7 +277,17 @@
         ]
     },
     "stripe": {
-        "apiKey": "{{ dictWasdiConfiguration.stripe.apiKey }}"
+        "apiKey": "{{ dictWasdiConfiguration.stripe.apiKey }}",
+        "products": [
+{% for sCurrentProduct in dictWasdiConfiguration.stripe.products %}
+            {
+                "id": "{{ sCurrentProduct }}",
+                "url": "{{ dictWasdiConfiguration.stripe.products[sCurrentProduct].url }}"
+            }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        ]
     },
     "traefik": {
 {% if dictWasdiConfiguration.traefik.firewallWhiteList == [] %}
