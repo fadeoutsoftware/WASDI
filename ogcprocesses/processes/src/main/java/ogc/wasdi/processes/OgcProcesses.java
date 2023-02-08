@@ -16,6 +16,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import ogc.wasdi.processes.providers.JerseyMapperProvider;
 import ogc.wasdi.processes.providers.OgcProcessesViewModelBodyWriter;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
@@ -43,6 +44,7 @@ public class OgcProcesses extends ResourceConfig {
 	public OgcProcesses() {
 		packages(true, "ogc.wasdi.processes.rest.resources");
 		register(JacksonFeature.class);
+		register(JerseyMapperProvider.class);
 		register(OgcProcessesViewModelBodyWriter.class);
 	}
 
@@ -240,7 +242,7 @@ public class OgcProcesses extends ResourceConfig {
 					
 					if (sUri.contains("?")) {
 						// Get the address
-						String [] asUriParts = sUri.split("?");
+						String [] asUriParts = sUri.split("\\?");
 						
 						if (asUriParts != null) {
 							if (asUriParts.length>0) {
