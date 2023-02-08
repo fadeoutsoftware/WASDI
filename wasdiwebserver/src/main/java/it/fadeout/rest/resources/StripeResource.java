@@ -2,6 +2,8 @@ package it.fadeout.rest.resources;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -21,6 +23,7 @@ import com.stripe.model.checkout.Session.CustomerDetails;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
+import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.utils.PermissionsUtils;
@@ -85,12 +88,20 @@ public class StripeResource {
 				return oResult;
 			}
 
-			if (sSubscriptionType.equals(SubscriptionType.OneDayStandard.name())) {
-				oResult.setBoolValue(true);
-				oResult.setStringValue("https://buy.stripe.com/test_6oEaGo7gY3Ve83m8wy" + "?client_reference_id=" + sSubscriptionId);
-			} else if (sSubscriptionType.equals(SubscriptionType.OneWeekStandard.name())) {
-				oResult.setBoolValue(true);
-				oResult.setStringValue("https://buy.stripe.com/test_5kAg0I0SAajC97q5kn" + "?client_reference_id=" + sSubscriptionId);
+			List<StripeProductConfig> aoProductConfigList = WasdiConfig.Current.stripe.products;
+
+			Map<String, String> aoProductConfigMap = aoProductConfigList.stream()
+					.collect(Collectors.toMap(t -> t.id, t -> t.url));
+
+			SubscriptionType oSubscriptionType = SubscriptionType.get(sSubscriptionType);
+
+			if (oSubscriptionType != null) {
+				String sBaseUrl = aoProductConfigMap.get(sSubscriptionType);
+
+				if (!Utils.isNullOrEmpty(sBaseUrl)) {
+					oResult.setBoolValue(true);
+					oResult.setStringValue(sBaseUrl + "?client_reference_id=" + sSubscriptionId);
+				}
 			}
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("StripeResource.getStripePaymentUrl: " + oEx);
