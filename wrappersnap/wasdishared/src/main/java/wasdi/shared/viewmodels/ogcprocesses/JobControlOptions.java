@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum JobControlOptions {
 	SYNC_EXECUTE("sync-execute"),
@@ -12,7 +13,12 @@ public enum JobControlOptions {
 	JobControlOptions(String sValue) {
 		this.value = sValue;
 	}
-
+	
+	@JsonValue
+	public String getValue() {
+		return value;
+	}
+	
 	@Override
 	public String toString() {
 		return String.valueOf(value);

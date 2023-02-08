@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TransmissionMode {
 	VALUE("value"),
@@ -12,11 +13,11 @@ public enum TransmissionMode {
 		this.value = sValue;
 	}
 
-	@Override
-	public String toString() {
-		return String.valueOf(value);
+	@JsonValue
+	public String getValue() {
+		return value;
 	}
-
+	
 	@JsonCreator
 	public static TransmissionMode fromValue(String sText) {
 		for (TransmissionMode oMode : TransmissionMode.values()) {
