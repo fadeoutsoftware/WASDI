@@ -246,10 +246,10 @@ public class ProcessesResource {
 			
 			// Read the processor entity
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessID);
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);
 			
 			// Chech if the processor is available in WASDI
-			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessID);
+			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
 						
 			if (!bFound) {
 				ApiException oApiException = new ApiException();
@@ -466,9 +466,12 @@ public class ProcessesResource {
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
 			}
 			
+			// Read the processor entity
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);			
 			
 			// Chech if the processor is available in WASDI
-			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessID);
+			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
 						
 			if (!bFound) {
 				// No, return the not found Exception
@@ -489,9 +492,6 @@ public class ProcessesResource {
 				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
 			}
 			
-			// Read the processor entity
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessID);
 			
 			// Set the operation type: can be run processor or idl or matlab
 			String sOperationType = LauncherOperations.RUNPROCESSOR.name();
