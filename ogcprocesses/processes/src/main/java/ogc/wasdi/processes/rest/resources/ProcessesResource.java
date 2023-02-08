@@ -156,8 +156,15 @@ public class ProcessesResource {
 					ProcessSummary oSummary = new ProcessSummary();
 					
 					// Copy the attributes
-					oSummary.setId(oProcessor.getProcessorId());
-					oSummary.setTitle(oProcessor.getName());
+					oSummary.setId(oProcessor.getName());
+					
+					if (Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+						oSummary.setTitle(oProcessor.getName());
+					}
+					else {
+						oSummary.setTitle(oProcessor.getFriendlyName());
+					}
+					
 					oSummary.setDescription(oProcessor.getDescription());
 					oSummary.setVersion(oProcessor.getVersion());
 					oSummary.getJobControlOptions().add(JobControlOptions.ASYNC_EXECUTE);
@@ -273,9 +280,16 @@ public class ProcessesResource {
     		wasdi.shared.viewmodels.ogcprocesses.Process oProcessViewModel = new wasdi.shared.viewmodels.ogcprocesses.Process();
     		
     		// Identifier
-    		oProcessViewModel.setId(oProcessor.getProcessorId());
+    		oProcessViewModel.setId(oProcessor.getName());
+    		
     		// Title
-    		oProcessViewModel.setTitle(oProcessor.getName());
+			if (Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+				oProcessViewModel.setTitle(oProcessor.getName());
+			}
+			else {
+				oProcessViewModel.setTitle(oProcessor.getFriendlyName());
+			}
+			
     		// Narrative Description
     		oProcessViewModel.setDescription(oProcessor.getDescription());
     		// Keywords
