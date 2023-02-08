@@ -248,9 +248,13 @@ public class ProcessesResource {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);
 			
-			// Chech if the processor is available in WASDI
-			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
-						
+			boolean bFound = false;
+			
+			if (oProcessor!=null) {
+				// Chech if the processor is available in WASDI
+				bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());				
+			}
+									
 			if (!bFound) {
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("no-such-process");
