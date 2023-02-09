@@ -84,7 +84,7 @@ public class JobsResource {
 			
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				// We need to valorize the sessionId
-				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
 			
 			// Initialize the pagination
@@ -260,7 +260,7 @@ public class JobsResource {
 			
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				// We need to valorize the sessionId
-				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
 			    		
     		// Security check: in case of no node we assume main node
@@ -389,7 +389,7 @@ public class JobsResource {
 			
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				// We need to valorize the sessionId
-				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
 			    		
     		// Security check: in case of no node we assume main node
@@ -482,7 +482,7 @@ public class JobsResource {
 			
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				// We need to valorize the sessionId
-				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
 			    		
     		// Security check: in case of no node we assume main node
