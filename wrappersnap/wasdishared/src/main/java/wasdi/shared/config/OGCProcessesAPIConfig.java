@@ -66,4 +66,12 @@ public class OGCProcessesAPIConfig {
 	 * Default application to use for validation mode
 	 */
 	public String validationEchoProcessId = "hellowasdi";
+	/**
+	 * Number of ms to sleep when polling WASDI to ask the status of a synch execution
+	 */
+	public int waitProcessSleepTimeout = 2000;
+	/**
+	 * Maximum cumulated timeout for the cycle polling for the status of a synch execution
+	 */
+	public int waitProcessMaxTimeout = 600000;
 }
