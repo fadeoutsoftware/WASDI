@@ -4,7 +4,11 @@ import java.util.ArrayList;
 
 import wasdi.shared.viewmodels.ogcprocesses.Schema;
 
-public class OneOfSchema {
+public class OneOfSchema extends Schema {
+	
+	public OneOfSchema() {
+		type = null;
+	}
 	
 	public ArrayList<Schema> oneOf = new ArrayList<>();
 }

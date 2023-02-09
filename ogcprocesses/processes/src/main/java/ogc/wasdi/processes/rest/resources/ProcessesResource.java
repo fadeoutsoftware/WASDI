@@ -47,7 +47,6 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ogcprocesses.ApiException;
 import wasdi.shared.viewmodels.ogcprocesses.Bbox;
-import wasdi.shared.viewmodels.ogcprocesses.Execute;
 import wasdi.shared.viewmodels.ogcprocesses.InputDescription;
 import wasdi.shared.viewmodels.ogcprocesses.JobControlOptions;
 import wasdi.shared.viewmodels.ogcprocesses.Link;
@@ -65,8 +64,8 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.BooleanSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DateSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DoubleSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.ImageSchema;
-import wasdi.shared.viewmodels.ogcprocesses.schemas.MixedSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.NumericSchema;
+import wasdi.shared.viewmodels.ogcprocesses.schemas.OneOfSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringArraySchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringInListSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringSchema;
@@ -433,21 +432,25 @@ public class ProcessesResource {
 				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
 					if (sProcessID.equals(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
 						// Adding Mixed Mode for validation. 
-						MixedSchema oMixed = new MixedSchema();
-						oMixed.schema.oneOf.add(ImageSchema.getJpg());
-						oMixed.schema.oneOf.add(ImageSchema.getTiff());
+						OneOfSchema oOneOf = new OneOfSchema();
+						oOneOf.oneOf.add(ImageSchema.getJpg());
+						oOneOf.oneOf.add(ImageSchema.getTiff());
 						
 						InputDescription oInputDescription = new InputDescription();
-						oInputDescription.setSchema(oMixed);
+						oInputDescription.setSchema(oOneOf);
 						oInputDescription.setMinOccurs(1);
 						oInputDescription.setMaxOccurs(1);
+						oInputDescription.setMetadata(null);
+						oInputDescription.setKeywords(null);
 						oInputDescription.setTitle("Mixed Input");
 						
 						oProcessViewModel.getInputs().put("mixed_input", oInputDescription);
 						
 						OutputDescription oOutputDescription = new OutputDescription();
 						oOutputDescription.setTitle("Mixed Output");
-						oOutputDescription.setSchema(oMixed);
+						oOutputDescription.setSchema(oOneOf);
+						oOutputDescription.setMetadata(null);
+						oOutputDescription.setKeywords(null);
 						
 						oProcessViewModel.getOutputs().put("mixed_output", oOutputDescription);
 					}					
