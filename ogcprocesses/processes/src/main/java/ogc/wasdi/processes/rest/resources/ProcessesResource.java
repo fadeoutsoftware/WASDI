@@ -193,8 +193,12 @@ public class ProcessesResource {
 				iAvailableApps++;
 			}
 			
+			WasdiLog.debugLog("ProcessesResource.getProcesses: found " + iAvailableApps + " Apps");
+			
 			// Did we finish all the pages?
 			if (iAvailableApps>oiOffset+oiLimit) {
+				
+				WasdiLog.debugLog("ProcessesResource.getProcesses: adding next and prev links");
 				
 				int iNextOffset = oiOffset+oiLimit;
 				
@@ -243,13 +247,13 @@ public class ProcessesResource {
     public Response getProcessDescription(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID) {
     	try {
     		if (sProcessID==null) sProcessID = "";
-    		WasdiLog.debugLog("ProcessesResource.getProcesses processID="+sProcessID);
+    		WasdiLog.debugLog("ProcessesResource.getProcessDescription processID="+sProcessID);
     		
 			// Check User 
 			User oUser = OgcProcesses.getUserFromSession(sSessionId, sAuthorization);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ProcessesResource.getProcesses: invalid session");
+				WasdiLog.debugLog("ProcessesResource.getProcessDescription: invalid session");
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
 			}
 			
@@ -260,11 +264,13 @@ public class ProcessesResource {
 			boolean bFound = false;
 			
 			if (oProcessor!=null) {
-				// Chech if the processor is available in WASDI
+				// Check if the processor is available in WASDI
 				bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());				
 			}
 									
 			if (!bFound) {
+				WasdiLog.debugLog("ProcessesResource.getProcessDescription: processor invalid or inaccessible");
+				
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("no-such-process");
 				oApiException.setType("http://www.opengis.net/def/exceptions/ogcapi-processes-1/1.0/no-such-process");
@@ -335,6 +341,8 @@ public class ProcessesResource {
 			boolean bGenerateInputsFromSample = true;
 			
 			if (aoAppUi!= null) {
+				WasdiLog.debugLog("ProcessesResource.getProcessDescription: Processor has an UI");
+				
 				try {					
 					// Check the render as strings flag
 					Boolean bRenderAsStrings = false;
@@ -370,11 +378,15 @@ public class ProcessesResource {
 				catch (Exception oUiEx) {
 					WasdiLog.errorLog("ProcessesResource.getProcessDescription: exception generating inputs from Ui " + oUiEx.toString());
 				}				
-				
+			}
+			else {
+				WasdiLog.debugLog("ProcessesResource.getProcessDescription: UI not available");
 			}
 			
 			// Did we managed to extract the inputs from the UI?
 			if (bGenerateInputsFromSample) {
+				WasdiLog.debugLog("ProcessesResource.getProcessDescription: Generate params from the sample");
+				
 				// No: we need to work with the Json Params Sample
 	    		String sParamSampleJson = oProcessor.getParameterSample();
 	    		sParamSampleJson = URLDecoder.decode(sParamSampleJson, StandardCharsets.UTF_8.toString());		
@@ -431,6 +443,8 @@ public class ProcessesResource {
 			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
 				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
 					if (sProcessID.equals(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
+						WasdiLog.debugLog("ProcessesResource.getProcessDescription: VALIDATION MODE: adding Mixed I/O");
+						
 						// Adding Mixed Mode for validation. 
 						OneOfSchema oOneOf = new OneOfSchema();
 						oOneOf.oneOf.add(ImageSchema.getJpg());
@@ -478,6 +492,8 @@ public class ProcessesResource {
 			oProcessViewModel.getOutputs().put("payload", oPayloadOutputDescription);
 			oProcessViewModel.getOutputs().put("workspaceId", oWorkspaceIdOutputDescription);
 			oProcessViewModel.getOutputs().put("files", oFilesOutputDescription);
+			
+			WasdiLog.debugLog("ProcessesResource.getProcessDescription: OGC View Model Done");
 
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oProcessViewModel);
     		oResponse = OgcProcesses.addLinkHeaders(oResponse, oProcessViewModel.getLinks());
@@ -502,7 +518,7 @@ public class ProcessesResource {
     @POST
     @Path("/{processID}/execution")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response executeApplication(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID, Map<String, Object> aoExecute) {
+    public Response executeApplication(@HeaderParam("Prefer") String sPreferHeader, @HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID, Map<String, Object> aoExecute) {
     	try {
     		if (sProcessID==null) sProcessID = "";
     		WasdiLog.debugLog("ProcessesResource.executeApplication processID="+sProcessID);
@@ -511,12 +527,12 @@ public class ProcessesResource {
 			User oUser = OgcProcesses.getUserFromSession(sSessionId, sAuthorization);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ProcessesResource.getProcesses: invalid session");
+				WasdiLog.debugLog("ProcessesResource.executeApplication: invalid session");
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
 			}
 			
 			if (aoExecute==null || !aoExecute.containsKey("inputs")) {
-				WasdiLog.debugLog("ProcessesResource.getProcesses: invalid body");
+				WasdiLog.debugLog("ProcessesResource.executeApplication: invalid body");
 				// We have an error, return the client error
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("error in parameters");
@@ -539,6 +555,7 @@ public class ProcessesResource {
 			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
 						
 			if (!bFound) {
+				WasdiLog.debugLog("ProcessesResource.executeApplication: processor not found or unavailable");
 				// No, return the not found Exception
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("no-such-process");
@@ -570,6 +587,8 @@ public class ProcessesResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an exception creating your workspace")).build();
 			}
 			
+			WasdiLog.debugLog("ProcessesResource.executeApplication: created Workspace " + oWorkspace.getWorkspaceId());
+			
 			// Create  the processor parameter
 			ProcessorParameter oParameter = new ProcessorParameter();
 			
@@ -585,7 +604,7 @@ public class ProcessesResource {
 			oParameter.setVersion(oProcessor.getVersion());
 			oParameter.setOGCProcess(true);
 			
-			// We need to convert the inputs to the WASDI format
+			// We need to convert the OGC inputs to the WASDI format
 			Map<String, Object> aoInputs = (Map<String, Object>) aoExecute.get("inputs");
 			
 			// Start with a default one
@@ -595,6 +614,8 @@ public class ProcessesResource {
 			Map<String, Object> oAppUi = getAppUI(sProcessID);
 			
 			if (oAppUi!=null) {
+				WasdiLog.debugLog("ProcessesResource.executeApplication: UI Available");
+				
 				// Yes we have it: and we render all as strings ?
 				Boolean bRenderAsStrings= false;
 				if (oAppUi.containsKey("renderAsStrings")) {
@@ -663,6 +684,9 @@ public class ProcessesResource {
 					WasdiLog.errorLog("ProcessesResource.executeApplication: error converting inputs, will use the default " + oInEx.toString());
 				}
 			}
+			else {
+				WasdiLog.debugLog("ProcessesResource.executeApplication: UI Not available");
+			}
 			
 			oParameter.setJson(sJson);
 			
@@ -677,8 +701,14 @@ public class ProcessesResource {
 			// call the API to really execute the processor 
 			String sResult = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId));
 			
+			WasdiLog.debugLog("ProcessesResource.executeApplication: execute request done");
+			
         	// Get back the primitive result: it does not work right to go in the catch 
             PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
+            
+            if (!Utils.isNullOrEmpty(sPreferHeader)) {
+            	WasdiLog.infoLog("ProcessesResource.executeApplication: Preference Header: " + sPreferHeader);
+            }
             
 			// We need the creation date
 			Date oCreationDate = new Date(); 
@@ -686,6 +716,9 @@ public class ProcessesResource {
     		StatusInfo oStatusInfo = new StatusInfo();
     		
     		if (oPrimitiveResult.getBoolValue()) {
+    			
+    			WasdiLog.debugLog("ProcessesResource.executeApplication: create success status info");
+    			
         		oStatusInfo.setCreated(oCreationDate);
         		
         		oStatusInfo.setJobID(oPrimitiveResult.getStringValue());
@@ -706,6 +739,8 @@ public class ProcessesResource {
                 oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
     		}
     		else {
+    			WasdiLog.debugLog("ProcessesResource.executeApplication: create error status info");
+    			
         		oStatusInfo.setCreated(oCreationDate);
         		oStatusInfo.setFinished(oCreationDate);
         		oStatusInfo.setProgress(0);

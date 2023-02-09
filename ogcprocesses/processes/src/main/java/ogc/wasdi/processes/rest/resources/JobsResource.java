@@ -111,7 +111,7 @@ public class JobsResource {
 					Map<String, String> asHeaders = new HashMap<String, String>();
 					asHeaders.put("x-session-token", sSessionId);
 					
-					WasdiLog.debugLog("ProcessesResource.getJobsList: calling url: " + sUrl);
+					WasdiLog.debugLog("ProcessesResource.getJobsList: calling WASDI Node at url: " + sUrl);
 					
 					String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
 					
@@ -119,7 +119,6 @@ public class JobsResource {
 						ArrayList<ProcessWorkspaceViewModel> aoProcWs = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
 						aoAllProcs.addAll(aoProcWs);
 					}
-					
 				}
 				catch (Exception e) {
 					WasdiLog.errorLog("JobsResource.getJobsList: exception contacting computing node: " + e.toString());
@@ -131,12 +130,16 @@ public class JobsResource {
     		
     		if (aoAllProcs.size()>0) {
     			
+    			WasdiLog.debugLog("JobsResource.getJobsList: got " + aoAllProcs.size() + " processes. Start filtering");
+    			
     			// Apply the requierd filters
     			filterProcessWorkspaceListFromProcesses(aoAllProcs, asProcesses.toArray(new String[0]));
     			filterProcessWorkspaceListFromStatus(aoAllProcs, asStatus.toArray(new String[0]));
     			filterProcessWorkspaceListFromDateTime(aoAllProcs, sDateTime);
     			filterProcessWorkspaceListFromMinDuration(aoAllProcs, aiMinDuration.toArray(new Integer[0]));
     			filterProcessWorkspaceListFromMaxDuration(aoAllProcs, aiMaxDuration.toArray(new Integer[0]));
+    			
+    			WasdiLog.debugLog("JobsResource.getJobsList: processes after filter: " + aoAllProcs.size());
     			
     			// Make a cycle to the filtered results to extract the valid ones
     			for (int iProcs = oiOffset; iProcs<oiOffset+oiLimit; oiOffset++) {
@@ -152,8 +155,12 @@ public class JobsResource {
     				}    				
     			}
     		}
+    		else {
+    			WasdiLog.debugLog("JobsResource.getJobsList: no process found");
+    		}
     		
     		if (oiOffset+oiLimit<aoAllProcs.size()) {
+    			WasdiLog.debugLog("JobsResource.getJobsList: adding next link");
         		// Next Link
         		Link oNextLink = new Link();
         		
@@ -168,6 +175,7 @@ public class JobsResource {
         		oJobList.getLinks().add(oNextLink);
         		
         		if (oiOffset>0) {
+        			WasdiLog.debugLog("JobsResource.getJobsList: adding prev link");
             		// Prev Link
             		Link oPrevLink = new Link();
             		
@@ -273,6 +281,7 @@ public class JobsResource {
     		
     		// Check the node
     		if (oWorkspace.getNodeCode().equals(WasdiConfig.Current.nodeCode)) {
+    			WasdiLog.debugLog("JobsResource.getJobStatus: process on this node, read db ");
     			// We are in this node: we can read directly from database
     			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
     			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sJobId);
@@ -287,6 +296,7 @@ public class JobsResource {
     			oProcWsViewModel = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
     		}
     		else {
+    			WasdiLog.debugLog("JobsResource.getJobStatus: process on remote node, query results ");
     			// Ask the Proc Workspace to the right node
     			NodeRepository oNodeRepository = new NodeRepository();
     			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
@@ -307,6 +317,8 @@ public class JobsResource {
 				ApiException oApiException = getNotFoundException(sJobId);
 				return Response.status(Status.NOT_FOUND).entity(oApiException).build();        			
     		}
+    		
+    		WasdiLog.debugLog("JobsResource.getJobStatus: WASDI status converted to OGC View Model ");
 
     		// Self link
     		Link oSelfLink = new Link();
@@ -402,8 +414,10 @@ public class JobsResource {
     		
 			NodeRepository oNodeRepository = new NodeRepository();
 			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+			
+			WasdiLog.debugLog("JobsResource.deleteJob: calling delete API");
     		
-    		updateProcessWorkspaceFromNode(sJobId,oNode,sSessionId);
+    		deleteProcessWorkspaceFromNode(sJobId,oNode,sSessionId);
     		
 			// Ask the Proc Workspace to the right node
 			oProcWsViewModel = readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
@@ -414,6 +428,8 @@ public class JobsResource {
     		oStatusInfo.setStatus(StatusCode.DISMISSED);
     		oStatusInfo.setMessage("Job Dismissed");
     		oStatusInfo.setProgress(oProcWsViewModel.getProgressPerc());
+    		
+    		WasdiLog.debugLog("JobsResource.deleteJob: created OGC Status View Model");
     		
     		Link oUpLink = new Link();
     		oUpLink.setHref(OgcProcesses.s_sBaseAddress+"jobs");
@@ -498,6 +514,7 @@ public class JobsResource {
 			
     		// Check the node
     		if (oWorkspace.getNodeCode().equals(WasdiConfig.Current.nodeCode)) {
+    			WasdiLog.debugLog("JobsResource.getJobResults: process on this node, read db");
     			// We are in this node: we can read directly from database
     			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
     			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(sJobId);
@@ -512,6 +529,7 @@ public class JobsResource {
     			oProcWsViewModel = ProcessWorkspaceViewModel.buildProcessWorkspaceViewModel(oProcessWorkspace);
     		}
     		else {
+    			WasdiLog.debugLog("JobsResource.getJobResults: process on remote node, call API");
     			// Ask the Proc Workspace to the right node
     			oProcWsViewModel = readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
     		}
@@ -521,6 +539,8 @@ public class JobsResource {
 				ApiException oApiException = getNotFoundException(sJobId);
 				return Response.status(Status.NOT_FOUND).entity(oApiException).build();    			
     		}
+    		
+    		WasdiLog.debugLog("JobsResource.getJobResults: create OGC Result");
     		
     		Results oResults = new Results();
     		
@@ -693,7 +713,7 @@ public class JobsResource {
 	 * @param sSessionId
 	 * @return
 	 */
-	protected void updateProcessWorkspaceFromNode(String sProcessWorkspaceId, Node oNode, String sSessionId) {
+	protected void deleteProcessWorkspaceFromNode(String sProcessWorkspaceId, Node oNode, String sSessionId) {
 		try {
 			if (oNode.getActive()==false) return;
 			
@@ -706,12 +726,12 @@ public class JobsResource {
 			Map<String, String> asHeaders = new HashMap<String, String>();
 			asHeaders.put("x-session-token", sSessionId);
 			
-			WasdiLog.debugLog("JobsResource.updateProcessWorkspaceFromNode: calling url: " + sUrl);
+			WasdiLog.debugLog("JobsResource.deleteProcessWorkspaceFromNode: calling url: " + sUrl);
 			
 			HttpUtils.httpGet(sUrl, asHeaders);
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("JobsResource.readProcessWorkspaceFromNode: exception contacting computing node: " + oEx.toString());
+			WasdiLog.errorLog("JobsResource.deleteProcessWorkspaceFromNode: exception contacting computing node: " + oEx.toString());
 		}		
 	}
 	
