@@ -26,6 +26,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.config.StripeProductConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SubscriptionRepository;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -112,7 +113,7 @@ public class StripeResource {
 
 	@GET
 	@Path("/confirmation/{CHECKOUT_SESSION_ID}")
-	public StripePaymentDetail confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("StripeResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
 		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
@@ -146,10 +147,37 @@ public class StripeResource {
 				oSubscription.setBuySuccess(true);
 
 				oSubscriptionRepository.updateSubscription(oSubscription);
+
+				sendRabbitMessage(sSubscriptionId, oStripePaymentDetail);
 			}
 		}
 
-		return oStripePaymentDetail;
+		return "<script type=\"text/javascript\">\r\n" + 
+				"setTimeout(\r\n" + 
+				"function ( )\r\n" + 
+				"{\r\n" + 
+				"  self.close();\r\n" + 
+				"}, 1000 );\r\n" + 
+				"</script>";
+	}
+
+	private void sendRabbitMessage(String sSubscriptionId, StripePaymentDetail oStripePaymentDetail) {
+		try {
+			// Search for exchange name
+			String sExchange = WasdiConfig.Current.rabbit.exchange;
+
+			// Set default if is empty
+			if (Utils.isNullOrEmpty(sExchange)) {
+				sExchange = "amq.topic";
+			}
+
+			// Send the Asynch Message to the clients
+			Send oSendToRabbit = new Send(sExchange);
+			oSendToRabbit.SendRabbitMessage(true, "SUBSCRIPTION", sSubscriptionId, oStripePaymentDetail, sSubscriptionId);
+			oSendToRabbit.Free();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("StripeResource.sendRabbitMessage: exception sending asynch notification");
+		}
 	}
 
 	private StripePaymentDetail retrieveStripePaymentDetail(String sCheckoutSessionId) {

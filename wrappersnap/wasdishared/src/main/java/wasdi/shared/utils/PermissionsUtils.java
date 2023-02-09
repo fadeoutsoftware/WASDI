@@ -6,8 +6,8 @@
  */
 package wasdi.shared.utils;
 
-import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.data.OrganizationRepository;
+import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;

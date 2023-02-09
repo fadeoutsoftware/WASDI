@@ -1,10 +1,10 @@
-<div class="modal fade subscription_editor-dialog">
+<div class="modal fade subscription_editor-dialog" >
     <div class="modal-dialog" style="width: 60vw">
         <div class="modal-content">
             <div class="modal-header">
                 <h4>Manage Subscription</h4>
             </div>
-            <div class="modal-body no-ale-style" style="height: 400px">
+            <div class="modal-body no-ale-style" style="height: 550px">
                 <legend ng-show="m_oController.m_oEditSubscription.subscriptionId == null">
                     {{"DIALOG_ADD_SUBSCRIPTION"|translate}}</legend>
                 <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null && m_oController.m_bEditMode">
@@ -70,8 +70,10 @@
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sStartDate"
+                                    moment-picker="m_oController.m_sStringStart"
                                     today="true"
+                                    start-view="day"
+                                    change="m_oController.selectDate()"
                                 >
                                     <input
                                         class="form-control wasdi-input"
@@ -79,6 +81,7 @@
                                         start-veiw="week"
                                         ng-model="m_oController.m_sStartDate"
                                         ng-model-options="{updateOn: ''}"
+                                       
                                     />
                                     <span class="input-group-addon">
                                         <i class="fa fa-calendar"></i>
@@ -94,7 +97,7 @@
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sEndDate"
+                                    moment-picker="m_oController.m_sStringEnd"
                                     today="true"
                                     ng-readonly="true"
                                 >
@@ -105,8 +108,9 @@
                                         ng-model="m_oController.m_sEndDate"
                                         ng-model-options="{updateOn: 'blur'}"
                                         ng-readonly="true"
+                                        disabled
                                     />
-                                    <span class="input-group-addon">
+                                    <span class="input-group-addon" style="cursor:not-allowed">
                                         <i class="fa fa-calendar"></i>
                                     </span>
                                 </div>

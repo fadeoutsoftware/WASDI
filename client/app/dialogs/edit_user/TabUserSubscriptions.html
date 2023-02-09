@@ -94,8 +94,15 @@
 
     <hr class="divider-line-style1" />
 
+    
+    <div class="loadIcon" ng-hide="!m_oController.m_bIsLoading">
+        <h3>Please wait... Your payment is being processed.</h3>
+        <p><em>If you re-open your list of subscriptions before the process is complete, it may not reflect your change!</em></p>
+        <invader></invader>
+    </div>
+
     <!-- Subscriptions Table -->
-    <table class="table table-hover subscriptions-list">
+    <table class="table table-hover subscriptions-list" ng-hide="m_oController.m_bIsLoading">
         <thead>
             <tr>
                 <th>Subscription Name</th>
