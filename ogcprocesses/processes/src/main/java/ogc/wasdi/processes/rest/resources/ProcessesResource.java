@@ -466,13 +466,13 @@ public class ProcessesResource {
 	 * @param sAuthorization Standard Http Authorization Header
 	 * @param sSessionId WASDI specific x-session-token header
      * @param sProcessID
-     * @param oExecute
+     * @param aoExecute
      * @return
      */
     @POST
     @Path("/{processID}/execution")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response executeApplication(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID, Execute oExecute) {
+    public Response executeApplication(@HeaderParam("Authorization") String sAuthorization, @HeaderParam("x-session-token") String sSessionId, @PathParam("processID") String sProcessID, Map<String, Object> aoExecute) {
     	try {
     		if (sProcessID==null) sProcessID = "";
     		WasdiLog.debugLog("ProcessesResource.executeApplication processID="+sProcessID);
@@ -483,6 +483,22 @@ public class ProcessesResource {
 			if (oUser==null) {
 				WasdiLog.debugLog("ProcessesResource.getProcesses: invalid session");
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
+			}
+			
+			if (aoExecute==null || !aoExecute.containsKey("inputs")) {
+				WasdiLog.debugLog("ProcessesResource.getProcesses: invalid body");
+				// We have an error, return the client error
+				ApiException oApiException = new ApiException();
+				oApiException.setTitle("error in parameters");
+				oApiException.setType("http://www.opengis.net/def/exceptions/ogcapi-processes-1/1.0/no-such-process");
+				
+				if (Utils.isNullOrEmpty(sProcessID)) sProcessID = "";
+				
+				String sDetail = "Processor with id \"" + sProcessID + "\" error in parameters";
+				oApiException.setDetail(sDetail);
+				oApiException.setStatus(400);
+				
+	    		return Response.status(Status.BAD_REQUEST).entity(oApiException).header("WWW-Authenticate", "Basic").build();				
 			}
 			
 			// Read the processor entity
@@ -508,9 +524,8 @@ public class ProcessesResource {
 			
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				// We need to valorize the sessionId
-				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
+				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
-			
 			
 			// Set the operation type: can be run processor or idl or matlab
 			String sOperationType = LauncherOperations.RUNPROCESSOR.name();
@@ -541,7 +556,7 @@ public class ProcessesResource {
 			oParameter.setOGCProcess(true);
 			
 			// We need to convert the inputs to the WASDI format
-			Map<String, Object> aoInputs = oExecute.getInputs();
+			Map<String, Object> aoInputs = (Map<String, Object>) aoExecute.get("inputs");
 			
 			// Start with a default one
 			String sJson = JsonUtils.stringify(aoInputs);
