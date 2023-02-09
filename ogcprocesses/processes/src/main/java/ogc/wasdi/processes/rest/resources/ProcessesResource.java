@@ -582,6 +582,8 @@ public class ProcessesResource {
 				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
 			
+			WasdiLog.debugLog("ProcessesResource.executeApplication: updated sessionId: " + sSessionId);
+			
 			// Set the operation type: can be run processor or idl or matlab
 			String sOperationType = LauncherOperations.RUNPROCESSOR.name();
 			if (oProcessor.getType().equals(ProcessorTypes.IDL)) sOperationType = LauncherOperations.RUNIDL.name();
@@ -620,7 +622,7 @@ public class ProcessesResource {
 			String sJson = JsonUtils.stringify(aoInputs);
 			
 			// Check if we have the app ui
-			Map<String, Object> oAppUi = getAppUI(sProcessID);
+			Map<String, Object> oAppUi = getAppUI(oProcessor.getProcessorId());
 			
 			if (oAppUi!=null) {
 				WasdiLog.debugLog("ProcessesResource.executeApplication: UI Available");
