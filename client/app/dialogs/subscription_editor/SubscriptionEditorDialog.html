@@ -70,9 +70,10 @@
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sStartDate"
+                                    moment-picker="m_oController.m_sStringStart"
                                     today="true"
                                     start-view="day"
+                                    change="m_oController.selectDate()"
                                 >
                                     <input
                                         class="form-control wasdi-input"
@@ -80,6 +81,7 @@
                                         start-veiw="week"
                                         ng-model="m_oController.m_sStartDate"
                                         ng-model-options="{updateOn: ''}"
+                                       
                                     />
                                     <span class="input-group-addon">
                                         <i class="fa fa-calendar"></i>
@@ -95,7 +97,7 @@
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sEndDate"
+                                    moment-picker="m_oController.m_sStringEnd"
                                     today="true"
                                     ng-readonly="true"
                                 >

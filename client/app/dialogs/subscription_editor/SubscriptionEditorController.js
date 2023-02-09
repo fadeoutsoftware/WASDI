@@ -11,8 +11,8 @@ SubscriptionEditorController = (function () {
         this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        console.log("SubscriptionEditorController | oExtras: ",  oExtras);
-        console.log("SubscriptionEditorController | this.m_oExtras: ",  this.m_oExtras);
+        console.log("SubscriptionEditorController | oExtras: ", oExtras);
+        console.log("SubscriptionEditorController | this.m_oExtras: ", this.m_oExtras);
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
@@ -24,6 +24,8 @@ SubscriptionEditorController = (function () {
         this.m_sBuyDate = null;
         this.m_sStartDate = null;
         this.m_sStartDate = null;
+        this.m_sStringStart = null;
+        this.m_sStringEnd = null;
 
         this.initializeDates();
 
@@ -57,6 +59,7 @@ SubscriptionEditorController = (function () {
 
         if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
             this.m_sStartDate = new Date();
+            console.log(this.m_sStartDate)
         } else {
             this.m_sStartDate = new Date(this.m_oEditSubscription.startDate);
         }
@@ -69,6 +72,7 @@ SubscriptionEditorController = (function () {
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("week")) {
                 this.m_sEndDate.setDate(this.m_sStartDate.getDate() + 7);
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("month")) {
+                console.log(this.m_sStartDate.getMonth()+1)
                 this.m_sEndDate.setMonth(this.m_sStartDate.getMonth() + 1);
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("year")) {
                 this.m_sEndDate.setFullYear(this.m_sStartDate.getFullYear() + 1);
@@ -78,8 +82,29 @@ SubscriptionEditorController = (function () {
         }
 
         console.log("SubscriptionEditorController.initializeDates | this.m_sStartDate: ", this.m_sStartDate);
+        console.log(this.m_sEndDate)
     }
+    SubscriptionEditorController.prototype.selectDate = function () {
+        let sTempStart = new Date(this.m_sStringStart);
+        console.log(this.m_sStartDate)
+        this.m_sStartDate = this.m_sStringStart;
 
+        console.log(this.m_sEndDate)
+        if (this.m_oEditSubscription.typeId.toLowerCase().includes("day")) {
+            this.m_sEndDate = new Date(sTempStart.setDate(sTempStart.getDate() + 1));
+
+        } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("week")) {
+            this.m_sEndDate = new Date(sTempStart.setDate(sTempStart.getDate() + 7));
+
+        } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("month")) {
+            this.m_sEndDate = new Date(sTempStart.setMonth(sTempStart.getMonth() + 1));
+            console.log(this.m_sEndDate)
+
+        } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("year")) {
+            this.m_sEndDate = new Date(sTempStart.setFullYear(sTempStart.getFullYear() + 1));
+        }
+
+    }
     SubscriptionEditorController.prototype.saveSubscription = function (sStartDate) {
         console.log("SubscriptionEditorController.saveSubscription | this.m_oEditSubscription: ", this.m_oEditSubscription);
         console.log("SubscriptionEditorController.saveSubscription | this.m_sStartDate: ", this.m_sStartDate);
@@ -157,14 +182,14 @@ SubscriptionEditorController = (function () {
                     oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
                     );
-
+ 
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {
                         if (oValue.typeId == oController.m_oEditSubscription.typeId) {
                             oController.m_oType = oValue;
                         }
                     });
                 }
-
+ 
                 oController.m_bLoadingTypes = false;
             }, function (data) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(
