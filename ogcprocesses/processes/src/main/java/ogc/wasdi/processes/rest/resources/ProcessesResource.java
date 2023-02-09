@@ -64,6 +64,8 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.BboxSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.BooleanSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DateSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DoubleSchema;
+import wasdi.shared.viewmodels.ogcprocesses.schemas.ImageSchema;
+import wasdi.shared.viewmodels.ogcprocesses.schemas.MixedSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.NumericSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringArraySchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringInListSchema;
@@ -425,6 +427,31 @@ public class ProcessesResource {
 					
 					oProcessViewModel.getInputs().put(sKey, oInputDescription);
 				}				
+			}
+			
+			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
+				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
+					if (sProcessID.equals(WasdiConfig.Current.ogcProcessesApi.validationEchoProcessId)) {
+						// Adding Mixed Mode for validation. 
+						MixedSchema oMixed = new MixedSchema();
+						oMixed.schema.oneOf.add(ImageSchema.getJpg());
+						oMixed.schema.oneOf.add(ImageSchema.getTiff());
+						
+						InputDescription oInputDescription = new InputDescription();
+						oInputDescription.setSchema(oMixed);
+						oInputDescription.setMinOccurs(1);
+						oInputDescription.setMaxOccurs(1);
+						oInputDescription.setTitle("Mixed Input");
+						
+						oProcessViewModel.getInputs().put("mixed_input", oInputDescription);
+						
+						OutputDescription oOutputDescription = new OutputDescription();
+						oOutputDescription.setTitle("Mixed Output");
+						oOutputDescription.setSchema(oMixed);
+						
+						oProcessViewModel.getOutputs().put("mixed_output", oOutputDescription);
+					}					
+				}
 			}
 			
 			// Add the generic payload as output

@@ -62,4 +62,8 @@ public class OGCProcessesAPIConfig {
 	 * Session Id to use for validation
 	 */
 	public String validationSessionId = "";
+	/**
+	 * Default application to use for validation mode
+	 */
+	public String validationEchoProcessId = "hellowasdi";
 }
