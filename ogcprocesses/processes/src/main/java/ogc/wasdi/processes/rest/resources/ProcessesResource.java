@@ -729,61 +729,65 @@ public class ProcessesResource {
             	if (sPreferHeader.equals("wait")) {
             		// Unless the user really wants a synch one!
             		bAsync = false;
+            		WasdiLog.debugLog("ProcessesResource.executeApplication: setting synch mode on");
             	}
             }
             
             ResponseBuilder oResponse = null;
             
             if (!oPrimitiveResult.getBoolValue()) {
-    			WasdiLog.debugLog("ProcessesResource.executeApplication: create error status info");
-    			Date oCreationDate = new Date(); 
-
-        		StatusInfo oStatusInfo = new StatusInfo();
-        		
-        		oStatusInfo.setCreated(oCreationDate);
-        		oStatusInfo.setFinished(oCreationDate);
-        		oStatusInfo.setProgress(0);
-        		oStatusInfo.setType(TypeEnum.PROCESS);
-        		oStatusInfo.setStatus(StatusCode.FAILED);
-        		oStatusInfo.setProcessID(sProcessID);
-        		oStatusInfo.setUpdated(oCreationDate);
-        		oStatusInfo.setMessage(oProcessor.getName()+" " + " could not be scheduled.");
-        		oResponse = Response.status(Status.CREATED).entity(oStatusInfo);
+    			WasdiLog.debugLog("ProcessesResource.executeApplication: unable to start the app, create error status info");
+//    			Date oCreationDate = new Date(); 
+//
+//        		StatusInfo oStatusInfo = new StatusInfo();
+//        		
+//        		oStatusInfo.setCreated(oCreationDate);
+//        		oStatusInfo.setFinished(oCreationDate);
+//        		oStatusInfo.setProgress(0);
+//        		oStatusInfo.setType(TypeEnum.PROCESS);
+//        		oStatusInfo.setStatus(StatusCode.FAILED);
+//        		oStatusInfo.setProcessID(sProcessID);
+//        		oStatusInfo.setUpdated(oCreationDate);
+//        		oStatusInfo.setMessage(oProcessor.getName()+" " + " could not be scheduled.");
+//        		
+//        		
+//        		
+//        		oResponse = Response.status(Status.CREATED).entity(oStatusInfo);    
+    			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an exception executing the processes")).build();    			
             }
             else {
                 String sProcessWorkspaceId = oPrimitiveResult.getStringValue();
                 
+                WasdiLog.debugLog("ProcessesResource.executeApplication: got process workspace id " + sProcessWorkspaceId);
+                
                 if (bAsync) {
+                	
         			// We need the creation date
         			Date oCreationDate = new Date(); 
 
             		StatusInfo oStatusInfo = new StatusInfo();
+            			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: asynch start done,  create success status info");
+        			
+            		oStatusInfo.setCreated(oCreationDate);
             		
-            		if (oPrimitiveResult.getBoolValue()) {
-            			
-            			WasdiLog.debugLog("ProcessesResource.executeApplication: create success status info");
-            			
-                		oStatusInfo.setCreated(oCreationDate);
-                		
-                		oStatusInfo.setJobID(sProcessWorkspaceId);
-                		oStatusInfo.setProgress(0);
-                		oStatusInfo.setType(TypeEnum.PROCESS);
-                		oStatusInfo.setStatus(StatusCode.ACCEPTED);
-                		oStatusInfo.setProcessID(sProcessID);
-                		oStatusInfo.setUpdated(oCreationDate);
-                		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + sProcessWorkspaceId);
-                		
-                		// Create the ogc processes task
-                        OgcProcessesTask oOgcProcessesTask = new OgcProcessesTask();
-                        oOgcProcessesTask.setProcessWorkspaceId(sProcessWorkspaceId);
-                        oOgcProcessesTask.setWorkspaceId(oWorkspace.getWorkspaceId());
-                        oOgcProcessesTask.setUserId(oUser.getUserId());
-                        // Insert it in the db 
-                        OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
-                        oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
-            		}
-            		else {
-            		}
+            		oStatusInfo.setJobID(sProcessWorkspaceId);
+            		oStatusInfo.setProgress(0);
+            		oStatusInfo.setType(TypeEnum.PROCESS);
+            		oStatusInfo.setStatus(StatusCode.ACCEPTED);
+            		oStatusInfo.setProcessID(sProcessID);
+            		oStatusInfo.setUpdated(oCreationDate);
+            		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + sProcessWorkspaceId);
+            		
+            		// Create the ogc processes task
+                    OgcProcessesTask oOgcProcessesTask = new OgcProcessesTask();
+                    oOgcProcessesTask.setProcessWorkspaceId(sProcessWorkspaceId);
+                    oOgcProcessesTask.setWorkspaceId(oWorkspace.getWorkspaceId());
+                    oOgcProcessesTask.setUserId(oUser.getUserId());
+                    // Insert it in the db 
+                    OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
+                    oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
+
             		
             		// Self link
             		Link oSelfLink = new Link();
@@ -825,17 +829,23 @@ public class ProcessesResource {
         			if (oNode!=null) sBaseUrl = oNode.getNodeBaseAddress();
         			if (sBaseUrl.endsWith("/") == false) sBaseUrl += "/";
         			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done,  wait for app to finish");
+        			
         			// Wait WASDI App
         			waitApplication(sProcessWorkspaceId, sBaseUrl, sSessionId);
+        			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done,  app finished get result");
                     
                     // Get the result
         			ProcessWorkspaceViewModel oProcVM = OgcProcesses.readProcessWorkspaceFromNode(sProcessWorkspaceId, oNode, sSessionId);
         			
         			// Assume is ok, otherwise we "agree" with the exception handling
         			if (bRawResults) {
+        				WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done, return raw results");
         				oResponse = Response.status(Status.OK).entity(oProcVM.getPayload());
         			}
         			else {
+        				WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done, return docs results");
         				Results oResults = OgcProcesses.getResultsFromProcessWorkspace(oProcVM, oNode, sSessionId);
         				oResponse = Response.status(Status.OK).entity(oResults);
         			}
