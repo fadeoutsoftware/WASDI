@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -53,15 +54,19 @@ public class StatusInfo extends OgcProcessesViewModel {
 	@JsonProperty("message")
 	private String message = null;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING)
 	@JsonProperty("created")
 	private Date created = null;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING)
 	@JsonProperty("started")
 	private Date started = null;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING)
 	@JsonProperty("finished")
 	private Date finished = null;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING)
 	@JsonProperty("updated")
 	private Date updated = null;
 

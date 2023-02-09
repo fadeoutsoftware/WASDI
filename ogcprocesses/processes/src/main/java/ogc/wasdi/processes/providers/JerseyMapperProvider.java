@@ -13,6 +13,7 @@ public class JerseyMapperProvider implements ContextResolver<ObjectMapper> {
     public JerseyMapperProvider() {
         // allow only non-null fields to be serialized
     	s_oApiMapper.setSerializationInclusion(Include.NON_NULL);
+    	//s_oApiMapper.setDateFormat()
     }    
     
     @Override
