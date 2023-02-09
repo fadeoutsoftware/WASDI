@@ -113,6 +113,7 @@ public class OgcProcesses extends ResourceConfig {
     			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
     				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
     					if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
+    						
     						WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
     						
     						UserRepository oUserRepo = new UserRepository();
@@ -122,6 +123,8 @@ public class OgcProcesses extends ResourceConfig {
     							WasdiLog.errorLog("OgcProcesses.getUserFromSession: VALIDATION MODE Invalid validation user");
     							return null;
     						}
+    						
+    						sSessionId=WasdiConfig.Current.ogcProcessesApi.validationSessionId;
     						
     						SessionRepository oSessionRepository = new SessionRepository();
     						UserSession oSession = oSessionRepository.getSession(sSessionId);
