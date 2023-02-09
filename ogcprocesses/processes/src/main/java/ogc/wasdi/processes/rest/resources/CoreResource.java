@@ -39,11 +39,11 @@ public class CoreResource {
     		LandingPage oLandingPage = new LandingPage();
     		
     		// Set title and description from configuration    		
-    		oLandingPage.setTitle(WasdiConfig.Current.ogcpProcessesApi.landingTitle);
-    		oLandingPage.setDescription(WasdiConfig.Current.ogcpProcessesApi.landingDescription);
+    		oLandingPage.setTitle(WasdiConfig.Current.ogcProcessesApi.landingTitle);
+    		oLandingPage.setDescription(WasdiConfig.Current.ogcProcessesApi.landingDescription);
     		
     		// Link 1: API Service Definition
-    		String sAPIDefinitionLink = WasdiConfig.Current.ogcpProcessesApi.landingLinkServiceDefinition;
+    		String sAPIDefinitionLink = WasdiConfig.Current.ogcProcessesApi.landingLinkServiceDefinition;
     		
     		Link oAPIDefinitionLink = new Link();
     		
@@ -58,7 +58,7 @@ public class CoreResource {
 	    		
 	    		if (asLinkParts != null) {
 	    			if (asLinkParts.length>0) {
-	    				oAPIDefinitionLink.setHref(OgcProcesses.s_sBaseAddress + asLinkParts[0]);
+	    				oAPIDefinitionLink.setHref(asLinkParts[0]);
 	    			}
 	    			
 	    			if (asLinkParts.length>1) {
@@ -71,11 +71,11 @@ public class CoreResource {
 	    		}				
 			}
     		    		
-    		oAPIDefinitionLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
-    		oAPIDefinitionLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oAPIDefinitionLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+    		oAPIDefinitionLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		// Link 2: Conformance
-    		String sConformanceLink = WasdiConfig.Current.ogcpProcessesApi.landingLinkConformance;
+    		String sConformanceLink = WasdiConfig.Current.ogcProcessesApi.landingLinkConformance;
     		
     		Link oConformanceLink = new Link();
     		
@@ -103,11 +103,11 @@ public class CoreResource {
         		}    			
     		}
     		    		
-    		oConformanceLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
-    		oConformanceLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oConformanceLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+    		oConformanceLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		// Link 3: Processes
-    		String sProcessesLink = WasdiConfig.Current.ogcpProcessesApi.landingLinkProcesses;
+    		String sProcessesLink = WasdiConfig.Current.ogcProcessesApi.landingLinkProcesses;
     		
     		Link oProcessesLink = new Link();
     		
@@ -135,11 +135,11 @@ public class CoreResource {
         		}
     		}
     		    		
-    		oProcessesLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
-    		oProcessesLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oProcessesLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+    		oProcessesLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		// Link 3: Processes
-    		String sJobsLink = WasdiConfig.Current.ogcpProcessesApi.landingLinkProcesses;
+    		String sJobsLink = WasdiConfig.Current.ogcProcessesApi.landingLinkProcesses;
     		
     		Link oJobsLink = new Link();
     		
@@ -167,8 +167,8 @@ public class CoreResource {
         		}
     		}
     		    		
-    		oJobsLink.setHreflang(WasdiConfig.Current.ogcpProcessesApi.defaultLinksLang);
-    		oJobsLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);    		
+    		oJobsLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+    		oJobsLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);    		
     		
     		oLandingPage.getLinks().add(oAPIDefinitionLink);
     		oLandingPage.getLinks().add(oConformanceLink);
@@ -179,7 +179,7 @@ public class CoreResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress);
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oLandingPage.getLinks().add(oSelfLink);
     		
@@ -189,7 +189,40 @@ public class CoreResource {
     		oHtmlLink.setRel("alternate");
     		oHtmlLink.setType("text/html");
     		
-    		oLandingPage.getLinks().add(oHtmlLink);    		
+    		oLandingPage.getLinks().add(oHtmlLink);
+    		
+    		// Link service-desc: while the specification states service-doc OR service-desc, the 
+    		String sAPIDescriptionLink = WasdiConfig.Current.ogcProcessesApi.landingLinkServiceDefinition;
+    		
+    		Link oAPIDescriptionLink = new Link();
+    		
+    		// Default Values
+    		oAPIDescriptionLink.setHref("https://developer.ogc.org/api/processes/swaggerui.html");
+    		oAPIDescriptionLink.setRel("service-doc");
+    		oAPIDescriptionLink.setTitle("APIDefinition");
+			
+			if (!Utils.isNullOrEmpty(sAPIDescriptionLink)) {
+				// Take what we have from config
+	    		String []asLinkParts = sAPIDescriptionLink.split(";");
+	    		
+	    		if (asLinkParts != null) {
+	    			if (asLinkParts.length>0) {
+	    				oAPIDefinitionLink.setHref(asLinkParts[0]);
+	    			}
+	    			
+	    			if (asLinkParts.length>1) {
+	    				oAPIDescriptionLink.setRel(asLinkParts[1]);
+	    			}
+	    			
+	    			if (asLinkParts.length>2) {
+	    				oAPIDescriptionLink.setTitle(asLinkParts[2]);
+	    			}    			
+	    		}				
+			}
+    		    		
+			oAPIDescriptionLink.setHreflang(WasdiConfig.Current.ogcProcessesApi.defaultLinksLang);
+			oAPIDescriptionLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+			oLandingPage.getLinks().add(oAPIDescriptionLink);
     		
     		
     		ResponseBuilder oResponse = Response.status(Status.OK).entity(oLandingPage);
@@ -215,7 +248,7 @@ public class CoreResource {
     		
     		Conformance oConformance = new Conformance();
     		
-    		String [] asConforms = WasdiConfig.Current.ogcpProcessesApi.conformsTo.split(";");
+    		String [] asConforms = WasdiConfig.Current.ogcProcessesApi.conformsTo.split(";");
     		
     		for (String sConformsTo : asConforms) {
     			oConformance.getConformsTo().add(sConformsTo);

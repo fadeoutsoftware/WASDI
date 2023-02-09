@@ -13,7 +13,8 @@ var WasdiApplicationUIController = (function () {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope, oTranslate) {
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, 
+        oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope, oTranslate, oImagesService) {
         /**
          * Angular Scope
          */
@@ -63,6 +64,10 @@ var WasdiApplicationUIController = (function () {
          * Modal Service
          */
         this.m_oModalService = oModalService;
+        /**
+         * Images Service
+         */
+        this.m_oImagesService = oImagesService;
         /**
          * SCE Angular Service
          */
@@ -214,6 +219,7 @@ var WasdiApplicationUIController = (function () {
         this.m_oProcessorService.getMarketplaceDetail(this.m_sSelectedApplication).then(function (data) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 oController.m_oApplication = data.data;
+                oController.m_oImagesService.updateProcessorLogoImageUrl(oController.m_oApplication);
             } else {
                 utilsVexDialogAlertTop(sAppDataError);
             }
@@ -794,7 +800,8 @@ var WasdiApplicationUIController = (function () {
         'ModalService',
         '$sce',
         '$rootScope',
-        '$translate'
+        '$translate',
+        'ImagesService'
     ];
 
     return WasdiApplicationUIController;

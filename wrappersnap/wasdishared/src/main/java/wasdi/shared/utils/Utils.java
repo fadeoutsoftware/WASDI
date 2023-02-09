@@ -41,22 +41,39 @@ public class Utils {
 	public static int s_iSessionValidityMinutes = 24 * 60;
 	private static SecureRandom s_oUtilsRandom = new SecureRandom();
 
-
+	/**
+	 * Private constructor
+	 */
 	private Utils() {
 		throw new IllegalStateException("Utils.Utils: this is just a utility class, please do not instantiate it");
 	}
 	
+	/**
+	 * Checks if a string is null or empty
+	 * @param sString String to check
+	 * @return true if it is null or empty. False if it is a valud string
+	 */
 	public static boolean isNullOrEmpty(String sString) {
 		return sString == null || sString.isEmpty();
 	}
-
-	public static boolean isNullOrEmpty(Double oDoube) {
-		return oDoube == null || oDoube.longValue() == 0;
+	
+	/**
+	 * Checks if a Double is null or empty
+	 * @param oDoube
+	 * @return
+	 */
+	public static boolean isNullOrEmpty(Double oDouble) {
+		return oDouble == null || oDouble.longValue() == 0;
 	}
 
-	//adapted from:
-	//4. Generate Random Alphanumeric String With Java 8 
-	//https://www.baeldung.com/java-random-string
+	/**
+	 * Get a random name capped to a specific length
+	 * adapted from:
+	 * 4. Generate Random Alphanumeric String With Java 8
+	 * https://www.baeldung.com/java-random-string 
+	 * @param iLen
+	 * @return
+	 */
 	public static String getCappedRandomName(int iLen) {
 		if(iLen < 0) {
 			iLen = - iLen;
@@ -74,10 +91,19 @@ public class Utils {
     		.toString();
 	}
 	
+	/**
+	 * Get a random name (ie UUID string)
+	 * @return Random name
+	 */
 	public static String getRandomName() {
 		return UUID.randomUUID().toString();
 	}
-
+	
+	/**
+	 * Convert a Double in a date assuming it contains a valid timestamp
+	 * @param oDouble Input timestamp
+	 * @return Corresponding date
+	 */
 	public static Date getDate(Double oDouble) {
 		if (oDouble == null) {
 			return null;

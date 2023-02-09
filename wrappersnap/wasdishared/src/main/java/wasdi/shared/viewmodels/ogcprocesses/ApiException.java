@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import wasdi.shared.utils.Utils;
 
-public class ApiException extends HashMap<String, Object>  {
+public class ApiException  {
 	
 	private String type = null;
 	private String title = null;

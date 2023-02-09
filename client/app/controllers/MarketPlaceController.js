@@ -13,9 +13,10 @@ var MarketPlaceController = (function() {
      * @param oProcessorService
      * @param oProcessorMediaService
      * @param oTranslate
+     * @param oImagesService
      * @constructor
      */
-    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oTranslate) {
+    function MarketPlaceController($scope, $state, oConstantsService, oAuthService, oProcessorService, oProcessorMediaService, oTranslate, oImagesService) {
         /**
          * Angular Scope
          */
@@ -52,6 +53,11 @@ var MarketPlaceController = (function() {
          * Translate Service
          */
         this.m_oTranslate = oTranslate;
+
+        /**
+         * Images Service
+         */
+        this.m_oImagesService = oImagesService;
 
         /**
          * Name Filter
@@ -140,7 +146,7 @@ var MarketPlaceController = (function() {
         this.m_oProcessorService.getMarketplaceList(this.m_oAppFilter).then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
-                oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data.data);
+                oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data.data, oController);
             }
             else
             {
@@ -318,7 +324,7 @@ var MarketPlaceController = (function() {
      * @param aoProcessorList
      * @returns {*}
      */
-    MarketPlaceController.prototype.setDefaultImagesAndVotes = function(aoProcessorList)
+    MarketPlaceController.prototype.setDefaultImagesAndVotes = function(aoProcessorList, oController)
     {
         if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
         {
@@ -332,6 +338,8 @@ var MarketPlaceController = (function() {
             {
                 aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
             }
+
+            oController.m_oImagesService.updateProcessorLogoImageUrl(aoProcessorList[iIndexProcessor]);
 
             if(utilsIsObjectNullOrUndefined(aoProcessorList[iIndexProcessor].votes)) {
                 if (aoProcessorList[iIndexProcessor].score>0) {
@@ -380,7 +388,8 @@ var MarketPlaceController = (function() {
         'AuthService',
         'ProcessorService',
         'ProcessorMediaService',
-        '$translate'
+        '$translate',
+        'ImagesService'
     ];
 
     return MarketPlaceController;

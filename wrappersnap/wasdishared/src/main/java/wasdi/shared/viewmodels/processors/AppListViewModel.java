@@ -20,6 +20,7 @@ public class AppListViewModel {
 	private Float price;
 	private boolean isMine;
 	private boolean buyed;
+	private String logo;
 	
 	public Float getPrice() {
 		return price;
@@ -87,6 +88,12 @@ public class AppListViewModel {
 	}
 	public void setVotes(Integer votes) {
 		this.votes = votes;
+	}
+	public String getLogo() {
+		return logo;
+	}
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 }

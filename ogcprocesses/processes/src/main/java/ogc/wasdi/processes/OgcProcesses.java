@@ -1,5 +1,7 @@
 package ogc.wasdi.processes;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +16,8 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import ogc.wasdi.processes.providers.JerseyMapperProvider;
+import ogc.wasdi.processes.providers.OgcProcessesViewModelBodyWriter;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
@@ -40,13 +44,19 @@ public class OgcProcesses extends ResourceConfig {
 	public OgcProcesses() {
 		packages(true, "ogc.wasdi.processes.rest.resources");
 		register(JacksonFeature.class);
+		register(JerseyMapperProvider.class);
+		register(OgcProcessesViewModelBodyWriter.class);
 	}
 
 	/**
 	 * Web Server intialization: it loads the main web-server configuration
+	 * @throws URISyntaxException 
 	 */
 	@PostConstruct
-	public void initOgcProcesses() {
+	public void initOgcProcesses() throws URISyntaxException {
+		
+		String sPath = new File(WasdiLog.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+		System.out.println(sPath);
 		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 		
 		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
@@ -58,8 +68,8 @@ public class OgcProcesses extends ResourceConfig {
 		if (!WasdiConfig.readConfig(sConfigFilePath)) {
 			WasdiLog.errorLog("ERROR IMPOSSIBLE TO READ CONFIG FILE IN " + sConfigFilePath);
 		}
-		
-		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcpProcessesApi.baseAddress;
+				
+		OgcProcesses.s_sBaseAddress = WasdiConfig.Current.ogcProcessesApi.baseAddress;
 		
 		if (!OgcProcesses.s_sBaseAddress.endsWith("/")) OgcProcesses.s_sBaseAddress += "/";
 		
@@ -94,6 +104,39 @@ public class OgcProcesses extends ResourceConfig {
     		}
     		
     		if (Utils.isNullOrEmpty(sSessionId)) {
+    			
+    			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
+    				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
+    					if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
+    						WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
+    						
+    						UserRepository oUserRepo = new UserRepository();
+    						oUser = oUserRepo.getUser(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+    						
+    						if (oUser == null) {
+    							WasdiLog.errorLog("OgcProcesses.getUserFromSession: VALIDATION MODE Invalid validation user");
+    							return null;
+    						}
+    						
+    						SessionRepository oSessionRepository = new SessionRepository();
+    						UserSession oSession = oSessionRepository.getSession(sSessionId);
+    						
+    						if (oSession == null) {
+    							oSession = new UserSession();
+    							oSession.setLoginDate(Utils.nowInMillis());
+    							oSession.setLastTouch(Utils.nowInMillis());
+    							oSession.setSessionId(sSessionId);
+    							oSession.setUserId(WasdiConfig.Current.ogcProcessesApi.validationUserId);
+    							
+    							oSessionRepository.insertSession(oSession);
+    						}
+    						
+    						return oUser;
+    					}
+    					
+    				}
+    			}
+    			
     			return null;
     		}
     		
@@ -197,44 +240,50 @@ public class OgcProcesses extends ResourceConfig {
 				// Check if there is something
 				if (!Utils.isNullOrEmpty(sUri)) {
 					
-					// Get the address
-					String [] asUriParts = sUri.split("?");
-					
-					if (asUriParts != null) {
-						if (asUriParts.length>0) {
-							
-							// Set the encoded address
-							sFinalLink = "<" + StringUtils.encodeUrl(sUri) + ">";
-							
-							// Let see if there are also Query parameters
-							String sParams = "";
-							
-							for (int iParts = 1; iParts<asUriParts.length; iParts++) {
-								sParams += asUriParts[iParts];
-							}
-							
-							// Split parameters
-							String [] asParams = sParams.split("&");
-							
-							if (asParams != null) {
-								if (asParams.length>0) {
-									// Add the parameter
-									sFinalLink += "; ";
-									for (String sParam : asParams) {
-										sFinalLink += sParam + ";";
-									}
-									
-									// Drop Last char
-									sFinalLink = sFinalLink.substring(0, sFinalLink.length()-1);
+					if (sUri.contains("?")) {
+						// Get the address
+						String [] asUriParts = sUri.split("\\?");
+						
+						if (asUriParts != null) {
+							if (asUriParts.length>0) {
+								
+								// Set the encoded address
+								sFinalLink = "<" + StringUtils.encodeUrl(asUriParts[0]) + ">";
+								
+								// Let see if there are also Query parameters
+								String sParams = "";
+								
+								for (int iParts = 1; iParts<asUriParts.length; iParts++) {
+									sParams += asUriParts[iParts];
 								}
+								
+								// Split parameters
+								String [] asParams = sParams.split("&");
+								
+								if (asParams != null) {
+									if (asParams.length>0) {
+										// Add the parameter
+										sFinalLink += "; ";
+										for (String sParam : asParams) {
+											sFinalLink += sParam + ";";
+										}
+										
+										// Drop Last char
+										sFinalLink = sFinalLink.substring(0, sFinalLink.length()-1);
+									}
+								}
+								
 							}
-							
-						}
+						}						
+					}
+					else  {
+						sFinalLink = "<" + StringUtils.encodeUrl(sUri) + ">";
 					}
 					
 					if (!Utils.isNullOrEmpty(sFinalLink)) {
 						sLinkHeaderContent += sFinalLink + ", ";
-					}
+					}						
+					
 				}
 			}
 			

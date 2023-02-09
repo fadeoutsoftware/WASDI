@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class JobList {
+public class JobList extends OgcProcessesViewModel {
 	@JsonProperty("jobs")
 	private List<StatusInfo> jobs = new ArrayList<StatusInfo>();
 

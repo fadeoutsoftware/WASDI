@@ -1,11 +1,11 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-public class Link {
-	private String href = null;
-	private String rel = null;
-	private String type = null;
-	private String hreflang = null;
-	private String title = null;
+public class Link extends OgcProcessesViewModel {
+	private String href = "";
+	private String rel = "";
+	private String type = "";
+	private String hreflang = "en";
+	private String title = "title";
 	  
 	public String getHref() {
 		return href;

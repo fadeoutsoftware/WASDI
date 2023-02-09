@@ -65,7 +65,8 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.BooleanSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DateSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.DoubleSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.NumericSchema;
-import wasdi.shared.viewmodels.ogcprocesses.schemas.StringListSchema;
+import wasdi.shared.viewmodels.ogcprocesses.schemas.StringArraySchema;
+import wasdi.shared.viewmodels.ogcprocesses.schemas.StringInListSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringSchema;
 
 @Path("processes")
@@ -112,7 +113,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes");
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oProcessList.getLinks().add(oSelfLink);
     		aoAllLinks.add(oSelfLink);
@@ -155,8 +156,15 @@ public class ProcessesResource {
 					ProcessSummary oSummary = new ProcessSummary();
 					
 					// Copy the attributes
-					oSummary.setId(oProcessor.getProcessorId());
-					oSummary.setTitle(oProcessor.getName());
+					oSummary.setId(oProcessor.getName());
+					
+					if (Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+						oSummary.setTitle(oProcessor.getName());
+					}
+					else {
+						oSummary.setTitle(oProcessor.getFriendlyName());
+					}
+					
 					oSummary.setDescription(oProcessor.getDescription());
 					oSummary.setVersion(oProcessor.getVersion());
 					oSummary.getJobControlOptions().add(JobControlOptions.ASYNC_EXECUTE);
@@ -170,7 +178,7 @@ public class ProcessesResource {
 		    		Link oProcessorLink = new Link();
 		    		oProcessorLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+oSummary.getId());
 		    		oProcessorLink.setRel("self");
-		    		oProcessorLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+		    		oProcessorLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 		    		oProcessorLink.setTitle("Process " + oProcessor.getName() + "  Description");
 		    		
 		    		oSummary.getLinks().add(oProcessorLink);
@@ -193,7 +201,7 @@ public class ProcessesResource {
 	    		Link oNextLink = new Link();
 	    		oNextLink.setHref(OgcProcesses.s_sBaseAddress+"processes?offset="+ iNextOffset +"&limit="+oiLimit.toString());
 	    		oNextLink.setRel("next");
-	    		oNextLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+	    		oNextLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 	    		
 	    		oProcessList.getLinks().add(oNextLink);
 	    		aoAllLinks.add(oNextLink);
@@ -202,7 +210,7 @@ public class ProcessesResource {
 	    		Link oPrevLink = new Link();
 	    		oPrevLink.setHref(OgcProcesses.s_sBaseAddress+"processes?offset="+ oiOffset.toString() +"&limit="+oiLimit.toString());
 	    		oPrevLink.setRel("prev");
-	    		oPrevLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+	    		oPrevLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
 	    		
 	    		oProcessList.getLinks().add(oPrevLink);
 	    		aoAllLinks.add(oPrevLink);
@@ -246,11 +254,15 @@ public class ProcessesResource {
 			
 			// Read the processor entity
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessID);
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);
 			
-			// Chech if the processor is available in WASDI
-			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessID);
-						
+			boolean bFound = false;
+			
+			if (oProcessor!=null) {
+				// Chech if the processor is available in WASDI
+				bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());				
+			}
+									
 			if (!bFound) {
 				ApiException oApiException = new ApiException();
 				oApiException.setTitle("no-such-process");
@@ -268,9 +280,16 @@ public class ProcessesResource {
     		wasdi.shared.viewmodels.ogcprocesses.Process oProcessViewModel = new wasdi.shared.viewmodels.ogcprocesses.Process();
     		
     		// Identifier
-    		oProcessViewModel.setId(oProcessor.getProcessorId());
+    		oProcessViewModel.setId(oProcessor.getName());
+    		
     		// Title
-    		oProcessViewModel.setTitle(oProcessor.getName());
+			if (Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
+				oProcessViewModel.setTitle(oProcessor.getName());
+			}
+			else {
+				oProcessViewModel.setTitle(oProcessor.getFriendlyName());
+			}
+			
     		// Narrative Description
     		oProcessViewModel.setDescription(oProcessor.getDescription());
     		// Keywords
@@ -297,7 +316,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID);
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oProcessViewModel.getLinks().add(oSelfLink);
     		
@@ -424,7 +443,7 @@ public class ProcessesResource {
 			OutputDescription oFilesOutputDescription = new OutputDescription();
 			oFilesOutputDescription.setDescription("WASDI Workspace where the files generated by the application are saved");
 			oFilesOutputDescription.setTitle("files");
-			oFilesOutputDescription.setSchema(new StringListSchema());
+			oFilesOutputDescription.setSchema(new StringArraySchema());
 			
 			oProcessViewModel.getOutputs().put("payload", oPayloadOutputDescription);
 			oProcessViewModel.getOutputs().put("workspaceId", oWorkspaceIdOutputDescription);
@@ -466,9 +485,12 @@ public class ProcessesResource {
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
 			}
 			
+			// Read the processor entity
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);			
 			
 			// Chech if the processor is available in WASDI
-			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessID);
+			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
 						
 			if (!bFound) {
 				// No, return the not found Exception
@@ -489,9 +511,6 @@ public class ProcessesResource {
 				sSessionId = OgcProcesses.getSessionIdFromBasicAuthentication(sAuthorization);
 			}
 			
-			// Read the processor entity
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessID);
 			
 			// Set the operation type: can be run processor or idl or matlab
 			String sOperationType = LauncherOperations.RUNPROCESSOR.name();
@@ -656,7 +675,7 @@ public class ProcessesResource {
     		Link oSelfLink = new Link();
     		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
     		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcpProcessesApi.defaultLinksType);
+    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
     		
     		oStatusInfo.getLinks().add(oSelfLink);
     		
@@ -717,13 +736,13 @@ public class ProcessesResource {
 					oCreatedSchema = new DateSchema();
 				} 
 				else if (sType.equals("dropdown") || sType.equals("listbox")) {
-					oCreatedSchema = new StringListSchema();
+					oCreatedSchema = new StringInListSchema();
 					
 					if (oControl.containsKey("values")) {
 						List<String> asValues = (List<String>) oControl.get("values");
 						
 						for (String sValue : asValues) {
-							((StringListSchema)oCreatedSchema).getEnum().add(sValue);
+							((StringInListSchema)oCreatedSchema).getEnum().add(sValue);
 						}
 					}
 				} 
@@ -1008,7 +1027,7 @@ public class ProcessesResource {
 					oWASDIInput.put(sKey, sValue);
 				}
 				else {
-					WasdiLog.infoLog("ProcessesResource.executeApplication: the parameter " + sKey + " has a not allowed string");
+					WasdiLog.infoLog("ProcessesResource.convertOGCInputToWasdiInput: the parameter " + sKey + " has a not allowed string");
 					bErrorOnValue = true;
 				}
 			}
@@ -1103,27 +1122,40 @@ public class ProcessesResource {
 				// or
 				// { "northEast": {"lat:","lng"}, "southWest": {"lat:","lng"} }
 				
-				Bbox oBbox = MongoRepository.s_oMapper.convertValue(aoInputs.get(sKey), Bbox.class);
-
 				double dNorth = 0.0;
 				double dWest = 0.0;
 				double dSouth = 0.0;
-				double dEast = 0.0;
+				double dEast = 0.0;				
+				
+				try {
+					Bbox oBbox = MongoRepository.s_oMapper.convertValue(aoInputs.get(sKey), Bbox.class);
 
-				if (oBbox.getBbox().size()==4) {										
-					dNorth = oBbox.getBbox().get(3).doubleValue();
-					dWest = oBbox.getBbox().get(0).doubleValue();
-					dSouth = oBbox.getBbox().get(1).doubleValue();
-					dEast = oBbox.getBbox().get(2).doubleValue();
+
+					if (oBbox.getBbox().size()==4) {										
+						dNorth = oBbox.getBbox().get(3).doubleValue();
+						dWest = oBbox.getBbox().get(0).doubleValue();
+						dSouth = oBbox.getBbox().get(1).doubleValue();
+						dEast = oBbox.getBbox().get(2).doubleValue();
+					}
+					else if (oBbox.getBbox().size()==6) {
+						dNorth = oBbox.getBbox().get(4).doubleValue();
+						dWest = oBbox.getBbox().get(0).doubleValue();
+						dSouth = oBbox.getBbox().get(1).doubleValue();
+						dEast = oBbox.getBbox().get(3).doubleValue();
+					}
+					else {
+						bErrorOnValue = true;
+					}					
 				}
-				else if (oBbox.getBbox().size()==6) {
-					dNorth = oBbox.getBbox().get(4).doubleValue();
-					dWest = oBbox.getBbox().get(0).doubleValue();
-					dSouth = oBbox.getBbox().get(1).doubleValue();
-					dEast = oBbox.getBbox().get(3).doubleValue();
-				}
-				else {
-					bErrorOnValue = true;
+				catch (Exception oBboxEx) {
+					WasdiLog.errorLog("ProcessesResource.convertOGCInputToWasdiInput: exception parsing the bbox, try with a WASDI String " + oBboxEx.toString());
+					
+					String sBbox = aoInputs.get(sKey).toString();
+					String [] asParts = sBbox.split(",");
+					dNorth = Double.parseDouble(asParts[0]);
+					dWest = Double.parseDouble(asParts[1]);
+					dSouth = Double.parseDouble(asParts[2]);
+					dEast = Double.parseDouble(asParts[3]);
 				}
 				
 				if (!bErrorOnValue) {
@@ -1151,7 +1183,7 @@ public class ProcessesResource {
 			}									
 		}
 		catch (Exception oInEx) {
-			WasdiLog.infoLog("ProcessesResource.executeApplication: the parsing of parameter " + sKey + " created an exception " + oInEx.toString());
+			WasdiLog.errorLog("ProcessesResource.convertOGCInputToWasdiInput: the parsing of parameter " + sKey + " created an exception " + oInEx.toString());
 			bErrorOnValue = true;
 		} 
 		

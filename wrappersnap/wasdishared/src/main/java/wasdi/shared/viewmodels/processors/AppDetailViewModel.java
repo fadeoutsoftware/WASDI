@@ -36,6 +36,7 @@ public class AppDetailViewModel {
 	private int totalRuns = 0;
 	private int userRuns = 0;
 	private ArrayList<String> categoryNames = new ArrayList<String>();
+	private String logo;
 	
 	
 	public ArrayList<String> getCategories() {
@@ -187,6 +188,12 @@ public class AppDetailViewModel {
 	}
 	public void setPublishDate(Double publishDate) {
 		this.publishDate = publishDate;
+	}
+	public String getLogo() {
+		return logo;
+	}
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 	
 }

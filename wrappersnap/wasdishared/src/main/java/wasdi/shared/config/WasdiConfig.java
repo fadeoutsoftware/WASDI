@@ -164,7 +164,7 @@ public class WasdiConfig {
 	/**
 	 * Configuration of the OGC Processes API WASDI Server implementation
 	 */
-	public OGCProcessesAPIConfig ogcpProcessesApi = new OGCProcessesAPIConfig();
+	public OGCProcessesAPIConfig ogcProcessesApi = new OGCProcessesAPIConfig();
 	
 	/**
 	 * Get the Catalogue Config for the specified Platform Type

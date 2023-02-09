@@ -46,7 +46,6 @@ import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
-import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -66,6 +65,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
+import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -180,8 +180,8 @@ public class Wasdi extends ResourceConfig {
 
 			WasdiLog.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Throwable oEx) {
+			WasdiLog.errorLog("Read MongoDb Configuration exception " + oEx.toString());
 		}
 		
 		// Read the code of this Node
@@ -190,8 +190,8 @@ public class Wasdi extends ResourceConfig {
 			s_sMyNodeCode = WasdiConfig.Current.nodeCode;
 			WasdiLog.debugLog("-------Node Code " + s_sMyNodeCode);
 
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Throwable oEx) {
+			WasdiLog.errorLog("Read the code of this Node exception " + oEx.toString());
 		}
 		
 		// Read the configuration of KeyCloak		
@@ -209,33 +209,19 @@ public class Wasdi extends ResourceConfig {
 				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
 			}			
 		}
-		catch (Throwable e) {
-			e.printStackTrace();
+		catch (Throwable oEx) {
+			WasdiLog.errorLog("Local Database config exception " + oEx.toString());
 		}
 
 		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
-		
-		// Local path the the web application
-		try {
-			String sLocalTomcatWebAppFolder = WasdiConfig.Current.paths.tomcatWebAppPath;
-			if (!Utils.isNullOrEmpty(sLocalTomcatWebAppFolder)) {
-				
-				ImageResourceUtils.s_sWebAppBasePath = sLocalTomcatWebAppFolder;
-				if (!ImageResourceUtils.s_sWebAppBasePath.endsWith("/")) ImageResourceUtils.s_sWebAppBasePath += "/";
-			}
-		}
-		catch (Throwable e) {
-			e.printStackTrace();
-		}
-
 		
 		// Configure Rabbit
 		try {
 			RabbitFactory.readConfig();
 			
 			WasdiLog.debugLog("-------Rabbit Initialized ");
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Throwable oEx) {
+			WasdiLog.errorLog("Configure Rabbit exception " + oEx.toString());
 		}
 		
 		// Initialize Snap
@@ -264,8 +250,8 @@ public class Wasdi extends ResourceConfig {
 			
 			Engine.start(false);
 
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Throwable oEx) {
+			WasdiLog.errorLog("Configure SNAP " + oEx.toString());
 		}
 		
 		
@@ -298,8 +284,8 @@ public class Wasdi extends ResourceConfig {
 			}
 			
 		}
-		catch (Throwable e) {
-			e.printStackTrace();
+		catch (Throwable oEx) {
+			WasdiLog.errorLog("Local Workspace Configuration Exception " + oEx.toString());
 		}
 		
 		WasdiLog.debugLog("------- WASDI Init done\n\n");
@@ -315,9 +301,8 @@ public class Wasdi extends ResourceConfig {
 			for (String string : enviorntmentVars.keySet()) { WasdiLog.debugLog(string + ": " + enviorntmentVars.get(string)); }
 			 			
 		}
-		catch (Exception e) {
-			WasdiLog.debugLog(e.toString());
-			e.printStackTrace();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Environment Vars Exception " + oEx.toString());
 		}
 	}
 
@@ -336,7 +321,6 @@ public class Wasdi extends ResourceConfig {
 			}
 		} catch (Exception oE) {
 			WasdiLog.debugLog("WASDI SHUTDOWN EXCEPTION: " + oE);
-			oE.printStackTrace();
 		}
 	}
 	
@@ -369,7 +353,7 @@ public class Wasdi extends ResourceConfig {
 				}				
 			}
 			catch (Exception oKeyEx) {
-				WasdiLog.debugLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
 
 
@@ -395,7 +379,7 @@ public class Wasdi extends ResourceConfig {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("WAsdi.getUserFromSession: something bad happened: " + oE);
 		}
 
 		return oUser;
@@ -711,7 +695,7 @@ public class Wasdi extends ResourceConfig {
 				}				
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("Wasdi.runProcess: " + oE);
+			WasdiLog.errorLog("Wasdi.runProcess: " + oE);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -793,7 +777,7 @@ public class Wasdi extends ResourceConfig {
 			return sMessage;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("Wasdi.httpPost Exception " + oEx.toString());
 			return "";
 		}
 	}
@@ -918,11 +902,11 @@ public class Wasdi extends ResourceConfig {
 				oConnection.disconnect();
 
 			} catch(Exception oE) {
-				WasdiLog.debugLog("WasdiLib.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
+				WasdiLog.errorLog("WasdiLib.uploadFile( " + sUrl + ", " + sFileName + ", ...): internal exception: " + oE);
 				throw oE;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
+			WasdiLog.errorLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not open file due to: " + oE + ", aborting");
 			throw oE;
 		}
 		
@@ -931,7 +915,7 @@ public class Wasdi extends ResourceConfig {
 				FileUtils.deleteDirectory(new File(sZippedFile).getParentFile());
 			}
 			catch (Exception oE) {
-				WasdiLog.debugLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
+				WasdiLog.errorLog("Wasdi.httpPostFile( " + sUrl + ", " + sFileName + ", ...): could not delete temp zip file: " + oE + "");
 			}			
 		}
 	}
