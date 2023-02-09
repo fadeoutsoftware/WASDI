@@ -1,10 +1,10 @@
-<div class="modal fade subscription_editor-dialog">
+<div class="modal fade subscription_editor-dialog" >
     <div class="modal-dialog" style="width: 60vw">
         <div class="modal-content">
             <div class="modal-header">
                 <h4>Manage Subscription</h4>
             </div>
-            <div class="modal-body no-ale-style" style="height: 400px">
+            <div class="modal-body no-ale-style" style="height: 550px">
                 <legend ng-show="m_oController.m_oEditSubscription.subscriptionId == null">
                     {{"DIALOG_ADD_SUBSCRIPTION"|translate}}</legend>
                 <legend ng-show="m_oController.m_oEditSubscription.subscriptionId != null && m_oController.m_bEditMode">
@@ -72,6 +72,7 @@
                                     format="YYYY-MM-DD"
                                     moment-picker="m_oController.m_sStartDate"
                                     today="true"
+                                    start-view="day"
                                 >
                                     <input
                                         class="form-control wasdi-input"
