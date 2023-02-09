@@ -602,9 +602,10 @@ public class JobsResource {
     		
     		oInfo.setProgress(oProcWs.getProgressPerc());
     		
-    		if (Utils.isNullOrEmpty(oProcWs.getOperationStartDate())) {
+    		if (!Utils.isNullOrEmpty(oProcWs.getOperationStartDate())) {
     			oInfo.setStarted(Utils.getWasdiDate(oProcWs.getOperationStartDate()));
     		}
+    		
     		StatusCode eStatus = StatusCode.ACCEPTED;
     		
     		String sWasdiStatus = oProcWs.getStatus();
