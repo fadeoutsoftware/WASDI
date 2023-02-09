@@ -348,12 +348,9 @@ public class OgcProcesses extends ResourceConfig {
 			
 			sUrl += "process/byid?procws="+sProcessWorkspaceId;
 			
-			Map<String, String> asHeaders = new HashMap<String, String>();
-			asHeaders.put("x-session-token", sSessionId);
-			
 			WasdiLog.debugLog("JobsResource.readProcessWorkspaceFromNode: calling url: " + sUrl);
 			
-			String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+			String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId));
 			
 			if (Utils.isNullOrEmpty(sResponse)==false) {
 				ProcessWorkspaceViewModel oProcWs = MongoRepository.s_oMapper.readValue(sResponse, ProcessWorkspaceViewModel.class);
