@@ -97,7 +97,9 @@
         "validationEchoProcessId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationEchoProcessId }}",
         "validationModeOn": {{ dictWasdiConfiguration.ogcProcessesApi.validationModeOn | lower }},
         "validationSessionId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationSessionId }}",
-        "validationUserId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationUserId }}"
+        "validationUserId": "{{ dictWasdiConfiguration.ogcProcessesApi.validationUserId }}",
+        "waitProcessMaxTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessMaxTimeout }},
+        "waitProcessSleepTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessSleepTimeout }}
     },
     "paths": {
         "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
