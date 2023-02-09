@@ -216,6 +216,33 @@ public class OgcProcesses extends ResourceConfig {
 	}
 	
 	/**
+	 * Updates the session Id taking it from Authorization if needed
+	 * considering also the validationMode option
+	 * @param sSessionId Session id as received from x-session-token
+	 * @param sAuthorization Basic http authorization token
+	 * @return Actual value of the session Id
+	 */
+	public static String updateSessionId(String sSessionId, String sAuthorization) {
+		try {
+			
+			if (!Utils.isNullOrEmpty(sSessionId)) return sSessionId;
+			
+			if (Utils.isNullOrEmpty(sAuthorization)) {
+				if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
+					return WasdiConfig.Current.ogcProcessesApi.validationSessionId;
+				}
+			}
+			
+			return getSessionIdFromBasicAuthentication(sAuthorization);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcesses.getSessionIdFromBasicAuthentication: something bad happened: " + oEx);
+		}
+		
+		return "";		
+	}
+	
+	/**
 	 * Adds Link Headers to http response
 	 * @param oResponse Response Builder
 	 * @param aoLinks List of links to add
