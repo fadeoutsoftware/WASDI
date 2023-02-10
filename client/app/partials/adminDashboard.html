@@ -127,14 +127,14 @@
                             </label>
                             <div
                                 class="input-group"
-                                format="YYYY-MM-DD HH"
+                                format="YYYY-MM-DD"
                                 moment-picker="m_oController.m_sDateFrom"
                                 today="true"
+                                start-view="month"
                             >
                                 <input
                                     class="form-control wasdi-input"
                                     position="bottom-right"
-                                    start-veiw="month"
                                     ng-model="m_oController.m_sDateFrom"
                                     ng-model-options="{updateOn: 'blur'}"
                                 />
@@ -150,15 +150,14 @@
                             </label>
                             <div
                                 class="input-group"
-                                format="YYYY-MM-DD HH"
+                                format="YYYY-MM-DD"
                                 moment-picker="m_oController.m_sDateTo"
                                 today="true"
-                                
+                                start-view="month"
                             >
                                 <input
                                     class="form-control wasdi-input w-100"
                                     position="bottom-right"
-                                    start-veiw="month"
                                     ng-model="m_oController.m_sDateTo"
                                     ng-model-options="{updateOn: 'blur'}"
                                 />

@@ -74,22 +74,45 @@
                     <div class="form-v4-group row">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_START_DATE'|translate}}</label>
 
-                        <div class="col-sm-4">
+                        <div class="col-sm-4" ng-show="m_oController.m_sBuyDate == null">
                             <div class="time-picker-container">
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sStringStart"
+                                    moment-picker="m_oController.m_sStartDate"
                                     today="true"
-                                    start-view="day"
+                                    start-view="month"
                                     change="m_oController.selectDate()"
                                 >
                                     <input
                                         class="form-control wasdi-input"
                                         position="bottom-right"
-                                        start-veiw="week"
                                         ng-model="m_oController.m_sStartDate"
                                         ng-model-options="{updateOn: ''}"
+                                    />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4" ng-show="m_oController.m_sBuyDate != null">
+                            <div class="time-picker-container">
+                                <div
+                                    class="input-group"
+                                    format="YYYY-MM-DD"
+                                    moment-picker="m_oController.m_sStartDate"
+                                    today="true"
+                                    start-view="month"
+                                    change="m_oController.selectDate()"
+                                >
+                                    <input
+                                        class="form-control wasdi-input"
+                                        position="bottom-right"
+                                        ng-model="m_oController.m_sStartDate"
+                                        ng-model-options="{updateOn: ''}"
+                                        disabled
                                     />
                                     <span class="input-group-addon">
                                         <i class="fa fa-calendar"></i>
@@ -105,14 +128,14 @@
                                 <div
                                     class="input-group"
                                     format="YYYY-MM-DD"
-                                    moment-picker="m_oController.m_sStringEnd"
+                                    moment-picker="m_oController.m_sEndDate"
                                     today="true"
+                                    start-view="month"
                                     ng-readonly="true"
                                 >
                                     <input
                                         class="form-control wasdi-input"
                                         position="bottom-right"
-                                        start-veiw="today"
                                         ng-model="m_oController.m_sEndDate"
                                         ng-model-options="{updateOn: 'blur'}"
                                         ng-readonly="true"
@@ -126,6 +149,15 @@
                         </div>
                     </div>
 
+                    <div class="form-v4-group row">
+                        <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_DURATION_IN_DAYS'|translate}}</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-v4-control-plaintext wasdi-input" name="durationDays"
+                                ng-readonly="true"
+                                ng-model="m_oController.m_lDurationDays" />
+                        </div>
+                    </div>
+
                     <div class="form-v4-group row" ng-show="m_oController.m_sBuyDate != null">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_BUY_DATE'|translate}}</label>
 
@@ -136,14 +168,15 @@
                                     format="YYYY-MM-DD"
                                     moment-picker="m_oController.m_sBuyDate"
                                     today="true"
+                                    start-view="month"
                                     ng-readonly="true"
                                 >
                                     <input
                                         class="form-control wasdi-input"
                                         position="bottom-right"
-                                        start-veiw="day"
                                         ng-model="m_oController.m_sBuyDate"
                                         ng-readonly="true"
+                                        disabled
                                     />
                                     <span class="input-group-addon">
                                         <i class="fa fa-calendar"></i>
