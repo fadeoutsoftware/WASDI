@@ -132,6 +132,16 @@ public class ProjectRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+	public boolean checkValidSubscription(Project oProject) {
+		if (oProject == null
+				|| Utils.isNullOrEmpty(oProject.getSubscriptionId())) {
+			return false;
+		}
+
+		return new SubscriptionRepository()
+				.checkValidSubscriptionBySubscriptionId(oProject.getSubscriptionId());
+	}
+
 	/**
 	 * Get a project by its name.
 	 * @param sName the name of the project
