@@ -11,8 +11,6 @@ SubscriptionEditorController = (function () {
         this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        console.log("SubscriptionEditorController | oExtras: ", oExtras);
-        console.log("SubscriptionEditorController | this.m_oExtras: ", this.m_oExtras);
 
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
@@ -23,9 +21,8 @@ SubscriptionEditorController = (function () {
 
         this.m_sBuyDate = null;
         this.m_sStartDate = null;
-        this.m_sStartDate = null;
-        this.m_sStringStart = null;
-        this.m_sStringEnd = null;
+        this.m_sEndDate = null;
+        this.m_lDurationDays = 0;
 
         this.initializeDates();
 
@@ -49,8 +46,6 @@ SubscriptionEditorController = (function () {
     }
 
     SubscriptionEditorController.prototype.initializeDates = function () {
-        console.log("SubscriptionEditorController.initializeDates | this.m_oEditSubscription.startDate: ", this.m_oEditSubscription.startDate);
-
         if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.buyDate)) {
             this.m_sBuyDate = null;
         } else {
@@ -59,7 +54,6 @@ SubscriptionEditorController = (function () {
 
         if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
             this.m_sStartDate = new Date();
-            console.log(this.m_sStartDate)
         } else {
             this.m_sStartDate = new Date(this.m_oEditSubscription.startDate);
         }
@@ -72,7 +66,6 @@ SubscriptionEditorController = (function () {
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("week")) {
                 this.m_sEndDate.setDate(this.m_sStartDate.getDate() + 7);
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("month")) {
-                console.log(this.m_sStartDate.getMonth()+1)
                 this.m_sEndDate.setMonth(this.m_sStartDate.getMonth() + 1);
             } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("year")) {
                 this.m_sEndDate.setFullYear(this.m_sStartDate.getFullYear() + 1);
@@ -81,47 +74,48 @@ SubscriptionEditorController = (function () {
             this.m_sEndDate = new Date(this.m_oEditSubscription.endDate);
         }
 
-        console.log("SubscriptionEditorController.initializeDates | this.m_sStartDate: ", this.m_sStartDate);
-        console.log(this.m_sEndDate)
+        let lDifferenceInTime = this.m_sEndDate.getTime() - this.m_sStartDate.getTime();
+        this.m_lDurationDays = lDifferenceInTime / (1000 * 3600 * 24);
+        this.m_lDurationDays = Math.round(this.m_lDurationDays);
     }
+
     SubscriptionEditorController.prototype.selectDate = function () {
-        let sTempStart = new Date(this.m_sStringStart);
-        console.log(this.m_sStartDate)
-        this.m_sStartDate = this.m_sStringStart;
+        let oStartDate = new Date(this.m_sStartDate);
+        this.m_sEndDate = new Date(this.m_sStartDate);
 
-        console.log(this.m_sEndDate)
         if (this.m_oEditSubscription.typeId.toLowerCase().includes("day")) {
-            this.m_sEndDate = new Date(sTempStart.setDate(sTempStart.getDate() + 1));
-
+            this.m_sEndDate.setDate(oStartDate.getDate() + 1);
         } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("week")) {
-            this.m_sEndDate = new Date(sTempStart.setDate(sTempStart.getDate() + 7));
-
+            this.m_sEndDate.setDate(oStartDate.getDate() + 7);
         } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("month")) {
-            this.m_sEndDate = new Date(sTempStart.setMonth(sTempStart.getMonth() + 1));
-            console.log(this.m_sEndDate)
-
+            this.m_sEndDate.setMonth(oStartDate.getMonth() + 1);
         } else if (this.m_oEditSubscription.typeId.toLowerCase().includes("year")) {
-            this.m_sEndDate = new Date(sTempStart.setFullYear(sTempStart.getFullYear() + 1));
+            this.m_sEndDate.setFullYear(oStartDate.getFullYear() + 1);
         }
 
+        let lDifferenceInTime = this.m_sEndDate.getTime() - oStartDate.getTime();
+        this.m_lDurationDays = lDifferenceInTime / (1000 * 3600 * 24);
+        this.m_lDurationDays = Math.round(this.m_lDurationDays);
     }
-    SubscriptionEditorController.prototype.saveSubscription = function (sStartDate) {
-        console.log("SubscriptionEditorController.saveSubscription | this.m_oEditSubscription: ", this.m_oEditSubscription);
-        console.log("SubscriptionEditorController.saveSubscription | this.m_sStartDate: ", this.m_sStartDate);
-        console.log("SubscriptionEditorController.saveSubscription | sStartDate: ", sStartDate);
 
-        // if (utilsIsObjectNullOrUndefined(this.m_oType)) {
-        //     this.m_oEditSubscription.typeId = "";
-        //     this.m_oEditSubscription.typeName = "";
-        // } else {
-        //     this.m_oEditSubscription.typeId = this.m_oType.typeId;
-        //     this.m_oEditSubscription.typeName = this.m_oType.name;
-        // }
+    SubscriptionEditorController.prototype.saveSubscription = function (sStartDate) {
 
         if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
             this.m_oEditSubscription.organizationId = "";
         } else {
             this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
+            this.m_oEditSubscription.startDate = new Date(this.m_sStartDate);
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.endDate)) {
+            this.m_oEditSubscription.endDate = new Date(this.m_sEndDate);
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.durationDays)) {
+            this.m_oEditSubscription.durationDays = this.m_lDurationDays;
         }
 
         let oController = this;
@@ -182,14 +176,14 @@ SubscriptionEditorController = (function () {
                     oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
                     );
- 
+
                     oController.m_aoTypesMap.forEach((oValue, sKey) => {
                         if (oValue.typeId == oController.m_oEditSubscription.typeId) {
                             oController.m_oType = oValue;
                         }
                     });
                 }
- 
+
                 oController.m_bLoadingTypes = false;
             }, function (data) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(

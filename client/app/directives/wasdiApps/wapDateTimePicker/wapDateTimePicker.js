@@ -20,6 +20,7 @@ angular.module('wasdi.wapDateTimePicker', [])
                         moment-picker="$ctrl.dateTime"
                         format="YYYY-MM-DD"
                         today="true"
+                        start-view="month"
                         >
 
                         <input  class="form-control"
