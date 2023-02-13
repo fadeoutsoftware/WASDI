@@ -49,6 +49,7 @@ import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -428,6 +429,21 @@ public class WorkspaceResource {
 			WasdiLog.debugLog("WorkspaceResource.CreateWorkspace: invalid session");
 
 			return null;
+		}
+
+		String sActiveProjectOfUser = oUser.getActiveProjectId();
+
+		ProjectRepository oProjectRepository = new ProjectRepository();
+		boolean bUserHasAValidSubscription = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+
+		if (!bUserHasAValidSubscription) {
+			WasdiLog.debugLog("WorkspaceResource.CreateWorkspace: the user's active subscription is not valid");
+
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setStringValue("the user's active subscription is not valid");
+
+			return oResult;
 		}
 
 		// Create New Workspace

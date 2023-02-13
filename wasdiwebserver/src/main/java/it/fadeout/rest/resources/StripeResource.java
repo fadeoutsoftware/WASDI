@@ -40,8 +40,9 @@ public class StripeResource {
 	@GET
 	@Path("/paymentUrl")
 	public PrimitiveResult getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId) {
-		WasdiLog.debugLog("StripeResource.getStripePaymentUrl( Subscription: " + sSubscriptionId + ")");
+			@QueryParam("subscription") String sSubscriptionId, @QueryParam("workspace") String sWorkspaceId) {
+		WasdiLog.debugLog("StripeResource.getStripePaymentUrl( " + "Subscription: " + sSubscriptionId + ", "
+				+ "Workspace: " + sWorkspaceId + ")");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
@@ -101,7 +102,14 @@ public class StripeResource {
 
 				if (!Utils.isNullOrEmpty(sBaseUrl)) {
 					oResult.setBoolValue(true);
-					oResult.setStringValue(sBaseUrl + "?client_reference_id=" + sSubscriptionId);
+
+					String sUrl = sBaseUrl + "?client_reference_id=" + sSubscriptionId;
+
+					if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+						sUrl += "_" + sWorkspaceId;
+					}
+
+					oResult.setStringValue(sUrl);
 				}
 			}
 		} catch (Exception oEx) {
@@ -124,13 +132,24 @@ public class StripeResource {
 
 		StripePaymentDetail oStripePaymentDetail = retrieveStripePaymentDetail(sCheckoutSessionId);
 
-		if (oStripePaymentDetail == null || Utils.isNullOrEmpty(oStripePaymentDetail.getClientReferenceId())) {
+		String sClientReferenceId = oStripePaymentDetail.getClientReferenceId();
+
+		if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
 			WasdiLog.debugLog("StripeResource.confirmation: Stripe returned an invalid result, aborting");
 
 			return null;
 		}
 
-		String sSubscriptionId = oStripePaymentDetail.getClientReferenceId();
+		String sSubscriptionId = null;
+		String sWorkspaceId = null;
+
+		if (sClientReferenceId.contains("_")) {
+			String[] asClientReferenceId = sClientReferenceId.split("_");
+			sSubscriptionId = asClientReferenceId[0];
+			sWorkspaceId = asClientReferenceId[1];
+		} else {
+			sSubscriptionId = sClientReferenceId;
+		}
 
 		WasdiLog.debugLog("StripeResource.confirmation( sSubscriptionId: " + sSubscriptionId + ")");
 
@@ -148,7 +167,9 @@ public class StripeResource {
 
 				oSubscriptionRepository.updateSubscription(oSubscription);
 
-				sendRabbitMessage(sSubscriptionId, oStripePaymentDetail);
+				if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+					sendRabbitMessage(sWorkspaceId, oStripePaymentDetail);
+				}
 			}
 		}
 
@@ -161,7 +182,7 @@ public class StripeResource {
 				"</script>";
 	}
 
-	private void sendRabbitMessage(String sSubscriptionId, StripePaymentDetail oStripePaymentDetail) {
+	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
 		try {
 			// Search for exchange name
 			String sExchange = WasdiConfig.Current.rabbit.exchange;
@@ -173,7 +194,7 @@ public class StripeResource {
 
 			// Send the Asynch Message to the clients
 			Send oSendToRabbit = new Send(sExchange);
-			oSendToRabbit.SendRabbitMessage(true, "SUBSCRIPTION", sSubscriptionId, oStripePaymentDetail, sSubscriptionId);
+			oSendToRabbit.SendRabbitMessage(true, "SUBSCRIPTION", sWorkspaceId, oStripePaymentDetail, sWorkspaceId);
 			oSendToRabbit.Free();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("StripeResource.sendRabbitMessage: exception sending asynch notification");

@@ -72,6 +72,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -846,6 +847,18 @@ public class ProcessorsResource  {
 
 			if (oUser==null) {
 				WasdiLog.debugLog("ProcessorsResource.internalRun( Session: " + sSessionId + ", Name: " + sName + ", encodedJson:" + sEncodedJson + ", WS: " + sWorkspaceId + " ): invalid session");
+				return oRunningProcessorViewModel;
+			}
+
+			String sActiveProjectOfUser = oUser.getActiveProjectId();
+
+			ProjectRepository oProjectRepository = new ProjectRepository();
+			boolean bUserHasAValidSubscription = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+
+			if (!bUserHasAValidSubscription) {
+				WasdiLog.debugLog("ProcessorsResource.internalRun: the user's active subscription is not valid");
+
+				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;
 			}
 			

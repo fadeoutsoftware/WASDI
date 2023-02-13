@@ -132,6 +132,27 @@ public class ProjectRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
+
+	/**
+	 * Check whether or not the subscription of the project is valid.
+	 * @param sProjectId the id of the project
+	 * @return true if the subscription of the project if valid, false otherwise
+	 */
+	public boolean checkValidSubscription(String sProjectId) {
+		if (Utils.isNullOrEmpty(sProjectId)) {
+			return false;
+		}
+
+		Project oProject = this.getProjectById(sProjectId);
+
+		return checkValidSubscription(oProject);
+	}
+
+	/**
+	 * Check whether or not the subscription of the project is valid.
+	 * @param oProject the project
+	 * @return true if the subscription of the project if valid, false otherwise
+	 */
 	public boolean checkValidSubscription(Project oProject) {
 		if (oProject == null
 				|| Utils.isNullOrEmpty(oProject.getSubscriptionId())) {

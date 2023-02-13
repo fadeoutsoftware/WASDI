@@ -4,6 +4,7 @@ SubscriptionEditorController = (function () {
         $window,
         oClose,
         oExtras,
+        oConstantsService,
         oSubscriptionService,
         oOrganizationService
     ) {
@@ -12,6 +13,7 @@ SubscriptionEditorController = (function () {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
 
+        this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
 
@@ -126,7 +128,13 @@ SubscriptionEditorController = (function () {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
 
-                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.stringValue).then(function (data) {
+                let oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                let sActiveWorkspaceId = oActiveWorkspace == null ? null : oActiveWorkspace.workspaceId;
+
+                console.log("SubscriptionEditorController.saveSubscription | oActiveWorkspace: ", oActiveWorkspace);
+                console.log("SubscriptionEditorController.saveSubscription | sActiveWorkspaceId: ", sActiveWorkspaceId);
+
+                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.stringValue, sActiveWorkspaceId).then(function (data) {
                     console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | data.data: ", data.data);
                     if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
                         let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
@@ -237,6 +245,7 @@ SubscriptionEditorController = (function () {
         '$window',
         'close',
         'extras',
+        'ConstantsService',
         'SubscriptionService',
         'OrganizationService'
     ];

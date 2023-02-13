@@ -60,8 +60,8 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
     };
 
     // Get Stripe payment url by subscription id
-    this.getStripePaymentUrl = function (sSubscriptionId) {
-        return this.m_oHttp.get(this.APIURL + '/stripe/paymentUrl?subscription=' + sSubscriptionId);
+    this.getStripePaymentUrl = function (sSubscriptionId, sWorkspaceId) {
+        return this.m_oHttp.get(this.APIURL + '/stripe/paymentUrl?subscription=' + sSubscriptionId + '&workspace=' + sWorkspaceId);
     }
 
 }]);
