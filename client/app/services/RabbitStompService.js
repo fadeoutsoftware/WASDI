@@ -187,7 +187,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                                             var fCallbackFunction = oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookFunction]
                                             fCallbackFunction(oMessageResult, oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookController]);
 
-                                            if (oThisService.m_afMessageHook[iHooks][oThisService.m_sCallOnce]) {
+                                            if (oThisService.m_afMessageHooks[iHooks][oThisService.m_sCallOnce]) {
                                                 oThisService.m_afMessageHooks.splice(iHooks, 1);
                                             }
                                         }
