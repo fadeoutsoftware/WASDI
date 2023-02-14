@@ -1075,8 +1075,12 @@ var EditUserController = (function () {
         oController.initializeSubscriptionsInfo();
         oController.m_bIsLoading = false;
 
-        if (utilsIsObjectNullOrUndefined(oRabbitMessage)) {
-            var oVexWindow = utilsVexDialogAlertBottomRightCorner(JSON.stringify(oRabbitMessage));
+        if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
+            let sRabbitMessage = JSON.stringify(oRabbitMessage);
+
+            console.log("EditUserController.rabbitMessageHook | sRabbitMessage:", sRabbitMessage);
+
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
             utilsVexCloseDialogAfter(5000, oVexWindow);
         }
     };
