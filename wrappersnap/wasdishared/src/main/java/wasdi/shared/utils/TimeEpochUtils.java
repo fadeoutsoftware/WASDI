@@ -28,6 +28,14 @@ public class TimeEpochUtils {
 	private static final String s_sDATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 
+	public static String fromEpochToDateString(Double oEpochMilliSeconds) {
+		if (oEpochMilliSeconds == null) {
+			return null;
+		}
+
+		return fromEpochToDateString(oEpochMilliSeconds.longValue());
+	}
+
 	public static String fromEpochToDateString(long lEpochMilliSeconds) {
 		try {
 			SimpleDateFormat oSimpleDateFormat = new SimpleDateFormat(s_sDATEFORMAT);

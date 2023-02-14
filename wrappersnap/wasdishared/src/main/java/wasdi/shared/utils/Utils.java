@@ -235,6 +235,9 @@ public class Utils {
 	}
 
 	public static Date getYyyyMMddTZDate(String sDate) {
+		if (isNullOrEmpty(sDate)) {
+			return null;
+		}
 
 		try {
 			return SIMPLE_DATE_FORMAT_yyyyMMddTZ.get().parse(sDate);
