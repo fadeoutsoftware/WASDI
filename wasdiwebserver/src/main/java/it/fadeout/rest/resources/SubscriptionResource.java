@@ -18,6 +18,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
@@ -34,7 +35,9 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
@@ -351,19 +354,15 @@ public class SubscriptionResource {
 
 	@DELETE
 	@Path("/delete")
-	public PrimitiveResult deleteSubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -372,8 +371,7 @@ public class SubscriptionResource {
 
 		if (oSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: subscription does not exist");
-			oResult.setStringValue("No subscription with the name already exists.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No subscription with the name exists.")).build();
 		}
 
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -385,35 +383,27 @@ public class SubscriptionResource {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: user " + oUser.getUserId() + " is not the owner [" + sSubscriptionOwner + "]: delete the sharing, not the subscription");
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
 
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sSubscriptionId);
-
-			return oResult;
+			return Response.ok(new SuccessResponse(sSubscriptionId)).build();
 		}
 
 		if (oUserResourcePermissionRepository.isSubscriptionShared(sSubscriptionId)) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: the subscription is shared with users");
-			oResult.setStringValue("The subscription cannot be removed as it is shared with users. Before deleting the subscription, please remove the sharings.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with users. Before deleting the subscription, please remove the sharings.")).build();
 		}
 
 		String sOrganizationId = oSubscription.getOrganizationId();
 
 		if (sOrganizationId != null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: the subscription is shared with an organization");
-			oResult.setStringValue("The subscription cannot be removed as it is shared with an organization. Before deleting the subscription, please remove the sharing.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with an organization. Before deleting the subscription, please remove the sharing.")).build();
 		}
 
 		if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sSubscriptionId);
+			return Response.ok(new SuccessResponse(sSubscriptionId)).build();
 		} else {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription( " + sSubscriptionId + " ): deletion failed");
-			oResult.setStringValue("The deletion of the subscription failed.");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the subscription failed.")).build();
 		}
-
-		return oResult;
 	}
 
 	@GET

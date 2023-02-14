@@ -70,10 +70,9 @@
                     </button>
                 </td>
 
-                <td class="over-icon"
-                    ng-show="m_oController.m_oEditOrganization.organizationId === m_oController.m_oEditOrganization.organizationId">
+                <td class="over-icon">
                     <button class="btn btn-danger btn-wasdi" title={{"DIALOG_EDIT_ORGANIZATION_DELETE"|translate}}
-                        ng-click="m_oController.deleteOrganization(m_oController.m_oUser.userId, oOrganization.organizationId)">
+                        ng-click="m_oController.deleteOrganization(oOrganization.organizationId)">
                         <!--Delete Organization-->
                         <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
                         <!--

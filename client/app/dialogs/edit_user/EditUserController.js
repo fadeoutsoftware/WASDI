@@ -39,9 +39,6 @@ var EditUserController = (function () {
         this.m_sSelectedTab = "UserInfo";
 
 
-
-
-
         this.m_aoTypes = [];
         this.m_aoTypesMap = [];
         this.m_oType = {};
@@ -53,11 +50,6 @@ var EditUserController = (function () {
         this.m_aoUsersList = [];
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {};
-        // this.m_sSelectedOrganizationId = null;
-
-        this.m_sUserPartialName = "";
-        this.m_aoMatchingUsersList = [];
-
 
         this.initializeOrganizationsInfo();
 
@@ -66,7 +58,6 @@ var EditUserController = (function () {
 
         this.m_oEditSubscription = {};
         this.m_oSharingSubscription = {};
-        // this.m_sSelectedSubscriptionId = null;
 
         this.initializeSubscriptionsInfo();
 
@@ -292,13 +283,8 @@ var EditUserController = (function () {
     EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
         console.log("EditUserController.showUsersByOrganization | sOrganizationId: ", sOrganizationId);
 
-        // this.m_sSelectedOrganizationId = sOrganizationId;
-        // console.log("EditUserController.showUsersByOrganization | this.m_sSelectedOrganizationId: ", this.m_sSelectedOrganizationId);
-
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {organizationId: sOrganizationId}
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
 
         if (utilsIsStrNullOrEmpty(sOrganizationId)) {
             return false;
@@ -339,111 +325,16 @@ var EditUserController = (function () {
         );
     }
 
-    // EditUserController.prototype.showOrganizationSharingForm = function(sOrganizationId) {
-    //     console.log("EditUserController.showOrganizationSharingForm | sOrganizationId: ", sOrganizationId);
-
-    //     this.m_sSelectedOrganizationId = sOrganizationId;
-    //     this.m_oEditOrganization = {}
-    //     this.m_oSharingOrganization = {}
-    //     this.m_aoMatchingUsersList = [];
-
-    //     var oController = this;
-
-    //     this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
-    //         function (data) {
-    //             if (utilsIsObjectNullOrUndefined(data.data) === false) {
-    //                 oController.m_oSharingOrganization = data.data;
-    //             } else {
-    //                 utilsVexDialogAlertTop(
-    //                     "GURU MEDITATION<br>ERROR IN GETTING THE ORGANIZATION BY ID"
-    //                 );
-    //             }
-
-    //             return true;
-    //         }
-    //     );
-    // }
-
-    /*
-    EditUserController.prototype.shareOrganization = function(sOrganizationId, sUserId) {
-
-        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sOrganizationId))) {
-            return false;
-        }
-
-        this.m_sSelectedOrganizationId = sOrganizationId;
-        this.m_oEditOrganization = {}
-
-        var oController = this;
-
-        this.m_oOrganizationService.addOrganizationSharing(sOrganizationId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log("EditUserController.shareOrganization | data.data: ", data.data);
-
-                    if (data.data.boolValue) {
-                        oController.showUsersByOrganization(sOrganizationId);
-                    }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN SHARING THE ORGANIZATION"
-                    );
-                }
-
-                return true;
-            }
-        );
-    }
-
-    EditUserController.prototype.unshareOrganization = function(sOrganizationId, sUserId) {
-        console.log("EditUserController.unshareOrganization | sOrganizationId: ", sOrganizationId);
-        console.log("EditUserController.unshareOrganization | sUserId: ", sUserId);
-
-        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sOrganizationId))) {
-            return false;
-        }
-
-        this.m_sSelectedOrganizationId = sOrganizationId;
-        this.m_oEditOrganization = {}
-
-        var oController = this;
-
-        this.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log("EditUserController.unshareOrganization | data.data: ", data.data);
-
-                    if (data.data.boolValue) {
-                        oController.showUsersByOrganization(sOrganizationId);
-                    }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
-                    );
-                }
-
-                return true;
-            }
-        );
-    }
-    */
-
     EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
         this.m_aoUsersList = [];
-        // this.m_sSelectedOrganizationId = null;
         this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
     }
 
     EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId, sEditMode) {
         console.log("EditUserController.showOrganizationEditForm | sOrganizationId: ", sOrganizationId);
 
-        // this.m_sSelectedOrganizationId = sOrganizationId;
         this.m_oSharingOrganization = {}
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
 
         let oController = this;
 
@@ -481,38 +372,34 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.deleteOrganization = function(sUserId, sOrganizationId) {
-        console.log("EditUserController.deleteOrganization | sOrganizationId: ", sOrganizationId);
-
-        // this.m_sSelectedOrganizationId = null;
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
+    EditUserController.prototype.deleteOrganization = function(sOrganizationId) {
 
         let sConfirmMsg = "Delete this Organization?"
 
         var oController = this;
 
-
         let oCallbackFunction = function(value) {
             if(value) {
-                oController.m_oOrganizationService.deleteOrganization(sOrganizationId).then(function (data) {
-                    if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                oController.m_oOrganizationService.deleteOrganization(sOrganizationId)
+                .then(function (data) {
+                    if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
                         var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
-                    } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
-                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
-                        utilsVexCloseDialogAfter(5000, oDialog);
                     } else {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
                     }
 
                     oController.initializeOrganizationsInfo();
+                }, function (error) {
+                    let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION";
 
-                },function (error) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
-            })
+                    if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                        sErrorMessage += "<br><br>" + error.data.message;
+                    }
+
+                    utilsVexDialogAlertTop(sErrorMessage);
+                })
             }
-                
         };
 
         utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
@@ -522,9 +409,6 @@ var EditUserController = (function () {
         console.log("EditUserController.cancelEditOrganizationForm");
 
         this.m_oEditOrganization = {}
-        // this.m_sSelectedOrganizationId = null;
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
     }
 
     EditUserController.prototype.cancelSharingOrganizationForm = function() {
@@ -532,9 +416,6 @@ var EditUserController = (function () {
 
         this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
-        // this.m_sSelectedOrganizationId = null;
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
@@ -561,8 +442,6 @@ var EditUserController = (function () {
 
     EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
         console.log("EditUserController.showSubscriptionEditForm | sSubscriptionId: ", sSubscriptionId);
-
-        // this.m_sSelectedSubscriptionId = sSubscriptionId;
 
         var oController = this;
 
@@ -626,37 +505,43 @@ var EditUserController = (function () {
         });
     }
 
-    EditUserController.prototype.deleteSubscription = function(sUserId, sSubscriptionId) {
-        console.log("EditUserController.deleteSubscription | sSubscriptionId: ", sSubscriptionId);
+    EditUserController.prototype.deleteSubscription = function(sSubscriptionId) {
 
-        // this.m_sSelectedSubscriptionId = null;
+        let sConfirmMsg = "Delete this Subscription?"
 
         var oController = this;
+        
+        let oCallbackFunction = function(value) {
+            if (value) {
+                oController.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
+                    .then(function (data) {
+                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION DELETED<br>READY");
+                            utilsVexCloseDialogAfter(4000, oDialog);
+                        } else {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
+                        }
 
-        this.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
-            .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION DELETED<br>READY");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
-                    utilsVexCloseDialogAfter(5000, oDialog);
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
-                }
+                        oController.initializeSubscriptionsInfo();
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION";
 
-                oController.initializeSubscriptionsInfo();
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + error.data.message;
+                        }
 
-            },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
-        });
+                        utilsVexDialogAlertTop(sErrorMessage);
+                    });
+            }
+        };
+
+        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
 
     EditUserController.prototype.cancelEditSubscriptionForm = function() {
         console.log("EditUserController.cancelEditSubscriptionForm");
 
         this.m_oEditSubscription = {}
-        // this.m_sSelectedSubscriptionId = null;
         this.m_aoMatchingOrganizationsList = [];
         this.m_sOrganizationPartialName = "";
     }
@@ -664,12 +549,8 @@ var EditUserController = (function () {
     EditUserController.prototype.showUsersBySubscription = function(sSubscriptionId) {
         console.log("EditUserController.showUsersBySubscription | sSubscriptionId: ", sSubscriptionId);
 
-        // this.m_sSelectedSubscriptionId = sSubscriptionId;
-        // console.log("EditUserController.showUsersBySubscription | this.m_sSelectedSubscriptionId: ", this.m_sSelectedSubscriptionId);
         this.m_oEditSubscription = {};
         this.m_oSharingSubscription = {subscriptionId: sSubscriptionId};
-//        this.m_aoMatchingUsersList = [];
-//        this.m_sUserPartialName = "";
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
@@ -710,101 +591,10 @@ var EditUserController = (function () {
         );
     }
 
-    // EditUserController.prototype.showSubscriptionSharingForm = function(sSubscriptionId) {
-    //     console.log("EditUserController.showSubscriptionSharingForm | sSubscriptionId: ", sSubscriptionId);
-
-    //     this.m_sSelectedSubscriptionId = sSubscriptionId;
-    //     this.m_oEditSubscription = {}
-    //     this.m_oSharingSubscription = {}
-    //     this.m_aoMatchingUsersList = [];
-
-    //     var oController = this;
-
-    //     this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
-    //         function (data) {
-    //             if (utilsIsObjectNullOrUndefined(data.data) === false) {
-    //                 oController.m_oSharingSubscription = data.data;
-    //             } else {
-    //                 utilsVexDialogAlertTop(
-    //                     "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
-    //                 );
-    //             }
-
-    //             return true;
-    //         }
-    //     );
-    // }
-/*
-    EditUserController.prototype.shareSubscription = function(sSubscriptionId, sUserId) {
-
-        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sSubscriptionId))) {
-            return false;
-        }
-
-        this.m_sSelectedSubscriptionId = sSubscriptionId;
-        this.m_oEditSubscription = {}
-
-        var oController = this;
-
-        this.m_oSubscriptionService.addSubscriptionSharing(sSubscriptionId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log("EditUserController.shareSubscription | data.data: ", data.data);
-
-                    if (data.data.boolValue) {
-                        oController.showUsersBySubscription(sSubscriptionId);
-                    }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN SHARING THE SUBSCRIPTION"
-                    );
-                }
-
-                return true;
-            }
-        );
-    }
-
-    EditUserController.prototype.unshareSubscription = function(sSubscriptionId, sUserId) {
-        console.log("EditUserController.unshareSubscription | sSubscriptionId: ", sSubscriptionId);
-        console.log("EditUserController.unshareSubscription | sUserId: ", sUserId);
-
-        if( (utilsIsObjectNullOrUndefined(sUserId)) || (utilsIsStrNullOrEmpty(sSubscriptionId))) {
-            return false;
-        }
-
-        this.m_sSelectedSubscriptionId = sSubscriptionId;
-        this.m_oEditSubscription = {}
-
-        var oController = this;
-
-        this.m_oSubscriptionService.removeSubscriptionSharing(sSubscriptionId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    console.log("EditUserController.unshareSubscription | data.data: ", data.data);
-
-                    if (data.data.boolValue) {
-                        oController.showUsersBySubscription(sSubscriptionId);
-                    }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN UNSHARING THE SUBSCRIPTION"
-                    );
-                }
-
-                return true;
-            }
-        );
-    }
-*/
-
     EditUserController.prototype.hideUsersBySubscription = function(sUserId, sSubscriptionId) {
         this.m_aoUsersList = [];
-        // this.m_sSelectedSubscriptionId = null;
         this.m_oEditSubscription = {}
         this.m_oSharingSubscription = {}
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
     }
 
     EditUserController.prototype.cancelSharingSubscriptionForm = function() {
@@ -812,38 +602,7 @@ var EditUserController = (function () {
 
         this.m_oEditSubscription = {}
         this.m_oSharingSubscription = {}
-        // this.m_sSelectedSubscriptionId = null;
-        this.m_aoMatchingUsersList = [];
-        this.m_sUserPartialName = "";
     }
-
-
-
-    /*
-    EditUserController.prototype.changeActiveProject = function(oProject) {
-        console.log("EditUserController.changeActiveProject | oProject: ", oProject);
-
-        var oController = this;
-
-        if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
-                console.log("EditUserController.changeActiveProject | data.data: ", data.data);
-                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
-                    utilsVexCloseDialogAfter(2000, oDialog);
-
-                    oController.initializeProjectsInfo();
-                    this.m_oProject = oProject;
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
-                }
-    
-            }, function (error) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
-            });
-        }
-    }
-    */
 
     EditUserController.prototype.changeActiveProjectWithButton = function(oProject) {
         console.log("EditUserController.changeActiveProjectWithButton | oProject: ", oProject);
@@ -915,10 +674,7 @@ var EditUserController = (function () {
     EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
         console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: " + sSubscriptionId + " | sSubscriptionName:" + sSubscriptionName);
 
-        // this.m_sSelectedSubscriptionId = sSubscriptionId;
         this.m_oEditSubscription = {};
-        // this.m_oSharingSubscription = {subscriptionId: sSubscriptionId}
-        // this.m_aoMatchingUsersList = [];
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
@@ -946,7 +702,6 @@ var EditUserController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function () {
-                            // oController.initializeSubscriptionsInfo();
                             oController.initializeProjectsInfo();
                         })
 
@@ -1001,29 +756,45 @@ var EditUserController = (function () {
         )
     }
 
-    EditUserController.prototype.deleteProject = function(sUserId, sProjectId) {
-        console.log("EditUserController.deleteProject | sProjectId: ", sProjectId);
+    /*
+    EditUserController.prototype.deleteProject = function(sProjectId) {
+
+        let sConfirmMsg = "Delete this Project?"
 
         var oController = this;
+        
+        let oCallbackFunction = function(value) {
+            if (value) {
+                oController.m_oProjectService.deleteProject(sProjectId)
+                    .then(function (data) {
+                        console.log("EditUserController.deleteProject | data: ", data);
+                        console.log("EditUserController.deleteProject | data.status: ", data.status);
+                        console.log("EditUserController.deleteProject | data.status === 200: ", (data.status === 200));
 
-        this.m_oProjectService.deleteProject(sProjectId)
-            .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
-                    utilsVexCloseDialogAfter(5000, oDialog);
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
-                }
+                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
+                            utilsVexCloseDialogAfter(4000, oDialog);
+                        } else {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
+                        }
 
-                oController.initializeProjectsInfo();
+                        oController.initializeProjectsInfo();
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING PROJECT";
 
-            },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
-        });
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + error.data.message;
+                        }
+
+                        utilsVexDialogAlertTop(sErrorMessage);
+                    });
+
+            }
+        };
+
+        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
+    */
 
     EditUserController.prototype.cancelEditProjectForm = function() {
         console.log("EditUserController.cancelEditProjectForm");
@@ -1084,8 +855,6 @@ var EditUserController = (function () {
             utilsVexCloseDialogAfter(5000, oVexWindow);
         }
     };
-
-
 
     EditUserController.$inject = [
         '$scope',

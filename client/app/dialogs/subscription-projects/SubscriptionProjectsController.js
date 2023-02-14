@@ -142,28 +142,42 @@ let SubscriptionProjectsController = (function () {
         )
     }
 
-    SubscriptionProjectsController.prototype.deleteProject = function(sUserId, sProjectId) {
-        console.log("SubscriptionProjectsController.deleteProject | sProjectId: ", sProjectId);
+    SubscriptionProjectsController.prototype.deleteProject = function(sProjectId) {
+
+        let sConfirmMsg = "Delete this Project?"
 
         var oController = this;
+        
+        let oCallbackFunction = function(value) {
+            if (value) {
+                oController.m_oProjectService.deleteProject(sProjectId)
+                    .then(function (data) {
+                        console.log("SubscriptionProjectsController.deleteProject | data: ", data);
+                        console.log("SubscriptionProjectsController.deleteProject | data.status: ", data.status);
+                        console.log("SubscriptionProjectsController.deleteProject | data.status === 200: ", (data.status === 200));
 
-        this.m_oProjectService.deleteProject(sProjectId)
-            .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === false) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(data.data.stringValue);
-                    utilsVexCloseDialogAfter(5000, oDialog);
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
-                }
+                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
+                            utilsVexCloseDialogAfter(4000, oDialog);
+                        } else {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
+                        }
 
-                oController.initializeProjectsInfo();
+                        oController.initializeProjectsInfo();
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING PROJECT";
 
-            },function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
-        });
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + error.data.message;
+                        }
+
+                        utilsVexDialogAlertTop(sErrorMessage);
+                    });
+
+            }
+        };
+
+        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
 
     SubscriptionProjectsController.prototype.cancelEditProjectForm = function() {
