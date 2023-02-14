@@ -538,12 +538,14 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
+        console.log("EditUserController.initializeSubscriptionsInfo");
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(
             function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
                     oController.m_aoSubscriptions = data.data;
+                    console.log("EditUserController.initializeSubscriptionsInfo | oController.m_aoSubscriptions: ", oController.m_aoSubscriptions);
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
@@ -1069,13 +1071,14 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
-        console.log("EditUserController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage)
+        console.log("EditUserController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
         oController.initializeSubscriptionsInfo();
         oController.m_bIsLoading = false;
 
-        
-        var oVexWindow = utilsVexDialogAlertBottomRightCorner(oRabbitMessage);
-        utilsVexCloseDialogAfter(10000, oVexWindow);
+        if (utilsIsObjectNullOrUndefined(oRabbitMessage)) {
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner(JSON.stringify(oRabbitMessage));
+            utilsVexCloseDialogAfter(5000, oVexWindow);
+        }
     };
 
 
