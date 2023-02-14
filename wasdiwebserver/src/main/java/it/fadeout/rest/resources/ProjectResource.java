@@ -15,6 +15,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Project;
@@ -27,7 +29,9 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectViewModel;
@@ -402,19 +406,15 @@ public class ProjectResource {
 
 	@DELETE
 	@Path("/delete")
-	public PrimitiveResult deleteProject(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteProject(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.deleteProject( Project: " + sProjectId + " )");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.deleteProject: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
@@ -423,48 +423,15 @@ public class ProjectResource {
 
 		if (oProject == null) {
 			WasdiLog.debugLog("ProjectResource.deleteProject: project does not exist");
-			oResult.setStringValue("No project with the name already exists.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the name exists.")).build();
 		}
-
-//		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-//
-//		String sProjectOwner = oProject.getUserId();
-//
-//		if (!sProjectOwner.equals(oUser.getUserId())) {
-//			// The current uses is not the owner of the project
-//			WasdiLog.debugLog("ProjectResource.deleteProject: user " + oUser.getUserId() + " is not the owner [" + sProjectOwner + "]: delete the sharing, not the project");
-//			oUserResourcePermissionRepository.deletePermissionsByUserIdAndProjectId(oUser.getUserId(), sProjectId);
-//
-//			oResult.setBoolValue(true);
-//			oResult.setStringValue(sProjectId);
-//
-//			return oResult;
-//		}
-//
-//		if (oUserResourcePermissionRepository.isProjectShared(sProjectId)) {
-//			WasdiLog.debugLog("ProjectResource.deleteProject: the project is shared with users");
-//			oResult.setStringValue("The project cannot be removed as it has users. Before deleting the project, please remove the users.");
-//			return oResult;
-//		}
-//
-//		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-//
-//		if (oSubscriptionRepository.projectHasSubscriptions(sProjectId)) {
-//			WasdiLog.debugLog("ProjectResource.deleteProject: the project shares subscriptions");
-//			oResult.setStringValue("The project cannot be removed as it shares subscriptions. Before deleting the project, please remove the sharings.");
-//			return oResult;
-//		}
 
 		if (oProjectRepository.deleteProject(sProjectId)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sProjectId);
+			return Response.ok(new SuccessResponse(sProjectId)).build();
 		} else {
 			WasdiLog.debugLog("ProjectResource.deleteProject( " + sProjectId + " ): deletion failed");
-			oResult.setStringValue("The deletion of the project failed.");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the project failed.")).build();
 		}
-
-		return oResult;
 	}
 
 	private static Project convert(ProjectEditorViewModel oProjectEVM) {

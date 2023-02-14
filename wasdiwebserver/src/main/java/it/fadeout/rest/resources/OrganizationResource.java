@@ -14,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
@@ -31,7 +32,9 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationEditorViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
@@ -295,19 +298,15 @@ public class OrganizationResource {
 
 	@DELETE
 	@Path("/delete")
-	public PrimitiveResult deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.deleteOrganization( Organization: " + sOrganizationId + " )");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
@@ -316,8 +315,7 @@ public class OrganizationResource {
 
 		if (oOrganization == null) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: organization does not exist");
-			oResult.setStringValue("No organization with the name already exists.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the name exists.")).build();
 		}
 
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -329,35 +327,27 @@ public class OrganizationResource {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
 
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sOrganizationId);
-
-			return oResult;
+			return Response.ok(new SuccessResponse(sOrganizationId)).build();
 		}
 
 		if (oUserResourcePermissionRepository.isOrganizationShared(sOrganizationId)) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization is shared with users");
-			oResult.setStringValue("The organization cannot be removed as it has users. Before deleting the organization, please remove the users.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it has users. Before deleting the organization, please remove the users.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
 		if (oSubscriptionRepository.organizationHasSubscriptions(sOrganizationId)) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization shares subscriptions");
-			oResult.setStringValue("The organization cannot be removed as it shares subscriptions. Before deleting the organization, please remove the sharings.");
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it shares subscriptions. Before deleting the organization, please remove the sharings.")).build();
 		}
 
 		if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sOrganizationId);
+			return Response.ok(new SuccessResponse(sOrganizationId)).build();
 		} else {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
-			oResult.setStringValue("The deletion of the organization failed.");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the organization failed.")).build();
 		}
-
-		return oResult;
 	}
 
 	/**
