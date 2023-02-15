@@ -246,16 +246,21 @@ var EditUserController = (function () {
         
         this.m_oProcessWorkspaceService.getProcessWorkspaceTotalRunningTimeByUserAndInterval(this.m_oUser.userId).then(
             function (data) {
-                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                            oController.m_lTotalRuntime = data.data;
-                        } else {
-                            utilsVexDialogAlertTop(
-                                "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME"
-                            );
-                        }
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+                    oController.m_lTotalRuntime = data.data;
+                } else {
+                    utilsVexDialogAlertTop(
+                        "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME"
+                    );
+                }
 
-                        return true;
-                    }
+                return true;
+            }, function (error) {
+                let sErrorMessage =  "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME";
+
+                utilsVexDialogAlertTop(sErrorMessage);
+            }
         );
     };
 
@@ -265,7 +270,8 @@ var EditUserController = (function () {
 
         this.m_oOrganizationService.getOrganizationsListByUser().then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_aoOrganizations = data.data;
                 } else {
                     utilsVexDialogAlertTop(
@@ -276,6 +282,14 @@ var EditUserController = (function () {
                 oController.m_bLoadingOrganizations = false;
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
     }
@@ -438,8 +452,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.cancelEditOrganizationForm = function() {
-        console.log("EditUserController.cancelEditOrganizationForm");
-
         this.m_oEditOrganization = {}
     }
 
@@ -451,14 +463,13 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
-        console.log("EditUserController.initializeSubscriptionsInfo");
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_aoSubscriptions = data.data;
-                    console.log("EditUserController.initializeSubscriptionsInfo | oController.m_aoSubscriptions: ", oController.m_aoSubscriptions);
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
@@ -468,6 +479,14 @@ var EditUserController = (function () {
                 oController.m_bLoadingSubscriptions = false;
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
     }
@@ -578,11 +597,7 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.cancelEditSubscriptionForm = function() {
-        console.log("EditUserController.cancelEditSubscriptionForm");
-
         this.m_oEditSubscription = {}
-        this.m_aoMatchingOrganizationsList = [];
-        this.m_sOrganizationPartialName = "";
     }
 
     EditUserController.prototype.showUsersBySubscription = function(sSubscriptionId) {
@@ -672,7 +687,8 @@ var EditUserController = (function () {
 
         this.m_oProjectService.getProjectsListByUser().then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_aoProjects = data.data;
 
                     const oFirstElement = { name: "No Active Project", projectId: null };
@@ -686,7 +702,6 @@ var EditUserController = (function () {
                     oController.m_oProject = oFirstElement;
 
                     oController.m_aoProjects.forEach((oValue) => {
-                        console.log("EditUserController.initializeProjectsInfo | oValue: ", oValue);
                         if (oValue.activeProject) {
                             oController.m_oProject = oValue;
                         }
@@ -698,17 +713,22 @@ var EditUserController = (function () {
                 }
 
                 oController.m_bLoadingProjects = false;
-                console.log("EditUserController.initializeProjectsInfo | oController.m_oProject: ", oController.m_oProject);
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
     }
 
 
     EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
-        console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: " + sSubscriptionId + " | sSubscriptionName:" + sSubscriptionName);
-
         this.m_oEditSubscription = {};
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
@@ -719,9 +739,9 @@ var EditUserController = (function () {
 
         this.m_oProjectService.getProjectsListBySubscription(sSubscriptionId).then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_aoUsersList = data.data;
-                    console.log("EditUserController.showProjectsBySubscription | oController.sSubscriptionId: " + oController.sSubscriptionId + " | oController.sSubscriptionName:" + oController.sSubscriptionName);
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
                         controller: 'SubscriptionProjectsController',
@@ -748,15 +768,19 @@ var EditUserController = (function () {
                 }
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS OF THE SUBSCRIPTION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
     }
 
     EditUserController.prototype.cancelEditProjectForm = function() {
-        console.log("EditUserController.cancelEditProjectForm");
-
-        this.m_aoMatchingOrganizationsList = [];
-        this.m_sOrganizationPartialName = "";
     }
 
 
@@ -804,8 +828,6 @@ var EditUserController = (function () {
 
         if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
             let sRabbitMessage = JSON.stringify(oRabbitMessage);
-
-            console.log("EditUserController.rabbitMessageHook | sRabbitMessage:", sRabbitMessage);
 
             var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
             utilsVexCloseDialogAfter(5000, oVexWindow);

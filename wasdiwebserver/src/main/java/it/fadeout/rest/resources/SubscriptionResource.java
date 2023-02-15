@@ -72,7 +72,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<SubscriptionListViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("SubscriptionResource.getListByUser()");
 
@@ -83,12 +83,12 @@ public class SubscriptionResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.getListByUser: invalid session: " + sSessionId);
-			return aoSubscriptionList;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), SUBSCRIPTION_READ)) {
-				return aoSubscriptionList;
+				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId());
@@ -130,7 +130,10 @@ public class SubscriptionResource {
 			// 4. subscriptions shared with the user on individual basis
 
 
-			List<OrganizationListViewModel> aoOrganizationLVMs = new OrganizationResource().getListByUser(sSessionId);
+			Response oResponse = new OrganizationResource().getListByUser(sSessionId);
+
+			@SuppressWarnings("unchecked")
+			List<OrganizationListViewModel> aoOrganizationLVMs = (List<OrganizationListViewModel>) oResponse.getEntity();
 
 			List<String> asOrganizationIds = aoOrganizationLVMs.stream()
 					.map(OrganizationListViewModel::getOrganizationId)
@@ -171,11 +174,12 @@ public class SubscriptionResource {
 					}
 				}
 			}
-		} catch (Exception oEx) {
-			oEx.toString();
-		}
 
-		return aoSubscriptionList;
+			return Response.ok(aoSubscriptionList).build();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("SubscriptionResource.getListByUser: " + oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -197,7 +201,7 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: invalid session");
-			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
@@ -208,7 +212,7 @@ public class SubscriptionResource {
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 				WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: user cannot access subscription info, aborting");
-				return Response.status(400).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
 			}
 
 			WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: read subscriptions " + sSubscriptionId);

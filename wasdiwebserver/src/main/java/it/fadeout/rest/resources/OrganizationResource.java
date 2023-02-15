@@ -66,7 +66,7 @@ public class OrganizationResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<OrganizationListViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("OrganizationResource.getListByUser()");
 
@@ -77,12 +77,12 @@ public class OrganizationResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.getListByUser: invalid session: " + sSessionId);
-			return aoOrganizationList;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ORGANIZATION_READ)) {
-				return aoOrganizationList;
+				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
@@ -120,11 +120,12 @@ public class OrganizationResource {
 					aoOrganizationList.add(oOrganizationViewModel);
 				}
 			}
-		} catch (Exception oEx) {
-			oEx.toString();
-		}
 
-		return aoOrganizationList;
+			return Response.ok(aoOrganizationList).build();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("OrganizationResource.getListByUser: " + oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -146,7 +147,7 @@ public class OrganizationResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: invalid session");
-			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
