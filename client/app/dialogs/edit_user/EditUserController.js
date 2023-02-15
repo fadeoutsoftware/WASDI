@@ -331,17 +331,15 @@ var EditUserController = (function () {
         this.m_oSharingOrganization = {}
     }
 
-    EditUserController.prototype.showOrganizationEditForm = function(sUserId, sOrganizationId, sEditMode) {
-        console.log("EditUserController.showOrganizationEditForm | sOrganizationId: ", sOrganizationId);
-
+    EditUserController.prototype.showOrganizationEditForm = function(sOrganizationId, sEditMode) {
         this.m_oSharingOrganization = {}
 
         let oController = this;
 
-
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_oEditOrganization = data.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/organization_editor/OrganizationEditorDialog.html",
@@ -368,8 +366,42 @@ var EditUserController = (function () {
                 }
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE ORGANIZATION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
+    }
+
+    EditUserController.prototype.showOrganizationAddForm = function() {
+        console.log("EditUserController.showOrganizationAddForm | ");
+
+        var oController = this;
+
+        let oNewOrganization = {};
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/organization_editor/OrganizationEditorDialog.html",
+            controller: "OrganizationEditorController",
+            inputs: {
+                extras: {
+                    organization: oNewOrganization,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeOrganizationsInfo();
+            })
+        });
     }
 
     EditUserController.prototype.deleteOrganization = function(sOrganizationId) {
@@ -441,14 +473,13 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
-        console.log("EditUserController.showSubscriptionEditForm | sSubscriptionId: ", sSubscriptionId);
-
         var oController = this;
 
 
         this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
             function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_oEditSubscription = data.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
@@ -472,6 +503,14 @@ var EditUserController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
                     );
                 }
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE SUBSCRIPTION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         )
     }
@@ -667,10 +706,6 @@ var EditUserController = (function () {
     }
 
 
-
-
-
-
     EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
         console.log("EditUserController.showProjectsBySubscription | sSubscriptionId: " + sSubscriptionId + " | sSubscriptionName:" + sSubscriptionName);
 
@@ -716,85 +751,6 @@ var EditUserController = (function () {
             }
         );
     }
-
-
-
-
-    EditUserController.prototype.showProjectEditForm = function(sUserId, sProjectId, sEditMode) {
-        console.log("EditUserController.showProjectEditForm | sProjectId: ", sProjectId);
-
-        var oController = this;
-
-
-        this.m_oProjectService.getProjectById(sProjectId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
-                        controller: "ProjectEditorController",
-                        inputs: {
-                            extras: {
-                                project: data.data,
-                                editMode: sEditMode
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function () {
-                            console.log("EditUserController.showProjectEditForm | calling initializeProjectsInfo() ");
-                            oController.initializeProjectsInfo();
-                        })
-                    })
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE PROJECT BY ID"
-                    );
-                }
-            }
-        )
-    }
-
-    /*
-    EditUserController.prototype.deleteProject = function(sProjectId) {
-
-        let sConfirmMsg = "Delete this Project?"
-
-        var oController = this;
-        
-        let oCallbackFunction = function(value) {
-            if (value) {
-                oController.m_oProjectService.deleteProject(sProjectId)
-                    .then(function (data) {
-                        console.log("EditUserController.deleteProject | data: ", data);
-                        console.log("EditUserController.deleteProject | data.status: ", data.status);
-                        console.log("EditUserController.deleteProject | data.status === 200: ", (data.status === 200));
-
-                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
-                            utilsVexCloseDialogAfter(4000, oDialog);
-                        } else {
-                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING PROJECT");
-                        }
-
-                        oController.initializeProjectsInfo();
-                    }, function (error) {
-                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING PROJECT";
-
-                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                            sErrorMessage += "<br><br>" + error.data.message;
-                        }
-
-                        utilsVexDialogAlertTop(sErrorMessage);
-                    });
-
-            }
-        };
-
-        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
-    }
-    */
 
     EditUserController.prototype.cancelEditProjectForm = function() {
         console.log("EditUserController.cancelEditProjectForm");

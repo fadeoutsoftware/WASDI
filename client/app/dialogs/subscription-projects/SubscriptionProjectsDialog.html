@@ -47,7 +47,7 @@
                         -->
 
                         <button class="btn btn-primary btn-wasdi mb-3" title={{"DIALOG_EDIT_PROJECT_ADD"|translate}}
-                            ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, null, true)">
+                            ng-click="m_oController.showProjectAddForm()">
                             <!--Add Project-->
                             <span class="ng-binding">{{"DIALOG_EDIT_PROJECT_ADD"|translate}}</span>
                         </button>
@@ -75,7 +75,7 @@
 
                                     <td class="over-icon">
                                         <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_PROJECT_EDIT"|translate}}
-                                            ng-click="m_oController.showProjectEditForm(m_oController.m_oUser.userId, oProject.projectId, true)">
+                                            ng-click="m_oController.showProjectEditForm(oProject.projectId)">
                                             <!--Edit Project-->
                                             <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
                                             <!--

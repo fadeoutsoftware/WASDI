@@ -4,8 +4,6 @@ let SubscriptionProjectsController = (function () {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oTranslate = oTranslate;
-        console.log("SubscriptionProjectsController | oExtras: ",  oExtras);
-        console.log("SubscriptionProjectsController | this.m_oExtras: ",  this.m_oExtras);
 
 
         this.m_oSubscriptionService = oSubscriptionService;
@@ -14,8 +12,6 @@ let SubscriptionProjectsController = (function () {
 
         this.m_sSelectedSubscriptionId = this.m_oExtras.subscriptionId;
         this.m_sSelectedSubscriptionName = this.m_oExtras.subscriptionName;
-        console.log("SubscriptionProjectsController | this.m_sSelectedSubscriptionId: " +  this.m_sSelectedSubscriptionId + " | m_sSelectedSubscriptionName:" + this.m_sSelectedSubscriptionName);
-
 
 
 
@@ -103,16 +99,13 @@ let SubscriptionProjectsController = (function () {
         );
     }
 
-    SubscriptionProjectsController.prototype.showProjectEditForm = function(sUserId, sProjectId, sEditMode) {
-        console.log("SubscriptionProjectsController.showProjectEditForm | sProjectId: ", sProjectId);
-
+    SubscriptionProjectsController.prototype.showProjectEditForm = function(sProjectId) {
         var oController = this;
-
-        console.log("SubscriptionProjectsController.showProjectEditForm | oController.m_sSelectedSubscriptionId: ", oController.m_sSelectedSubscriptionId + " | oController.m_sSelectedSubscriptionName: " + oController.m_sSelectedSubscriptionName);
 
         this.m_oProjectService.getProjectById(sProjectId).then(
             function (data) {
-                if (!utilsIsObjectNullOrUndefined(data.data)) {
+                if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
                         controller: "ProjectEditorController",
@@ -121,7 +114,7 @@ let SubscriptionProjectsController = (function () {
                                 project: data.data,
                                 subscriptionId: oController.m_sSelectedSubscriptionId,
                                 subscriptionName: oController.m_sSelectedSubscriptionName,
-                                editMode: sEditMode
+                                editMode: true
                             }
                         }
                     }).then(function (modal) {
@@ -129,7 +122,6 @@ let SubscriptionProjectsController = (function () {
                             backdrop: 'static'
                         })
                         modal.close.then(function () {
-                            console.log("SubscriptionProjectsController.showProjectEditForm | calling initializeProjectsInfo() ");
                             oController.initializeProjectsInfo();
                         })
                     })
@@ -138,8 +130,42 @@ let SubscriptionProjectsController = (function () {
                         "GURU MEDITATION<br>ERROR IN GETTING THE PROJECT BY ID"
                     );
                 }
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE PROJECT";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + error.data.message;
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         )
+    }
+
+    SubscriptionProjectsController.prototype.showProjectAddForm = function() {
+        var oController = this;
+
+        let oNewProject = {};
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
+            controller: "ProjectEditorController",
+            inputs: {
+                extras: {
+                    project: oNewProject,
+                    subscriptionId: oController.m_sSelectedSubscriptionId,
+                    subscriptionName: oController.m_sSelectedSubscriptionName,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeProjectsInfo();
+            })
+        });
     }
 
     SubscriptionProjectsController.prototype.deleteProject = function(sProjectId) {
@@ -152,9 +178,6 @@ let SubscriptionProjectsController = (function () {
             if (value) {
                 oController.m_oProjectService.deleteProject(sProjectId)
                     .then(function (data) {
-                        console.log("SubscriptionProjectsController.deleteProject | data: ", data);
-                        console.log("SubscriptionProjectsController.deleteProject | data.status: ", data.status);
-                        console.log("SubscriptionProjectsController.deleteProject | data.status === 200: ", (data.status === 200));
 
                         if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
                             var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
@@ -182,9 +205,6 @@ let SubscriptionProjectsController = (function () {
 
     SubscriptionProjectsController.prototype.cancelEditProjectForm = function() {
         console.log("SubscriptionProjectsController.cancelEditProjectForm");
-
-        this.m_aoMatchingOrganizationsList = [];
-        this.m_sOrganizationPartialName = "";
     }
 
 

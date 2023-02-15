@@ -167,7 +167,7 @@ public class ProjectResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public ProjectViewModel getProjectViewModel(@HeaderParam("x-session-token") String sSessionId,
+	public Response getProjectViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.getProjectViewModel( Project: " + sProjectId + ")");
 
@@ -177,13 +177,13 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getProjectViewModel: invalid session");
-			return null;
+			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sProjectId)) {
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("Invalid projectId.")).build();
 			}
 
 			WasdiLog.debugLog("ProjectResource.getProjectViewModel: read projects " + sProjectId);
@@ -196,36 +196,21 @@ public class ProjectResource {
 
 			if (oProject.getSubscriptionId() == null) {
 				WasdiLog.debugLog("ProjectResource.getProjectViewModel: the project is not connected with a subscription, aborting");
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("The project is not connected with a subscription.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), oProject.getSubscriptionId())) {
 				WasdiLog.debugLog("ProjectResource.getProjectViewModel: user cannot access project info, aborting");
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("The user cannot access the project info.")).build();
 			}
 
 			oVM = convert(oProject, oUser.getActiveProjectId());
 
-//			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-//
-//			// Get Sharings
-//			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-//					.getProjectSharingsByProjectId(oProject.getProjectId());
-//			// Add Sharings to View Model
-//			if (aoSharings != null) {
-//				if (oVM.getSharedUsers() == null) {
-//					oVM.setSharedUsers(new ArrayList<String>());
-//				}
-//
-//				for (UserResourcePermission oSharing : aoSharings) {
-//					oVM.getSharedUsers().add(oSharing.getUserId());
-//				}
-//			}
+			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog( "ProjectResource.getProjectViewModel: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return oVM;
 	}
 
 	/**
@@ -415,6 +400,10 @@ public class ProjectResource {
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.deleteProject: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+		}
+
+		if (Utils.isNullOrEmpty(sProjectId)) {
+			return Response.status(400).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
