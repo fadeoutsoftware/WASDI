@@ -203,18 +203,14 @@ public class OrganizationResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+	public Response createOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.createOrganization( Organization: " + oOrganizationEditorViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.createOrganization: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
@@ -223,8 +219,7 @@ public class OrganizationResource {
 
 		if (oExistingOrganization != null) {
 			WasdiLog.debugLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
-			oResult.setStringValue("An organization with the same name already exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("An organization with the same name already exists.")).build();
 		}
 
 		Organization oOrganization = convert(oOrganizationEditorViewModel);
@@ -232,13 +227,10 @@ public class OrganizationResource {
 		oOrganization.setOrganizationId(Utils.getRandomName());
 
 		if (oOrganizationRepository.insertOrganization(oOrganization)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oOrganization.getOrganizationId());
+			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
 		} else {WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
-			oResult.setStringValue("The creation of the organization failed.");
+			return Response.serverError().build();
 		}
-
-		return oResult;
 	}
 
 	/**
@@ -250,18 +242,14 @@ public class OrganizationResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
+	public Response upateOrganization(@HeaderParam("x-session-token") String sSessionId, OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		WasdiLog.debugLog("OrganizationResource.updateOrganization( Organization: " + oOrganizationEditorViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
@@ -270,8 +258,7 @@ public class OrganizationResource {
 
 		if (oExistingOrganization == null) {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization: organization does not exist");
-			oResult.setStringValue("No organization with the Id exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("No organization with the Id exists.")).build();
 		}
 
 		Organization oExistingOrganizationWithTheSameName = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
@@ -279,24 +266,19 @@ public class OrganizationResource {
 		if (oExistingOrganizationWithTheSameName != null
 				&& !oExistingOrganizationWithTheSameName.getOrganizationId().equalsIgnoreCase(oExistingOrganization.getOrganizationId())) {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization: a different organization with the same name already exists");
-			oResult.setStringValue("An organization with the same name already exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("An organization with the same name already exists.")).build();
 		}
-
 
 
 		Organization oOrganization = convert(oOrganizationEditorViewModel);
 		oOrganization.setUserId(oUser.getUserId());
 
 		if (oOrganizationRepository.updateOrganization(oOrganization)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oOrganization.getOrganizationId());
+			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
 		} else {
 			WasdiLog.debugLog("OrganizationResource.updateOrganization( " + oOrganizationEditorViewModel.getName() + " ): update failed");
-			oResult.setStringValue("The update of the organization failed.");
+			return Response.serverError().build();
 		}
-
-		return oResult;
 	}
 
 	@DELETE

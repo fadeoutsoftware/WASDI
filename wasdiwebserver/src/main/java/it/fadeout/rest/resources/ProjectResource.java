@@ -227,18 +227,14 @@ public class ProjectResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
+	public Response createProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
 		WasdiLog.debugLog("ProjectResource.createProject( Project: " + oProjectEditorViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.createProject: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
@@ -247,25 +243,22 @@ public class ProjectResource {
 
 		if (oExistingProject != null) {
 			WasdiLog.debugLog("ProjectResource.createProject: a different project with the same name already exists");
-			oResult.setStringValue("An project with the same name already exists.");
-			return oResult;
+
+			return Response.status(400).entity(new ErrorResponse("A project with the same name already exists.")).build();
 		}
 
 		Project oProject = convert(oProjectEditorViewModel);
 		oProject.setProjectId(Utils.getRandomName());
 
 		if (oProjectRepository.insertProject(oProject)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oProject.getProjectId());
-
 			if (oProjectEditorViewModel.isActiveProject()) {
 				this.changeActiveProject(sSessionId, oProject.getProjectId());
 			}
-		} else {WasdiLog.debugLog("ProjectResource.createProject( " + oProjectEditorViewModel.getName() + " ): insertion failed");
-			oResult.setStringValue("The creation of the project failed.");
-		}
 
-		return oResult;
+			return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
+		} else {WasdiLog.debugLog("ProjectResource.createProject( " + oProjectEditorViewModel.getName() + " ): insertion failed");
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -277,18 +270,14 @@ public class ProjectResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult upateProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
+	public Response upateProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
 		WasdiLog.debugLog("ProjectResource.updateProject( Project: " + oProjectEditorViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.updateProject: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
@@ -297,8 +286,7 @@ public class ProjectResource {
 
 		if (oExistingProject == null) {
 			WasdiLog.debugLog("ProjectResource.updateProject: project does not exist");
-			oResult.setStringValue("No project with the Id exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("No project with the Id exists.")).build();
 		}
 
 		Project oExistingProjectWithTheSameName = oProjectRepository.getByName(oProjectEditorViewModel.getName());
@@ -306,17 +294,13 @@ public class ProjectResource {
 		if (oExistingProjectWithTheSameName != null
 				&& !oExistingProjectWithTheSameName.getProjectId().equalsIgnoreCase(oExistingProject.getProjectId())) {
 			WasdiLog.debugLog("ProjectResource.updateProject: a different project with the same name already exists");
-			oResult.setStringValue("An project with the same name already exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("An project with the same name already exists.")).build();
 		}
-
 
 
 		Project oProject = convert(oProjectEditorViewModel);
 
 		if (oProjectRepository.updateProject(oProject)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oProject.getProjectId());
 
 			if (oProjectEditorViewModel.isActiveProject()) {
 				this.changeActiveProject(sSessionId, oProject.getProjectId());
@@ -327,15 +311,15 @@ public class ProjectResource {
 
 				if (oUserRepository.updateUser(oUser)) {
 					WasdiLog.debugLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
-					oResult.setStringValue("The removing of the active project failed.");
+					return Response.status(400).entity(new ErrorResponse("The removing of the active project failed.")).build();
 				}
 			}
+
+			return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
 		} else {
 			WasdiLog.debugLog("ProjectResource.updateProject( " + oProjectEditorViewModel.getName() + " ): update failed");
-			oResult.setStringValue("The update of the project failed.");
+			return Response.serverError().build();
 		}
-
-		return oResult;
 	}
 
 	/**

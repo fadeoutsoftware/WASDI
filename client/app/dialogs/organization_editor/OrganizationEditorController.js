@@ -20,13 +20,12 @@ let OrganizationEditorController = (function () {
     };
 
     OrganizationEditorController.prototype.saveOrganization = function () {
-        console.log(" OrganizationEditorController.saveOrganization");
 
         let oController = this;
 
         this.m_oOrganizationService.saveOrganization(this.m_oEditOrganization).then(function (data) {
-            console.log(" OrganizationEditorController.saveOrganizationInfo | data.data: ", data.data);
-            if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+            if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
             } else {
@@ -35,7 +34,13 @@ let OrganizationEditorController = (function () {
 
             oController.m_oScope.close();
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION");
+            let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION";
+
+            if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                sErrorMessage += "<br><br>" + error.data.message;
+            }
+
+            utilsVexDialogAlertTop(sErrorMessage);
 
             oController.m_oScope.close();
         });
