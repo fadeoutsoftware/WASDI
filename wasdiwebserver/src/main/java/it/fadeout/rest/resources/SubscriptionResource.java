@@ -256,18 +256,14 @@ public class SubscriptionResource {
 	@POST
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult createSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
+	public Response createSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.createSubscription( Subscription: " + oSubscriptionViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.createSubscription: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -276,14 +272,12 @@ public class SubscriptionResource {
 
 		if (oExistingSubscription != null) {
 			WasdiLog.debugLog("SubscriptionResource.createSubscription: a different subscription with the same name already exists");
-			oResult.setStringValue("An subscription with the same name already exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
 		oSubscription.setSubscriptionId(Utils.getRandomName());
-//		oSubscription.setBuyDate(Utils.nowInMillis());
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
@@ -294,13 +288,10 @@ public class SubscriptionResource {
 
 			new ProjectResource().createProject(sSessionId, oProjectEditorViewModel);
 
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oSubscription.getSubscriptionId());
+			return Response.ok(new SuccessResponse(oSubscription.getSubscriptionId())).build();
 		} else {WasdiLog.debugLog("SubscriptionResource.createSubscription( " + oSubscriptionViewModel.getName() + " ): insertion failed");
-			oResult.setStringValue("The creation of the subscription failed.");
+			return Response.serverError().build();
 		}
-
-		return oResult;
 	}
 
 	/**
@@ -312,18 +303,14 @@ public class SubscriptionResource {
 	@PUT
 	@Path("/update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult upateSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
+	public Response upateSubscription(@HeaderParam("x-session-token") String sSessionId, SubscriptionViewModel oSubscriptionViewModel) {
 		WasdiLog.debugLog("SubscriptionResource.updateSubscription( Subscription: " + oSubscriptionViewModel.toString() + ")");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -332,8 +319,7 @@ public class SubscriptionResource {
 
 		if (oExistingSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: subscription does not exist");
-			oResult.setStringValue("No subscription with the Id exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("No subscription with the Id exists.")).build();
 		}
 
 		Subscription oExistingSubscriptionWithTheSameName = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
@@ -341,20 +327,16 @@ public class SubscriptionResource {
 		if (oExistingSubscriptionWithTheSameName != null
 				&& !oExistingSubscriptionWithTheSameName.getSubscriptionId().equalsIgnoreCase(oExistingSubscription.getSubscriptionId())) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: a different subscription with the same name already exists");
-			oResult.setStringValue("A subscription with the same name already exists.");
-			return oResult;
+			return Response.status(400).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 
 		if (oSubscriptionRepository.updateSubscription(oSubscription)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(oSubscription.getSubscriptionId());
+			return Response.ok(new SuccessResponse(oSubscription.getSubscriptionId())).build();
 		} else {WasdiLog.debugLog("SubscriptionResource.updateSubscription( " + oSubscriptionViewModel.getName() + " ): update failed");
-			oResult.setStringValue("The update of the subscription failed.");
+			return Response.serverError().build();
 		}
-
-		return oResult;
 	}
 
 	@DELETE

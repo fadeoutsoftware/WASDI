@@ -28,17 +28,10 @@ SubscriptionEditorController = (function () {
 
         this.initializeDates();
 
-        // this.m_aoTypes = [];
-        // this.m_aoTypesMap = [];
-        // this.m_oType = {};
-        // this.m_bLoadingTypes = true;
-
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
-
-        // this.getSubscriptionTypes();
 
         this.getOrganizationsListByUser();
 
@@ -124,7 +117,8 @@ SubscriptionEditorController = (function () {
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
             console.log("SubscriptionEditorController.saveSubscription | data.data: ", data.data);
-            if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
+            if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
 
@@ -134,7 +128,7 @@ SubscriptionEditorController = (function () {
                 console.log("SubscriptionEditorController.saveSubscription | oActiveWorkspace: ", oActiveWorkspace);
                 console.log("SubscriptionEditorController.saveSubscription | sActiveWorkspaceId: ", sActiveWorkspaceId);
 
-                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.stringValue, sActiveWorkspaceId).then(function (data) {
+                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.message, sActiveWorkspaceId).then(function (data) {
                     console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | data.data: ", data.data);
                     if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
                         let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
@@ -159,7 +153,13 @@ SubscriptionEditorController = (function () {
             }
 
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
+            let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION";
+
+            if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                sErrorMessage += "<br><br>" + error.data.message;
+            }
+
+            utilsVexDialogAlertTop(sErrorMessage);
 
             oController.m_oScope.close();
         });
@@ -168,41 +168,6 @@ SubscriptionEditorController = (function () {
         this.m_oType = {};
         this.m_oOrganization = {};
     }
-
-    /*
-    SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
-        let oController = this;
-        oController.m_oSubscriptionService.getSubscriptionTypes().then(
-            function (data) {
-                if (data.status !== 200) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(
-                        "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
-                    );
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else {
-                    oController.m_aoTypes = data.data;
-                    oController.m_aoTypesMap = oController.m_aoTypes.map(
-                        (item) => ({ name: item.name, typeId: item.typeId })
-                    );
-
-                    oController.m_aoTypesMap.forEach((oValue, sKey) => {
-                        if (oValue.typeId == oController.m_oEditSubscription.typeId) {
-                            oController.m_oType = oValue;
-                        }
-                    });
-                }
-
-                oController.m_bLoadingTypes = false;
-            }, function (data) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner(
-                    "GURU MEDITATION<br>ERROR GETTING TYPES"
-                );
-                utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_bLoadingTypes = false;
-            }
-        );
-    }
-    */
 
     SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
         let oController = this;

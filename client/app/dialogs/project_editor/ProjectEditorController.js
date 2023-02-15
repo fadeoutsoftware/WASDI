@@ -47,24 +47,19 @@ ProjectEditorController = (function () {
     }
 
     ProjectEditorController.prototype.saveProject = function () {
-        console.log("ProjectEditorController.saveProject");
-        console.log("ProjectEditorController.saveProject | this.m_oSubscription: ", this.m_oSubscription);
-        console.log("ProjectEditorController.saveProject | this.m_oEditProject: ", this.m_oEditProject);
-
         if (utilsIsObjectNullOrUndefined(this.m_oSubscription)) {
             this.m_oEditProject.subscriptionId = "";
         } else {
             this.m_oEditProject.subscriptionId = this.m_oSubscription.subscriptionId;
         }
-        console.log("ProjectEditorController.saveProject | this.m_oEditProject: ", this.m_oEditProject);
 
         let oController = this;
 
         this.m_oEditProject.activeProject = this.m_oActiveProject;
 
         this.m_oProjectService.saveProject(this.m_oEditProject).then(function (data) {
-            console.log("ProjectEditorController.saveProject | data.data: ", data.data);
-            if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+            if (!utilsIsObjectNullOrUndefined(data)
+                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT SAVED<br>READY");
                 utilsVexCloseDialogAfter(2000, oDialog);
             } else {
@@ -74,7 +69,13 @@ ProjectEditorController = (function () {
             oController.m_oScope.close();
 
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING PROJECT");
+            let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING PROJECT";
+
+            if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                sErrorMessage += "<br><br>" + error.data.message;
+            }
+
+            utilsVexDialogAlertTop(sErrorMessage);
 
             oController.m_oScope.close();
         });
