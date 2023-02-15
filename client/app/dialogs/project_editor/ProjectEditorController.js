@@ -9,30 +9,17 @@ ProjectEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        console.log("ProjectEditorController | oExtras: ",  oExtras);
-        console.log("ProjectEditorController | this.m_oExtras: ",  this.m_oExtras);
 
         this.m_oProjectService = oProjectService;
         this.m_oSubscriptionService = oSubscriptionService;
 
         this.m_oEditProject = this.m_oExtras.project;
 
-        // this.m_sSelectedSubscriptionId = this.m_oExtras.subscriptionId;
-        // this.m_sSelectedSubscriptionName = this.m_oExtras.subscriptionName;
-        // console.log("ProjectEditorController | this.m_sSelectedSubscriptionId: " +  this.m_sSelectedSubscriptionId + " | m_sSelectedSubscriptionName:" + this.m_sSelectedSubscriptionName);
-
-
         this.m_bEditMode = this.m_oExtras.editMode;
 
-        // this.m_aoSubscriptions = [];
-        // this.m_aoSubscriptionsMap = [];
         this.m_oSubscription = {subscriptionId: this.m_oExtras.subscriptionId, name: this.m_oExtras.subscriptionName};
-        console.log("ProjectEditorController | this.m_oSubscription: ",  this.m_oSubscription);
-
-//        this.m_bLoadingSubscriptions = true;
 
         this.initializeProjectInfo();
-//        this.getSubscriptionsListByUser();
 
         /**
          * ActiveProject flag
@@ -95,43 +82,6 @@ ProjectEditorController = (function () {
         this.m_oEditProject = {};
         this.m_oSubscription = {};
     }
-
-    /*
-    ProjectEditorController.prototype.getSubscriptionsListByUser = function () {
-        let oController = this;
-
-        this.m_oSubscriptionService.getSubscriptionsListByUser().then(
-            function (data) {
-                if (data.status !== 200) {
-                    let oDialog = utilsVexDialogAlertBottomRightCorner(
-                        "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTIONS"
-                    );
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else {
-                    oController.m_aoSubscriptions = data.data;
-                    oController.m_aoSubscriptionsMap = oController.m_aoSubscriptions.map(
-                        (item) => ({ name: item.name, subscriptionId: item.subscriptionId })
-                    );
-
-                    oController.m_aoSubscriptionsMap.forEach((oValue, sKey) => {
-                        if (oValue.subscriptionId == oController.m_oEditProject.subscriptionId) {
-                            oController.m_oSubscription = oValue;
-                        }
-                    });
-                }
-
-                oController.m_bLoadingSubscriptions = false;
-            },
-            function (data) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner(
-                    "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTIONS"
-                );
-                utilsVexCloseDialogAfter(4000, oDialog);
-                oController.m_bLoadingSubscriptions = false;
-            }
-        );
-    }
-    */
 
     ProjectEditorController.$inject = [
         '$scope',

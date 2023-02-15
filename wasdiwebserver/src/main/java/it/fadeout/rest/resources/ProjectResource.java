@@ -48,7 +48,7 @@ public class ProjectResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProjectListViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
 		WasdiLog.debugLog("ProjectResource.getListByUser()");
 
@@ -59,12 +59,12 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getListByUser: invalid session: " + sSessionId);
-			return aoProjectList;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
-				return aoProjectList;
+				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			WasdiLog.debugLog("ProjectResource.getListByUser: projects for " + oUser.getUserId());
@@ -73,7 +73,10 @@ public class ProjectResource {
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
 
-			List<SubscriptionListViewModel> aoSubscriptionLVMs = new SubscriptionResource().getListByUser(sSessionId);
+			Response oResponse = new SubscriptionResource().getListByUser(sSessionId);
+
+			@SuppressWarnings("unchecked")
+			List<SubscriptionListViewModel> aoSubscriptionLVMs = (List<SubscriptionListViewModel>) oResponse.getEntity();
 
 			List<String> asSubscriptionIds = aoSubscriptionLVMs.stream()
 					.map(SubscriptionListViewModel::getSubscriptionId)
@@ -91,11 +94,12 @@ public class ProjectResource {
 
 				aoProjectList.add(oProjectViewModel);
 			}
-		} catch (Exception oEx) {
-			oEx.toString();
-		}
 
-		return aoProjectList;
+			return Response.ok(aoProjectList).build();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("ProjectResource.getListByUser: " + oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -107,7 +111,7 @@ public class ProjectResource {
 	@GET
 	@Path("/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProjectListViewModel> getListBySubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response getListBySubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("ProjectResource.getListBySubscription(Subscription: " + sSubscriptionId + ")");
 
@@ -118,12 +122,12 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getListBySubscription: invalid session: " + sSessionId);
-			return aoProjectList;
+			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
-				return aoProjectList;
+				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			WasdiLog.debugLog("ProjectResource.getListBySubscription: projects for " + oUser.getUserId());
@@ -151,11 +155,12 @@ public class ProjectResource {
 
 				aoProjectList.add(oProjectViewModel);
 			}
-		} catch (Exception oEx) {
-			oEx.toString();
-		}
 
-		return aoProjectList;
+			return Response.ok(aoProjectList).build();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("ProjectResource.getListBySubscription: " + oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -177,7 +182,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getProjectViewModel: invalid session");
-			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
