@@ -187,7 +187,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public SubscriptionViewModel getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId,
+	public Response getSubscriptionViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel( Subscription: " + sSubscriptionId + ")");
 
@@ -197,18 +197,18 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: invalid session");
-			return null;
+			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sSubscriptionId)) {
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 				WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: user cannot access subscription info, aborting");
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
 			}
 
 			WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: read subscriptions " + sSubscriptionId);
@@ -222,7 +222,7 @@ public class SubscriptionResource {
 			if (oSubscription == null) {
 				WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: the subscription cannot be found, aborting");
 
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("The subscription cannot be found.")).build();
 			}
 
 			String sOrganizationName = null;
@@ -235,11 +235,12 @@ public class SubscriptionResource {
 			}
 
 			oVM = convert(oSubscription, sOrganizationName);
+
+			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return oVM;
 	}
 
 	/**
@@ -283,7 +284,7 @@ public class SubscriptionResource {
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
 			oProjectEditorViewModel.setName(oSubscription.getName());
-			oProjectEditorViewModel.setDescription("automatically created project for the " + oSubscription.getName() + "subscription");
+			oProjectEditorViewModel.setDescription("project automatically created for the " + oSubscription.getName() + " subscription");
 			oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 			oProjectEditorViewModel.setActiveProject(oUser.getActiveProjectId() == null);
 
@@ -363,6 +364,10 @@ public class SubscriptionResource {
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+		}
+
+		if (Utils.isNullOrEmpty(sSubscriptionId)) {
+			return Response.status(400).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();

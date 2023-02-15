@@ -136,7 +136,7 @@ public class OrganizationResource {
 	@GET
 	@Path("/byId")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public OrganizationViewModel getOrganizationViewModel(@HeaderParam("x-session-token") String sSessionId,
+	public Response getOrganizationViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel( Organization: " + sOrganizationId + ")");
 
@@ -146,18 +146,18 @@ public class OrganizationResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: invalid session");
-			return null;
+			return Response.status(400).entity(new ErrorResponse("Invalid session.")).build();
 		}
 
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sOrganizationId)) {
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("Invalid organizationId.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessOrganization(oUser.getUserId(), sOrganizationId)) {
 				WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: user cannot access organization info, aborting");
-				return oVM;
+				return Response.status(400).entity(new ErrorResponse("The user cannot access the organization info.")).build();
 			}
 
 			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: read organizations " + sOrganizationId);
@@ -174,6 +174,7 @@ public class OrganizationResource {
 			// Get Sharings
 			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
 					.getOrganizationSharingsByOrganizationId(oOrganization.getOrganizationId());
+
 			// Add Sharings to View Model
 			if (aoSharings != null) {
 				if (oVM.getSharedUsers() == null) {
@@ -184,11 +185,12 @@ public class OrganizationResource {
 					oVM.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
+
+			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog( "OrganizationResource.getOrganizationViewModel: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return oVM;
 	}
 
 	/**
@@ -307,6 +309,10 @@ public class OrganizationResource {
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.deleteOrganization: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+		}
+
+		if (Utils.isNullOrEmpty(sOrganizationId)) {
+			return Response.status(400).entity(new ErrorResponse("Invalid organizationId.")).build();
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
