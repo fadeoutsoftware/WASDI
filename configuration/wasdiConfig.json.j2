@@ -281,6 +281,9 @@
     },
     "stripe": {
         "apiKey": "{{ dictWasdiConfiguration.stripe.apiKey }}",
+{% if dictWasdiConfiguration.stripe.products | length == 0 %}
+        "products": []
+{% else %}
         "products": [
 {% for sCurrentProduct in dictWasdiConfiguration.stripe.products %}
             {
@@ -291,6 +294,7 @@
 {% endfor %}
 
         ]
+{% endif %}
     },
     "traefik": {
 {% if dictWasdiConfiguration.traefik.firewallWhiteList == [] %}
