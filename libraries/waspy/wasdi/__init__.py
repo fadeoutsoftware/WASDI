@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.0.1
+Version 0.8.0.2
 
-Last Update: 25/11/2022
+Last Update: 16/02/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -3948,8 +3948,12 @@ def asynchPublishBand(sProduct, sBand):
     except Exception as oE:
         wasdiLog('[ERROR] asynchPublishBand: error in trying to publish band: ' + str(type(oE)) + ': ' + str(oE))
     if oResult is not None and oResult.ok:
-        oJsonResult = oResult.json()
-        return oJsonResult
+
+        try:
+            oJsonResult = oResult.json()
+            return oJsonResult
+        except Exception as oE:
+            wasdiLog('[ERROR] asynchPublishBand: error in trying to get the proc id: ' + str(type(oE)) + ': ' + str(oE))
     else:
         wasdiLog('[ERROR] asynchPublishBand: publishBand failed with status: ' + str(oResult.status_code) +', aborting')
 
@@ -3966,7 +3970,16 @@ def publishBand(sProduct, sBand):
     :return: a string containing the final status of the operation: "DONE", "STOPPED", "ERROR"
     """
 
-    return waitProcess(asynchPublishBand(sProduct, sBand))
+    oJsonResult = asynchPublishBand(sProduct, sBand)
+
+    try:
+        if oJsonResult is not None:
+            sProcessId = oJsonResult["payload"]
+            return waitProcess(sProcessId)
+        else:
+            return "ERROR"
+    except:
+        return "ERROR"
 
 def getlayerWMS(sProduct, sBand):
     """
