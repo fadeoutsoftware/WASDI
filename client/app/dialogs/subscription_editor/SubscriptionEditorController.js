@@ -115,10 +115,10 @@ SubscriptionEditorController = (function () {
 
         let oController = this;
 
-        this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (data) {
-            console.log("SubscriptionEditorController.saveSubscription | data.data: ", data.data);
-            if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+        this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
+            console.log("SubscriptionEditorController.saveSubscription | response.data: ", response.data);
+            if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
 
@@ -128,13 +128,13 @@ SubscriptionEditorController = (function () {
                 console.log("SubscriptionEditorController.saveSubscription | oActiveWorkspace: ", oActiveWorkspace);
                 console.log("SubscriptionEditorController.saveSubscription | sActiveWorkspaceId: ", sActiveWorkspaceId);
 
-                oController.m_oSubscriptionService.getStripePaymentUrl(data.data.message, sActiveWorkspaceId).then(function (data) {
-                    console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | data.data: ", data.data);
-                    if (!utilsIsObjectNullOrUndefined(data.data) && data.data.boolValue) {
+                oController.m_oSubscriptionService.getStripePaymentUrl(response.data.message, sActiveWorkspaceId).then(function (response) {
+                    console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | response.data: ", response.data);
+                    if (!utilsIsObjectNullOrUndefined(response.data) && response.data.boolValue) {
                         let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        let sUrl = data.data.stringValue;
+                        let sUrl = response.data.stringValue;
                         console.log(" SubscriptionEditorController.saveSubscription | getStripePaymentUrl | sUrl: ", sUrl);
 
                         oController.m_oWindow.open(sUrl, '_blank');
@@ -156,7 +156,7 @@ SubscriptionEditorController = (function () {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION";
 
             if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                sErrorMessage += "<br><br>" + error.data.message;
+                sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
             }
 
             utilsVexDialogAlertTop(sErrorMessage);

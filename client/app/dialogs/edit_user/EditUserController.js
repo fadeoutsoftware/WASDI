@@ -269,10 +269,10 @@ var EditUserController = (function () {
         var oController = this;
 
         this.m_oOrganizationService.getOrganizationsListByUser().then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_aoOrganizations = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_aoOrganizations = response.data;
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS"
@@ -286,7 +286,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF ORGANIZATIONS";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -295,8 +295,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
-        console.log("EditUserController.showUsersByOrganization | sOrganizationId: ", sOrganizationId);
-
         this.m_oEditOrganization = {};
         this.m_oSharingOrganization = {organizationId: sOrganizationId}
 
@@ -339,11 +337,13 @@ var EditUserController = (function () {
         );
     }
 
+    /*
     EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
         this.m_aoUsersList = [];
         this.m_oEditOrganization = {}
         this.m_oSharingOrganization = {}
     }
+    */
 
     EditUserController.prototype.showOrganizationEditForm = function(sOrganizationId, sEditMode) {
         this.m_oSharingOrganization = {}
@@ -351,16 +351,16 @@ var EditUserController = (function () {
         let oController = this;
 
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_oEditOrganization = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_oEditOrganization = response.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/organization_editor/OrganizationEditorDialog.html",
                         controller: 'OrganizationEditorController',
                         inputs: {
                             extras: {
-                                organization: data.data,
+                                organization: response.data,
                                 editMode: sEditMode
                             }
                         }
@@ -384,7 +384,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE ORGANIZATION";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -427,8 +427,8 @@ var EditUserController = (function () {
         let oCallbackFunction = function(value) {
             if(value) {
                 oController.m_oOrganizationService.deleteOrganization(sOrganizationId)
-                .then(function (data) {
-                    if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                .then(function (response) {
+                    if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
                         var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
                     } else {
@@ -440,7 +440,7 @@ var EditUserController = (function () {
                     let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION";
 
                     if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                        sErrorMessage += "<br><br>" + error.data.message;
+                        sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                     }
 
                     utilsVexDialogAlertTop(sErrorMessage);
@@ -466,10 +466,10 @@ var EditUserController = (function () {
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_aoSubscriptions = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_aoSubscriptions = response.data;
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
@@ -483,7 +483,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -494,18 +494,17 @@ var EditUserController = (function () {
     EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
         var oController = this;
 
-
         this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_oEditSubscription = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_oEditSubscription = response.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
                         controller: "SubscriptionEditorController",
                         inputs: {
                             extras: {
-                                subscription: data.data,
+                                subscription: response.data,
                                 editMode: sEditMode
                             }
                         }
@@ -526,7 +525,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE SUBSCRIPTION";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -535,8 +534,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
-        console.log("EditUserController.showSubscriptionAddForm | typeId: " + typeId + " | typeName: " + typeName);
-
         var oController = this;
 
         let oNewSubscription = {
@@ -572,8 +569,8 @@ var EditUserController = (function () {
         let oCallbackFunction = function(value) {
             if (value) {
                 oController.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
-                    .then(function (data) {
-                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                    .then(function (response) {
+                        if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
                             var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION DELETED<br>READY");
                             utilsVexCloseDialogAfter(4000, oDialog);
                         } else {
@@ -585,7 +582,7 @@ var EditUserController = (function () {
                         let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION";
 
                         if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                            sErrorMessage += "<br><br>" + error.data.message;
+                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                         }
 
                         utilsVexDialogAlertTop(sErrorMessage);
@@ -613,15 +610,15 @@ var EditUserController = (function () {
         var oController = this;
 
         this.m_oSubscriptionService.getUsersBySharedSubscription(sSubscriptionId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_aoUsersList = data.data;
+            function (response) {
+                if (utilsIsObjectNullOrUndefined(response.data) === false) {
+                    oController.m_aoUsersList = response.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
                         controller: 'SubscriptionUsersController',
                         inputs: {
                             extras: {
-                                users: data.data,
+                                users: response.data,
                                 subscriptionId: sSubscriptionId
                             }
                         }
@@ -652,32 +649,33 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.cancelSharingSubscriptionForm = function() {
-        console.log("EditUserController.cancelSharingSubscriptionForm");
-
         this.m_oEditSubscription = {}
         this.m_oSharingSubscription = {}
     }
 
     EditUserController.prototype.changeActiveProjectWithButton = function(oProject) {
-        console.log("EditUserController.changeActiveProjectWithButton | oProject: ", oProject);
-
         var oController = this;
 
         if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
-                console.log("EditUserController.changeActiveProjectWithButton | data.data: ", data.data);
-                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (response) {
+
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
                     utilsVexCloseDialogAfter(2000, oDialog);
 
-                    oController.initializeProjectsInfo();
                     this.m_oProject = oProject;
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
                 }
     
             }, function (error) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             });
         }
     }
@@ -686,13 +684,13 @@ var EditUserController = (function () {
         var oController = this;
 
         this.m_oProjectService.getProjectsListByUser().then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_aoProjects = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_aoProjects = response.data;
 
                     const oFirstElement = { name: "No Active Project", projectId: null };
-                    let aoProjects = [oFirstElement].concat(data.data);
+                    let aoProjects = [oFirstElement].concat(response.data);
 
                     oController.m_aoProjectsMap = aoProjects.map(
                         (item) => ({ name: item.name, projectId: item.projectId })
@@ -719,7 +717,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -738,16 +736,16 @@ var EditUserController = (function () {
         var oController = this;
 
         this.m_oProjectService.getProjectsListBySubscription(sSubscriptionId).then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
-                    oController.m_aoUsersList = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    oController.m_aoUsersList = response.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
                         controller: 'SubscriptionProjectsController',
                         inputs: {
                             extras: {
-                                projects: data.data,
+                                projects: response.data,
                                 subscriptionId: sSubscriptionId,
                                 subscriptionName: sSubscriptionName
                             }
@@ -772,7 +770,7 @@ var EditUserController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS OF THE SUBSCRIPTION";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -789,14 +787,14 @@ var EditUserController = (function () {
         console.log("EditUserController.getSubscriptionTypes");
         let oController = this;
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
-            function (data) {
-                if (data.status !== 200) {
+            function (response) {
+                if (response.status !== 200) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner(
                         "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
                     );
                     utilsVexCloseDialogAfter(4000, oDialog);
                 } else {
-                    oController.m_aoTypes = data.data;
+                    oController.m_aoTypes = response.data;
                     oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
                     );

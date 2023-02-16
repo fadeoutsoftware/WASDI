@@ -57,9 +57,9 @@ ProjectEditorController = (function () {
 
         this.m_oEditProject.activeProject = this.m_oActiveProject;
 
-        this.m_oProjectService.saveProject(this.m_oEditProject).then(function (data) {
-            if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+        this.m_oProjectService.saveProject(this.m_oEditProject).then(function (response) {
+            if (!utilsIsObjectNullOrUndefined(response)
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT SAVED<br>READY");
                 utilsVexCloseDialogAfter(2000, oDialog);
             } else {
@@ -72,7 +72,7 @@ ProjectEditorController = (function () {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING PROJECT";
 
             if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                sErrorMessage += "<br><br>" + error.data.message;
+                sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
             }
 
             utilsVexDialogAlertTop(sErrorMessage);

@@ -30,7 +30,6 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ErrorResponse;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectListViewModel;
@@ -39,6 +38,8 @@ import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 
 @Path("/projects")
 public class ProjectResource {
+
+	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
 
 	/**
 	 * Get the list of projects associated to a user.
@@ -59,7 +60,7 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getListByUser: invalid session: " + sSessionId);
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -122,7 +123,7 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getListBySubscription: invalid session: " + sSessionId);
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -182,14 +183,15 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.getProjectViewModel: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Domain Check
+		if (Utils.isNullOrEmpty(sProjectId)) {
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		try {
-			// Domain Check
-			if (Utils.isNullOrEmpty(sProjectId)) {
-				return Response.status(400).entity(new ErrorResponse("Invalid projectId.")).build();
-			}
 
 			WasdiLog.debugLog("ProjectResource.getProjectViewModel: read projects " + sProjectId);
 
@@ -201,12 +203,12 @@ public class ProjectResource {
 
 			if (oProject.getSubscriptionId() == null) {
 				WasdiLog.debugLog("ProjectResource.getProjectViewModel: the project is not connected with a subscription, aborting");
-				return Response.status(400).entity(new ErrorResponse("The project is not connected with a subscription.")).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The project is not connected with a subscription.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), oProject.getSubscriptionId())) {
 				WasdiLog.debugLog("ProjectResource.getProjectViewModel: user cannot access project info, aborting");
-				return Response.status(400).entity(new ErrorResponse("The user cannot access the project info.")).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The user cannot access the project info.")).build();
 			}
 
 			oVM = convert(oProject, oUser.getActiveProjectId());
@@ -234,7 +236,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.createProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
@@ -244,7 +246,7 @@ public class ProjectResource {
 		if (oExistingProject != null) {
 			WasdiLog.debugLog("ProjectResource.createProject: a different project with the same name already exists");
 
-			return Response.status(400).entity(new ErrorResponse("A project with the same name already exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("A project with the same name already exists.")).build();
 		}
 
 		Project oProject = convert(oProjectEditorViewModel);
@@ -277,7 +279,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.updateProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
@@ -286,7 +288,7 @@ public class ProjectResource {
 
 		if (oExistingProject == null) {
 			WasdiLog.debugLog("ProjectResource.updateProject: project does not exist");
-			return Response.status(400).entity(new ErrorResponse("No project with the Id exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id exists.")).build();
 		}
 
 		Project oExistingProjectWithTheSameName = oProjectRepository.getByName(oProjectEditorViewModel.getName());
@@ -294,7 +296,7 @@ public class ProjectResource {
 		if (oExistingProjectWithTheSameName != null
 				&& !oExistingProjectWithTheSameName.getProjectId().equalsIgnoreCase(oExistingProject.getProjectId())) {
 			WasdiLog.debugLog("ProjectResource.updateProject: a different project with the same name already exists");
-			return Response.status(400).entity(new ErrorResponse("An project with the same name already exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An project with the same name already exists.")).build();
 		}
 
 
@@ -311,7 +313,7 @@ public class ProjectResource {
 
 				if (oUserRepository.updateUser(oUser)) {
 					WasdiLog.debugLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
-					return Response.status(400).entity(new ErrorResponse("The removing of the active project failed.")).build();
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The removing of the active project failed.")).build();
 				}
 			}
 
@@ -331,24 +333,19 @@ public class ProjectResource {
 	@PUT
 	@Path("/active")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId) {
+	public Response changeActiveProject(@HeaderParam("x-session-token") String sSessionId, @QueryParam("project") String sProjectId) {
 		WasdiLog.debugLog("ProjectResource.changeActiveProject( ProjectId: " + sProjectId + ")");
-
-		if (sProjectId != null) {
-			if (sProjectId.isEmpty() || sProjectId.equals("null")) {
-				sProjectId = null;
-			}
-		}
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.changeActiveProject: invalid session");
-			oResult.setStringValue("Invalid session.");
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Domain Check
+		if (Utils.isNullOrEmpty(sProjectId) || sProjectId.equals("null")) {
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		if (sProjectId != null) {
@@ -358,8 +355,8 @@ public class ProjectResource {
 
 			if (oProject == null) {
 				WasdiLog.debugLog("ProjectResource.changeActiveProject: project does not exist");
-				oResult.setStringValue("No project with the Id " + sProjectId + " exists.");
-				return oResult;
+
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id " + sProjectId + " exists.")).build();
 			}
 		}
 
@@ -368,14 +365,12 @@ public class ProjectResource {
 		oUser.setActiveProjectId(sProjectId);
 
 		if (oUserRepository.updateUser(oUser)) {
-			oResult.setBoolValue(true);
-			oResult.setStringValue(sProjectId);
+			return Response.ok(new SuccessResponse(sProjectId)).build();
 		} else {
 			WasdiLog.debugLog("ProjectResource.changeActiveProject( " + "changing the active project of the user to " + sProjectId + " failed");
-			oResult.setStringValue("The changing of the active project failed.");
-		}
 
-		return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The changing of the active project failed.")).build();
+		}
 	}
 
 	@DELETE
@@ -388,11 +383,11 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.deleteProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		if (Utils.isNullOrEmpty(sProjectId)) {
-			return Response.status(400).entity(new ErrorResponse("Invalid projectId.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
