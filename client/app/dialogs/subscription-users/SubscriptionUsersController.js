@@ -21,13 +21,9 @@ let SubscriptionUsersController = (function () {
     }
 
     SubscriptionUsersController.prototype.shareSubscription = function (sUserId) {
-        let sSubscriptionId = this.m_sSelectedSubscriptionId;
-        console.log("SubscriptionUsersController.shareSubscription | sSubscriptionId: ", sSubscriptionId);
-        console.log("SubscriptionUsersController.shareSubscription | sUserId: ", sUserId);
-
         let oController = this;
 
-        if (utilsIsObjectNullOrUndefined(sUserId) === true) {
+        if (utilsIsObjectNullOrUndefined(sUserId)) {
             return false;
         }
 
@@ -39,30 +35,36 @@ let SubscriptionUsersController = (function () {
         }
 
         this.m_oSubscriptionService.addSubscriptionSharing(this.m_sSelectedSubscriptionId, sUserId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    // oController.m_aoUsersList = data.data;
-                    console.log("SubscriptionUsersController.shareSubscription | data.data: ", data.data);
-
-                    if (data.data.boolValue) {
-                        // oController.showUsersBySubscription(sSubscriptionId);
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
+                    if (response.data.message === "Done") {
                         let oDialog = utilsVexDialogAlertBottomRightCorner(
                             `SUBSCRIPTION SUCCESSFULLY SHARED WITH ${sUserId}`
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
                         oController.m_aoUsersList.push({ userId: sUserId });
-                        oController.m_sUserEmail="";
-                    } else {
-                        var oDialog = utilsVexDialogAlertBottomRightCorner(oController.m_oTranslate.instant(data.data.stringValue));
-                        utilsVexCloseDialogAfter(5000, oDialog);
+                        oController.m_sUserEmail = "";
+                    } else if (response.data.message === "Already Shared.") {
+                        let oDialog = utilsVexDialogAlertBottomRightCorner(
+                            `SUBSCRIPTION ALREADY SHARED WITH ${sUserId}`
+                        );
+                        utilsVexCloseDialogAfter(4000, oDialog);
+
+                        oController.m_aoUsersList.push({ userId: sUserId });
+                        oController.m_sUserEmail = "";
                     }
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN SHARING THE SUBSCRIPTION"
-                    );
                 }
+
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN SHARING THE SUBSCRIPTION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         )
     }
@@ -72,35 +74,47 @@ let SubscriptionUsersController = (function () {
         
         let sConfirmMsg = `Confirm unsharing with ${sUserId}`
         
-        let oUnshareReviewCallback = function (value) {
+        let oUnshareCallback = function (value) {
+            if (value) {
                 oController.m_oSubscriptionService.removeSubscriptionSharing(sSubscriptionId, sUserId).then(
-                function (data) {
-                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                        // oController.m_aoUsersList = data.data;
-                        console.log("EditUserController.unshareSubscription | data.data: ", data.data);
-                        if (data.data.boolValue) {
+                    function (response) {
+                        if (!utilsIsObjectNullOrUndefined(response)
+                                && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                            let oDialog = utilsVexDialogAlertBottomRightCorner(
+                                `SUBSCRIPTION SUCCESSFULLY UNSHARED WITH ${sUserId}`
+                            );
+                            utilsVexCloseDialogAfter(4000, oDialog);
+
                             oController.showUsersBySubscription(sSubscriptionId);
+                        } else {
+                            utilsVexDialogAlertTop(
+                                "GURU MEDITATION<br>ERROR IN UNSHARING THE SUBSCRIPTION"
+                            );
                         }
-                    } else {
-                        utilsVexDialogAlertTop(
-                            "GURU MEDITATION<br>ERROR IN UNSHARING THE SUBSCRIPTION"
-                        );
+                        return true;
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN UNSHARING THE SUBSCRIPTION";
+
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                        }
+
+                        utilsVexDialogAlertTop(sErrorMessage);
                     }
-                    return true;
-                }
-            );
+                );
+            }
         }
         
-        utilsVexDialogConfirm(sConfirmMsg, oUnshareReviewCallback); 
+        utilsVexDialogConfirm(sConfirmMsg, oUnshareCallback); 
     }
 
     SubscriptionUsersController.prototype.showUsersBySubscription = function (sSubscriptionId) {
         var oController = this;
 
         this.m_oSubscriptionService.getUsersBySharedSubscription(sSubscriptionId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_aoUsersList = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
+                    oController.m_aoUsersList = response.data;
                 } else {
                     utilsVexDialogAlertTop(
                         "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE SUBSCRIPTION"

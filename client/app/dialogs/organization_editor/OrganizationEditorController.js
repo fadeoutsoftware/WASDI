@@ -23,9 +23,9 @@ let OrganizationEditorController = (function () {
 
         let oController = this;
 
-        this.m_oOrganizationService.saveOrganization(this.m_oEditOrganization).then(function (data) {
-            if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+        this.m_oOrganizationService.saveOrganization(this.m_oEditOrganization).then(function (response) {
+            if (!utilsIsObjectNullOrUndefined(response)
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
             } else {
@@ -37,7 +37,7 @@ let OrganizationEditorController = (function () {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING ORGANIZATION";
 
             if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                sErrorMessage += "<br><br>" + error.data.message;
+                sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
             }
 
             utilsVexDialogAlertTop(sErrorMessage);

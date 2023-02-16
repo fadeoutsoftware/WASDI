@@ -36,7 +36,6 @@ import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ErrorResponse;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
@@ -83,7 +82,7 @@ public class SubscriptionResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.getListByUser: invalid session: " + sSessionId);
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -92,6 +91,13 @@ public class SubscriptionResource {
 			}
 
 			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId());
+
+
+			// 1. subscriptions directly owned by the user
+			// 2. subscriptions belonging to organizations owned by the user
+			// 3. subscriptions belonging to organizations shared with the user
+			// 4. subscriptions shared with the user on individual basis
+
 
 			// Create repo
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -122,12 +128,6 @@ public class SubscriptionResource {
 
 				aoSubscriptionList.add(oSubscriptionViewModel);
 			}
-
-			//TODO
-			// 1. subscriptions directly owned by the user
-			// 2. subscriptions belonging to organizations owned by the user
-			// 3. subscriptions belonging to organizations shared with the user
-			// 4. subscriptions shared with the user on individual basis
 
 
 			Response oResponse = new OrganizationResource().getListByUser(sSessionId);
@@ -162,7 +162,10 @@ public class SubscriptionResource {
 					Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(oSharedSubscription.getResourceId());
 
 					if (oSubscription == null) {
-						WasdiLog.debugLog("SubscriptionResource.getListByUser: Subscription Shared not available " + oSharedSubscription.getResourceId());
+						WasdiLog.debugLog("SubscriptionResource.getListByUser: The subscription that was shared is no longer available " + oSharedSubscription.getResourceId() + ". Removing the orphane record.");
+
+						oUserResourcePermissionRepository.deletePermissionsByOrganizationId(oSharedSubscription.getResourceId());
+
 						continue;
 					}
 
@@ -201,13 +204,13 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sSubscriptionId)) {
-				return Response.status(400).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
@@ -226,7 +229,7 @@ public class SubscriptionResource {
 			if (oSubscription == null) {
 				WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel: the subscription cannot be found, aborting");
 
-				return Response.status(400).entity(new ErrorResponse("The subscription cannot be found.")).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be found.")).build();
 			}
 
 			String sOrganizationName = null;
@@ -263,7 +266,7 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.createSubscription: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -272,7 +275,7 @@ public class SubscriptionResource {
 
 		if (oExistingSubscription != null) {
 			WasdiLog.debugLog("SubscriptionResource.createSubscription: a different subscription with the same name already exists");
-			return Response.status(400).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
@@ -310,7 +313,7 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -319,7 +322,7 @@ public class SubscriptionResource {
 
 		if (oExistingSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: subscription does not exist");
-			return Response.status(400).entity(new ErrorResponse("No subscription with the Id exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No subscription with the Id exists.")).build();
 		}
 
 		Subscription oExistingSubscriptionWithTheSameName = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
@@ -327,7 +330,7 @@ public class SubscriptionResource {
 		if (oExistingSubscriptionWithTheSameName != null
 				&& !oExistingSubscriptionWithTheSameName.getSubscriptionId().equalsIgnoreCase(oExistingSubscription.getSubscriptionId())) {
 			WasdiLog.debugLog("SubscriptionResource.updateSubscription: a different subscription with the same name already exists");
-			return Response.status(400).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
 		}
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
@@ -349,11 +352,11 @@ public class SubscriptionResource {
 
 		if (oUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse("Invalid session.")).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		if (Utils.isNullOrEmpty(sSubscriptionId)) {
-			return Response.status(400).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -425,26 +428,24 @@ public class SubscriptionResource {
 	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult shareSubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response shareSubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sDestinationUserId) {
 
 		WasdiLog.debugLog("SubscriptionResource.ShareSubscription( WS: " + sSubscriptionId + ", User: " + sDestinationUserId + " )");
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
-
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.shareSubscription: invalid session");
 
-			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
-
-			return oResult;
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
-		
+
+		// Domain Check
+		if (Utils.isNullOrEmpty(sSubscriptionId)) {
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+		}
+
 		// Check if the subscription exists
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 		Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
@@ -452,20 +453,14 @@ public class SubscriptionResource {
 		if (oSubscription == null) {
 			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: invalid subscription");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SUBSCRIPTION);
-
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_SUBSCRIPTION)).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), SUBSCRIPTION_READ)) {
 			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
 
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_SUBSCRIPTION);
-
-			return oResult;
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_SUBSCRIPTION)).build();
 		}
 
 		// Can the user access this resource?
@@ -473,10 +468,7 @@ public class SubscriptionResource {
 				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 			WasdiLog.debugLog("SubscriptionResource.shareSubscription: " + sSubscriptionId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION);
-
-			return oResult;
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION)).build();
 		}
 
 		// Cannot Autoshare
@@ -486,10 +478,7 @@ public class SubscriptionResource {
 			} else {
 				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: auto sharing not so smart");
 
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
-
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_ONESELF)).build();
 			}
 		}
 
@@ -497,10 +486,7 @@ public class SubscriptionResource {
 		if (sDestinationUserId.equals(oSubscription.getUserId())) {
 			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sharing with the owner not so smart");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
-
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_OWNER)).build();
 		}
 
 		UserRepository oUserRepository = new UserRepository();
@@ -510,10 +496,7 @@ public class SubscriptionResource {
 			//No. So it is neither the owner or a shared one
 			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: Destination user does not exists");
 
-			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
-
-			return oResult;
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER)).build();
 		}
 
 		try {
@@ -523,31 +506,21 @@ public class SubscriptionResource {
 				UserResourcePermission oSubscriptionSharing =
 						new UserResourcePermission("subscription", sSubscriptionId, sDestinationUserId, oSubscription.getUserId(), oRequesterUser.getUserId(), "write");
 
-				oUserResourcePermissionRepository.insertPermission(oSubscriptionSharing);				
+				oUserResourcePermissionRepository.insertPermission(oSubscriptionSharing);
+
+				//TODO - uncomment the line below
+//				sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oSubscription.getName());
+
+				return Response.ok(new SuccessResponse("Done")).build();
 			} else {
 				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: already shared!");
-				oResult.setStringValue("Already Shared.");
-				oResult.setBoolValue(true);
-				oResult.setIntValue(Status.OK.getStatusCode());
-
-				return oResult;
+				return Response.ok(new SuccessResponse("Already Shared.")).build();
 			}
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: " + oEx);
 
-			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
-
-			return oResult;
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
-
-		//TODO - uncomment the line below
-//		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oSubscription.getName());
-
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
-
-		return oResult;
 	}
 
 //	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sSubscriptionName) {
@@ -644,54 +617,44 @@ public class SubscriptionResource {
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public PrimitiveResult deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
+	public Response deleteUserSharedSubscription(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("subscription") String sSubscriptionId, @QueryParam("userId") String sUserId) {
 
 		WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription( WS: " + sSubscriptionId + ", User:" + sUserId + " )");
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
+
 		// Validate Session
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oRequestingUser == null) {
 			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid session");
 
-			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
 
-			return oResult;
+		// Domain Check
+		if (Utils.isNullOrEmpty(sSubscriptionId)) {
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
 		}
 
 		try {
-
 			UserRepository oUserRepository = new UserRepository();
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 
 			if (oDestinationUser == null) {
 				WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: invalid destination user");
 
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
-
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_DESTINATION_USER)).build();
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(sUserId, sSubscriptionId);
+
+			return Response.ok(new SuccessResponse("Done")).build();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
 
-			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
-
-			return oResult;
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
 		}
-
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
-		oResult.setIntValue(Status.OK.getStatusCode());
-
-		return oResult;
 	}
 
 	private static SubscriptionViewModel convert(Subscription oSubscription, String sOrganizationName) {

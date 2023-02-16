@@ -26,51 +26,21 @@ let SubscriptionProjectsController = (function () {
 
 
 
-
-
         $scope.close = function (result) {
             oClose(result, 500)
         }
     }
 
-
-
-    /*
-    SubscriptionProjectsController.prototype.changeActiveProject = function(oProject) {
-        console.log("SubscriptionProjectsController.changeActiveProject | oProject: ", oProject);
-
-        var oController = this;
-
-        if (!utilsIsObjectNullOrUndefined(oProject)) {
-            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (data) {
-                console.log("SubscriptionProjectsController.changeActiveProject | data.data: ", data.data);
-                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
-                    let oDialog = utilsVexDialogAlertBottomRightCorner("ACTIVE PROJECT CHANGED<br>READY");
-                    utilsVexCloseDialogAfter(2000, oDialog);
-
-                    oController.initializeProjectsInfo();
-                    this.m_oProject = oProject;
-                } else {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
-                }
-    
-            }, function (error) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
-            });
-        }
-    }
-    */
-
     SubscriptionProjectsController.prototype.initializeProjectsInfo = function() {
         var oController = this;
 
         this.m_oProjectService.getProjectsListBySubscription(this.m_sSelectedSubscriptionId).then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data.data)) {
-                    oController.m_aoProjects = data.data;
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
+                    oController.m_aoProjects = response.data;
 
                     const oFirstElement = { name: "No Active Project", projectId: null };
-                    let aoProjects = [oFirstElement].concat(data.data);
+                    let aoProjects = [oFirstElement].concat(response.data);
 
                     oController.m_aoProjectsMap = aoProjects.map(
                         (item) => ({ name: item.name, projectId: item.projectId })
@@ -80,7 +50,6 @@ let SubscriptionProjectsController = (function () {
                     oController.m_oProject = oFirstElement;
 
                     oController.m_aoProjects.forEach((oValue) => {
-                        // console.log("SubscriptionProjectsController.initializeProjectsInfo | oValue: ", oValue);
                         if (oValue.activeProject) {
                             oController.m_oProject = oValue;
                         }
@@ -92,9 +61,16 @@ let SubscriptionProjectsController = (function () {
                 }
 
                 oController.m_bLoadingProjects = false;
-                console.log("SubscriptionProjectsController.initializeProjectsInfo | oController.m_oProject: ", oController.m_oProject);
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
             }
         );
     }
@@ -103,15 +79,15 @@ let SubscriptionProjectsController = (function () {
         var oController = this;
 
         this.m_oProjectService.getProjectById(sProjectId).then(
-            function (data) {
-                if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+            function (response) {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/project_editor/ProjectEditorDialog.html",
                         controller: "ProjectEditorController",
                         inputs: {
                             extras: {
-                                project: data.data,
+                                project: response.data,
                                 subscriptionId: oController.m_sSelectedSubscriptionId,
                                 subscriptionName: oController.m_sSelectedSubscriptionName,
                                 editMode: true
@@ -134,7 +110,7 @@ let SubscriptionProjectsController = (function () {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE PROJECT";
 
                 if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + error.data.message;
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
@@ -177,9 +153,9 @@ let SubscriptionProjectsController = (function () {
         let oCallbackFunction = function(value) {
             if (value) {
                 oController.m_oProjectService.deleteProject(sProjectId)
-                    .then(function (data) {
+                    .then(function (response) {
 
-                        if (!utilsIsObjectNullOrUndefined(data) && data.status === 200) {
+                        if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
                             var oDialog = utilsVexDialogAlertBottomRightCorner("PROJECT DELETED<br>READY");
                             utilsVexCloseDialogAfter(4000, oDialog);
                         } else {
@@ -191,7 +167,7 @@ let SubscriptionProjectsController = (function () {
                         let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING PROJECT";
 
                         if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                            sErrorMessage += "<br><br>" + error.data.message;
+                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
                         }
 
                         utilsVexDialogAlertTop(sErrorMessage);
