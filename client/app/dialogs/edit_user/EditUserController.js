@@ -533,7 +533,15 @@ var EditUserController = (function () {
                 oController.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
                     .then(function (response) {
                         if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION DELETED<br>READY");
+                            let sMessage = "SUBSCRIPTION DELETED<br>READY";
+
+                            if (!utilsIsObjectNullOrUndefined(response.data) && !utilsIsStrNullOrEmpty(response.data.message)) {
+                                if (response.data.message !== "Done") {
+                                    sMessage += "<br><br>" + oController.m_oTranslate.instant(response.data.message);
+                                }
+                            }
+
+                            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
                             utilsVexCloseDialogAfter(4000, oDialog);
                         } else {
                             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");

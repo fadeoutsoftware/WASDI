@@ -380,10 +380,19 @@ public class SubscriptionResource {
 
 		if (!sSubscriptionOwner.equals(oUser.getUserId())) {
 			// The current uses is not the owner of the subscription
-			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: user " + oUser.getUserId() + " is not the owner [" + sSubscriptionOwner + "]: delete the sharing, not the subscription");
-			oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
 
-			return Response.ok(new SuccessResponse(sSubscriptionId)).build();
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
+
+			if (oPermission == null) {
+				WasdiLog.debugLog("SubscriptionResource.deleteSubscription: the subscription is shared by an organization and cannot be individually removed:" + sSubscriptionOwner);
+
+				return Response.ok(new SuccessResponse("Subscriptions shared by an organization cannot be removed")).build();
+			} else {
+				WasdiLog.debugLog("SubscriptionResource.deleteSubscription: user " + oUser.getUserId() + " is not the owner [" + sSubscriptionOwner + "]: delete the sharing, not the subscription");
+				oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
+
+				return Response.ok(new SuccessResponse("Sharing removed")).build();
+			}
 		}
 
 		if (oUserResourcePermissionRepository.isSubscriptionShared(sSubscriptionId)) {
@@ -398,7 +407,7 @@ public class SubscriptionResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with an organization. Before deleting the subscription, please remove the sharing.")).build();
 		}
 
-		if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
+		if (oSubscriptionRepository.deleteSubscription("Done")) {
 			return Response.ok(new SuccessResponse(sSubscriptionId)).build();
 		} else {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription( " + sSubscriptionId + " ): deletion failed");
@@ -742,7 +751,7 @@ public class SubscriptionResource {
 
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
-	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
 
 		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
@@ -803,7 +812,7 @@ public class SubscriptionResource {
 				"}, 1000 );\r\n" + 
 				"</script>";
 		
-		return Response.ok(new SuccessResponse(sHtmlContent)).build();
+		return sHtmlContent;
 	}
 
 	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
