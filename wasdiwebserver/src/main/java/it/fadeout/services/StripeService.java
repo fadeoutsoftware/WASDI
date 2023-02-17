@@ -1,4 +1,4 @@
-package it.fadeout.rest.resources;
+package it.fadeout.services;
 
 import java.util.Date;
 import java.util.List;
@@ -16,7 +16,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 
-public class StripeResource {
+public class StripeService {
 
 	public StripePaymentDetail retrieveStripePaymentDetail(String sCheckoutSessionId) {
 		StripePaymentDetail oStripePaymentDetail = new StripePaymentDetail();
@@ -68,7 +68,7 @@ public class StripeResource {
 				}
 			}
 		} catch (StripeException oEx) {
-			WasdiLog.debugLog("StripeResource.confirmation: " + oEx);
+			WasdiLog.debugLog("StripeService.confirmation: " + oEx);
 		}
 
 		return oStripePaymentDetail;

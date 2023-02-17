@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
+import it.fadeout.services.StripeService;
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
@@ -750,7 +751,7 @@ public class SubscriptionResource {
 			return null;
 		}
 
-		StripeResource oStripeResource = new StripeResource();
+		StripeService oStripeResource = new StripeService();
 		StripePaymentDetail oStripePaymentDetail = oStripeResource.retrieveStripePaymentDetail(sCheckoutSessionId);
 
 		String sClientReferenceId = oStripePaymentDetail.getClientReferenceId();
