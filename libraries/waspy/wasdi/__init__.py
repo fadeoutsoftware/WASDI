@@ -59,7 +59,6 @@ import traceback
 import zipfile
 import requests
 import getpass
-import sys
 import os.path
 import inspect
 from datetime import datetime
@@ -381,7 +380,7 @@ def setIsOnExternalServer(bIsOnExternalServer):
     """
     Set the Is on  External Server Flag: keep it false, as default, while developing or when in another infrastructure
 
-    :param bIsOnServer: set the flag to know if the processor is running on an external server
+    :param bIsOnExternalServer: set the flag to know if the processor is running on an external server
     """
     global m_bIsOnExternalServer
     m_bIsOnExternalServer = bIsOnExternalServer
@@ -584,6 +583,9 @@ def init(sConfigFilePath=None):
     if m_sSessionId != '':
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/auth/checksession'
+
+        oResponse = None
+        
         try:
             oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
@@ -1566,14 +1568,14 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
     return None
 
 
-def getProcessorPayloadAsJson(sProcessorPayload):
+def getProcessorPayloadAsJson(sProcessObjId):
     """
     Retrieves the payload in json format using getProcessorPayload
 
     :param sProcessObjId: a valid processor obj id
     :return: the processor payload if present as a dictionary, None otherwise
     """
-    return getProcessorPayload(sProcessorPayload, True)
+    return getProcessorPayload(sProcessObjId, True)
 
 
 def setSubPid(sProcessId, iSubPid):
