@@ -130,11 +130,11 @@ SubscriptionEditorController = (function () {
 
                 oController.m_oSubscriptionService.getStripePaymentUrl(response.data.message, sActiveWorkspaceId).then(function (response) {
                     console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | response.data: ", response.data);
-                    if (!utilsIsObjectNullOrUndefined(response.data) && response.data.boolValue) {
+                    if (!utilsIsObjectNullOrUndefined(response.data) && response.data.message) {
                         let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        let sUrl = response.data.stringValue;
+                        let sUrl = response.data.message;
                         console.log(" SubscriptionEditorController.saveSubscription | getStripePaymentUrl | sUrl: ", sUrl);
 
                         oController.m_oWindow.open(sUrl, '_blank');
