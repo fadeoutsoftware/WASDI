@@ -16,6 +16,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -27,10 +28,13 @@ import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.config.StripeProductConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
@@ -39,6 +43,7 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
+import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
@@ -652,6 +657,170 @@ public class SubscriptionResource {
 			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
+		}
+	}
+
+
+
+
+	@GET
+	@Path("/stripe/paymentUrl")
+	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("subscription") String sSubscriptionId, @QueryParam("workspace") String sWorkspaceId) {
+		WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl( " + "Subscription: " + sSubscriptionId + ", "
+				+ "Workspace: " + sWorkspaceId + ")");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		try {
+			// Domain Check
+			if (Utils.isNullOrEmpty(sSubscriptionId)) {
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+			}
+
+			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+				WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: user cannot access subscription info, aborting");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
+			}
+
+			WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: read subscriptions " + sSubscriptionId);
+
+			// Create repo
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+
+			// Get requested subscription
+			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+
+			if (oSubscription == null) {
+				WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: subscription does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be found.")).build();
+			}
+
+			String sSubscriptionType = oSubscription.getType();
+
+			if (Utils.isNullOrEmpty(sSubscriptionType)) {
+				WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: the subscription does not have a valid type, aborting");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription does not have a valid type.")).build();
+			}
+
+			List<StripeProductConfig> aoProductConfigList = WasdiConfig.Current.stripe.products;
+
+			Map<String, String> aoProductConfigMap = aoProductConfigList.stream()
+					.collect(Collectors.toMap(t -> t.id, t -> t.url));
+
+			SubscriptionType oSubscriptionType = SubscriptionType.get(sSubscriptionType);
+
+			if (oSubscriptionType == null) {
+				WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: the subscription does not have a valid type, aborting");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription does not have a valid type.")).build();
+			} else {
+				String sBaseUrl = aoProductConfigMap.get(sSubscriptionType);
+
+				if (Utils.isNullOrEmpty(sBaseUrl)) {
+					WasdiLog.debugLog("SubscriptionResource.getStripePaymentUrl: the wasdiConfig.json file doed not contain a valid configuration for the subscription");
+					return Response.serverError().build();
+				} else {
+					String sUrl = sBaseUrl + "?client_reference_id=" + sSubscriptionId;
+
+					if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+						sUrl += "_" + sWorkspaceId;
+					}
+
+					return Response.ok(new SuccessResponse(sUrl)).build();
+				}
+			}
+		} catch (Exception oEx) {
+			return Response.serverError().build();
+		}
+	}
+
+	@GET
+	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
+	public Response confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
+		WasdiLog.debugLog("SubscriptionResource.confirmation( sCheckoutSessionId: " + sCheckoutSessionId + ")");
+
+		if (Utils.isNullOrEmpty(sCheckoutSessionId)) {
+			WasdiLog.debugLog("SubscriptionResource.confirmation: Stripe returned a null CHECKOUT_SESSION_ID, aborting");
+
+			return null;
+		}
+
+		StripeResource oStripeResource = new StripeResource();
+		StripePaymentDetail oStripePaymentDetail = oStripeResource.retrieveStripePaymentDetail(sCheckoutSessionId);
+
+		String sClientReferenceId = oStripePaymentDetail.getClientReferenceId();
+
+		if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
+			WasdiLog.debugLog("SubscriptionResource.confirmation: Stripe returned an invalid result, aborting");
+
+			return null;
+		}
+
+		String sSubscriptionId = null;
+		String sWorkspaceId = null;
+
+		if (sClientReferenceId.contains("_")) {
+			String[] asClientReferenceId = sClientReferenceId.split("_");
+			sSubscriptionId = asClientReferenceId[0];
+			sWorkspaceId = asClientReferenceId[1];
+		} else {
+			sSubscriptionId = sClientReferenceId;
+		}
+
+		WasdiLog.debugLog("SubscriptionResource.confirmation( sSubscriptionId: " + sSubscriptionId + ")");
+
+		if (oStripePaymentDetail != null) {
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+
+			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+
+			if (oSubscription == null) {
+				WasdiLog.debugLog("SubscriptionResource.confirmation: subscription does not exist");
+			} else {
+				oSubscription.setBuyDate(Utils.nowInMillis());
+				oSubscription.setBuySuccess(true);
+
+				oSubscriptionRepository.updateSubscription(oSubscription);
+
+				if (!Utils.isNullOrEmpty(sWorkspaceId)) {
+					sendRabbitMessage(sWorkspaceId, oStripePaymentDetail);
+				}
+			}
+		}
+
+		String sHtmlContent = "<script type=\"text/javascript\">\r\n" + 
+				"setTimeout(\r\n" + 
+				"function ( )\r\n" + 
+				"{\r\n" + 
+				"  self.close();\r\n" + 
+				"}, 1000 );\r\n" + 
+				"</script>";
+		
+		return Response.ok(new SuccessResponse(sHtmlContent)).build();
+	}
+
+	private void sendRabbitMessage(String sWorkspaceId, StripePaymentDetail oStripePaymentDetail) {
+		try {
+			// Search for exchange name
+			String sExchange = WasdiConfig.Current.rabbit.exchange;
+
+			// Set default if is empty
+			if (Utils.isNullOrEmpty(sExchange)) {
+				sExchange = "amq.topic";
+			}
+
+			// Send the Asynch Message to the clients
+			Send oSendToRabbit = new Send(sExchange);
+			oSendToRabbit.SendRabbitMessage(true, "SUBSCRIPTION", sWorkspaceId, oStripePaymentDetail, sWorkspaceId);
+			oSendToRabbit.Free();
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("SubscriptionResource.sendRabbitMessage: exception sending asynch notification");
 		}
 	}
 
