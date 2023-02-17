@@ -109,12 +109,17 @@ var WorkspaceController = (function () {
         this.m_oWorkspaceService.createWorkspace().then(function (data, status) {
             if (data.data != null) {
                 if (data.data != undefined) {
-                    var sWorkspaceId = data.data.stringValue;
-                    oController.openWorkspace(sWorkspaceId);
+                    if (data.data.boolValue) {
+                        var sWorkspaceId = data.data.stringValue;
+                        oController.openWorkspace(sWorkspaceId);
+                    } else {
+                        //alert('error');
+                        utilsVexDialogAlertTop(sError + "<br><br>" + data.data.stringValue);
+                    }
 
                 }
             }
-        },(function (data, status) {
+        },(function (error, status) {
             //alert('error');
             utilsVexDialogAlertTop(sError);
         }));
@@ -145,11 +150,9 @@ var WorkspaceController = (function () {
                     // oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", {workSpace: sWorkspaceId});//use workSpace when reload editor page
                     oController.m_oConstantsService.setActiveWorkspace(data.data);
-                   
-                    
                 }
             }
-        },(function (data, status) {
+        },(function (error, status) {
             //alert('error');
             utilsVexDialogAlertTop(sError);
         }));
@@ -249,7 +252,7 @@ var WorkspaceController = (function () {
             if (!utilsIsObjectNullOrUndefined(data)) {
                 oController.m_oWorkspaceViewModel = data.data;
             }
-        },(function (data, status) {
+        },(function (error, status) {
             utilsVexDialogAlertTop(sError);
         }));
 

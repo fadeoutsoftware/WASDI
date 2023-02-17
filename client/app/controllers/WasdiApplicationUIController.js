@@ -508,9 +508,9 @@ var WasdiApplicationUIController = (function () {
                 oController.m_oRootScope.title = sWorkspaceName;
 
             }
-                , function () {
-                    utilsVexDialogAlertTop(sCreateError);
-                });
+            , function () {
+                utilsVexDialogAlertTop(sCreateError);
+            });
         } else {
             if (this.m_oSelectedWorkspace) {
                 this.m_oRootScope.title = this.m_oSelectedWorkspace.workspaceName;
