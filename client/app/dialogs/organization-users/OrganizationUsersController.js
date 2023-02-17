@@ -11,8 +11,9 @@ let OrganizationUsersController = (function () {
         this.m_sUserEmail = "";
 
         this.m_sSelectedOrganizationId = this.oExtras.organizationId;
-        this.m_aoUsersList = oExtras.users;
+
         this.m_bLoadingUsers = true;
+        this.showUsersByOrganization();
 
         $scope.close = function (result) {
             oClose(result, 500)
@@ -68,14 +69,14 @@ let OrganizationUsersController = (function () {
         )
     }
 
-    OrganizationUsersController.prototype.unshareOrganization = function (sOrganizationId, sUserId) {
+    OrganizationUsersController.prototype.unshareOrganization = function (sUserId) {
         let oController = this;
-        
+
         let sConfirmMsg = `Confirm unsharing with ${sUserId}`
-        
+
         let oUnshareCallback = function (value) {
             if (value) {
-                oController.m_oOrganizationService.removeOrganizationSharing(sOrganizationId, sUserId).then(
+                oController.m_oOrganizationService.removeOrganizationSharing(oController.m_sSelectedOrganizationId, sUserId).then(
                     function (response) {
                         if (!utilsIsObjectNullOrUndefined(response)
                                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
@@ -84,7 +85,7 @@ let OrganizationUsersController = (function () {
                             );
                             utilsVexCloseDialogAfter(4000, oDialog);
 
-                            oController.showUsersByOrganization(sOrganizationId);
+                            oController.showUsersByOrganization(oController.m_sSelectedOrganizationId);
                         } else {
                             utilsVexDialogAlertTop(
                                 "GURU MEDITATION<br>ERROR IN UNSHARING THE ORGANIZATION"
@@ -107,10 +108,10 @@ let OrganizationUsersController = (function () {
         utilsVexDialogConfirm(sConfirmMsg, oUnshareCallback); 
     }
 
-    OrganizationUsersController.prototype.showUsersByOrganization = function (sOrganizationId) {
+    OrganizationUsersController.prototype.showUsersByOrganization = function () {
         var oController = this;
 
-        this.m_oOrganizationService.getUsersBySharedOrganization(sOrganizationId).then(
+        this.m_oOrganizationService.getUsersBySharedOrganization(this.m_sSelectedOrganizationId).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response.data)) {
                     oController.m_aoUsersList = response.data;
@@ -123,6 +124,16 @@ let OrganizationUsersController = (function () {
                 oController.m_bLoadingUsers = false;
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
+
+                oController.m_bLoadingUsers = false;
             }
         );
     }

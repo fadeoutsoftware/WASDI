@@ -311,7 +311,7 @@ public class ProjectResource {
 
 				oUser.setActiveProjectId(null);
 
-				if (oUserRepository.updateUser(oUser)) {
+				if (!oUserRepository.updateUser(oUser)) {
 					WasdiLog.debugLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
 					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The removing of the active project failed.")).build();
 				}
@@ -341,11 +341,6 @@ public class ProjectResource {
 		if (oUser == null) {
 			WasdiLog.debugLog("ProjectResource.changeActiveProject: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
-		}
-
-		// Domain Check
-		if (Utils.isNullOrEmpty(sProjectId) || sProjectId.equals("null")) {
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		if (sProjectId != null) {

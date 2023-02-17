@@ -58,11 +58,6 @@
                                 <thead>
                                     <tr>
                                         <th>UserId</th>
-                                        <!-- 
-                                            <th>Name</th>
-                                            <th>Surname</th>
-                                            <th>Role</th> 
-                                        -->
                                         <th>
                                         </th>
                                     </tr>
@@ -70,14 +65,11 @@
                                 <tbody>
                                     <tr ng-repeat="oUser in m_oController.m_aoUsersList">
                                         <td>{{oUser.userId}}</td>
-                                        <!-- <td>{{oUser.name}}</td>
-                                                        <td>{{oUser.surname}}</td>
-                                                        <td>{{oUser.role}}</td> -->
 
                                         <td class="over-icon">
                                             <button class="btn btn-danger btn-wasdi"
                                                 title={{"DIALOG_EDIT_SUBSCRIPTION_UNSHARE"|translate}}
-                                                ng-click="m_oController.unshareSubscription(m_oController.m_sSelectedSubscriptionId, oUser.userId)">
+                                                ng-click="m_oController.unshareSubscription(oUser.userId)">
                                                 <!--Unshare Subscription-->
                                                 <i class="fa fa-trash fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                                                 <span class="ng-binding">{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span>

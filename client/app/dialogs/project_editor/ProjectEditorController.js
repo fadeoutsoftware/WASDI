@@ -4,11 +4,13 @@ ProjectEditorController = (function () {
         oClose,
         oExtras,
         oProjectService,
-        oSubscriptionService
+        oSubscriptionService,
+        oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_oTranslate = oTranslate;
 
         this.m_oProjectService = oProjectService;
         this.m_oSubscriptionService = oSubscriptionService;
@@ -89,7 +91,8 @@ ProjectEditorController = (function () {
         'close',
         'extras',
         'ProjectService',
-        'SubscriptionService'
+        'SubscriptionService',
+        '$translate'
     ];
     return ProjectEditorController
 })();

@@ -21,7 +21,6 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.saveProject = function (oProject) {
-        console.log("ProjectService.saveProject | oProject: ", oProject);
         if (utilsIsStrNullOrEmpty(oProject.projectId)) {
             return this.createProject(oProject);
         } else {
@@ -30,17 +29,14 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
     };
 
     this.createProject = function (oProject) {
-        console.log("ProjectService.createProject | m_oEditProject: ", oProject);
         return this.m_oHttp.post(this.APIURL + '/projects/add', oProject);
     };
 
     this.updateProject = function (oProject) {
-        console.log("ProjectService.updateProject | oProject: ", oProject);
         return this.m_oHttp.put(this.APIURL + '/projects/update', oProject);
     };
 
     this.changeActiveProject = function (sProjectId) {
-        console.log("ProjectService.changeActiveProject | sProjectId: ", sProjectId);
         return this.m_oHttp.put(this.APIURL + '/projects/active' + (sProjectId == null ? "" : "?project=" + sProjectId));
     };
 

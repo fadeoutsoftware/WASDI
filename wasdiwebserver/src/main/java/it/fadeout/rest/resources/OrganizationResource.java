@@ -498,7 +498,7 @@ public class OrganizationResource {
 	@GET
 	@Path("share/byorganization")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<OrganizationSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
+	public Response getEnableUsersSharedOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
 
 		WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedWorksace( Organization: " + sOrganizationId + " )");
 
@@ -508,10 +508,8 @@ public class OrganizationResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedWorksace: invalid session");
-			return aoOrganizationSharingViewModels;
-
-//			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -527,15 +525,13 @@ public class OrganizationResource {
 
 					aoOrganizationSharingViewModels.add(oOrganizationSharingViewModel);
 				}
-
 			}
 
+			return Response.ok(aoOrganizationSharingViewModels).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedWorksace: " + oEx);
-			return aoOrganizationSharingViewModels;
+			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedOrganization: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return aoOrganizationSharingViewModels;
 
 	}
 
