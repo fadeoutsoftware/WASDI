@@ -17,7 +17,6 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
     };
 
     this.saveSubscription = function (oSubscription) {
-        console.log("SubscriptionService.saveSubscription | oSubscription: ", oSubscription);
         if (utilsIsStrNullOrEmpty(oSubscription.subscriptionId)) {
             return this.createSubscription(oSubscription);
         } else {
@@ -26,12 +25,10 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
     };
 
     this.createSubscription = function (oSubscription) {
-        console.log("SubscriptionService.createSubscription | m_oEditSubscription: ", oSubscription);
         return this.m_oHttp.post(this.APIURL + '/subscriptions/add', oSubscription);
     };
 
     this.updateSubscription = function (oSubscription) {
-        console.log("SubscriptionService.updateSubscription | oSubscription: ", oSubscription);
         return this.m_oHttp.put(this.APIURL + '/subscriptions/update', oSubscription);
     };
 

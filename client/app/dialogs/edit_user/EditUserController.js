@@ -49,7 +49,6 @@ var EditUserController = (function () {
         this.m_aoOrganizations = [];
         this.m_aoUsersList = [];
         this.m_oEditOrganization = {};
-        this.m_oSharingOrganization = {};
 
         this.initializeOrganizationsInfo();
 
@@ -57,7 +56,6 @@ var EditUserController = (function () {
         this.m_aoSubscriptions = [];
 
         this.m_oEditSubscription = {};
-        this.m_oSharingSubscription = {};
 
         this.initializeSubscriptionsInfo();
 
@@ -295,59 +293,29 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
-        this.m_oEditOrganization = {};
-        this.m_oSharingOrganization = {organizationId: sOrganizationId}
-
         if (utilsIsStrNullOrEmpty(sOrganizationId)) {
             return false;
         }
 
-        var oController = this;
-
-        this.m_oOrganizationService.getUsersBySharedOrganization(sOrganizationId).then(
-            function (data) {
-                if (utilsIsObjectNullOrUndefined(data.data) === false) {
-                    oController.m_aoUsersList = data.data;
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/organization-users/OrganizationUsersDialog.html",
-                        controller: 'OrganizationUsersController',
-                        inputs: {
-                            extras: {
-                                users: data.data,
-                                organizationId: sOrganizationId
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function () {
-                            oController.initializeOrganizationsInfo();
-                        })
-
-                    })
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE ORGANIZATION"
-                    );
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/organization-users/OrganizationUsersDialog.html",
+            controller: 'OrganizationUsersController',
+            inputs: {
+                extras: {
+                    organizationId: sOrganizationId
                 }
-
-                return true;
             }
-        );
-    }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+            })
 
-    /*
-    EditUserController.prototype.hideUsersByOrganization = function(sUserId, sOrganizationId) {
-        this.m_aoUsersList = [];
-        this.m_oEditOrganization = {}
-        this.m_oSharingOrganization = {}
+        })
     }
-    */
 
     EditUserController.prototype.showOrganizationEditForm = function(sOrganizationId, sEditMode) {
-        this.m_oSharingOrganization = {}
-
         let oController = this;
 
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
@@ -393,8 +361,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showOrganizationAddForm = function() {
-        console.log("EditUserController.showOrganizationAddForm | ");
-
         var oController = this;
 
         let oNewOrganization = {};
@@ -419,7 +385,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.deleteOrganization = function(sOrganizationId) {
-
         let sConfirmMsg = "Delete this Organization?"
 
         var oController = this;
@@ -456,10 +421,7 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.cancelSharingOrganizationForm = function() {
-        console.log("EditUserController.cancelSharingOrganizationForm");
-
         this.m_oEditOrganization = {}
-        this.m_oSharingOrganization = {}
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
@@ -598,59 +560,30 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.showUsersBySubscription = function(sSubscriptionId) {
-        console.log("EditUserController.showUsersBySubscription | sSubscriptionId: ", sSubscriptionId);
-
-        this.m_oEditSubscription = {};
-        this.m_oSharingSubscription = {subscriptionId: sSubscriptionId};
-
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
         }
 
-        var oController = this;
-
-        this.m_oSubscriptionService.getUsersBySharedSubscription(sSubscriptionId).then(
-            function (response) {
-                if (utilsIsObjectNullOrUndefined(response.data) === false) {
-                    oController.m_aoUsersList = response.data;
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
-                        controller: 'SubscriptionUsersController',
-                        inputs: {
-                            extras: {
-                                users: response.data,
-                                subscriptionId: sSubscriptionId
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function () {
-                            oController.initializeSubscriptionsInfo();
-                        })
-
-                    })
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE SUBSCRIPTION"
-                    );
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
+            controller: 'SubscriptionUsersController',
+            inputs: {
+                extras: {
+                    subscriptionId: sSubscriptionId
                 }
-
-                return true;
             }
-        );
-    }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+            })
 
-    EditUserController.prototype.hideUsersBySubscription = function(sUserId, sSubscriptionId) {
-        this.m_aoUsersList = [];
-        this.m_oEditSubscription = {}
-        this.m_oSharingSubscription = {}
+        })
     }
 
     EditUserController.prototype.cancelSharingSubscriptionForm = function() {
         this.m_oEditSubscription = {}
-        this.m_oSharingSubscription = {}
     }
 
     EditUserController.prototype.changeActiveProjectWithButton = function(oProject) {
@@ -721,6 +654,8 @@ var EditUserController = (function () {
                 }
 
                 utilsVexDialogAlertTop(sErrorMessage);
+
+                oController.m_bLoadingProjects = false;
             }
         );
     }
@@ -735,65 +670,36 @@ var EditUserController = (function () {
 
         var oController = this;
 
-        this.m_oProjectService.getProjectsListBySubscription(sSubscriptionId).then(
-            function (response) {
-                if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
-                    oController.m_aoUsersList = response.data;
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
-                        controller: 'SubscriptionProjectsController',
-                        inputs: {
-                            extras: {
-                                projects: response.data,
-                                subscriptionId: sSubscriptionId,
-                                subscriptionName: sSubscriptionName
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function () {
-                            oController.initializeProjectsInfo();
-                        })
-
-                    })
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS OF THE SUBSCRIPTION"
-                    );
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
+            controller: 'SubscriptionProjectsController',
+            inputs: {
+                extras: {
+                    subscriptionId: sSubscriptionId,
+                    subscriptionName: sSubscriptionName
                 }
-
-                return true;
-            }, function (error) {
-                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS OF THE SUBSCRIPTION";
-
-                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
-                }
-
-                utilsVexDialogAlertTop(sErrorMessage);
             }
-        );
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeProjectsInfo();
+            })
+
+        })
     }
 
     EditUserController.prototype.cancelEditProjectForm = function() {
     }
 
-
-
     EditUserController.prototype.getSubscriptionTypes = function () {
-        console.log("EditUserController.getSubscriptionTypes");
         let oController = this;
+
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
             function (response) {
-                if (response.status !== 200) {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(
-                        "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
-                    );
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                } else {
+                if (!utilsIsObjectNullOrUndefined(response)
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_aoTypes = response.data;
                     oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
@@ -803,17 +709,21 @@ var EditUserController = (function () {
                         if (oValue.typeId == oController.m_oEditSubscription.typeId) {
                             oController.m_oType = oValue;
                         }
-                    });
-
-                    console.log("EditUserController.getSubscriptionTypes | oController.m_aoTypes: ", oController.m_aoTypes);
+                    });                
+                } else {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(
+                        "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
+                    );
+                    utilsVexCloseDialogAfter(4000, oDialog);
                 }
 
                 oController.m_bLoadingTypes = false;
-            }, function (data) {
+            }, function (error) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner(
-                    "GURU MEDITATION<br>ERROR GETTING TYPES"
+                    "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
                 );
                 utilsVexCloseDialogAfter(4000, oDialog);
+
                 oController.m_bLoadingTypes = false;
             }
         );

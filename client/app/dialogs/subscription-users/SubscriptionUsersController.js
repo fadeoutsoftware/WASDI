@@ -11,9 +11,9 @@ let SubscriptionUsersController = (function () {
         this.m_sUserEmail = "";
 
         this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
-        this.m_aoUsersList = oExtras.users;
 
         this.m_bLoadingUsers = true;
+        this.showUsersBySubscription();
 
         $scope.close = function (result) {
             oClose(result, 500)
@@ -69,14 +69,14 @@ let SubscriptionUsersController = (function () {
         )
     }
 
-    SubscriptionUsersController.prototype.unshareSubscription = function (sSubscriptionId, sUserId) {
+    SubscriptionUsersController.prototype.unshareSubscription = function (sUserId) {
         let oController = this;
         
         let sConfirmMsg = `Confirm unsharing with ${sUserId}`
         
         let oUnshareCallback = function (value) {
             if (value) {
-                oController.m_oSubscriptionService.removeSubscriptionSharing(sSubscriptionId, sUserId).then(
+                oController.m_oSubscriptionService.removeSubscriptionSharing(oController.m_sSelectedSubscriptionId, sUserId).then(
                     function (response) {
                         if (!utilsIsObjectNullOrUndefined(response)
                                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
@@ -85,7 +85,7 @@ let SubscriptionUsersController = (function () {
                             );
                             utilsVexCloseDialogAfter(4000, oDialog);
 
-                            oController.showUsersBySubscription(sSubscriptionId);
+                            oController.showUsersBySubscription();
                         } else {
                             utilsVexDialogAlertTop(
                                 "GURU MEDITATION<br>ERROR IN UNSHARING THE SUBSCRIPTION"
@@ -108,10 +108,10 @@ let SubscriptionUsersController = (function () {
         utilsVexDialogConfirm(sConfirmMsg, oUnshareCallback); 
     }
 
-    SubscriptionUsersController.prototype.showUsersBySubscription = function (sSubscriptionId) {
+    SubscriptionUsersController.prototype.showUsersBySubscription = function () {
         var oController = this;
 
-        this.m_oSubscriptionService.getUsersBySharedSubscription(sSubscriptionId).then(
+        this.m_oSubscriptionService.getUsersBySharedSubscription(this.m_sSelectedSubscriptionId).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response.data)) {
                     oController.m_aoUsersList = response.data;
@@ -124,6 +124,16 @@ let SubscriptionUsersController = (function () {
                 oController.m_bLoadingUsers = false;
 
                 return true;
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF USERS OF THE SUBSCRIPTION";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
+
+                oController.m_bLoadingUsers = false;
             }
         );
     }

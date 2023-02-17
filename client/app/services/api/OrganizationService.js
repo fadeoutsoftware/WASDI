@@ -17,7 +17,6 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     };
 
     this.saveOrganization = function (oOrganization) {
-        console.log("OrganizationService.saveOrganization | oOrganization: ", oOrganization);
         if (utilsIsStrNullOrEmpty(oOrganization.organizationId)) {
             return this.createOrganization(oOrganization);
         } else {
@@ -26,12 +25,10 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     };
 
     this.createOrganization = function (oOrganization) {
-        console.log("OrganizationService.createOrganization | m_oEditOrganization: ", oOrganization);
         return this.m_oHttp.post(this.APIURL + '/organizations/add', oOrganization);
     };
 
     this.updateOrganization = function (oOrganization) {
-        console.log("OrganizationService.updateOrganization | oOrganization: ", oOrganization);
         return this.m_oHttp.put(this.APIURL + '/organizations/update', oOrganization);
     };
 

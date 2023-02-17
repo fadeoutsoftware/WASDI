@@ -403,10 +403,10 @@ public class SubscriptionResource {
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<SubscriptionTypeViewModel> getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getSubscriptionTypes(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionTypes()");
 
-		return convert(Arrays.asList(SubscriptionType.values()));
+		return Response.ok(convert(Arrays.asList(SubscriptionType.values()))).build();
 	}
 
 	private static List<SubscriptionTypeViewModel> convert(List<SubscriptionType> aoSubscriptionTypes) {
@@ -575,9 +575,9 @@ public class SubscriptionResource {
 	@GET
 	@Path("share/bysubscription")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<SubscriptionSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
+	public Response getEnableUsersSharedSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 
-		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace( WS: " + sSubscriptionId + " )");
+		WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription( Subscription: " + sSubscriptionId + " )");
 
 	
 		List<UserResourcePermission> aoSubscriptionSharing = null;
@@ -585,8 +585,8 @@ public class SubscriptionResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: invalid session");
-			return aoSubscriptionSharingViewModels;
+			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
@@ -602,15 +602,13 @@ public class SubscriptionResource {
 
 					aoSubscriptionSharingViewModels.add(oSubscriptionSharingViewModel);
 				}
-
 			}
 
+			return Response.ok(aoSubscriptionSharingViewModels).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedWorksace: " + oEx);
-			return aoSubscriptionSharingViewModels;
+			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription: " + oEx);
+			return Response.serverError().build();
 		}
-
-		return aoSubscriptionSharingViewModels;
 
 	}
 

@@ -13,10 +13,6 @@ let SubscriptionProjectsController = (function () {
         this.m_sSelectedSubscriptionId = this.m_oExtras.subscriptionId;
         this.m_sSelectedSubscriptionName = this.m_oExtras.subscriptionName;
 
-
-
-        this.m_aoProjects = this.m_oExtras.projects;
-
         this.m_aoProjectsMap = [];
         this.m_oProject = {};
 
