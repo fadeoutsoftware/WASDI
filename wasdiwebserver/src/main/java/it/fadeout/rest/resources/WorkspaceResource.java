@@ -441,7 +441,7 @@ public class WorkspaceResource {
 
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			oResult.setStringValue("the user's active subscription is not valid");
+			oResult.setStringValue("A project with an active subscription should be selected");
 
 			return oResult;
 		}
@@ -499,6 +499,7 @@ public class WorkspaceResource {
 
 		if (oWorkspaceRepository.insertWorkspace(oWorkspace)) {
 			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(true);
 			oResult.setStringValue(oWorkspace.getWorkspaceId());
 
 			return oResult;

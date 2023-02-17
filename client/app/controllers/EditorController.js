@@ -190,7 +190,7 @@
                  
                 oThat.generateDefaultNavBarMenu();
             }, (function (data, status) {
-                var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
+                var sMessage = oThat.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
                 utilsVexDialogAlertBottomRightCorner(sMessage);
             }));        
         }
