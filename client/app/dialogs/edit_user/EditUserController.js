@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate, oRabbitStompService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -19,6 +19,7 @@ var EditUserController = (function () {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oModalService = oModalService;
         this.m_oTranslate = oTranslate;
+        this.m_oRabbitStompService = oRabbitStompService;
 
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
@@ -67,7 +68,26 @@ var EditUserController = (function () {
         this.initializeProjectsInfo();
 
 
+        /* 
+        RabbitStomp Service call
+        */
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "SUBSCRIPTION",
+            this,
+            this.rabbitMessageHook
+        );
+
+        var oController = this;
+
+
         $scope.close = function (result) {
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
+
+            oClose(result, 300); // close, but give 500ms for bootstrap to animate
+        };
+
+        $scope.add = function (result) {
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
     }
@@ -704,6 +724,19 @@ var EditUserController = (function () {
         );
     }
 
+    EditUserController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
+        console.log("EditUserController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
+        oController.initializeSubscriptionsInfo();
+        oController.m_bIsLoading = false;
+
+        if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
+            let sRabbitMessage = JSON.stringify(oRabbitMessage);
+
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
+            utilsVexCloseDialogAfter(5000, oVexWindow);
+        }
+    };
+
     EditUserController.$inject = [
         '$scope',
         'close',
@@ -716,7 +749,8 @@ var EditUserController = (function () {
         'ProjectService',
         'AdminDashboardService',
         'ModalService',
-        '$translate'
+        '$translate',
+        "RabbitStompService"
     ];
     return EditUserController ;
 })();

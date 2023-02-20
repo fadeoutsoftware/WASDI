@@ -6,8 +6,7 @@ SubscriptionEditorController = (function () {
         oExtras,
         oConstantsService,
         oSubscriptionService,
-        oOrganizationService,
-        oRabbitStompService
+        oOrganizationService
     ) {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
@@ -17,7 +16,6 @@ SubscriptionEditorController = (function () {
         this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
-        this.m_oRabbitStompService = oRabbitStompService;
 
         this.m_oEditSubscription = oExtras.subscription;
         this.m_bEditMode = oExtras.editMode;
@@ -32,16 +30,6 @@ SubscriptionEditorController = (function () {
 
         this.initializeSubscriptionInfo();
 
-        
-        /* 
-        RabbitStomp Service call
-        */
-        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
-            "SUBSCRIPTION",
-            this,
-            this.rabbitMessageHook
-        );
-
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
@@ -52,15 +40,8 @@ SubscriptionEditorController = (function () {
         var oController = this;
 
         $scope.close = function (result) {
-            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
-
             oClose(result, 500);
         }
-
-        $scope.add = function (result) {
-            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
-            oClose(result, 300); // close, but give 500ms for bootstrap to animate
-        };
     }
 
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
@@ -175,6 +156,7 @@ SubscriptionEditorController = (function () {
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
             console.log("SubscriptionEditorController.saveSubscription | response.data: ", response.data);
+
             if (!utilsIsObjectNullOrUndefined(response)
                     && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
 
@@ -187,10 +169,11 @@ SubscriptionEditorController = (function () {
                 utilsVexCloseDialogAfter(4000, oDialog);
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
-
-//                oController.m_oScope.close();
             }
 
+            if (oController.m_bIsPaid) {
+                oController.m_oScope.close();
+            }
         }, function (error) {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION";
 
@@ -200,12 +183,16 @@ SubscriptionEditorController = (function () {
 
             utilsVexDialogAlertTop(sErrorMessage);
 
-//            oController.m_oScope.close();
+            if (oController.m_bIsPaid) {
+                oController.m_oScope.close();
+            }
         });
 
-        // this.m_oEditSubscription = {};
-        // this.m_oType = {};
-        // this.m_oOrganization = {};
+        if (this.m_bIsPaid) {
+            this.m_oEditSubscription = {};
+            this.m_oType = {};
+            this.m_oOrganization = {};
+        }
     }
 
     SubscriptionEditorController.prototype.checkout = function () {
@@ -229,30 +216,17 @@ SubscriptionEditorController = (function () {
                 oController.m_oWindow.open(sUrl, '_blank');
             }
 
-//            oController.m_oScope.close();
+            oController.m_oScope.close();
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN RETRIEVING THE PAYMENT URL");
 
-//            oController.m_oScope.close();
+            oController.m_oScope.close();
         });
+
+        this.m_oEditSubscription = {};
+        this.m_oType = {};
+        this.m_oOrganization = {};
     }
-
-    SubscriptionEditorController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
-        console.log("SubscriptionEditorController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
-//        oController.initializeSubscriptionsInfo();
-//        oController.m_bIsLoading = false;
-
-
-oController.initializeSubscriptionInfo();
-oController.initializeDates();
-
-        if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
-            let sRabbitMessage = JSON.stringify(oRabbitMessage);
-
-            var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
-            utilsVexCloseDialogAfter(5000, oVexWindow);
-        }
-    };
 
     SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
         let oController = this;
@@ -297,8 +271,7 @@ oController.initializeDates();
         'extras',
         'ConstantsService',
         'SubscriptionService',
-        'OrganizationService',
-        "RabbitStompService"
+        'OrganizationService'
     ];
     return SubscriptionEditorController
 })();
