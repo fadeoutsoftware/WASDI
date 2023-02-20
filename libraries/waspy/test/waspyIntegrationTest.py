@@ -1,5 +1,6 @@
+
 '''
-Unit Test class
+Unit Integration class
 A config file is required in the current directory
 The test case are executed in the same order as they are implemented on this file.
 The scenario tested follows the tutorial of wasdi till test number 7, after that
@@ -19,6 +20,7 @@ from pathlib import Path
 import wasdi
 from os.path import exists
 from shutil import copyfile
+import json
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -53,9 +55,10 @@ class WaspyIntegrationTests(unittest.TestCase):
         cls.sTestFile1Name = "S2A_MSIL1C_20201008T102031_N0209_R065_T32TMR_20201008T123525"
         cls.sTestFile2Name = "S2B_MSIL1C_20201013T101909_N0209_R065_T32TMR_20201018T165151"
 
-        wasdi.init("./config.json")
+        # tries to init from config file, if one is provided
+        wasdi.init("./resources/config.json")
 
-        cls.readBoundingBox(cls)
+        cls.readBoundingBoxString(cls)
 
     def clearWorkspaces(self, sWorkspaceName):
         asWorkspaces = wasdi.getWorkspaces()
@@ -86,8 +89,8 @@ class WaspyIntegrationTests(unittest.TestCase):
         for sProduct in asProducts:
             wasdi.deleteProduct(sProduct)
 
-    def readBoundingBox(self):
-        sBbox = wasdi.getParameter("bounding.box")
+    def readBoundingBoxString(self):
+        sBbox = wasdi.getParameter("bbox")
         try:
             asBbox = sBbox.split(",")
             self.dULLat = asBbox[0]
@@ -96,6 +99,24 @@ class WaspyIntegrationTests(unittest.TestCase):
             self.dLRLon = asBbox[3]
         except Exception as oE:
             logging.error(f'readBoundingBox: {type(oE)}: {oE}')
+
+    def searchImages(self):
+        asQuery = {
+            'sPlatform': wasdi.getParameter('platform'),
+            'sDateFrom': wasdi.getParameter('startDate'),
+            'sDateTo': wasdi.getParameter('endDate'),
+            'fULLat': self.dULLat,
+            'fULLon': self.dULLon,
+            'fLRLat': self.dLRLat,
+            'fLRLon': self.dLRLon,
+            'sProductType': wasdi.getParameter('product.type'),
+            'sCloudCoverage': wasdi.getParameter('max.cloud'),
+            'sProvider': wasdi.getParameter('default.provider')
+        }
+        aoSearchResult = wasdi.searchEOImages(**asQuery)
+        return aoSearchResult
+
+
 
     def test_01_createWorkspace(self):
         logging.info(f'test_01_createWorkspace: {self.m_sWorkspaceName}')
@@ -132,21 +153,33 @@ class WaspyIntegrationTests(unittest.TestCase):
         self.assertTrue(bContained1)
         self.assertTrue(wasdi.getParameter('file1.name') in asNames)
 
-    def searchImages(self):
-        asQuery = {
-            'sPlatform': wasdi.getParameter('platform'),
-            'sDateFrom': wasdi.getParameter('startDate'),
-            'sDateTo': wasdi.getParameter('endDate'),
-            'fULLat': self.dULLat,
-            'fULLon': self.dULLon,
-            'fLRLat': self.dLRLat,
-            'fLRLon': self.dLRLon,
-            'sProductType': wasdi.getParameter('product.type'),
-            'sCloudCoverage': wasdi.getParameter('max.cloud'),
-            'sProvider': wasdi.getParameter('default.provider')
+    def test_03_01_searchProduct(self):
+        sPlatform = "S2",
+        sDateFrom = "2021-05-14",
+        sDateTo = "2021-05-21",
+        sProvider = "AUTO",
+
+        oBoundingBox = {
+            "northEast": {
+                "lat": 46.69,
+                "lng": 13.93
+            },
+            "southWest": {
+                "lat": 45.60,
+                "lng": 12.44
+            }
         }
-        aoSearchResult = wasdi.searchEOImages(**asQuery)
-        return aoSearchResult
+
+        aoResults = wasdi.searchEOImages(sPlatform=sPlatform,
+                                         sDateFrom=sDateFrom,
+                                         sDateTo=sDateTo,
+                                         fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
+                                         sProductType=None, iOrbitNumber=None,
+                                         sSensorOperationalMode=None, sCloudCoverage=None,
+                                         sProvider=sProvider, oBoundingBox=oBoundingBox,
+                                         aoParams=None, sFileName=None)
+        self.assertIsNotNone(aoResults)
+        self.assertTrue(len(aoResults) > 0)
 
     def test_04_importProductList(self):
 
@@ -300,6 +333,116 @@ class WaspyIntegrationTests(unittest.TestCase):
 
         return
 
+    def test_11_waitProcesses_wrongInputTypeExitsWithEmptyList(self):
+        aoWrongList = [['a', 'b', 'c'], ['d', 'e', 'f']]
+        asReturnList = wasdi.waitProcesses(aoWrongList)
+        self.assertEqual(len(asReturnList), 0)
+
+    def test_waitProcesses_mixedWrongInputListExitsWithEmptyList(self):
+        sCurrentWorkspaceId =wasdi.getActiveWorkspaceId()
+        sWsToOpen = wasdi.getParameter('wsWithProcsAndProds')
+        wasdi.openWorkspaceById(sWsToOpen)
+        sProcessObjId = wasdi.getParameter('validProcessObjId')
+        asMixedList = ['a', 'b', sProcessObjId]
+
+        asReturnList = wasdi.waitProcesses(asMixedList)
+
+        self.assertEqual(len(asReturnList), 1)
+
+        #reset to initial workspace
+        wasdi.openWorkspaceById(sCurrentWorkspaceId)
+
+
+    def test_getProductDetailsByWorkspaceId_goodId(self):
+        sCurrentWorkspaceId = wasdi.getActiveWorkspaceId()
+        sWsToOpen = wasdi.getParameter('wsWithProcsAndProds')
+        wasdi.openWorkspaceById(sWsToOpen)
+
+        aoReturnList = wasdi.getDetailedProductsByWorkspaceId()
+        self.assertEqual(len(aoReturnList), 1)
+
+        # reset to initial workspace
+        wasdi.openWorkspaceById(sCurrentWorkspaceId)
+
+    def test_publishBand_good(self):
+        #wasdi.init("./resources/config.json")
+        sCurrentWorkspaceId = wasdi.getActiveWorkspaceId()
+        sWsToOpen = wasdi.getParameter('wsWithBandsToPublish')
+        wasdi.openWorkspaceById(sWsToOpen)
+
+        sFileName = wasdi.getParameter('fileName')
+        sBand = wasdi.getParameter('bandName')
+
+        oReturnedObject = wasdi.asynchPublishBand(sFileName, sBand)
+        self.assertTrue("payload" in oReturnedObject)
+        self.assertTrue(oReturnedObject["payload"] is not None)
+
+        if isinstance(oReturnedObject["payload"], str):
+            # then the publish band API returned a processObjId and we can wait on it
+            sStatus = wasdi.waitProcess(oReturnedObject["payload"])
+            self.assertEqual("DONE", sStatus)
+            # let's do it again to get the JSON
+            oReturnedObject = wasdi.asynchPublishBand(sFileName, sBand)
+
+            # at this point the API should have returned a json, and we can try to see if the band is published
+            self.assertTrue(isinstance(oReturnedObject["payload"], dict))
+            # bandName
+            self.assertTrue("bandName" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["bandName"])
+            self.assertTrue(oReturnedObject["payload"]["bandName"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["bandName"]) > 0)
+            # boundingBox
+            self.assertTrue("boundingBox" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["boundingBox"])
+            self.assertTrue(oReturnedObject["payload"]["boundingBox"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["boundingBox"]) > 0)
+            # geoserverBoundingBox
+            self.assertTrue("geoserverBoundingBox" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverBoundingBox"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverBoundingBox"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["geoserverBoundingBox"]) > 0)
+            # geoserverUrl
+            self.assertTrue("geoserverUrl" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverUrl"])
+            self.assertTrue(oReturnedObject["payload"]["geoserverUrl"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["geoserverUrl"]) > 0)
+            # productName
+            self.assertTrue("productName" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["productName"])
+            self.assertTrue(oReturnedObject["payload"]["productName"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["productName"]) > 0)
+            # workspaceId
+            self.assertTrue("workspaceId" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["workspaceId"])
+            self.assertTrue(oReturnedObject["payload"]["workspaceId"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["workspaceId"]) > 0)
+            # layerId
+            self.assertTrue("layerId" in oReturnedObject["payload"])
+            self.assertTrue(oReturnedObject["payload"]["layerId"])
+            self.assertTrue(oReturnedObject["payload"]["layerId"] is not None)
+            self.assertTrue(len(oReturnedObject["payload"]["layerId"]) > 0)
+
+        print(oReturnedObject)
+
+        # reset to initial workspace
+        wasdi.openWorkspaceById(sCurrentWorkspaceId)
+
+    def test_getLayerWMS_good(self):
+        #wasdi.init("./resources/config.json")
+        sCurrentWorkspaceId = wasdi.getActiveWorkspaceId()
+        sWsToOpen = wasdi.getParameter('wsWithBandsToPublish')
+        wasdi.openWorkspaceById(sWsToOpen)
+
+        sProductName = wasdi.getParameter('fileName')
+        sBand = wasdi.getParameter('bandName')
+
+        oWMSResponse = json.loads(wasdi.getlayerWMS(sProductName, sBand))
+        print(oWMSResponse)
+        self.assertIsNotNone(oWMSResponse)
+        self.assertTrue("server" in oWMSResponse)
+        self.assertTrue("layerId" in oWMSResponse)
+
+
     #
     # test begin here
     #
@@ -450,5 +593,5 @@ class WaspyIntegrationTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    WaspyIntegrationTests.initTest();
+    WaspyIntegrationTests.initTest()
     unittest.main()

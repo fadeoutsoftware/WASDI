@@ -18,9 +18,12 @@ import org.json.JSONObject;
 
 import ogc.wasdi.processes.providers.JerseyMapperProvider;
 import ogc.wasdi.processes.providers.OgcProcessesViewModelBodyWriter;
+import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
@@ -29,6 +32,8 @@ import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.Link;
+import wasdi.shared.viewmodels.ogcprocesses.Results;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
 public class OgcProcesses extends ResourceConfig {
 	
@@ -108,6 +113,7 @@ public class OgcProcesses extends ResourceConfig {
     			if (WasdiConfig.Current.ogcProcessesApi.validationModeOn) {
     				if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationUserId)) {
     					if (!Utils.isNullOrEmpty(WasdiConfig.Current.ogcProcessesApi.validationSessionId)) {
+    						
     						WasdiLog.warnLog("OgcProcesses.getUserFromSession: VALIDATION MODE ON - AUTO LOGIN");
     						
     						UserRepository oUserRepo = new UserRepository();
@@ -117,6 +123,8 @@ public class OgcProcesses extends ResourceConfig {
     							WasdiLog.errorLog("OgcProcesses.getUserFromSession: VALIDATION MODE Invalid validation user");
     							return null;
     						}
+    						
+    						sSessionId=WasdiConfig.Current.ogcProcessesApi.validationSessionId;
     						
     						SessionRepository oSessionRepository = new SessionRepository();
     						UserSession oSession = oSessionRepository.getSession(sSessionId);
@@ -324,5 +332,69 @@ public class OgcProcesses extends ResourceConfig {
 		}
 		
 		return oResponse;
+	}
+	
+	/**
+	 * Reads a single Process Workspace from a Node using WASDI API
+	 * @param sProcessWorkspaceId Id of the process Workspace
+	 * @param oNode Node Entity
+	 * @param sSessionId Actual Session Id
+	 * @return The Process Workspace View Model if available or null
+	 */
+	public static ProcessWorkspaceViewModel readProcessWorkspaceFromNode(String sProcessWorkspaceId, Node oNode, String sSessionId) {
+		try {
+			if (oNode.getActive()==false) return null;
+			
+			String sUrl = oNode.getNodeBaseAddress();
+			
+			if (!sUrl.endsWith("/")) sUrl += "/";
+			
+			sUrl += "process/byid?procws="+sProcessWorkspaceId;
+			
+			WasdiLog.debugLog("JobsResource.readProcessWorkspaceFromNode: calling url: " + sUrl);
+			
+			String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId));
+			
+			if (Utils.isNullOrEmpty(sResponse)==false) {
+				ProcessWorkspaceViewModel oProcWs = MongoRepository.s_oMapper.readValue(sResponse, ProcessWorkspaceViewModel.class);
+				return oProcWs;
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcesses.readProcessWorkspaceFromNode: exception contacting computing node: " + oEx.toString());
+		}		
+		
+		return null;
+	}
+	
+	public static Results getResultsFromProcessWorkspace(ProcessWorkspaceViewModel oProcWsViewModel, Node oNode, String sSessionId) {
+		Results oResults = new Results();
+		
+		try {
+			oResults.put("workspaceId", oProcWsViewModel.getWorkspaceId());
+			oResults.put("payload", oProcWsViewModel.getPayload());
+			
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			List<DownloadedFile> aoFiles = oDownloadedFilesRepository.getByWorkspace(oProcWsViewModel.getWorkspaceId());
+			
+			String sBaseUrl = WasdiConfig.Current.baseUrl;
+			
+			if (oNode!=null) sBaseUrl = oNode.getNodeBaseAddress();
+			
+			String[] asFiles = new String[aoFiles.size()];
+			
+			for (int iFiles = 0; iFiles<aoFiles.size(); iFiles++) {
+				String sLink = sBaseUrl + "/catalog/downloadbyname?token=" + sSessionId + "&filename=" + aoFiles.get(iFiles).getFileName() + "&workspace=" + oProcWsViewModel.getWorkspaceId();
+				asFiles[iFiles] = sLink;
+			}
+			
+			oResults.put("files", asFiles);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OgcProcesses.getResultsFromProcessWorkspace: exception contacting computing node: " + oEx.toString());
+		}	
+
+		
+		return oResults;
 	}
 }

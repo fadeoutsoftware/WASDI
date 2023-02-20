@@ -1,4 +1,6 @@
 """"""
+import wasdi
+
 """
 WASDI (LU) S.a.r.l.
 
@@ -32,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.0.1
+Version 0.8.0.2
 
-Last Update: 25/11/2022
+Last Update: 16/02/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -42,11 +44,10 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 """
-from time import sleep
-from telnetlib import AO
 import urllib
-from urllib.parse import urlencode
 from builtins import str
+from time import sleep
+from urllib.parse import urlencode
 
 name = "wasdi"
 
@@ -58,7 +59,6 @@ import traceback
 import zipfile
 import requests
 import getpass
-import sys
 import os.path
 import inspect
 from datetime import datetime
@@ -83,7 +83,7 @@ m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+# m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bIsOnExternalServer = False
 m_iRequestsTimeout = 2 * 60
@@ -161,9 +161,9 @@ def getParametersDict():
     :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
-    
+
     aoReturnDict = dict(m_aoParamsDictionary)
-    
+
     if "user" in aoReturnDict:
         del aoReturnDict["user"]
 
@@ -171,8 +171,8 @@ def getParametersDict():
         del aoReturnDict["sessionid"]
 
     if "workspaceid" in aoReturnDict:
-        del aoReturnDict["workspaceid"]    
-    
+        del aoReturnDict["workspaceid"]
+
     return aoReturnDict
 
 
@@ -380,7 +380,7 @@ def setIsOnExternalServer(bIsOnExternalServer):
     """
     Set the Is on  External Server Flag: keep it false, as default, while developing or when in another infrastructure
 
-    :param bIsOnServer: set the flag to know if the processor is running on an external server
+    :param bIsOnExternalServer: set the flag to know if the processor is running on an external server
     """
     global m_bIsOnExternalServer
     m_bIsOnExternalServer = bIsOnExternalServer
@@ -543,12 +543,11 @@ def init(sConfigFilePath=None):
     sWname = None
     sWId = None
     m_bValidSession = False
-    
-    #P.Campanella 2022/08/30: if there is no config file, try the default notebook one
+
+    # P.Campanella 2022/08/30: if there is no config file, try the default notebook one
     if sConfigFilePath is None:
         if os.path.exists("/home/wasdi/notebook/notebook_config.cfg"):
             sConfigFilePath = "/home/wasdi/notebook/notebook_config.cfg"
-            
 
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
@@ -557,14 +556,14 @@ def init(sConfigFilePath=None):
             _loadParams()
 
     if m_sUser is None and m_sPassword is None:
-        
+
         m_sUser = input('[INFO] waspy.init: Please Insert WASDI User:')
 
         m_sPassword = getpass.getpass(prompt='[INFO] waspy.init: Please Insert WASDI Password:', stream=None)
 
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
-        
+
         if sWId is None and sWname is None:
             sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
@@ -584,6 +583,9 @@ def init(sConfigFilePath=None):
     if m_sSessionId != '':
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/auth/checksession'
+
+        oResponse = None
+        
         try:
             oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
@@ -1009,7 +1011,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
     if oResult is not None:
         if oResult.ok is True:
             oJsonResults = oResult.json()
-    
+
             for sProduct in oJsonResults:
                 try:
                     asProducts.append(sProduct)
@@ -1017,6 +1019,45 @@ def getProductsByWorkspaceId(sWorkspaceId):
                     continue
 
     return asProducts
+
+
+def getDetailedProductsByWorkspaceId(sId=None):
+    if sId is None or sId == '':
+        _log('getDetailedProductsByActiveWorkspace: defaulting')
+        sId = getActiveWorkspaceId()
+
+    sUrl = getBaseUrl() + '/product/byws' + '?workspace=' + sId
+    asHeaders = _getStandardHeaders()
+    oResponse = None
+    try:
+        global m_iRequestsTimeout
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oE:
+        wasdi.wasdiLog('[ERROR] getProductDetailsByWorkspaceId: got ' + str(type(oE)) + ': ' + str(oE) +
+                       ' while geting products list, aborting')
+    aoProducts = []
+
+    try:
+        if not oResponse.ok:
+            wasdi.wasdiLog(
+                '[ERROR] getProductDetailsByWorkspaceId: call failed with status ' +
+                oResponse.status_code +
+                ', aborting'
+            )
+            return aoProducts
+    except Exception as oE:
+        wasdi.wasdiLog(
+            '[ERROR] getProductDetailsByWorkspaceId: could not parse response due to ' + str(type(oE)) + ': ' + str(oE))
+        return aoProducts
+
+    try:
+        aoProducts = oResponse.json()
+    except Exception as oE:
+        wasdiLog(
+            '[ERROR] getProductDetailsByWorkspaceId: could not convert response due to ' + str(type(oE)) + ': ' + str(
+                oE))
+
+    return aoProducts
 
 
 def getProductsByActiveWorkspace():
@@ -1358,7 +1399,8 @@ def waitProcesses(asProcIdList):
             try:
                 iReturn = oResult.status_code
             except Exception as oEx:
-                wasdiLog("[ERROR] waitProcesses: return status was not ok but cannot read it due to: " + str(type(oEx)) + ": " + str(oEx))
+                wasdiLog("[ERROR] waitProcesses: return status was not ok but cannot read it due to: " + str(
+                    type(oEx)) + ": " + str(oEx))
             else:
                 wasdiLog("[ERROR] waitProcesses: return status was " + str(iReturn))
             # nothing else we can do
@@ -1471,7 +1513,7 @@ def setProcessPayload(sProcessId, data):
 
 def setPayload(data):
     """
-    Set the payload of the actual running process.
+    Sets the payload of the current running process.
     The payload is saved only when run on Server. In local mode is just a print.
 
     :param data: data to save in the payload. Suggestion is to use JSON
@@ -1526,14 +1568,14 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
     return None
 
 
-def getProcessorPayloadAsJson(sProcessorPayload):
+def getProcessorPayloadAsJson(sProcessObjId):
     """
     Retrieves the payload in json format using getProcessorPayload
 
     :param sProcessObjId: a valid processor obj id
     :return: the processor payload if present as a dictionary, None otherwise
     """
-    return getProcessorPayload(sProcessorPayload, True)
+    return getProcessorPayload(sProcessObjId, True)
 
 
 def setSubPid(sProcessId, iSubPid):
@@ -1824,7 +1866,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
         print('[ERROR] waspy.searchEOImages: platform cannot be None' +
               '  ******************************************************************************')
         return aoReturnList
-    
+
     if sPlatform == "S1":
         if sProductType is not None:
             if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
@@ -1869,7 +1911,6 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
         wasdiLog("[WARNING] waspy.searchEOImages: sDateFrom is None, assume very old one 01/01/1900" +
                  '  ******************************************************************************')
         sDateFrom = "1900-01-01"
-        
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
@@ -1882,7 +1923,6 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
                  '  ******************************************************************************')
         oToday = datetime.today()
         sDateTo = oToday.strftime("%Y-%m-%d")
-        
 
     # if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateTo)):
@@ -1931,9 +1971,9 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
         sCloudCoverage = sCloudCoverage.upper()
 
     # create query string:
-    
+
     sQuery = ""
-    
+
     if sFileName is not None:
         sQuery += sFileName
 
@@ -1944,7 +1984,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
     elif sPlatform == "S1":
         sQuery += "Sentinel-1"
     elif sPlatform == "S3":
-        sQuery += "Sentinel-3"        
+        sQuery += "Sentinel-3"
     elif sPlatform == "VIIRS":
         sQuery += "VIIRS"
     elif sPlatform == "L8":
@@ -1955,9 +1995,9 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
         sQuery += "Sentinel-5P"
     elif sPlatform == "ERA5":
         sQuery += "ERA5"
-    else:        
+    else:
         sQuery += sPlatform
-    
+
     # If available add product type
     if sProductType is not None:
         sQuery += " AND producttype:" + str(sProductType)
@@ -1987,14 +2027,14 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
             except:
                 wasdiLog('[WARNING] waspy.searchEOImages: could not convert iOrbitNumber to an int, ignoring it' +
                          '  ******************************************************************************')
-    
+
     if aoParams is not None:
         try:
             for sKey in aoParams:
                 sQuery += " AND " + sKey + ":" + aoParams[sKey]
         except:
             wasdiLog('[WARNING] waspy.searchEOImages: exception adding generic params')
-    
+
     # Close the first block
     sQuery += ") "
 
@@ -2016,7 +2056,7 @@ def searchEOImages(sPlatform, sDateFrom=None, sDateTo=None,
 
     if sProvider is None:
         sProvider = "AUTO"
-    
+
     sQuery = "providers=" + sProvider
 
     try:
@@ -2208,15 +2248,14 @@ def importProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, sProvid
     sUrl += "&provider=" + sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
-    
 
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += urllib.parse.quote(sBoundingBox)
-        
+
     if sName is not None:
-        sUrl += "&name="+urllib.parse.quote(sName)
-    
+        sUrl += "&name=" + urllib.parse.quote(sName)
+
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
         sUrl += getProcId()
@@ -2259,9 +2298,9 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     
     :return: ProcessId of the Download Operation or "ERROR" if there is any problem
     """
-    
+
     sReturn = "ERROR"
-    
+
     if sProvider is None:
         sProvider = "AUTO"
 
@@ -2272,13 +2311,13 @@ def asynchImportProductByFileUrl(sFileUrl=None, sName=None, sBoundingBox=None, s
     sUrl += sProvider
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
-    
+
     if sBoundingBox is not None:
         sUrl += "&bbox="
         sUrl += urllib.parse.quote(sBoundingBox)
-        
+
     if sName is not None:
-        sUrl += "&name="+ urllib.parse.quote(sName)    
+        sUrl += "&name=" + urllib.parse.quote(sName)
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
@@ -2324,9 +2363,9 @@ def importProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        
+
         sFileUrl = oProduct["link"]
-        
+
         sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
@@ -2334,12 +2373,12 @@ def importProduct(oProduct, sProvider=None):
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
-                
+
         sName = None
         if "title" in oProduct:
             sName = oProduct['title']
 
-        return importProductByFileUrl(sFileUrl=sFileUrl,sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
+        return importProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2362,9 +2401,9 @@ def asynchImportProduct(oProduct, sProvider=None):
     _log('[INFO] waspy.importProduct( ' + str(oProduct) + ' )')
 
     try:
-        
+
         sFileUrl = oProduct["link"]
-        
+
         sBoundingBox = None
         if "footprint" in oProduct:
             sBoundingBox = oProduct["footprint"]
@@ -2372,12 +2411,13 @@ def asynchImportProduct(oProduct, sProvider=None):
         if sProvider is None:
             if "provider" in oProduct:
                 sProvider = oProduct["provider"]
-                
+
         sName = None
         if "title" in oProduct:
             sName = oProduct["title"]
 
-        return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
+        return asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
+                                            sProvider=sProvider)
     except Exception as e:
         wasdiLog("[ERROR] waspy.importProduct: exception " + str(e))
         return "ERROR"
@@ -2409,7 +2449,7 @@ def importProductList(aoProducts, sProvider=None):
             sFileUrl = oProduct["link"]
             if "footprint" in oProduct:
                 sBoundingBox = oProduct["footprint"]
-                
+
             sName = None
             if "title" in oProduct:
                 sName = oProduct["title"]
@@ -2421,7 +2461,8 @@ def importProductList(aoProducts, sProvider=None):
                     sActualProvider = oProduct["provider"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sActualProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
+                                                   sProvider=sActualProvider)
 
             # Append the process id to the list
             asReturnList.append(sReturn)
@@ -2465,13 +2506,14 @@ def asynchImportProductList(aoProducts, sProvider=None):
             if sActualProvider is None:
                 if "provider" in oProduct:
                     sActualProvider = oProduct["provider"]
-                    
+
             sName = None
             if "title" in oProduct:
                 sName = oProduct["title"]
 
             # Start the download propagating the Asynch Flag
-            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox, sProvider=sProvider)
+            sReturn = asynchImportProductByFileUrl(sFileUrl=sFileUrl, sName=sName, sBoundingBox=sBoundingBox,
+                                                   sProvider=sProvider)
             # Append the process id to the list
             asReturnList.append(sReturn)
         except Exception as e:
@@ -2575,7 +2617,7 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
 
     :param aoParams: a dictionary of parameters for the processor
     :return: the Process Id if every thing is ok, '' if there was any problem
-    """    
+    """
     return executeProcessor(sProcessorName, aoParams)
 
 
@@ -2689,7 +2731,7 @@ def _uploadFile(sFileName):
             else:
                 wasdiLog('[ERROR] uploadFile: upload failed with code {oResponse.status_code}: {oResponse.text}')
         except Exception as oE:
-            wasdiLog('[ERROR] uploadFile: upload failed due to ' +str(type(oE)) + str(oE))
+            wasdiLog('[ERROR] uploadFile: upload failed due to ' + str(type(oE)) + str(oE))
     except Exception as oE:
         wasdiLog('[ERROR] uploadFile: ' + str(oE))
     # finally:
@@ -3031,7 +3073,8 @@ def asynchMosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
-    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, fPixelSizeX=fPixelSizeX, fPixelSizeY=fPixelSizeY, bAsynch=True)
+    return mosaic(asInputFiles, sOutputFile, iNoDataValue, iIgnoreInputValue, fPixelSizeX=fPixelSizeX,
+                  fPixelSizeY=fPixelSizeY, bAsynch=True)
 
 
 def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None, fPixelSizeX=None, fPixelSizeY=None,
@@ -3311,12 +3354,13 @@ def getProcessesByWorkspace(iStartIndex=0, iEndIndex=20, sStatus=None, sOperatio
 
     return asProcesses
 
+
 def bboxStringToObject(sBbox):
     """
     Convert the WASDI String BBOX format "N,W,S,W" to Object format {"northEast": {"lat":, lng":}, {"southWest":{"lat":, "lng":} } 
     """
     oBbox = {}
-    
+
     try:
         asBbox = sBbox.split(",")
         oBbox["northEast"] = {}
@@ -3325,24 +3369,25 @@ def bboxStringToObject(sBbox):
         oBbox["southWest"] = {}
         oBbox["southWest"]["lat"] = float(asBbox[2])
         oBbox["southWest"]["lng"] = float(asBbox[1])
-        
+
     except Exception as oEx:
         wasdiLog("[ERROR] bboxStringToObject: " + str(oEx))
-    
+
     return oBbox
-    
-    
+
+
 def bboxObjectToString(oBbox):
     """
     Convert the WASDI Object BBOX format {"northEast": {"lat":, lng":}, {"southWest":{"lat":, "lng":} } to the String format "N,W,S,W"  
     """
-    
+
     try:
-        sBbox = str(oBbox["northEast"]["lat"])+"," + str(oBbox["southWest"]["lng"]) + "," + str(oBbox["southWest"]["lat"]) + "," + str(oBbox["northEast"]["lng"])         
+        sBbox = str(oBbox["northEast"]["lat"]) + "," + str(oBbox["southWest"]["lng"]) + "," + str(
+            oBbox["southWest"]["lat"]) + "," + str(oBbox["northEast"]["lng"])
     except Exception as oEx:
         wasdiLog("[ERROR] bboxObjectToString: " + str(oEx))
-    
-    return sBbox    
+
+    return sBbox
 
 
 def _log(sLog):
@@ -3840,6 +3885,135 @@ def _getDefaultCRS():
             "          AXIS[\"Geodetic latitude\", NORTH]]"
     )
 
+
+def asynchPublishBand(sProduct, sBand):
+    """
+    publishes a band of a given product
+
+    :param sProduct: the product containing the desired band
+    :param sBand: the band name in the product
+
+    :return: a string containing the processObjId of the publishBand operation
+    """
+
+    # validate input
+    if sProduct is None or sProduct == '':
+        wasdiLog('[ERROR] asynchPublishBand: ' + sProduct + ' is not a valid file name, aborting')
+        return None
+
+    if sBand is None or sBand == '':
+        wasdiLog('[ERROR] asynchPublishBand: ' + sBand + ' is not a valid band name, aborting')
+        return None
+
+    aoProducts = getDetailedProductsByWorkspaceId()
+    asProducts = [oProduct['fileName'] for oProduct in aoProducts]
+    if sProduct not in asProducts:
+        wasdiLog('[ERROR] asynchPublishBand: ' + sProduct + ' not found in workspace, aborting')
+        return None
+
+    aoCandidates = [oProd for oProd in aoProducts if oProd['fileName'] == sProduct]
+    if len(aoCandidates) < 1:
+        wasdiLog('[ERROR] asynchPublishBand: could not find product on WASDI, aborting')
+        return None
+
+    oProduct = aoCandidates[0]
+    if oProduct is None:
+        wasdiLog('[ERROR] asynchPublishBand: product is None, aborting')
+        return None
+
+    if 'bandsGroups' not in oProduct:
+        wasdiLog('[ERROR] asynchPublishBand: bandsGroup not present, aborting')
+        return None
+
+    if 'bands' not in oProduct['bandsGroups']:
+        wasdiLog('[ERROR] asynchPublishBand: bandsGroup has not bands, aborting')
+        return None
+
+    aoBands = [oBand for oBand in oProduct['bandsGroups']['bands'] if oBand['name']==sBand]
+    if len(aoBands) < 1:
+        wasdiLog('[ERROR] asynchPublishBand: band not found, these are available:' +
+                 str(oProduct['bandsGroups']['bands']) +
+                 ', aborting')
+        return None
+
+
+    # call publish band
+    oResult = None
+    try:
+        sUrl = getBaseUrl() + '/filebuffer/publishband?' + \
+               'fileUrl=' + sProduct + \
+               '&workspace=' + getActiveWorkspaceId() + \
+               '&band=' + sBand
+        asHeaders = _getStandardHeaders()
+        global m_iRequestsTimeout
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oE:
+        wasdiLog('[ERROR] asynchPublishBand: error in trying to publish band: ' + str(type(oE)) + ': ' + str(oE))
+    if oResult is not None and oResult.ok:
+
+        try:
+            oJsonResult = oResult.json()
+            return oJsonResult
+        except Exception as oE:
+            wasdiLog('[ERROR] asynchPublishBand: error in trying to get the proc id: ' + str(type(oE)) + ': ' + str(oE))
+    else:
+        wasdiLog('[ERROR] asynchPublishBand: publishBand failed with status: ' + str(oResult.status_code) +', aborting')
+
+    return None
+
+
+def publishBand(sProduct, sBand):
+    """
+    publishes a band of a given product
+
+    :param sProduct: the product containing the desired band
+    :param sBand: the band name in the product
+
+    :return: a string containing the final status of the operation: "DONE", "STOPPED", "ERROR"
+    """
+
+    oJsonResult = asynchPublishBand(sProduct, sBand)
+
+    try:
+        if oJsonResult is not None:
+            sProcessId = oJsonResult["payload"]
+            return waitProcess(sProcessId)
+        else:
+            return "ERROR"
+    except:
+        return "ERROR"
+
+def getlayerWMS(sProduct, sBand):
+    """
+    Starts a publish band process and wait for the result to be available.
+    The function then return a JSON containing the geoServerUrl and the LayerId to be used on external application/
+    mpa visualizations
+    Waits for a total of 10 attempts waiting 3 seconds each.
+    :param sProduct: The product for which the WMS layers details are required
+    :param sBand: The band required
+    :return: A JSON string with the following structure { server : [GeoServerUrl] , layerId : [LayerId] }
+    """
+    iCountRetries = 10
+    oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
+    while not ('payload' in oPublishedBandResponse and 'layerId' in oPublishedBandResponse['payload']):
+        if (iCountRetries == 0):
+            wasdiLog('[ERROR] getlayerWMS: reached the maximum number of attempt ( ' + str(type(iCountRetries)) + ') Aborting operation')
+            return
+        oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
+        time.sleep(3)
+        iCountRetries -= 1
+        wasdiLog('[INFO] getlayerWMS: waiting for the band to be available... (' + str(type(iCountRetries)) + ' attempts left before aborting)')
+    oPayload = oPublishedBandResponse["payload"]
+    oResult = dict()
+    oResult["server"] = oPayload["geoserverUrl"]
+    oResult["layerId"] = oPayload["layerId"]
+    return json.dumps(oResult)
+
+
+    """    if oResult is not None and oResult.ok:
+        oJsonResult = oResult.json()
+        return oJsonResult
+        """
 
 if __name__ == '__main__':
     _log(

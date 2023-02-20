@@ -23,9 +23,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import ogc.wasdi.processes.OgcProcesses;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.OgcProcessesTask;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.ProcessorUI;
@@ -33,6 +37,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OgcProcessesTaskRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
@@ -53,6 +58,7 @@ import wasdi.shared.viewmodels.ogcprocesses.Link;
 import wasdi.shared.viewmodels.ogcprocesses.OutputDescription;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessSummary;
+import wasdi.shared.viewmodels.ogcprocesses.Results;
 import wasdi.shared.viewmodels.ogcprocesses.Schema;
 import wasdi.shared.viewmodels.ogcprocesses.StatusCode;
 import wasdi.shared.viewmodels.ogcprocesses.StatusInfo;
@@ -69,6 +75,7 @@ import wasdi.shared.viewmodels.ogcprocesses.schemas.OneOfSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringArraySchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringInListSchema;
 import wasdi.shared.viewmodels.ogcprocesses.schemas.StringSchema;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
 @Path("processes")
 public class ProcessesResource {
@@ -531,6 +538,7 @@ public class ProcessesResource {
 	    		return Response.status(Status.UNAUTHORIZED).entity(ApiException.getUnauthorized()).header("WWW-Authenticate", "Basic").build();
 			}
 			
+			// Check the Body Inputs
 			if (aoExecute==null || !aoExecute.containsKey("inputs")) {
 				WasdiLog.debugLog("ProcessesResource.executeApplication: invalid body");
 				// We have an error, return the client error
@@ -551,7 +559,7 @@ public class ProcessesResource {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessID);			
 			
-			// Chech if the processor is available in WASDI
+			// Check if the processor is available in WASDI
 			boolean bFound = PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId());
 						
 			if (!bFound) {
@@ -573,6 +581,8 @@ public class ProcessesResource {
 				// We need to valorize the sessionId
 				sSessionId = OgcProcesses.updateSessionId(sSessionId, sAuthorization);
 			}
+			
+			WasdiLog.debugLog("ProcessesResource.executeApplication: updated sessionId: " + sSessionId);
 			
 			// Set the operation type: can be run processor or idl or matlab
 			String sOperationType = LauncherOperations.RUNPROCESSOR.name();
@@ -605,13 +615,14 @@ public class ProcessesResource {
 			oParameter.setOGCProcess(true);
 			
 			// We need to convert the OGC inputs to the WASDI format
+			@SuppressWarnings("unchecked")
 			Map<String, Object> aoInputs = (Map<String, Object>) aoExecute.get("inputs");
 			
 			// Start with a default one
 			String sJson = JsonUtils.stringify(aoInputs);
 			
 			// Check if we have the app ui
-			Map<String, Object> oAppUi = getAppUI(sProcessID);
+			Map<String, Object> oAppUi = getAppUI(oProcessor.getProcessorId());
 			
 			if (oAppUi!=null) {
 				WasdiLog.debugLog("ProcessesResource.executeApplication: UI Available");
@@ -706,72 +717,153 @@ public class ProcessesResource {
         	// Get back the primitive result: it does not work right to go in the catch 
             PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
             
+            // Synch/Asynch mode: asynch by WASDI Default
+            boolean bAsync = true;
+            boolean bAddPreferenceAppliedHeader = false;
+            
+            // Do we have a Prefer Header?
             if (!Utils.isNullOrEmpty(sPreferHeader)) {
             	WasdiLog.infoLog("ProcessesResource.executeApplication: Preference Header: " + sPreferHeader);
+            	
+            	// If there is the Prefer Header, we will have to add a similar header also to the response
+            	bAddPreferenceAppliedHeader = true;
+            	
+            	if (sPreferHeader.equals("wait")) {
+            		// Unless the user really wants a synch one!
+            		bAsync = false;
+            		WasdiLog.debugLog("ProcessesResource.executeApplication: setting synch mode on");
+            	}
             }
             
-			// We need the creation date
-			Date oCreationDate = new Date(); 
+            ResponseBuilder oResponse = null;
+            
+            if (!oPrimitiveResult.getBoolValue()) {
+    			WasdiLog.debugLog("ProcessesResource.executeApplication: unable to start the app, create error status info");
+//    			Date oCreationDate = new Date(); 
+//
+//        		StatusInfo oStatusInfo = new StatusInfo();
+//        		
+//        		oStatusInfo.setCreated(oCreationDate);
+//        		oStatusInfo.setFinished(oCreationDate);
+//        		oStatusInfo.setProgress(0);
+//        		oStatusInfo.setType(TypeEnum.PROCESS);
+//        		oStatusInfo.setStatus(StatusCode.FAILED);
+//        		oStatusInfo.setProcessID(sProcessID);
+//        		oStatusInfo.setUpdated(oCreationDate);
+//        		oStatusInfo.setMessage(oProcessor.getName()+" " + " could not be scheduled.");
+//        		
+//        		
+//        		
+//        		oResponse = Response.status(Status.CREATED).entity(oStatusInfo);    
+    			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ApiException.getInternalServerError("There was an exception executing the processes")).build();    			
+            }
+            else {
+                String sProcessWorkspaceId = oPrimitiveResult.getStringValue();
+                
+                WasdiLog.debugLog("ProcessesResource.executeApplication: got process workspace id " + sProcessWorkspaceId);
+                
+                if (bAsync) {
+                	
+        			// We need the creation date
+        			Date oCreationDate = new Date(); 
 
-    		StatusInfo oStatusInfo = new StatusInfo();
+            		StatusInfo oStatusInfo = new StatusInfo();
+            			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: asynch start done,  create success status info");
+        			
+            		oStatusInfo.setCreated(oCreationDate);
+            		
+            		oStatusInfo.setJobID(sProcessWorkspaceId);
+            		oStatusInfo.setProgress(0);
+            		oStatusInfo.setType(TypeEnum.PROCESS);
+            		oStatusInfo.setStatus(StatusCode.ACCEPTED);
+            		oStatusInfo.setProcessID(sProcessID);
+            		oStatusInfo.setUpdated(oCreationDate);
+            		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + sProcessWorkspaceId);
+            		
+            		// Create the ogc processes task
+                    OgcProcessesTask oOgcProcessesTask = new OgcProcessesTask();
+                    oOgcProcessesTask.setProcessWorkspaceId(sProcessWorkspaceId);
+                    oOgcProcessesTask.setWorkspaceId(oWorkspace.getWorkspaceId());
+                    oOgcProcessesTask.setUserId(oUser.getUserId());
+                    // Insert it in the db 
+                    OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
+                    oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
+
+            		
+            		// Self link
+            		Link oSelfLink = new Link();
+            		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+            		oSelfLink.setRel("self");
+            		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
+            		
+            		oStatusInfo.getLinks().add(oSelfLink);
+            		
+            		// Alternate html link
+            		Link oHtmlLink = new Link();
+            		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
+            		oHtmlLink.setRel("alternate");
+            		oHtmlLink.setType("text/html");
+            		
+            		oStatusInfo.getLinks().add(oHtmlLink);    		
+            		
+            		oResponse = Response.status(Status.CREATED).entity(oStatusInfo);
+            		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
+            		
+                }
+                else {
+                    // Do we have to return Raw or Document results?
+                    boolean bRawResults = true;
+                    
+                    if (aoExecute.containsKey("response")) {
+                    	String sResponse = aoExecute.get("response").toString();
+                    	if (sResponse.equals("document")) {
+                    		bRawResults = false;
+                    	}
+                    }
+                    
+                    // Get the Workspace base Url
+        			String sBaseUrl = WasdiConfig.Current.baseUrl;
+        			
+        			NodeRepository oNodeRepository = new NodeRepository();
+        			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+        			
+        			if (oNode!=null) sBaseUrl = oNode.getNodeBaseAddress();
+        			if (sBaseUrl.endsWith("/") == false) sBaseUrl += "/";
+        			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done,  wait for app to finish");
+        			
+        			// Wait WASDI App
+        			waitApplication(sProcessWorkspaceId, sBaseUrl, sSessionId);
+        			
+        			WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done,  app finished get result");
+                    
+                    // Get the result
+        			ProcessWorkspaceViewModel oProcVM = OgcProcesses.readProcessWorkspaceFromNode(sProcessWorkspaceId, oNode, sSessionId);
+        			
+        			// Assume is ok, otherwise we "agree" with the exception handling
+        			if (bRawResults) {
+        				WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done, return raw results");
+        				oResponse = Response.status(Status.OK).entity(oProcVM.getPayload());
+        			}
+        			else {
+        				WasdiLog.debugLog("ProcessesResource.executeApplication: synch start done, return docs results");
+        				Results oResults = OgcProcesses.getResultsFromProcessWorkspace(oProcVM, oNode, sSessionId);
+        				oResponse = Response.status(Status.OK).entity(oResults);
+        			}
+                }
+                
+                // Add the location link
+        		String sLocationLink = OgcProcesses.s_sBaseAddress + "/jobs/" + sProcessWorkspaceId;
+        		oResponse = oResponse.header("Location", sLocationLink);                
+            }
     		
-    		if (oPrimitiveResult.getBoolValue()) {
+    		if (bAddPreferenceAppliedHeader) {
+    			String sPreferenceApplied = "respond-async";
+    			if (!bAsync) sPreferenceApplied = "wait";
     			
-    			WasdiLog.debugLog("ProcessesResource.executeApplication: create success status info");
-    			
-        		oStatusInfo.setCreated(oCreationDate);
-        		
-        		oStatusInfo.setJobID(oPrimitiveResult.getStringValue());
-        		oStatusInfo.setProgress(0);
-        		oStatusInfo.setType(TypeEnum.PROCESS);
-        		oStatusInfo.setStatus(StatusCode.ACCEPTED);
-        		oStatusInfo.setProcessID(sProcessID);
-        		oStatusInfo.setUpdated(oCreationDate);
-        		oStatusInfo.setMessage(oProcessor.getName()+" " + " has been scheduled with id " + oPrimitiveResult.getStringValue());
-        		
-        		// Create the ogc processes task
-                OgcProcessesTask oOgcProcessesTask = new OgcProcessesTask();
-                oOgcProcessesTask.setProcessWorkspaceId(oPrimitiveResult.getStringValue());
-                oOgcProcessesTask.setWorkspaceId(oWorkspace.getWorkspaceId());
-                oOgcProcessesTask.setUserId(oUser.getUserId());
-                // Insert it in the db 
-                OgcProcessesTaskRepository oOgcProcessesTaskRepository = new OgcProcessesTaskRepository();
-                oOgcProcessesTaskRepository.insertOgcProcessesTask(oOgcProcessesTask);
+    			oResponse = oResponse.header("Preference-Applied", sPreferenceApplied);
     		}
-    		else {
-    			WasdiLog.debugLog("ProcessesResource.executeApplication: create error status info");
-    			
-        		oStatusInfo.setCreated(oCreationDate);
-        		oStatusInfo.setFinished(oCreationDate);
-        		oStatusInfo.setProgress(0);
-        		oStatusInfo.setType(TypeEnum.PROCESS);
-        		oStatusInfo.setStatus(StatusCode.FAILED);
-        		oStatusInfo.setProcessID(sProcessID);
-        		oStatusInfo.setUpdated(oCreationDate);
-        		oStatusInfo.setMessage(oProcessor.getName()+" " + " could not be scheduled.");    			
-    		}
-    		
-    		// Self link
-    		Link oSelfLink = new Link();
-    		oSelfLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
-    		oSelfLink.setRel("self");
-    		oSelfLink.setType(WasdiConfig.Current.ogcProcessesApi.defaultLinksType);
-    		
-    		oStatusInfo.getLinks().add(oSelfLink);
-    		
-    		// Alternate html link
-    		Link oHtmlLink = new Link();
-    		oHtmlLink.setHref(OgcProcesses.s_sBaseAddress+"processes/"+sProcessID+"/execution");
-    		oHtmlLink.setRel("alternate");
-    		oHtmlLink.setType("text/html");
-    		
-    		oStatusInfo.getLinks().add(oHtmlLink);    		
-    		
-    		ResponseBuilder oResponse = Response.status(Status.CREATED).entity(oStatusInfo);
-    		oResponse = OgcProcesses.addLinkHeaders(oResponse, oStatusInfo.getLinks());
-    		
-    		String sLocationLink = OgcProcesses.s_sBaseAddress + "/jobs/" + oPrimitiveResult.getStringValue();
-    		oResponse = oResponse.header("Location", sLocationLink);
     				
     		return oResponse.build();
     	}
@@ -985,7 +1077,7 @@ public class ProcessesResource {
      * @return List of controls
      */
     @SuppressWarnings("unchecked")
-	public List<Map<String, Object>> getAllControls(Map<String, Object> aoAppUi) {
+	protected List<Map<String, Object>> getAllControls(Map<String, Object> aoAppUi) {
     	ArrayList<Map<String, Object>> aoAllControls = new ArrayList<Map<String, Object>>();
     	
     	try {
@@ -1021,7 +1113,7 @@ public class ProcessesResource {
      * @param sProcessorId
      * @return
      */
-    public Map<String,Object> getAppUI(String sProcessorId) {
+    protected Map<String,Object> getAppUI(String sProcessorId) {
     	try {
     		// Check if we have an UI: this can drive a better Input Description
 			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
@@ -1053,7 +1145,7 @@ public class ProcessesResource {
      * @param bRenderAsStrings Flag to detemine if this params are all strings or objects
      * @return True if ok and the parameter is added to oWASDIInput, false in case of any problem
      */
-    public boolean convertOGCInputToWasdiInput(Map<String,Object> oWASDIInput, Map<String,Object> aoInputs, Map<String, Object> oControl, boolean bRenderAsStrings) {
+    protected boolean convertOGCInputToWasdiInput(Map<String,Object> oWASDIInput, Map<String,Object> aoInputs, Map<String, Object> oControl, boolean bRenderAsStrings) {
     	
     	boolean bErrorOnValue = false;
     	
@@ -1269,4 +1361,111 @@ public class ProcessesResource {
 		
 		return bErrorOnValue;
     }
+    
+    /**
+     * Wait a WASDI Process Workspace to finish
+     * @param sProcWsId Process Workspace Id
+     * @param sBaseUrl Workspace base Url
+     * @return The output status of the application
+     */
+    protected String waitApplication(String sProcWsId, String sBaseUrl, String sSessionId) {
+    	// Protect our self in a try-catch block
+    	try {
+    		
+    		if (Utils.isNullOrEmpty(sProcWsId)) {
+    			WasdiLog.errorLog("ProcessesResource.waitApplication: Proccess Workspace Id is null");
+    			return ProcessStatus.ERROR.name();
+    		}
+    		
+    		int iCumulatedWait = 0;
+    		
+    		WasdiLog.infoLog("ProcessesResource.waitApplication: start polling for " + sProcWsId);
+    		
+    		// Start the cycle: it is safe with the timeout
+    		while (true) {
+    			
+    			// Read process status
+    			String sStatus = getProcessStatus(sProcWsId, sBaseUrl, sSessionId);
+    			
+    			if (sStatus.equals(ProcessStatus.DONE.name()) || sStatus.equals(ProcessStatus.ERROR.name()) || sStatus.equals(ProcessStatus.STOPPED.name())) {
+    				WasdiLog.infoLog("ProcessesResource.waitApplication: found final state " + sStatus);
+    				return sStatus;
+    			}
+    			
+    			// Check Timeout
+    			if (iCumulatedWait>WasdiConfig.Current.ogcProcessesApi.waitProcessMaxTimeout) {
+    				WasdiLog.infoLog("ProcessesResource.waitApplication: timeout, exit");
+    				break;
+    			}
+    			
+    			try {
+    				Thread.sleep(WasdiConfig.Current.ogcProcessesApi.waitProcessSleepTimeout);	
+    			}
+    			catch (InterruptedException oInt) {
+    				WasdiLog.errorLog("sleep exception");
+    			}
+    			
+    			// Increment the sleep count
+    			iCumulatedWait += WasdiConfig.Current.ogcProcessesApi.waitProcessSleepTimeout;
+    		}
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProcessesResource.waitApplication: exception " + oEx.toString());
+		}
+    	
+    	return ProcessStatus.ERROR.name();
+    }
+    
+	/**
+	 * Get WASDI Process Status 
+	 * @param sProcessId Process Id
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 */
+	protected String getProcessStatus(String sProcessId, String sBaseUrl, String sSessionId) {
+		WasdiLog.debugLog("ProcessesResource.getProcessStatus( " + sProcessId + " )");
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			WasdiLog.debugLog("ProcessesResource.getProcessStatus: process id null or empty, aborting");
+		}
+		try {
+			// Create the API call
+			String sUrl = sBaseUrl + "process/byid?procws="+sProcessId;
+
+			// Add session token
+			Map<String, String> asHeaders = new HashMap<String, String>();
+			asHeaders.put("x-session-token", sSessionId);
+			
+			// Call the API
+			String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+			
+			// Get result and extract status
+			Map<String, Object> aoJSONMap = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+
+			String sStatus = aoJSONMap.get("status").toString();
+			if(isThisAValidStatus(sStatus)) {
+				return sStatus;
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessesResource.getProcessStatus: " + oEx.toString());
+		}	  
+		return "";
+	}
+	
+	/**
+	 * Check if the input string is a Valid Status
+	 * @param sStatus
+	 * @return true if the status is valid, false otherwise
+	 */
+	private boolean isThisAValidStatus(String sStatus) {
+		return(null!=sStatus &&(
+				sStatus.equals(ProcessStatus.CREATED.name()) ||
+				sStatus.equals(ProcessStatus.RUNNING.name()) ||
+				sStatus.equals(ProcessStatus.DONE.name()) ||
+				sStatus.equals(ProcessStatus.STOPPED.name()) ||
+				sStatus.equals(ProcessStatus.ERROR.name()) ||
+				sStatus.equals(ProcessStatus.WAITING.name()) ||
+				sStatus.equals(ProcessStatus.READY.name())
+				));
+	}
 }

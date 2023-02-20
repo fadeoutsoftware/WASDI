@@ -300,7 +300,7 @@ public class JobsResource {
     			// Ask the Proc Workspace to the right node
     			NodeRepository oNodeRepository = new NodeRepository();
     			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
-    			oProcWsViewModel = readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
+    			oProcWsViewModel = OgcProcesses.readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
     		}
     		
     		if (oProcWsViewModel == null) {
@@ -420,7 +420,7 @@ public class JobsResource {
     		deleteProcessWorkspaceFromNode(sJobId,oNode,sSessionId);
     		
 			// Ask the Proc Workspace to the right node
-			oProcWsViewModel = readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
+			oProcWsViewModel = OgcProcesses.readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
 			
     		StatusInfo oStatusInfo = new StatusInfo();
     		
@@ -531,7 +531,7 @@ public class JobsResource {
     		else {
     			WasdiLog.debugLog("JobsResource.getJobResults: process on remote node, call API");
     			// Ask the Proc Workspace to the right node
-    			oProcWsViewModel = readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
+    			oProcWsViewModel = OgcProcesses.readProcessWorkspaceFromNode(sJobId, oNode, sSessionId);
     		}
     		
     		if (oProcWsViewModel == null) {
@@ -545,24 +545,8 @@ public class JobsResource {
     		Results oResults = new Results();
     		
     		if (oProcWsViewModel.getStatus().equals(ProcessStatus.DONE.name())) {
-    			oResults.put("workspaceId", oProcWsViewModel.getWorkspaceId());
-    			oResults.put("payload", oProcWsViewModel.getPayload());
     			
-    			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-    			List<DownloadedFile> aoFiles = oDownloadedFilesRepository.getByWorkspace(oProcWsViewModel.getWorkspaceId());
-    			
-    			String sBaseUrl = WasdiConfig.Current.baseUrl;
-    			
-    			if (oNode!=null) sBaseUrl = oNode.getNodeBaseAddress();
-    			
-    			String[] asFiles = new String[aoFiles.size()];
-    			
-    			for (int iFiles = 0; iFiles<aoFiles.size(); iFiles++) {
-					String sLink = sBaseUrl + "/catalog/downloadbyname?token=" + sSessionId + "&filename=" + aoFiles.get(iFiles).getFileName() + "&workspace=" + oWorkspace.getWorkspaceId();
-					asFiles[iFiles] = sLink;
-				}
-    			
-    			oResults.put("files", asFiles);
+    			oResults = OgcProcesses.getResultsFromProcessWorkspace(oProcWsViewModel, oNode, sSessionId);    			
     		}
     		else if (oProcWsViewModel.getStatus().equals(ProcessStatus.ERROR.name())) {
     			WasdiLog.debugLog("JobsResource.getJobResults: Job is in error");
@@ -618,9 +602,10 @@ public class JobsResource {
     		
     		oInfo.setProgress(oProcWs.getProgressPerc());
     		
-    		if (Utils.isNullOrEmpty(oProcWs.getOperationStartDate())) {
+    		if (!Utils.isNullOrEmpty(oProcWs.getOperationStartDate())) {
     			oInfo.setStarted(Utils.getWasdiDate(oProcWs.getOperationStartDate()));
     		}
+    		
     		StatusCode eStatus = StatusCode.ACCEPTED;
     		
     		String sWasdiStatus = oProcWs.getStatus();
@@ -668,42 +653,6 @@ public class JobsResource {
 		oApiException.setDetail(sDetail);
 		oApiException.setStatus(404);
 		return oApiException;		
-	}
-	
-	/**
-	 * Reas a single Process Workspace from a Node using WASDI API
-	 * @param sProcessWorkspaceId Id of the process Workspace
-	 * @param oNode Node Entity
-	 * @param sSessionId Actual Session Id
-	 * @return The Process Workspace View Model if available or null
-	 */
-	protected ProcessWorkspaceViewModel readProcessWorkspaceFromNode(String sProcessWorkspaceId, Node oNode, String sSessionId) {
-		try {
-			if (oNode.getActive()==false) return null;
-			
-			String sUrl = oNode.getNodeBaseAddress();
-			
-			if (!sUrl.endsWith("/")) sUrl += "/";
-			
-			sUrl += "process/byid?procws="+sProcessWorkspaceId;
-			
-			Map<String, String> asHeaders = new HashMap<String, String>();
-			asHeaders.put("x-session-token", sSessionId);
-			
-			WasdiLog.debugLog("JobsResource.readProcessWorkspaceFromNode: calling url: " + sUrl);
-			
-			String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
-			
-			if (Utils.isNullOrEmpty(sResponse)==false) {
-				ProcessWorkspaceViewModel oProcWs = MongoRepository.s_oMapper.readValue(sResponse, ProcessWorkspaceViewModel.class);
-				return oProcWs;
-			}
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("JobsResource.readProcessWorkspaceFromNode: exception contacting computing node: " + oEx.toString());
-		}		
-		
-		return null;
 	}
 	
 	/**

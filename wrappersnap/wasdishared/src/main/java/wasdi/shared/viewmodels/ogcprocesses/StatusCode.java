@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum StatusCode {
 	ACCEPTED("accepted"),
@@ -15,6 +16,7 @@ public enum StatusCode {
 		this.value = sValue;
 	}
 
+	@JsonValue
 	@Override
 	public String toString() {
 		return String.valueOf(value);
