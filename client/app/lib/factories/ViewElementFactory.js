@@ -296,7 +296,7 @@ class DateTimePicker extends UIComponent {
             if (this.m_sDate) {
                 return this.m_sDate;
             } else {
-                return "";
+                return null;
             }
         }
 
@@ -341,10 +341,18 @@ class SelectArea extends UIComponent {
          */
         this.getValue = function () {
             try {
-                return this.oBoundingBox;
+
+                var sTest = this.getStringValue();
+
+                if (sTest!="") {
+                    return this.oBoundingBox;
+                }
+                else {
+                    return null;
+                }
             }
             catch (e) {
-                return "";
+                return null;
             }
         }
 
@@ -418,8 +426,12 @@ class NumericBox extends UIComponent {
                 let fValue = parseFloat(this.m_sText)
                 // if we can't parse the value as a number
                 if (isNaN(fValue)) {
-                    asMessages.push(this.label + " - Please check parameters ");
-                    return false;
+                    if (utilsIsObjectNullOrUndefined(this.required)==false) {
+                        if (this.required) {
+                            asMessages.push(this.label + " - Please check parameters ");
+                            return false;        
+                        }
+                    }
                 }
                 if (utilsIsObjectNullOrUndefined(this.m_fMin)==false) {
                     if (fValue<this.m_fMin) {
@@ -447,7 +459,9 @@ class NumericBox extends UIComponent {
          * @returns {string} Value in the numericbox
          */
         this.getValue = function () {
-            return parseFloat(this.m_sText);
+            var fFloatValue = parseFloat(this.m_sText);
+            if (isNaN(fFloatValue)) return null;
+            else return fFloatValue;
         }
 
         /**

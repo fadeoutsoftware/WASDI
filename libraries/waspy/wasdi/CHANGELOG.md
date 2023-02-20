@@ -3,11 +3,18 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
 ## [0.8.0.1] - 2022-11-25
 ### Added
 - added separated timeout for the upload of files
 - added support to sessionId and procId in config
 - added "on external server" option
+## [0.7.5.2] - 2022-11-29
+### Added
+- publishBand
+- getLayerWms
+### Fixed
+- waitProcesses: now it handles POST returns status different from 200 (so it's safe no matter how you mess up your list of processes) 
 
 ## [0.7.5.1] - 2022-10-12
 ### Added
