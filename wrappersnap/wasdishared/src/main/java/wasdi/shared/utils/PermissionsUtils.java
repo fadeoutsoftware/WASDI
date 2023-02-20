@@ -6,9 +6,11 @@
  */
 package wasdi.shared.utils;
 
-import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.Subscription;
+import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -113,18 +115,29 @@ public class PermissionsUtils {
 			}
 
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-			if (oSubscriptionRepository.isOwnedByUser(sUserId, sSubscriptionId)) {
+
+			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+
+			if (sUserId.equals(oSubscription.getUserId())) {
 				return true;
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-			return oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId);
+			String sOrganizationId = oSubscription.getOrganizationId();
+
+			if (sOrganizationId == null) {
+				return oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId);
+			}
+
+			UserResourcePermission oPermision = oUserResourcePermissionRepository.getOrganizationSharingByUserIdAndOrganizationId(sUserId, sOrganizationId);
+
+			return oPermision != null;
 		} catch (Exception oE) {
 			WasdiLog.debugLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
-		}
 
-		return false;
+			return false;
+		}
 	}
 
 	/**

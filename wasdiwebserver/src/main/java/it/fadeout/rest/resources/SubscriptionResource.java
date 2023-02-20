@@ -44,6 +44,7 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
+import wasdi.shared.viewmodels.organizations.ProjectListViewModel;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
@@ -407,8 +408,21 @@ public class SubscriptionResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with an organization. Before deleting the subscription, please remove the sharing.")).build();
 		}
 
-		if (oSubscriptionRepository.deleteSubscription("Done")) {
-			return Response.ok(new SuccessResponse(sSubscriptionId)).build();
+
+		ProjectResource oProjectResource = new ProjectResource();
+		Response oResponse = oProjectResource.getListBySubscription(sSessionId, sSubscriptionId);
+
+		@SuppressWarnings("unchecked")
+		List<ProjectListViewModel> aoProjectList = (List<ProjectListViewModel>) oResponse.getEntity();
+
+		if (!aoProjectList.isEmpty()) {
+			WasdiLog.debugLog("SubscriptionResource.deleteSubscription: the subscription has associated projects");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is used by projects. Before deleting the subscription, please remove the projects.")).build();
+		}
+
+		if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
+
+			return Response.ok(new SuccessResponse("Done")).build();
 		} else {
 			WasdiLog.debugLog("SubscriptionResource.deleteSubscription( " + sSubscriptionId + " ): deletion failed");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the subscription failed.")).build();
