@@ -218,7 +218,7 @@
                         </button>
                         <button type="submit" class="btn btn-primary btn-wasdi"
                             ng-show="m_oController.m_bEditMode && m_oController.m_oEditSubscription.subscriptionId !== null && !m_oController.m_bIsPaid"
-                            ng-click="m_oController.checkout()">
+                            ng-click="m_oController.checkout()" data-dismiss="modal">
                             {{"DIALOG_EDIT_SUBSCRIPTION_CHECKOUT"|translate}}
                         </button>
                         <button type="submit" class="btn btn-primary btn-wasdi"

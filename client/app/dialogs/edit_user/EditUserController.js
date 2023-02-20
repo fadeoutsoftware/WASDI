@@ -734,6 +734,15 @@ var EditUserController = (function () {
 
             var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
             utilsVexCloseDialogAfter(5000, oVexWindow);
+
+            if (!utilsIsObjectNullOrUndefined(oRabbitMessage.payload)) {
+                if (!utilsIsStrNullOrEmpty(oRabbitMessage.payload.invoicePdfUrl)) {
+                    let sUrl = oRabbitMessage.payload.invoicePdfUrl;
+                    console.log("EditUserController.rabbitMessageHook | sUrl: ", sUrl);
+
+                    oController.m_oWindow.open(sUrl, '_blank');
+                }
+            }
         }
     };
 
