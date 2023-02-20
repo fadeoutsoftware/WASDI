@@ -243,8 +243,8 @@ SubscriptionEditorController = (function () {
 //        oController.m_bIsLoading = false;
 
 
-        this.initializeSubscriptionInfo();
-        this.initializeDates();
+oController.initializeSubscriptionInfo();
+oController.initializeDates();
 
         if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
             let sRabbitMessage = JSON.stringify(oRabbitMessage);
