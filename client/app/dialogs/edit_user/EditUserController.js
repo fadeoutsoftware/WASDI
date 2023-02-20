@@ -5,9 +5,10 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate, oRabbitStompService) {
+    function EditUserController($scope, $window, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate, oRabbitStompService) {
         //MEMBERS
         this.m_oScope = $scope;
+        this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oAuthService = oAuthService;
@@ -748,6 +749,7 @@ var EditUserController = (function () {
 
     EditUserController.$inject = [
         '$scope',
+        '$window',
         'close',
         'extras',
         'AuthService',
