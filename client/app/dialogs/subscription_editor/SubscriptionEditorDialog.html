@@ -105,7 +105,6 @@
                                     moment-picker="m_oController.m_sStartDate"
                                     today="true"
                                     start-view="month"
-                                    change="m_oController.selectDate()"
                                 >
                                     <input
                                         class="form-control wasdi-input"
@@ -114,7 +113,7 @@
                                         ng-model-options="{updateOn: ''}"
                                         disabled
                                     />
-                                    <span class="input-group-addon">
+                                    <span class="input-group-addon" style="cursor:not-allowed">
                                         <i class="fa fa-calendar"></i>
                                     </span>
                                 </div>
@@ -178,7 +177,7 @@
                                         ng-readonly="true"
                                         disabled
                                     />
-                                    <span class="input-group-addon">
+                                    <span class="input-group-addon" style="cursor:not-allowed">
                                         <i class="fa fa-calendar"></i>
                                     </span>
                                 </div>
@@ -213,7 +212,17 @@
 
                     <div class="col-12 text-right">
                         <button type="submit" class="btn btn-primary btn-wasdi"
-                            ng-show="m_oController.m_bEditMode"
+                            ng-show="m_oController.m_bEditMode && m_oController.m_oEditSubscription.subscriptionId === null"
+                            ng-click="m_oController.saveSubscription()">
+                            {{"DIALOG_EDIT_SUBSCRIPTION_ADD_TO_CART"|translate}}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-wasdi"
+                            ng-show="m_oController.m_bEditMode && m_oController.m_oEditSubscription.subscriptionId !== null && !m_oController.m_bIsPaid"
+                            ng-click="m_oController.checkout()">
+                            {{"DIALOG_EDIT_SUBSCRIPTION_CHECKOUT"|translate}}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-wasdi"
+                            ng-show="m_oController.m_bEditMode && m_oController.m_oEditSubscription.subscriptionId !== null && m_oController.m_bIsPaid"
                             ng-click="m_oController.saveSubscription()" data-dismiss="modal">
                             {{"DIALOG_EDIT_SUBSCRIPTION_SAVE"|translate}}
                         </button>

@@ -5,7 +5,7 @@
 
 var EditUserController = (function () {
 
-    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate, oRabbitStompService) {
+    function EditUserController($scope, oClose, oExtras, oAuthService, oConstantsService, oProcessWorkspaceService, oOrganizationService, oSubscriptionService, oProjectService, oAdminDashboardService, oModalService, oTranslate) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -19,7 +19,6 @@ var EditUserController = (function () {
         this.m_oAdminDashboardService = oAdminDashboardService;
         this.m_oModalService = oModalService;
         this.m_oTranslate = oTranslate;
-        this.m_oRabbitStompService = oRabbitStompService;
 
         this.m_oUser = this.m_oExtras.user;
         this.m_bEditingPassword = false;
@@ -67,27 +66,8 @@ var EditUserController = (function () {
 
         this.initializeProjectsInfo();
 
-        
-        /* 
-        RabbitStomp Service call
-        */
-        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
-            "SUBSCRIPTION",
-            this,
-            this.rabbitMessageHook
-        );
-
-        var oController = this;
-
 
         $scope.close = function (result) {
-            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
-
-            oClose(result, 300); // close, but give 500ms for bootstrap to animate
-        };
-
-        $scope.add = function (result) {
-            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
     }
@@ -425,6 +405,7 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
+        console.log("EditUserController.initializeSubscriptionsInfo");
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(
@@ -456,51 +437,37 @@ var EditUserController = (function () {
     EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
         var oController = this;
 
-        this.m_oSubscriptionService.getSubscriptionById(sSubscriptionId).then(
-            function (response) {
-                if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
-                    oController.m_oEditSubscription = response.data;
-                    oController.m_oModalService.showModal({
-                        templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
-                        controller: "SubscriptionEditorController",
-                        inputs: {
-                            extras: {
-                                subscription: response.data,
-                                editMode: sEditMode
-                            }
-                        }
-                    }).then(function (modal) {
-                        modal.element.modal({
-                            backdrop: 'static'
-                        })
-                        modal.close.then(function () {
-                            oController.initializeSubscriptionsInfo();
-                        })
-                    })
-                } else {
-                    utilsVexDialogAlertTop(
-                        "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
-                    );
-                }
-            }, function (error) {
-                let sErrorMessage = "GURU MEDITATION<br>ERROR IN FETCHING THE SUBSCRIPTION";
+        let oOldSubscription = {
+            subscriptionId: sSubscriptionId
+        };
 
-                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oOldSubscription,
+                    editMode: sEditMode
                 }
-
-                utilsVexDialogAlertTop(sErrorMessage);
             }
-        )
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        })
     }
 
     EditUserController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
         var oController = this;
 
         let oNewSubscription = {
+            subscriptionId: null,
             typeId: typeId,
-            typeName: typeName
+            typeName: typeName,
+            buySuccess: false
         };
 
         this.m_oModalService.showModal({
@@ -737,19 +704,6 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
-        console.log("EditUserController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
-        oController.initializeSubscriptionsInfo();
-        oController.m_bIsLoading = false;
-
-        if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
-            let sRabbitMessage = JSON.stringify(oRabbitMessage);
-
-            var oVexWindow = utilsVexDialogAlertBottomRightCorner(sRabbitMessage);
-            utilsVexCloseDialogAfter(5000, oVexWindow);
-        }
-    };
-
     EditUserController.$inject = [
         '$scope',
         'close',
@@ -762,8 +716,7 @@ var EditUserController = (function () {
         'ProjectService',
         'AdminDashboardService',
         'ModalService',
-        '$translate',
-        "RabbitStompService"
+        '$translate'
     ];
     return EditUserController ;
 })();
