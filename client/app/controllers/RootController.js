@@ -129,7 +129,13 @@ var RootController = (function() {
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
             if(utilsIsObjectNullOrUndefined(newValue) === false)
             {
-                if(newValue.name.includes("Untitled Workspace"))
+                let sWorkspaceName = newValue.workspaceName;
+
+                if (utilsIsStrNullOrEmpty(sWorkspaceName)) {
+                    sWorkspaceName = newValue.name;
+                }
+
+                if(sWorkspaceName.includes("Untitled Workspace"))
                 {
                     $scope.m_oController.getWorkspacesInfo();
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
