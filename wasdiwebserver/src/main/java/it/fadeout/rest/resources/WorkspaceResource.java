@@ -541,10 +541,16 @@ public class WorkspaceResource {
 			// Initialize repository
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
+			String sName = oWorkspaceEditorViewModel.getName();
+			while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+				sName = Utils.cloneWorkspaceName(sName);
+				WasdiLog.debugLog("WorkspaceResource.updateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+			}
+
 			// Default values
 			oWorkspace.setCreationDate((double) oWorkspaceEditorViewModel.getCreationDate().getTime());
 			oWorkspace.setLastEditDate((double) oWorkspaceEditorViewModel.getLastEditDate().getTime());
-			oWorkspace.setName(oWorkspaceEditorViewModel.getName());
+			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
 
@@ -569,6 +575,8 @@ public class WorkspaceResource {
 			if (oWorkspaceRepository.updateWorkspaceName(oWorkspace)) {
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setStringValue(oWorkspace.getWorkspaceId());
+
+				oWorkspaceEditorViewModel.setName(sName);
 
 				return oWorkspaceEditorViewModel;
 			} else {
