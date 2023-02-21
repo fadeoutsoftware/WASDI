@@ -127,7 +127,6 @@ var RootController = (function() {
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
-            /*
             if(utilsIsObjectNullOrUndefined(newValue) === false)
             {
                 if(newValue.name.includes("Untitled Workspace"))
@@ -136,7 +135,6 @@ var RootController = (function() {
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
                 }
             }
-            */
         });
 
 
@@ -155,7 +153,7 @@ var RootController = (function() {
                     if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING" ||
                         $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="WAITING" ||
                         $scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="READY") {
-                         $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
                     }
                 }
             }
@@ -601,7 +599,7 @@ var RootController = (function() {
             modal.element.modal({
                 backdrop: 'static',
                 keyboard: false
-              });
+            });
 
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
@@ -623,35 +621,24 @@ var RootController = (function() {
                 return;
             }
 
-            // Disabled on front-end side as the forced-renaming is now done on the server side
-            // if( value === "Untitled Workspace" )
-            // {
-            //     value = oController.forcedChangeNameWorkspace();
-            // }
             var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
-            let sNewName = value; 
-            let aoWorkspaceNames = []; 
-            oController.m_oWorkspaceService.getWorkspacesInfoListByUser().then(data => {
-                data.data.forEach(oWorkspace => {
-                    aoWorkspaceNames.push(oWorkspace.workspaceName)
-                });
-                
-                if(!aoWorkspaceNames.includes(sNewName)){
-                     oWorkspace.name = value;
-                     oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
-                        oWorkspace.name = data.data.name
-                        oController.m_oRootScope.title = data.data.name
-                        oController.m_bIsEditModelWorkspaceNameActive = false;
-                        utilsVexDialogAlertTop("Name successfully changed.")
-                    }); // no error handling in this case
-                }
-                if(aoWorkspaceNames.includes(sNewName) && oWorkspace.name !== sNewName) {
-                    utilsVexDialogAlertTop("You already have a workspace with this name.")
-                } 
+
+            oWorkspace.name = value;
+
+            oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).then(function (data) {
+                oWorkspace.name = data.data.name;
+                oController.m_oRootScope.title = data.data.name;
+                oController.m_bIsEditModelWorkspaceNameActive = false;
+                utilsVexDialogAlertTop("Name successfully changed.")
+            },
+            function (data) {
+                console.log("RootController.editModelWorkspaceNameSetTrue | data: ", data);
+
+                var oDialog = utilsVexDialogAlertBottomRightCorner(
+                    "GURU MEDITATION<br>ERROR CHANGING THE WORKSPACE'S NAME"
+                );
+                utilsVexCloseDialogAfter(4000, oDialog);
             });
-            
-            
-            // 
         };
 
         var sMessage = this.m_oTranslate.instant("MSG_INSERT_WS_NAME");
