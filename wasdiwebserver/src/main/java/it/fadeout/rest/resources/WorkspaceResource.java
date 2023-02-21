@@ -83,6 +83,7 @@ public class WorkspaceResource {
 
 	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE";
 	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE";
+	private static final String MSG_ERROR_ACTIVE_PROJECT_REQUIRED = "MSG_ERROR_ACTIVE_PROJECT_REQUIRED";
 
 	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
 	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
@@ -441,7 +442,7 @@ public class WorkspaceResource {
 
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			oResult.setStringValue("A project with an active subscription should be selected");
+			oResult.setStringValue(MSG_ERROR_ACTIVE_PROJECT_REQUIRED);
 
 			return oResult;
 		}
@@ -542,9 +543,14 @@ public class WorkspaceResource {
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
 			String sName = oWorkspaceEditorViewModel.getName();
-			while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
+
+			Workspace oExistingWorkspace = oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName);
+
+			while (oExistingWorkspace != null && !oExistingWorkspace.getWorkspaceId().equals(oWorkspaceEditorViewModel.getWorkspaceId())) {
 				sName = Utils.cloneWorkspaceName(sName);
 				WasdiLog.debugLog("WorkspaceResource.updateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+
+				oExistingWorkspace = oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName);
 			}
 
 			// Default values

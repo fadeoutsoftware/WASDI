@@ -105,7 +105,9 @@ import wasdi.shared.viewmodels.processworkspace.RunningProcessorViewModel;
  *
  */
 @Path("/processors")
-public class ProcessorsResource  {	
+public class ProcessorsResource  {
+
+	private static final String MSG_ERROR_ACTIVE_PROJECT_REQUIRED = "MSG_ERROR_ACTIVE_PROJECT_REQUIRED";
 	
 	/**
 	 * Upload a new processor in Wasdi
@@ -859,6 +861,7 @@ public class ProcessorsResource  {
 				WasdiLog.debugLog("ProcessorsResource.internalRun: the user's active subscription is not valid");
 
 				oRunningProcessorViewModel.setStatus("ERROR");
+				oRunningProcessorViewModel.setProcessingIdentifier(MSG_ERROR_ACTIVE_PROJECT_REQUIRED);
 				return oRunningProcessorViewModel;
 			}
 			
