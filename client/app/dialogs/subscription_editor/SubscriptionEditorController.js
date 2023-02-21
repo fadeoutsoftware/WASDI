@@ -6,12 +6,14 @@ SubscriptionEditorController = (function () {
         oExtras,
         oConstantsService,
         oSubscriptionService,
-        oOrganizationService
+        oOrganizationService,
+        oTranslate
     ) {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_oTranslate = oTranslate;
 
         this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
@@ -271,7 +273,8 @@ SubscriptionEditorController = (function () {
         'extras',
         'ConstantsService',
         'SubscriptionService',
-        'OrganizationService'
+        'OrganizationService',
+        '$translate'
     ];
     return SubscriptionEditorController
 })();
