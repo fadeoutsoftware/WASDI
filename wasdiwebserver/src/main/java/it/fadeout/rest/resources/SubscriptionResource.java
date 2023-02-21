@@ -177,7 +177,7 @@ public class SubscriptionResource {
 					}
 
 					if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), null, "shared by " + oSharedSubscription.getOwnerId());
+						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), "", "shared by " + oSharedSubscription.getOwnerId());
 
 						aoSubscriptionList.add(oSubscriptionViewModel);
 						asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());
