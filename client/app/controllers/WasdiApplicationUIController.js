@@ -332,14 +332,24 @@ var WasdiApplicationUIController = (function () {
         // Run the processor
         oController.m_oProcessorService.runProcessor(sApplicationName, JSON.stringify(oProcessorInput)).then(function (data, status) {
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
-                // Ok, processor scheduled, notify the user
-                var oDialog = utilsVexDialogAlertBottomRightCorner(sScheduled);
-                utilsVexCloseDialogAfter(4000, oDialog);
+                if (data.data.status === "CREATED") {
+                    // Ok, processor scheduled, notify the user
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(sScheduled);
+                    utilsVexCloseDialogAfter(4000, oDialog);
 
-                oController.m_oConstantsService.setActiveWorkspace(null);
+                    oController.m_oConstantsService.setActiveWorkspace(null);
 
-                // Move to the editor
-                oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
+                    // Move to the editor
+                    oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
+                } else if (data.data.status === "ERROR") {
+                    if (utilsIsStrNullOrEmpty(data.data.processingIdentifier)) {
+                        utilsVexDialogAlertTop(sError);
+                    } else {
+                        utilsVexDialogAlertTop(sError + "<br><br>" + oController.m_oTranslate.instant(data.data.processingIdentifier));
+                    }
+                } else {
+                    console.log("WasdiApplicationUIController.executeProcessorInWorkspace | unexpected status: ", data.data.status);
+                }
             } else {
                 utilsVexDialogAlertTop(sError);
             }

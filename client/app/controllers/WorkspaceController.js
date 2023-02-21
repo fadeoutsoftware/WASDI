@@ -114,7 +114,7 @@ var WorkspaceController = (function () {
                         oController.openWorkspace(sWorkspaceId);
                     } else {
                         //alert('error');
-                        utilsVexDialogAlertTop(sError + "<br><br>" + data.data.stringValue);
+                        utilsVexDialogAlertTop(sError + "<br><br>" + oController.m_oTranslate.instant(data.data.stringValue));
                     }
 
                 }

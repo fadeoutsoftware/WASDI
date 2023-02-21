@@ -889,5 +889,6 @@
 	"DIALOG_EDIT_PROJECT_SEARCH": "Search",
 	"DIALOG_EDIT_PROJECT_CHANGE_ACTIVE": "Change Active",
 
-	"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT": "Select the Active Project"
+	"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT": "Select the Active Project",
+	"MSG_ERROR_ACTIVE_PROJECT_REQUIRED": "A valid subscription and an active project are required. Please see the User Dashboard."
 }
