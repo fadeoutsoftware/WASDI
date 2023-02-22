@@ -426,7 +426,6 @@ var EditUserController = (function () {
     }
 
     EditUserController.prototype.initializeSubscriptionsInfo = function() {
-        console.log("EditUserController.initializeSubscriptionsInfo");
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(

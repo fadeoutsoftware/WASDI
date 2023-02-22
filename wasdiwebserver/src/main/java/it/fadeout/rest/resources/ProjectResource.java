@@ -310,6 +310,7 @@ public class ProjectResource {
 				UserRepository oUserRepository = new UserRepository();
 
 				oUser.setActiveProjectId(null);
+				oUser.setActiveSubscriptionId(null);
 
 				if (!oUserRepository.updateUser(oUser)) {
 					WasdiLog.debugLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
@@ -343,6 +344,8 @@ public class ProjectResource {
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
+		String sSubscriptionId = null;
+
 		if (sProjectId != null) {
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
@@ -353,10 +356,13 @@ public class ProjectResource {
 
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id " + sProjectId + " exists.")).build();
 			}
+
+			sSubscriptionId = oProject.getSubscriptionId();
 		}
 
 		UserRepository oUserRepository = new UserRepository();
 
+		oUser.setActiveSubscriptionId(sSubscriptionId);
 		oUser.setActiveProjectId(sProjectId);
 
 		if (oUserRepository.updateUser(oUser)) {
