@@ -93,6 +93,26 @@ public class SubscriptionRepository extends MongoRepository {
 	}
 
 	/**
+	 * Get the subscriptions by their IDs.
+	 * @param asSubscriptionIds the list of subscriptionIds
+	 * @return the list of subscriptions
+	 */
+	public List<Subscription> getSubscriptionsBySubscriptionIds(Collection<String> asSubscriptionIds) {
+		final List<Subscription> aoReturnList = new ArrayList<>();
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(Filters.in("subscriptionId", asSubscriptionIds));
+
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
+	/**
 	 * Check whether or not a subscription is valid.
 	 * @param sSubscriptionId the id of the subscription
 	 * @return true if the subscription if valid, false otherwise

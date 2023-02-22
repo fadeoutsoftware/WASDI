@@ -126,18 +126,20 @@ public class PermissionsUtils {
 
 			String sOrganizationId = oSubscription.getOrganizationId();
 
-			if (sOrganizationId == null) {
-				return oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId);
+			if (oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId)) {
+				return true;
 			}
 
-			UserResourcePermission oPermision = oUserResourcePermissionRepository.getOrganizationSharingByUserIdAndOrganizationId(sUserId, sOrganizationId);
+			if (sOrganizationId != null) {
+				UserResourcePermission oPermision = oUserResourcePermissionRepository.getOrganizationSharingByUserIdAndOrganizationId(sUserId, sOrganizationId);
 
-			return oPermision != null;
+				return oPermision != null;
+			}
 		} catch (Exception oE) {
 			WasdiLog.debugLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
-
-			return false;
 		}
+
+		return false;
 	}
 
 	/**

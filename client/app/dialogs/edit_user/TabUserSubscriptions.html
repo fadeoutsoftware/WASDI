@@ -155,9 +155,8 @@
                 </td>
 
                 <td class="over-icon">
-                    <span ng-show="oSubscription.organizationName === ''">&nbsp;</span>
                     <button class="btn btn-primary btn-wasdi" title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                        ng-show="!oSubscription.adminRole && oSubscription.organizationName !== ''"
+                        ng-show="!oSubscription.adminRole"
                         ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                         <!--Edit Subscription-->
                         <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
