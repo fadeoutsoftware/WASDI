@@ -47,6 +47,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
@@ -358,7 +359,8 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
 						
 						
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody(); 
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							ArrayList<ProcessHistoryViewModel> aoNodeHistory = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessHistoryViewModel>>(){});
@@ -494,7 +496,8 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
 						
 						
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							AppStatsViewModel oNodeStats = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<AppStatsViewModel>(){});
@@ -1228,7 +1231,8 @@ public class ProcessWorkspaceResource {
 
 						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
 
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
 							Long lRunningTimeOnNode = Long.valueOf(sResponse);
@@ -1445,7 +1449,8 @@ public class ProcessWorkspaceResource {
 					if (sUrl.endsWith("/") == false) sUrl += "/";
 					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
 					
-					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
+					HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+					String sNodeResponse = oHttpCallResponse.getResponseBody();
 					
 					// Create an array of answers
 					JSONArray oResults = new JSONArray(sNodeResponse);

@@ -17,6 +17,7 @@ import org.apache.commons.net.io.Util;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class LSAHttpUtils {
 	private LSAHttpUtils() {
@@ -74,12 +75,9 @@ public class LSAHttpUtils {
 		WasdiLog.debugLog("QueryExecutorLSA.httpGetResults( " + sUrl + " )");
 
 		HashMap<String, String> asHeaders = new HashMap<String, String>();
-
-		long lStart = System.nanoTime();
-		String sResult = HttpUtils.standardHttpGETQuery(sUrl, asHeaders);
-		long lEnd = System.nanoTime();
-
-		HttpUtils.logOperationSpeed(sUrl, "httpGetResults", lStart, lEnd, sResult);
+		
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
+		String sResult = oHttpCallResponse.getResponseBody();
 
 		return sResult;
 	}
