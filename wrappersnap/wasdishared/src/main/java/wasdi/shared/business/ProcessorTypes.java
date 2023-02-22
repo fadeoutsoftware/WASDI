@@ -21,6 +21,7 @@ public class ProcessorTypes {
 	public static String TRAEFIK_NOTEBOOK = "traefik-notebook";
 	public static String CSHARP = "csharp";
 	public static String EOEPCA = "eoepca";
+	public static String PYTHON_PIP_2 = "python_pip_2";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
@@ -36,6 +37,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(TRAEFIK_NOTEBOOK)) return "traefik-notebook";
 		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		else if (sProcessorType.equals(EOEPCA)) return "eoepca";
+		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
 		return "";
 	}
 	
@@ -74,6 +76,9 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(CSHARP)) {
 			aoFiles.add("deploywasdidocker.sh");
 			aoFiles.add("runwasdidocker.sh");
+		}
+		else if (sProcessorType.equals(PYTHON_PIP_2)) {
+			
 		}
 
 		return aoFiles;

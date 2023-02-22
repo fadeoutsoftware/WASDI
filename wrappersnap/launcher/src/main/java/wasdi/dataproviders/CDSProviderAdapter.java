@@ -19,6 +19,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.gis.BoundingBoxUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class CDSProviderAdapter extends ProviderAdapter {
 
@@ -140,7 +141,8 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			try {
 				Map<String, String> asHeaders = null;
 				String sAuth = sDownloadUser + ":" + sDownloadPassword;
-				sResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders, sAuth);
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders, sAuth);
+				sResult = oHttpCallResponse.getResponseBody();
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("CDSProviderAdapter.performCdsSearchRequest: exception in http get call: " + oEx.toString());
 			}
@@ -171,7 +173,8 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			}
 
 			try {
-				sResult = HttpUtils.httpGet(CDS_URL_GET_STATUS, asHeaders);
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(CDS_URL_GET_STATUS, asHeaders); 
+				sResult = oHttpCallResponse.getResponseBody();
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("CDSProviderAdapter.performCdsGetStatusRequest: exception in http get call: " + oEx.toString());
 			}

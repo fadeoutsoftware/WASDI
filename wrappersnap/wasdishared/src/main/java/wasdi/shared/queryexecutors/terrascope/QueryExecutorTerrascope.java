@@ -10,6 +10,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -69,7 +70,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 				String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
 
 				// Make the call
-				String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(encodedUrl); 
+				String sTerrascopeResults = oHttpCallResponse.getResponseBody();
 
 				WasdiLog.debugLog("QueryExecutorTerrascope: get Results, extract the total count");
 
@@ -107,7 +109,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 					String encodedUrl = ((QueryTranslatorTerrascope) m_oQueryTranslator).encode(sTerrascopeQuery);
 
 					// Make the call
-					String sTerrascopeResults = HttpUtils.httpGet(encodedUrl);
+					HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(encodedUrl); 
+					String sTerrascopeResults = oHttpCallResponse.getResponseBody();
 
 					WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 
@@ -120,7 +123,8 @@ public class QueryExecutorTerrascope extends QueryExecutor {
 			if (Utils.isNullOrEmpty(sTerrascopeQuery)) return aoReturnList;
 
 			// Make the query
-			String sTerrascopeResults = HttpUtils.httpGet(sTerrascopeQuery);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sTerrascopeQuery); 
+			String sTerrascopeResults = oHttpCallResponse.getResponseBody();
 
 			WasdiLog.debugLog("QueryExecutorTerrascope.executeAndRetrieve: got result, start conversion");
 

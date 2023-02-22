@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import wasdi.asynch.PushDockerImagesThread;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
@@ -27,29 +27,14 @@ import wasdi.shared.utils.log.WasdiLog;
  *
  */
 public class EoepcaProcessorEngine extends DockerProcessorEngine {
-	
-	/**
-	 * Constructor that initializes the main members
-	 * @param sWorkingRootPath Wasdi root path
-	 * @param sDockerTemplatePath Docker templates path 
-	 * @param sTomcatUser User to use in the docker
-	 */
-	public EoepcaProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
-		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-
-		m_sDockerTemplatePath = sDockerTemplatePath;		
-		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "eoepca";
 		
-	}	
-	
 	/**
 	 * Default constructor
 	 */
 	public EoepcaProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "eoepca";
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.EOEPCA);
 		
 	}
 	
@@ -63,7 +48,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 				
 		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 		
 		if (aoRegisters == null) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
@@ -125,67 +110,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
         return true;
-	}
-	
-	/**
-	 * Push one image in all the registers
-	 * @param oProcessor Processor
-	 * @return name of the image
-	 */
-	protected String pushImageInRegisters(Processor oProcessor) {
-		try {
-			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
-			
-			// And get the processor folder
-			String sProcessorFolder = getProcessorFolder(oProcessor.getName());
-			
-			// Create the docker utils
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, "");
-			
-			// Here we keep track of how many registers we tried
-			int iAvailableRegisters=0;
-			// Here we save the address of the image
-			String sPushedImageAddress = "";
-			
-			// For each register: ordered by priority
-			for (; iAvailableRegisters<aoRegisters.size(); iAvailableRegisters++) {
-				
-				DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
-				
-				WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
-				
-				// Try to login and push
-				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
-				
-				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
-					WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: image pushed");
-					// Ok we got a valid address!
-					break;
-				}
-			}
-			
-			// Did we used all the avaialbe options?
-			if (iAvailableRegisters<aoRegisters.size()) {
-				
-				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
-				oPushDockerImagesThread.setProcessor(oProcessor);
-				
-				for (int iOtherRegisters = 0; iOtherRegisters<aoRegisters.size(); iOtherRegisters++) {
-					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
-				}
-				
-				WasdiLog.debugLog("EoepcaProcessorEngine.pushImageInRegisters: staring thread to push on other regitries");
-				oPushDockerImagesThread.start();
-			}
-			
-			return sPushedImageAddress;
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.pushImageInRegisters: error " + oEx.toString());
-		}
-		
-		return "";
-	}
+	}	
 	
 	/**
 	 * Renders the CWL (and app body) templates
@@ -309,40 +234,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	}
 	
 	/**
-	 * Log in and Push an image to a Docker Registry
-	 * @param oDockerUtils
-	 * @param oDockerRegistryConfig
-	 * @param sImageName
-	 * @return
-	 */
-	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
-		try {
-			// Login in the docker
-			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
-			
-			if (!bLogged) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error logging in, return false.");
-				return "";
-			}
-			
-			// Push the image
-			boolean bPushed = oDockerUtils.push(sImageName);
-			
-			if (!bPushed) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: error in push, return false.");
-				return "";				
-			}
-			
-			return sImageName;
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("EoepcaProcessorEngine.loginAndPush: Exception " + oEx.toString());
-		}
-		
-		return "";
-	}
-
-	/**
 	 * Executes an EOEPCA Processor
 	 */
 	@Override
@@ -358,7 +249,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	public boolean delete(ProcessorParameter oParameter) {
 
 		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 		
 		if (aoRegisters == null) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.delete: registers list is null, return false.");
@@ -391,19 +282,19 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
 		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 		
 		if (aoRegisters == null) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: registers list is empty, return false.");
 			return false;			
 		}
 		
-		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: call base class deploy");
+		WasdiLog.debugLog("EoepcaProcessorEngine.redeploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
 		m_sTomcatUser = "";
@@ -430,7 +321,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		if (!bResult) {
 			// This is not good
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: super class deploy returned false. So we stop here.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
 						
@@ -438,7 +329,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to push the image.");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: Impossible to push the image.");
 			return false;
 		}
 		
@@ -447,14 +338,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 
 		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: empty args, not good");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: empty args, not good");
 			return false;
 		}
 		
 		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
 		
 		if (!bTemplates) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: problems rendering the template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: problems rendering the template");
 			return false;
 		}
 		

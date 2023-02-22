@@ -1,5 +1,6 @@
 package wasdi.processors;
 
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.managers.IPackageManager;
 
 public class CSharpProcessorEngine extends DockerProcessorEngine {
@@ -7,7 +8,7 @@ public class CSharpProcessorEngine extends DockerProcessorEngine {
 	public CSharpProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "csharp";
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.CSHARP);
 		
 	}
 
@@ -16,12 +17,4 @@ public class CSharpProcessorEngine extends DockerProcessorEngine {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 	}
 
-	public CSharpProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
-		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-
-		m_sDockerTemplatePath = sDockerTemplatePath;		
-		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "csharp";
-		
-	}
 }

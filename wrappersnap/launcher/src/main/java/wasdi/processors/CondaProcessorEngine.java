@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.utils.log.WasdiLog;
@@ -20,17 +21,9 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 	
 	public CondaProcessorEngine() {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "conda";		
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.CONDA);		
 	}
-
-	public CondaProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-		super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
-		
-		m_sDockerTemplatePath = sDockerTemplatePath;		
-		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "conda";			
-	}
-
+	
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
 		IPackageManager oPackageManager = new CondaPackageManagerImpl(sIp, iPort);

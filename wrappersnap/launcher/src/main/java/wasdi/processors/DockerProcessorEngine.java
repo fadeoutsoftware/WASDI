@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -21,10 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
+import wasdi.asynch.PushDockerImagesThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -56,10 +59,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		super();
 	}
 	
-    public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-        super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
-    }
-
 	public String getDockerImageName() {
 		return m_sDockerImageName;
 	}
@@ -97,9 +96,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
         if (oParameter == null) return false;
 
-        ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessorRepository oProcessorRepository = new ProcessorRepository();
-        ProcessWorkspace oProcessWorkspace = null;
+        ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
 
         String sProcessorName = oParameter.getName();
@@ -108,10 +107,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         try {
 
             processWorkspaceLog("Start Deploy of " + sProcessorName + " Type " + oParameter.getProcessorType());
-
-            oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            oProcessWorkspace = m_oProcessWorkspace;
-
+            
             if (bFirstDeploy) {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
                 processWorkspaceLog("This is a first deploy of this app");
@@ -141,8 +137,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 return false;
             }
 
-            if (bFirstDeploy)
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+            if (bFirstDeploy) {
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+            }
+                
             WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor: unzip processor");
 
             // Unzip the processor (and check for entry point myProcessor.py)
@@ -161,8 +159,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterUnzipProcessor(sProcessorFolder);
 
-            if (bFirstDeploy)
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            if (bFirstDeploy) {
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            }
+                
+            
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: copy container image template");
 
             // Copy Docker template files in the processor folder
@@ -181,13 +182,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
 
-            processWorkspaceLog("Image done, start the docker");
+            processWorkspaceLog("Image done");
 
             if (bFirstDeploy)
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
@@ -199,6 +200,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             if (m_bRunAfterDeploy) {
+            	processWorkspaceLog("Start the docker");
                 oDockerUtils.run(iProcessorPort);
                 processWorkspaceLog("Application started");
             }
@@ -298,15 +300,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             return false;
         }
 
-        ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
-        ProcessWorkspace oProcessWorkspace = null;
+        // Get Repo and Process Workspace
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
 
         try {
-
-            // Get Repo and Process Workspace
-            oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            oProcessWorkspace = m_oProcessWorkspace;
-
 
             // Check workspace folder
             String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
@@ -420,7 +418,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 String sProcessorFolder = getProcessorFolder(sProcessorName);
 
                 // Start it
-                DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+                DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
                 oDockerUtils.run();
                 
                 // Wait a little bit
@@ -662,7 +660,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             processWorkspaceLog("Delete Processor Docker");
 
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
@@ -775,7 +773,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             onAfterCopyTemplate(sProcessorFolder);
 
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
 
             // Delete the image
@@ -1096,7 +1094,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 			Map<String, String> asHeaders = Collections.emptyMap();
 
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			WasdiLog.debugLog("CondaPackageManagerImpl.isDockerServerUp: iResult: " + iResult);
@@ -1124,8 +1122,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(oParameter.getSessionID());
 			
 			WasdiLog.debugLog("DockerProcessorEngine.reconstructEnvironment: calling url " + sUrl);
+			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			// Call the API to get the lastest action list
-			String sResult = HttpUtils.httpGet(sUrl, asHeaders);
+			String sResult = oHttpCallResponse.getResponseBody();
 			
 			// Convert to an array of strings
 			ArrayList<String> asActions = MongoRepository.s_oMapper.readValue(sResult, new TypeReference<ArrayList<String>>(){});
@@ -1169,5 +1169,101 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		
 		return bRet;
 	}
+	
+	/**
+	 * Push one image in all the registers
+	 * @param oProcessor Processor
+	 * @return name of the image
+	 */
+	protected String pushImageInRegisters(Processor oProcessor) {
+		try {
+			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+			
+			// And get the processor folder
+			String sProcessorFolder = getProcessorFolder(oProcessor.getName());
+			
+			// Create the docker utils
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+			
+			// Here we keep track of how many registers we tried
+			int iAvailableRegisters=0;
+			// Here we save the address of the image
+			String sPushedImageAddress = "";
+			
+			// For each register: ordered by priority
+			for (; iAvailableRegisters<aoRegisters.size(); iAvailableRegisters++) {
+				
+				DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iAvailableRegisters);
+				
+				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
+				
+				// Try to login and push
+				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
+				
+				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
+					WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: image pushed");
+					// Ok we got a valid address!
+					break;
+				}
+			}
+			
+			// Did we used all the avaialbe options?
+			if (iAvailableRegisters<aoRegisters.size()) {
+				
+				PushDockerImagesThread oPushDockerImagesThread = new PushDockerImagesThread();
+				oPushDockerImagesThread.setProcessor(oProcessor);
+				
+				for (int iOtherRegisters = 0; iOtherRegisters<aoRegisters.size(); iOtherRegisters++) {
+					oPushDockerImagesThread.getRegisters().add(aoRegisters.get(iOtherRegisters));
+				}
+				
+				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: staring thread to push on other regitries");
+				oPushDockerImagesThread.start();
+			}
+			
+			return sPushedImageAddress;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.pushImageInRegisters: error " + oEx.toString());
+		}
+		
+		return "";
+	}
+	
+	
+	/**
+	 * Log in and Push an image to a Docker Registry
+	 * @param oDockerUtils
+	 * @param oDockerRegistryConfig
+	 * @param sImageName
+	 * @return
+	 */
+	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
+		try {
+			// Login in the docker
+			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			
+			if (!bLogged) {
+				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error logging in, return false.");
+				return "";
+			}
+			
+			// Push the image
+			boolean bPushed = oDockerUtils.push(sImageName);
+			
+			if (!bPushed) {
+				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error in push, return false.");
+				return "";				
+			}
+			
+			return sImageName;
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: Exception " + oEx.toString());
+		}
+		
+		return "";
+	}
+	
 
 }
