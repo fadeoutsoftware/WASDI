@@ -681,6 +681,15 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setProductName(sProductName);
 					oProcess.setWorkspaceId(oParameter.getWorkspace());
 					oProcess.setUserId(sUserId);
+
+					//TODO - enforce the presence of a valid subscription and of an active project
+					if (Utils.isNullOrEmpty(oUser.getActiveProjectId())
+							|| Utils.isNullOrEmpty(oUser.getActiveSubscriptionId())) {
+						WasdiLog.debugLog("Wasdi.runProcess: Process Scheduled for Launcher. The user does not have a valid subscription and an active project");
+					}
+
+					oProcess.setProjectId(oUser.getActiveProjectId());
+					oProcess.setSubscriptionId(oUser.getActiveSubscriptionId());
 					oProcess.setProcessObjId(sProcessObjId);
 					if (!Utils.isNullOrEmpty(sParentId)) oProcess.setParentId(sParentId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
