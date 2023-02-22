@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
@@ -163,10 +164,31 @@ public class SubscriptionResource {
 			// Get the list of subscriptions shared with this user
 			List<UserResourcePermission> aoSharedSubscriptions = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
 
+
 			if (aoSharedSubscriptions.size() > 0) {
+				List<String> asSubscriptionIds = aoSharedSubscriptions.stream()
+						.map(UserResourcePermission::getResourceId)
+						.collect(Collectors.toList());
+
+				List<Subscription> aoSubscriptions = oSubscriptionRepository.getSubscriptionsBySubscriptionIds(asSubscriptionIds);
+
+				Map<String, Subscription> aoSubscriptionsById = aoSubscriptions.stream()
+					      .collect(Collectors.toMap(Subscription::getSubscriptionId, Function.identity()));
+
+
+
+				List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSubscriptions.stream()
+						.map(Subscription::getOrganizationId)
+						.collect(Collectors.toList());
+
+				List<Organization> aoOrganizationsOfDirectSubscriptionSharings = oOrganizationRepository.getOrganizations(asOrganizationIdsOfDirectSubscriptionSharings);
+
+				Map<String, String> aoNamesOfOrganizationsOfDirectSubscriptionSharings = aoOrganizationsOfDirectSubscriptionSharings.stream()
+					      .collect(Collectors.toMap(Organization::getOrganizationId, Organization::getName));
+
 				// For each
 				for (UserResourcePermission oSharedSubscription : aoSharedSubscriptions) {
-					Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(oSharedSubscription.getResourceId());
+					Subscription oSubscription = aoSubscriptionsById.get(oSharedSubscription.getResourceId());
 
 					if (oSubscription == null) {
 						WasdiLog.debugLog("SubscriptionResource.getListByUser: The subscription that was shared is no longer available " + oSharedSubscription.getResourceId() + ". Removing the orphane record.");
@@ -177,7 +199,9 @@ public class SubscriptionResource {
 					}
 
 					if (!asUniqueSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), "", "shared by " + oSharedSubscription.getOwnerId());
+						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(),
+								aoNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
+								"shared by " + oSharedSubscription.getOwnerId());
 
 						aoSubscriptionList.add(oSubscriptionViewModel);
 						asUniqueSubscriptionIds.add(oSubscription.getSubscriptionId());

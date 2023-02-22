@@ -37,21 +37,16 @@ SubscriptionEditorController = (function () {
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
-        this.getOrganizationsListByUser();
-
-        var oController = this;
-
         $scope.close = function (result) {
             oClose(result, 500);
         }
     }
 
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
-        console.log("SubscriptionEditorController.initializeSubscriptionInfo | this.m_oEditSubscription: ", this.m_oEditSubscription);
-
         if (utilsIsStrNullOrEmpty(this.m_oEditSubscription.subscriptionId)) {
             this.m_bIsPaid = this.m_oEditSubscription.buySuccess;
             this.initializeDates();
+            this.getOrganizationsListByUser();
         } else {
             var oController = this;
 
@@ -62,6 +57,7 @@ SubscriptionEditorController = (function () {
                         oController.m_oEditSubscription = response.data;
                         oController.m_bIsPaid = oController.m_oEditSubscription.buySuccess;
                         oController.initializeDates();
+                        oController.getOrganizationsListByUser();
                     } else {
                         utilsVexDialogAlertTop(
                             "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
@@ -157,8 +153,6 @@ SubscriptionEditorController = (function () {
         let oController = this;
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
-            console.log("SubscriptionEditorController.saveSubscription | response.data: ", response.data);
-
             if (!utilsIsObjectNullOrUndefined(response)
                     && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
 
@@ -201,19 +195,14 @@ SubscriptionEditorController = (function () {
         let oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         let sActiveWorkspaceId = oActiveWorkspace == null ? null : oActiveWorkspace.workspaceId;
 
-        console.log("SubscriptionEditorController.saveSubscription | oActiveWorkspace: ", oActiveWorkspace);
-        console.log("SubscriptionEditorController.saveSubscription | sActiveWorkspaceId: ", sActiveWorkspaceId);
-
         let oController = this;
 
         this.m_oSubscriptionService.getStripePaymentUrl(this.m_oEditSubscription.subscriptionId, sActiveWorkspaceId).then(function (response) {
-            console.log("SubscriptionEditorController.saveSubscription | getStripePaymentUrl | response.data: ", response.data);
             if (!utilsIsObjectNullOrUndefined(response.data) && response.data.message) {
                 let oDialog = utilsVexDialogAlertBottomRightCorner("PAYMENT URL RECEIVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
 
                 let sUrl = response.data.message;
-                console.log(" SubscriptionEditorController.saveSubscription | getStripePaymentUrl | sUrl: ", sUrl);
 
                 oController.m_oWindow.open(sUrl, '_blank');
             }
