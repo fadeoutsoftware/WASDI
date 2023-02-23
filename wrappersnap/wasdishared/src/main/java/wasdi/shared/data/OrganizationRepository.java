@@ -146,7 +146,7 @@ public class OrganizationRepository extends MongoRepository {
 	 * @param sUserId the owner of the organization
 	 * @return the organization if found, null otherwise
 	 */
-	public List<Organization> getOrganizationsByUser(String sUserId) {
+	public List<Organization> getOrganizationByUser(String sUserId) {
 		final List<Organization> aoReturnList = new ArrayList<>();
 
 		try {

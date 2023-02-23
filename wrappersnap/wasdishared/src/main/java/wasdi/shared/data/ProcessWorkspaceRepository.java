@@ -8,13 +8,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.bson.BsonNull;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -28,11 +26,10 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessWorkspaceAggregatorByUserIdResult;
+import wasdi.shared.business.MongoDbSumResult;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
-import wasdi.shared.business.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -1605,8 +1602,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 		return aoReturnList;
 	}
 
-	public List<ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... asStatuses) {
-		List<ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult> aoReturnList = new ArrayList<>();
+	public List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> getQueuesByNodeAndStatuses(String sNodeCode, String... asStatuses) {
+		List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoReturnList = new ArrayList<>();
 
 		try {
 			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(Arrays.asList(
@@ -1620,7 +1617,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					new Document("$sort",
 							new Document("operationType", 1L).append("operationSubType", 1L).append("status", 1L))));
 
-			fillList(aoReturnList, oDocuments, ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult.class);
+			fillList(aoReturnList, oDocuments, ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult.class);
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
@@ -1668,7 +1665,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			if (oDocument != null) {
 				String sJSON = oDocument.toJson();
-				ProcessWorkspaceAggregatorByUserIdResult oMongoDbSumResult = s_oMapper.readValue(sJSON, ProcessWorkspaceAggregatorByUserIdResult.class);
+				MongoDbSumResult oMongoDbSumResult = s_oMapper.readValue(sJSON, MongoDbSumResult.class);
 
 				if (oMongoDbSumResult != null) {
 					lTotalRunningTime = oMongoDbSumResult.getTotal();
@@ -1690,34 +1687,6 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	Bson oFilter = Filters.and(oFilterUserId, oFilterDateFrom, oFilterDateTo);
 
     	return oFilter;
-    }
-
-	public List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> getRunningTimeInfo(Collection<String> asSubscriptionIds) {
-		List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList = new ArrayList<>();
-
-		try {
-			AggregateIterable<Document> oDocuments = getCollection(m_sThisCollection).aggregate(
-					Arrays.asList(
-							new Document("$match",
-									new Document("subscriptionId", new Document("$in", asSubscriptionIds))
-										.append("projectId", new Document("$exists", true).append("$ne", new BsonNull()))
-							),
-							new Document("$group",
-									new Document("_id",
-											new Document("subscriptionId", "$subscriptionId")
-												.append("projectId", "$projectId")
-									)
-										.append("total", new Document("$sum", "$runningTime"))
-							)
-					)
-			);
-
-			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult.class);
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-		}
-
-		return aoResultList;
     }
 
 }

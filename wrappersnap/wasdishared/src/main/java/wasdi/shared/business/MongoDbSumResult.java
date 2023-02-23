@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProcessWorkspaceAggregatorByUserIdResult {
+public class MongoDbSumResult {
 
 	private String _id;
 	private Long total;

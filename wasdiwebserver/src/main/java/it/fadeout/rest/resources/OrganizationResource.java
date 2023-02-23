@@ -4,11 +4,7 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.business.UserApplicationPermission.ORGANIZATION_READ;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -75,7 +71,7 @@ public class OrganizationResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		List<OrganizationListViewModel> aoOrganizationLVM = new ArrayList<>();
+		List<OrganizationListViewModel> aoOrganizationList = new ArrayList<>();
 
 		// Domain Check
 		if (oUser == null) {
@@ -90,71 +86,48 @@ public class OrganizationResource {
 
 			WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
 
+			// Create repo
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-			// Get the list of Organizations owned by the user
+			// Get Organization List
+			List<Organization> aoOrganizations = oOrganizationRepository.getOrganizationByUser(oUser.getUserId());
 
-			List<Organization> aoOwnedOrganizations = getOrganizationsOwnedByUser(oUser.getUserId());
+			// For each
+			for (Organization oOrganization : aoOrganizations) {
+				// Create View Model
+				OrganizationListViewModel oOrganizationViewModel = convert(oOrganization, oUser.getUserId());
 
-			List<OrganizationListViewModel> aoOwnedOrganizationLVM = aoOwnedOrganizations.stream()
-					.map(t -> convert(t, oUser.getUserId()))
-					.collect(Collectors.toList());
+				aoOrganizationList.add(oOrganizationViewModel);
+			}
 
-			aoOrganizationLVM.addAll(aoOwnedOrganizationLVM);
+			// Get the list of organizations shared with this user
+			List<UserResourcePermission> aoSharedOrganizations = oUserResourcePermissionRepository.getOrganizationSharingsByUserId(oUser.getUserId());
 
+			if (aoSharedOrganizations.size() > 0) {
+				// For each
+				for (UserResourcePermission oSharedOrganization : aoSharedOrganizations) {
+					Organization oOrganization = oOrganizationRepository.getOrganizationById(oSharedOrganization.getResourceId());
 
-			// Get the list of Organizations shared with this user
+					if (oOrganization == null) {
+						WasdiLog.debugLog("OrganizationResource.getListByUser: The organization that was shared is no longer available " + oSharedOrganization.getResourceId() + ". Removing the orphane record.");
 
-			List<Organization> aoSharedOrganizations = getOrganizationsSharedWithUser(oUser.getUserId());
+						oUserResourcePermissionRepository.deletePermissionsByOrganizationId(oSharedOrganization.getResourceId());
 
-			List<OrganizationListViewModel> aoSharedOrganizationLVM = aoSharedOrganizations.stream()
-					.map(t -> convert(t, oUser.getUserId()))
-					.collect(Collectors.toList());
+						continue;
+					}
 
-			aoOrganizationLVM.addAll(aoSharedOrganizationLVM);
+					OrganizationListViewModel oOrganizationViewModel = convert(oOrganization, oUser.getUserId());
 
-			return Response.ok(aoOrganizationLVM).build();
+					aoOrganizationList.add(oOrganizationViewModel);
+				}
+			}
+
+			return Response.ok(aoOrganizationList).build();
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("OrganizationResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
-	}
-
-	public Set<String> getIdsOfOrganizationsOwnedByOrSharedWithUser(String sUserId) {
-		Set<String> aoOrganizationIds = new HashSet<>();
-
-		aoOrganizationIds.addAll(getIdsOfOrganizationsOwnedByUser(sUserId));
-		aoOrganizationIds.addAll(getIdsOfOrganizationsSharedWithUser(sUserId));
-
-		return aoOrganizationIds;
-	}
-
-	private List<Organization> getOrganizationsOwnedByUser(String sUserId) {
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-
-		return oOrganizationRepository.getOrganizationsByUser(sUserId);
-	}
-
-	private Set<String> getIdsOfOrganizationsOwnedByUser(String sUserId) {
-		return getOrganizationsOwnedByUser(sUserId).stream().map(Organization::getOrganizationId).collect(Collectors.toSet());
-	}
-
-	private List<Organization> getOrganizationsSharedWithUser(String sUserId) {
-		Set<String> aoOrganizationIds = getIdsOfOrganizationsSharedWithUser(sUserId);
-
-		if (aoOrganizationIds.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-
-		return oOrganizationRepository.getOrganizations(aoOrganizationIds);
-	}
-
-	private Set<String> getIdsOfOrganizationsSharedWithUser(String sUserId) {
-		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-		List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getOrganizationSharingsByUserId(sUserId);
-
-		return aoSharings.stream().map(UserResourcePermission::getResourceId).collect(Collectors.toSet());
 	}
 
 	/**

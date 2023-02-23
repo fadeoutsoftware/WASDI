@@ -9,42 +9,6 @@
     </div>
 </div>
 
-<!-- Show Account Info  -->
-<div class="row-v4 mt-3">
-    <div class="col-v4">
-        <legend>
-            {{"DIALOG_EDIT_USER_ACCOUNT_INFO"|translate}}
-        </legend>
-
-        <div class="d-flex flex-row">
-            <p class="mr-2 text-uppercase">
-                {{"DIALOG_EDIT_USER_USER_ID" | translate}}:
-            </p>
-            <p>
-                {{m_oController.m_oUser.userId}}
-            </p>
-        </div>
-
-        <div class="d-flex flex-row">
-            <p class="mr-2 text-uppercase">
-                {{"DIALOG_EDIT_USER_ACCOUNT_TYPE" | translate}}:
-            </p>
-            <p>
-                <span class="text-success">{{m_oController.m_oUser.type}}</span>
-            </p>
-        </div>
-
-        <div class="d-flex flex-row">
-            <p class="mr-2 text-uppercase">
-                {{"DIALOG_EDIT_USER_TIME" | translate}}:
-            </p>
-            <p>
-                <span class="text-success">{{m_oController.m_lTotalRuntime | convertMsToTime}}</span>
-            </p>
-        </div>
-    </div>
-</div>
-
 <!-- Edit user info form -->
 <div class="row-v4 mt-2">
     <div class="col-v4">

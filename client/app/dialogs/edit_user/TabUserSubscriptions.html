@@ -2,6 +2,12 @@
 
     <p class="mr-2 text-uppercase">
     </p>
+    <p>
+        ACCOUNT TYPE: <span class="text-success">{{m_oController.m_oUser.type}}</span>
+        &nbsp;
+        TOTAL PROCESSING TIME: <span class="text-success">{{m_oController.m_lTotalRuntime |
+            convertMsToTime}}</span>
+    </p>
 
     <hr class="divider-line-style1" />
 
@@ -104,8 +110,7 @@
                 <th>Subscription Owner</th>
                 <th>Organization</th>
                 <th>Status</th>
-                <th>Association</th>
-                <th>Time</th>
+                <th>Reason</th>
 
                 <th></th>
                 <th></th>
@@ -121,8 +126,6 @@
                 <td>{{oSubscription.organizationName}}</td>
                 <td><span class="text-success" ng-show="oSubscription.buySuccess">Paid</span><span class="text-warning" ng-show="!oSubscription.buySuccess">Draft</span></td>
                 <td>{{oSubscription.reason}}</td>
-                <td ng-show="oSubscription.runningTime">{{oSubscription.runningTime | convertMsToTime}}</td>
-                <td ng-show="!oSubscription.runningTime"></td>
 
                 <td class="over-icon">
                     <span ng-show="oSubscription.adminRole === false">&nbsp;</span>
