@@ -12,6 +12,7 @@ import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class PLANETProviderAdapter extends ProviderAdapter {
 	
@@ -210,8 +211,10 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 		
 		try {
 			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, getPlanetHeaders()); 
+			
 			//Call the Asset URL
-			String sResult = HttpUtils.standardHttpGETQuery(sUrl, getPlanetHeaders());
+			String sResult = oHttpCallResponse.getResponseBody();
 			
 			// Convert the response in the relative JSON Map representation
 			TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};
@@ -250,8 +253,9 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 		
 		try {
 			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, getPlanetHeaders());
 			// We query the asset
-			String sResult = HttpUtils.standardHttpGETQuery(sUrl, getPlanetHeaders());
+			String sResult = oHttpCallResponse.getResponseBody();
 			
 			// Convert the response in the relative JSON Map representation
 			TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};

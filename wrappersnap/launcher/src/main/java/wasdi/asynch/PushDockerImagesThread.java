@@ -42,7 +42,7 @@ public class PushDockerImagesThread extends Thread {
 				String sProcessorFolder = WasdiConfig.Current.paths.downloadRootPath + "/processors/" + m_oProcessor.getName() + "/";
 				
 				// Create the docker utils
-				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder, WasdiConfig.Current.paths.downloadRootPath, "");
+				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder, "");
 				
 				
 				// For each register: ordered by priority

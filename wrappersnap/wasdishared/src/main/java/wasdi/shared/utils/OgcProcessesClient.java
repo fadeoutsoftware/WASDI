@@ -2,6 +2,7 @@ package wasdi.shared.utils;
 
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.ogcprocesses.Conformance;
 import wasdi.shared.viewmodels.ogcprocesses.Execute;
 import wasdi.shared.viewmodels.ogcprocesses.JobList;
@@ -55,7 +56,8 @@ public class OgcProcessesClient {
 	 */
 	public LandingPage getLandingPage() {
 		try {
-			String sResponse = HttpUtils.httpGet(m_sBaseUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(m_sBaseUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getLandingPage: empty response, return null");
@@ -80,7 +82,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "conformance";
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getConformance: empty response, return null");
@@ -105,7 +108,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "processes";
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getProcesses: empty response, return null");
@@ -130,7 +134,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "processes/"+sProcessId;
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getProcessDescription: empty response, return null");
@@ -159,7 +164,8 @@ public class OgcProcessesClient {
 			
 			String sPayload = MongoRepository.s_oMapper.writeValueAsString(oExecute);
 			
-			String sResponse = HttpUtils.httpPost(sUrl, sPayload, null);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, null); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.executProcess: empty response, return null");
@@ -184,7 +190,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs";
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getJobs: empty response, return null");
@@ -210,7 +217,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getStatus: empty response, return null");
@@ -262,7 +270,8 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			String sResponse = HttpUtils.httpGet(sUrl);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.getResults: empty response, return null");

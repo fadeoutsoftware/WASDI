@@ -27,5 +27,6 @@ public class SubscriptionListViewModel {
 	private String reason;
 	private boolean buySuccess;
 	private boolean adminRole;
+	private Long runningTime;
 
 }

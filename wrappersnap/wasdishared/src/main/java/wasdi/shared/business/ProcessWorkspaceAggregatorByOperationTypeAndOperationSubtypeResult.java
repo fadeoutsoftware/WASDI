@@ -12,7 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult {
+public class ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult {
 
 	@Delegate
 	private Id _id;

@@ -303,7 +303,7 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
         };
 
         this.getProcessWorkspaceTotalRunningTimeByUserAndInterval = function(sUserId, sDateFrom, sDateTo) {
-            let sUrl = this.APIURL + '/process/runningTime?userId=' + sUserId;
+            let sUrl = this.APIURL + '/process/runningTime/UI?userId=' + sUserId;
 
             if (utilsIsStrNullOrEmpty(sDateFrom) === false) {
                 sUrl += '&dateFrom=' + sDateFrom;
@@ -312,6 +312,12 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             if (utilsIsStrNullOrEmpty(sDateTo) === false) {
                 sUrl += '&dateTo=' + sDateTo;
             }
+
+            return this.m_oHttp.get(sUrl);
+        };
+
+        this.getProcessWorkspaceTotalRunningTimeBySubscriptionAndProject = function() {
+            let sUrl = this.APIURL + '/process/runningTime/SP';
 
             return this.m_oHttp.get(sUrl);
         };

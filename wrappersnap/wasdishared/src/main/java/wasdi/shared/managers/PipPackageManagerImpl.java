@@ -47,7 +47,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
@@ -89,7 +89,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sJsonResponse = oHttpCallResponse.getResponseBody();
 
@@ -139,7 +139,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
-		HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 		Integer iResult = oHttpCallResponse.getResponseCode();
 		String sResponse = oHttpCallResponse.getResponseBody();
 

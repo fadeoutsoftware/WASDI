@@ -5,6 +5,7 @@ import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,8 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
+import wasdi.shared.business.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
+import wasdi.shared.business.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
@@ -47,6 +49,7 @@ import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
@@ -358,7 +361,8 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: calling url: " + sUrl);
 						
 						
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody(); 
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							ArrayList<ProcessHistoryViewModel> aoNodeHistory = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessHistoryViewModel>>(){});
@@ -494,7 +498,8 @@ public class ProcessWorkspaceResource {
 						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: calling url: " + sUrl);
 						
 						
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
 						
 						if (Utils.isNullOrEmpty(sResponse)==false) {
 							AppStatsViewModel oNodeStats = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<AppStatsViewModel>(){});
@@ -1142,20 +1147,20 @@ public class ProcessWorkspaceResource {
 	}
 
 	@GET
-	@Path("/runningTime")
+	@Path("/runningTime/UI")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Long getRunningTime(@HeaderParam("x-session-token") String sSessionId, 
+	public Long getRunningTimeByUserAndInterval(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("userId") String sTargetUserId,
 			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo) {
 
-		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime");
+		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval");
 
 		Long lRunningTime = null;
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: invalid session");
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: invalid session");
 			return lRunningTime;
 		}
 
@@ -1221,14 +1226,15 @@ public class ProcessWorkspaceResource {
 					try {
 						String sUrl = oNode.getNodeBaseAddress();
 						if (!sUrl.endsWith("/")) sUrl += "/";
-						sUrl += "process/runningTime?userId=" + sTargetUserId +"&dateFrom=" + sDateFrom + "&dateTo=" + sDateTo;
+						sUrl += "process/runningTime/UI?userId=" + sTargetUserId +"&dateFrom=" + sDateFrom + "&dateTo=" + sDateTo;
 
 						Map<String, String> asHeaders = new HashMap<String, String>();
 						asHeaders.put("x-session-token", sSessionId);
 
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: calling url: " + sUrl);
 
-						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
 
 						if (!Utils.isNullOrEmpty(sResponse)) {
 							Long lRunningTimeOnNode = Long.valueOf(sResponse);
@@ -1236,15 +1242,122 @@ public class ProcessWorkspaceResource {
 							lRunningTime += lRunningTimeOnNode;
 						}
 					} catch (Exception e) {
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: exception contacting computing node: " + e.toString());
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: exception contacting computing node: " + e.toString());
 					}
 				}
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: " + oEx);
 		}
 
 		return lRunningTime;
+	}
+
+	@GET
+	@Path("/runningTime/SP")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Map<String, Map<String, Long>> getRunningTimeBySubscriptionAndProject(@HeaderParam("x-session-token") String sSessionId) {
+
+		WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject");
+
+		Map<String, Map<String, Long>> aoRunningTimeBySubscriptionByProject = new HashMap<String, Map<String,Long>>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
+			return aoRunningTimeBySubscriptionByProject;
+		}
+
+		try {
+			Collection<String> asIdsOfSubscriptionsAssociatedWithUser =
+					new SubscriptionResource().getIdsOfSubscriptionsAssociatedWithUser(oUser.getUserId());
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			List<ProcessWorkspaceAggregatorBySubscriptionAndProjectResult> aoResultList =
+					oProcessWorkspaceRepository.getRunningTimeInfo(asIdsOfSubscriptionsAssociatedWithUser);
+
+			for (ProcessWorkspaceAggregatorBySubscriptionAndProjectResult oResult : aoResultList) {
+				Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionByProject.get(oResult.getSubscriptionId());
+
+				if (aoRunningTimeByProject == null) {
+					aoRunningTimeByProject = new HashMap<>();
+					aoRunningTimeBySubscriptionByProject.put(oResult.getSubscriptionId(), aoRunningTimeByProject);
+				}
+
+				Long lTotalRunningTime = aoRunningTimeByProject.get(oResult.getProjectId());
+
+				if (lTotalRunningTime == null) {
+					lTotalRunningTime = Long.valueOf(0);
+					aoRunningTimeByProject.put(oResult.getProjectId(), lTotalRunningTime);
+				}
+
+				aoRunningTimeByProject.put(oResult.getProjectId(), aoRunningTimeByProject.get(oResult.getProjectId()) + oResult.getTotal());
+			}
+
+			// The main node needs to query also the others
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						sUrl += "process/runningTime/UI";
+
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: calling url: " + sUrl);
+
+						HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+						String sResponse = oHttpCallResponse.getResponseBody();
+
+WasdiLog.debugLog("sResponse: " + sResponse);
+
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							Map<String, Map<String, Long>> aoRunningTimeBySubscriptionByProjectFromNode = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String, Map<String, Long>>>(){});
+							if (aoRunningTimeBySubscriptionByProjectFromNode != null) {
+								for (Map.Entry<String, Map<String, Long>> oEntrySubscription : aoRunningTimeBySubscriptionByProjectFromNode.entrySet()) {
+									String sSubscriptionId = oEntrySubscription.getKey();
+									Map<String, Long> aoRunningTimeByProjectFromNode = oEntrySubscription.getValue();
+
+									Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionByProject.get(sSubscriptionId);
+
+									if (aoRunningTimeByProject == null) {
+										aoRunningTimeBySubscriptionByProject.put(sSubscriptionId, aoRunningTimeByProjectFromNode);
+									} else {
+										for (Map.Entry<String, Long> oEntryProject : aoRunningTimeByProjectFromNode.entrySet()) {
+											String sProjectId = oEntryProject.getKey();
+											Long lRunningTimeFromNode = oEntryProject.getValue();
+
+											Long lRunningTime = aoRunningTimeByProject.get(sProjectId);
+
+											if (lRunningTime == null) {
+												aoRunningTimeByProject.put(sProjectId, lRunningTimeFromNode);
+											} else {
+												aoRunningTimeByProject.put(sProjectId, lRunningTime + lRunningTimeFromNode);
+											}
+										}
+									}
+								}
+							}
+						}
+					} catch (Exception e) {
+						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + e.toString());
+					}
+				}
+			}
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: " + oEx);
+		}
+
+		return aoRunningTimeBySubscriptionByProject;
 	}
 	
 	/**
@@ -1309,14 +1422,14 @@ public class ProcessWorkspaceResource {
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 
 				// Retrive operations from the Database
-				List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoResultsList =
+				List<ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult> aoResultsList =
 						oProcessWorkspaceRepository.getQueuesByNodeAndStatuses(sNodeCode, asStatuses);
 
 				// Create an aggregated map: Map<OperationType, Map<OperationSubType, Map<Status, Count>>>
 				// For each operation type, for each subtype, map state - number of processes
 				Map<String, Map<String, Map<String, Integer>>> aoPWAggregatedMap = new HashMap<>();
 
-				for (ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult oResult : aoResultsList) {
+				for (ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult oResult : aoResultsList) {
 					
 					// Get the operation type
 					String sOperationType = oResult.getOperationType();
@@ -1445,7 +1558,8 @@ public class ProcessWorkspaceResource {
 					if (sUrl.endsWith("/") == false) sUrl += "/";
 					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
 					
-					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
+					HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+					String sNodeResponse = oHttpCallResponse.getResponseBody();
 					
 					// Create an array of answers
 					JSONArray oResults = new JSONArray(sNodeResponse);

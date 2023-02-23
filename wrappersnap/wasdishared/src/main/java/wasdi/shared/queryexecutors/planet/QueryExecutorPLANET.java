@@ -15,6 +15,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -88,7 +89,8 @@ public class QueryExecutorPLANET extends QueryExecutor {
 			}
 			
 			// Call the http 
-			String sResponse = HttpUtils.httpPost(sUrl, sPayload, aoHeaders, sAuth);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, aoHeaders, sAuth); 
+			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			// Translate the result
 			List<QueryResultViewModel> aoFoundItems = m_oResponseTranslator.translateBatch(sResponse, bFullViewModel);

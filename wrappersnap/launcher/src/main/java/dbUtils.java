@@ -313,8 +313,6 @@ public class dbUtils {
     
     public static void redeployProcessor(Processor oProcessor) {
         String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-        String sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
-        String sTomcatUser = WasdiConfig.Current.tomcatUser;
         
         String sProcessorFolder = sBasePath + "/processors/" + oProcessor.getName() + "/";
         
@@ -323,7 +321,7 @@ public class dbUtils {
         	return;
         }
 
-        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, sDockerTemplatePath, sTomcatUser);
+        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType());
 
         ProcessorParameter oParameter = new ProcessorParameter();
 
@@ -511,7 +509,7 @@ public class dbUtils {
 
                             System.out.println("Processor " + sProcessorName + " present in the node");
 
-                            WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType(), sBasePath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
+                            WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oProcessor.getType());
 
                             ProcessorParameter oParameter = new ProcessorParameter();
 

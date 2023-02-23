@@ -31,11 +31,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	public JupyterNotebookProcessorEngine() {
 		super();
 	}
-
-	public JupyterNotebookProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-	}
-
+	
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");

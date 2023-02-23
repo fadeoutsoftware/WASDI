@@ -17,6 +17,7 @@ import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class PipProcessorEngine extends DockerProcessorEngine {
 
@@ -25,10 +26,6 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 	public PipProcessorEngine() {
 		super();
-	}
-
-	public PipProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
-		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
 	}
 
 	@Override
@@ -138,7 +135,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 
 			String sPipApi = "https://pypi.org/pypi/" + sPackage + "/json/";
 
-			String sResult = HttpUtils.httpGet(sPipApi, null);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sPipApi, null); 
+			String sResult = oHttpCallResponse.getResponseBody();
 
 			if (Utils.isNullOrEmpty(sResult)==false) {
 				try {
