@@ -235,21 +235,21 @@
         "millisWaitAfterDelete": {{ dictWasdiConfiguration.dockers.millisWaitAfterDelete }},
         "millisWaitAfterDeployScriptCreated": {{ dictWasdiConfiguration.dockers.millisWaitAfterDeployScriptCreated }},
         "millisWaitForLogin": {{ dictWasdiConfiguration.dockers.millisWaitForLogin }},
-        "eoepca": {
-            "registers": [
-{% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.eoepca.registers %}
-                {
-                    "id": "{{ sCurrentDockerRegistry }}",
-                    "address": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].address }}",
-                    "apiAddress": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].apiAddress }}",
-                    "user": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].user }}",
-                    "password": "{{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].password }}",
-                    "priority": {{ dictWasdiConfiguration.dockers.eoepca.registers[sCurrentDockerRegistry].priority }}
-                }{% if not loop.last %},
+        "registers": [
+{% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.registers %}
+            {
+                "id": "{{ sCurrentDockerRegistry }}",
+                "address": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].address }}",
+                "apiAddress": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].apiAddress }}",
+                "user": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].user }}",
+                "password": "{{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].password }}",
+                "priority": {{ dictWasdiConfiguration.dockers.registers[sCurrentDockerRegistry].priority }}
+            }{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
             ],
+        "eoepca": {
             "dockerWriteFolder": "{{ dictWasdiConfiguration.dockers.eoepca.dockerWriteFolder }}",
             "adesServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.adesServerAddress }}",
             "adesUser": "{{ dictWasdiConfiguration.dockers.eoepca.adesUser }}",
