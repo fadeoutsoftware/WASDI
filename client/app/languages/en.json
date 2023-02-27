@@ -306,6 +306,7 @@
 	"DIALOG_EDIT_USER_ACCOUNT_TYPE_2": "user", 
 	"DIALOG_EDIT_USER_PROCESS_TIME_1": "You have used", 
 	"DIALOG_EDIT_USER_PROCESS_TIME_2": "of WASDI processing time",
+	"DIALOG_EDIT_USER_TIME": "Total processing time",
 
     "DIALOG_FTP_TITLE":"Transfer to FTP",
     "DIALOG_FTP_INPUT_SERVER":"FTP Server address",
