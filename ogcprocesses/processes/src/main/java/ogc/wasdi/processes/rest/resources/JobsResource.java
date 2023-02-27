@@ -113,7 +113,7 @@ public class JobsResource {
 					
 					WasdiLog.debugLog("ProcessesResource.getJobsList: calling WASDI Node at url: " + sUrl);
 					
-					String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+					String sResponse = HttpUtils.httpGet(sUrl, asHeaders).getResponseBody();
 					
 					if (Utils.isNullOrEmpty(sResponse)==false) {
 						ArrayList<ProcessWorkspaceViewModel> aoProcWs = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});

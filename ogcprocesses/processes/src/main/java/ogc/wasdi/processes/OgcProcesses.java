@@ -157,7 +157,7 @@ public class OgcProcesses extends ResourceConfig {
 				Map<String,String> asHeaders = new HashMap<>();
 				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 				
-				String sResponse = HttpUtils.httpPost(WasdiConfig.Current.keycloack.introspectAddress, sPayload, asHeaders, WasdiConfig.Current.keycloack.client + ":" + WasdiConfig.Current.keycloack.clientSecret);
+				String sResponse = HttpUtils.httpPost(WasdiConfig.Current.keycloack.introspectAddress, sPayload, asHeaders, WasdiConfig.Current.keycloack.client + ":" + WasdiConfig.Current.keycloack.clientSecret).getResponseBody();
 				JSONObject oJSON = null;
 				if(!Utils.isNullOrEmpty(sResponse)) {
 					oJSON = new JSONObject(sResponse);
@@ -353,7 +353,7 @@ public class OgcProcesses extends ResourceConfig {
 			
 			WasdiLog.debugLog("JobsResource.readProcessWorkspaceFromNode: calling url: " + sUrl);
 			
-			String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId));
+			String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)).getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)==false) {
 				ProcessWorkspaceViewModel oProcWs = MongoRepository.s_oMapper.readValue(sResponse, ProcessWorkspaceViewModel.class);

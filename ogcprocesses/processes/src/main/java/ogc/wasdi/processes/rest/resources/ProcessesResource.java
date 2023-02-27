@@ -710,7 +710,7 @@ public class ProcessesResource {
 			sUrl += "processing/run?operation=" + sOperationType + "&name=" + URLEncoder.encode(oProcessor.getName(), java.nio.charset.StandardCharsets.UTF_8.toString());
 			
 			// call the API to really execute the processor 
-			String sResult = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId));
+			String sResult = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId)).getResponseBody();
 			
 			WasdiLog.debugLog("ProcessesResource.executeApplication: execute request done");
 			
@@ -1028,7 +1028,7 @@ public class ProcessesResource {
     		if (sUrl.endsWith("/") == false) sUrl += "/";
     		sUrl += "/process/nodesByScore";
     		
-    		String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId));
+    		String sResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)).getResponseBody();
     		
     		ArrayList<LinkedHashMap<String, Object>> oGetClass = new ArrayList<>();
     		
@@ -1436,7 +1436,7 @@ public class ProcessesResource {
 			asHeaders.put("x-session-token", sSessionId);
 			
 			// Call the API
-			String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+			String sResponse = HttpUtils.httpGet(sUrl, asHeaders).getResponseBody();
 			
 			// Get result and extract status
 			Map<String, Object> aoJSONMap = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
