@@ -1307,7 +1307,7 @@ public class ProcessWorkspaceResource {
 					try {
 						String sUrl = oNode.getNodeBaseAddress();
 						if (!sUrl.endsWith("/")) sUrl += "/";
-						sUrl += "process/runningTime/UI";
+						sUrl += "process/runningTime/SP";
 
 						Map<String, String> asHeaders = new HashMap<String, String>();
 						asHeaders.put("x-session-token", sSessionId);
