@@ -427,7 +427,7 @@ public class ConsoleResource {
 			}
 			
 			// Lets see if it answer
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(oJupyterNotebook.getUrl(), Collections.emptyMap());
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(oJupyterNotebook.getUrl(), Collections.emptyMap());
 
 			int iResponseCode = oHttpCallResponse.getResponseCode().intValue();
 

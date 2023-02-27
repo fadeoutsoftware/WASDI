@@ -3,7 +3,7 @@ package wasdi.shared.viewmodels.ogcprocesses;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdditionalParameter {
+public class AdditionalParameter extends OgcProcessesViewModel  {
 	private String name = null;
 	private List<Object> value = new ArrayList<Object>();
 	

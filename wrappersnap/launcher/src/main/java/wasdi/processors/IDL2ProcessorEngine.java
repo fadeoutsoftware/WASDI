@@ -6,6 +6,7 @@ import java.io.FileWriter;
 
 import com.google.common.io.Files;
 
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
@@ -16,18 +17,9 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	public IDL2ProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "idl";		
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.IDL);		
 	}
-
 	
-	public IDL2ProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-		super(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
-		
-		m_sDockerTemplatePath = sDockerTemplatePath;		
-		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "idl";		
-	}
-
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
@@ -215,12 +207,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			}
 			
 			// Get the processor Path
-			String sDestinationFilePath = m_sWorkingRootPath;
-			if (!sDestinationFilePath.endsWith(File.separator)) {
-				sDestinationFilePath+=File.separator;
-			}
-			
-			sDestinationFilePath = sDestinationFilePath+ "processors" + File.separator + m_oParameter.getName() + File.separator;
+			String sDestinationFilePath = getProcessorFolder(m_oParameter.getName());;
 			
 			File oLibFile = new File(sLibFilePath+"idlwasdilib.pro");
 			File oDestinationFile = new File(sDestinationFilePath+"idlwasdilib.pro");

@@ -205,7 +205,7 @@
 
     "DIALOG_PROCESSES_LOGS_TITLE":"Workspace Processes List",
 	"DIALOG_PROCESSES_LOGS_NO_WS":"No workspace selected, cannot loading data. If you refreshed the page please go to Workspace section and select one.",
-	"DIALOG_PROCESSES_LOGS_NONE":"None",
+	"DIALOG_PROCESSES_LOGS_NONE":"ANY",
 	"DIALOG_PROCESSES_LOGS_CREATED":"CREATED",
 	"DIALOG_PROCESSES_LOGS_RUNNING":"RUNNING",
 	"DIALOG_PROCESSES_LOGS_WAITING":"WAITING",
@@ -424,8 +424,10 @@
 
 	"DIALOG_MANAGE_USERS_TITLE": "Manage Users",
 	"DIALOG_MANAGE_WORKSPACES_TITLE": "Manage Workspaces",
+	"DIALOG_MANAGE_PROCESSORS_TITLE": "Manage Processors",
 	"DIALOG_MANAGE_USERS_USER_PARTIAL_NAME": "User name or email",
 	"DIALOG_MANAGE_WORKSPACES_WORKSPACE_PARTIAL_NAME": "Workspace name or ID",
+	"DIALOG_MANAGE_PROCESSORS_PROCESSOR_PARTIAL_NAME": "Processor name or ID",
 	"DIALOG_MANAGE_USERS_SEARCH": "Search",
 
 

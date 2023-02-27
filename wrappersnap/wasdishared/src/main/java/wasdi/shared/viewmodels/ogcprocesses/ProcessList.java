@@ -3,7 +3,7 @@ package wasdi.shared.viewmodels.ogcprocesses;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessList {
+public class ProcessList extends OgcProcessesViewModel {
 	
 	private List<ProcessSummary> processes = new ArrayList<ProcessSummary>();
 	private List<Link> links = new ArrayList<Link>();

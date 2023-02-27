@@ -20,6 +20,7 @@ import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
@@ -481,7 +482,8 @@ public class QueryExecutorGPM extends QueryExecutor {
 			}
 
 			try {
-				sResult = HttpUtils.standardHttpGETQuery(sUrl, HttpUtils.getBasicAuthorizationHeaders(s_oDataProviderConfig.user, s_oDataProviderConfig.password));
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getBasicAuthorizationHeaders(s_oDataProviderConfig.user, s_oDataProviderConfig.password)); 
+				sResult = oHttpCallResponse.getResponseBody();
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("QueryExecutorGPM.performRequest: exception in http get call: " + oEx.toString());
 			}

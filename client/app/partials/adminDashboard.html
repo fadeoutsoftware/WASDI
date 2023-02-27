@@ -269,8 +269,8 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Name</th>
                             <th>WorkspaceId</th>
+                            <th>Name</th>
                             <th>Node</th>
                             <th>Owner</th>
                         </tr>
@@ -279,10 +279,96 @@
                         <tr
                             ng-repeat="oWorkspace in m_oController.m_aoWorkspacesList"
                         >
-                            <td>{{oWorkspace.workspaceName}}</td>
                             <td>{{oWorkspace.workspaceId}}</td>
+                            <td>{{oWorkspace.workspaceName}}</td>
                             <td>{{oWorkspace.nodeCode}}</td>
                             <td>{{oWorkspace.ownerUserId}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="container-fluid">
+                    <div class="row give-permission-row">
+                        <h3>
+                            {{"DIALOG_MANAGE_PROCESSORS_TITLE" | translate}}
+                        </h3>
+                        <div class="spacer"></div>
+
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <div class="group">
+                                <label class="filter-label">
+                                    {{"DIALOG_MANAGE_PROCESSORS_PROCESSOR_PARTIAL_NAME"
+                                    | translate}}
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="processorPartialName"
+                                    id="workspaceprocessorPartialName"
+                                    class="form-control wasdi-input"
+                                    value=""
+                                    title=""
+                                    ng-model="m_oController.m_sProcessorPartialName"
+                                    required="required"
+                                />
+
+                                <span class="highlight filter-highlight"></span>
+                                <span class="bar filter-bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <div class="group">
+                                <button
+                                    class="btn btn-primary btn-wasdi btn-lg"
+                                    ng-click="m_oController.findProcessorsByPartialName(m_oController.m_sProcessorPartialName)"
+                                >
+                                    <i
+                                        class="fa fa-search fa-lg"
+                                        aria-hidden="true"
+                                    ></i>
+                                    <span class="ng-binding"
+                                        >{{"DIALOG_MANAGE_USERS_SEARCH" |
+                                        translate}}</span
+                                    >
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="m_oController.m_aoProcessorsList.length > 0">
+            <div class="spacer"></div>
+
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ProcessorId</th>
+                            <th>Name</th>
+                            <th>Version</th>
+                            <th>Publisher</th>
+                            <th>Is Public</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            ng-repeat="oProcessor in m_oController.m_aoProcessorsList"
+                        >
+                            <td>{{oProcessor.processorId}}</td>
+                            <td>{{oProcessor.processorName}}</td>
+                            <td>{{oProcessor.processorVersion}}</td>
+                            <td>{{oProcessor.publisher}}</td>
+                            <td>{{oProcessor.isPublic === 1 ? "Yes" : "No"}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -854,31 +940,43 @@
                 <div class="spacer"></div>
     
                 <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                    <table class="table table-hover">
+                    <table class="table table-hover text-right">
                         <thead>
                             <tr>
-                                <th>Node Code</th>
-                                <th>Timestamp</th>
-                                <th>Licenses</th>
+                                <th class="text-left">Node Code</th>
+                                <th class="text-left">Timestamp</th>
+                                <th class="text-left">Licenses</th>
                                 <th>Processes</th>
                                 <th>Disk Used</th>
                                 <th>Disk Available</th>
                                 <th>Disk Total</th>
                                 <th>Disk Used</th>
                                 <th>Disk Available</th>
+
+                                <th>RAM Used</th>
+                                <th>RAM Available</th>
+                                <th>RAM Total</th>
+                                <th>RAM Used</th>
+                                <th>RAM Available</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="oNode in m_oController.m_aoAvailableNodesSortedByScoreList">
-                                <td>{{oNode.nodeCode}}</td>
-                                <td>{{oNode.timestampAsString}}</td>
-                                <td>{{oNode.licenses}}</td>
+                                <td class="text-left">{{oNode.nodeCode}}</td>
+                                <td class="text-left">{{oNode.timestampAsString}}</td>
+                                <td class="text-left">{{oNode.licenses}}</td>
                                 <td>{{oNode.numberOfProcesses}}</td>
                                 <td>{{oNode.diskPercentageUsed + " %"}}</td>
                                 <td>{{oNode.diskPercentageAvailable + " %"}}</td>
-                                <td>{{oNode.diskAbsoluteTotal | formatFileSize:2}}</td>
-                                <td>{{oNode.diskAbsoluteUsed | formatFileSize:2}}</td>
-                                <td>{{oNode.diskAbsoluteAvailable | formatFileSize:2}}</td>
+                                <td>{{oNode.diskAbsoluteTotal | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.diskAbsoluteUsed | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.diskAbsoluteAvailable | convertBytesToHigherUnit:2}}</td>
+
+                                <td>{{oNode.memoryPercentageUsed + " %"}}</td>
+                                <td>{{oNode.memoryPercentageAvailable + " %"}}</td>
+                                <td>{{oNode.memoryAbsoluteTotal | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.memoryAbsoluteUsed | convertBytesToHigherUnit:2}}</td>
+                                <td>{{oNode.memoryAbsoluteAvailable | convertBytesToHigherUnit:2}}</td>
                             </tr>
                         </tbody>
                     </table>

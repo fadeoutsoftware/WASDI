@@ -15,6 +15,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
  * Wrap main docker functionalities
@@ -61,10 +62,11 @@ public class DockerUtils {
      * @param sWorkingRootPath WASDI Working path
      * @param sTomcatUser      User
      */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath, String sTomcatUser) {
+    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser) {
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder;
-        m_sWorkingRootPath = sWorkingRootPath;
+        m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
+        if (!m_sWorkingRootPath.endsWith(File.separator)) m_sWorkingRootPath += File.separator; 
         m_sUser = sTomcatUser;
     }
     
@@ -173,12 +175,14 @@ public class DockerUtils {
             // Prepare the name of the docker
             String sDockerBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
             
+            sDockerName = sDockerBaseName;
+            
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
             	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
             }
-
+            
             // Initialize Args
             ArrayList<String> asArgs = new ArrayList<>();
 
@@ -208,7 +212,7 @@ public class DockerUtils {
                     	String sMultiTagBuild = "docker build -t" + sDockerName;
                     	
                     	// Take all our registers
-                    	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.eoepca.getRegisters();
+                    	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
                     	
                     	// For each register
                     	for (DockerRegistryConfig oDockerRegistryConfig : aoRegisters) {
@@ -476,7 +480,7 @@ public class DockerUtils {
             if (WasdiConfig.Current.nodeCode.equals("wasdi")) {            	
                 if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
                 	WasdiLog.infoLog("This is a registry stored docker: clean all our registers");
-                	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.eoepca.registers) {
+                	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
                 		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
     				}
                 }
@@ -550,6 +554,35 @@ public class DockerUtils {
     	return true;
     }
     
+    /**
+     * Pull a docker image from a registry. Must be logged 
+     * @param sImage Image name
+     * @return True if pushed false if error 
+     */
+    public boolean pull(String sImage, String sRegistry) {	
+    	try {
+    		
+            // Create the docker command
+            ArrayList<String> asArgs = new ArrayList<>();
+            // Push
+            asArgs.add("pull");
+            
+            String sServerImage = sRegistry + "/" + sImage;
+            
+            asArgs.add(sServerImage);
+            
+            String sCommand = "docker";
+			
+            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
+    		
+    	} catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
+            return false;
+        }
+    	
+    	return true;
+    }    
+    
     public void removeImageFromRegistry(String sImageName, String sVersion, DockerRegistryConfig oRegistry) {
     	try {
     		
@@ -560,9 +593,9 @@ public class DockerUtils {
     		
     		// Get the layer manifest
     		Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(oRegistry.user, oRegistry.password);
-    		asHeaders.put("Accept", "application/vnd.docker.distribution.manifest.v1+json");
+    		
     		String sUrl = oRegistry.apiAddress;
-    		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+    		sUrl += "/repository/docker-wasdi-processor/v2/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
     		
@@ -572,7 +605,8 @@ public class DockerUtils {
     		
     		Map<String, List<String>> aoOuputHeaders = new HashMap<>(); 
     		
-    		String sManifest = HttpUtils.httpGet(sUrl, asHeaders, aoOuputHeaders);
+    		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders, aoOuputHeaders); 
+    		String sManifest = oHttpCallResponse.getResponseBody();
     		//Manifest oManifest = MongoRepository.s_oMapper.readValue(sManifest, Manifest.class);
     		
     		//WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: got manifest " + sManifest);
@@ -590,7 +624,7 @@ public class DockerUtils {
     		
     		if (!Utils.isNullOrEmpty(sDigest)) {
         		sUrl = oRegistry.apiAddress;
-        		sUrl += "/repository/docker-wasdi-processor/v2/wasdi/";
+        		sUrl += "/repository/docker-wasdi-processor/v2/";
         		sUrl += sImageName;
         		sUrl += "/manifests/" + sDigest;
         		

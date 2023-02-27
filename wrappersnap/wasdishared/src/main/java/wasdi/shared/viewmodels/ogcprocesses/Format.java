@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-public class Format {
+public class Format extends OgcProcessesViewModel  {
 	private String mediaType = null;
 	private String encoding = null;
 	private Schema schema = null;

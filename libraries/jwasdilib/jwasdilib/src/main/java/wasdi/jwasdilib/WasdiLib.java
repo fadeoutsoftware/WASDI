@@ -2149,6 +2149,7 @@ public class WasdiLib {
 	 * @param iOrbitNumber Sentinel Orbit Number. Can be null.
 	 * @param sSensorOperationalMode Sensor Operational Mode. ONLY for S1. Accepts -> "SM", "IW", "EW", "WV". Can be null. Ignored for Platform "S2"
 	 * @param sCloudCoverage Cloud Coverage. Sample syntax: [0 TO 9.4] 
+	 * @param aoParams a dictionary of search keys to add to the query. The system will add key=value to the query sent to WASDI.
 	 * @return List of the available products as a LIST of Dictionary representing JSON Object:
 	 * {
 	 * 		footprint = <image footprint in WKT>
@@ -2161,7 +2162,7 @@ public class WasdiLib {
 	 * }
 	 */
 	public List<Map<String, Object>> searchEOImages(String sPlatform, String sDateFrom, String sDateTo, Double dULLat, Double dULLon, Double dLRLat, Double dLRLon,
-			String sProductType, Integer iOrbitNumber, String sSensorOperationalMode, String sCloudCoverage ) {
+			String sProductType, Integer iOrbitNumber, String sSensorOperationalMode, String sCloudCoverage, Map<String, Object> aoParams) {
 
 		log("WasdiLib.searchEOImages( " + sPlatform + ", [ " + sDateFrom + ", " + sDateTo + " ], " +
 				"[ " + dULLat + ", " + dULLon + ", " + dLRLat + ", " + dLRLon + " ], " + 
@@ -2271,6 +2272,18 @@ public class WasdiLib {
 		// Date Block
 		sQuery += "AND (beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
 		sQuery += "AND endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+
+		if (aoParams != null) {
+			try {
+				for (Map.Entry<String, Object> oEntry : aoParams.entrySet()) {
+					if (oEntry.getKey() != null && oEntry.getValue() != null) {
+						sQuery += " AND " + oEntry.getKey() + ":" + oEntry.getValue().toString();
+					}
+				}
+			} catch(Exception oE) {
+				log("WasdiLib.searchEOImages: exception adding generic params");
+			}
+		}
 
 		// Close the second block
 		sQuery += ") ";
@@ -2445,15 +2458,26 @@ public class WasdiLib {
 			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
 			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
 
-			String sUrl = m_sBaseUrl + "/filebuffer/download?fileUrl=" + sEncodedFileLink+"&provider="+
-					sProvider +"&workspace="+m_sActiveWorkspace+"&bbox="+sEncodedBoundingBox;
-			
-			if (sName != null) {
-				sUrl = sUrl + "&name="+sName;
+			String sUrl = m_sBaseUrl + "/filebuffer/download";
+
+			Map<String, String> asPayload = new HashMap<>();
+			asPayload.put("fileUrl", sEncodedFileLink);
+			asPayload.put("name", sName);
+			asPayload.put("provider", sProvider);
+			asPayload.put("workspace", m_sActiveWorkspace);
+			asPayload.put("bbox", sEncodedBoundingBox);
+			asPayload.put("parent", null);
+
+			String sPayload = null;
+			try {
+				sPayload = s_oMapper.writeValueAsString(asPayload);
+			} catch (Exception oE) {
+				log("WasdiLib.asynchImportProduct: could not serialize payload due to " + oE + ", aborting");
+				return null;
 			}
 
 			// Call the server
-			String sResponse = httpGet(sUrl, getStandardHeaders());
+			String sResponse = httpPost(sUrl, sPayload, getStandardHeaders());
 
 			// Read the Primitive Result response
 			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});

@@ -1,6 +1,10 @@
 package wasdi.shared.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Dockers configuration
@@ -54,4 +58,25 @@ public class DockersConfig {
 	 * Configuration of the EoEpca related docker parameters
 	 */
 	public EOEPCAConfig eoepca;
+	
+	/**
+	 * List of docker registries supported
+	 */
+	public ArrayList<DockerRegistryConfig> registers;
+	
+	/**
+	 * Get the list of registers ordered by priority
+	 * @return Ordered list of registers
+	 */
+	public ArrayList<DockerRegistryConfig> getRegisters() {
+		try {
+			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
+		}		
+		catch (Exception oEx) {
+			WasdiLog.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
+		}
+		
+		return registers;
+	}
+	
 }

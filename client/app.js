@@ -38,6 +38,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.NodeService',
     'wasdi.AdminDashboardService',
     'wasdi.PackageManagerService',
+    'wasdi.ImagesService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -71,6 +72,8 @@ var wasdiApp = angular.module('wasdi', [
 
     //FILTERS
     'wasdi.stringUtils',
+    'wasdi.stringUtilsTime',
+    'wasdi.stringUtilsFileSize',
 
     //EXTERNAL LIBS
     'ui.bootstrap',

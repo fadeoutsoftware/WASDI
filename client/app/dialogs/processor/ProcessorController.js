@@ -14,7 +14,8 @@ var ProcessorController = (function () {
         oRootScope,
         oProcessorService,
         oProcessorMediaService,
-        oModalService
+        oModalService,
+        oImagesService
     ) {
         /**
          * Angular Scope
@@ -70,6 +71,10 @@ var ProcessorController = (function () {
          */
         this.m_oProcessorService = oProcessorService;
         /**
+         * Images Service
+         */
+        this.m_oImagesService = oImagesService;
+        /**
          * User Uploaded Zip file
          * @type {null}
          */
@@ -103,7 +108,7 @@ var ProcessorController = (function () {
             { name: "OCTAVE 6.x", id: "octave" },
             { name: "Python 3.x Conda", id: "conda" },
             { name: "C# .NET Core", id: "csharp" },
-            { name: "EOEPCA", id: "eoepca" }
+            { name: "OGC Application Package", id: "eoepca" }
         ];
         /**
          * Selected Processor Type
@@ -336,6 +341,8 @@ var ProcessorController = (function () {
                 function (data) {
                     if (utilsIsObjectNullOrUndefined(data.data) === false) {
                         oController.m_oProcessorDetails = data.data;
+
+                        oController.m_oImagesService.updateProcessorLogoImageUrl(oController.m_oProcessorDetails);
 
                         oController.m_oProcessorMediaService
                             .getCategories()
@@ -864,7 +871,7 @@ var ProcessorController = (function () {
             var oBody = new FormData();
             oBody.append("image", oSelectedFile);
 
-            this.m_oProcessorMediaService
+            this.m_oImagesService
                 .uploadProcessorLogo(this.m_oInputProcessor.processorId, oBody)
                 .then(
                     function (data) {
@@ -900,7 +907,7 @@ var ProcessorController = (function () {
             var oBody = new FormData();
             oBody.append("image", oSelectedFile);
 
-            this.m_oProcessorMediaService
+            this.m_oImagesService
                 .uploadProcessorImage(this.m_oInputProcessor.processorId, oBody)
                 .then(
                     function (data) {
@@ -929,22 +936,17 @@ var ProcessorController = (function () {
     ProcessorController.prototype.removeProcessorImage = function (sImage) {
         let oController = this;
 
-        let asSplit = sImage.split("/");
-        if (asSplit == null) return;
-        if (asSplit.length == 0) return;
-        let sImageIndex = asSplit[asSplit.length - 1];
+        let sImageName = this.m_oImagesService.getImageNameFromUrl(sImage);
 
-        this.m_oProcessorMediaService
+        this.m_oImagesService
             .removeProcessorImage(
-                this.m_oInputProcessor.processorId,
-                sImageIndex
+                this.m_oInputProcessor.processorName,
+                sImageName
             )
             .then(
                 function (data) {
                     oController.m_oProcessorDetails.images =
-                        oController.m_oProcessorDetails.images.filter(function (
-                            e
-                        ) {
+                        oController.m_oProcessorDetails.images.filter(function (e) {
                             return e !== sImage;
                         });
 
@@ -1066,6 +1068,7 @@ var ProcessorController = (function () {
         "ProcessorService",
         "ProcessorMediaService",
         "ModalService",
+        "ImagesService"
     ];
     return ProcessorController;
 })();

@@ -26,8 +26,10 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MetricsEntryRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -38,6 +40,7 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.permissions.UserResourcePermissionViewModel;
+import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
@@ -112,7 +115,7 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.shareWorkspace: invalid session");
+			WasdiLog.debugLog("WorkspaceResource.findWorkspacesByPartialName: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -122,7 +125,7 @@ public class AdminDashboardResource {
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
-			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
+			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
 		}
 
@@ -138,6 +141,47 @@ public class AdminDashboardResource {
 		}
 
 		GenericEntity<List<WorkspaceListInfoViewModel>> entity = new GenericEntity<List<WorkspaceListInfoViewModel>>(aoWorkspaceVMs, List.class);
+
+		return Response.ok(entity).build();
+	}
+
+	@GET
+	@Path("/processorsByPartialName")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public Response findProcessorsByPartialName(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("partialName") String sPartialName) {
+
+		WasdiLog.debugLog("AdminDashboardResource.findProcessorsByPartialName(" + " Partial name: " + sPartialName + " )");
+
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.debugLog("WorkspaceResource.findProcessorsByPartialName: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}
+
+		// Can the user access this section?
+		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+		}
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			WasdiLog.debugLog("AdminDashboardResource.findProcessorsByPartialName: invalid partialName");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
+		}
+
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		List<Processor> aoProcessors = oProcessorRepository.findProcessorsByPartialName(sPartialName);
+
+		List<DeployedProcessorViewModel> aoProcessorVMs = new ArrayList<>();
+
+		if (aoProcessors != null) {
+			aoProcessorVMs = aoProcessors.stream()
+					.map(AdminDashboardResource::convert)
+					.collect(Collectors.toList());
+		}
+
+		GenericEntity<List<DeployedProcessorViewModel>> entity = new GenericEntity<List<DeployedProcessorViewModel>>(aoProcessorVMs, List.class);
 
 		return Response.ok(entity).build();
 	}
@@ -364,6 +408,20 @@ public class AdminDashboardResource {
 		oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 
 		return oWSViewModel;
+	}
+
+	public static DeployedProcessorViewModel convert(Processor oProcessor) {
+		DeployedProcessorViewModel oProcessorViewModel = new DeployedProcessorViewModel();
+
+		oProcessorViewModel.setPublisher(oProcessor.getUserId());
+		oProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
+		oProcessorViewModel.setProcessorName(oProcessor.getName());
+		oProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
+		oProcessorViewModel.setType(oProcessor.getType());
+		oProcessorViewModel.setProcessorVersion(oProcessor.getVersion());
+		oProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
+
+		return oProcessorViewModel;
 	}
 
 	public static UserResourcePermissionViewModel convert(UserResourcePermission oPermission) {

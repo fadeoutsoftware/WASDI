@@ -1,4 +1,4 @@
-angular.module('wasdi.stringUtils', [])
+angular.module('wasdi.stringUtilsTime', [])
 
 .filter('convertMsToTime', function() {
 	return function(lMilliseconds) {

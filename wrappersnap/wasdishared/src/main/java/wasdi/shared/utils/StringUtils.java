@@ -67,7 +67,12 @@ public final class StringUtils {
 		}
 		return result;
 	}
-
+	
+	/**
+	 * Encode sUrl in URL Encoding
+	 * @param sUrl String to encode
+	 * @return Encoded String
+	 */
 	public static String encodeUrl(String sUrl) {
 		try {
 			return URLEncoder.encode(sUrl, java.nio.charset.StandardCharsets.UTF_8.toString());

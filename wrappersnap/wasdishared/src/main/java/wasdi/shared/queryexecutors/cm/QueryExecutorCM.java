@@ -45,11 +45,7 @@ public class QueryExecutorCM extends QueryExecutor {
 	 */
 	@Override
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-		if (sProduct.toLowerCase().contains("dataset")) {
-			return sOriginalUrl;
-		}
-
-		return null;
+		return sOriginalUrl;
 	}
 
 	@Override
@@ -104,13 +100,11 @@ public class QueryExecutorCM extends QueryExecutor {
 		if (sProtocol.equalsIgnoreCase("SUBS")) {
 			QueryResultViewModel oResult = new QueryResultViewModel();
 
-			String sFileName = oQueryViewModel.productType;
-
-			oResult.setId(sFileName);
-			oResult.setTitle("dataset");
-
 			String sService = oQueryViewModel.productType;
 			String sProduct = oQueryViewModel.productName;
+
+			oResult.setId(sService);
+			oResult.setTitle(sProduct + "_" + Utils.nowInMillis().longValue() + ".nc");
 
 			StringBuilder oSBQuery = new StringBuilder("");
 

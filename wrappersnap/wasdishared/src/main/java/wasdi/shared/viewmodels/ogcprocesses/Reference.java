@@ -2,7 +2,7 @@ package wasdi.shared.viewmodels.ogcprocesses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Reference {
+public class Reference extends OgcProcessesViewModel {
 	@JsonProperty("$ref")
 	private String $ref = null;
 

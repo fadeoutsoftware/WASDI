@@ -337,6 +337,10 @@ public class WasdiFileUtils {
 			return false;
 		}
 
+		if (!destinationDirectoryPath.endsWith(File.separator)) {
+			destinationDirectoryPath += File.separator;
+		}
+
 		File sourceFile = new File(sourcePath);
 		if (!fileExists(sourceFile)) {
 			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourceFile does not exist");
@@ -352,7 +356,11 @@ public class WasdiFileUtils {
 
 		if (sourceFile.isDirectory()) {
 			for (File file : sourceFile.listFiles()) {
-				outcome = outcome & moveFile(file.getAbsolutePath(), destinationDirectoryPath);
+				outcome = outcome & moveFile(file.getAbsolutePath(), destinationDirectoryPath + sourceFile.getName());
+			}
+
+			if (sourceFile.listFiles().length == 0) {
+				deleteFile(sourcePath);
 			}
 		} else {
 			File destinationFile = new File(destinationDirectoryPath + sourceFile.getName());
@@ -740,7 +748,7 @@ public class WasdiFileUtils {
 					|| sFileName.toUpperCase().startsWith("EEHTSEB")) {
 				return Platforms.ECOSTRESS;
 			}
-			else if (sFileName.toLowerCase().contains("dataset") || sFileName.toLowerCase().contains("med") || sFileName.toLowerCase().contains("global-analysis-forecast") || sFileName.toUpperCase().contains("-GLO-")) {
+			else if (sFileName.toLowerCase().endsWith(".nc")) {
 				return Platforms.CM;
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {

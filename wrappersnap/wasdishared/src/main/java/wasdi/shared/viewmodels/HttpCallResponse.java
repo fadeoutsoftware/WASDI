@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 public class HttpCallResponse {
 
-	private Integer responseCode;
-	private String responseBody;
+	private Integer responseCode = -1;
+	private String responseBody = "";
 
 }

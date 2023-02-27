@@ -69,47 +69,33 @@ public abstract class WasdiProcessorEngine {
 	 * @return
 	 */
 	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
-		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
-	}
-	
-	
-	/**
-	 * Create an instance of a Processor Engine
-	 * @param sType Type of Processor
-	 * @param sWorkingRootPath WASDI Working Path
-	 * @param sDockerTemplatePath Docker Template Path
-	 * @param sTomcatUser Tomcat user to impersonate
-	 * @return
-	 */
-	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-		
 		if (Utils.isNullOrEmpty(sType)) {
 			sType = ProcessorTypes.UBUNTU_PYTHON37_SNAP;
 		}
 		
 		if (sType.equals(ProcessorTypes.IDL)) {
-			return new IDL2ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
+			return new IDL2ProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
-			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
+			return new UbuntuPython37ProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.OCTAVE)) {
-			return new OctaveProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new OctaveProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.CONDA)) {
-			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new CondaProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.JUPYTER_NOTEBOOK)) {
-			return new JupyterNotebookProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new JupyterNotebookProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
-			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new CSharpProcessorEngine();
 		}		
 		else if (sType.equals(ProcessorTypes.EOEPCA)) {
-			return new EoepcaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new EoepcaProcessorEngine();
 		}
 		else {
-			return new UbuntuPython37ProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+			return new UbuntuPython37ProcessorEngine();
 		}
 	}
 
@@ -117,23 +103,10 @@ public abstract class WasdiProcessorEngine {
 	 * Create a Processor Engine using paths and tomcat user from config
 	 */
 	public WasdiProcessorEngine() {
-		m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
 		m_sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
 		m_sTomcatUser = WasdiConfig.Current.tomcatUser;
 	}
-	
-	/**
-	 * Create a Processor Engine
-	 * @param sWorkingRootPath Main working path
-	 * @param sDockerTemplatePath Docker template path
-	 * @param sTomcatUser Tomcat user
-	 */
-	public WasdiProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
-		m_sWorkingRootPath = sWorkingRootPath;
-		m_sDockerTemplatePath = sDockerTemplatePath;
-		m_sTomcatUser = sTomcatUser;
-	}
-		
+			
 	/**
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
@@ -230,7 +203,7 @@ public abstract class WasdiProcessorEngine {
 
 			String sUrl = sBaseUrl + "/processors/downloadprocessor?processorId=" + sProcessorId;
 
-			String sSavePath = m_sWorkingRootPath + "/processors/" + oProcessor.getName() + "/";
+			String sSavePath = getProcessorFolder(oProcessor.getName());
 			String sOutputFilePath = sSavePath + sProcessorId + ".zip";
 
 			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
@@ -323,7 +296,7 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public String getProcessorFolder(String sProcessorName) {
 		// Set the processor path
-		String sDownloadRootPath = m_sWorkingRootPath;
+		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
 
 		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
 
@@ -422,6 +395,50 @@ public abstract class WasdiProcessorEngine {
             try {
                 ZipFileUtils oZipExtractor = new ZipFileUtils(sProcessObjId);
                 oZipExtractor.unzip(oProcessorZipFile.getCanonicalPath(), sProcessorFolder);
+
+                // fix https://github.com/fadeoutsoftware/WASDI/issues/635
+                // New application: zip file with a folder containing the actual data does not work
+                File oProcessorFolder = new File(sProcessorFolder);
+                if (oProcessorFolder.exists()) {
+                    if (oProcessorFolder.isDirectory()) {
+                         String[] asFileNames = oProcessorFolder.list();
+
+                         if (asFileNames != null) {
+                             if (asFileNames.length == 2) {
+                                 if (asFileNames[0].equalsIgnoreCase(sZipFileName)
+                                         || asFileNames[1].equalsIgnoreCase(sZipFileName)) {
+                                     for (String sFileName : asFileNames) {
+                                         if (sFileName.equalsIgnoreCase(sZipFileName)) {
+                                             continue;
+                                         } else {
+                                             String sExtractedFilePath = sProcessorFolder + sFileName;
+                                             File oExtractedFile = new File(sExtractedFilePath);
+
+                                             if (oExtractedFile.exists()) {
+                                                 if (oExtractedFile.isDirectory()) {
+                                                     sExtractedFilePath += File.separator;
+
+                                                    String[] asExtractedFileNames = oExtractedFile.list();
+
+                                                    if (asExtractedFileNames != null) {
+                                                        for (String sExtractedFileName : asExtractedFileNames) {
+                                                            WasdiFileUtils.moveFile(sExtractedFilePath + sExtractedFileName, sProcessorFolder);
+                                                        }
+
+                                                        asExtractedFileNames = oExtractedFile.list();
+                                                        if (asExtractedFileNames != null && asExtractedFileNames.length == 0) {
+                                                            WasdiFileUtils.deleteFile(sExtractedFilePath);
+                                                        }
+                                                    }
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                    }
+                }
             } catch (Exception oE) {
                 WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
                 return false;

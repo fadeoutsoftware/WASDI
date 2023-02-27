@@ -11,6 +11,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
@@ -234,7 +235,8 @@ public abstract class QueryExecutor {
 		}
 
 		long lStart = System.nanoTime();
-		String sResult = HttpUtils.standardHttpGETQuery(sUrl, asHeaders);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+		String sResult = oHttpCallResponse.getResponseBody();
 		long lEnd = System.nanoTime();
 
 		HttpUtils.logOperationSpeed(sUrl, "standardHttpGETQuery", lStart, lEnd, sResult);
@@ -261,7 +263,8 @@ public abstract class QueryExecutor {
 		}
 
 		long lStart = System.nanoTime();
-		String sResult = HttpUtils.standardHttpPOSTQuery(sUrl, asHeaders, sPayload);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
+		String sResult = oHttpCallResponse.getResponseBody();
 		long lEnd = System.nanoTime();
 
 		HttpUtils.logOperationSpeed(sUrl, "standardHttpPOSTQuery", lStart, lEnd, sResult);

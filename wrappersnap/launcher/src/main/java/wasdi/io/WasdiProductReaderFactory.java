@@ -47,16 +47,7 @@ public class WasdiProductReaderFactory {
 			return new Sentinel3ProductReader(oFile);
 		}
 
-		if (oFile.getName().toLowerCase().endsWith(".nc")
-//				&& (oFile.getName().toLowerCase().contains("dataset")
-//						|| oFile.getName().toLowerCase().contains("cmems")
-//						|| oFile.getName().toLowerCase().contains("med")
-//						|| oFile.getName().toLowerCase().contains("glo")
-//						|| oFile.getName().toLowerCase().contains("meto")
-//						|| oFile.getName().toLowerCase().contains("bs")
-//						|| oFile.getName().toLowerCase().contains("blksea")
-//						)
-				) {
+		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			return new CmNcProductReader(oFile);
 		}
 

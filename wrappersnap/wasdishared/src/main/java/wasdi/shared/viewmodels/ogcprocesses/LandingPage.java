@@ -7,10 +7,14 @@ import java.util.List;
 /**
  * LandingPage
  */
-public class LandingPage   {
+public class LandingPage extends OgcProcessesViewModel   {
 	private String title = null;
 	private String description = null;
 	private List<Link> links = new ArrayList<Link>();
+	
+	public LandingPage() {
+		
+	}
 	
 	public String getTitle() {
 		return title;

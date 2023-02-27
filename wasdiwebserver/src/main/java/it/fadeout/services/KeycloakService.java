@@ -12,6 +12,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**
@@ -42,7 +43,8 @@ public class KeycloakService implements AuthProviderService {
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
 			WasdiLog.debugLog("KeycloakService.getToken: about to get token: " + sAuthUrl + ", " + sPayload);
-			String sAuthResult = HttpUtils.httpPost(sAuthUrl, sPayload, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sAuthUrl, sPayload, asHeaders);
+			String sAuthResult = oHttpCallResponse.getResponseBody();
 			if(Utils.isNullOrEmpty(sAuthResult)) {
 				throw new RuntimeException("could not login into keycloak");
 			}
@@ -79,7 +81,10 @@ public class KeycloakService implements AuthProviderService {
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.clear();
 		asHeaders.put("Authorization", "Bearer " + sToken);
-		String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+		
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+		String sResponse = oHttpCallResponse.getResponseBody();
+		
 		WasdiLog.debugLog("KeycloakService.getUserData: user data: " + sResponse);
 		return sResponse;
 	}
@@ -96,7 +101,8 @@ public class KeycloakService implements AuthProviderService {
 		sPayload += "&password=" + sPassword;
 		Map<String, String> asHeaders = new HashMap<>();
 		asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-		String sAuthResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
+		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
+		String sAuthResult = oHttpCallResponse.getResponseBody();
 		WasdiLog.debugLog("KeycloakService.login: auth result: " + sAuthResult);
 		return sAuthResult;
 	}
@@ -229,7 +235,8 @@ public class KeycloakService implements AuthProviderService {
 			asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 			//POST -> authenticate on keycloak 
 			WasdiLog.debugLog("KeycloakService.logout: about to logout: " + sUrl + ", " + sPayload);
-			String sLogoutResult = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders); 
+			String sLogoutResult = oHttpCallResponse.getResponseBody();
 			return true;
 		} catch (Exception oE) {
 			WasdiLog.debugLog("KeycloakService.getKeycloakAdminCliToken: " + oE);

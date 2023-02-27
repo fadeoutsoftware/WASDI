@@ -157,6 +157,11 @@ public class WasdiConfig {
 	public TraefikConfig traefik = new TraefikConfig();
 	
 	/**
+	 * Configuration of the OGC Processes API WASDI Server implementation
+	 */
+	public OGCProcessesAPIConfig ogcProcessesApi = new OGCProcessesAPIConfig();
+	
+	/**
 	 * Get the Catalogue Config for the specified Platform Type
 	 * @param sPlatformType Platform of interest
 	 * @return Catalogue configuration for the specified platform

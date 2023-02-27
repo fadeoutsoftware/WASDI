@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.google.common.io.Files;
 
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
@@ -16,18 +17,9 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 	public OctaveProcessorEngine() {
 		super();
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "octave";		
+		m_sDockerTemplatePath += ProcessorTypes.getTemplateFolder(ProcessorTypes.OCTAVE);		
 	}
-
-	public OctaveProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser)  {
-		super(sWorkingRootPath,sDockerTemplatePath, sTomcatUser);
-
-		m_sDockerTemplatePath = sDockerTemplatePath;		
-		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
-		m_sDockerTemplatePath += "octave";
-		
-	}
-
+	
 	@Override
 	protected IPackageManager getPackageManager(String sIp, int iPort) {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
@@ -112,13 +104,8 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 			}
 			
 			// Get the processor Path
-			String sDestinationFilePath = m_sWorkingRootPath;
-			if (!sDestinationFilePath.endsWith(File.separator)) {
-				sDestinationFilePath+=File.separator;
-			}
+			String sDestinationFilePath = getProcessorFolder(m_oParameter.getName());
 			
-			sDestinationFilePath = sDestinationFilePath+ "processors" + File.separator + m_oParameter.getName() + File.separator;
-
 			// Lib folder
 			File oLibFolder = new File(sLibFilePath);
 						

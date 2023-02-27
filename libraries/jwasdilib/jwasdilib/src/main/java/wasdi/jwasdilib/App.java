@@ -31,12 +31,12 @@ public class App
         System.out.println(oLib.getProcessorPath());
         
         oLib.setDefaultProvider("CREODIAS");
-        List<Map<String, Object>>  aoResults =  oLib.searchEOImages("S3", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
-        aoResults =  oLib.searchEOImages("ENVI", "2010-11-20", "2010-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
-        aoResults =  oLib.searchEOImages("S5P", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
-        aoResults =  oLib.searchEOImages("L8", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        List<Map<String, Object>>  aoResults =  oLib.searchEOImages("S3", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null, null);
+        aoResults =  oLib.searchEOImages("ENVI", "2010-11-20", "2010-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null, null);
+        aoResults =  oLib.searchEOImages("S5P", "2021-11-26", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null, null);
+        aoResults =  oLib.searchEOImages("L8", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null, null);
         oLib.setDefaultProvider("VIIRS");
-        aoResults =  oLib.searchEOImages("VIIRS", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null);
+        aoResults =  oLib.searchEOImages("VIIRS", "2021-11-20", "2021-11-28", 40.0, 22.0, 35.0, 25.0, null, null, null, null, null);
       
         testExecuteWorkflow(oLib);
         
@@ -229,7 +229,7 @@ public class App
     }
     
     public static void testSearchAndMosaic(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null, null);
     	
     	if (aoFound != null) {
     		if (aoFound.size() > 1) {
@@ -253,7 +253,7 @@ public class App
 
     
     public static void testSearch(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null, null);
     	
     	if (aoFound != null) {
     		if (aoFound.size() > 0) {
@@ -349,19 +349,19 @@ public class App
     }
     
     public static void testImport(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importProduct(aoFound.get(0));
     }
     
     public static void testImportProductList(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2021-04-01", "2021-04-09", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importProductListWithMaps(aoFound.subList(0, 2));
     }
     
     public static void testImportAndPreprocess(WasdiLib oLib) {
-    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-06-01", "2021-06-06", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S2", "2021-06-01", "2021-06-06", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null, null);
     	System.out.println("Found " + aoFound.size() + " products");
     	oLib.importAndPreprocess(aoFound.subList(0, 2), "ndvi", "_ndvi.tif");
     }

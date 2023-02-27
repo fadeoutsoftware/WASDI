@@ -1,0 +1,5 @@
+{
+    "maxActivationCycles": 10,
+	"activationCyclesSleepSeconds": 60,
+	"retrySleep": 60
+}

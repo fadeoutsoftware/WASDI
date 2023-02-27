@@ -1,6 +1,6 @@
-angular.module('wasdi.stringUtils', [])
+angular.module('wasdi.stringUtilsFileSize', [])
 
-.filter('formatFileSize', function() {
+.filter('convertBytesToHigherUnit', function() {
 	return function(bytes, precision) {
 		if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
 		if (typeof precision === 'undefined') precision = 1;

@@ -115,7 +115,12 @@ public class TimeEpochUtils {
 
 		return getLaterDate(oCurrentDate.getTime(), iDaysLater);
 	}
-
+	
+	/**
+	 * Converts a string based date in ISO8601 format to an Instant Object
+	 * @param sDate
+	 * @return
+	 */
 	public static Instant fromDateStringToInstant(String sDate) {
 		Instant oDateFrom = null;
 
@@ -128,5 +133,26 @@ public class TimeEpochUtils {
 		}
 
 		return oDateFrom;
+	}
+	
+	/**
+	 * Converts a string based date in ISO8601 format to a Date Object
+	 * @param sDate ISO8601 date string
+	 * @return Corresponding Date
+	 */
+	public static Date fromISO8061DateStringToDate(String sDate) {
+		
+		try {
+			Instant oInstant = fromDateStringToInstant(sDate);
+			
+			if (oInstant!=null) {
+				return Date.from(oInstant);
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("TimeEpochUtils.fromISO8061DateStringToDate: could not convert start date " + sDate + " to a valid date, ignoring it");
+		}
+		
+		return null;
+		
 	}
 }

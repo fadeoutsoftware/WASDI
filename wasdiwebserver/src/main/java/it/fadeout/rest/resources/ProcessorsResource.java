@@ -40,7 +40,6 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.ImageResourceUtils;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
@@ -78,6 +77,8 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.ImageResourceUtils;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -510,15 +511,9 @@ public class ProcessorsResource  {
 				float fScore = -1.0f;
 				
 				if (!oProcessor.getShowInStore()) continue;
-
-				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				
 				// See if this is a processor the user can access to
-				if (oProcessor.getIsPublic() != 1) {
-					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
-						if (oSharing == null) continue;
-					}
-				}
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
 				
 				// Check and apply name filter taking in account both friendly and app name.
 				// Friendly name was added on the check to have a coherent behaviour for the users
@@ -603,6 +598,7 @@ public class ProcessorsResource  {
 				
 				iAvailableApps++;
 				
+				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
 				if (oSharing != null || oProcessor.getUserId().equals(oUser.getUserId())) oAppListViewModel.setIsMine(true);
 				else oAppListViewModel.setIsMine(false);
 				
@@ -613,7 +609,8 @@ public class ProcessorsResource  {
 				oAppListViewModel.setBuyed(false);
 				oAppListViewModel.setPrice(oProcessor.getOndemandPrice());
 
-				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+				oAppListViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+				oAppListViewModel.setLogo(oProcessor.getLogo());
 				
 				// Set the friendly name, same of name if null
 				if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -703,7 +700,11 @@ public class ProcessorsResource  {
 			oAppDetailViewModel.setShowInStore(oProcessor.getShowInStore());
 			oAppDetailViewModel.setLongDescription(oProcessor.getLongDescription());
 			
-			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoRelativePath(oProcessor));
+			oAppDetailViewModel.setImgLink(ImageResourceUtils.getProcessorLogoPlaceholderPath(oProcessor));
+			
+			if (!Utils.isNullOrEmpty(oProcessor.getLogo())) {
+				oAppDetailViewModel.setLogo(oProcessor.getLogo());
+			}
 			
 			// Set the friendly name, same of name if null
 			if (!Utils.isNullOrEmpty(oProcessor.getFriendlyName())) {
@@ -733,7 +734,7 @@ public class ProcessorsResource  {
 			}
 			
 			oAppDetailViewModel.setImages(ImageResourceUtils.getProcessorImagesList(oProcessor));
-			oAppDetailViewModel.setMaxImages(ProcessorsMediaResource.IMAGE_NAMES.length);
+			oAppDetailViewModel.setMaxImages(ImageResourceUtils.s_asIMAGE_NAMES.length);
 			
 			// TODO: At the moment we do not have this data: put the number of run in the main server
 			// But this has to be changed
@@ -2045,7 +2046,8 @@ public class ProcessorsResource  {
 	}		
 	
 	/**
-	 * Zip a full processor
+	 * Zip a full processor excluding the files contained in the relative type template folder
+	 * and 
 	 * @param oInitialFile
 	 * @return
 	 */
