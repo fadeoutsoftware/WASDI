@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
+import org.geotools.xml.styling.sldSchema;
 import org.json.JSONObject;
 
 import wasdi.shared.utils.log.WasdiLog;
@@ -1067,7 +1068,7 @@ public final class HttpUtils {
 		WasdiLog.debugLog("HttpUtils." + sMethodName + " performance: " + dMillis + " ms, "
 				+ iResponseSize + " B (" + dSpeed + " B/s)");
 	}
-	
+
 	/**
 	 * Obtains an OpenId Connection Token
 	 * @param sUrl Url to call
@@ -1075,8 +1076,23 @@ public final class HttpUtils {
 	 * @param sPassword Password
 	 * @param sClientId Client Id
 	 * @return The token, or null in case of errors
-	 */
+	 */	
 	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId) {
+		return obtainOpenidConnectToken(sUrl, sUser, sPassword, sClientId, null, null);
+	}
+	
+	/**
+	 * 
+	 * Obtains an OpenId Connection Token
+	 * @param sUrl Url to call
+	 * @param sUser User
+	 * @param sPassword Password
+	 * @param sClientId Client Id
+	 * @param sScope Scope 
+	 * @param sClientSecret Client Secret
+	 * @return The token, or null in case of errors
+	 */
+	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId, String sScope, String sClientSecret) {
 		try {
 			URL oURL = new URL(sUrl);
 
@@ -1084,7 +1100,18 @@ public final class HttpUtils {
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			oConnection.setDoOutput(true);
-			oConnection.getOutputStream().write(("client_id=" + sClientId + "&password=" + sPassword + "&username=" + sUser + "&grant_type=password").getBytes());
+			
+			String sBody = "client_id=" + sClientId + "&password=" + sPassword + "&username=" + sUser + "&grant_type=password";
+			
+			if (!Utils.isNullOrEmpty(sScope)) {
+				sBody = "scope=" + sScope + "&" + sBody;
+			}
+			
+			if (!Utils.isNullOrEmpty(sClientSecret)) {
+				sBody = sBody + "&client_secret=" + sClientSecret;
+			}
+			
+			oConnection.getOutputStream().write(sBody.getBytes());
 
 			int iStatus = oConnection.getResponseCode();
 			WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: Response status: " + iStatus);

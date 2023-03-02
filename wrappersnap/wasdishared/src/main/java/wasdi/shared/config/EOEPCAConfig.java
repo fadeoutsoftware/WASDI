@@ -14,13 +14,28 @@ public class EOEPCAConfig {
 	public String adesServerAddress;
 	
 	/**
-	 * User of the ades server
+	 * Address of the authentication server
 	 */
-	public String adesUser;
+	public String authServerAddress;
 	
 	/**
-	 * Password of the ades server
+	 * Client Id for authentication
 	 */
-	public String adesPassword;
+	public String clientId;
+	
+	/**
+	 * Client Secret for authentication
+	 */
+	public String clientSecret;
+	
+	/**
+	 * User of the eoepca server
+	 */
+	public String user;
+	
+	/**
+	 * Password of the eoepca server
+	 */
+	public String password;
 	
 }

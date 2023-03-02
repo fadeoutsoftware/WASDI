@@ -288,6 +288,16 @@ public abstract class WasdiProcessorEngine {
 	public void setSendToRabbit(Send m_oSendToRabbit) {
 		this.m_oSendToRabbit = m_oSendToRabbit;
 	}
+	
+	/**
+	 * Get the processor folder by Processor
+	 * @param oProcessor Processor Object
+	 * @return the folder of the processor
+	 */
+	public String getProcessorFolder(Processor oProcessor) {
+		if (oProcessor == null) return null;
+		return getProcessorFolder(oProcessor.getName());
+	}
 
 	/**
 	 * Get the processor folder by processor name
