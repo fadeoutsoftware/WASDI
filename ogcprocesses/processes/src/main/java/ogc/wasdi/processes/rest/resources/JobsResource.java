@@ -41,6 +41,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.ogcprocesses.ApiException;
 import wasdi.shared.viewmodels.ogcprocesses.JobList;
 import wasdi.shared.viewmodels.ogcprocesses.Link;
@@ -113,7 +114,8 @@ public class JobsResource {
 					
 					WasdiLog.debugLog("ProcessesResource.getJobsList: calling WASDI Node at url: " + sUrl);
 					
-					String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+					HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+					String sResponse = oHttpCallResponse.getResponseBody();
 					
 					if (Utils.isNullOrEmpty(sResponse)==false) {
 						ArrayList<ProcessWorkspaceViewModel> aoProcWs = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<ArrayList<ProcessWorkspaceViewModel>>(){});
