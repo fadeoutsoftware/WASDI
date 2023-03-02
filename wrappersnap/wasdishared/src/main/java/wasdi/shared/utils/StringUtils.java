@@ -98,7 +98,12 @@ public final class StringUtils {
 
 		return input;
 	}
-
+	
+	/**
+	 * Convert an array of bytes in a String representation
+	 * @param bytes Array of bytes
+	 * @return String hex representation 
+	 */
 	private static String bytesToHexadecimal(byte[] bytes) {
 		// Convert byte array into signum representation
 		BigInteger bigInteger = new BigInteger(1, bytes);

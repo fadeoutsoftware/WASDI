@@ -1,5 +1,6 @@
 package wasdi.processors;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
@@ -102,6 +105,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		
+		// Render the template for CWL
 		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
 		
 		if (!bTemplates) {
@@ -109,7 +113,39 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		
-        return true;
+		// Now we need to post: start from reading the appDeployBody.json file
+		String sDeployBodyFilePath = getProcessorFolder(oProcessor) + "appDeployBody.json";
+
+		
+		String sDeployBody = WasdiFileUtils.fileToText(sDeployBodyFilePath);
+		
+		if (Utils.isNullOrEmpty(sDeployBody)) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: appDeployBody empty or not found at path " + sDeployBodyFilePath);
+			return false;
+		}
+		
+		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(WasdiConfig.Current.dockers.eoepca.adesServerAddress);
+		
+		// Is this istance under authentication?		
+		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
+			// Authenticate to the eoepca installation
+			String sScope = "scope=openid user_name is_operator";
+			
+			// We need an openId Connection Token
+			String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
+					, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret);
+			
+			// And the relative headers
+			Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
+			
+			// That we inject in all the call to ADES/OGC Processes API
+			oOgcProcessesClient.setHeaders(asHeaders);
+		}
+		
+		// Call the deploy function: is a post of the App Deploy Body
+		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+		
+        return bApiAnswer;
 	}	
 	
 	/**

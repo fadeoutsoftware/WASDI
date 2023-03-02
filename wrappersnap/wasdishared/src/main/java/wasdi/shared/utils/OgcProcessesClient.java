@@ -1,5 +1,8 @@
 package wasdi.shared.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -23,6 +26,9 @@ public class OgcProcessesClient {
 	
 	private String m_sBaseUrl;
 	
+	Map<String, String> m_asHeaders = new HashMap<>();
+	
+	
 	/**
 	 * Default constructor
 	 */
@@ -37,16 +43,40 @@ public class OgcProcessesClient {
 		setBaseUrl(sBaseUrl);
 	}
 	
+	/**
+	 * Get the base url
+	 * @return
+	 */
 	public String getBaseUrl() {
 		return m_sBaseUrl;
 	}
 
+	/**
+	 * Set the base url. Adds the final / if missing.
+	 * @param sBaseUrl
+	 */
 	public void setBaseUrl(String sBaseUrl) {
 		
 		if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
 		
 		this.m_sBaseUrl = sBaseUrl;
 	}
+	
+	/**
+	 * Get the map of default headers to add to the http calls
+	 * @return Map of Headers
+	 */
+	public Map<String, String> getHeaders() {
+		return m_asHeaders;
+	}
+	
+	/**
+	 * Set the map of default headers to add to the http calls
+	 * @param m_asHeaders Map of Headers
+	 */
+	public void setHeaders(Map<String, String> m_asHeaders) {
+		this.m_asHeaders = m_asHeaders;
+	}		
 	
 	
 	/**
@@ -56,7 +86,7 @@ public class OgcProcessesClient {
 	 */
 	public LandingPage getLandingPage() {
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(m_sBaseUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(m_sBaseUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -82,7 +112,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "conformance";
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -108,7 +138,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "processes";
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -134,7 +164,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "processes/"+sProcessId;
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -164,7 +194,7 @@ public class OgcProcessesClient {
 			
 			String sPayload = MongoRepository.s_oMapper.writeValueAsString(oExecute);
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, null); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -190,7 +220,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs";
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -217,7 +247,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -244,7 +274,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			String sResponse = HttpUtils.httpDelete(sUrl, null);
+			String sResponse = HttpUtils.httpDelete(sUrl, m_asHeaders);
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
 				WasdiLog.debugLog("OgcProcessesClient.dismiss: empty response, return null");
@@ -270,7 +300,7 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl); 
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, m_asHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			if (Utils.isNullOrEmpty(sResponse)) {
@@ -287,5 +317,37 @@ public class OgcProcessesClient {
 			return null;
 		}
 	}	
-		
+	
+	/**
+	 * Get the list of processes available in the server
+	 * @return ProcessList View Model 
+	 */
+	public boolean deployProcess(String sBody) {
+		try {
+			String sUrl = m_sBaseUrl + "processes";
+			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sBody, m_asHeaders);
+			
+			String sResponse = oHttpCallResponse.getResponseBody();
+			
+			if (Utils.isNullOrEmpty(sResponse)) {
+				WasdiLog.debugLog("OgcProcessesClient.deployProcess: empty response, return null");
+			}
+			else {
+				WasdiLog.debugLog("OgcProcessesClient.deployProcess: got response " + sResponse );
+			}
+			
+			if (oHttpCallResponse.getResponseCode()>=200 && oHttpCallResponse.getResponseCode()<=299) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("OgcProcessesClient.deployProcess: Exception " + oEx.toString());
+			return false;
+		}
+	}
+
 }
