@@ -26,6 +26,8 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  *
  */
 public class QueryTranslatorCREODIAS extends QueryTranslator {
+	
+	protected String m_sCreoDiasApiBaseUrl = "https://finder.creodias.eu/resto/api/collections/";
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
@@ -172,7 +174,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				}
 				sResult += parseFootPrint(sQuery);
 				sResult += parseTimeFrame(sQuery);
-				sResult += "&status=all";
+				//sResult += "&status=all";
 
 //				if (sResult.contains("Sentinel1") && sResult.contains("productType=GRD")) {
 //					sResult += "&timeliness=Fast-24h";
@@ -251,7 +253,8 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				if(0>iEnd) {
 					iEnd = sQuery.length();
 				}
-				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd).replaceAll(" ", "+") + "))";
+				//sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd).replaceAll(" ", "+") + "))";
+				sResult ="&geometry=POLYGON((" + sQuery.substring(iStart, iEnd) + "))";
 			}
 		} catch (Exception oE) {
 			Utils.log("ERROR", "QueryTranslatorCREODIAS.parseFootprint: could not identify footprint substring limits: " + oE);
@@ -431,21 +434,21 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 		if(Utils.isNullOrEmpty(sQuery)) {
 			Utils.debugLog("QueryTranslatorCREODIAS.getCountUrl: sQuery is null");
 		}
-		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
+		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+=translateAndEncodeParams(sQuery);
 		
 		//faster, but the number is only an estimate:
 		sUrl += "&maxRecords=1";
 
 		//accurate, but slower
-		sUrl += "&exactCount=1";
+		sUrl += "&exactCount=1&status=all";
 		
 		return sUrl;
 	}
 
 	@Override
 	public String getSearchUrl(PaginatedQuery oQuery) {
-		String sUrl = "https://finder.creodias.eu/resto/api/collections/";
+		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+= translateAndEncodeParams(oQuery.getQuery());
 		sUrl += "&maxRecords=" + oQuery.getOriginalLimit();
 		
@@ -464,9 +467,9 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			Utils.debugLog("QueryTranslatorCREODIAS.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
-		sUrl += "&sortParam=" + oQuery.getSortedBy(); //"startDate"
+		sUrl += "&sortParam=startDate";// + oQuery.getSortedBy(); //"startDate"
 		sUrl += "&sortOrder=" + oQuery.getOrder(); //"descending"
-		sUrl += "&status=all&dataset=ESA-DATASET";
+		sUrl += "&status=all"; //&dataset=ESA-DATASET";
 		
 		return sUrl;
 		
