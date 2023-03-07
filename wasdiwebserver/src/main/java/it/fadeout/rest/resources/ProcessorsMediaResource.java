@@ -1,36 +1,20 @@
 package it.fadeout.rest.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.io.FilenameUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import com.google.common.io.Files;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.AppCategory;
@@ -39,18 +23,13 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
-import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.ImageResourceUtils;
-import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
 import wasdi.shared.viewmodels.processors.CommentDetailViewModel;
 import wasdi.shared.viewmodels.processors.CommentListViewModel;

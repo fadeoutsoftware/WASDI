@@ -498,6 +498,10 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	public int deletePermissionsByProcessorId(String sProcessorId) {
 		return deletePermissionsByTypeAndResourceId("processor", sProcessorId);
 	}
+	
+	public int deletePermissionsByProcessorParameterTemplateId(String sProcessorParameterTemplateId) {
+		return deletePermissionsByTypeAndResourceId("processorparameterstemplate", sProcessorParameterTemplateId);
+	}	
 
 
 

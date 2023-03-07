@@ -1,13 +1,10 @@
 package it.fadeout.rest.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,13 +12,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.FilenameUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -37,8 +30,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
-import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -105,7 +96,7 @@ public class AuthResource {
 				return UserViewModel.getInvalid();	
 			}
 
-			WasdiLog.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
+			WasdiLog.debugLog("AuthResource.login: requested access from " + oLoginInfo.getUserId());
 			
 			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
@@ -113,13 +104,13 @@ public class AuthResource {
 			
 			if( oUser == null ) {
 				// User not in the db
-				WasdiLog.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
+				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
 
 			if(null == oUser.getValidAfterFirstAccess()) {
 				// this is to fix legacy users for which confirmation has never been activated
-				WasdiLog.debugLog("AuthResource.Login: hotfix: legacy wasdi user " + oUser.getUserId() + " did not have the 'valid after first access' flag, setting its value to true");
+				WasdiLog.debugLog("AuthResource.login: hotfix: legacy wasdi user " + oUser.getUserId() + " did not have the 'valid after first access' flag, setting its value to true");
 				oUser.setValidAfterFirstAccess(true);
 			}
 
@@ -139,7 +130,7 @@ public class AuthResource {
 					
 					m_oKeycloakService.logout(sRefreshToken);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
+					WasdiLog.debugLog("AuthResource.login: could not parse response due to " + oE + ", aborting");
 				}
 				
 				
@@ -163,7 +154,7 @@ public class AuthResource {
 				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
 				
 				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
-					WasdiLog.debugLog("AuthResource.Login: could not insert session in DB, aborting");
+					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
 					return UserViewModel.getInvalid();
 				}
 				
@@ -182,15 +173,15 @@ public class AuthResource {
 					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
 				}
 
-				WasdiLog.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
+				WasdiLog.debugLog("AuthService.login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
 				return oUserVM;
 			} else {
-				WasdiLog.debugLog("AuthService.Login: access failed");
+				WasdiLog.debugLog("AuthService.login: access failed");
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("AuthService.Login: " + oEx);
+			WasdiLog.debugLog("AuthService.login: " + oEx);
 		}
 
 		return UserViewModel.getInvalid();
@@ -216,7 +207,7 @@ public class AuthResource {
 			// Check if we can see the user from the session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			if (oUser == null) {
 				WasdiLog.debugLog("AuthResource.CheckSession: invalid session");
 				return UserViewModel.getInvalid();
 			}
@@ -305,8 +296,8 @@ public class AuthResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		try {
-			InternetAddress emailAddr = new InternetAddress(sEmail);
-			emailAddr.validate();
+			InternetAddress oEmailAddr = new InternetAddress(sEmail);
+			oEmailAddr.validate();
 		} catch (AddressException oEx) {
 			WasdiLog.debugLog("AuthResource.createSftpAccount: email is invalid, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
@@ -404,7 +395,7 @@ public class AuthResource {
 		WasdiLog.debugLog("AuthService.ListSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null) {
 			return null;
 		}	
 		String sAccount = oUser.getUserId();		
@@ -432,7 +423,7 @@ public class AuthResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -467,7 +458,7 @@ public class AuthResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if(null == oUser || !m_oCredentialPolicy.satisfies(oUser)) {
+		if(null == oUser) {
 			return Response.status(Status.UNAUTHORIZED).build(); 
 		}
 

@@ -71,22 +71,24 @@ public class OrganizationResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		WasdiLog.debugLog("OrganizationResource.getListByUser()");
+		WasdiLog.debugLog("OrganizationResource.getListByUser");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		List<OrganizationListViewModel> aoOrganizationLVM = new ArrayList<>();
 
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.debugLog("OrganizationResource.getListByUser: invalid session: " + sSessionId);
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
+		
+		
 
 		try {
 			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ORGANIZATION_READ)) {
 				return Response.status(Status.FORBIDDEN).build();
 			}
+			
+			List<OrganizationListViewModel> aoOrganizationLVM = new ArrayList<>();
 
 			WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
 
@@ -257,7 +259,8 @@ public class OrganizationResource {
 
 		if (oOrganizationRepository.insertOrganization(oOrganization)) {
 			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
-		} else {WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
+		} else {
+			WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
 			return Response.serverError().build();
 		}
 	}
@@ -458,8 +461,7 @@ public class OrganizationResource {
 
 				oUserResourcePermissionRepository.insertPermission(oOrganizationSharing);
 
-				//TODO - uncomment the line below
-				// sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
+				sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
 
 				return Response.ok(new SuccessResponse("Done")).build();
 			} else {

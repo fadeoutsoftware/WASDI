@@ -94,6 +94,12 @@ public class ProcessorParametersTemplateResource {
 
 		// Check the user session
 		if (oUser == null) {
+			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oUser.getUserId(), sTemplateId)) {
+			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: user cannot access parameter template");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -105,13 +111,26 @@ public class ProcessorParametersTemplateResource {
 		if (oTemplate == null) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		int iDeletedCount = 0;
 
-		// CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+		
+		// Check if this is the owner or a shared user
 		if (!oProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate(sTemplateId, sUserId)) {
-			return Response.status(Status.UNAUTHORIZED).build();
+			// Shared User: we just delete the sharing
+			
+			iDeletedCount = oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorParametersTemplateId(sUserId, sTemplateId);
 		}
-
-		int iDeletedCount = oProcessorParametersTemplateRepository.deleteByTemplateId(sTemplateId);
+		else {
+			// Owner: we delete the template
+			iDeletedCount = oProcessorParametersTemplateRepository.deleteByTemplateId(sTemplateId);
+			
+			if (iDeletedCount>0) {
+				// Clean also the sharings, it does not exists anymore
+				oUserResourcePermissionRepository.deletePermissionsByProcessorParameterTemplateId(sTemplateId);
+			}
+		}
 
 		if (iDeletedCount == 0) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -142,6 +161,10 @@ public class ProcessorParametersTemplateResource {
 		String sUserId = oUser.getUserId();
 
 		if (oDetailViewModel == null) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(sUserId, oDetailViewModel.getTemplateId())) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 

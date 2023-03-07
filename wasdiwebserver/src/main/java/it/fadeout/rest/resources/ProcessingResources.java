@@ -27,6 +27,7 @@ import wasdi.shared.parameters.settings.MultiSubsetSetting;
 import wasdi.shared.parameters.settings.RegridSetting;
 import wasdi.shared.parameters.settings.SubsetSetting;
 import wasdi.shared.utils.LauncherOperationsUtils;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -222,17 +223,34 @@ public class ProcessingResources {
         
         // Is valid?
         if (oUser == null) {
-
             // Not authorized
             oResult.setIntValue(401);
             oResult.setBoolValue(false);
 
             return oResult;
         }
+        
+        // Check the subscription
+        if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+            // Not authorized
+            oResult.setIntValue(401);
+            oResult.setBoolValue(false);
+
+            return oResult;        	
+        }
+        
+        
+        // Check if the user can access the workspace
+        if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            // Not authorized
+            oResult.setIntValue(401);
+            oResult.setBoolValue(false);
+
+            return oResult;        	
+        }
 
         try {
-            // Update process list
-
+            // Generate the process workspace Id
             sProcessObjId = Utils.getRandomName();
 
             // Create Operator instance
@@ -259,15 +277,18 @@ public class ProcessingResources {
 
             // Serialization Path
             String sPath = WasdiConfig.Current.paths.serializationPath;
-
+            
+            // Run the process
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
             return oResult;
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
@@ -325,9 +346,17 @@ public class ProcessingResources {
             // Check the user
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
-            // Is valid?
+            // Is valid user?
             if (oUser==null) {
+                // Not authorised
+                oResult.setIntValue(401);
+                oResult.setBoolValue(false);
 
+                return oResult;
+            }
+            
+            // Is there a valid subscription?
+            if (!PermissionsUtils.userHasValidSubscription(oUser)) {
                 // Not authorised
                 oResult.setIntValue(401);
                 oResult.setBoolValue(false);
@@ -348,6 +377,15 @@ public class ProcessingResources {
             
             // Deserialize the parameter received in the Body
             oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
+            
+            // Can the user access the workspace?
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), oParameter.getWorkspace())) {
+                // Not authorised
+                oResult.setIntValue(401);
+                oResult.setBoolValue(false);
+
+                return oResult;            	
+            }            
             
             String sPath = WasdiConfig.Current.paths.serializationPath;
             

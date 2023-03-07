@@ -9,11 +9,13 @@ package wasdi.shared.utils;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -27,31 +29,34 @@ import wasdi.shared.utils.log.WasdiLog;
 public class PermissionsUtils {
 	
 	private PermissionsUtils() {
-		// / private constructor to hide the public implicit one 
+		// private constructor to hide the public implicit one 
 	}
-
+	
 	/**
-	 * @param sUserId a valid userId
-	 * @param sNodeCode a valid nodeCode
-	 * @return true if the user has access the node, false otherwise
+	 * Check if a User has a Valid Subscription
+	 * @param oUser
+	 * @return
 	 */
-	public static boolean canUserAccessNode(String sUserId, String sNodeCode) {
+	public static boolean userHasValidSubscription(User oUser) {
+		
+		if (oUser == null) return false;
+		
 		try {
-			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sNodeCode)) {
-				return false;
-			}
-
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
-			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sNodeCode);
-		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sNodeCode + " ): error: " + oE);
+			String sActiveProjectOfUser = oUser.getActiveProjectId();
+			ProjectRepository oProjectRepository = new ProjectRepository();
+			boolean bUserHasAValidSubscription = oProjectRepository.checkValidSubscription(sActiveProjectOfUser);
+			
+			return bUserHasAValidSubscription;
 		}
-
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.userHasValidSubscription: error: " + oEx);
+		}
+		
 		return false;
 	}
-
+	
 	/**
+	 * Check if a User Can Access a Workspace
 	 * @param sUserId a valid userId
 	 * @param sWorkspaceId a valid workspaceId
 	 * @return true if the user owns the workspace, or if the owner shared the workspace with the user, false otherwise
@@ -63,6 +68,7 @@ public class PermissionsUtils {
 			}
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
 			if (oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
 				return true;
 			}
@@ -71,13 +77,14 @@ public class PermissionsUtils {
 
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
 		}
 
 		return false;
 	}
 
 	/**
+	 * Check if a User can Access and Organization
 	 * @param sUserId a valid userId
 	 * @param sOrganizationId a valid organizationId
 	 * @return true if the user owns the organization, or if the owner shared the organization with the user, false otherwise
@@ -104,6 +111,8 @@ public class PermissionsUtils {
 	}
 
 	/**
+	 * Check if a User can Access a Subscription
+	 * 
 	 * @param sUserId a valid userId
 	 * @param sSubscriptionId a valid subscriptionId
 	 * @return true if the user owns the subscription, or if the owner shared the subscription with the user, false otherwise
@@ -124,17 +133,17 @@ public class PermissionsUtils {
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-			String sOrganizationId = oSubscription.getOrganizationId();
-
 			if (oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sUserId, sSubscriptionId)) {
 				return true;
 			}
+			
+			String sOrganizationId = oSubscription.getOrganizationId();
 
 			if (sOrganizationId != null) {
 				UserResourcePermission oPermision = oUserResourcePermissionRepository.getOrganizationSharingByUserIdAndOrganizationId(sUserId, sOrganizationId);
-
 				return oPermision != null;
 			}
+			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("PermissionsUtils.canUserAccessSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
 		}
@@ -143,6 +152,8 @@ public class PermissionsUtils {
 	}
 
 	/**
+	 * Check if a User can access a Style
+	 * 
 	 * @param sUserId a valid userId
 	 * @param sStyleId a valid StyleId
 	 * @return true if the user owns the Style, or if the owner shared the Style with the user, false otherwise
@@ -171,6 +182,7 @@ public class PermissionsUtils {
 
 
 	/**
+	 * Check if a User can access a Process Workspace
 	 * @param sUserId a valid user id
 	 * @param sProcessObjId a valid process obj id
 	 * @return true if the user can access the process, false otherwise
@@ -198,6 +210,8 @@ public class PermissionsUtils {
 	}
 
 	/**
+	 * Check if a User can access a Processor Parameter Template
+	 * 
 	 * @param sUserId a valid userId
 	 * @param sTemplateId a valid templateId
 	 * @return true if the user owns the ProcessorParametersTemplate, false otherwise
@@ -240,6 +254,47 @@ public class PermissionsUtils {
 			
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
+			return canUserAccessProcessor(sUserId, oProcessor);
+			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
+		}
+
+		return false;		
+	}
+	
+	/**
+	 * Check if a user can access a Processor starting from the name
+	 * @param sUserId User that request the access
+	 * @param sName Name of the processor
+	 * @return
+	 */
+	public static boolean canUserAccessProcessorByName(String sUserId, String sName) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
+			
+			return canUserAccessProcessor(sUserId, oProcessor);			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sName + " ): error: " + oE);
+		}
+
+		return false;		
+	}
+	
+	/**
+	 * Check if a user can access a Processor
+	 * @param sUserId User requesting access
+	 * @param oProcessor Processor requested
+	 * @return true if can access, false if not
+	 */
+	public static boolean canUserAccessProcessor(String sUserId, Processor oProcessor) {
+		try {			
 			if (oProcessor == null) return false;
 			
 			if (oProcessor.getIsPublic()>0) return true;
@@ -247,13 +302,13 @@ public class PermissionsUtils {
 			if (oProcessor.getUserId().equals(sUserId)) return true;
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			return oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId);
+			return oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, oProcessor.getProcessorId());
 		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor error: " + oE);
 		}
 
 		return false;		
-	}
+	}	
 	
 	/**
 	 * Check if a user can access a specific image

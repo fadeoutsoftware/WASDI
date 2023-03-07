@@ -115,7 +115,7 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.findWorkspacesByPartialName: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -200,7 +200,7 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.findResourcePermissions: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -241,6 +241,13 @@ public class AdminDashboardResource {
 
 		WasdiLog.debugLog("AdminDashboardResource.addResourcePermission(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sDestinationUserId + " )");
+		
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}		
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
@@ -319,6 +326,13 @@ public class AdminDashboardResource {
 
 		WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sUserId + " )");
+		
+		// Validate Session
+		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		if (oRequesterUser == null) {
+			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+		}		
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
@@ -443,8 +457,6 @@ public class AdminDashboardResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response updateMetricsEntry(@HeaderParam("x-session-token") String sSessionId, MetricsEntry oMetricsEntry) {
 
-//		WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry()");
-
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
@@ -456,8 +468,6 @@ public class AdminDashboardResource {
 		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
-
-
 
 		if (oMetricsEntry == null) {
 			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: invalid payload");

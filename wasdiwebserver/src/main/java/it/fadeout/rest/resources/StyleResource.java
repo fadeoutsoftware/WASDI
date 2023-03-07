@@ -53,6 +53,7 @@ import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -211,15 +212,11 @@ public class StyleResource {
 				WasdiLog.debugLog("StyleResource.updateFile: error in styleId " + sStyleId + " not found on DB");
 				return Response.notModified("StyleId not found, please check parameters").build();
 			}
-
-			// Checks that user can modify the style
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
-			if (!oUser.getUserId().equals(oStyle.getUserId()) && !oUserResourcePermissionRepository.isStyleSharedWithUser(oUser.getUserId(), oStyle.getStyleId())) {
+			
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
 				WasdiLog.debugLog("StyleResource.updateFile: User " + oUser.getUserId() + " doesn't have rights on style " + oStyle.getName());
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-
 
 			// filesystem-side work
 
@@ -328,6 +325,11 @@ public class StyleResource {
 				WasdiLog.debugLog("StyleResource.getXML( Session: " + sSessionId + ", Style: " + sStyleId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
+			
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
+				WasdiLog.debugLog("StyleResource.getXML( Session: " + sSessionId + ", Style: " + sStyleId + " ): user cannot access style");
+				return Response.status(Status.UNAUTHORIZED).build();				
+			}
 
 			// Check that the style exists on db
 			StyleRepository oStyleRepository = new StyleRepository();
@@ -388,6 +390,11 @@ public class StyleResource {
 			WasdiLog.debugLog("StyleResource.updateParams( Session: " + sSessionId + ", Style: " + sStyleId + " ): invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
+		
+		if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
+			WasdiLog.debugLog("StyleResource.updateParams( Session: " + sSessionId + ", Style: " + sStyleId + " ): user cannot access style");
+			return Response.status(Status.UNAUTHORIZED).build();				
+		}		
 
 		StyleRepository oStyleRepository = new StyleRepository();
 		Style oStyle = oStyleRepository.getStyle(sStyleId);

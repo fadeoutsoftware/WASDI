@@ -42,7 +42,14 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 public class ConsoleResource {
 
 	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-
+	
+	/**
+	 * Creates a new Jupyter Notebook in a workspace
+	 * @param oRequest Http Servlet Request, used to get client IP
+	 * @param sSessionId Session Id
+	 * @param sWorkspaceId Workspace where to create the notebook
+	 * @return Primitive result with true and the url of the notebook if all ok. False and error description if not ok
+	 */
 	@POST
 	@Path("/create")
 	public PrimitiveResult create(@Context HttpServletRequest oRequest, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspaceId") String sWorkspaceId) {
@@ -52,16 +59,13 @@ public class ConsoleResource {
 		oResult.setBoolValue(false);
 
 		try {
+			
+			// Check the session token
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-
+			
 			if (oUser == null) {
 				WasdiLog.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-				return oResult;
-			}
-
-			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 				return oResult;
 			}
 
@@ -74,6 +78,13 @@ public class ConsoleResource {
 
 				return oResult;
 			}
+			
+			// Check the subscription
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.debugLog("ConsoleResource.create: No valid Subscription");
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				return oResult;			
+			}			
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
@@ -282,7 +293,6 @@ public class ConsoleResource {
 
 		String sUserId = oUser.getUserId();
 
-
 		//check the user can access the workspace
 		if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
 			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace info, aborting");
@@ -467,6 +477,11 @@ public class ConsoleResource {
 		return bFilesAreTheSame;
 	}
 	
+	/**
+	 * Get the Node where the workspace is running
+	 * @param oWorkspace Workspace to check
+	 * @return Node entity
+	 */
 	private Node getWorkspaceNode(Workspace oWorkspace) {
 		NodeRepository oNodeRepo = new NodeRepository();
 
@@ -475,7 +490,12 @@ public class ConsoleResource {
 
 		return oNode;
 	}
-
+	
+	/**
+	 * Get the base address of the node where the workspace is running
+	 * @param oWorkspace Workspace to check
+	 * @return Node base address
+	 */
 	private String getNodeBaseAddress(Workspace oWorkspace) {
 		Node oNode = getWorkspaceNode(oWorkspace); 
 
@@ -578,6 +598,11 @@ public class ConsoleResource {
 		return bIsAllowed;
 	}
 	
+	/**
+	 * Extract the IP of the client calling an API
+	 * @param oRequest Http Request received
+	 * @return The IP of the client
+	 */
 	protected String resolveClientIp(HttpServletRequest oRequest) {
 		
 		String sXRealIp = oRequest.getHeader("X-Real-IP");

@@ -77,11 +77,9 @@ public enum UserApplicationRole {
 		boolean bResult = false;
 
 		if (Utils.isNullOrEmpty(sUserRole)) {
-			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole
-					+ "): is invalid");
+			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The user role (" + sUserRole + "): is invalid");
 		} else if (ePermission == null) {
-			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission
-					+ "): is invalid");
+			WasdiLog.debugLog("UserApplicationRole.userHasRightsToAccessResource() | The permission (" + ePermission + "): is invalid");
 		} else {
 			UserApplicationRole oUserApplicationRole = UserApplicationRole.get(sUserRole);
 			Set<String> asGrantedAuthorities = oUserApplicationRole.getGrantedAuthorities();

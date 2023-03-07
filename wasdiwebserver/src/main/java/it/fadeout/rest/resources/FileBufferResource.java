@@ -44,6 +44,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.ShareFileParameter;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -124,7 +125,6 @@ public class FileBufferResource {
 
 			String sUserId = oUser.getUserId();
 
-
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
 
@@ -141,6 +141,15 @@ public class FileBufferResource {
 
 				return oResult;
 			}
+			
+			//check the user can access the workspace
+			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sOriginWorkspaceId)) {
+				WasdiLog.debugLog("FileBufferResource.share: the user cannot access the origin ws");
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				oResult.setStringValue("Invalid origin workspace.");
+
+				return oResult;
+			}			
 
 			Workspace oOriginWorkspace = oWorkspaceRepository.getWorkspace(sOriginWorkspaceId);
 
@@ -168,6 +177,15 @@ public class FileBufferResource {
 
 				return oResult;
 			}
+			
+			//check the user can access the workspace
+			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sDestinationWorkspaceId)) {
+				WasdiLog.debugLog("FileBufferResource.share: the user cannot access the destination ws");
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				oResult.setStringValue("Invalid destination workspace.");
+
+				return oResult;
+			}					
 
 			Workspace oDestinationWorkspace = oWorkspaceRepository.getWorkspace(sDestinationWorkspaceId);
 
@@ -307,7 +325,8 @@ public class FileBufferResource {
 	
 	/**
 	 * Trigger a new import of an image in WASDI.
-	 * The method checks the input, create the parameter and call WASDI.runProcess
+	 * The method has been deprecated to use the POST Version.
+	 * This method is for retro compatibility and just calls the POST Version
 	 * 
 	 * @param sSessionId User Session
 	 * @param sFileUrl Url of the file to import
@@ -371,11 +390,16 @@ public class FileBufferResource {
 				oResult.setIntValue(401);
 				return oResult;
 			}
+			
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.debugLog("FileBufferResource.imageImport(): No valid Subscription");
+				oResult.setIntValue(401);
+				return oResult;				
+			}
 
 			String sUserId = oUser.getUserId();
 			
 			String sProcessObjId = Utils.getRandomName();
-
 
 			if (oImageImportViewModel == null) {
 				WasdiLog.debugLog("FileBufferResource.imageImport(): request is not valid");
@@ -397,6 +421,13 @@ public class FileBufferResource {
 			String sWorkspaceId = oImageImportViewModel.getWorkspace();
 			String sBoundingBox = oImageImportViewModel.getBbox();
 			String sParentProcessWorkspaceId = oImageImportViewModel.getParent();
+			
+			//check the user can access the workspace
+			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
+				WasdiLog.debugLog("FileBufferResource.imageImport: user cannot access workspace");
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				return oResult;
+			}
 
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
@@ -474,6 +505,12 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 			
 			WasdiLog.debugLog("FileBufferResource.PublishBand, user: " + sUserId + ", workspace: " + sWorkspaceId);
+			
+			//check the user can access the workspace
+			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
+				WasdiLog.debugLog("FileBufferResource.PublishBand: user cannot access workspace");
+				return oReturnValue;
+			}
 			
 			// Get the full product path
 			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
@@ -590,6 +627,12 @@ public class FileBufferResource {
 				WasdiLog.debugLog("FileBufferResource.downloadStyleByName( Session: " + sSessionId + ", Style: " + sStyle + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
+			
+			//check the user can access the workspace
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyle)) {
+				WasdiLog.debugLog("FileBufferResource.PublishBand: user cannot access workspace");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}			
 
 			// Take path
 			String sDownloadRootPath = Wasdi.getDownloadPath();
@@ -643,14 +686,17 @@ public class FileBufferResource {
 
 		try {
 			// Check authorization
-			if (Utils.isNullOrEmpty(sSessionId)) {
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser == null) {
 				WasdiLog.debugLog("FileBufferResource.uploadStyle: invalid session");
 				return Response.status(401).build();
 			}
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-
-			if (oUser == null) return Response.status(401).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+			
+			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+				WasdiLog.debugLog("FileBufferResource.uploadStyle: No valid Subscription");
+				return Response.status(401).build();				
+			}			
 
 			// Get Download Path
 			String sDownloadRootPath = Wasdi.getDownloadPath();

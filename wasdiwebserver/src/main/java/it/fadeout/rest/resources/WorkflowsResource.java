@@ -100,16 +100,13 @@ public class WorkflowsResource {
 
         try {
             // Check authorization
-            if (Utils.isNullOrEmpty(sSessionId)) {
-				WasdiLog.debugLog("WorkflowsResource.uploadFile: invalid session");
-                return Response.status(401).build();
-            }
+        	
             User oUser = Wasdi.getUserFromSession(sSessionId);
             // Checks whether null file is passed
             if (fileInputStream == null) return Response.status(400).build();
 
             if (oUser == null) return Response.status(401).build();
-            if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+            
 
             String sUserId = oUser.getUserId();
 
@@ -207,14 +204,11 @@ public class WorkflowsResource {
 
         try {
             // Check authorization
-            if (Utils.isNullOrEmpty(sSessionId)) {
-                WasdiLog.debugLog("WorkflowsResource.updateFile( InputStream, Session: " + sSessionId + ", Ws: " + sWorkflowId + " ): invalid session");
-                return Response.status(401).build();
-            }
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) return Response.status(401).build();
-            if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+            
+            
 
             // Get Download Path
             String sDownloadRootPath = Wasdi.getDownloadPath();

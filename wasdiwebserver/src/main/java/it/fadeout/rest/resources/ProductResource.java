@@ -83,8 +83,11 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName + " ): invalid session");
                 return null;
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId()))
-                return null;
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName + " ): user cannot access workspace");
+                return null;            	
+            }
 
             String sPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
@@ -158,7 +161,11 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.GetByProductName: invalid session");
                 return null;
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.GetByProductName: user cannot access workspace");
+                return null;            	
+            }
 
             String sFullPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
@@ -203,10 +210,15 @@ public class ProductResource {
 
         // Validate Session
         User oUser = Wasdi.getUserFromSession(sSessionId);
-        if (oUser == null)
-            return null;
-        if (Utils.isNullOrEmpty(oUser.getUserId()))
-            return null;
+        
+        if (oUser == null) {
+        	return null;
+        }
+        
+        if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.debugLog("ProductResource.GetMetadataByProductName: user cannot access workspace");
+            return null;            	
+        }        
 
         String sProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
@@ -320,8 +332,10 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.GetListByWorkspace: invalid session");
                 return aoProductList;
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
-                return aoProductList;
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.GetListByWorkspace: user cannot access workspace");
+                return aoProductList;            	
             }
             
             // Get the list of products for workspace
@@ -415,8 +429,10 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
                 return aoProductList;
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
-                return aoProductList;
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.getLightListByWorkspace( WS: " + sWorkspaceId + " ): user cannot access workspace");
+                return aoProductList;            	
             }
 
             WasdiLog.debugLog("ProductResource.getLightListByWorkspace: products for " + sWorkspaceId);
@@ -474,8 +490,10 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " ): invalid session");
                 return aoProductList;
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
-                return aoProductList;
+            
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.getNamesByWorkspace( WS: " + sWorkspaceId + " ): user cannot access the workspace");
+                return aoProductList;            	
             }
 
             WasdiLog.debugLog("ProductResource.getNamesByWorkspace: products for " + sWorkspaceId);
@@ -547,9 +565,11 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... ): invalid session");
                 return Response.status(401).build();
             }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
+
+            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... ): user cannot access workspace");
                 return Response.status(401).build();
-            }
+            }            
 
             if (oProductViewModel == null) {
                 return Response.status(500).build();
@@ -708,6 +728,7 @@ public class ProductResource {
         }
 
         User oUser = Wasdi.getUserFromSession(sSessionId);
+        
         if (oUser == null) {
             WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
             return Response.status(401).build();
@@ -898,13 +919,6 @@ public class ProductResource {
             // Domain Check
             if (oUser == null) {
                 WasdiLog.debugLog("ProductResource.DeleteProduct: invalid session");
-                oReturn.setIntValue(404);
-                return oReturn;
-            }
-            if (Utils.isNullOrEmpty(oUser.getUserId())) {
-                String sMessage = "user not found";
-                WasdiLog.debugLog("ProductResource.DeleteProduct: " + sMessage);
-                oReturn.setStringValue(sMessage);
                 oReturn.setIntValue(404);
                 return oReturn;
             }
@@ -1108,7 +1122,6 @@ public class ProductResource {
 
         } catch (Exception oEx) {
             WasdiLog.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
-            oEx.printStackTrace();
             oReturn.setIntValue(500);
             oReturn.setStringValue(oEx.toString());
             return oReturn;
@@ -1139,9 +1152,26 @@ public class ProductResource {
     public PrimitiveResult deleteMultipleProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("deletefile") Boolean bDeleteFile,
                                          @QueryParam("workspace") String sWorkspaceId, @QueryParam("deletelayer") Boolean bDeleteLayer,
                                          List<String> asProductList) {
+    	
         // Support variable used to identify if deletions of one or more products failed
         AtomicBoolean bDirty = new AtomicBoolean(false);
         PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+        
+    	User oUser = Wasdi.getUserFromSession(sSessionId);
+    	
+    	if (oUser == null) {
+            WasdiLog.debugLog("ProductResource.deleteMultipleProduct: invalid session " );
+            oPrimitiveResult.setIntValue(500);
+            oPrimitiveResult.setBoolValue(false);
+            return oPrimitiveResult;    		
+    	}
+    	
+    	if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.debugLog("ProductResource.deleteMultipleProduct: user cannot access workspace" );
+            oPrimitiveResult.setIntValue(500);
+            oPrimitiveResult.setBoolValue(false);
+            return oPrimitiveResult;    		
+    	}
         
         if (asProductList != null) {
             asProductList.stream().forEach(sFile -> {

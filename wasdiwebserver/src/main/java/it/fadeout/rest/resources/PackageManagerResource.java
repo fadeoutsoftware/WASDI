@@ -35,6 +35,7 @@ import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -132,9 +133,13 @@ public class PackageManagerResource {
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			
 			WasdiLog.debugLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getListPackages: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
 		}
 		
 		String sContentAsJson = readPackagesInfoFile(sName);
@@ -191,6 +196,11 @@ public class PackageManagerResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
+		}		
+		
 		if (WasdiConfig.Current.nodeCode.equals("wasdi") == false) {
 			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
 			return Response.status(Status.BAD_REQUEST).build();			
@@ -241,6 +251,11 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
+		}		
 
 
 		// Trying to read the Package Manager info from the packagesInfo.json file.
@@ -323,19 +338,14 @@ public class PackageManagerResource {
 			
 			if (oProcessorToForceUpdate == null) {
 				WasdiLog.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
-				return Response.serverError().build();
+				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
-				
-				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-				
-				if (!oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId)) {
-					WasdiLog.debugLog("PackageManagerResource.environmentupdate: processor not of user " + oProcessorToForceUpdate.getUserId());
-					return Response.status(Status.UNAUTHORIZED).build();					
-				}
-			}
-
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
+				WasdiLog.debugLog("PackageManagerResource.environmentupdate: user cannot access the processor");
+				return Response.status(Status.UNAUTHORIZED).build();			
+			}			
+			
 			// Schedule the process to run the operation in the environment
 			String sProcessObjId = Utils.getRandomName();
 			
@@ -403,6 +413,11 @@ public class PackageManagerResource {
 		}
 	}	
 
+	/**
+	 * Get the appropriate Package Manager Instance from the Processor (type)
+	 * @param oProcessor The Processor we want to access the Package Manager
+	 * @return Package Manager Instance
+	 */
 	private IPackageManager getPackageManager(Processor oProcessor) {
 		IPackageManager oPackageManager = null;
 
