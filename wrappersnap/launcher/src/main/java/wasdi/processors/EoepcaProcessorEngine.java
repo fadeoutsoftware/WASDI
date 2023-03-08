@@ -129,11 +129,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// Is this istance under authentication?		
 		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
 			// Authenticate to the eoepca installation
-			String sScope = "scope=openid user_name is_operator";
+			String sScope = "openid user_name is_operator";
+			
+			Map<String, String> asNoCacheHeaders = new HashMap<>();
+			asNoCacheHeaders.put("Cache-Control", "no-cache");
 			
 			// We need an openId Connection Token
 			String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
-					, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret);
+					, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
 			
 			// And the relative headers
 			Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);

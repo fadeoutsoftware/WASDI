@@ -317,7 +317,7 @@ var HomeController = (function () {
         var sMessage1 = this.m_oTranslate.instant("MSG_RECOVER_1");
         var sMessage2 = this.m_oTranslate.instant("MSG_RECOVER_2");
         var sMessage3 = this.m_oTranslate.instant("MSG_LOGIN_ERROR");
-
+        var sMessage4 = "Error recovering account. Please try attemping recover with Keycloak. Press 'ok' to be directed."
         this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).then(
             function (data, status) {
                 // oController.callbackLogin(data, status,oController);
@@ -330,12 +330,19 @@ var HomeController = (function () {
                         // then hide the recovery password dialog
                         oController.m_bIsVisibleRecoveryPassword = !oController.m_bIsVisibleRecoveryPassword;
 
+                    } else if (data.data.boolValue === false){ 
+                        utilsVexDialogConfirm(sMessage4, function(value){
+                            if(value) {
+                               oController.keycloakLogin() 
+                            }
+                            
+                        }) 
                     } else {
                         if (utilsIsStrNullOrEmpty(data.data.stringValue) === false) {
                             oController.m_sMessageError = data.stringValue;
                         }
                         oController.m_bError = true;
-                    }
+                    }   
                 } else {
                     utilsVexDialogAlertTop(sMessage3);
                 }

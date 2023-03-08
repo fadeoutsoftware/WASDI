@@ -29,12 +29,12 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.managers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -45,82 +45,7 @@ import wasdi.shared.viewmodels.processors.PackageViewModel;
 
 @Path("/packageManager")
 public class PackageManagerResource {
-
-	/**
-	 * Reads the packageInfo JSON file of a processor
-	 * @param sProcessorName Name of the processor
-	 * @return String with the JSON representation of packages, or an error message
-	 */
-	protected String readPackagesInfoFile(String sProcessorName) throws Exception {
-
-		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
-
-		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
-
-			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-
-			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
-				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
-			} 
-			
-			// Read the file
-			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
-			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
-				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-			}
-
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
-		}
-
-		return sOutput;
-	}
-
-	/**
-	 * Reads the envActions txt file of a processor
-	 * @param sProcessorName Name of the processor
-	 * @return String with the list of instructions/actions, or an error message
-	 */
-	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
-
-		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
-
-		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
-
-			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-
-			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
-				return "error: directory " + oDirPath.toString() + " not found";
-			} else {
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
-			}
-			
-			// Read the file
-			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
-			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
-				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
-			}
-
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: " + oEx);
-		}
-
-		return sOutput;
-	}
-
+	
 	@GET
 	@Path("/listPackages")
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId,
@@ -132,9 +57,13 @@ public class PackageManagerResource {
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			
 			WasdiLog.debugLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getListPackages: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
 		}
 		
 		String sContentAsJson = readPackagesInfoFile(sName);
@@ -191,6 +120,11 @@ public class PackageManagerResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
+		}		
+		
 		if (WasdiConfig.Current.nodeCode.equals("wasdi") == false) {
 			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
 			return Response.status(Status.BAD_REQUEST).build();			
@@ -207,23 +141,7 @@ public class PackageManagerResource {
 
 		return Response.ok(asEnvActions).build();
 	}
-
-	private static List<String> parseEnvironmentActionsContent(String sContent) {
-		List<String> asEnvActions = new ArrayList<>();
-
-		if (!Utils.isNullOrEmpty(sContent)) {
-			String[] asRows = sContent.split("\n");
-
-			for (String sRow : asRows ) {
-				if (!sRow.trim().isEmpty()) {
-					asEnvActions.add(sRow.trim());
-				}
-			}
-		}
-
-		return asEnvActions;
-	}
-
+	
 	@GET
 	@Path("/managerVersion")
 	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
@@ -241,6 +159,11 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
+			return Response.status(Status.UNAUTHORIZED).build();			
+		}		
 
 
 		// Trying to read the Package Manager info from the packagesInfo.json file.
@@ -278,7 +201,7 @@ public class PackageManagerResource {
 
 			oPackageManagerVM = oPackageManager.getManagerVersion();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
 		}
 
 		return Response.ok(oPackageManagerVM).build();
@@ -323,19 +246,14 @@ public class PackageManagerResource {
 			
 			if (oProcessorToForceUpdate == null) {
 				WasdiLog.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
-				return Response.serverError().build();
+				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!oProcessorToForceUpdate.getUserId().equals(oUser.getUserId())) {
-				
-				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-				
-				if (!oUserResourcePermissionRepository.isProcessorSharedWithUser(sUserId, sProcessorId)) {
-					WasdiLog.debugLog("PackageManagerResource.environmentupdate: processor not of user " + oProcessorToForceUpdate.getUserId());
-					return Response.status(Status.UNAUTHORIZED).build();					
-				}
-			}
-
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
+				WasdiLog.debugLog("PackageManagerResource.environmentupdate: user cannot access the processor");
+				return Response.status(Status.UNAUTHORIZED).build();			
+			}			
+			
 			// Schedule the process to run the operation in the environment
 			String sProcessObjId = Utils.getRandomName();
 			
@@ -386,7 +304,7 @@ public class PackageManagerResource {
 					WasdiLog.debugLog("PackageManagerResource.environmentupdate: Worker started");						
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
+					WasdiLog.errorLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
 				}
 			}			
 			
@@ -398,11 +316,16 @@ public class PackageManagerResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.environmentupdate: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.environmentupdate: " + oEx);
 			return Response.serverError().build();
 		}
 	}	
 
+	/**
+	 * Get the appropriate Package Manager Instance from the Processor (type)
+	 * @param oProcessor The Processor we want to access the Package Manager
+	 * @return Package Manager Instance
+	 */
 	private IPackageManager getPackageManager(Processor oProcessor) {
 		IPackageManager oPackageManager = null;
 
@@ -420,6 +343,102 @@ public class PackageManagerResource {
 		}
 
 		return oPackageManager;
+	}
+	
+	/**
+	 * Reads the packageInfo JSON file of a processor
+	 * @param sProcessorName Name of the processor
+	 * @return String with the JSON representation of packages, or an error message
+	 */
+	protected String readPackagesInfoFile(String sProcessorName) throws Exception {
+
+		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
+
+		try {
+
+			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
+
+			// Take path of the processor
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
+				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
+			} 
+			
+			// Read the file
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
+		}
+
+		return sOutput;
+	}
+
+	/**
+	 * Reads the envActions txt file of a processor
+	 * @param sProcessorName Name of the processor
+	 * @return String with the list of instructions/actions, or an error message
+	 */
+	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
+
+		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
+
+		try {
+
+			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
+
+			// Take path of the processor
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
+				return "error: directory " + oDirPath.toString() + " not found";
+			} else {
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
+			}
+			
+			// Read the file
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.readEnvActionsFile: " + oEx);
+		}
+
+		return sOutput;
+	}
+	
+	/**
+	 * Split the content of a json actions file in a list of strings
+	 * @param sContent
+	 * @return
+	 */
+	private static List<String> parseEnvironmentActionsContent(String sContent) {
+		List<String> asEnvActions = new ArrayList<>();
+
+		if (!Utils.isNullOrEmpty(sContent)) {
+			String[] asRows = sContent.split("\n");
+
+			for (String sRow : asRows ) {
+				if (!sRow.trim().isEmpty()) {
+					asEnvActions.add(sRow.trim());
+				}
+			}
+		}
+
+		return asEnvActions;
 	}
 
 }

@@ -107,8 +107,8 @@ var ProcessorController = (function () {
             { name: "IDL 3.7.2", id: "ubuntu_idl372" },
             { name: "OCTAVE 6.x", id: "octave" },
             { name: "Python 3.x Conda", id: "conda" },
-            { name: "C# .NET Core", id: "csharp" },
-            { name: "OGC Application Package", id: "eoepca" }
+            { name: "C# .NET Core", id: "csharp" }// P.Campanella 07-03-2023 Comment for align all the branches in Master,
+            //{ name: "OGC Application Package", id: "eoepca" }
         ];
         /**
          * Selected Processor Type

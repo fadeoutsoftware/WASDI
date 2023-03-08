@@ -256,10 +256,15 @@ public final class HttpUtils {
 
 					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					
+					if (oErrorStream!=null) {
+						Util.copyStream(oErrorStream, oBytearrayOutputStream);
 
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
+						if (oBytearrayOutputStream!=null) {
+							sResult = oBytearrayOutputStream.toString();
+							oHttpCallResponse.setResponseBody(sResult);							
+						}
+					}
 				}
 			} catch (Exception oEint) {
 				WasdiLog.debugLog("HttpUtils.httpPost: " + oEint);
@@ -1078,7 +1083,7 @@ public final class HttpUtils {
 	 * @return The token, or null in case of errors
 	 */	
 	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId) {
-		return obtainOpenidConnectToken(sUrl, sUser, sPassword, sClientId, null, null);
+		return obtainOpenidConnectToken(sUrl, sUser, sPassword, sClientId, null, null, null);
 	}
 	
 	/**
@@ -1092,13 +1097,20 @@ public final class HttpUtils {
 	 * @param sClientSecret Client Secret
 	 * @return The token, or null in case of errors
 	 */
-	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId, String sScope, String sClientSecret) {
+	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId, String sScope, String sClientSecret, Map<String, String> asOtherHeaders) {
 		try {
 			URL oURL = new URL(sUrl);
 
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			
+			if (asOtherHeaders!=null) {
+				for (String sKey : asOtherHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey, asOtherHeaders.get(sKey));					
+				}
+			}
+			
 			oConnection.setDoOutput(true);
 			
 			String sBody = "client_id=" + sClientId + "&password=" + sPassword + "&username=" + sUser + "&grant_type=password";

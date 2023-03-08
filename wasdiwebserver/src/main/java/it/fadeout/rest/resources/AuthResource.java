@@ -1,13 +1,10 @@
 package it.fadeout.rest.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,13 +12,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.FilenameUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -37,8 +30,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
-import wasdi.shared.utils.ImageFile;
-import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -93,19 +84,19 @@ public class AuthResource {
 		try {
 			// Validate inputs
 			if (oLoginInfo == null) {
-				WasdiLog.debugLog("Auth.Login: login info null, user not authenticated");
+				WasdiLog.debugLog("Auth.login: login info null, user not authenticated");
 				return UserViewModel.getInvalid();
 			}
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserId())){
-				WasdiLog.debugLog("Auth.Login: userId null or empty, user not authenticated");
+				WasdiLog.debugLog("Auth.login: userId null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserPassword())){
-				WasdiLog.debugLog("Auth.Login: password null or empty, user not authenticated");
+				WasdiLog.debugLog("Auth.login: password null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
 
-			WasdiLog.debugLog("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
+			WasdiLog.debugLog("AuthResource.login: requested access from " + oLoginInfo.getUserId());
 			
 			// Check if the user exists
 			UserRepository oUserRepository = new UserRepository();
@@ -113,16 +104,15 @@ public class AuthResource {
 			
 			if( oUser == null ) {
 				// User not in the db
-				WasdiLog.debugLog("AuthResource.Login: user not found: " + oLoginInfo.getUserId() + ", aborting");
+				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", aborting");
 				return UserViewModel.getInvalid();
 			}
 
-			if(null == oUser.getValidAfterFirstAccess()) {
+			if(oUser.getValidAfterFirstAccess() == null) {
 				// this is to fix legacy users for which confirmation has never been activated
-				WasdiLog.debugLog("AuthResource.Login: hotfix: legacy wasdi user " + oUser.getUserId() + " did not have the 'valid after first access' flag, setting its value to true");
+				WasdiLog.debugLog("AuthResource.login: hotfix: legacy wasdi user " + oUser.getUserId() + " did not have the 'valid after first access' flag, setting its value to true");
 				oUser.setValidAfterFirstAccess(true);
 			}
-
 
 			// First try to Authenticate using keycloak
 			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
@@ -139,7 +129,7 @@ public class AuthResource {
 					
 					m_oKeycloakService.logout(sRefreshToken);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("KeycloakService.getUserDbId: could not parse response due to " + oE + ", aborting");
+					WasdiLog.errorLog("AuthResource.login: could not parse response due to " + oE + ", aborting");
 				}
 				
 				
@@ -163,7 +153,7 @@ public class AuthResource {
 				UserSession oSession = oSessionRepository.insertUniqueSession(oUser.getUserId());
 				
 				if(null==oSession || Utils.isNullOrEmpty(oSession.getSessionId())) {
-					WasdiLog.debugLog("AuthResource.Login: could not insert session in DB, aborting");
+					WasdiLog.debugLog("AuthResource.login: could not insert session in DB, aborting");
 					return UserViewModel.getInvalid();
 				}
 				
@@ -182,15 +172,15 @@ public class AuthResource {
 					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
 				}
 
-				WasdiLog.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
+				WasdiLog.debugLog("AuthService.login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
 				return oUserVM;
 			} else {
-				WasdiLog.debugLog("AuthService.Login: access failed");
+				WasdiLog.debugLog("AuthService.login: access failed");
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("AuthService.Login: " + oEx);
+			WasdiLog.errorLog("AuthService.login: " + oEx);
 		}
 
 		return UserViewModel.getInvalid();
@@ -207,17 +197,11 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 		try {
-			// Validate imputs
-			if(Utils.isNullOrEmpty(sSessionId)) {
-				WasdiLog.debugLog("AuthResource.CheckSession: SessionId is null or empty");
-				return UserViewModel.getInvalid();
-			}
-
 			// Check if we can see the user from the session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				WasdiLog.debugLog("AuthResource.CheckSession: invalid session");
+			if (oUser == null) {
+				WasdiLog.debugLog("AuthResource.checkSession: invalid session");
 				return UserViewModel.getInvalid();
 			}
 
@@ -229,7 +213,7 @@ public class AuthResource {
 			oUserVM.setType(oUser.getType());
 			return oUserVM;
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.CheckSession: " + oE);
+			WasdiLog.errorLog("AuthResource.checkSession: " + oE);
 		}
 		return UserViewModel.getInvalid();
 	}	
@@ -243,13 +227,7 @@ public class AuthResource {
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
-		WasdiLog.debugLog("AuthResource.Logout");
-		
-		// Validate the session
-		if(null == sSessionId) {
-			WasdiLog.debugLog("AuthResource.CheckSession: null sSessionId");
-			return PrimitiveResult.getInvalid();
-		}
+		WasdiLog.debugLog("AuthResource.logout");
 		
 		// Try to get the user
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -268,11 +246,11 @@ public class AuthResource {
 			oResult.setStringValue(sSessionId);
 			if(oSessionRepository.deleteSession(oSession)) {
 
-				WasdiLog.debugLog("AuthService.Logout: Session data base deleted.");
+				WasdiLog.debugLog("AuthService.logout: Session data base deleted.");
 				oResult.setBoolValue(true);
 			} else {
 
-				WasdiLog.debugLog("AuthService.Logout: Error deleting session data base.");
+				WasdiLog.debugLog("AuthService.logout: Error deleting session data base.");
 				oResult.setBoolValue(false);
 			}
 
@@ -297,7 +275,7 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		
-		WasdiLog.debugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
+		WasdiLog.debugLog("AuthService.createSftpAccount: Called for Mail " + sEmail);
 		
 		// Validate the inputs
 		if(Utils.isNullOrEmpty(sEmail)) {
@@ -305,10 +283,10 @@ public class AuthResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		try {
-			InternetAddress emailAddr = new InternetAddress(sEmail);
-			emailAddr.validate();
+			InternetAddress oEmailAddr = new InternetAddress(sEmail);
+			oEmailAddr.validate();
 		} catch (AddressException oEx) {
-			WasdiLog.debugLog("AuthResource.createSftpAccount: email is invalid, aborting");
+			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -342,7 +320,7 @@ public class AuthResource {
 			// Try to create the account
 			if (!oManager.createAccount(sAccount, sPassword)) {
 	
-				WasdiLog.debugLog("AuthService.CreateSftpAccount: error creating sftp account");
+				WasdiLog.debugLog("AuthService.createSftpAccount: error creating sftp account");
 				return Response.serverError().build();
 			}
 	
@@ -354,7 +332,7 @@ public class AuthResource {
 			// All is done
 			return Response.ok().build();
 		}catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.CreateSftpAccount: " + oE);
+			WasdiLog.errorLog("AuthService.createSftpAccount: " + oE);
 		}
 		return Response.serverError().build();
 	}
@@ -367,11 +345,12 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public boolean existsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AuthService.ExistsSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
+			WasdiLog.debugLog("AuthService.existsSftpAccount: invalid session");
 			return false;
 		}
 		String sAccount = oUser.getUserId();		
@@ -385,8 +364,8 @@ public class AuthResource {
 		try{
 			// Check the user
 			bRes = oManager.checkUser(sAccount);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.existsSftpAccount: error " + oEx.toString());
 		}
 		return bRes;
 	}
@@ -404,7 +383,8 @@ public class AuthResource {
 		WasdiLog.debugLog("AuthService.ListSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null) {
+			WasdiLog.debugLog("AuthService.listSftpAccount: invalid session");
 			return null;
 		}	
 		String sAccount = oUser.getUserId();		
@@ -428,11 +408,12 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 
-		WasdiLog.debugLog("AuthService.RemoveSftpAccount");
+		WasdiLog.debugLog("AuthService.removeSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null) {
+			WasdiLog.debugLog("AuthService.removeSftpAccount: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -459,15 +440,17 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 
-		WasdiLog.debugLog("AuthService.UpdateSftpPassword Mail: " + sEmail);
+		WasdiLog.debugLog("AuthService.updateSftpPassword Mail: " + sEmail);
 
 		if(!m_oCredentialPolicy.validEmail(sEmail)) {
+			WasdiLog.debugLog("AuthService.updateSftpPassword Mail: invalid mail");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if(null == oUser || !m_oCredentialPolicy.satisfies(oUser)) {
+		if(null == oUser) {
+			WasdiLog.debugLog("AuthService.updateSftpPassword Mail: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build(); 
 		}
 
@@ -505,25 +488,24 @@ public class AuthResource {
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{
 		try{
-			WasdiLog.debugLog("AuthService.UserRegistration"); 
+			WasdiLog.debugLog("AuthService.userRegistration"); 
 
 			//filter bad cases out
 			if(null == oRegistrationInfoViewModel) {
-				WasdiLog.debugLog("AuthService.UserRegistration: view model is null");
+				WasdiLog.debugLog("AuthService.userRegistration: view model is null");
 				PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 				oPrimitiveResult.setIntValue(400);
 				return oPrimitiveResult;
 			}
+			
 			if(Utils.isNullOrEmpty(oRegistrationInfoViewModel.getUserId())) {
-				WasdiLog.debugLog("AuthService.UserRegistration: userid in view model is null");
+				WasdiLog.debugLog("AuthService.userRegistration: userid in view model is null");
 				PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 				oPrimitiveResult.setIntValue(400);
 				return oPrimitiveResult;
 			}
 
-			WasdiLog.debugLog("AuthService.UserRegistration: input is good");
-
-			WasdiLog.debugLog("AuthService.UserRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
+			WasdiLog.debugLog("AuthService.userRegistration: checking if " + oRegistrationInfoViewModel.getUserId() + " is already in wasdi ");
 			UserRepository oUserRepository = new UserRepository();
 			User oWasdiUser = oUserRepository.getUser(oRegistrationInfoViewModel.getUserId());
 
@@ -533,10 +515,10 @@ public class AuthResource {
 				PrimitiveResult oResult = new PrimitiveResult();
 				//not modified
 				oResult.setIntValue(304);
-				WasdiLog.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
+				WasdiLog.debugLog("AuthService.userRegistration: " + oRegistrationInfoViewModel.getUserId() + " already in wasdi");
 				return oResult;
 			} else {
-				WasdiLog.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
+				WasdiLog.debugLog("AuthService.userRegistration: " + oRegistrationInfoViewModel.getUserId() + " is a new user");
 				//no, it's a new user! :)
 				//let's check it's a legit one (against kc)  
 				//otherwise someone might call this api even if the user is not registered on KC
@@ -548,7 +530,7 @@ public class AuthResource {
 					PrimitiveResult oResult = new PrimitiveResult();
 					//not found
 					oResult.setIntValue(404);
-					WasdiLog.debugLog("AuthService.UserRegistration: " + oRegistrationInfoViewModel.getUserId() + " not found in keycloak, aborting");
+					WasdiLog.debugLog("AuthService.userRegistration: " + oRegistrationInfoViewModel.getUserId() + " not found in keycloak, aborting");
 					return oResult;
 				}
 				
@@ -565,7 +547,7 @@ public class AuthResource {
 					}
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("Exception reading Users default node " + oEx);
+					WasdiLog.errorLog("AuthResource.userRegistration: Exception reading Users default node " + oEx);
 				}
 				oNewUser.setDefaultNode(sDefaultNode);
 				
@@ -589,7 +571,7 @@ public class AuthResource {
 				}
 			}
 		} catch(Exception oE) {
-			WasdiLog.debugLog("AuthResource.userRegistration: " + oE + ", aborting");
+			WasdiLog.errorLog("AuthResource.userRegistration: " + oE + ", aborting");
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -613,9 +595,12 @@ public class AuthResource {
 
 
 		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
+			WasdiLog.debugLog("AuthResources.validateNewUser: invalid userId");
 			return PrimitiveResult.getInvalid();
 		}
+		
 		if(!m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
+			WasdiLog.debugLog("AuthResources.validateNewUser: invalid token");
 			return PrimitiveResult.getInvalid();
 		}
 
@@ -670,11 +655,13 @@ public class AuthResource {
 		//note: only name and surname can be changed, so far. Other fields are ignored
 
 		if(null == oInputUserVM ) {
+			WasdiLog.debugLog("AuthService.editUserDetails: invalid User View Model");
 			return UserViewModel.getInvalid();
 		}
 		//check only name and surname: they are the only fields that must be valid,
 		//the others will typically be null, including userId
 		if(!m_oCredentialPolicy.validName(oInputUserVM.getName()) || !m_oCredentialPolicy.validSurname(oInputUserVM.getSurname())) {
+			WasdiLog.debugLog("AuthService.editUserDetails: invalid user name");
 			return UserViewModel.getInvalid();
 		}
 
@@ -683,7 +670,7 @@ public class AuthResource {
 			User oUserId = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
-				WasdiLog.debugLog("Null user from session id (does the user exist?)");
+				WasdiLog.debugLog("AuthService.editUserDetails: invalid session");
 				return UserViewModel.getInvalid();
 			}
 
@@ -709,9 +696,8 @@ public class AuthResource {
 			oOutputUserVM.setType(oUserId.getType());
 			return oOutputUserVM;
 
-		} catch(Exception e) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: Exception");
-			e.printStackTrace();
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("AuthService.editUserDetails: Exception " + oEx.toString());
 		}
 		//should not get here
 		return UserViewModel.getInvalid();
@@ -729,16 +715,16 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult changePassword(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChangePasswordViewModel) {
 
-		WasdiLog.debugLog("AuthService.ChangeUserPassword"  );
+		WasdiLog.debugLog("AuthService.changePassword");
 
 		//input validation
 		if(null == oChangePasswordViewModel) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: ChangeUserPasswordViewModel is null, aborting");
+			WasdiLog.debugLog("AuthService.changePassword: ChangeUserPasswordViewModel is null, aborting");
 			return PrimitiveResult.getInvalid();
 		}
 
 		if(!m_oCredentialPolicy.satisfies(oChangePasswordViewModel)) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: invalid input");
+			WasdiLog.debugLog("AuthService.changePassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
 
@@ -747,7 +733,7 @@ public class AuthResource {
 			User oUserId = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
-				WasdiLog.debugLog("Null user from session id (does the user exist?)");
+				WasdiLog.debugLog("AuthService.changePassword: invalid session");
 				return PrimitiveResult.getInvalid();
 			}
 
@@ -755,7 +741,7 @@ public class AuthResource {
 			boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChangePasswordViewModel.getCurrentPassword().toCharArray(), sOldPassword);
 
 			if( !bPasswordCorrect ) {
-				WasdiLog.debugLog("Wrong current password for user " + oUserId);
+				WasdiLog.debugLog("AuthService.changePassword: Wrong current password for user " + oUserId);
 				return PrimitiveResult.getInvalid();
 			} else {
 				//todo create new user in keycloak
@@ -770,7 +756,7 @@ public class AuthResource {
 				return oResult;
 			}
 		} catch(Exception oE) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: " + oE);
+			WasdiLog.errorLog("AuthService.changePassword: " + oE);
 		}
 
 		return PrimitiveResult.getInvalid();
@@ -809,7 +795,7 @@ public class AuthResource {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
+			WasdiLog.errorLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setStringValue("Internal Server Error");
 			oResult.setIntValue(500);
@@ -867,7 +853,7 @@ public class AuthResource {
 				break;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
+			WasdiLog.errorLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
 		}
 
 		//apparently things did not work well
@@ -926,7 +912,7 @@ public class AuthResource {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.sendPasswordEmail: " + oE);
+			WasdiLog.errorLog("AuthResource.sendPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
@@ -940,9 +926,9 @@ public class AuthResource {
 	 * @return
 	 */
 	private Boolean sendSftpPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
-		WasdiLog.debugLog("AuthResource.sendSFTPPasswordEmail");
+		WasdiLog.debugLog("AuthResource.sendSftpPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
-			WasdiLog.debugLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
+			WasdiLog.debugLog("AuthResource.sendSftpPasswordEmail: null input, not enough information to send email");
 			return false;
 		}
 		//send email with new password
@@ -976,7 +962,7 @@ public class AuthResource {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.sendSFTPPasswordEmail: " + oE);
+			WasdiLog.errorLog("AuthResource.sendSftpPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
@@ -1011,7 +997,7 @@ public class AuthResource {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
+				WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: sMercuriusAPIAddress is null");
 				return false;
 			}
 
@@ -1057,8 +1043,8 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: error sending notification email to admin");
 				return false;
 			}
-		} catch(Exception e) {
-			WasdiLog.debugLog("\n\n"+e.getMessage()+"\n\n" );
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("AuthResource.notifyNewUserInWasdi error "+oEx.getMessage());
 			return false;
 		}
 		return true;

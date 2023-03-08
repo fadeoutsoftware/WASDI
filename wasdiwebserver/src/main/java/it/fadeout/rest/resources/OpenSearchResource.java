@@ -97,7 +97,7 @@ public class OpenSearchResource {
 					}
 					
 				} catch (Exception oE) {
-					WasdiLog.debugLog(m_sClassName + ".count: " + oE);
+					WasdiLog.errorLog(m_sClassName + ".count: " + oE);
 				}
 				
 				sProviders = getProvider(sOriginalProvider, sPlatformType,iNextProvider);
@@ -110,7 +110,7 @@ public class OpenSearchResource {
 
 			return iCounter;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".count: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".count: " + oE);
 		}
 		return -1;
 	}
@@ -206,7 +206,7 @@ public class OpenSearchResource {
 				} 
 			}
 			catch (Exception oE) {
-				WasdiLog.debugLog(m_sClassName + ".search: " + oE);
+				WasdiLog.errorLog(m_sClassName + ".search: " + oE);
 			}
 			
 			sProvider = getProvider(sOriginalProvider, sPlatformType, iNextProvider);
@@ -257,7 +257,7 @@ public class OpenSearchResource {
 			
 			return aoRetProviders;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".getDataProviders: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".getDataProviders: " + oE);
 			return null;
 		}
 	}
@@ -330,7 +330,7 @@ public class OpenSearchResource {
 						}
 						
 					} catch (Exception oE) {
-						WasdiLog.debugLog(m_sClassName + ".countList: " + oE);
+						WasdiLog.errorLog(m_sClassName + ".countList: " + oE);
 					}
 					
 					// Try to get next provider
@@ -345,7 +345,7 @@ public class OpenSearchResource {
 			
 			return iCounter;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".countList (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
+			WasdiLog.errorLog(m_sClassName + ".countList (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
 		}
 		return -1;
 	}
@@ -381,7 +381,7 @@ public class OpenSearchResource {
 						
 			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
-				WasdiLog.debugLog(m_sClassName + ".searchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
+				WasdiLog.debugLog(m_sClassName + ".searchList, no queries available");
 				return null;
 			}
 	
@@ -417,8 +417,12 @@ public class OpenSearchResource {
 						// Get the Provider Total Count
 						int iTotalResultsForProviders = oExecutor.executeCount(sQuery);
 						
-						// Any result >= 0 is valid 
-						if (iTotalResultsForProviders>=0) {
+						boolean bSwitchToNextProvider = false;
+						
+						if (iTotalResultsForProviders<0) {
+							bSwitchToNextProvider = true;
+						}
+						else {
 							WasdiLog.debugLog(m_sClassName + ".searchList: [" + sProvider + "] Images Found " + iTotalResultsForProviders);
 							
 							// Get the real results, paginated
@@ -465,8 +469,13 @@ public class OpenSearchResource {
 									// Execute the query
 									List<QueryResultViewModel> aoProviderPageResult = oExecutor.executeAndRetrieve(oQuery, false);
 									
+									if (aoProviderPageResult==null) {
+										bSwitchToNextProvider = true;
+										break;
+									}
+									
 									// Did we got a result?
-									if (aoProviderPageResult != null && !aoProviderPageResult.isEmpty()) {
+									if (!aoProviderPageResult.isEmpty()) {
 										
 										// Sum the grand total
 										iObtainedResults += aoProviderPageResult.size();
@@ -489,30 +498,33 @@ public class OpenSearchResource {
 										WasdiLog.debugLog(m_sClassName + ".searchList, NO results found for " + sProvider);
 									}
 								} catch (Exception oEx) {
-									WasdiLog.debugLog(m_sClassName + ".searchList: " + oEx);
+									WasdiLog.errorLog(m_sClassName + ".searchList: " + oEx);
 								}
 								
 								iActualPage ++;
 							}
 							
 							// Exit from the providers cylcle
-							sProvider = null;				
+							if (!bSwitchToNextProvider) sProvider = null;				
 						}
-						else {
-							WasdiLog.debugLog(m_sClassName + " Error contacting " + sProvider + " try next provider");
+
+
+						if (bSwitchToNextProvider) {
+							
+							WasdiLog.debugLog(m_sClassName + ".searchList: Error contacting " + sProvider + " try next provider");
 							sProvider = getProvider(sOriginalProviders, sPlatformType, iNextProvider);
 							iNextProvider++;
 							
 							if (sProvider != null) {
-								WasdiLog.debugLog(m_sClassName + " selected Provider " + sProvider);
+								WasdiLog.debugLog(m_sClassName + ".searchList: selected Provider " + sProvider);
 							}
 							else {
-								WasdiLog.debugLog(m_sClassName + " no more providers abailable ");	
+								WasdiLog.debugLog(m_sClassName + ".searchList: no more providers available ");	
 							}
 						}
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
+					WasdiLog.errorLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
 				}
 			}
 			
@@ -523,7 +535,7 @@ public class OpenSearchResource {
 			
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".SearchList: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".SearchList: " + oE);
 		}
 		return null;
 	}
@@ -565,7 +577,7 @@ public class OpenSearchResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog(m_sClassName + ".getProvider: " + oEx.toString());
+			WasdiLog.errorLog(m_sClassName + ".getProvider: " + oEx.toString());
 		}
 		
 		if (iPriority == 0) {
@@ -611,9 +623,10 @@ public class OpenSearchResource {
 			if (!Utils.isNullOrEmpty(sProviderLimit)) {
 				try {
 					iLimit = Integer.parseInt(sProviderLimit);
-					WasdiLog.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
+					WasdiLog.debugLog("OpenSearchResource.gePageLimitForProvider: " + sProvider + " using " + sProviderLimit + " Page Size ");
 				}
-				catch (Exception e) {
+				catch (Exception oEx) {
+					WasdiLog.errorLog("OpenSearchResource.gePageLimitForProvider: error " + oEx);
 				}
 			}
 			
@@ -623,6 +636,7 @@ public class OpenSearchResource {
 			return iLimit;			
 		}
 		catch (Exception oEx) {
+			WasdiLog.errorLog("OpenSearchResource.gePageLimitForProvider: error " + oEx);
 		}
 		
 		return iLimit;

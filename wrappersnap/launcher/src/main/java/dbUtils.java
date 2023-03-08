@@ -10,7 +10,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -58,6 +60,8 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -2054,6 +2058,36 @@ public class dbUtils {
 
     public static String s_sMyNodeCode = "wasdi";
     private static Scanner s_oScanner;
+    
+    public static void testEOEPCALogin() {
+    	
+    	String sDeployBody = "{ \"executionUnit\": { \"href\": \"https://test.wasdi.net/wasdiwebserver/rest/processors/getcwl?processorName=hello_eoepca2\", \"type\": \"application/cwl\" }}";
+    	
+		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(WasdiConfig.Current.dockers.eoepca.adesServerAddress);
+		
+		// Is this istance under authentication?		
+		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
+			// Authenticate to the eoepca installation
+			String sScope = "openid user_name is_operator";
+			
+			Map<String, String> asNoCacheHeaders = new HashMap<>();
+			asNoCacheHeaders.put("Cache-Control", "no-cache");
+			asNoCacheHeaders.put("Accept", "application/json");
+			
+			// We need an openId Connection Token
+			String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
+					, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
+			
+			// And the relative headers
+			Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
+			
+			// That we inject in all the call to ADES/OGC Processes API
+			oOgcProcessesClient.setHeaders(asHeaders);
+		}
+		
+		// Call the deploy function: is a post of the App Deploy Body
+		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);    	
+    }
 
     public static void main(String[] args) {
 
@@ -2113,6 +2147,8 @@ public class dbUtils {
             }
             
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+            
+            testEOEPCALogin();
 
             boolean bExit = false;
 
