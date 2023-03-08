@@ -102,6 +102,9 @@ public class QueryExecutorSENTINEL extends QueryExecutorOpenSearch {
 			String sResultAsString = null;
 			
 			sResultAsString = standardHttpGETQuery(sUrl);
+			
+			if (sResultAsString == null) return -1;
+			
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
 				WasdiLog.debugLog("QueryExecutorSENTINEL.executeCount: Document response null, aborting");

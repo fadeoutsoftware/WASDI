@@ -70,6 +70,9 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
 			// execute standard http query
 			String sResults = standardHttpGETQuery(sOutputQuery);
+			
+			if (sResults == null) return -1;
+			
 			// Let the transaltor give us the number of results
 			int iResults = m_oResponseTranslator.getCountResult(sResults);
 			
@@ -121,6 +124,9 @@ public abstract class QueryExecutorHttpGet extends QueryExecutor {
 			String sOutputQuery = m_oQueryTranslator.getSearchUrl(oQuery);
 			// Call standard http get API
 			String sResults = standardHttpGETQuery(sOutputQuery);
+			
+			if (sResults==null) return null;
+			
 			// Transalte the result
 			List<QueryResultViewModel> aoResults = m_oResponseTranslator.translateBatch(sResults, bFullViewModel);
 			
