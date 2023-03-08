@@ -317,7 +317,7 @@ public class FileBufferResource {
 
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), /*sProvider.toUpperCase(),*/ sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("FileBufferResource.share: " + oEx);
+			WasdiLog.errorLog("FileBufferResource.share: " + oEx);
 		}
 
 		return oResult;
@@ -412,7 +412,7 @@ public class FileBufferResource {
 				try {
 					sFileUrl = java.net.URLDecoder.decode(oImageImportViewModel.getFileUrl(), StandardCharsets.UTF_8.name());
 				} catch (UnsupportedEncodingException e) {
-					WasdiLog.debugLog("FileBufferResource.imageImport excepion decoding the fileUrl");
+					WasdiLog.errorLog("FileBufferResource.imageImport excepion decoding the fileUrl");
 				}
 			}
 
@@ -458,10 +458,10 @@ public class FileBufferResource {
 			
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, sPath, oParameter, sParentProcessWorkspaceId);
 			
-		} catch (IOException e) {
-			WasdiLog.debugLog("DownloadResource.imageImport: Error updating process list " + e);
-		} catch (Exception e) {
-			WasdiLog.debugLog("DownloadResource.imageImport: Error updating process list " + e);
+		} catch (IOException oEx) {
+			WasdiLog.errorLog("DownloadResource.imageImport: Error updating process list " + oEx);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DownloadResource.imageImport: Error updating process list " + oEx);
 		}
 		
 		oResult.setIntValue(500);
@@ -584,12 +584,12 @@ public class FileBufferResource {
 			
 			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
 			oReturnValue.setPayload(sProcessObjId);
-		}catch (IOException e) {
-			WasdiLog.debugLog("DownloadResource.PublishBand: " + e);
+		}catch (IOException oEx) {
+			WasdiLog.errorLog("DownloadResource.PublishBand: " + oEx);
 			return oReturnValue;
 
-		} catch (Exception e) {
-			WasdiLog.debugLog("DownloadResource.PublishBand: " + e);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DownloadResource.PublishBand: " + oEx);
 			return oReturnValue;
 		}
 
@@ -662,7 +662,7 @@ public class FileBufferResource {
 
 		} 
 		catch (Exception oEx) {
-			WasdiLog.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
+			WasdiLog.errorLog("FileBufferResource.downloadStyleByName: " + oEx);
 		}
 
 		return null;
@@ -690,12 +690,12 @@ public class FileBufferResource {
 
 			if (oUser == null) {
 				WasdiLog.debugLog("FileBufferResource.uploadStyle: invalid session");
-				return Response.status(401).build();
+				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
 				WasdiLog.debugLog("FileBufferResource.uploadStyle: No valid Subscription");
-				return Response.status(401).build();				
+				return Response.status(Status.UNAUTHORIZED).build();				
 			}			
 
 			// Get Download Path
@@ -724,7 +724,7 @@ public class FileBufferResource {
 			}
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("FileBufferResource.uploadStyle: " + oEx);
+			WasdiLog.errorLog("FileBufferResource.uploadStyle: " + oEx);
 			return Response.serverError().build();
 		}
 		
@@ -772,7 +772,8 @@ public class FileBufferResource {
 						
 						asStyles.add(sStyle);
 					}
-					catch (Exception e) {
+					catch (Exception oEx) {
+						WasdiLog.errorLog("FileBufferResource.getStyles: error " + oEx.toString());
 					}
 				}				
 			}
@@ -780,7 +781,7 @@ public class FileBufferResource {
 			return Response.ok(asStyles).build();
 		} 
 		catch (Exception oEx) {
-			WasdiLog.debugLog("FileBufferResource.downloadStyleByName: " + oEx);
+			WasdiLog.errorLog("FileBufferResource.getStyles: " + oEx);
 		}
 
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();

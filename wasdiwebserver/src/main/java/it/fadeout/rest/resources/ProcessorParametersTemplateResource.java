@@ -85,7 +85,7 @@ public class ProcessorParametersTemplateResource {
 		try {
 			sTemplateId = java.net.URLDecoder.decode(sTemplateId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate excepion decoding the template Id");
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate excepion decoding the template Id");
 		}
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate(sProcessorId: " + sTemplateId + ")");
@@ -552,7 +552,7 @@ public class ProcessorParametersTemplateResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.ShareProcessorParametersTemplate: " + oEx);
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.ShareProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -606,7 +606,7 @@ public class ProcessorParametersTemplateResource {
 				
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.ShareProcessorParametersTemplate: notification exception " + oEx.toString());
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.ShareProcessorParametersTemplate: notification exception " + oEx.toString());
 		}
 	}
 
@@ -651,7 +651,7 @@ public class ProcessorParametersTemplateResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnableUsersSharedWorksace: " + oEx);
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.getEnableUsersSharedWorksace: " + oEx);
 			return aoProcessorParametersTemplateSharingViewModels;
 		}
 
@@ -697,7 +697,7 @@ public class ProcessorParametersTemplateResource {
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
             oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorParametersTemplateId(sUserId, sProcessorParametersTemplateId);
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: " + oEx);
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);

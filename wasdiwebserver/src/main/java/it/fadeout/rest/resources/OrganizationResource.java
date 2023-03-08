@@ -116,7 +116,7 @@ public class OrganizationResource {
 
 			return Response.ok(aoOrganizationLVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.getListByUser: " + oEx);
+			WasdiLog.errorLog("OrganizationResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -220,7 +220,7 @@ public class OrganizationResource {
 
 			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog( "OrganizationResource.getOrganizationViewModel: " + oEx);
+			WasdiLog.errorLog( "OrganizationResource.getOrganizationViewModel: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -469,7 +469,7 @@ public class OrganizationResource {
 				return Response.ok(new SuccessResponse("Already Shared.")).build();
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: " + oEx);
+			WasdiLog.errorLog("OrganizationResource.shareOrganization: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
@@ -513,7 +513,7 @@ public class OrganizationResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
+			WasdiLog.errorLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
 		}
 	}
 
@@ -558,7 +558,7 @@ public class OrganizationResource {
 
 			return Response.ok(aoOrganizationSharingViewModels).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedOrganization: " + oEx);
+			WasdiLog.errorLog("OrganizationResource.getEnableUsersSharedOrganization: " + oEx);
 			return Response.serverError().build();
 		}
 
@@ -601,7 +601,7 @@ public class OrganizationResource {
 
 			return Response.ok(new SuccessResponse("Done")).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization: " + oEx);
+			WasdiLog.errorLog("OrganizationResource.deleteUserSharedOrganization: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
 		}

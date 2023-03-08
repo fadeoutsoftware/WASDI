@@ -93,13 +93,13 @@ public class ProcessorsMediaResource {
 		try {
 		    sProcessorId = java.net.URLDecoder.decode(sProcessorId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview excepion decoding processor Id");
+			WasdiLog.errorLog("ProcessorsMediaResource.deleteReview excepion decoding processor Id");
 		}
 		
 		try {
 			sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
+			WasdiLog.errorLog("ProcessorsMediaResource.deleteReview excepion decoding review Id");
 		}		
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.deleteReview( sProcessorId: "+ sProcessorId +" reviewId: "+sReviewId+")");
@@ -156,13 +156,13 @@ public class ProcessorsMediaResource {
 		try {
 		    sReviewId = java.net.URLDecoder.decode(sReviewId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment excepion decoding parent review Id");
+			WasdiLog.errorLog("ProcessorsMediaResource.deleteComment excepion decoding parent review Id");
 		}
 		
 		try {
 			sCommentId = java.net.URLDecoder.decode(sCommentId, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment excepion decoding comment Id");
+			WasdiLog.errorLog("ProcessorsMediaResource.deleteComment excepion decoding comment Id");
 		}		
 		
 		WasdiLog.debugLog("ProcessorsMediaResource.deleteComment( sReviewId: " + sReviewId + " sCommentId: " + sCommentId + ")");

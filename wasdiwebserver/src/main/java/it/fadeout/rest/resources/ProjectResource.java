@@ -98,7 +98,7 @@ public class ProjectResource {
 
 			return Response.ok(aoProjectList).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProjectResource.getListByUser: " + oEx);
+			WasdiLog.errorLog("ProjectResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -159,7 +159,7 @@ public class ProjectResource {
 
 			return Response.ok(aoProjectList).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProjectResource.getListBySubscription: " + oEx);
+			WasdiLog.errorLog("ProjectResource.getListBySubscription: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -215,7 +215,7 @@ public class ProjectResource {
 
 			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog( "ProjectResource.getProjectViewModel: " + oEx);
+			WasdiLog.errorLog( "ProjectResource.getProjectViewModel: " + oEx);
 			return Response.serverError().build();
 		}
 	}

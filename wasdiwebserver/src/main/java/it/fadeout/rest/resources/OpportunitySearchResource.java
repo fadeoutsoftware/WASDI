@@ -123,7 +123,7 @@ public class OpportunitySearchResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("OpportunitySearchResource.Search: Error searching opportunity " + oEx);
+			WasdiLog.errorLog("OpportunitySearchResource.Search: Error searching opportunity " + oEx);
 		}
 
 		return aoCoverageSwathResultViewModels;
@@ -211,7 +211,7 @@ public class OpportunitySearchResource {
 			}
 			oVM.aoChilds = aoChildsViewModel;
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
 		return oVM;
 	}
@@ -283,7 +283,7 @@ public class OpportunitySearchResource {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getCoverageSwathResultViewModelFromCoverageSwathResult: " + oE);
 		}
 		return oVM;
 	}
@@ -352,7 +352,7 @@ public class OpportunitySearchResource {
 				aoResults.add(oSwathResult);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getSwatViewModelFromResult: " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getSwatViewModelFromResult: " + oE);
 		}
 		return aoResults;
 	}
@@ -413,10 +413,10 @@ public class OpportunitySearchResource {
 				for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
 					oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
 			} catch (Exception oE) {
-				WasdiLog.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
+				WasdiLog.errorLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.GetSatelliteTrack( " + sSatname + " ): " + oE);
 		}
 		return oReturnViewModel;
 	}
@@ -483,7 +483,7 @@ public class OpportunitySearchResource {
 
 			kml.setFeature(oPlacemark);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getKmlSearchResults( Text: " + sText + ", Footprint: " + sFootPrint + " ): " + oE);
 		}
 
 		return kml;
@@ -556,16 +556,14 @@ public class OpportunitySearchResource {
 					oSatellite.getOrbitCore().setShowGroundTrack(true);
 
 				} catch (Exception e) {
-					WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
-					e.printStackTrace();
+					WasdiLog.errorLog("OpportunitySearchResource.getUpdatedSatelliteTrack: " + e);
 					continue;
 				}
 
 				aoRet.add(oPositionViewModel);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
-			oE.printStackTrace();
+			WasdiLog.errorLog("OpportunitySearchResource.getUpdatedSatelliteTrack( " + sSatName + "): " + oE);
 		}
 
 		return aoRet;
@@ -637,12 +635,12 @@ public class OpportunitySearchResource {
 					oSatelliteResource.setSatelliteSensors(aoSensorViewModels);
 					aaoReturnValue.add(oSatelliteResource);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("getSatellitesResources Exception: " + oE);
+					WasdiLog.errorLog("getSatellitesResources Exception: " + oE);
 					return aaoReturnValue;
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources: " + oE);
+			WasdiLog.errorLog("OpportunitySearchResource.getSatellitesResources: " + oE);
 		}
 		return aaoReturnValue;
 

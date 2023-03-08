@@ -258,7 +258,7 @@ public class ConsoleResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ConsoleResource.create: " + oEx);
+			WasdiLog.errorLog("ConsoleResource.create: " + oEx);
 
 			oResult.setStringValue("Error in starting proccess");
 			oResult.setBoolValue(false);
@@ -403,7 +403,7 @@ public class ConsoleResource {
 			return Response.ok(oResult).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ConsoleResource.create: JupyterNotebook started");
+			WasdiLog.errorLog("ConsoleResource.create: JupyterNotebook started");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
@@ -451,7 +451,7 @@ public class ConsoleResource {
 		}
 		catch (Exception oEx) {
 			// Something went wrong
-			WasdiLog.debugLog("ConsoleResource.internalIsActive exception: " + oEx.toString());
+			WasdiLog.errorLog("ConsoleResource.internalIsActive exception: " + oEx.toString());
 		}
 		
 		return null;
@@ -592,7 +592,7 @@ public class ConsoleResource {
 			}					
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ConsoleResource.isClientIpAllowedForThisUser exception: " + oEx.toString());
+			WasdiLog.errorLog("ConsoleResource.isClientIpAllowedForThisUser exception: " + oEx.toString());
 		}
 
 		return bIsAllowed;

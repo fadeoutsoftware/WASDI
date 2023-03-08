@@ -479,7 +479,7 @@ public class AdminDashboardResource {
 			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
 			oMetricsEntryRepository.updateMetricsEntry(oMetricsEntry);
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
+			WasdiLog.errorLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
@@ -515,7 +515,7 @@ public class AdminDashboardResource {
 
 			return Response.ok(oGenericEntity).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
+			WasdiLog.errorLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_SEARCH_PROCESS)).build();
 		}
 	}

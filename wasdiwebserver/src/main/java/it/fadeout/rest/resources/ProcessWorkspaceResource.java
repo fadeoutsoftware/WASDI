@@ -19,6 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONArray;
 
@@ -143,7 +144,7 @@ public class ProcessWorkspaceResource {
 				try {
 					eStatus = ProcessStatus.valueOf(sStatus);
 				}catch (Exception oE) {
-					WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
+					WasdiLog.errorLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sStatus + " to a valid process status, ignoring it");
 				}
 			}
 			
@@ -152,7 +153,7 @@ public class ProcessWorkspaceResource {
 				try {
 					eLauncherOperation = LauncherOperations.valueOf(sOperationType);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
+					WasdiLog.errorLog("ProcessWorkspaceResource.GetProcessByWorkspace: could not convert " + sOperationType + " to a valid operation type, ignoring it");
 				}
 			}
 
@@ -175,7 +176,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.GetProcessByWorkspace: " + oEx);
 		}
 
 		return aoProcessList;
@@ -237,7 +238,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx);
 		}
 
 		return aoProcessList;
@@ -334,7 +335,7 @@ public class ProcessWorkspaceResource {
 					oRun.setWorkspaceName(aoWorkspaceNames.get(oProcess.getWorkspaceId()));					
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception generating History View Model " + oEx.toString());
+					WasdiLog.errorLog("ProcessWorkspaceResource.getProcessByApplication: exception generating History View Model " + oEx.toString());
 				}
 				
 				if (oRun.getWorkspaceName().equals("wasdi_specific_node_ws_code")) continue;
@@ -378,7 +379,7 @@ public class ProcessWorkspaceResource {
 						
 					}
 					catch (Exception e) {
-						WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: exception contacting computing node: " + e.toString());
+						WasdiLog.errorLog("ProcessWorkspaceResource.getProcessByApplication: exception contacting computing node: " + e.toString());
 					}
 				}
 				
@@ -386,7 +387,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.getProcessByApplication: error retrieving process " + oEx);
 		}
 
 		return aoProcessList;
@@ -468,7 +469,7 @@ public class ProcessWorkspaceResource {
 					}
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception generating History View Model " + oEx.toString());
+					WasdiLog.errorLog("ProcessWorkspaceResource.getApplicationStatistics: exception generating History View Model " + oEx.toString());
 				}
 				
 			}
@@ -521,7 +522,7 @@ public class ProcessWorkspaceResource {
 						
 					}
 					catch (Exception e) {
-						WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: exception contacting computing node: " + e.toString());
+						WasdiLog.errorLog("ProcessWorkspaceResource.getApplicationStatistics: exception contacting computing node: " + e.toString());
 					}
 				}
 				
@@ -539,7 +540,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: error retrieving process " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.getApplicationStatistics: error retrieving process " + oEx);
 		}
 
 		return oReturnStats;
@@ -596,7 +597,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.getLastProcessByWorkspace: " + oEx);
 		}
 
 		return aoProcessList;
@@ -642,7 +643,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.GetLastProcessByUser: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.GetLastProcessByUser: " + oEx);
 		}
 
 		return aoProcessList;
@@ -707,7 +708,7 @@ public class ProcessWorkspaceResource {
 			oSummaryViewModel.setUserProcessRunning(iUserRunning);
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.GetSummary: " + oEx);
 		}
 
 		return oSummaryViewModel;
@@ -733,12 +734,12 @@ public class ProcessWorkspaceResource {
 			// Domain Check
 			if (oUser == null) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess( Process: " + sToKillProcessObjId + ", treeKill: " + bKillTheEntireTree + " ): invalid session");
-				return Response.status(401).build();
+				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			if(Utils.isNullOrEmpty(sToKillProcessObjId)) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: processObjId is null or empty, aborting");
-				return Response.status(401).build();
+				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -747,13 +748,13 @@ public class ProcessWorkspaceResource {
 			//check that the process exists
 			if(null==oProcessToKill) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: process not found in DB, aborting");
-				return Response.status(400).build();
+				return Response.status(Status.BAD_REQUEST).build();
 			}
 
 			// check that the user can access the processWorkspace
 			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: user cannot access requested process workspace");
-				return Response.status(403).build();
+				return Response.status(Status.FORBIDDEN).build();
 			}
 	
 			ProcessWorkspaceService oProcessService = new ProcessWorkspaceService();
@@ -765,10 +766,10 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.DeleteProcess: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.DeleteProcess: " + oEx);
 		}
 
-		return Response.status(500).build();
+		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 
 
@@ -815,7 +816,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.GetProcessById: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.GetProcessById: " + oEx);
 		}
 
 		return oProcess;
@@ -855,7 +856,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.getStatusProcessesById: " + oEx);
 		}
 
 		return asReturnStatusList;
@@ -885,7 +886,7 @@ public class ProcessWorkspaceResource {
 				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById: " + oE );
+			WasdiLog.errorLog("ProcessWorkspaceResource.getProcessStatusById: " + oE );
 		}
 		return null;
 	}
@@ -970,7 +971,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.UpdateProcessById: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.UpdateProcessById: " + oEx);
 		}
 
 		return oProcess;
@@ -1046,7 +1047,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.SetProcessPayload: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.SetProcessPayload: " + oEx);
 		}
 
 		return oProcess;
@@ -1103,8 +1104,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid: " + oEx);
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceResource.setSubProcessPid: " + oEx);
 		}
 
 		return oProcess;
@@ -1137,7 +1137,7 @@ public class ProcessWorkspaceResource {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: user " + oUser.getUserId() + " cannot access process obj id " + sProcessObjId );
 			}
 		}catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: " + oE );
+			WasdiLog.errorLog("ProcessWorkspaceResource.getPayload: " + oE );
 		}
 		
 		return null;
@@ -1238,13 +1238,13 @@ public class ProcessWorkspaceResource {
 
 							lRunningTime += lRunningTimeOnNode;
 						}
-					} catch (Exception e) {
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: exception contacting computing node: " + e.toString());
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: exception contacting computing node: " + oEx.toString());
 					}
 				}
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: " + oEx);
+			WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: " + oEx);
 		}
 
 		return lRunningTime;
@@ -1345,8 +1345,8 @@ WasdiLog.debugLog("sResponse: " + sResponse);
 								}
 							}
 						}
-					} catch (Exception e) {
-						WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + e.toString());
+					} catch (Exception oEx) {
+						WasdiLog.errorLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: exception contacting computing node: " + oEx.toString());
 					}
 				}
 			}

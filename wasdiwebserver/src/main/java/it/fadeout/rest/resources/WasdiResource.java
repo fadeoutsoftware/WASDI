@@ -121,7 +121,7 @@ public class WasdiResource {
 				WasdiLog.debugLog("WasdiResource.sendEmail: notification sent with result " + iPositiveSucceded);
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiResource.sendEmail: notification exception " + oEx.toString());
+			WasdiLog.errorLog("WasdiResource.sendEmail: notification exception " + oEx.toString());
 		}
 	}
 }

@@ -127,20 +127,15 @@ public class StyleResource {
 			try (FileReader oFileReader = new FileReader(oStyleSldFile)) {
 				insertStyle(sUserId, sStyleId, sName, sDescription, oStyleSldFile.getPath(), bPublic);
 			} catch (Exception oEx) {
-				WasdiLog.debugLog("StyleResource.uploadFile: " + oEx);
+				WasdiLog.errorLog("StyleResource.uploadFile: " + oEx);
 				oResult.setStringValue("Error saving the style.");
 				return oResult;
 			}
 
-			//computational-node-side work
-//			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
-//				computationalNodesAddStyle(sSessionId, sName, sDescription, bPublic, oStyleSldFile.getPath());
-//			}
-
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
 		} catch (Exception oEx2) {
-			WasdiLog.debugLog("StyleResource.uploadFile: " + oEx2);
+			WasdiLog.errorLog("StyleResource.uploadFile: " + oEx2);
 		}
 
 		oResult.setBoolValue(true);
@@ -258,10 +253,9 @@ public class StyleResource {
 
 			try {
 				writeFile(oFileInputStream, oStyleSldFileTemp);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} 
+			catch (Exception oEx) {
+				WasdiLog.errorLog("StyleResource.updateFile: error writing file: " + oEx);
 			}
 			
 			if (bZipped) {
@@ -286,7 +280,7 @@ public class StyleResource {
 					if (oStyleSldFileTemp.exists())
 						oStyleSldFileTemp.delete();
 
-					WasdiLog.debugLog("StyleResource.updateFile: " + oEx);
+					WasdiLog.errorLog("StyleResource.updateFile: " + oEx);
 					return Response.status(Status.NOT_MODIFIED).build();
 				}
 			}
@@ -300,7 +294,7 @@ public class StyleResource {
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
 		} catch (Exception oEx2) {
-			WasdiLog.debugLog("StyleResource.updateFile: " + oEx2);
+			WasdiLog.errorLog("StyleResource.updateFile: " + oEx2);
 			return Response.serverError().build();
 		}
 
@@ -353,11 +347,10 @@ public class StyleResource {
 			sXml = new String(Files.readAllBytes(oStyleFile.toPath()));
 
 			return Response.ok(sXml, MediaType.APPLICATION_XML).build();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.getXML error : " + oEx);
+		} 
 
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}

@@ -29,7 +29,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
@@ -77,7 +76,7 @@ public class PackageManagerResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
 		}
 
 		return sOutput;
@@ -116,7 +115,7 @@ public class PackageManagerResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.readEnvActionsFile: " + oEx);
 		}
 
 		return sOutput;
@@ -293,7 +292,7 @@ public class PackageManagerResource {
 
 			oPackageManagerVM = oPackageManager.getManagerVersion();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
 		}
 
 		return Response.ok(oPackageManagerVM).build();
@@ -396,7 +395,7 @@ public class PackageManagerResource {
 					WasdiLog.debugLog("PackageManagerResource.environmentupdate: Worker started");						
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
+					WasdiLog.errorLog("PackageManagerResource.environmentupdate: error starting UpdateProcessorEnvironmentWorker " + oEx.toString());
 				}
 			}			
 			
@@ -408,7 +407,7 @@ public class PackageManagerResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("PackageManagerResource.environmentupdate: " + oEx);
+			WasdiLog.errorLog("PackageManagerResource.environmentupdate: " + oEx);
 			return Response.serverError().build();
 		}
 	}	

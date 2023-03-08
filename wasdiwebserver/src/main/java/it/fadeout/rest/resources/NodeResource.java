@@ -114,7 +114,7 @@ public class NodeResource {
 				}
 			}
 			catch (Throwable oEx) {
-				WasdiLog.debugLog("NodeResource.getAllNodes: Exception " + oEx.toString());
+				WasdiLog.errorLog("NodeResource.getAllNodes: Exception " + oEx.toString());
 			}
 		}
 		
@@ -219,7 +219,7 @@ public class NodeResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeResource.ShareNode: " + oEx);
+			WasdiLog.errorLog("NodeResource.ShareNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -273,7 +273,7 @@ public class NodeResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("NodeResource.ShareNode: notification exception " + oEx.toString());
+			WasdiLog.errorLog("NodeResource.ShareNode: notification exception " + oEx.toString());
 		}
 	}
 
@@ -317,7 +317,7 @@ public class NodeResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeResource.getEnableUsersSharedWorksace: " + oEx);
+			WasdiLog.errorLog("NodeResource.getEnableUsersSharedWorksace: " + oEx);
 			return aoNodeSharingViewModels;
 		}
 
@@ -363,7 +363,7 @@ public class NodeResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndNodeCode(sUserId, sNodeCode);
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeResource.deleteUserSharedNode: " + oEx);
+			WasdiLog.errorLog("NodeResource.deleteUserSharedNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);

@@ -188,8 +188,8 @@ public class ProcessingResources {
                 PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
                 WasdiLog.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
                 return Response.ok(oPrimitiveResult).build();
-            } catch (Exception oe) {
-                oe.printStackTrace();
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("ProcessingResources.sen2CorConversion error: " + oEx);
             }
 
         }
@@ -282,14 +282,14 @@ public class ProcessingResources {
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
 
         } 
-        catch (IOException e) {
-            WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
+        catch (IOException oEx) {
+            WasdiLog.errorLog("ProsessingResources.ExecuteOperation: " + oEx);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
             return oResult;
         } 
-        catch (Exception e) {
-            WasdiLog.debugLog("ProsessingResources.ExecuteOperation: " + e);
+        catch (Exception oEx) {
+            WasdiLog.errorLog("ProsessingResources.ExecuteOperation: " + oEx);
             oResult.setBoolValue(false);
             oResult.setIntValue(500);
             return oResult;
@@ -392,8 +392,7 @@ public class ProcessingResources {
             // Make Wasdi handle this request: this should be in this node...
             return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
         } catch (Exception oE) {
-            WasdiLog.debugLog("ProcessingResources.runProcess: " + oE);
-            oE.printStackTrace();
+            WasdiLog.errorLog("ProcessingResources.runProcess: " + oE);
             oResult.setStringValue(oE.toString());
             oResult.setIntValue(500);
             oResult.setBoolValue(false);

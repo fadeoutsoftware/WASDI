@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -134,7 +135,7 @@ public class ProductResource {
                 return oResult;
             }
         } catch (Exception oE) {
-            WasdiLog.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
+            WasdiLog.errorLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
         }
         return PrimitiveResult.getInvalid();
     }
@@ -188,7 +189,7 @@ public class ProductResource {
                 WasdiLog.debugLog("ProductResource.GetByProductName: product not found");
             }
         } catch (Exception oE) {
-            WasdiLog.debugLog("ProductResource.GetByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " ): " + oE);
+            WasdiLog.errorLog("ProductResource.GetByProductName( Product: " + sProductName + ", WS: " + sWorkspaceId + " ): " + oE);
         }
         return null;
     }
@@ -289,7 +290,7 @@ public class ProductResource {
                     // Ok return Metadata
                     return oReloaded;
                 } catch (Exception oEx) {
-                    WasdiLog.debugLog("ProductResource.GetMetadataByProductName: " + oEx);
+                    WasdiLog.errorLog("ProductResource.GetMetadataByProductName: " + oEx);
                     return null;
                 }
 
@@ -389,7 +390,7 @@ public class ProductResource {
                 }
             }
         } catch (Exception oEx) {
-            WasdiLog.debugLog("ProductResource.GetListByWorkspace: " + oEx);
+            WasdiLog.errorLog("ProductResource.GetListByWorkspace: " + oEx);
         }
         
         // Return the list
@@ -458,7 +459,7 @@ public class ProductResource {
                 aoProductList.add(oGeoPVM);
             }
         } catch (Exception oEx) {
-            WasdiLog.debugLog("ProductResource.getLightListByWorkspace: " + oEx);
+            WasdiLog.errorLog("ProductResource.getLightListByWorkspace: " + oEx);
         }
 
         return aoProductList;
@@ -536,7 +537,7 @@ public class ProductResource {
                 }
             }
         } catch (Exception oEx) {
-            WasdiLog.debugLog("ProductResource.getNamesByWorkspace: " + oEx);
+            WasdiLog.errorLog("ProductResource.getNamesByWorkspace: " + oEx);
         }
 
         return aoProductList;
@@ -563,16 +564,16 @@ public class ProductResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
             if (oUser == null) {
                 WasdiLog.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... ): invalid session");
-                return Response.status(401).build();
+                return Response.status(Status.UNAUTHORIZED).build();
             }
 
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
                 WasdiLog.debugLog("ProductResource.UpdateProductViewModel( WS: " + sWorkspaceId + ", ... ): user cannot access workspace");
-                return Response.status(401).build();
+                return Response.status(Status.UNAUTHORIZED).build();
             }            
 
             if (oProductViewModel == null) {
-                return Response.status(500).build();
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
 
             WasdiLog.debugLog("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
@@ -591,7 +592,7 @@ public class ProductResource {
 
             if (oDownloaded == null) {
                 WasdiLog.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
-                return Response.status(500).build();
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
             
             
@@ -680,13 +681,13 @@ public class ProductResource {
                     }                	
                 }
                 catch (Exception oStyleEx) {
-                	WasdiLog.debugLog("ProductResource.UpdateProductViewModel: Exception changing geoserver style " + oStyleEx.toString());
+                	WasdiLog.errorLog("ProductResource.UpdateProductViewModel: Exception changing geoserver style " + oStyleEx.toString());
 				}
 
                 // Save
                 if (oDownloadedFilesRepository.updateDownloadedFile(oDownloaded) == false) {
                     WasdiLog.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
-                    return Response.status(500).build();
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
                 
                 WasdiLog.debugLog("ProductResource.UpdateProductViewModel: Updated ");
@@ -696,11 +697,11 @@ public class ProductResource {
             }
 
         } catch (Exception oEx) {
-            WasdiLog.debugLog("ProductResource.UpdateProductViewModel: " + oEx);
-            return Response.status(500).build();
+            WasdiLog.errorLog("ProductResource.UpdateProductViewModel: " + oEx);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        return Response.status(200).build();
+        return Response.status(Status.OK).build();
     }
     
     /**
@@ -724,14 +725,14 @@ public class ProductResource {
         // before any operation check that this is not an injection attempt from the user
         if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
             WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): Injection attempt from users");
-            return Response.status(400).build();
+            return Response.status(Status.BAD_REQUEST).build();
         }
 
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
             WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid session");
-            return Response.status(401).build();
+            return Response.status(Status.UNAUTHORIZED).build();
         }
         
         String sUserId = oUser.getUserId();
@@ -745,7 +746,7 @@ public class ProductResource {
         // If workspace is not found in DB returns bad request
         if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
             WasdiLog.debugLog("ProductResource.uploadfile( InputStream, WS: " + sWorkspaceId + ", Name: " + sName + " ): invalid workspace");
-            return Response.status(403).build();
+            return Response.status(Status.FORBIDDEN).build();
         }
         
         // Take path
@@ -797,8 +798,8 @@ public class ProductResource {
             }
 
         } catch (Exception e) {
-            WasdiLog.debugLog("ProductResource.uploadfile: " + e);
-            return Response.status(500).build();
+            WasdiLog.errorLog("ProductResource.uploadfile: " + e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -823,27 +824,20 @@ public class ProductResource {
         // before any operation check that this is not an injection attempt from the user
         if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
             WasdiLog.debugLog("ProductResource.uploadfile: Injection attempt from users");
-            return Response.status(400).build();
+            return Response.status(Status.BAD_REQUEST).build();
         }
 
         // Check the user session
-        if (Utils.isNullOrEmpty(sSessionId)) {
-            WasdiLog.debugLog("ProductResource.uploadfile: invalid session");
-            return Response.status(401).build();
-        }
-
         User oUser = Wasdi.getUserFromSession(sSessionId);
+        
         if (oUser == null) {
-            return Response.status(401).build();
-        }
-        if (Utils.isNullOrEmpty(oUser.getUserId())) {
-            return Response.status(401).build();
+            return Response.status(Status.UNAUTHORIZED).build();
         }
 
         // If workspace is not found in DB returns bad request
         if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
             WasdiLog.debugLog("ProductResource.uploadfile: invalid workspace");
-            return Response.status(403).build();
+            return Response.status(Status.FORBIDDEN).build();
         }
 
         // Check the file name
@@ -874,9 +868,9 @@ public class ProductResource {
             }
 
             return Response.ok().build();
-        } catch (Exception e) {
-            WasdiLog.debugLog("ProductResource.uploadfile: " + e);
-            return Response.status(500).build();
+        } catch (Exception oEx) {
+            WasdiLog.errorLog("ProductResource.uploadfile: " + oEx);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -1051,16 +1045,16 @@ public class ProductResource {
                                 // delete published band on data base
                                 oPublishedBandsRepository.deleteByProductNameLayerId(oDownloadedFile.getFilePath(), oPublishedBand.getLayerId());
                             } catch (Exception oEx) {
-                                WasdiLog.debugLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
+                                WasdiLog.errorLog("ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
                             }
 
                         } catch (Exception oEx) {
-                            WasdiLog.debugLog("ProductResource.DeleteProduct: " + oEx);
+                            WasdiLog.errorLog("ProductResource.DeleteProduct: " + oEx);
                         }
                     }            		
             	}
             	catch (Exception oEx) {
-                    WasdiLog.debugLog("ProductResource.DeleteProduct: Exception deleting layers: " + oEx);
+                    WasdiLog.errorLog("ProductResource.DeleteProduct: Exception deleting layers: " + oEx);
                 }            	
             }
 
@@ -1070,7 +1064,7 @@ public class ProductResource {
                 oProductWorkspaceRepository.deleteByProductNameWorkspace(oDownloadedFile.getFilePath(), sWorkspaceId);
                 oDownloadedFilesRepository.deleteByFilePath(oDownloadedFile.getFilePath());
             } catch (Exception oEx) {
-                WasdiLog.debugLog("ProductResource.DeleteProduct: error deleting product-workspace related records on db and the Downloaded File Entry " + oEx);
+                WasdiLog.errorLog("ProductResource.DeleteProduct: error deleting product-workspace related records on db and the Downloaded File Entry " + oEx);
                 oReturn.setIntValue(500);
                 oReturn.setStringValue(oEx.toString());
                 return oReturn;
@@ -1093,7 +1087,7 @@ public class ProductResource {
                     }
 
                 } catch (Exception oEx) {
-                    WasdiLog.debugLog("ProductResource.DeleteProduct: error deleting Metadata " + oEx);
+                    WasdiLog.errorLog("ProductResource.DeleteProduct: error deleting Metadata " + oEx);
                     oReturn.setIntValue(500);
                     oReturn.setStringValue(oEx.toString());
                     return oReturn;
@@ -1116,12 +1110,12 @@ public class ProductResource {
                 oSendToRabbit.SendRabbitMessage(true, "DELETE", sWorkspaceId, null, sWorkspaceId);
                 oSendToRabbit.Free();
             } catch (Exception oEx) {
-                WasdiLog.debugLog("ProductResource.DeleteProduct: exception sending asynch notification");
+                WasdiLog.errorLog("ProductResource.DeleteProduct: exception sending asynch notification");
             }
 
 
         } catch (Exception oEx) {
-            WasdiLog.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+            WasdiLog.errorLog("ProductResource.DeleteProduct: error deleting product " + oEx);
             oReturn.setIntValue(500);
             oReturn.setStringValue(oEx.toString());
             return oReturn;

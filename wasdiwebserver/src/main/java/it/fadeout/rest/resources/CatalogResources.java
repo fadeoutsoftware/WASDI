@@ -120,8 +120,8 @@ public class CatalogResources {
 			WasdiLog.debugLog("CatalogResources.DownloadEntryByName: done, return");
 			
 			return oResponseBuilder.build();
-		} catch (Exception e) {
-			WasdiLog.debugLog("CatalogResources.DownloadEntryByName: " + e);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.DownloadEntryByName: " + oEx);
 		}
 		return null;
 	}
@@ -310,7 +310,7 @@ public class CatalogResources {
 				aoFileEntries.put(sPath, oPath.toFile());
 			});
 		} catch (Exception oE) {
-			WasdiLog.debugLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
+			WasdiLog.errorLog("CatalogResource.zipSentinel3: " + oE + " while adding files");
 		}
 
 		
@@ -341,8 +341,8 @@ public class CatalogResources {
 				return zipSentinel3(oInitialFile);
 			} 
 		} 
-		catch (Exception e) {
-			WasdiLog.debugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.zipOnTheFlyAndStream: " + oEx);
 		} 
 		return null;
 	}
@@ -415,7 +415,7 @@ public class CatalogResources {
 			return Response.ok(oResult).build();					
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("CatalogResources.checkFileByNode: exception " + oEx.toString());
+			WasdiLog.errorLog("CatalogResources.checkFileByNode: exception " + oEx.toString());
 			return Response.serverError().build();
 		}		
 	}
@@ -513,7 +513,7 @@ public class CatalogResources {
 			}
 
 		} catch (Exception e) {
-			WasdiLog.debugLog("DownloadResource.Download: " + e);
+			WasdiLog.errorLog("DownloadResource.Download: " + e);
 		}
 
 		return Response.serverError().build();
@@ -604,8 +604,8 @@ public class CatalogResources {
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 
-		} catch (Exception e) {
-			WasdiLog.debugLog("CatalogueResource.IngestFileInWorkspace: " + e);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.IngestFileInWorkspace: " + oEx);
 		}
 
 		oResult.setBoolValue(false);
@@ -700,8 +700,8 @@ public class CatalogResources {
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
 
-		} catch (Exception e) {
-			WasdiLog.debugLog("CatalogueResource.copyFileToSftp: " + e);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.copyFileToSftp: " + oEx);
 		}
 
 		oResult.setBoolValue(false);
@@ -768,10 +768,10 @@ public class CatalogResources {
 						
 			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
 
-		} catch (Exception e) {
-			WasdiLog.debugLog("CatalogueResource.ftpTransferFile: " + e);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.ftpTransferFile: " + oEx);
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
-			oRes.setStringValue(e.toString());
+			oRes.setStringValue(oEx.toString());
 			return oRes;
 		}
 	}

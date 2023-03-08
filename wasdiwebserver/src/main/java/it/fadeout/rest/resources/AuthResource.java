@@ -130,7 +130,7 @@ public class AuthResource {
 					
 					m_oKeycloakService.logout(sRefreshToken);
 				} catch (Exception oE) {
-					WasdiLog.debugLog("AuthResource.login: could not parse response due to " + oE + ", aborting");
+					WasdiLog.errorLog("AuthResource.login: could not parse response due to " + oE + ", aborting");
 				}
 				
 				
@@ -181,7 +181,7 @@ public class AuthResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("AuthService.login: " + oEx);
+			WasdiLog.errorLog("AuthService.login: " + oEx);
 		}
 
 		return UserViewModel.getInvalid();
@@ -220,7 +220,7 @@ public class AuthResource {
 			oUserVM.setType(oUser.getType());
 			return oUserVM;
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.CheckSession: " + oE);
+			WasdiLog.errorLog("AuthResource.CheckSession: " + oE);
 		}
 		return UserViewModel.getInvalid();
 	}	
@@ -299,7 +299,7 @@ public class AuthResource {
 			InternetAddress oEmailAddr = new InternetAddress(sEmail);
 			oEmailAddr.validate();
 		} catch (AddressException oEx) {
-			WasdiLog.debugLog("AuthResource.createSftpAccount: email is invalid, aborting");
+			WasdiLog.errorLog("AuthResource.createSftpAccount: email is invalid, aborting");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -345,7 +345,7 @@ public class AuthResource {
 			// All is done
 			return Response.ok().build();
 		}catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.CreateSftpAccount: " + oE);
+			WasdiLog.errorLog("AuthService.CreateSftpAccount: " + oE);
 		}
 		return Response.serverError().build();
 	}
@@ -358,7 +358,7 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public boolean existsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog("AuthService.ExistsSftpAccount");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -376,8 +376,8 @@ public class AuthResource {
 		try{
 			// Check the user
 			bRes = oManager.checkUser(sAccount);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResource.existsSftpAccount: error " + oEx.toString());
 		}
 		return bRes;
 	}
@@ -556,7 +556,7 @@ public class AuthResource {
 					}
 				}
 				catch (Exception oEx) {
-					WasdiLog.debugLog("Exception reading Users default node " + oEx);
+					WasdiLog.errorLog("Exception reading Users default node " + oEx);
 				}
 				oNewUser.setDefaultNode(sDefaultNode);
 				
@@ -580,7 +580,7 @@ public class AuthResource {
 				}
 			}
 		} catch(Exception oE) {
-			WasdiLog.debugLog("AuthResource.userRegistration: " + oE + ", aborting");
+			WasdiLog.errorLog("AuthResource.userRegistration: " + oE + ", aborting");
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -700,9 +700,8 @@ public class AuthResource {
 			oOutputUserVM.setType(oUserId.getType());
 			return oOutputUserVM;
 
-		} catch(Exception e) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: Exception");
-			e.printStackTrace();
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("AuthService.ChangeUserPassword: Exception " + oEx.toString());
 		}
 		//should not get here
 		return UserViewModel.getInvalid();
@@ -761,7 +760,7 @@ public class AuthResource {
 				return oResult;
 			}
 		} catch(Exception oE) {
-			WasdiLog.debugLog("AuthService.ChangeUserPassword: " + oE);
+			WasdiLog.errorLog("AuthService.ChangeUserPassword: " + oE);
 		}
 
 		return PrimitiveResult.getInvalid();
@@ -800,7 +799,7 @@ public class AuthResource {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
+			WasdiLog.errorLog("AuthService.lostPassword: preliminary checks broken due to: " + oE + ", aborting");
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setStringValue("Internal Server Error");
 			oResult.setIntValue(500);
@@ -858,7 +857,7 @@ public class AuthResource {
 				break;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
+			WasdiLog.errorLog("AuthService.lostPassword: could not complete the password recovery due to: " + oE);
 		}
 
 		//apparently things did not work well
@@ -917,7 +916,7 @@ public class AuthResource {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.sendPasswordEmail: " + oE);
+			WasdiLog.errorLog("AuthResource.sendPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
@@ -967,7 +966,7 @@ public class AuthResource {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("AuthResource.sendSFTPPasswordEmail: " + oE);
+			WasdiLog.errorLog("AuthResource.sendSFTPPasswordEmail: " + oE);
 			return false;
 		}
 		return false;
@@ -1048,8 +1047,8 @@ public class AuthResource {
 				WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: error sending notification email to admin");
 				return false;
 			}
-		} catch(Exception e) {
-			WasdiLog.debugLog("\n\n"+e.getMessage()+"\n\n" );
+		} catch(Exception oEx) {
+			WasdiLog.errorLog("AuthResource.notifyNewUserInWasdi error "+oEx.getMessage());
 			return false;
 		}
 		return true;

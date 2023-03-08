@@ -139,8 +139,7 @@ public class ImagesResource {
 					WasdiLog.debugLog("ImagesResource.uploadImage: can't create new file");
 				}
 			} catch (IOException e) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: " + e.toString());
-				e.printStackTrace();
+				WasdiLog.errorLog("ImagesResource.uploadImage: " + e.toString());
 			}	    
 		    
 		    ImageFile oOutputImage = new ImageFile(sPath);

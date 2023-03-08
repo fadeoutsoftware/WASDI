@@ -8,6 +8,7 @@ package wasdi.shared.utils;
 
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
@@ -16,6 +17,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProjectRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -340,17 +342,45 @@ public class PermissionsUtils {
 				else return false;
 			}
 			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
-				//TODO: check if the user can manipulate the organization
-				return true;
+				return canUserAccessOrganization(sUserId, sFolder);
 			}
 			
 			return false;
 			
-		} catch (Exception oE) {
-			WasdiLog.debugLog("PermissionsUtils.canUserAccessImage error: " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessImage error: " + oE);
 		}
 
 		return false;			
+	}
+	
+	/**
+	 * Check if a user can access a workflow or not
+	 * @param sUserId User requesting the access
+	 * @param sWorkflowId workflow id
+	 * @return true if can be accessed, false otherwise
+	 */
+	public static boolean canUserAccessWorkflow(String sUserId, String sWorkflowId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId)) return false;
+			if (Utils.isNullOrEmpty(sWorkflowId)) return false;
+			
+			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+			SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
+			
+			if (oWorkflow == null) return false;
+			
+			if (oWorkflow.getUserId().equals(sUserId)) return true;
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			return oUserResourcePermissionRepository.isWorkflowSharedWithUser(sUserId, sWorkflowId);			
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessWorkflow error: " + oE);
+		}
+		
+		return false;
 	}
 }
  

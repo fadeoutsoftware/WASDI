@@ -97,7 +97,7 @@ public class OpenSearchResource {
 					}
 					
 				} catch (Exception oE) {
-					WasdiLog.debugLog(m_sClassName + ".count: " + oE);
+					WasdiLog.errorLog(m_sClassName + ".count: " + oE);
 				}
 				
 				sProviders = getProvider(sOriginalProvider, sPlatformType,iNextProvider);
@@ -110,7 +110,7 @@ public class OpenSearchResource {
 
 			return iCounter;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".count: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".count: " + oE);
 		}
 		return -1;
 	}
@@ -206,7 +206,7 @@ public class OpenSearchResource {
 				} 
 			}
 			catch (Exception oE) {
-				WasdiLog.debugLog(m_sClassName + ".search: " + oE);
+				WasdiLog.errorLog(m_sClassName + ".search: " + oE);
 			}
 			
 			sProvider = getProvider(sOriginalProvider, sPlatformType, iNextProvider);
@@ -257,7 +257,7 @@ public class OpenSearchResource {
 			
 			return aoRetProviders;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".getDataProviders: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".getDataProviders: " + oE);
 			return null;
 		}
 	}
@@ -330,7 +330,7 @@ public class OpenSearchResource {
 						}
 						
 					} catch (Exception oE) {
-						WasdiLog.debugLog(m_sClassName + ".countList: " + oE);
+						WasdiLog.errorLog(m_sClassName + ".countList: " + oE);
 					}
 					
 					// Try to get next provider
@@ -345,7 +345,7 @@ public class OpenSearchResource {
 			
 			return iCounter;
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".countList (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
+			WasdiLog.errorLog(m_sClassName + ".countList (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
 		}
 		return -1;
 	}
@@ -489,7 +489,7 @@ public class OpenSearchResource {
 										WasdiLog.debugLog(m_sClassName + ".searchList, NO results found for " + sProvider);
 									}
 								} catch (Exception oEx) {
-									WasdiLog.debugLog(m_sClassName + ".searchList: " + oEx);
+									WasdiLog.errorLog(m_sClassName + ".searchList: " + oEx);
 								}
 								
 								iActualPage ++;
@@ -512,7 +512,7 @@ public class OpenSearchResource {
 						}
 					}
 				} catch (Exception oE) {
-					WasdiLog.debugLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
+					WasdiLog.errorLog(m_sClassName + ".SearchList: (maybe your request was ill-formatted: " + oE);
 				}
 			}
 			
@@ -523,7 +523,7 @@ public class OpenSearchResource {
 			
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		} catch (Exception oE) {
-			WasdiLog.debugLog(m_sClassName + ".SearchList: " + oE);
+			WasdiLog.errorLog(m_sClassName + ".SearchList: " + oE);
 		}
 		return null;
 	}
@@ -565,7 +565,7 @@ public class OpenSearchResource {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog(m_sClassName + ".getProvider: " + oEx.toString());
+			WasdiLog.errorLog(m_sClassName + ".getProvider: " + oEx.toString());
 		}
 		
 		if (iPriority == 0) {
@@ -613,7 +613,8 @@ public class OpenSearchResource {
 					iLimit = Integer.parseInt(sProviderLimit);
 					WasdiLog.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
 				}
-				catch (Exception e) {
+				catch (Exception oEx) {
+					WasdiLog.errorLog("OpenSearchResource.gePageLimitForProvider: error " + oEx);
 				}
 			}
 			
@@ -623,6 +624,7 @@ public class OpenSearchResource {
 			return iLimit;			
 		}
 		catch (Exception oEx) {
+			WasdiLog.errorLog("OpenSearchResource.gePageLimitForProvider: error " + oEx);
 		}
 		
 		return iLimit;

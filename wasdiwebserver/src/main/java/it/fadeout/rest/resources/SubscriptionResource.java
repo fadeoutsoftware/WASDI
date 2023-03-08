@@ -202,7 +202,7 @@ public class SubscriptionResource {
 
 			return Response.ok(aoSubscriptionLVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.getListByUser: " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -328,7 +328,7 @@ public class SubscriptionResource {
 
 			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
+			WasdiLog.errorLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -622,53 +622,11 @@ public class SubscriptionResource {
 				return Response.ok(new SuccessResponse("Already Shared.")).build();
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.ShareSubscription: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 	}
-
-//	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sSubscriptionName) {
-//		try {
-//			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-//
-//			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: sMercuriusAPIAddress is null");
-//			}
-//			else {
-//
-//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: send notification");
-//
-//				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-//				Message oMessage = new Message();
-//
-//				String sTitle = "Subscription " + sSubscriptionName + " Shared";
-//
-//				oMessage.setTilte(sTitle);
-//
-//				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-//				if (sSender==null) {
-//					sSender = "wasdi@wasdi.net";
-//				}
-//
-//				oMessage.setSender(sSender);
-//
-//				String sMessage = "The user " + sRequesterUserId + " shared with you the subscription: " + sSubscriptionName;
-//
-//				oMessage.setMessage(sMessage);
-//
-//				Integer iPositiveSucceded = 0;
-//
-//				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-//				
-//				WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification sent with result " + iPositiveSucceded);
-//			}
-//
-//		}
-//		catch (Exception oEx) {
-//			WasdiLog.debugLog("SubscriptionResource.ShareSubscription: notification exception " + oEx.toString());
-//		}
-//	}
 
 	/**
 	 * Get the list of users that has a Subscription in sharing.
@@ -711,7 +669,7 @@ public class SubscriptionResource {
 
 			return Response.ok(aoSubscriptionSharingViewModels).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.getEnableUsersSharedSubscription: " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.getEnableUsersSharedSubscription: " + oEx);
 			return Response.serverError().build();
 		}
 
@@ -754,7 +712,7 @@ public class SubscriptionResource {
 
 			return Response.ok(new SuccessResponse("Done")).build();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
+			WasdiLog.errorLog("SubscriptionResource.deleteUserSharedSubscription: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
 		}
@@ -835,6 +793,7 @@ public class SubscriptionResource {
 				}
 			}
 		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionResource.getStripePaymentUrl error " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -920,7 +879,7 @@ public class SubscriptionResource {
 			oSendToRabbit.SendRabbitMessage(true, "SUBSCRIPTION", sWorkspaceId, oStripePaymentDetail, sWorkspaceId);
 			oSendToRabbit.Free();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SubscriptionResource.sendRabbitMessage: exception sending asynch notification");
+			WasdiLog.errorLog("SubscriptionResource.sendRabbitMessage: exception sending asynch notification");
 		}
 	}
 

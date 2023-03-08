@@ -98,55 +98,6 @@ public class WorkspaceResource {
 	@Context
 	ServletConfig m_oServletConfig;
 
-	@GET
-	@Path("/workspacelistbyproductname")
-	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
-			@HeaderParam("x-session-token") String sSessionId, @QueryParam("productname") String sProductName) {
-		WasdiLog.debugLog("WorkspaceResource.getWorkspaceListByProductName( Product: " + sProductName + " )");
-
-		// input validation
-		if (Utils.isNullOrEmpty(sProductName)) {
-			WasdiLog.debugLog("WorkspaceResource.getWorkspaceListByProductName: sProductName null or empty");
-			return null;
-		}
-		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
-		if (oUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.getWorkspaceListByProductName( Product: " + sProductName + " ): invalid session");
-			return null;
-		}
-		
-		// get list of workspaces ID by product name
-		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-		List<String> asWorkspaces = oProductWorkspaceRepository.getWorkspaces(sProductName);
-
-		if (asWorkspaces == null) {
-			WasdiLog.debugLog("WorkspaceResource.getWorkspaceListByProductName: Workspaces list is null");
-			return null;
-		}
-
-		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-		List<WorkspaceListInfoViewModel> aoResult = new ArrayList<>();
-
-		// get workspace info for each workspace ID
-		for (String sWorkspaceID : asWorkspaces) {
-
-			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceID);
-
-			if (null != oWorkspace) {
-				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
-				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());
-				oTemp.setWorkspaceName(oWorkspace.getName());
-				oTemp.setOwnerUserId(oWorkspace.getUserId());
-				aoResult.add(oTemp);
-			}
-		}
-
-		return aoResult;
-	}
-
 	/**
 	 * Get a list of workspaces of a user
 	 * @param sSessionId User Session Id
@@ -165,16 +116,11 @@ public class WorkspaceResource {
 		
 		// Domain Check
 		if (oUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.GetListByUser: invalid session: " + sSessionId);
+			WasdiLog.debugLog("WorkspaceResource.GetListByUser: invalid session");
 			return aoWSList;
 		}
 
 		try {
-
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), WORKSPACE_READ)) {
-				return aoWSList;
-			}
-
 
 			WasdiLog.debugLog("WorkspaceResource.GetListByUser: workspaces for " + oUser.getUserId());
 
@@ -288,7 +234,7 @@ public class WorkspaceResource {
 			}
 
 		} catch (Exception oEx) {
-			oEx.toString();
+			WasdiLog.errorLog("WorkspaceResource.getListByUser error: " + oEx);
 		}
 
 		return aoWSList;
@@ -401,7 +347,7 @@ public class WorkspaceResource {
 				}
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog( "WorkspaceResource.getWorkspaceEditorViewModel: " + oEx);
+			WasdiLog.errorLog( "WorkspaceResource.getWorkspaceEditorViewModel: " + oEx);
 		}
 
 		return oVM;
@@ -426,9 +372,9 @@ public class WorkspaceResource {
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
 			WasdiLog.debugLog("WorkspaceResource.CreateWorkspace: invalid session");
-
 			return null;
 		}
 
@@ -529,14 +475,25 @@ public class WorkspaceResource {
 
 		// Validate Session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
 			WasdiLog.debugLog("WorkspaceResource.UpdateWorkspace: invalid session");
 			return null;
 		}
+		
+		// Validate input view model
+		if (oWorkspaceEditorViewModel==null) {
+			WasdiLog.debugLog("WorkspaceResource.UpdateWorkspace: invalid Workspace View Model");
+			return null;			
+		}
+		
+		// Check if the user can access
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), oWorkspaceEditorViewModel.getWorkspaceId())) {
+			WasdiLog.debugLog("WorkspaceResource.UpdateWorkspace: user cannot access the workspace");
+			return null;			
+		}
 
 		try {
-			
-			
 			// Create New Workspace
 			Workspace oWorkspace = new Workspace();
 			// Initialize repository
@@ -589,8 +546,7 @@ public class WorkspaceResource {
 				return null;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.UpdateWorkspace: Error update workspace: " + oEx);
-
+			WasdiLog.errorLog("WorkspaceResource.UpdateWorkspace: Error update workspace: " + oEx);
 			return null;
 		}
 	}
@@ -619,8 +575,9 @@ public class WorkspaceResource {
 		try {
 			// Validate Session
 			oUser = Wasdi.getUserFromSession(sSessionId);
+			
 			if (oUser == null) {
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: invalid session");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -632,12 +589,12 @@ public class WorkspaceResource {
 
 			//check user can access given workspace
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: " + sWorkspaceId + " cannot be accessed by " + oUser.getUserId() + ", aborting");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			
 		} catch (Exception oE) {
-			WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace( " + sSessionId + ", " + sWorkspaceId + " ): cannot complete checks due to " + oE);
+			WasdiLog.errorLog("WorkspaceResource.deleteWorkspace( " + sSessionId + ", " + sWorkspaceId + " ): cannot complete checks due to " + oE);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -648,7 +605,7 @@ public class WorkspaceResource {
 			//check that the workspace really exists
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			if(null==oWorkspace) {
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: " + sWorkspaceId + " is not a valid workspace, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -656,7 +613,7 @@ public class WorkspaceResource {
 			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
 			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
 				// This is not the owner of the workspace
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: User " + oUser.getUserId() + " is not the owner [" + sWorkspaceOwner + "]: delete the sharing, not the ws");
                 UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
                 oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUser.getUserId(), sWorkspaceId);
 				return Response.ok().build();
@@ -668,13 +625,13 @@ public class WorkspaceResource {
 			//kill active processes
 			ProcessWorkspaceService oProcessWorkspaceService = new ProcessWorkspaceService();
 			if(oProcessWorkspaceService.killProcessesInWorkspace(sWorkspaceId, sSessionId, true)) {
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: WARNING: could not schedule kill processes in workspace");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: WARNING: could not schedule kill processes in workspace");
 			}
 			
 			// get workspace path
 			String sWorkspacePath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
-			WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
+			WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
 			// Delete Workspace Db Entry
 			if (oWorkspaceRepository.deleteWorkspace(sWorkspaceId)) {
@@ -687,7 +644,7 @@ public class WorkspaceResource {
 				// Do we need to delete layers?
 				if (bDeleteLayer) {
 					try {
-						WasdiLog.debugLog("ProductResource.DeleteProduct: Deleting workspace layers");
+						WasdiLog.debugLog("ProductResource.deleteWorkspace: Deleting workspace layers");
 
 						// GeoServer Manager Object
 						GeoServerManager oGeoServerManager = new GeoServerManager();
@@ -703,7 +660,7 @@ public class WorkspaceResource {
 
 							if (aoDownloadedFileList.size() > 1) {
 								// Yes, it is in other Ws, jump
-								WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: The file is also in other workspaces, leave the bands as they are");
+								WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: The file is also in other workspaces, leave the bands as they are");
 								continue;
 							}
 
@@ -727,17 +684,17 @@ public class WorkspaceResource {
 								try {
 									// Remove Geoserver layer (and file)
 									if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-										WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+										WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 									}
 
 									try {
 										// delete published band on database
 										oPublishRepository.deleteByProductNameLayerId(sProductName, oPublishedBand.getLayerId());
 									} catch (Exception oEx) {
-										WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());
+										WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: error deleting published band on data base " + oEx.toString());
 									}
 								} catch (Exception oEx) {
-									WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: error deleting layer id " + oEx.toString());
+									WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: error deleting layer id " + oEx.toString());
 								}
 							}
 							
@@ -747,14 +704,14 @@ public class WorkspaceResource {
 								String sMetadataFileRef = oDownloadedFile.getProductViewModel().getMetadataFileReference();
 								
 								if (!Utils.isNullOrEmpty(sMetadataFileRef)) {
-									WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: deleting metadata file " + sMetadataFileRef);
+									WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: deleting metadata file " + sMetadataFileRef);
 									FileUtils.deleteQuietly(new File(sMetadataFileRef));
 								}
 							}
 							
 						}
 					} catch (Exception oE) {
-						WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete layers: " + oE);
+						WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: error while trying to delete layers: " + oE);
 					}
 
 				}
@@ -762,36 +719,36 @@ public class WorkspaceResource {
 				if (bDeleteFile) {
 					try {
 
-						WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: Delete workspace folder " + sWorkspacePath);
+						WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: Delete workspace folder " + sWorkspacePath);
 
 						// delete directory
 						try {
 							File oDir = new File(sWorkspacePath);
 							if (!oDir.exists()) {
-								WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: trying to delete non existing directory " + sWorkspacePath);
+								WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: trying to delete non existing directory " + sWorkspacePath);
 							}
 							// try anyway for two reasons:
 							// 1. non existing directories are handled anyway
 							// 2. try avoiding race conditions
 							FileUtils.deleteDirectory(oDir);
 						} catch (Exception oE) {
-							WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: error while trying to delete directory " + sWorkspacePath + ": " + oE);
+							WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: error while trying to delete directory " + sWorkspacePath + ": " + oE);
 						}
 
 						// delete download file on database
 						for (ProductWorkspace oProductWorkspace : aoProductsWorkspaces) {
 							try {
 
-								WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: Deleting file " + oProductWorkspace.getProductName());
+								WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: Deleting file " + oProductWorkspace.getProductName());
 								oDownloadedFilesRepository.deleteByFilePath(oProductWorkspace.getProductName());
 
 							} catch (Exception oEx) {
-								WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting download on data base: " + oEx);
+								WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: Error deleting download on data base: " + oEx);
 							}
 						}
 
 					} catch (Exception oEx) {
-						WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting workspace directory: " + oEx);
+						WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: Error deleting workspace directory: " + oEx);
 					}
 				}
 
@@ -806,12 +763,12 @@ public class WorkspaceResource {
 				return Response.ok().build();
 			} 
 			else {
-				WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: Error deleting workspace on data base");
+				WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: Error deleting workspace on data base");
 			}
 				
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.DeleteWorkspace: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.deleteWorkspace: " + oEx);
 		}
 
 		return Response.serverError().build();
@@ -867,7 +824,7 @@ public class WorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.terminateConsole: Exception " + oEx.toString());
+			WasdiLog.errorLog("WorkspaceResource.terminateConsole: Exception " + oEx.toString());
 		}
 		
 		return false;
@@ -895,12 +852,11 @@ public class WorkspaceResource {
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("WorkspaceResource.shareWorkspace: invalid session");
-
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
-
 			return oResult;
 		}
 		
@@ -913,16 +869,6 @@ public class WorkspaceResource {
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_WORKSPACE);
-
-			return oResult;
-		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), WORKSPACE_READ)) {
-			WasdiLog.debugLog("WorkspaceResource.shareWorkspace: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
 
 			return oResult;
 		}
@@ -940,16 +886,11 @@ public class WorkspaceResource {
 
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-				// A user that has Admin rights should be able to auto-share the resource.
-			} else {
-				WasdiLog.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
+			WasdiLog.debugLog("WorkspaceResource.ShareWorkspace: auto sharing not so smart");
 
-				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
-
-				return oResult;
-			}
+			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+			oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+			return oResult;
 		}
 
 		// Cannot share with the owner
@@ -992,7 +933,7 @@ public class WorkspaceResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.ShareWorkspace: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.ShareWorkspace: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -1046,7 +987,7 @@ public class WorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.ShareWorkspace: notification exception " + oEx.toString());
+			WasdiLog.errorLog("WorkspaceResource.ShareWorkspace: notification exception " + oEx.toString());
 		}
 	}
 
@@ -1060,18 +1001,22 @@ public class WorkspaceResource {
 	@GET
 	@Path("share/byworkspace")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<WorkspaceSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
+	public List<WorkspaceSharingViewModel> getEnabledUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
-		WasdiLog.debugLog("WorkspaceResource.getEnableUsersSharedWorksace( WS: " + sWorkspaceId + " )");
-
+		WasdiLog.debugLog("WorkspaceResource.getEnabledUsersSharedWorksace( WS: " + sWorkspaceId + " )");
 	
 		List<UserResourcePermission> aoWorkspaceSharing = null;
 		List<WorkspaceSharingViewModel> aoWorkspaceSharingViewModels = new ArrayList<WorkspaceSharingViewModel>();
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			WasdiLog.debugLog("WorkspaceResource.getEnableUsersSharedWorksace: invalid session");
+			WasdiLog.debugLog("WorkspaceResource.getEnabledUsersSharedWorksace: invalid session");
 			return aoWorkspaceSharingViewModels;
+		}
+		
+		if (!PermissionsUtils.canUserAccessWorkspace(oOwnerUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.debugLog("WorkspaceResource.getEnabledUsersSharedWorksace: user cannot access the workspace");
+			return aoWorkspaceSharingViewModels;			
 		}
 
 		try {
@@ -1091,7 +1036,7 @@ public class WorkspaceResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.getEnableUsersSharedWorksace: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.getEnableUsersSharedWorksace: " + oEx);
 			return aoWorkspaceSharingViewModels;
 		}
 
@@ -1108,17 +1053,26 @@ public class WorkspaceResource {
 		WasdiLog.debugLog("WorkspaceResource.deleteUserSharedWorkspace( WS: " + sWorkspaceId + ", User:" + sUserId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
 		// Validate Session
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oRequestingUser == null) {
 			WasdiLog.debugLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
-
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
-
 			return oResult;
 		}
+		
+		
+		if (!PermissionsUtils.canUserAccessWorkspace(oRequestingUser.getUserId(), sWorkspaceId)
+				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequestingUser.getRole(), ADMIN_DASHBOARD)) {
+			WasdiLog.debugLog("WorkspaceResource.deleteUserSharedWorkspace: user cannot access workspace");
+			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
+			return oResult;
+		}
+		
 
 		try {
 
@@ -1137,7 +1091,7 @@ public class WorkspaceResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.deleteUserSharedWorkspace: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
@@ -1196,7 +1150,7 @@ public class WorkspaceResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("WorkspaceResource.getWorkspaceNameById: " + oEx);
+			WasdiLog.errorLog("WorkspaceResource.getWorkspaceNameById: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	} 
