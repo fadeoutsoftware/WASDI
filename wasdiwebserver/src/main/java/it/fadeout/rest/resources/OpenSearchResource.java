@@ -417,8 +417,12 @@ public class OpenSearchResource {
 						// Get the Provider Total Count
 						int iTotalResultsForProviders = oExecutor.executeCount(sQuery);
 						
-						// Any result >= 0 is valid 
-						if (iTotalResultsForProviders>=0) {
+						boolean bSwitchToNextProvider = false;
+						
+						if (iTotalResultsForProviders<0) {
+							bSwitchToNextProvider = true;
+						}
+						else {
 							WasdiLog.debugLog(m_sClassName + ".searchList: [" + sProvider + "] Images Found " + iTotalResultsForProviders);
 							
 							// Get the real results, paginated
@@ -465,8 +469,13 @@ public class OpenSearchResource {
 									// Execute the query
 									List<QueryResultViewModel> aoProviderPageResult = oExecutor.executeAndRetrieve(oQuery, false);
 									
+									if (aoProviderPageResult==null) {
+										bSwitchToNextProvider = true;
+										break;
+									}
+									
 									// Did we got a result?
-									if (aoProviderPageResult != null && !aoProviderPageResult.isEmpty()) {
+									if (!aoProviderPageResult.isEmpty()) {
 										
 										// Sum the grand total
 										iObtainedResults += aoProviderPageResult.size();
@@ -496,9 +505,12 @@ public class OpenSearchResource {
 							}
 							
 							// Exit from the providers cylcle
-							sProvider = null;				
+							if (!bSwitchToNextProvider) sProvider = null;				
 						}
-						else {
+
+
+						if (bSwitchToNextProvider) {
+							
 							WasdiLog.debugLog(m_sClassName + " Error contacting " + sProvider + " try next provider");
 							sProvider = getProvider(sOriginalProviders, sPlatformType, iNextProvider);
 							iNextProvider++;
