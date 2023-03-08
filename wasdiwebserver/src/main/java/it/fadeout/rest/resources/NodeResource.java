@@ -71,7 +71,7 @@ public class NodeResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			WasdiLog.debugLog("NodeResource.getAllNodes( Session: " + sSessionId + "): invalid session");
+			WasdiLog.debugLog("NodeResource.getAllNodes: invalid session");
 			return null;			
 		}
 		
@@ -194,7 +194,7 @@ public class NodeResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			WasdiLog.debugLog("NodeResource.ShareNode: Destination user does not exists");
+			WasdiLog.debugLog("NodeResource.shareNode: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
@@ -211,7 +211,7 @@ public class NodeResource {
 
 				oUserResourcePermissionRepository.insertPermission(oNodeSharing);				
 			} else {
-				WasdiLog.debugLog("NodeResource.ShareNode: already shared!");
+				WasdiLog.debugLog("NodeResource.shareNode: already shared!");
 				oResult.setStringValue("Already Shared.");
 				oResult.setBoolValue(true);
 				oResult.setIntValue(Status.OK.getStatusCode());
@@ -219,7 +219,7 @@ public class NodeResource {
 				return oResult;
 			}
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("NodeResource.ShareNode: " + oEx);
+			WasdiLog.errorLog("NodeResource.shareNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
@@ -240,11 +240,11 @@ public class NodeResource {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("NodeResource.ShareNode: sMercuriusAPIAddress is null");
+				WasdiLog.debugLog("NodeResource.sendNotificationEmail: sMercuriusAPIAddress is null");
 			}
 			else {
 
-				WasdiLog.debugLog("NodeResource.ShareNode: send notification");
+				WasdiLog.debugLog("NodeResource.sendNotificationEmail: send notification");
 
 				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);	
 				Message oMessage = new Message();
@@ -268,12 +268,12 @@ public class NodeResource {
 
 				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
 
-				WasdiLog.debugLog("NodeResource.ShareNode: notification sent with result " + iPositiveSucceded);
+				WasdiLog.debugLog("NodeResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
 			}
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("NodeResource.ShareNode: notification exception " + oEx.toString());
+			WasdiLog.errorLog("NodeResource.sendNotificationEmail: notification exception " + oEx.toString());
 		}
 	}
 

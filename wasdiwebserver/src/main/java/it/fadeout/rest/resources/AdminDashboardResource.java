@@ -82,12 +82,14 @@ public class AdminDashboardResource {
 		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
-
+		
+		// Do we have at least 3 chars to make our search?
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
 		}
-
+		
+		// Create the repo and get the list
 		UserRepository oUserRepository = new UserRepository();
 		List<User> aoUsers = oUserRepository.findUsersByPartialName(sPartialName);
 
@@ -399,59 +401,6 @@ public class AdminDashboardResource {
 		}
 	}
 
-	public static UserViewModel convert(User oUser) {
-		UserViewModel oUserVM = new UserViewModel();
-		oUserVM.setName(oUser.getName());
-		oUserVM.setSurname(oUser.getSurname());
-		oUserVM.setUserId(oUser.getUserId());
-		oUserVM.setType(oUser.getType());
-
-		if (oUser.getRole() != null) {
-			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));
-		}
-
-		return oUserVM;
-	}
-
-	public static WorkspaceListInfoViewModel convert(Workspace oWorkspace) {
-		WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
-
-		oWSViewModel.setOwnerUserId(oWorkspace.getUserId());
-		oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
-		oWSViewModel.setWorkspaceName(oWorkspace.getName());
-		oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
-
-		return oWSViewModel;
-	}
-
-	public static DeployedProcessorViewModel convert(Processor oProcessor) {
-		DeployedProcessorViewModel oProcessorViewModel = new DeployedProcessorViewModel();
-
-		oProcessorViewModel.setPublisher(oProcessor.getUserId());
-		oProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
-		oProcessorViewModel.setProcessorName(oProcessor.getName());
-		oProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
-		oProcessorViewModel.setType(oProcessor.getType());
-		oProcessorViewModel.setProcessorVersion(oProcessor.getVersion());
-		oProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
-
-		return oProcessorViewModel;
-	}
-
-	public static UserResourcePermissionViewModel convert(UserResourcePermission oPermission) {
-		UserResourcePermissionViewModel oPermissionViewModel = new UserResourcePermissionViewModel();
-
-		oPermissionViewModel.setResourceId(oPermission.getResourceId());
-		oPermissionViewModel.setResourceType(oPermission.getResourceType());
-		oPermissionViewModel.setUserId(oPermission.getUserId());
-		oPermissionViewModel.setOwnerId(oPermission.getOwnerId());
-		oPermissionViewModel.setPermissions(oPermission.getPermissions());
-		oPermissionViewModel.setCreatedBy(oPermission.getCreatedBy());
-		oPermissionViewModel.setCreatedDate(oPermission.getCreatedDate());
-
-		return oPermissionViewModel;
-	}
-
 	@PUT
 	@Path("/metrics")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -460,7 +409,7 @@ public class AdminDashboardResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: invalid session");
+			WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
@@ -470,7 +419,7 @@ public class AdminDashboardResource {
 		}
 
 		if (oMetricsEntry == null) {
-			WasdiLog.debugLog("AdminDashboardResource.addMetricsEntry: invalid payload");
+			WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry: invalid payload");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_METRICS_ENTRY)).build();
 		}
 
@@ -479,7 +428,7 @@ public class AdminDashboardResource {
 			MetricsEntryRepository oMetricsEntryRepository = new MetricsEntryRepository();
 			oMetricsEntryRepository.updateMetricsEntry(oMetricsEntry);
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("AdminDashboardResource.addMetricsEntry: Error inserting metricsEntry: " + oEx);
+			WasdiLog.errorLog("AdminDashboardResource.updateMetricsEntry: Error inserting metricsEntry: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
 		}
 
@@ -519,5 +468,78 @@ public class AdminDashboardResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_SEARCH_PROCESS)).build();
 		}
 	}
+	
+	/**
+	 * Converts a User in a User View Model
+	 * @param oUser User Entity to convert
+	 * @return Corresponding View Model
+	 */
+	public static UserViewModel convert(User oUser) {
+		UserViewModel oUserVM = new UserViewModel();
+		oUserVM.setName(oUser.getName());
+		oUserVM.setSurname(oUser.getSurname());
+		oUserVM.setUserId(oUser.getUserId());
+		oUserVM.setType(oUser.getType());
+
+		if (oUser.getRole() != null) {
+			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));
+		}
+
+		return oUserVM;
+	}
+	
+	/**
+	 * Converts a Workspace Entity in the WorkspaceListInfoViewModel
+	 * @param oWorkspace Workspace Entity to convert
+	 * @return Corresponding View Model
+	 */
+	public static WorkspaceListInfoViewModel convert(Workspace oWorkspace) {
+		WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
+
+		oWSViewModel.setOwnerUserId(oWorkspace.getUserId());
+		oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
+		oWSViewModel.setWorkspaceName(oWorkspace.getName());
+		oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
+
+		return oWSViewModel;
+	}
+
+	/**
+	 * Convert a Processor Entity in the DeployedProcessorViewModel
+	 * @param oProcessor Processor Entity to convert
+	 * @return Corresponding View Model
+	 */
+	public static DeployedProcessorViewModel convert(Processor oProcessor) {
+		DeployedProcessorViewModel oProcessorViewModel = new DeployedProcessorViewModel();
+
+		oProcessorViewModel.setPublisher(oProcessor.getUserId());
+		oProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
+		oProcessorViewModel.setProcessorName(oProcessor.getName());
+		oProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
+		oProcessorViewModel.setType(oProcessor.getType());
+		oProcessorViewModel.setProcessorVersion(oProcessor.getVersion());
+		oProcessorViewModel.setIsPublic(oProcessor.getIsPublic());
+
+		return oProcessorViewModel;
+	}
+
+	/**
+	 * Converts a UserResourcePermission Entity in to the UserResourcePermissionViewModel
+	 * @param oPermission UserResourcePermission entity to convert
+	 * @return Corresponding View Model
+	 */
+	public static UserResourcePermissionViewModel convert(UserResourcePermission oPermission) {
+		UserResourcePermissionViewModel oPermissionViewModel = new UserResourcePermissionViewModel();
+
+		oPermissionViewModel.setResourceId(oPermission.getResourceId());
+		oPermissionViewModel.setResourceType(oPermission.getResourceType());
+		oPermissionViewModel.setUserId(oPermission.getUserId());
+		oPermissionViewModel.setOwnerId(oPermission.getOwnerId());
+		oPermissionViewModel.setPermissions(oPermission.getPermissions());
+		oPermissionViewModel.setCreatedBy(oPermission.getCreatedBy());
+		oPermissionViewModel.setCreatedDate(oPermission.getCreatedDate());
+
+		return oPermissionViewModel;
+	}	
 
 }

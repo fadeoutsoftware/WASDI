@@ -45,82 +45,7 @@ import wasdi.shared.viewmodels.processors.PackageViewModel;
 
 @Path("/packageManager")
 public class PackageManagerResource {
-
-	/**
-	 * Reads the packageInfo JSON file of a processor
-	 * @param sProcessorName Name of the processor
-	 * @return String with the JSON representation of packages, or an error message
-	 */
-	protected String readPackagesInfoFile(String sProcessorName) throws Exception {
-
-		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
-
-		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
-
-			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-
-			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
-				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
-			} 
-			
-			// Read the file
-			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
-			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
-				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-			}
-
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
-		}
-
-		return sOutput;
-	}
-
-	/**
-	 * Reads the envActions txt file of a processor
-	 * @param sProcessorName Name of the processor
-	 * @return String with the list of instructions/actions, or an error message
-	 */
-	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
-
-		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
-
-		try {
-
-			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
-
-			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-
-			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
-				return "error: directory " + oDirPath.toString() + " not found";
-			} else {
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
-			}
-			
-			// Read the file
-			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
-			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
-				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
-			}
-
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("PackageManagerResource.readEnvActionsFile: " + oEx);
-		}
-
-		return sOutput;
-	}
-
+	
 	@GET
 	@Path("/listPackages")
 	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId,
@@ -216,23 +141,7 @@ public class PackageManagerResource {
 
 		return Response.ok(asEnvActions).build();
 	}
-
-	private static List<String> parseEnvironmentActionsContent(String sContent) {
-		List<String> asEnvActions = new ArrayList<>();
-
-		if (!Utils.isNullOrEmpty(sContent)) {
-			String[] asRows = sContent.split("\n");
-
-			for (String sRow : asRows ) {
-				if (!sRow.trim().isEmpty()) {
-					asEnvActions.add(sRow.trim());
-				}
-			}
-		}
-
-		return asEnvActions;
-	}
-
+	
 	@GET
 	@Path("/managerVersion")
 	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
@@ -434,6 +343,102 @@ public class PackageManagerResource {
 		}
 
 		return oPackageManager;
+	}
+	
+	/**
+	 * Reads the packageInfo JSON file of a processor
+	 * @param sProcessorName Name of the processor
+	 * @return String with the JSON representation of packages, or an error message
+	 */
+	protected String readPackagesInfoFile(String sProcessorName) throws Exception {
+
+		String sOutput = "{\"warning\": \"the packagesInfo.json file for the processor " + sProcessorName + " was not found\"}";
+
+		try {
+
+			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
+
+			// Take path of the processor
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: directory " + oDirPath.toString() + " not found");
+				return "{\"error\": \"directory " + oDirPath.toString() + " not found\"}";
+			} 
+			
+			// Read the file
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/packagesInfo.json";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.readPackagesInfoFile: " + oEx);
+		}
+
+		return sOutput;
+	}
+
+	/**
+	 * Reads the envActions txt file of a processor
+	 * @param sProcessorName Name of the processor
+	 * @return String with the list of instructions/actions, or an error message
+	 */
+	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
+
+		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
+
+		try {
+
+			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
+
+			// Take path of the processor
+			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
+			File oDirFile = oDirPath.toFile();
+
+			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
+				return "error: directory " + oDirPath.toString() + " not found";
+			} else {
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
+			}
+			
+			// Read the file
+			String sAbsoluteFilePath = oDirFile.getAbsolutePath() + "/envActionsList.txt";
+			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
+				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.readEnvActionsFile: " + oEx);
+		}
+
+		return sOutput;
+	}
+	
+	/**
+	 * Split the content of a json actions file in a list of strings
+	 * @param sContent
+	 * @return
+	 */
+	private static List<String> parseEnvironmentActionsContent(String sContent) {
+		List<String> asEnvActions = new ArrayList<>();
+
+		if (!Utils.isNullOrEmpty(sContent)) {
+			String[] asRows = sContent.split("\n");
+
+			for (String sRow : asRows ) {
+				if (!sRow.trim().isEmpty()) {
+					asEnvActions.add(sRow.trim());
+				}
+			}
+		}
+
+		return asEnvActions;
 	}
 
 }

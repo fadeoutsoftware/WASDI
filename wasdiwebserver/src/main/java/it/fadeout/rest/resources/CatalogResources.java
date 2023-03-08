@@ -67,7 +67,7 @@ public class CatalogResources {
 			@QueryParam("workspace") String sWorkspaceId)
 	{			
 
-		WasdiLog.debugLog("CatalogResources.DownloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
+		WasdiLog.debugLog("CatalogResources.downloadEntryByName( FileName: " + sFileName + ", Ws: " + sWorkspaceId);
 		
 		try {
 			
@@ -79,7 +79,7 @@ public class CatalogResources {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
+				WasdiLog.debugLog("CatalogResources.downloadEntryByName: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -90,7 +90,7 @@ public class CatalogResources {
 			
 			if(oFile == null) {
 				// File invalid
-				WasdiLog.debugLog("CatalogResources.DownloadEntryByName: file not readable");
+				WasdiLog.debugLog("CatalogResources.downloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
 			} 
 			else {
@@ -103,13 +103,13 @@ public class CatalogResources {
 				
 				if(bMustZip) {
 					// Yes, zip and stream on the fly
-					WasdiLog.debugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
+					WasdiLog.debugLog("CatalogResources.downloadEntryByName: file " + oFile.getName() + " must be zipped");
 					return prepareAndReturnZip(oFile);
 				} else {
 					// No, just return the stream
-					WasdiLog.debugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
+					WasdiLog.debugLog("CatalogResources.downloadEntryByName: no need to zip file " + oFile.getName());
 					oStream = new FileStreamingOutput(oFile);
-					WasdiLog.debugLog("CatalogResources.DownloadEntryByName: file ok return content");
+					WasdiLog.debugLog("CatalogResources.downloadEntryByName: file ok return content");
 					oResponseBuilder = Response.ok(oStream);
 					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 					//oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
@@ -117,13 +117,450 @@ public class CatalogResources {
 				}
 			}
 			
-			WasdiLog.debugLog("CatalogResources.DownloadEntryByName: done, return");
-			
 			return oResponseBuilder.build();
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogResources.DownloadEntryByName: " + oEx);
+			WasdiLog.errorLog("CatalogResources.downloadEntryByName: " + oEx);
 		}
 		return null;
+	}
+	
+	/**
+	 * Check if a file is present on the actual node
+	 * @param sSessionId User Session
+	 * @param sFileName File Name
+	 * @param sWorkspaceId Workspace where the file is
+	 * @return Primitive Result with boolValue = true if the file exist or false if not
+	 */
+	@GET
+	@Path("fileOnNode")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
+	{	
+		WasdiLog.debugLog("CatalogResources.checkFileByNode");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("CatalogResources.checkFileByNode: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		try {
+			String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
+
+			File oFile = new File(sTargetFilePath);
+			
+			WasdiLog.debugLog("CatalogResources.checkFileByNode: path " + sTargetFilePath);
+			
+			boolean bExists = oFile.exists();
+			
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(bExists);
+			
+			WasdiLog.debugLog("CatalogResources.checkFileByNode " + sFileName + ": " + bExists);
+			
+			return Response.ok(oResult).build();					
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.checkFileByNode: exception " + oEx.toString());
+			return Response.serverError().build();
+		}		
+	}
+	
+	/**
+	 * Check if a file exists on WASDI (this node for instance) or not
+	 * @param sSessionId User Session
+	 * @param sFileName File Name
+	 * @param sWorkspaceId Workspace Id
+	 * @return Primitive Result with boolValue = true if the file exists, false if not exists (is not added to WASDI and/or is not on this node)
+	 */
+	@GET
+	@Path("checkdownloadavaialibitybyname")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
+	{
+		WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		File oFile = this.getEntryFile(sFileName,sWorkspaceId);
+		
+		if(oFile == null) {
+			return Response.serverError().build();	
+		}
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(oFile != null);
+		return Response.ok(oResult).build();		
+
+	}
+
+	/**
+	 * Ingest a new file from sftp in to a target Workspace
+	 * @param sSessionId User session token header
+	 * @param sFile name of the file to ingest
+	 * @param sWorkspaceId target workspace
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sStyle Default style to use for the file
+	 * @return Http Response
+	 */
+	@PUT
+	@Path("/upload/ingest")
+	@Produces({"application/json", "text/xml"})
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+		
+		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
+		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
+
+		WasdiLog.debugLog("CatalogResource.ingestFile File: " + sFile + " Ws: " + sWorkspaceId + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
+
+		// Check user session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (oUser == null) {
+			WasdiLog.debugLog("CatalogResource.ingestFile: invalid session");
+			return Response.status(Status.UNAUTHORIZED).build();		
+		}
+		String sUserId = oUser.getUserId();		
+
+		// Find the sftp folder
+		String sUserBaseDir = WasdiConfig.Current.paths.sftpRootPath;
+
+		File oUserBaseDir = new File(sUserBaseDir);
+		File oFilePath = new File(new File(new File(oUserBaseDir, sUserId), "uploads"), sFile);
+
+		// Is the file available?
+		if (!oFilePath.canRead()) {
+			WasdiLog.debugLog("CatalogResource.ingestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			return Response.serverError().build();
+		}
+		try {						
+			// Generate the unique process id
+			String sProcessObjId = Utils.getRandomName();
+			
+			// Ingest file parameter
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			oParameter.setStyle(sStyle);
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
+				return Response.serverError().build();
+			}
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DownloadResource.ingestFile: " + oEx);
+		}
+
+		return Response.serverError().build();
+
+	}
+
+	/**
+	 * Ingest a file already existing in a Workspace 
+	 * @param sSessionId User Session token
+	 * @param sFile Name of the file to ingest
+	 * @param sWorkspaceId Id of the target workspace 
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param sStyle Default style to use for the file
+	 * @return Primitive Result with boolValue true or false and Http Code in intValue
+	 */
+	@GET
+	@Path("/upload/ingestinws")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
+		
+		// Create the result object
+		PrimitiveResult oResult = new PrimitiveResult();
+
+		WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file " + sFile + " workspace: " + sWorkspaceId);
+
+		// Check the user session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (oUser == null) {
+			WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: invalid session");
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;		
+		}
+		
+		// Get the user account
+		String sUserId = oUser.getUserId();
+		
+		// Get the file path		
+		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		
+		WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: computed file path: " + sFilePath);
+		
+		File oFilePath = new File(sFilePath);
+		
+		// Check if the file exists 
+		if (!oFilePath.canRead()) {
+			WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file not found. Check if it is an extension problem");
+
+			String [] asSplittedFileName = sFile.split("\\.");
+
+			if (asSplittedFileName.length == 1) {
+
+				WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file without exension, try .dim");
+
+				sFile = sFile + ".dim";
+				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				oFilePath = new File(sFilePath);
+
+				if (!oFilePath.canRead()) {
+					WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;							
+				}
+			}
+			else {
+				WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;											
+			}
+
+		}
+		
+		try {
+			String sProcessObjId = Utils.getRandomName();
+
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			oParameter.setStyle(sStyle);
+			//set the process object Id to params
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.ingestFileInWorkspace: " + oEx);
+		}
+
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		return oResult;
+	}
+
+	/**
+	 * Copy a file from a workspace to the user sftp folder 
+	 * @param sSessionId User Session token
+	 * @param sFile Name of the file to copy
+	 * @param sWorkspaceId Id of the workspace
+	 * @param sParentProcessWorkspaceId Proc Id of the parent Process 
+	 * @param sRelativePath relative path to use from the sftp home
+	 * @return Primitive Result with boolValue true or false and Http Code in intValue
+	 */
+	@GET
+	@Path("/copytosfpt")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
+		
+		// Create the result object
+		PrimitiveResult oResult = new PrimitiveResult();
+
+		WasdiLog.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspaceId);
+
+		// Check the user session
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		if (oUser == null) {
+			WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: invalid session");
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;		
+		}
+		
+		// Get the user account
+		String sUserId = oUser.getUserId();
+		
+		// Get the file path		
+		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		
+		WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
+		
+		File oFilePath = new File(sFilePath);
+		
+		// Check if the file exists 
+		if (!oFilePath.canRead()) {
+			WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not found. Check if it is an extension problem");
+
+			String [] asSplittedFileName = sFile.split("\\.");
+
+			if (asSplittedFileName.length == 1) {
+
+				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
+
+				sFile = sFile + ".dim";
+				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				oFilePath = new File(sFilePath);
+
+				if (!oFilePath.canRead()) {
+					WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;							
+				}
+			}
+			else {
+				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;											
+			}
+
+		}
+		
+		try {
+			
+			// Crete the ingest parameter
+			String sProcessObjId = Utils.getRandomName();
+
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			if (!Utils.isNullOrEmpty(sRelativePath)) {
+				oParameter.setRelativePath(sRelativePath);
+			}
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.copyFileToSftp: " + oEx);
+		}
+
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		return oResult;
+	}
+	
+	/**
+	 * Send a file to an external SFTP server 
+	 * @param sSessionId User Session
+	 * @param sWorkspaceId Worksapce Id
+	 * @param sParentProcessWorkspaceId Proc Id of the parent process
+	 * @param oFtpTransferVM View Model of the info to move the file (filename, dest server address and credentials, paths..)
+	 * @return
+	 */
+	@PUT
+	@Path("/upload/ftp")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId,
+			FtpTransferViewModel oFtpTransferVM) {
+		
+		WasdiLog.debugLog("CatalogResource.ftpTransferFile");
+
+		//input validation
+		if(null == oFtpTransferVM) {
+			WasdiLog.debugLog("CatalogResource.ftpTransferFile: invalid session");
+			// check appropriateness
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Null arguments");
+			return oResult;
+		}
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if(null==oUser) {
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Invalid Session");
+			return oResult;
+		}
+		
+		String sUserId = oUser.getUserId();
+
+		try {
+			WasdiLog.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
+			
+			String sProcessObjId = Utils.getRandomName();
+			String sFileName = oFtpTransferVM.getFileName();
+			
+			FtpUploadParameters oParam = new FtpUploadParameters();
+			oParam.setFtpServer(oFtpTransferVM.getServer());
+			oParam.setPort(oFtpTransferVM.getPort());
+			oParam.setSftp(oFtpTransferVM.getSftp());
+			oParam.setUsername(oFtpTransferVM.getUser());
+			oParam.setPassword(oFtpTransferVM.getPassword());
+			oParam.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
+			
+			oParam.setLocalFileName(sFileName);
+			oParam.setExchange(sWorkspaceId);
+			oParam.setWorkspace(sWorkspaceId);
+			oParam.setProcessObjId(sProcessObjId);
+			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+
+			String sPath = WasdiConfig.Current.paths.serializationPath;
+						
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogueResource.ftpTransferFile: " + oEx);
+			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
+			oRes.setStringValue(oEx.toString());
+			return oRes;
+		}
+	}
+	
+	/**
+	 * Get the file object corresponding to the input requests.
+	 * It returns null if the file is not registered in WASDI and or if the file is not physically present
+	 * @param sFileName
+	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
+	 */
+	private File getEntryFile(String sFileName, String sWorkspace)
+	{
+		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
+				
+		String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+
+		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
+
+		if (oDownloadedFile == null) {
+			oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
+		}
+
+		if (oDownloadedFile == null) 
+		{
+			WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
+			return null;
+		}
+		
+		File oFile = new File(sTargetFilePath);
+
+		if( oFile.canRead() == true) {
+			return oFile;
+		}
+		else {
+			WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
+			return null; 
+		}
 	}
 	
 	/**
@@ -188,11 +625,11 @@ public class CatalogResources {
 		// Set response headers and return 
 		String sFileName = oInitialFile.getName();
 		
-		WasdiLog.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
+		WasdiLog.debugLog("CatalogResources.zipBeanDimapFile: sFileName1 " + sFileName);
 		
 		sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
 		
-		WasdiLog.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
+		WasdiLog.debugLog("CatalogResources.zipBeanDimapFile: sFileName2 Path " + sFileName);
 		
 		return zipOnTheFly(aoFileEntries, sFileName);
 	}
@@ -284,8 +721,8 @@ public class CatalogResources {
 				lLength += oTempFile.length();
 			}
 		}
+		
 		//oResponseBuilder.header("Content-Length", lLength);
-		WasdiLog.debugLog("CatalogResources.zipShapeFile: return ");
 		return oResponseBuilder.build();
 	}
 	
@@ -342,7 +779,7 @@ public class CatalogResources {
 			} 
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogResources.zipOnTheFlyAndStream: " + oEx);
+			WasdiLog.errorLog("CatalogResources.prepareAndReturnZip: " + oEx);
 		} 
 		return null;
 	}
@@ -374,442 +811,6 @@ public class CatalogResources {
 					);
 		}
 		return bRet;
-	}
-	
-	/**
-	 * Check if a file is present on the actual node
-	 * @param sSessionId User Session
-	 * @param sFileName File Name
-	 * @param sWorkspaceId Workspace where the file is
-	 * @return Primitive Result with boolValue = true if the file exist or false if not
-	 */
-	@GET
-	@Path("fileOnNode")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkFileByNode(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
-	{	
-		
-		WasdiLog.debugLog("CatalogResources.checkFileByNode");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResources.checkFileByNode: user not authorized");
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-		
-		try {
-			String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
-
-			File oFile = new File(sTargetFilePath);
-			
-			WasdiLog.debugLog("CatalogResources.checkFileByNode: path " + sTargetFilePath);
-			
-			boolean bExists = oFile.exists();
-			
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(bExists);
-			
-			WasdiLog.debugLog("CatalogResources.checkFileByNode " + sFileName + ": " + bExists);
-			
-			return Response.ok(oResult).build();					
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogResources.checkFileByNode: exception " + oEx.toString());
-			return Response.serverError().build();
-		}		
-	}
-	
-	/**
-	 * Check if a file exists on WASDI (this node for instance) or not
-	 * @param sSessionId User Session
-	 * @param sFileName File Name
-	 * @param sWorkspaceId Workspace Id
-	 * @return Primitive Result with boolValue = true if the file exists, false if not exists (is not added to WASDI and/or is not on this node)
-	 */
-	@GET
-	@Path("checkdownloadavaialibitybyname")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
-	{
-		WasdiLog.debugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
-
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-
-		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-
-		File oFile = this.getEntryFile(sFileName,sWorkspaceId);
-		
-		if(oFile == null) {
-			return Response.serverError().build();	
-		}
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(oFile != null);
-		return Response.ok(oResult).build();		
-
-	}
-
-	/**
-	 * Ingest a new file from sftp in to a target Workspace
-	 * @param sSessionId User session token header
-	 * @param sFile name of the file to ingest
-	 * @param sWorkspaceId target workspace
-	 * @param sParentProcessWorkspaceId Proc Id of the parent process
-	 * @param sStyle Default style to use for the file
-	 * @return Http Response
-	 */
-	@PUT
-	@Path("/upload/ingest")
-	@Produces({"application/json", "text/xml"})
-	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
-		
-		if (Utils.isNullOrEmpty(sParentProcessWorkspaceId)) sParentProcessWorkspaceId = "";
-		if (Utils.isNullOrEmpty(sStyle)) sStyle = "";
-
-		WasdiLog.debugLog("CatalogResource.IngestFile File: " + sFile + " Ws: " + sWorkspaceId + " ParentId " + sParentProcessWorkspaceId + " Style " + sStyle);
-
-		// Check user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) return Response.status(Status.UNAUTHORIZED).build();		
-		String sUserId = oUser.getUserId();		
-
-		// Find the sftp folder
-		String sUserBaseDir = WasdiConfig.Current.paths.sftpRootPath;
-
-		File oUserBaseDir = new File(sUserBaseDir);
-		File oFilePath = new File(new File(new File(oUserBaseDir, sUserId), "uploads"), sFile);
-
-		// Is the file available?
-		if (!oFilePath.canRead()) {
-			WasdiLog.debugLog("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
-			return Response.serverError().build();
-		}
-		try {						
-			// Generate the unique process id
-			String sProcessObjId = Utils.getRandomName();
-			
-			// Ingest file parameter
-			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setFilePath(oFilePath.getAbsolutePath());
-			oParameter.setStyle(sStyle);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
-			
-			if (oRes.getBoolValue()) {
-				return Response.ok().build();
-			}
-			else {
-				return Response.serverError().build();
-			}
-
-		} catch (Exception e) {
-			WasdiLog.errorLog("DownloadResource.Download: " + e);
-		}
-
-		return Response.serverError().build();
-
-	}
-
-	/**
-	 * Ingest a file already existing in a Workspace 
-	 * @param sSessionId User Session token
-	 * @param sFile Name of the file to ingest
-	 * @param sWorkspaceId Id of the target workspace 
-	 * @param sParentProcessWorkspaceId Proc Id of the parent process
-	 * @param sStyle Default style to use for the file
-	 * @return Primitive Result with boolValue true or false and Http Code in intValue
-	 */
-	@GET
-	@Path("/upload/ingestinws")
-	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("style") String sStyle) {
-		
-		// Create the result object
-		PrimitiveResult oResult = new PrimitiveResult();
-
-		WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file " + sFile + " workspace: " + sWorkspaceId);
-
-		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			oResult.setBoolValue(false);
-			oResult.setIntValue(401);
-			return oResult;		
-		}
-		
-		// Get the user account
-		String sUserId = oUser.getUserId();
-		
-		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
-		
-		WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: computed file path: " + sFilePath);
-		
-		File oFilePath = new File(sFilePath);
-		
-		// Check if the file exists 
-		if (!oFilePath.canRead()) {
-			WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an extension problem");
-
-			String [] asSplittedFileName = sFile.split("\\.");
-
-			if (asSplittedFileName.length == 1) {
-
-				WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
-
-				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
-				oFilePath = new File(sFilePath);
-
-				if (!oFilePath.canRead()) {
-					WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
-					oResult.setBoolValue(false);
-					oResult.setIntValue(500);
-					return oResult;							
-				}
-			}
-			else {
-				WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file with exension but not available");
-				WasdiLog.debugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;											
-			}
-
-		}
-		
-		try {
-			String sProcessObjId = Utils.getRandomName();
-
-			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setFilePath(oFilePath.getAbsolutePath());
-			oParameter.setStyle(sStyle);
-			//set the process object Id to params
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
-
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogueResource.IngestFileInWorkspace: " + oEx);
-		}
-
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-		return oResult;
-	}
-
-	/**
-	 * Copy a file from a workspace to the user sftp folder 
-	 * @param sSessionId User Session token
-	 * @param sFile Name of the file to copy
-	 * @param sWorkspaceId Id of the workspace
-	 * @param sParentProcessWorkspaceId Proc Id of the parent Process 
-	 * @param sRelativePath relative path to use from the sftp home
-	 * @return Primitive Result with boolValue true or false and Http Code in intValue
-	 */
-	@GET
-	@Path("/copytosfpt")
-	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult copyFileToSftp(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId, @QueryParam("path") String sRelativePath) {
-		
-		// Create the result object
-		PrimitiveResult oResult = new PrimitiveResult();
-
-		WasdiLog.debugLog("CatalogResource.copyFileToSftp: file " + sFile + " from workspace: " + sWorkspaceId);
-
-		// Check the user session
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		if (oUser == null) {
-			oResult.setBoolValue(false);
-			oResult.setIntValue(401);
-			return oResult;		
-		}
-		
-		// Get the user account
-		String sUserId = oUser.getUserId();
-		
-		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
-		
-		WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
-		
-		File oFilePath = new File(sFilePath);
-		
-		// Check if the file exists 
-		if (!oFilePath.canRead()) {
-			WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not found. Check if it is an extension problem");
-
-			String [] asSplittedFileName = sFile.split("\\.");
-
-			if (asSplittedFileName.length == 1) {
-
-				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
-
-				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
-				oFilePath = new File(sFilePath);
-
-				if (!oFilePath.canRead()) {
-					WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
-					oResult.setBoolValue(false);
-					oResult.setIntValue(500);
-					return oResult;							
-				}
-			}
-			else {
-				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file with exension but not available");
-				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;											
-			}
-
-		}
-		
-		try {
-			
-			// Crete the ingest parameter
-			String sProcessObjId = Utils.getRandomName();
-
-			IngestFileParameter oParameter = new IngestFileParameter();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setFilePath(oFilePath.getAbsolutePath());
-			if (!Utils.isNullOrEmpty(sRelativePath)) {
-				oParameter.setRelativePath(sRelativePath);
-			}
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
-
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogueResource.copyFileToSftp: " + oEx);
-		}
-
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-		return oResult;
-	}
-	
-	/**
-	 * Send a file to an external SFTP server 
-	 * @param sSessionId User Session
-	 * @param sWorkspaceId Worksapce Id
-	 * @param sParentProcessWorkspaceId Proc Id of the parent process
-	 * @param oFtpTransferVM View Model of the info to move the file (filename, dest server address and credentials, paths..)
-	 * @return
-	 */
-	@PUT
-	@Path("/upload/ftp")
-	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("parent") String sParentProcessWorkspaceId,
-			FtpTransferViewModel oFtpTransferVM) {
-		
-		WasdiLog.debugLog("CatalogResource.ftpTransferFile");
-
-		//input validation
-		if(null == oFtpTransferVM) {
-			// check appropriateness
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setStringValue("Null arguments");
-			return oResult;
-		}
-		
-		User oUser = Wasdi.getUserFromSession(sSessionId);
-		
-		if(null==oUser) {
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setStringValue("Invalid Session");
-			return oResult;
-		}
-		
-		String sUserId = oUser.getUserId();
-
-		try {
-			WasdiLog.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
-			
-			String sProcessObjId = Utils.getRandomName();
-			String sFileName = oFtpTransferVM.getFileName();
-			
-			FtpUploadParameters oParam = new FtpUploadParameters();
-			oParam.setFtpServer(oFtpTransferVM.getServer());
-			oParam.setPort(oFtpTransferVM.getPort());
-			oParam.setSftp(oFtpTransferVM.getSftp());
-			oParam.setUsername(oFtpTransferVM.getUser());
-			oParam.setPassword(oFtpTransferVM.getPassword());
-			oParam.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
-			
-			oParam.setLocalFileName(sFileName);
-			oParam.setExchange(sWorkspaceId);
-			oParam.setWorkspace(sWorkspaceId);
-			oParam.setProcessObjId(sProcessObjId);
-			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-						
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
-
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogueResource.ftpTransferFile: " + oEx);
-			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
-			oRes.setStringValue(oEx.toString());
-			return oRes;
-		}
-	}
-	
-	/**
-	 * Get the file object corresponding to the input requests.
-	 * It returns null if the file is not registered in WASDI and or if the file is not physically present
-	 * @param sFileName
-	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
-	 */
-	private File getEntryFile(String sFileName, String sWorkspace)
-	{
-		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
-				
-		String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
-
-		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);
-
-		if (oDownloadedFile == null) {
-			oDownloadedFile = oRepo.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sTargetFilePath));
-		}
-
-		if (oDownloadedFile == null) 
-		{
-			WasdiLog.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found in path " + sTargetFilePath);
-			return null;
-		}
-		
-		File oFile = new File(sTargetFilePath);
-
-		if( oFile.canRead() == true) {
-			return oFile;
-		}
-		else {
-			WasdiLog.debugLog("CatalogResources.getEntryFile: cannot read file " + sFileName + " from " + sTargetFilePath + ", returning null");
-			return null; 
-		}
-	}
+	}	
 
 }

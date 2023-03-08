@@ -64,7 +64,7 @@ public class ConsoleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if (oUser == null) {
-				WasdiLog.debugLog("ConsoleResource.create( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ConsoleResource.create: invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 				return oResult;
 			}
@@ -73,7 +73,7 @@ public class ConsoleResource {
 
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				WasdiLog.debugLog("ConsoleResource.create: user cannot access workspace info, aborting");
+				WasdiLog.debugLog("ConsoleResource.create: user cannot access workspace, aborting");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 
 				return oResult;
@@ -98,10 +98,8 @@ public class ConsoleResource {
 
 
 			if (!Wasdi.s_sMyNodeCode.equals(oWorkspace.getNodeCode())) {
-
 				oResult.setStringValue("WORKSPACE NOT IN THIS NODE");
 				oResult.setBoolValue(false);
-
 				return oResult;
 			}
 			
@@ -279,15 +277,15 @@ public class ConsoleResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: invalid session");
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 
 			return oResult;
 		}
 
 		if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: invalid workspace id");
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-
 			return oResult;
 		}
 
@@ -295,7 +293,7 @@ public class ConsoleResource {
 
 		//check the user can access the workspace
 		if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace info, aborting");
+			WasdiLog.debugLog("ConsoleResource.isJupyterNotebookActive: user cannot access workspace, aborting");
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 
 			return oResult;
@@ -344,12 +342,12 @@ public class ConsoleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				WasdiLog.debugLog("ConsoleResource.ready( Session: " + sSessionId + ", WS: " + sWorkspaceId + " ): invalid workspace id");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: invalid workspace id");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -357,7 +355,7 @@ public class ConsoleResource {
 
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				WasdiLog.debugLog("ConsoleResource.ready: user cannot access workspace info, aborting");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: user cannot access workspace, aborting");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 			
@@ -366,7 +364,7 @@ public class ConsoleResource {
 			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 
 			if (oWorkspace == null) {
-				WasdiLog.debugLog("ConsoleResource.ready: " + sWorkspaceId + " is not a valid workspace, aborting");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: " + sWorkspaceId + " is not a valid workspace, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
@@ -376,7 +374,7 @@ public class ConsoleResource {
 			if (oNotebook == null) {
 				
 				// No: so for sure is not ready
-				WasdiLog.debugLog("ConsoleResource.ready: notebook not active, return false");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: notebook not active, return false");
 				
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setBoolValue(false);
@@ -390,20 +388,20 @@ public class ConsoleResource {
 			
 			if (bIsUpToDate) {
 				// Ok we can return the url
-				WasdiLog.debugLog("ConsoleResource.ready: JupyterNotebook Up and Running");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: JupyterNotebook Up and Running");
 				
 				oResult.setStringValue(oNotebook.getUrl());
 				oResult.setBoolValue(true);
 			} else {
 				// No way
-				WasdiLog.debugLog("ConsoleResource.ready: JupyterNotebook changed, not ready");
+				WasdiLog.debugLog("ConsoleResource.isNotebookReady: JupyterNotebook changed, not ready");
 				oResult.setBoolValue(false);				
 			}	
 			
 			return Response.ok(oResult).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ConsoleResource.create: JupyterNotebook started");
+			WasdiLog.errorLog("ConsoleResource.isNotebookReady: JupyterNotebook started");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
@@ -451,7 +449,7 @@ public class ConsoleResource {
 		}
 		catch (Exception oEx) {
 			// Something went wrong
-			WasdiLog.errorLog("ConsoleResource.internalIsActive exception: " + oEx.toString());
+			WasdiLog.errorLog("ConsoleResource.internalIsJupyterActive exception: " + oEx.toString());
 		}
 		
 		return null;

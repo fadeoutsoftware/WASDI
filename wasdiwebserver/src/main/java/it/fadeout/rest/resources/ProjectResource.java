@@ -51,7 +51,7 @@ public class ProjectResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		WasdiLog.debugLog("ProjectResource.getListByUser()");
+		WasdiLog.debugLog("ProjectResource.getListByUser");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -59,20 +59,16 @@ public class ProjectResource {
 
 		// Domain Check
 		if (oUser == null) {
-			WasdiLog.debugLog("ProjectResource.getListByUser: invalid session: " + sSessionId);
+			WasdiLog.debugLog("ProjectResource.getListByUser: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
-				return Response.status(Status.FORBIDDEN).build();
-			}
-
+			
 			WasdiLog.debugLog("ProjectResource.getListByUser: projects for " + oUser.getUserId());
 
 			// Create repo
 			ProjectRepository oProjectRepository = new ProjectRepository();
-
 
 			Response oResponse = new SubscriptionResource().getListByUser(sSessionId);
 
@@ -98,7 +94,7 @@ public class ProjectResource {
 
 			return Response.ok(aoProjectList).build();
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProjectResource.getListByUser: " + oEx);
+			WasdiLog.errorLog("ProjectResource.getListByUser error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -122,17 +118,11 @@ public class ProjectResource {
 
 		// Domain Check
 		if (oUser == null) {
-			WasdiLog.debugLog("ProjectResource.getListBySubscription: invalid session: " + sSessionId);
+			WasdiLog.debugLog("ProjectResource.getListBySubscription: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
 
 		try {
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), PROJECT_READ)) {
-				return Response.status(Status.FORBIDDEN).build();
-			}
-
-			WasdiLog.debugLog("ProjectResource.getListBySubscription: projects for " + oUser.getUserId());
-
 
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
@@ -159,7 +149,7 @@ public class ProjectResource {
 
 			return Response.ok(aoProjectList).build();
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProjectResource.getListBySubscription: " + oEx);
+			WasdiLog.errorLog("ProjectResource.getListBySubscription error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -188,13 +178,11 @@ public class ProjectResource {
 
 		// Domain Check
 		if (Utils.isNullOrEmpty(sProjectId)) {
+			WasdiLog.debugLog("ProjectResource.getProjectViewModel: invalid project id");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
 		try {
-
-			WasdiLog.debugLog("ProjectResource.getProjectViewModel: read projects " + sProjectId);
-
 			// Create repo
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
@@ -215,7 +203,7 @@ public class ProjectResource {
 
 			return Response.ok(oVM).build();
 		} catch (Exception oEx) {
-			WasdiLog.errorLog( "ProjectResource.getProjectViewModel: " + oEx);
+			WasdiLog.errorLog( "ProjectResource.getProjectViewModel error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -353,7 +341,6 @@ public class ProjectResource {
 
 			if (oProject == null) {
 				WasdiLog.debugLog("ProjectResource.changeActiveProject: project does not exist");
-
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id " + sProjectId + " exists.")).build();
 			}
 
@@ -367,9 +354,9 @@ public class ProjectResource {
 
 		if (oUserRepository.updateUser(oUser)) {
 			return Response.ok(new SuccessResponse(sProjectId)).build();
-		} else {
+		} 
+		else {
 			WasdiLog.debugLog("ProjectResource.changeActiveProject( " + "changing the active project of the user to " + sProjectId + " failed");
-
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The changing of the active project failed.")).build();
 		}
 	}
@@ -388,6 +375,7 @@ public class ProjectResource {
 		}
 
 		if (Utils.isNullOrEmpty(sProjectId)) {
+			WasdiLog.debugLog("ProjectResource.deleteProject: invalid project id");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
 
@@ -402,8 +390,9 @@ public class ProjectResource {
 
 		if (oProjectRepository.deleteProject(sProjectId)) {
 			return Response.ok(new SuccessResponse(sProjectId)).build();
-		} else {
-			WasdiLog.debugLog("ProjectResource.deleteProject( " + sProjectId + " ): deletion failed");
+		} 
+		else {
+			WasdiLog.debugLog("ProjectResource.deleteProject: deletion failed");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the project failed.")).build();
 		}
 	}

@@ -68,15 +68,14 @@ public class ProcessorsMediaResource {
 		
 		// Check the user session
 		if(oUser == null){
+			WasdiLog.debugLog("ProcessorsMediaResource.getCategories: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
-
 		
 		List<AppCategory> aoAppCategories = oAppCategoriesRepository.getCategories();
 		ArrayList<AppCategoryViewModel> aoAppCategoriesViewModel = getCategoriesViewModel(aoAppCategories);
 		
 	    return Response.ok(aoAppCategoriesViewModel).build();
-
 	}
 	
 	/**
@@ -107,6 +106,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -117,6 +117,7 @@ public class ProcessorsMediaResource {
 
 
 		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: invalid processor");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -124,15 +125,16 @@ public class ProcessorsMediaResource {
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if( oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: user is not the review owner");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		int iDeletedCount = oReviewRepository.deleteReview(sProcessorId, sReviewId);
 
 		if( iDeletedCount == 0 ){
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: return count of db operation is 0");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-
 
 		// Delete all the comments associated with the recently deleted review
 		CommentRepository oCommentRepository = new CommentRepository();
@@ -171,6 +173,7 @@ public class ProcessorsMediaResource {
 		
 		// Check the user session
 		if (oUser == null) {
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -181,6 +184,7 @@ public class ProcessorsMediaResource {
 
 
 		if (oReview != null && Utils.isNullOrEmpty(oReview.getTitle()) && Utils.isNullOrEmpty(oReview.getComment())) {
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -188,12 +192,14 @@ public class ProcessorsMediaResource {
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if (!oCommentRepository.isTheOwnerOfTheComment(sReviewId, sCommentId, sUserId)) {
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid comment");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		int iDeletedCount = oCommentRepository.deleteComment(sReviewId, sCommentId);
 
 		if (iDeletedCount == 0) {
+			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: delete returned 0");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -215,12 +221,14 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
+			WasdiLog.debugLog("ProcessorsMediaResource.updateReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
 		
 		if(oReviewViewModel == null ){
+			WasdiLog.debugLog("ProcessorsMediaResource.updateReview: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -257,12 +265,14 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
+			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
 		
 		if (oCommentViewModel == null) {
+			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: invalid comment");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -272,6 +282,7 @@ public class ProcessorsMediaResource {
 		
 		boolean isUpdated = oCommentRepository.updateComment(oComment);
 		if (isUpdated == false) {
+			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: the update was not good");
 			return Response.status(Status.BAD_REQUEST).build();
 		} else {
 			return Response.status(Status.OK).build();
@@ -403,12 +414,12 @@ public class ProcessorsMediaResource {
 	@Path("/reviews/getlist")
 	public Response getReviewListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorName") String sProcessorName, @QueryParam("page") Integer iPage, @QueryParam("itemsperpage") Integer iItemsPerPage) {
 		
-		WasdiLog.debugLog("ProcessorsMediaResource.getReview");
-
+		WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
+			WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -416,6 +427,7 @@ public class ProcessorsMediaResource {
 		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 		
 		if(oProcessor == null || Utils.isNullOrEmpty(oProcessor.getName()) ) {
+			WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor: invalid processor");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -469,6 +481,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
+			WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -476,6 +489,7 @@ public class ProcessorsMediaResource {
 		Review oReview = oReviewRepository.getReview(sReviewId);
 		
 		if (oReview == null || Utils.isNullOrEmpty(oReview.getId())) {
+			WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -491,59 +505,6 @@ public class ProcessorsMediaResource {
 		List<CommentListViewModel> aoCommentsListViewModel = getListCommentsViewModel(aoReviewComments);
 
 	    return Response.ok(aoCommentsListViewModel).build();
-	}
-
-	/**
-	 * Transform the list of Comment objects into a list of Comment ListViewModel.
-	 * @param aoCommentList
-	 * @return a list of list view models
-	 */
-	private static List<CommentListViewModel> getListCommentsViewModel(List<Comment> aoCommentList) {
-		if (aoCommentList == null) {
-			return null; 
-		}
-
-		return aoCommentList.stream().map(ProcessorsMediaResource::getListViewModel).collect(Collectors.toList());
-	}
-
-	/**
-	 * Transform the Comment object into a Comment ListViewModel.
-	 * @param oComment the comment object
-	 * @return a list view model
-	 */
-	private static CommentListViewModel getListViewModel(Comment oComment) {
-		if (oComment == null) {
-			return null; 
-		}
-
-		CommentListViewModel oListViewModel = new CommentListViewModel();
-		oListViewModel.setCommentId(oComment.getCommentId());
-		oListViewModel.setReviewId(oComment.getReviewId());
-		oListViewModel.setUserId(oComment.getUserId());
-		oListViewModel.setDate(new Date(oComment.getDate().longValue()));
-		oListViewModel.setText(oComment.getText());
-
-		return oListViewModel;
-	}
-	
-	/**
-	 * Transform the Comment object into a Comment DetailViewModel.
-	 * @param oComment the comment object
-	 * @return a detail view model
-	 */
-	private static CommentDetailViewModel getDetailViewModel(Comment oComment) {
-		if (oComment == null) {
-			return null; 
-		}
-
-		CommentDetailViewModel oDetailViewModel = new CommentDetailViewModel();
-		oDetailViewModel.setCommentId(oComment.getCommentId());
-		oDetailViewModel.setReviewId(oComment.getReviewId());
-		oDetailViewModel.setUserId(oComment.getUserId());
-		oDetailViewModel.setDate(new Date(oComment.getDate().longValue()));
-		oDetailViewModel.setText(oComment.getText());
-
-		return oDetailViewModel;
 	}
 	
 	/**
@@ -561,6 +522,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
+			WasdiLog.debugLog("ProcessorsMediaResource.getPublishers: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -747,5 +709,58 @@ public class ProcessorsMediaResource {
 		
 		return aoAppCategoriesViewModel;
 	} 
+	
+	/**
+	 * Transform the list of Comment objects into a list of Comment ListViewModel.
+	 * @param aoCommentList
+	 * @return a list of list view models
+	 */
+	private static List<CommentListViewModel> getListCommentsViewModel(List<Comment> aoCommentList) {
+		if (aoCommentList == null) {
+			return null; 
+		}
+
+		return aoCommentList.stream().map(ProcessorsMediaResource::getListViewModel).collect(Collectors.toList());
+	}
+
+	/**
+	 * Transform the Comment object into a Comment ListViewModel.
+	 * @param oComment the comment object
+	 * @return a list view model
+	 */
+	private static CommentListViewModel getListViewModel(Comment oComment) {
+		if (oComment == null) {
+			return null; 
+		}
+
+		CommentListViewModel oListViewModel = new CommentListViewModel();
+		oListViewModel.setCommentId(oComment.getCommentId());
+		oListViewModel.setReviewId(oComment.getReviewId());
+		oListViewModel.setUserId(oComment.getUserId());
+		oListViewModel.setDate(new Date(oComment.getDate().longValue()));
+		oListViewModel.setText(oComment.getText());
+
+		return oListViewModel;
+	}
+	
+	/**
+	 * Transform the Comment object into a Comment DetailViewModel.
+	 * @param oComment the comment object
+	 * @return a detail view model
+	 */
+	private static CommentDetailViewModel getDetailViewModel(Comment oComment) {
+		if (oComment == null) {
+			return null; 
+		}
+
+		CommentDetailViewModel oDetailViewModel = new CommentDetailViewModel();
+		oDetailViewModel.setCommentId(oComment.getCommentId());
+		oDetailViewModel.setReviewId(oComment.getReviewId());
+		oDetailViewModel.setUserId(oComment.getUserId());
+		oDetailViewModel.setDate(new Date(oComment.getDate().longValue()));
+		oDetailViewModel.setText(oComment.getText());
+
+		return oDetailViewModel;
+	}	
 }
 

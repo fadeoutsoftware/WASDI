@@ -381,7 +381,7 @@ public class OpenSearchResource {
 						
 			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
-				WasdiLog.debugLog(m_sClassName + ".searchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
+				WasdiLog.debugLog(m_sClassName + ".searchList, no queries available");
 				return null;
 			}
 	
@@ -511,15 +511,15 @@ public class OpenSearchResource {
 
 						if (bSwitchToNextProvider) {
 							
-							WasdiLog.debugLog(m_sClassName + " Error contacting " + sProvider + " try next provider");
+							WasdiLog.debugLog(m_sClassName + ".searchList: Error contacting " + sProvider + " try next provider");
 							sProvider = getProvider(sOriginalProviders, sPlatformType, iNextProvider);
 							iNextProvider++;
 							
 							if (sProvider != null) {
-								WasdiLog.debugLog(m_sClassName + " selected Provider " + sProvider);
+								WasdiLog.debugLog(m_sClassName + ".searchList: selected Provider " + sProvider);
 							}
 							else {
-								WasdiLog.debugLog(m_sClassName + " no more providers abailable ");	
+								WasdiLog.debugLog(m_sClassName + ".searchList: no more providers available ");	
 							}
 						}
 					}
@@ -623,7 +623,7 @@ public class OpenSearchResource {
 			if (!Utils.isNullOrEmpty(sProviderLimit)) {
 				try {
 					iLimit = Integer.parseInt(sProviderLimit);
-					WasdiLog.debugLog(sProvider + " using " + sProviderLimit + " Page Size ");
+					WasdiLog.debugLog("OpenSearchResource.gePageLimitForProvider: " + sProvider + " using " + sProviderLimit + " Page Size ");
 				}
 				catch (Exception oEx) {
 					WasdiLog.errorLog("OpenSearchResource.gePageLimitForProvider: error " + oEx);

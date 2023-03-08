@@ -74,7 +74,7 @@ public class ImagesResource {
 			}			
 			
 			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: invalid user or session");
+				WasdiLog.debugLog("ImagesResource.uploadImage: user cannot access image");
 				return Response.status(Status.UNAUTHORIZED).build();				
 			}
 						
@@ -387,7 +387,7 @@ public class ImagesResource {
 			return oResponse;
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ImagesResource.deleteImage: exception " + oEx);
+			WasdiLog.errorLog("ImagesResource.uploadProcessorLogo: exception " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 

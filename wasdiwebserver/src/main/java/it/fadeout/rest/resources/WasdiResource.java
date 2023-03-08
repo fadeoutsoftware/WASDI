@@ -55,7 +55,7 @@ public class WasdiResource {
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			WasdiLog.debugLog("WasdiResource.feedback( Session: " + sSessionId + " ): invalid session");
+			WasdiLog.debugLog("WasdiResource.feedback: invalid session");
 			oPrimitiveResult.setIntValue(401);
 			return oPrimitiveResult;
 		}
