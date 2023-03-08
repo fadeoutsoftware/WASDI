@@ -642,10 +642,12 @@ public class WorkflowsResource {
             return oResult;
         }
         
-        if (Utils.isNullOrEmpty(oRequesterUser.getUserId())) {
+        if (Utils.isNullOrEmpty(oRequesterUser.getUserId()) && 
         		!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
             WasdiLog.debugLog("WorkflowsResource.shareWorkflow: user cannot access workflow");
             oResult.setStringValue("Invalid user.");
+            return oResult;
+        }
 
         try {
 
@@ -757,8 +759,7 @@ public class WorkflowsResource {
     @DELETE
     @Path("share/delete")
     @Produces({"application/xml", "application/json", "text/xml"})
-    public PrimitiveResult deleteUserSharingWorkflow(@HeaderParam("x-session-token") String
-                                                             sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+    public PrimitiveResult deleteUserSharingWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
 
         WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow( ProcId: " + sWorkflowId + ", User:" + sUserId + " )");
         PrimitiveResult oResult = new PrimitiveResult();
