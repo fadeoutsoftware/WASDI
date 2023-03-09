@@ -18,7 +18,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.14.1</jackson.version>
-        <probav.version>2.2.0</probav.version>
     </properties>
 
     <build>
@@ -138,19 +137,6 @@
             <artifactId>wasdishared</artifactId>
             <version>${revision}</version>
         </dependency>
-        <!-- PROBAV -->
-        <!--
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-kit</artifactId>
-            <version>${probav.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-reader</artifactId>
-            <version>${probav.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.nfs.orbits</groupId>
             <artifactId>orbit</artifactId>
@@ -179,15 +165,6 @@
 		</dependency>
     </dependencies>
 
-    <!--
-    <pluginRepositories>
-        <pluginRepository>
-            <id>alfresco</id>
-            <name>Alfresco Repository</name>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-    -->
     <!--
     <repositories>
         <repository>
