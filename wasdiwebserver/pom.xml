@@ -139,6 +139,7 @@
             <version>${revision}</version>
         </dependency>
         <!-- PROBAV -->
+        <!--
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-kit</artifactId>
@@ -149,6 +150,7 @@
             <artifactId>probavbox-reader</artifactId>
             <version>${probav.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.nfs.orbits</groupId>
             <artifactId>orbit</artifactId>
@@ -185,6 +187,7 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <!--
     <repositories>
         <repository>
             <id>snap-repo-public</id>
@@ -200,4 +203,5 @@
             </snapshots>
         </repository>
     </repositories>
+    -->
 </project>
