@@ -208,11 +208,11 @@ var MarketPlaceController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 if (oController.m_oAppFilter.page == 0) {
-                    oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data.data);
+                    oController.m_aoApplicationList = oController.setDefaultImagesAndVotes(data.data, oController);
                 }
                 else {
                     if (data.data.length>0) {
-                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImagesAndVotes(data.data));
+                        oController.m_aoApplicationList = oController.m_aoApplicationList.concat(oController.setDefaultImagesAndVotes(data.data, oController));
                     }
                 }
 

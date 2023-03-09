@@ -41,6 +41,7 @@ import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
 import it.fadeout.Wasdi;
@@ -155,7 +156,16 @@ public class WorkflowsResource {
                 oWorkflow.setNodeUrl(Wasdi.getActualNode().getNodeBaseAddress());
             }
             
-            fillWorkflowIONodes(oWorkflowXmlFile, oWorkflow);
+            boolean bResult = fillWorkflowIONodes(oWorkflowXmlFile, oWorkflow);
+            
+            if (!bResult)  {
+            	WasdiLog.debugLog("WorkflowsResource.uploadFile: error finding IO Nodes");
+            	return Response.serverError().build();
+            }
+            
+            // Save the Workflow
+            SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+            oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);            
 
             /*
             try (FileReader oFileReader = new FileReader(oWorkflowXmlFile)) {
@@ -1106,38 +1116,38 @@ public class WorkflowsResource {
 			Document oWorkflowXml = oDocBuilder.parse(oFile);
 			oWorkflowXml.getDocumentElement().normalize();
 			WasdiLog.debugLog("fillWorkflowIONodes.Root element: " + oWorkflowXml.getDocumentElement().getNodeName());
+			
 			// loop through each item
-			NodeList aoItems = oWorkflowXml.getChildNodes().item(0).getChildNodes();
+			NodeList aoItems = oWorkflowXml.getElementsByTagName("node");
 			
 			for (int iItem = 0; iItem < aoItems.getLength(); iItem++)
 			{
-				if (aoItems.item(iItem).getNodeName().equals("node"))
-				{
-					Element oElement = (Element) aoItems.item(iItem);
+				org.w3c.dom.Node oNode = aoItems.item(iItem);
+				
+				if (oNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+					Element oNodeElement = (Element) oNode;
 					
-					if (oElement.hasAttribute("id")) {
+					if (oNodeElement.hasAttribute("id")) {
+						String sId = oNodeElement.getAttribute("id");
+						NodeList aoOperatorItems = oNodeElement.getElementsByTagName("operator");
 						
-						NodeList aoOperatorItems = oElement.getChildNodes();
+						if (aoOperatorItems == null) continue;
+						if (aoOperatorItems.getLength()<=0) continue;
 						
-						for (int iOpItems =0; iOpItems < aoOperatorItems.getLength(); iOpItems++) {
-							Element oOperatorElement = (Element) aoOperatorItems.item(iOpItems);
-							
-							if (oOperatorElement.getNodeName().equals("operator")) {
-								String sOperator = oOperatorElement.getNodeValue();
-								
-								if (sOperator.equals("Write")) {
-									oSnapWorflow.getOutputNodeNames().add(oElement.getAttribute("id"));
-									
-									WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Write Node");
-								}
-								else if (sOperator.equals("Read")) {
-									oSnapWorflow.getInputNodeNames().add(oElement.getAttribute("id"));
-									WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Read Node");
-								}
-							}
-						}								
+						String sOperator = aoOperatorItems.item(0).getTextContent();
+						
+						if (sOperator==null) continue;
+						
+						if (sOperator.equals("Write")) {
+							oSnapWorflow.getOutputNodeNames().add(sId);
+							WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Write Node with id = " + sId);
+						}
+						else if (sOperator.equals("Read")) {
+							oSnapWorflow.getInputNodeNames().add(sId);
+							WasdiLog.debugLog("fillWorkflowIONodes.fillWorkflowIONodes: Found Read Node with id = " + sId);
+						}						
+						
 					}
-			
 				}
 			}
 			

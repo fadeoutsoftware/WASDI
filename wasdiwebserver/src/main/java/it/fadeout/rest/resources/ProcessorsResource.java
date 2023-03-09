@@ -306,7 +306,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.uploadProcessor:" + oEx);
+			WasdiLog.errorLog("ProcessorsResource.uploadProcessor error:" + oEx);
 			oResult.setIntValue(500);
 			return oResult;
 		}
@@ -375,7 +375,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getDeployedProcessors: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.getDeployedProcessors error: " + oEx);
 			return aoRet;
 		}		
 		return aoRet;
@@ -431,7 +431,7 @@ public class ProcessorsResource  {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getSingleDeployedProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.getSingleDeployedProcessor error: " + oEx);
 			return oDeployedProcessorViewModel;
 		}		
 		return oDeployedProcessorViewModel;
@@ -615,8 +615,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppList: " + oEx);
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppList error: " + oEx);
 			return aoRet;
 		}		
 		return aoRet;
@@ -752,7 +751,7 @@ public class ProcessorsResource  {
 			return Response.ok(oAppDetailViewModel).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppDetail: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.getMarketPlaceAppDetail error: " + oEx);
 			return Response.serverError().build();
 		}		
 	}	
@@ -902,7 +901,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.internalRun: " + oEx );
+			WasdiLog.errorLog("ProcessorsResource.internalRun error: " + oEx );
 			oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 			return oRunningProcessorViewModel;
 		}
@@ -967,7 +966,7 @@ public class ProcessorsResource  {
 			oPrimitiveResult.setStringValue(sOutputCumulativeResult);
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.help: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.help error: " + oEx);
 			return oPrimitiveResult;
 		}
 		
@@ -1097,7 +1096,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.addLog" + oEx);
+			WasdiLog.errorLog("ProcessorResource.addLog error: " + oEx);
 			return Response.serverError().build();
 		}
 		return Response.ok().build();
@@ -1139,7 +1138,7 @@ public class ProcessorsResource  {
 			}
 			iResult = oCounter.getValue() + 1;
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " ): " + oEx);
+			WasdiLog.errorLog("ProcessorResource.countLogs error: " + oEx);
 		}
 		return iResult;
 	}
@@ -1200,7 +1199,7 @@ public class ProcessorsResource  {
 			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.getLogs: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.getLogs error: " + oEx);
 			return aoRetList;
 		}
 		
@@ -1301,7 +1300,7 @@ public class ProcessorsResource  {
 			return Response.ok().build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.nodeDeleteProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.nodeDeleteProcessor error: " + oEx);
 			return Response.serverError().build();
 		}
 	}	
@@ -1427,7 +1426,7 @@ public class ProcessorsResource  {
 			return Response.ok().build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.deleteProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.deleteProcessor error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -1526,7 +1525,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.redeployProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.redeployProcessor error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -1627,7 +1626,7 @@ public class ProcessorsResource  {
 			}
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorResource.libraryUpdate: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.libraryUpdate error: " + oEx);
 			return Response.serverError().build();
 		}
 	}	
@@ -1698,7 +1697,7 @@ public class ProcessorsResource  {
 			return Response.ok().build();
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("ProcessorResource.updateProcessor Exception: " + oEx);
+			WasdiLog.errorLog("ProcessorResource.updateProcessor  error: " + oEx);
 			return Response.serverError().build();
 		}
 	}	
@@ -1889,7 +1888,7 @@ public class ProcessorsResource  {
 
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("ProcessorsResource.updateProcessorFiles Exception:" + oEx.toString());
+			WasdiLog.errorLog("ProcessorsResource.updateProcessorFiles  error:" + oEx.toString());
 			return Response.serverError().build();
 		}
 		return Response.ok().build();
@@ -1946,7 +1945,7 @@ public class ProcessorsResource  {
 			return Response.ok().build();
 		}
 		catch (Throwable oEx) {
-			WasdiLog.errorLog("ProcessorResource.updateProcessorDetails: " + oEx.toString());
+			WasdiLog.errorLog("ProcessorResource.updateProcessorDetails error: " + oEx.toString());
 			return Response.serverError().build();
 		}
 	}		
@@ -2017,7 +2016,7 @@ public class ProcessorsResource  {
 			return zipProcessor(oFile, oProcessor);			
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.downloadProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.downloadProcessor error: " + oEx);
 		}
 		
 		return Response.serverError().build();
@@ -2145,7 +2144,7 @@ public class ProcessorsResource  {
 			}				
 			
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.shareProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.shareProcessor error: " + oEx);
 
 			oResult.setStringValue("Error in save proccess");
 			oResult.setBoolValue(false);
@@ -2204,7 +2203,7 @@ public class ProcessorsResource  {
 			}
 			
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getEnableUsersSharedProcessor: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.getEnableUsersSharedProcessor error: " + oEx);
 			return aoReturnList;
 		}
 
@@ -2278,7 +2277,7 @@ public class ProcessorsResource  {
 			oResult.setStringValue("Done");
 			oResult.setBoolValue(true);
 		} catch (Exception oE) {
-			WasdiLog.errorLog("ProcessorsResource.deleteUserSharedProcessor( Session: " + sSessionId + ", ProcId: " + sProcessorId + ", User:" + sUserId + " ): " + oE);
+			WasdiLog.errorLog("ProcessorsResource.deleteUserSharedProcessor error: " + oE);
 		}
 		return oResult;
 	}
@@ -2332,7 +2331,7 @@ public class ProcessorsResource  {
 			return Response.status(Status.OK).entity(sJsonUI).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.getUI: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.getUI error: " + oEx);
 			return Response.serverError().build();
 		}
 		
@@ -2409,7 +2408,7 @@ public class ProcessorsResource  {
 			return Response.status(Status.OK).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.saveUI: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.saveUI error: " + oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -2455,7 +2454,7 @@ public class ProcessorsResource  {
 			return oResponseBuilder.build();			
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog("CatalogResources.getCWLDescriptor: " + oEx);
+			WasdiLog.errorLog("CatalogResources.getCWLDescriptor error: " + oEx);
 		}
 		
 		return Response.serverError().build();
@@ -2588,7 +2587,7 @@ public class ProcessorsResource  {
 			WasdiLog.debugLog("ProcessorsResource.zipProcessor: done");
 			return oResponseBuilder.build();
 		} catch (Exception oE) {
-			WasdiLog.errorLog("ProcessorsResource.zipProcessor: " + oE);
+			WasdiLog.errorLog("ProcessorsResource.zipProcessor error: " + oE);
 		}
 		return Response.serverError().build();
 	}	
@@ -2650,7 +2649,7 @@ public class ProcessorsResource  {
 			}
 			return true;
 		} catch (Exception oE) {
-			WasdiLog.errorLog("ProcessorsResource.unzipProcessor: " + oE);
+			WasdiLog.errorLog("ProcessorsResource.unzipProcessor error: " + oE);
 		}
 		return false;
 	}
