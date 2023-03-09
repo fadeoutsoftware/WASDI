@@ -66,8 +66,8 @@
             <div id="kc-registration">
                 <span>${msg("noAccount")} <a tabindex="6" href="${url.registrationUrl}">${msg("doRegister")}</a></span>
             </div>
-                            <div> <h4>Fadeout Software - <a href="http://www.wasdi.net/index.php?title=Terms">Terms & condition </a> - <a href="http://www.wasdi.net/index.php?title=Privacy">Privacy policy</a> <h4></div>
-                <div> <h4>Need help with authentication? <a href="mailto:wasdi-auth@fadeout.it">Contact us!</a> </h4></div>
+                            <div> <h4>WASDI Sarl - <a href="https://wasdi.readthedocs.io/en/latest/EULA.html">Terms & condition </a> - <a href="https://wasdi.readthedocs.io/en/latest/EULA.html#information-security-and-data-protection-gdpr">Privacy policy</a> <h4></div>
+                <div> <h4>Need help with authentication? <a href="mailto:info@wasdi.cloud">Contact us!</a> </h4></div>
         </#if>
     </#if>
 

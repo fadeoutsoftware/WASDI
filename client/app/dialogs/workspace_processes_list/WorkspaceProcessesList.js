@@ -280,7 +280,7 @@ var WorkspaceProcessesList = (function () {
                     var oLink=document.createElement('a');
                     oLink.href = file;
                     let sTimestamp = (new Date()).toISOString().replace(/[^0-9]/g, "_").slice(0, 19);
-                    oLink.download = "processes_" + oController.m_sActiveWorkspaceName + "_" + sTimestamp;
+                    oLink.download = "processes_" + oController.m_sActiveWorkspaceName + "_" + sTimestamp + ".csv";
                     oLink.click();
                 }
             }

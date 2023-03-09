@@ -50,7 +50,7 @@
         },
         "values": {
             "indexvalue": {
-                "Sentinel-2": "Sentinel-2"
+                "Sentinel-2": ""
             },
             "filename": {
                 "S2A_*": "S2A",
@@ -71,7 +71,7 @@
 		},
 		"values":{
 			"indexvalue": {
-				"Sentinel-3": "Sentinel-3"
+				"Sentinel-3": ""
 			},
 			"producttype": {
 				"SR_1_SRA___": "SR_1_SRA___",

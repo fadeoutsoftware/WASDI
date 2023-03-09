@@ -32,6 +32,7 @@ import org.apache.commons.net.io.Util;
 import org.geotools.xml.styling.sldSchema;
 import org.json.JSONObject;
 
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
@@ -232,12 +233,20 @@ public final class HttpUtils {
 			try (OutputStream oOutputStream = oConnection.getOutputStream()) {
 				oOutputStream.write(ayBytes);
 			}
+			
 
-			WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
+			// Avoid log spam when we check the token
+			boolean bLog = true;
+			
+			if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+				bLog = false;
+			}
+			
+			if (bLog) WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
 
 			try {
 				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
+				if (bLog) WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 
@@ -267,13 +276,13 @@ public final class HttpUtils {
 					}
 				}
 			} catch (Exception oEint) {
-				WasdiLog.debugLog("HttpUtils.httpPost: " + oEint);
+				WasdiLog.debugLog("HttpUtils.httpPost error: " + oEint);
 			} finally {
 				oConnection.disconnect();
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.httpPost: " + oE);
+			WasdiLog.debugLog("HttpUtils.httpPost error: " + oE);
 		}
 
 		return oHttpCallResponse;
