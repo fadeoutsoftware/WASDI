@@ -137,6 +137,8 @@ public class QueryExecutorPLANET extends QueryExecutor {
 				String sUrl = m_sBaseUrl + "item-types/" + sItemType + "/items/" + sId + "/assets";
 				String sResult = standardHttpGETQuery(sUrl);
 				
+				if (sResult == null) return null;
+				
 				// Convert the response in the relative JSON Map representation
 				TypeReference<HashMap<String,Object>> oMapType = new TypeReference<HashMap<String,Object>>() {};
 				HashMap<String,Object> oPlanetResponse = MongoRepository.s_oMapper.readValue(sResult, oMapType);

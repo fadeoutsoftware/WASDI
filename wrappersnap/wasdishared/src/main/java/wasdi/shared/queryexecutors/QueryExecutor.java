@@ -240,8 +240,13 @@ public abstract class QueryExecutor {
 		long lEnd = System.nanoTime();
 
 		HttpUtils.logOperationSpeed(sUrl, "standardHttpGETQuery", lStart, lEnd, sResult);
-
-		return sResult;
+		
+		if (oHttpCallResponse.getResponseCode()>=200 && oHttpCallResponse.getResponseCode()<=299) {
+			return sResult;
+		}
+		else {
+			return null;
+		}
 	}
 	
 	protected String standardHttpPOSTQuery(String sUrl, String sPayload) {

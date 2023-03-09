@@ -102,6 +102,9 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 			}
 
 			String sResultAsString = standardHttpGETQuery(sUrl);
+			
+			if (sResultAsString == null) return null;
+			
 			// build the parser
 			Parser oParser = oAbdera.getParser();
 			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
