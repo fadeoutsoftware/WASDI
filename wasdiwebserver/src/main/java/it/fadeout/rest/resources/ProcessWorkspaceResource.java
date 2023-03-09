@@ -583,7 +583,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: user cannot access the workspace");
 				return aoProcessList;				
 			}
