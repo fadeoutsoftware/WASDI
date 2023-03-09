@@ -3,6 +3,8 @@ org.esa.s1tbx.io.polsarpro.PolsarProProductWriterPlugIn
 org.esa.s1tbx.io.gamma.GammaProductWriterPlugIn
 org.esa.s1tbx.io.geotiffxml.GeoTiffXMLProductWriterPlugIn
 org.esa.s1tbx.io.generic.GenericBSQWriterPlugIn
+org.esa.s1tbx.io.gamma.pyrate.PyRateGammaProductWriterPlugIn
+
 org.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn
 org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn
 org.esa.snap.csv.dataio.writer.CsvProductWriterPlugIn

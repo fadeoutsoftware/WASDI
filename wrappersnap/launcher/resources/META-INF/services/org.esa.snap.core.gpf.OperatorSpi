@@ -17,9 +17,10 @@ org.esa.s1tbx.sar.gpf.geometric.ALOSDeskewingOp$Spi
 org.esa.s1tbx.sar.gpf.geometric.TerrainFlatteningOp$Spi
 org.esa.s1tbx.sar.gpf.geometric.SRGROp$Spi
 org.esa.s1tbx.sar.gpf.geometric.UpdateGeoRefOp$Spi
-org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp$Spi
+org.esa.s1tbx.sar.gpf.geometric.MultitemporalCompositingOp$Spi
 org.esa.s1tbx.sar.gpf.DeburstWSSOp$Spi
 org.esa.s1tbx.sar.gpf.MultilookOp$Spi
+org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp$Spi
 
 org.esa.s1tbx.utilities.gpf.DataAnalysisOp$Spi
 org.esa.s1tbx.utilities.gpf.BandMergeOp$Spi
@@ -39,12 +40,15 @@ org.esa.s1tbx.insar.gpf.GoldsteinFilterOp$Spi
 org.esa.s1tbx.insar.gpf.PhaseToElevationOp$Spi
 org.esa.s1tbx.insar.gpf.StackAveragingOp$Spi
 org.esa.s1tbx.insar.gpf.StackSplitWriter$Spi
+org.esa.s1tbx.insar.gpf.MultiMasterOp$Spi
 org.esa.s1tbx.insar.gpf.CoherenceOp$Spi
 org.esa.s1tbx.insar.gpf.InterferogramOp$Spi
 org.esa.s1tbx.insar.gpf.PCAOp$Spi
 org.esa.s1tbx.insar.gpf.PhaseToDisplacementOp$Spi
 org.esa.s1tbx.insar.gpf.IntegerInterferogramOp$Spi
 org.esa.s1tbx.insar.gpf.StampsExportOp$Spi
+org.esa.s1tbx.insar.gpf.MultiMasterInSAROp$Spi
+org.esa.s1tbx.insar.gpf.HorizontalVerticalMotionOp$Spi
 
 org.esa.s1tbx.sentinel1.gpf.TOPSARDeburstOp$Spi
 org.esa.s1tbx.sentinel1.gpf.TOPSARSplitOp$Spi
@@ -60,6 +64,19 @@ org.esa.s1tbx.sentinel1.gpf.GRDPostProcessOp$Spi
 org.esa.s1tbx.sentinel1.gpf.EAPPhaseCorrectionOp$Spi
 org.esa.s1tbx.sentinel1.gpf.DoubleDifferenceInterferogramOp$Spi
 
+org.esa.s1tbx.fex.gpf.urban.SpeckleDivergenceOp$Spi
+org.esa.s1tbx.fex.gpf.forest.ForestAreaDetectionOp$Spi
+org.esa.s1tbx.fex.gpf.flood.FloodDetectionOp$Spi
+org.esa.s1tbx.fex.gpf.texture.GaborFilterOp$Spi
+org.esa.s1tbx.fex.gpf.forest.ForestAreaClassificationOp$Spi
+org.esa.s1tbx.fex.gpf.oceantools.AdaptiveThresholdingOp$Spi
+org.esa.s1tbx.fex.gpf.oceantools.ObjectDiscriminationOp$Spi
+org.esa.s1tbx.fex.gpf.oceantools.OilSpillDetectionOp$Spi
+org.esa.s1tbx.fex.gpf.oceantools.OilSpillClusteringOp$Spi
+org.esa.s1tbx.fex.gpf.oceantools.WindFieldEstimationOp$Spi
+org.esa.s1tbx.fex.gpf.ChangeDetectionOp$Spi
+org.esa.s1tbx.fex.gpf.SubGraphOp$Spi
+org.esa.s1tbx.fex.gpf.decisiontree.DecisionTreeOp$Spi
 
 org.esa.snap.core.gpf.common.ReadOp$Spi
 org.esa.snap.core.gpf.common.MergeOp$Spi
