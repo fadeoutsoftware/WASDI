@@ -179,6 +179,7 @@
 		</dependency>
     </dependencies>
 
+    <!--
     <pluginRepositories>
         <pluginRepository>
             <id>alfresco</id>
@@ -186,7 +187,7 @@
             <url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
         </pluginRepository>
     </pluginRepositories>
-
+    -->
     <!--
     <repositories>
         <repository>
