@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -23,7 +19,7 @@ import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
- * Hello world!
+ * WASDI Scheduler
  *
  */
 public class WasdiScheduler 
@@ -67,24 +63,18 @@ public class WasdiScheduler
 	public static void main(String[] args) {		
 		System.out.println("---------------------------- WASDI SCHEDULER START ----------------------------\n");
 		
-		// create the parser
-		CommandLineParser oParser = new DefaultParser();
-
-		// create Options object
-		Options oOptions = new Options();
-		
-		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
-
 		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
 		
 		try {
-	        // parse the command line arguments
-	        CommandLine oLine = oParser.parse(oOptions, args);
-
-	        if (oLine.hasOption("config")) {
-	            // Get the Parameter File
-	        	sConfigFilePath = oLine.getOptionValue("config");
-	        }			
+			
+			// Parse the command line to find the path of the config file 
+			if (args != null) {
+				if (args.length>=2) {
+					if (args[0].equals("-c") || args[0].equals("--config")) {
+						sConfigFilePath = args[1];
+					}
+				}
+			}			 
 		}
 		catch (Exception oEx) {
             System.err.println("WasdiScheduler.main - Exception paring args " + oEx.toString());			
