@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration debug="true"
-                     xmlns:log4j='http://jakarta.apache.org/log4j/'>
+<log4j:configuration debug="true" xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
     </appender>
 
@@ -14,11 +12,9 @@
         <param name="append" value="true" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <!--param name="file" value="/logs/launcher.log" /-->
-        <param name="file" value="C:/Temp/wasdi/launcher/logs/launcher.log" />
+        <param name="file" value="/var/log/wasdi/launcher.log" />
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
     </appender>
 
@@ -26,14 +22,11 @@
         <param name="append" value="false" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <!--param name="file" value="./logs/publisher.log" /-->
-        <param name="file" value="C:/Temp/wasdi/launcher/logs/publisher.log" />
+        <param name="file" value="/var/log/wasdi/publisher.log" />
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
     </appender>
-
 
     <root>
         <level value="debug" />
@@ -60,6 +53,11 @@
         <appender-ref ref="fileLauncher" />
     </logger>
 
+    <logger name="wasdi.geoserver">
+        <level value="debug" />
+        <appender-ref ref="filePublisher" />
+    </logger>
+
     <logger name="wasdi.shared.utils">
         <level value="debug" />
         <appender-ref ref="fileLauncher" />
@@ -69,22 +67,11 @@
         <level value="debug" />
         <appender-ref ref="fileLauncher" />
     </logger>
-    
-    <logger name="org.esa.snap">
-        <level value="all" />
+{% if ( companyEnvironmentName | lower ) in ["local", "test"] %}
+
+    <logger name="wasdi.shared.managers">
+        <level value="debug" />
         <appender-ref ref="fileLauncher" />
     </logger>
-
-    <logger name="wasdi.geoserver">
-        <level value="debug" />
-        <appender-ref ref="filePublisher" />
-    </logger>
-    
-    <logger name="net.schmizz.sshj">
-        <level value="debug" />
-        <appender-ref ref="filePublisher" />
-    </logger>
-
-
-
+{% endif %}
 </log4j:configuration>
