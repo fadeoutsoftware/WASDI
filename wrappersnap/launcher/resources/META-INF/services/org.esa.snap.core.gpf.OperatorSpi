@@ -20,7 +20,7 @@ org.esa.s1tbx.sar.gpf.geometric.UpdateGeoRefOp$Spi
 org.esa.s1tbx.sar.gpf.geometric.MultitemporalCompositingOp$Spi
 org.esa.s1tbx.sar.gpf.DeburstWSSOp$Spi
 org.esa.s1tbx.sar.gpf.MultilookOp$Spi
-org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp$Spi
+org.esa.s1tbx.orbits.gpf.ApplyOrbitFileOp$Spi
 
 org.esa.s1tbx.utilities.gpf.DataAnalysisOp$Spi
 org.esa.s1tbx.utilities.gpf.BandMergeOp$Spi
