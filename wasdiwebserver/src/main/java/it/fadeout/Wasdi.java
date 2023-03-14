@@ -43,9 +43,11 @@ import org.apache.commons.net.io.Util;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
+import it.fadeout.providers.JerseyMapperProvider;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -146,6 +148,8 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public Wasdi() {
 		register(new WasdiBinder());
+		register(JacksonFeature.class);
+		register(JerseyMapperProvider.class);
 		packages(true, "it.fadeout.rest.resources");
 	}
 	
