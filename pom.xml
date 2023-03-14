@@ -23,20 +23,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--revision>0.0.1-SNAPSHOT</revision-->
     </properties>
-
-    <!--
-        HERE WE CONFIGURE OUR OWN NEXUS REPOSITORY
-        TO DOWNLOAD LIBRARIES NOT AVAILABLE ON INTERNET
-    -->
-    <repositories>
-        <repository>
-            <id>wasdi-library</id>
-            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
-        </repository>
-    </repositories>
 
     <!--
         HERE WE ADD PLUGINS NEEDED TO DEPLOY AUTOMATICALLY IN NEXUS
@@ -58,6 +45,31 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
@@ -78,4 +90,16 @@
             <url>${wasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <!--
+        HERE WE CONFIGURE OUR OWN NEXUS REPOSITORY
+        TO DOWNLOAD LIBRARIES NOT AVAILABLE ON INTERNET
+    -->
+    <repositories>
+        <repository>
+            <id>wasdi-library</id>
+            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
+        </repository>
+    </repositories>
 </project>
