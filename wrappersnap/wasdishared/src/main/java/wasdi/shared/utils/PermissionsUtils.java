@@ -42,7 +42,8 @@ public class PermissionsUtils {
 	public static boolean userHasValidSubscription(User oUser) {
 		
 		if (oUser == null) return false;
-		
+		return true;
+		/*
 		try {
 			String sActiveProjectOfUser = oUser.getActiveProjectId();
 			ProjectRepository oProjectRepository = new ProjectRepository();
@@ -55,6 +56,7 @@ public class PermissionsUtils {
 		}
 		
 		return false;
+		*/
 	}
 	
 	/**

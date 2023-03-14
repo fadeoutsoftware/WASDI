@@ -34,14 +34,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphException;
-import org.esa.snap.core.gpf.graph.GraphIO;
-import org.esa.snap.core.gpf.graph.Node;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
 import it.fadeout.Wasdi;
