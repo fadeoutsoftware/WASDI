@@ -67,7 +67,7 @@ public class StyleResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public PrimitiveResult uploadFile(@FormDataParam("file") InputStream fileInputStream,
+	public PrimitiveResult uploadFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
@@ -98,7 +98,7 @@ public class StyleResource {
 			// File checking
 
 			// Checks whether null file is passed
-			if (fileInputStream == null) {
+			if (oFileInputStream == null) {
 				WasdiLog.debugLog("StyleResource.uploadFile: invalid file");
 				oResult.setStringValue("Invalid file");
 				return oResult;
@@ -122,7 +122,7 @@ public class StyleResource {
 			WasdiLog.debugLog("StyleResource.uploadFile: style file Path: " + oStyleSldFile.getPath());
 
 			// save uploaded file
-			writeFile(fileInputStream, oStyleSldFile);
+			writeFile(oFileInputStream, oStyleSldFile);
 
 			try (FileReader oFileReader = new FileReader(oStyleSldFile)) {
 				insertStyle(sUserId, sStyleId, sName, sDescription, oStyleSldFile.getPath(), bPublic);
@@ -818,7 +818,7 @@ public class StyleResource {
 
 			// Take path
 			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sStyleSldPath = sDownloadRootPath + "styles/" + sStyleId + ".sld";
+			String sStyleSldPath = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld";
 
 			File oFile = new File(sStyleSldPath);
 
