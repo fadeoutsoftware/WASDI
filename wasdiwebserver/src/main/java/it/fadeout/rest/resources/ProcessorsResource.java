@@ -558,7 +558,7 @@ public class ProcessorsResource  {
 				
 				if (oFilters.getScore()> 0) {
 										
-					if (fScore<=oFilters.getScore() && fScore != -1.0f) {
+					if (fScore<oFilters.getScore() && fScore != -1.0f) {
 						continue;
 					}
 				}
