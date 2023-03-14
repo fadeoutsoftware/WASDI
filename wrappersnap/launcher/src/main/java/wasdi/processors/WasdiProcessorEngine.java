@@ -200,8 +200,12 @@ public abstract class WasdiProcessorEngine {
 			String sBaseUrl = oProcessor.getNodeUrl();
 			
 			if (Utils.isNullOrEmpty(sBaseUrl)) sBaseUrl = WasdiConfig.Current.baseUrl;
+			
+			if (!sBaseUrl.endsWith("/"))  {
+				sBaseUrl += "/";
+			}
 
-			String sUrl = sBaseUrl + "/processors/downloadprocessor?processorId=" + sProcessorId;
+			String sUrl = sBaseUrl + "processors/downloadprocessor?processorId=" + sProcessorId;
 
 			String sSavePath = getProcessorFolder(oProcessor.getName());
 			String sOutputFilePath = sSavePath + sProcessorId + ".zip";
