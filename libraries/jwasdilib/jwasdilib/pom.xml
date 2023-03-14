@@ -16,14 +16,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>wasdi-library</id>
-            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
-        </repository>
-    </repositories>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -110,4 +102,12 @@
             <version>2.7</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>wasdi-library</id>
+            <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
+        </repository>
+    </repositories>
 </project>
