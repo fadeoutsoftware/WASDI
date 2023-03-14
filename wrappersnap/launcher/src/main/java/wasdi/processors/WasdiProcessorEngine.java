@@ -207,6 +207,10 @@ public abstract class WasdiProcessorEngine {
 			String sOutputFilePath = sSavePath + sProcessorId + ".zip";
 
 			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
+			
+			WasdiLog.debugLog("Downloding from: " + sUrl);
+			WasdiLog.debugLog("Downloding to: " + sOutputFilePath);
+			
 			return HttpUtils.downloadFile(sUrl, asHeaders, sOutputFilePath);
 		}
 		catch (Exception oEx) {
