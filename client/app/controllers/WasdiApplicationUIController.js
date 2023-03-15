@@ -728,6 +728,7 @@ var WasdiApplicationUIController = (function () {
         this.m_oProductService.getProductListByWorkspace(oWorkspace.workspaceId).then(function (data, status) {
 
             oController.m_aoProducts = [];
+            oController.m_aoProductsFile = [];
 
             if (utilsIsObjectNullOrUndefined(data.data) == false) {
                 //push all products
