@@ -487,8 +487,9 @@ public class Publishband extends Operation {
             }
 
             String sBaseUrl = WasdiConfig.Current.baseUrl;
+            if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
 
-            String sUrl = sBaseUrl + "/filebuffer/downloadstyle?style=" + sStyle;
+            String sUrl = sBaseUrl + "filebuffer/downloadstyle?style=" + sStyle;
 
             Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
             return HttpUtils.downloadFile(sUrl, asHeaders, sDestinationFileFullPath);

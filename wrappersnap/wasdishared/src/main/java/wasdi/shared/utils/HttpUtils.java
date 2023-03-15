@@ -29,7 +29,6 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
-import org.geotools.xml.styling.sldSchema;
 import org.json.JSONObject;
 
 import wasdi.shared.config.WasdiConfig;
@@ -342,75 +341,6 @@ public final class HttpUtils {
 			}
 		} catch (Exception oE) {
 			WasdiLog.errorLog("HttpUtils.newStandardHttpDelete: " + oE);
-		}
-
-		return oHttpCallResponse;
-	}
-
-	public static HttpCallResponse standardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
-		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
-
-		String sResult = null;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Accept", "*/*");
-			oConnection.setDoOutput(true);
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			
-			byte[] ayBytes = sPayload.getBytes();
-			oConnection.setFixedLengthStreamingMode(ayBytes.length);
-			oConnection.connect();
-			
-			try (OutputStream oOutputStream = oConnection.getOutputStream()) {
-				oOutputStream.write(ayBytes);
-			}
-
-			WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
-				
-				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
-
-
-				if (iResponseCode >= 200 && iResponseCode <=299) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-						oHttpCallResponse.setResponseBody(sResult);
-					}
-				} else {
-					WasdiLog.debugLog("HttpUtils.httpPost: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
-				}
-			} catch (Exception oEint) {
-				WasdiLog.debugLog("HttpUtils.httpPost: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-
-		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.httpPost: " + oE);
 		}
 
 		return oHttpCallResponse;

@@ -7,6 +7,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -66,7 +67,7 @@ public class Trigger {
 		catch(Exception oEx)
 		{
 			//no log4j configuration
-			System.err.println( "Trigger - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx) );
+			System.err.println( "Trigger - Error loading log.  Reason: " + ExceptionUtils.getStackTrace(oEx) );
 			System.exit(-1);
 		}
 		
@@ -122,7 +123,7 @@ public class Trigger {
 			WasdiLog.debugLog(new EndMessageProvider().getGood());
 		}
 		catch( ParseException oEx ) {
-			WasdiLog.errorLog("Trigger Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			WasdiLog.errorLog("Trigger Exception " + ExceptionUtils.getStackTrace(oEx));
 			System.exit(-1);
 		}
 	}

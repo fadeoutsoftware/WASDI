@@ -595,7 +595,9 @@ public class DockerUtils {
     		Map<String, String> asHeaders = HttpUtils.getBasicAuthorizationHeaders(oRegistry.user, oRegistry.password);
     		
     		String sUrl = oRegistry.apiAddress;
-    		sUrl += "/repository/docker-wasdi-processor/v2/";
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "repository/docker-wasdi-processor/v2/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
     		
@@ -624,7 +626,10 @@ public class DockerUtils {
     		
     		if (!Utils.isNullOrEmpty(sDigest)) {
         		sUrl = oRegistry.apiAddress;
-        		sUrl += "/repository/docker-wasdi-processor/v2/";
+        		
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		
+        		sUrl += "repository/docker-wasdi-processor/v2/";
         		sUrl += sImageName;
         		sUrl += "/manifests/" + sDigest;
         		

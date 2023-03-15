@@ -153,8 +153,13 @@ public class KeycloakService implements AuthProviderService {
 			WasdiLog.debugLog("KeycloakService.requirePasswordUpdateViaEmail: user DB id null or empty, aborting");
 			return oResult;
 		}
+		
+		String sBaseUrl = WasdiConfig.Current.keycloack.address;
+		
+		if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
+		
 		StringBuilder oUrlBuilder = new StringBuilder()
-				.append(WasdiConfig.Current.keycloack.address)
+				.append(sBaseUrl)
 				.append("admin/realms/wasdi/users/")
 				.append(sUserDbId)
 				.append("/execute-actions-email?redirect_uri=")
