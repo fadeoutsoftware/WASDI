@@ -167,6 +167,24 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
             WasdiLog.errorLog("PythonPipProcessorEngine2.run: parameter is null");
             return false;
         }
+        
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is empty, return false.");
+			return false;			
+		}
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: call base class deploy");
+		
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;        
 
         // Get Repo and Process Workspace
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -288,6 +306,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
                 // Start it
                 DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
                 oDockerUtils.setPullDuringRun(true);
+                oDockerUtils.setDockerRegistry(m_sDockerRegistry);
                 oDockerUtils.run();
                 
                 // Wait a little bit
