@@ -52,7 +52,12 @@ public class DockerUtils {
     /**
      * Docker registry in use
      */
-    String m_sDockerRegistry = "";    
+    String m_sDockerRegistry = "";
+    
+    /**
+     * DIRTY flag to allow the run of a docker pulled from a registry
+     */
+    boolean m_bPullDuringRun = false;
 
     /**
      * Create a new instance
@@ -336,7 +341,31 @@ public class DockerUtils {
                     	}
                 		
                 	}
-                }                
+                }
+                
+                // Add the pull command
+                if (m_bPullDuringRun) {
+                	WasdiLog.debugLog("DockerUtils.run: adding the pull always flag");
+                	
+                	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+                	
+    				// For each register: ordered by priority
+    				for (int iRegisters=0; iRegisters<aoRegisters.size(); iRegisters++) {
+    					
+    					DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iRegisters);
+    					
+    					WasdiLog.debugLog("DockerUtils.run: try to push to " + oDockerRegistryConfig.id);
+    					
+    					// Try to login and push
+    					boolean bLogged = login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
+    					
+    					if (!bLogged) {
+    						WasdiLog.debugLog("DockerUtils.run: error in the login");
+    					}
+    				}                	
+                	
+                	asArgs.add("--pull always");
+                }
 
                 // Docker name
                 asArgs.add(sDockerName);
@@ -646,5 +675,13 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.removeImageFromRegistry: error " + oEx.toString());
 		}
     }
+
+	public boolean getPullDuringRun() {
+		return m_bPullDuringRun;
+	}
+
+	public void setPullDuringRun(boolean bPullDuringRun) {
+		this.m_bPullDuringRun = bPullDuringRun;
+	}
 
 }
