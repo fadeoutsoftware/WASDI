@@ -1001,3 +1001,10 @@ wrappersnap/wasdishared/src/test/java/resources/test.properties
 wrappersnap/wasdishared/src/test/java/resources/images/lux1.tif
 wrappersnap/wasdishared/src/test/java/resources/images/lux2.tif
 wrappersnap/launcher/src/main/java/MyMain.java
+.flattened-pom.xml
+ogcprocesses/processes/.flattened-pom.xml
+scheduler/.flattened-pom.xml
+wasditrigger/.flattened-pom.xml
+wasdiwebserver/.flattened-pom.xml
+wrappersnap/launcher/.flattened-pom.xml
+wrappersnap/wasdishared/.flattened-pom.xml
