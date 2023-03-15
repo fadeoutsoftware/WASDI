@@ -322,52 +322,52 @@ public class WasdiFileUtils {
 
 	/**
 	 * Move a file to a destination directory.
-	 * @param sourcePath the path of the file to be moved
-	 * @param destinationDirectoryPath the path of the destination directory
+	 * @param sSourcePath the path of the file to be moved
+	 * @param sDestinationDirectoryPath the path of the destination directory
 	 * @return true if the operation was successful, false otherwise
 	 */
-	public static boolean moveFile(String sourcePath, String destinationDirectoryPath) {
-		if (sourcePath == null) {
+	public static boolean moveFile(String sSourcePath, String sDestinationDirectoryPath) {
+		if (sSourcePath == null) {
 			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourcePath is null");
 			return false;
 		}
 
-		if (destinationDirectoryPath == null) {
+		if (sDestinationDirectoryPath == null) {
 			WasdiLog.errorLog("WasdiFileUtils.moveFile: destinationDirectoryPath is null");
 			return false;
 		}
 
-		if (!destinationDirectoryPath.endsWith(File.separator)) {
-			destinationDirectoryPath += File.separator;
+		if (!sDestinationDirectoryPath.endsWith(File.separator)) {
+			sDestinationDirectoryPath += File.separator;
 		}
 
-		File sourceFile = new File(sourcePath);
-		if (!fileExists(sourceFile)) {
+		File oSourceFile = new File(sSourcePath);
+		if (!fileExists(oSourceFile)) {
 			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourceFile does not exist");
 			return false;
 		}
 
-		File destinationDirectory = new File(destinationDirectoryPath);
-		if (!destinationDirectory.exists()) {
-			destinationDirectory.mkdirs();
+		File oDestinationDirectory = new File(sDestinationDirectoryPath);
+		if (!oDestinationDirectory.exists()) {
+			oDestinationDirectory.mkdirs();
 		}
 
-		boolean outcome = true;
+		boolean bOutcome = true;
 
-		if (sourceFile.isDirectory()) {
-			for (File file : sourceFile.listFiles()) {
-				outcome = outcome & moveFile(file.getAbsolutePath(), destinationDirectoryPath + sourceFile.getName());
+		if (oSourceFile.isDirectory()) {
+			for (File oFile : oSourceFile.listFiles()) {
+				bOutcome = bOutcome & moveFile(oFile.getAbsolutePath(), sDestinationDirectoryPath + oSourceFile.getName());
 			}
 
-			if (sourceFile.listFiles().length == 0) {
-				deleteFile(sourcePath);
+			if (oSourceFile.listFiles().length == 0) {
+				deleteFile(sSourcePath);
 			}
 		} else {
-			File destinationFile = new File(destinationDirectoryPath + sourceFile.getName());
-			outcome = sourceFile.renameTo(destinationFile);
+			File oDestinationFile = new File(sDestinationDirectoryPath + oSourceFile.getName());
+			bOutcome = oSourceFile.renameTo(oDestinationFile);
 		}
 
-		return outcome;
+		return bOutcome;
 	}
 
 	public static String renameFile(String sOldFileFullName, String sNewFileSimpleName) {
