@@ -419,6 +419,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                 // Start it
                 DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+                oDockerUtils.setDockerRegistry(m_sDockerRegistry);
                 oDockerUtils.run();
                 
                 // Wait a little bit
