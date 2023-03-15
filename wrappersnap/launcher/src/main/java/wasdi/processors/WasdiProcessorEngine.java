@@ -94,6 +94,9 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.EOEPCA)) {
 			return new EoepcaProcessorEngine();
 		}
+		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2)) {
+			return new PythonPipProcessorEngine2();
+		}		
 		else {
 			return new UbuntuPython37ProcessorEngine();
 		}

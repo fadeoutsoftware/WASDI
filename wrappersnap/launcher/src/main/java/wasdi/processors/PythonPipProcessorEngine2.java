@@ -75,6 +75,8 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		// And we work with our main register
 		m_sDockerRegistry = aoRegisters.get(0).address;
 		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry = " + m_sDockerRegistry);
+		
 		// Build the image of the docker
 		boolean bResult = super.deploy(oParameter, bFirstDeploy);
 		
