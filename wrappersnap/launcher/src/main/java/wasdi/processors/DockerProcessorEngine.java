@@ -305,13 +305,25 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     protected void onAfterDeploy(String sProcessorFolder) {
 
     }
+    
+    /**
+     * Run a Docker Processor
+     */
+    public boolean run(ProcessorParameter oParameter) {
+    	return run(oParameter, true);
+    }
+
 
 
     /**
      * Run a Docker Processor
+     * 
+     * @param oParameter Processo Parameter
+     * @param bBuildLocally True to build locally, false otherwise
+     * @return
      */
     @SuppressWarnings("unchecked")
-    public boolean run(ProcessorParameter oParameter) {
+    public boolean run(ProcessorParameter oParameter, boolean bBuildLocally) {
 
         WasdiLog.debugLog("DockerProcessorEngine.run: start");
 
@@ -366,7 +378,21 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
 
                 if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
-                    deploy(oParameter, false);
+                	
+                	boolean bResult = true;
+                	
+                	if (bBuildLocally) {
+                		bResult = deploy(oParameter, false);                		
+                	}
+                	else {
+                		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), sProcessorZipFile);
+                	}
+                	
+                	if (!bResult) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                        return false;                		
+                	}
                     
                     m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
                     

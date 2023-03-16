@@ -186,7 +186,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry " + m_sDockerRegistry);
 
-        return super.run(oParameter);
+        return super.run(oParameter, false);
 	}
 	
 
