@@ -142,15 +142,24 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		// Read the processor from the db
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-		
+				
+
+		// Create utils
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
+        if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
+        	oDockerUtils.stop(oProcessor);
+        }
+        
+        
 		// Increment the version of the processor
 		String sNewVersion = oProcessor.getVersion();
 		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
 		oProcessor.setVersion(sNewVersion);
 		// Save it
 		oProcessorRepository.updateProcessor(oProcessor);
+        
 		
-		boolean bResult = super.redeploy(oParameter);
+		boolean bResult = super.redeploy(oParameter, false);
 		
 		if (!bResult) {
 			// This is not good

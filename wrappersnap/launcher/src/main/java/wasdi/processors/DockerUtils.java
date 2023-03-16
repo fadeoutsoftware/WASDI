@@ -635,7 +635,108 @@ public class DockerUtils {
         }
     	
     	return true;
-    }    
+    }
+    
+    /**
+     * Stop a running container
+     * @param oProcessor Processor associated to the container
+     * @return true if stopped
+     */
+    public boolean stop(Processor oProcessor) {
+    	if (oProcessor == null) {
+    		WasdiLog.errorLog("DockerUtils.stop: processor is null");
+    		return false;
+    	}
+    	
+    	return stop(oProcessor.getName(), oProcessor.getVersion());    	
+    }
+    
+    /**
+     * Stop a running container
+     * @param sProcessorName Processor Name
+     * @param sVersion Version
+     * @return true if stopped
+     */
+    public boolean stop(String sProcessorName, String sVersion) {
+       	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "containers/json";
+    		
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return false;
+    		}
+    		
+    		List<Object> aoOutputJsonMap = null;
+
+            try {
+                ObjectMapper oMapper = new ObjectMapper();
+                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.stop: exception converting API result " + oEx);
+                return false;
+            }
+            
+            String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
+            String sId = "";
+            
+            for (Object oContainer : aoOutputJsonMap) {
+				try {
+					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
+					String sImageName = oContainerMap.get("Image");
+					
+					if (sImageName.endsWith(sMyImage)) {
+						WasdiLog.debugLog("DockerUtils.stop: found my container " + sMyImage + " Docker Image = " +sImageName);
+						sId = oContainerMap.get("Id");
+						break;
+					}
+					
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.stop: error parsing a container json entity " + oEx.toString());
+		        }
+			}
+            
+            if (!Utils.isNullOrEmpty(sId)) {
+            	sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "containers/" + sId + "/stop";
+        		
+        		oResponse = HttpUtils.httpGet(sUrl);
+        		
+        		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+        			return false;
+        		}
+        		else {
+        			return true;
+        		}
+            }
+    		
+    		return false;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.stop: " + oEx.toString());
+            return false;
+        }
+    }
+    
+    /**
+     * Check if a container is started
+     * @param oProcessor Processor Entity
+     * @return true if it is running
+     */
+    public boolean isContainerStarted(Processor oProcessor) {
+    	if (oProcessor == null) {
+    		WasdiLog.errorLog("DockerUtils.isContainerStarted: processor is null");
+    		return false;
+    	}
+    	
+    	return isContainerStarted(oProcessor.getName(), oProcessor.getVersion());
+    }
     
     /**
      * Check if a container is started
@@ -696,9 +797,23 @@ public class DockerUtils {
     
     /**
      * Check if an image is available on the local registry
-     * @param sProcessorName
-     * @param sVersion
-     * @return
+     * @param oProcessor Processor entity
+     * @return true if the image is available locally
+     */
+    public boolean isImageAvailable(Processor oProcessor) {
+    	if (oProcessor == null) {
+    		WasdiLog.errorLog("DockerUtils.isImageAvailable: processor is null");
+    		return false;
+    	}
+    	
+    	return isImageAvailable(oProcessor.getName(), oProcessor.getVersion());
+    }
+    
+    /**
+     * Check if an image is available on the local registry
+     * @param sProcessorName Processor Name
+     * @param sVersion Processor Version
+     * @return true if the image is available locally
      */
     @SuppressWarnings("unchecked")
 	public boolean isImageAvailable(String sProcessorName, String sVersion) {
