@@ -64,8 +64,7 @@ public class ProcessorTypes {
 			aoFiles.add("packagesInfo.json");
 			aoFiles.add("runwasdidocker.sh");
 			aoFiles.add("deploywasdidocker.sh");
-			aoFiles.add("cleanwasdidocker.sh");
-			
+			aoFiles.add("cleanwasdidocker.sh");			
 		}
 		else if (sProcessorType.equals(JUPYTER_NOTEBOOK)) {
 			
@@ -78,7 +77,10 @@ public class ProcessorTypes {
 			aoFiles.add("runwasdidocker.sh");
 		}
 		else if (sProcessorType.equals(PYTHON_PIP_2)) {
-			
+			aoFiles.add("packagesInfo.json");
+			aoFiles.add("runwasdidocker.sh");
+			aoFiles.add("deploywasdidocker.sh");
+			aoFiles.add("cleanwasdidocker.sh");			
 		}
 
 		return aoFiles;

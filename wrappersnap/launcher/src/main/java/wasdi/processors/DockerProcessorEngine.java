@@ -389,7 +389,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             		bResult = deploy(oParameter, false);                		
             	}
             	else {
-            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), sProcessorZipFile);
+            		File oZipFile = new File(sProcessorZipFile);
+            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), oZipFile.getName());
             	}
             	
             	if (!bResult) {
