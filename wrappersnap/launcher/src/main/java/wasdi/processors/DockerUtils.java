@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -623,14 +626,78 @@ public class DockerUtils {
 			
             RunTimeUtils.shellExec(sCommand, asArgs, true);    		
     		
-    	} catch (Exception oEx) {
-    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
+    	} 
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.login: " + oEx.toString());
             return false;
         }
     	
     	return true;
     }    
     
+    /**
+     * Check if a container is started
+     * @param sProcessorName
+     * @param sVersion
+     * @return
+     */
+    public boolean isContainerStarted(String sProcessorName, String sVersion) {
+    	
+    	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "containers/json";
+    		
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return false;
+    		}
+    		
+            List<Map<String, String>> aoOutputJsonMap = null;
+
+            try {
+                ObjectMapper oMapper = new ObjectMapper();
+                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Map<String, String>>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.isContainerStarted: exception converting API result " + oEx);
+                return false;
+            }
+            
+            String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
+            
+            for (Map<String, String> oContainer : aoOutputJsonMap) {
+				try {
+					
+					String sImageName = oContainer.get("Image");
+					
+					if (sImageName.endsWith(sMyImage)) {
+						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my image " + sMyImage + " Docker Image = " +sImageName);
+						return true;
+					}
+					
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.isContainerStarted: error parsing a container json entity " + oEx.toString());
+		        }
+			}
+    		
+    		return false;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.isContainerStarted: " + oEx.toString());
+            return false;
+        }
+    }
+    
+    /**
+     * Remove an image from a Registry
+     * @param sImageName
+     * @param sVersion
+     * @param oRegistry
+     */
     public void removeImageFromRegistry(String sImageName, String sVersion, DockerRegistryConfig oRegistry) {
     	try {
     		

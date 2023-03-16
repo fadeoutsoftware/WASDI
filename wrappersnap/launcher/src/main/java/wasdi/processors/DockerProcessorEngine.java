@@ -376,32 +376,38 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 String sProcessorZipFile = downloadProcessor(oProcessor, oParameter.getSessionID());
 
                 WasdiLog.infoLog("DockerProcessorEngine.run: processor zip file downloaded: " + sProcessorZipFile);
-
-                if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
-                	
-                	boolean bResult = true;
-                	
-                	if (bBuildLocally) {
-                		bResult = deploy(oParameter, false);                		
-                	}
-                	else {
-                		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), sProcessorZipFile);
-                	}
-                	
-                	if (!bResult) {
-                        WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
-                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                        return false;                		
-                	}
-                    
-                    m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
-                    
-                } else {
+                
+                if (Utils.isNullOrEmpty(sProcessorZipFile)) {
                     WasdiLog.errorLog("DockerProcessorEngine.run: processor not available on node and not downloaded: exit.. ");
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;
+                    return false;                	
                 }
+                
+                // Now we need or to redeploy or to unzip locally
+            	boolean bResult = true;
+            	
+            	if (bBuildLocally) {
+            		bResult = deploy(oParameter, false);                		
+            	}
+            	else {
+            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), sProcessorZipFile);
+            	}
+            	
+            	if (!bResult) {
+                    WasdiLog.errorLog("DockerProcessorEngine.run: impossible to deploy locally or unzip. We stop here");
+                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                    return false;                		
+            	}
+                
+                m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());                    
             }
+
+            // Create the Docker Utils Object
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser);
+            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            
+            boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
+            WasdiLog.debugLog("DockerProcessorEngine.run: Is Container started returned " + bIsContainerStarted);
 
             // Decode JSON
             String sEncodedJson = oParameter.getJson();
@@ -461,11 +467,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 WasdiLog.debugLog("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
 
                 // Try to start Again the docker
-                String sProcessorFolder = getProcessorFolder(sProcessorName);
-
-                // Start it
-                DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
-                oDockerUtils.setDockerRegistry(m_sDockerRegistry);
                 oDockerUtils.run();
                 
                 // Wait a little bit

@@ -65,6 +65,11 @@ public class DockersConfig {
 	public ArrayList<DockerRegistryConfig> registers;
 	
 	/**
+	 * Address of the API of the local Docker instance
+	 */
+	public String internalDockerAPIAddress = "http://127.0.0.1:2375/";
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */
