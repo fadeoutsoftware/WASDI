@@ -124,6 +124,11 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			return false;			
 		}
 		
+		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
+			return false;			
+		}
+		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: call base class deploy");
 		
 		// We do not need to start after the build
@@ -155,6 +160,10 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 						
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
+		
+		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
+			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: we got an empty address of the pushed image");
+		}
 		
         return true;
 	}
@@ -215,7 +224,12 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		catch (Exception oEx) {
 			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
 		}		
-		
+	}
+	
+	@Override
+	public boolean libraryUpdate(ProcessorParameter oParameter) {
+		WasdiLog.debugLog("DockerProcessorEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
+		return redeploy(oParameter);
 	}
 
 }

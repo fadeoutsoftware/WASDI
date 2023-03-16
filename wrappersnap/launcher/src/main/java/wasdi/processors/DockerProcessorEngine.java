@@ -212,30 +212,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iProcessorPort = oProcessor.getPort();
             }
 
-//            if (m_bRunAfterDeploy) {
-//            	// We need to start it
-//            	processWorkspaceLog("Start the docker");
-//                oDockerUtils.start(iProcessorPort);
-//                processWorkspaceLog("Application started");
-//            }
-//            else {
-//            	WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: RunAfterDeploy is false, docker not started");
-//            }
-
             if (bFirstDeploy) {
             	// In case of a first deploy we update the processor with the assigned port
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 90);
                 oProcessor.setPort(iProcessorPort);
                 oProcessorRepository.updateProcessor(oProcessor);
             }
-//            else {
-//            	// Did we started?
-//            	if (m_bRunAfterDeploy) {
-//            		// Wait for it and re-create the environment
-//                	waitForApplicationToStart(oParameter);
-//                	reconstructEnvironment(oParameter, iProcessorPort);            		
-//            	}
-//            }
 
             try {
                 DeployProcessorPayload oDeployPayload = new DeployProcessorPayload();
@@ -390,7 +372,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
-            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oProcessor.getProcessorId(), oZipFile.getName());
+            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
             	}
             	
             	if (!bResult) {
@@ -687,14 +669,26 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             return false;
         }
     }
-
+    
+    
     /**
-     * Deploy
+     * Re-Deploy an existing processor
      *
-     * @param oParameter
-     * @return
+     * @param oParameter Processor Parameter
+     * @return true if all ok
      */
     public boolean redeploy(ProcessorParameter oParameter) {
+    	return redeploy(oParameter, true);
+    }
+
+    /**
+     * Re-Deploy an existing processor
+     *
+     * @param oParameter Processor Parameter
+     * @param bDeleteOldImage True to delete the old image, false otherwise
+     * @return true if all ok
+     */
+    public boolean redeploy(ProcessorParameter oParameter, boolean bDeleteOldImage) {
 
         if (oParameter == null) {
             WasdiLog.errorLog("DockerProcessorEngine.redeploy: oParameter is null");
@@ -739,12 +733,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             onAfterCopyTemplate(sProcessorFolder);
 
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
-            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
 
-            // Delete the image
-            WasdiLog.infoLog("DockerProcessorEngine.redeploy: delete the container");
-            oDockerUtils.delete();
+            if (bDeleteOldImage) {
+                // Delete the image
+                WasdiLog.infoLog("DockerProcessorEngine.redeploy: delete the container");
+                oDockerUtils.delete();            	
+            }
 
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
@@ -753,21 +748,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterDeploy(sProcessorFolder);
             
-            if (m_bRunAfterDeploy) {
-                // Run
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
-                WasdiLog.infoLog("DockerProcessorEngine.redeploy: run the container");
-                oDockerUtils.start();
-                
-                
-                // Recreate the user environment
-                waitForApplicationToStart(oParameter);
-                reconstructEnvironment(oParameter, oProcessor.getPort());
-                
-    			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
-    				refreshPackagesInfo(oParameter);
-    			}            	
-            }
+            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -886,9 +867,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         	
         }
     }
-
+    
+    /**
+     * Get the specific instance of the Package Manager compatible with this instance
+     * @param sIp
+     * @param iPort
+     * @return
+     */
     protected abstract IPackageManager getPackageManager(String sIp, int iPort);
 
+    /**
+     * Updates the processor environment
+     */
 	@Override
 	public boolean environmentUpdate(ProcessorParameter oParameter) {
 
