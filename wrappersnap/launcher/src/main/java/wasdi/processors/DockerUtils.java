@@ -657,8 +657,6 @@ public class DockerUtils {
     			return false;
     		}
     		
-    		WasdiLog.debugLog("DockerUtils.isContainerStarted: GOT RESULT " + oResponse.getResponseBody());
-    		
     		List<Object> aoOutputJsonMap = null;
 
             try {

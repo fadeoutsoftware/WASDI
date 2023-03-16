@@ -2098,39 +2098,6 @@ public class dbUtils {
 
         try {
         	System.out.println("Wasdi DB Utils");
-        	
-        	
-        	String sJson = WasdiFileUtils.fileToText("C:\\Temp\\containers.json");
-        	
-            List<Object> aoOutputJsonMap = null;
-
-            try {
-                ObjectMapper oMapper = new ObjectMapper();
-                aoOutputJsonMap = oMapper.readValue(sJson, new TypeReference<List<Object>>(){});
-            } catch (Exception oEx) {
-                WasdiLog.errorLog("DockerUtils.isContainerStarted: exception converting API result " + oEx);
-            }
-            
-            String sMyImage = "wasdi/hello_docker2:1";
-            
-            for (Object oContainer : aoOutputJsonMap) {
-				try {
-					
-					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
-					
-					String sImageName = oContainerMap.get("Image");
-					
-					if (sImageName.endsWith(sMyImage)) {
-						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my image " + sMyImage + " Docker Image = " +sImageName);
-					}
-					
-				}
-		    	catch (Exception oEx) {
-		    		WasdiLog.errorLog("DockerUtils.isContainerStarted: error parsing a container json entity " + oEx.toString());
-		        }
-			}
-        	
-        	
         	        	
             // create the parser
             CommandLineParser oParser = new DefaultParser();
