@@ -33,6 +33,18 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>wasdi-release</id>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>wasdi-snapshot</id>
+            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+<!--
     <repositories>
         <repository>
             <id>wasdi-release</id>
@@ -40,4 +52,5 @@
             <url>${wasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
         </repository>
     </repositories>
+-->
 </project>
