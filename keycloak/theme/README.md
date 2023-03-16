@@ -1,18 +1,41 @@
-## KEYCLOAK WASDI THEME 
-Theme used on WASDI for keycloak appereance customization.
+# INTRODUCTION
 
-# META-INF
-This directory contains the configuration and the manifest of the theme itself
+Theme to customize the Keycloak's interface with our WASDI theme.
 
-# theme\WASDI
-The directory contains all the customized template files and static resources (.ftl)
+# ARBORESCENCE
 
-## CREATE THE JAR 
-To create the jar launch the current command 
- ```
-jar cf keycloak_theme_wasdi.jar META-INF theme
- ```
- (jdk installed is required)
+## src/main/resources/META-INF
 
-## DEPLOY THE THEME 
-[TODO] add deploy instructions
+This directory contains the configuration of the theme itself.
+
+## src/main/resources/theme/WASDI
+
+The directory contains all the customized template files and static resources (.ftl).
+
+# CREATE THE JAR
+
+## Prerequisites
+
+To have:
+  - JDK 8
+  - Maven >= 3.6.3
+
+## Create the JAR
+
+```
+# mvn --batch-mode --define revision=1.0 --define skipTests --update-snapshots clean package
+```
+
+# DEPLOY THE THEME
+
+Copy the theme in:
+
+```
+# cp target/keycloak-theme-wasdi-*.jar /path/to/keycloak/themes/.
+```
+
+Restart Keycloak:
+
+```
+# systemctl restart keycloak
+```
