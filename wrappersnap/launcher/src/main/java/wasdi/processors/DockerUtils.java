@@ -344,7 +344,7 @@ public class DockerUtils {
                 }
                 
                 // Add the pull command
-                if (m_bPullDuringRun) {
+                if (m_bPullDuringRun) {	
                 	WasdiLog.debugLog("DockerUtils.run: adding the pull always flag");
                 	
                 	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
@@ -362,7 +362,7 @@ public class DockerUtils {
     					if (!bLogged) {
     						WasdiLog.debugLog("DockerUtils.run: error in the login");
     					}
-    				}                	
+    				}
                 	
                 	asArgs.add("--pull always");
                 }

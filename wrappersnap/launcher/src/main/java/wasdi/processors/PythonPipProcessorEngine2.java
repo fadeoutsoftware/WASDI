@@ -231,15 +231,10 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 
                 WasdiLog.infoLog("PythonPipProcessorEngine2.run: processor zip file downloaded: " + sProcessorZipFile);
 
-                if (!Utils.isNullOrEmpty(sProcessorZipFile)) {
-                    deploy(oParameter, false);
-                    
-                    m_oSendToRabbit.SendRabbitMessage(true, LauncherOperations.INFO.name(), m_oParameter.getExchange(), "INSTALLATION DONE<BR>STARTING APP", m_oParameter.getExchange());
-                    
-                } else {
-                    WasdiLog.errorLog("PythonPipProcessorEngine2.run: processor not available on node and not downloaded: exit.. ");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
-                    return false;
+                if (!unzipProcessor(getProcessorFolder(oProcessor), sProcessorId + ".zip", oParameter.getProcessObjId())) {
+                	WasdiLog.infoLog("PythonPipProcessorEngine2.run: error un zipping the processor");
+                	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                	return false;
                 }
             }
 
@@ -284,7 +279,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
             oConnection.setRequestProperty("Content-Type", "application/json");
             oConnection.setConnectTimeout(iConnectionTimeOut);
             oConnection.setReadTimeout(iReadTimeOut);
-            
 
             OutputStream oOutputStream = null;
             try {
