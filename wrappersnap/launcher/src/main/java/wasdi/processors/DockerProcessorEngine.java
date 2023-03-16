@@ -967,6 +967,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		}
 	}
 
+
+	/**
+	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
+	 * @param oParameter the processor parameter
+	 * @param iPort port of the processor server
+	 * @return
+	 */	
 	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
 		if (oParameter == null) {
 			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: oParameter is null");
@@ -989,10 +996,22 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 					+ "] environment not updated in this node, return");
 			return false;
 		}
+		
 
 		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 		int iPort = oProcessor.getPort();
 
+        // Create the Docker Utils Object
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+        
+        // Check if the container is started
+        boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
+        
+        if (!bIsContainerStarted) {
+        	oDockerUtils.start();
+        	waitForApplicationToStart(oParameter);
+        }
+        
 		try {
 			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
 

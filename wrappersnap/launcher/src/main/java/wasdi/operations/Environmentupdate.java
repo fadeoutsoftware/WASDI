@@ -17,6 +17,14 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
+/**
+ * Environment Update Operation.
+ * 
+ * Takes in input a Processor Parameter
+ * 
+ * @author p.campanella
+ *
+ */
 public class Environmentupdate extends Operation {
 
 	@Override
@@ -52,11 +60,10 @@ public class Environmentupdate extends Operation {
 						
 			// Get the right Processor Engine
 			WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
-	        
 			
-			// If we are not on node, nothing to do
+			// If the application is not on this node there is nothing to do
 	        if (!oEngine.isProcessorOnNode(oParameter)) {
-                WasdiLog.errorLog("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
+                WasdiLog.infoLog("Environmentupdate.executeOperation: Processor [" + oProcessor.getName() + "] not installed in this node, return");
                 return true;	        	
 	        }
 	        
@@ -65,10 +72,9 @@ public class Environmentupdate extends Operation {
 
 			if (Utils.isNullOrEmpty(sProcessorName)) {
 				// Should really not happen. But we love safe programming
-				sProcessorName = oProcessor.getProcessorId();
-				
 				WasdiLog.errorLog("Environmentupdate.executeOperation: The processor does not have a name, we use Id " + sProcessorName);
-			}	        
+				return false;
+			}
 	        
 			oEngine.setSendToRabbit(m_oSendToRabbit);
 			oEngine.setParameter(oParameter);
