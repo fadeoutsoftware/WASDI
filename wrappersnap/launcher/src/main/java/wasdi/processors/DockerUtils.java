@@ -187,7 +187,7 @@ public class DockerUtils {
      * Deploy a docker
      * @return the docker image tag if ok, empty string in case of problems
      */
-    public String deploy() {
+    public String build() {
     	
     	String sDockerName = "";
 
@@ -296,8 +296,8 @@ public class DockerUtils {
     /**
      * Run the docker
      */
-    public boolean run() {
-        return run(m_oProcessor.getPort());
+    public boolean start() {
+        return start(m_oProcessor.getPort());
     }
 
     /**
@@ -305,7 +305,7 @@ public class DockerUtils {
      *
      * @param iProcessorPort Port to use
      */
-    public boolean run(int iProcessorPort) {
+    public boolean start(int iProcessorPort) {
 
         try {
             // Get the docker name
@@ -415,7 +415,7 @@ public class DockerUtils {
 					WasdiLog.debugLog("DockerUtils.run: logging in to " + oDockerRegistryConfig.id);
 					
 					// Try to login and push
-					boolean bLogged = login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
+					boolean bLogged = loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
 					
 					if (!bLogged) {
 						WasdiLog.debugLog("DockerUtils.run: error in the login");
@@ -555,7 +555,7 @@ public class DockerUtils {
      * @param sFolder 
      * @return True if logged false otherwise
      */
-    public boolean login(String sServer, String sUser, String sPassword, String sFolder) {
+    public boolean loginInRegistry(String sServer, String sUser, String sPassword, String sFolder) {
     	try {
             // Create the docker command            
             String sCommand = "docker login --username " + sUser + " --password '" + sPassword + "' " + sServer;

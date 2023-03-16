@@ -82,7 +82,7 @@ public class PushDockerImagesThread extends Thread {
 	 */
 	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
 		try {
-			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
 				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error logging in, return false.");

@@ -144,7 +144,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // First Check if processor exists
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-
             String sProcessorFolder = getProcessorFolder(sProcessorName);
 
             // Create the file
@@ -194,7 +193,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create Docker Util and deploy the docker
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
-            m_sDockerImageName = oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
             	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
@@ -213,15 +212,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 iProcessorPort = oProcessor.getPort();
             }
 
-            if (m_bRunAfterDeploy) {
-            	// We need to start it
-            	processWorkspaceLog("Start the docker");
-                oDockerUtils.run(iProcessorPort);
-                processWorkspaceLog("Application started");
-            }
-            else {
-            	WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: RunAfterDeploy is false, docker not started");
-            }
+//            if (m_bRunAfterDeploy) {
+//            	// We need to start it
+//            	processWorkspaceLog("Start the docker");
+//                oDockerUtils.start(iProcessorPort);
+//                processWorkspaceLog("Application started");
+//            }
+//            else {
+//            	WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: RunAfterDeploy is false, docker not started");
+//            }
 
             if (bFirstDeploy) {
             	// In case of a first deploy we update the processor with the assigned port
@@ -229,14 +228,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oProcessor.setPort(iProcessorPort);
                 oProcessorRepository.updateProcessor(oProcessor);
             }
-            else {
-            	// Did we started?
-            	if (m_bRunAfterDeploy) {
-            		// Wait for it and re-create the environment
-                	waitForApplicationToStart(oParameter);
-                	reconstructEnvironment(oParameter, iProcessorPort);            		
-            	}
-            }
+//            else {
+//            	// Did we started?
+//            	if (m_bRunAfterDeploy) {
+//            		// Wait for it and re-create the environment
+//                	waitForApplicationToStart(oParameter);
+//                	reconstructEnvironment(oParameter, iProcessorPort);            		
+//            	}
+//            }
 
             try {
                 DeployProcessorPayload oDeployPayload = new DeployProcessorPayload();
@@ -345,7 +344,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             if (!oWorkspacePath.exists()) {
                 try {
-                    WasdiLog.infoLog("DockerProcessorEngine.run: creating ws folder");
                     oWorkspacePath.mkdirs();
                 } catch (Exception oWorkspaceFolderException) {
                     WasdiLog.errorLog("DockerProcessorEngine.run: exception creating ws: " + oWorkspaceFolderException);
@@ -363,8 +361,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Check processor
             if (oProcessor == null) {
-                // Catch block will handle
-                throw new Exception("DockerProcessorEngine.run: Impossible to find processor " + sProcessorId);
+            	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to find processor " + sProcessorId);
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+                return false;                    
             }
 
             // Check if the processor is available on the node
@@ -405,8 +404,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create the Docker Utils Object
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
             
+            // Check if the container is started
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
-            WasdiLog.debugLog("DockerProcessorEngine.run: Is Container started returned " + bIsContainerStarted);
+            
+            if (!bIsContainerStarted) {
+            	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
+            	
+                // Try to start Again the docker
+                oDockerUtils.start();
+                
+                // Wait for it
+                waitForApplicationToStart(oParameter);
+            }
 
             // Decode JSON
             String sEncodedJson = oParameter.getJson();
@@ -449,47 +458,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oConnection.setRequestProperty("Content-Type", "application/json");
             oConnection.setConnectTimeout(iConnectionTimeOut);
             oConnection.setReadTimeout(iReadTimeOut);
-            
 
-            OutputStream oOutputStream = null;
-            try {
-
-                // Try to fetch the result from docker
-                oOutputStream = oConnection.getOutputStream();
-                oOutputStream.write(sJson.getBytes());
-                oOutputStream.flush();
-                if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    logErrorMessageFromConnection(oConnection);
-                    throw new Exception("DockerProcessorEngine.run: response code is: " + oConnection.getResponseCode());
-                }
-            } catch (Exception oE) {
-                WasdiLog.debugLog("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
-
-                // Try to start Again the docker
-                oDockerUtils.run();
-                
-                // Wait a little bit
-                waitForApplicationToStart(oParameter);
-
-                // Try again the connection
-                WasdiLog.debugLog("DockerProcessorEngine.run: connection failed: try to connect again");
-                oProcessorUrl = new URL(sUrl);
-                oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
-                oConnection.setDoOutput(true);
-                oConnection.setRequestMethod("POST");
-                oConnection.setRequestProperty("Content-Type", "application/json");
-
-                oOutputStream = oConnection.getOutputStream();
-                oOutputStream.write(sJson.getBytes());
-                oOutputStream.flush();
-
-                if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    logErrorMessageFromConnection(oConnection);
-                    // Nothing to do
-                    throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
-                }
-
-                WasdiLog.debugLog("DockerProcessorEngine.run: ok container recovered");
+            // Try to fetch the result from docker
+            OutputStream oOutputStream = oConnection.getOutputStream();
+            oOutputStream.write(sJson.getBytes());
+            oOutputStream.flush();
+            if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                logErrorMessageFromConnection(oConnection);
+                throw new Exception("DockerProcessorEngine.run: response code is: " + oConnection.getResponseCode());
             }
 
             // Get Result from server
@@ -772,7 +748,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create again
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 33);
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: deploy the image");
-            m_sDockerImageName = oDockerUtils.deploy();
+            m_sDockerImageName = oDockerUtils.build();
 
             onAfterDeploy(sProcessorFolder);
             
@@ -780,7 +756,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 // Run
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
                 WasdiLog.infoLog("DockerProcessorEngine.redeploy: run the container");
-                oDockerUtils.run();
+                oDockerUtils.start();
                 
                 
                 // Recreate the user environment
@@ -875,7 +851,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
             }
             oConnection.disconnect();
-
 
             waitForApplicationToStart(oParameter);
 
@@ -1366,7 +1341,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
 		try {
 			// Login in the docker
-			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
 				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error logging in, return false.");
