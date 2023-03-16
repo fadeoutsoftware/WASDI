@@ -43,7 +43,8 @@ pipeline {
     stage('MAVEN - BUILD') {
       steps {
         sh script: '''
-          cd keycloak/theme
+          cd keycloak
+          cd theme
           mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define skipTests --update-snapshots clean package
         ''',
         label: "Build"
@@ -53,9 +54,11 @@ pipeline {
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
         sh script: '''
-          cd keycloak/theme
-          mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy
-        ''', label: "Deploy in Nexus"
+          cd keycloak
+          cd theme
+          mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define skipTests --update-snapshots deploy
+        ''',
+        label: "Deploy in Nexus"
       }
     }
   }
