@@ -204,7 +204,7 @@ public class DockerUtils {
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
-            	WasdiLog.debugLog("DockerUtils.deploy: using registry " + m_sDockerRegistry);
+            	WasdiLog.debugLog("DockerUtils.build: using registry " + m_sDockerRegistry);
             	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
             }
             
@@ -218,7 +218,7 @@ public class DockerUtils {
             try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
                 // Fill the script file
                 if (oBuildScriptWriter != null) {
-                    WasdiLog.debugLog("DockerUtils.deploy: Creating " + sBuildScriptFile + " file");
+                    WasdiLog.debugLog("DockerUtils.build: Creating " + sBuildScriptFile + " file");
 
                     oBuildScriptWriter.write("#!/bin/bash");
                     oBuildScriptWriter.newLine();
@@ -231,7 +231,7 @@ public class DockerUtils {
                     	oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
                     }
                     else {
-                    	WasdiLog.debugLog("DockerUtils.deploy: multi tag build ");
+                    	WasdiLog.debugLog("DockerUtils.build: multi tag build ");
                     	
                     	// Register: the first tag is already in the Docker Name
                     	String sMultiTagBuild = "docker build -t" + sDockerName;
@@ -247,7 +247,7 @@ public class DockerUtils {
 							// No, ok, we can add a new tag
 							sMultiTagBuild += " -t" +  oDockerRegistryConfig.address + "/"  + sDockerBaseName;
 							
-							WasdiLog.debugLog("DockerUtils.deploy: added tag  for " + oDockerRegistryConfig.id);
+							WasdiLog.debugLog("DockerUtils.build: added tag  for " + oDockerRegistryConfig.id);
 						}
                     	
                     	// Last the space and the folder to build
@@ -284,9 +284,9 @@ public class DockerUtils {
             // Run the script
             RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
 
-            WasdiLog.debugLog("DockerUtils.deploy: created image " + sDockerName);
+            WasdiLog.debugLog("DockerUtils.build: created image " + sDockerName);
         } catch (Exception oEx) {
-        	WasdiLog.errorLog("DockerUtils.deploy: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.build: " + oEx.toString());
             return "";
         }
 
@@ -352,7 +352,7 @@ public class DockerUtils {
                 if (WasdiConfig.Current.dockers.extraHosts != null) {
                 	
                 	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-                		WasdiLog.debugLog("DockerUtils.run adding configured extra host mapping to the run arguments");
+                		WasdiLog.debugLog("DockerUtils.start adding configured extra host mapping to the run arguments");
                     	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
                     		
                     		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
@@ -378,11 +378,11 @@ public class DockerUtils {
                     sCommandLine += sArg + " ";
                 }
 
-                WasdiLog.debugLog("DockerUtils.run CommandLine: " + sCommandLine);
+                WasdiLog.debugLog("DockerUtils.start CommandLine: " + sCommandLine);
 
                 try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
                     if (null != oRunWriter) {
-                        WasdiLog.debugLog("DockerUtils.run: Creating " + sRunFile + " file");
+                        WasdiLog.debugLog("DockerUtils.start: Creating " + sRunFile + " file");
 
                         oRunWriter.write("#!/bin/bash");
                         oRunWriter.newLine();
@@ -403,7 +403,7 @@ public class DockerUtils {
             
             // Add the pull command
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	WasdiLog.debugLog("DockerUtils.run: log in in the registers");
+            	WasdiLog.debugLog("DockerUtils.start: log in in the registers");
             	
             	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
             	
@@ -412,13 +412,13 @@ public class DockerUtils {
 					
 					DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iRegisters);
 					
-					WasdiLog.debugLog("DockerUtils.run: logging in to " + oDockerRegistryConfig.id);
+					WasdiLog.debugLog("DockerUtils.start: logging in to " + oDockerRegistryConfig.id);
 					
 					// Try to login and push
 					boolean bLogged = loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
 					
 					if (!bLogged) {
-						WasdiLog.debugLog("DockerUtils.run: error in the login");
+						WasdiLog.debugLog("DockerUtils.start: error in the login");
 					}
 				}
             }
@@ -435,9 +435,9 @@ public class DockerUtils {
             // Execute the command to start the docker
             RunTimeUtils.shellExec(sRunFile, asArgs, false);
 
-            WasdiLog.debugLog("DockerUtils.run " + sDockerName + " started");
+            WasdiLog.debugLog("DockerUtils.start " + sDockerName + " started");
         } catch (Exception oEx) {
-        	WasdiLog.errorLog("DockerUtils.run: " + oEx.toString());
+        	WasdiLog.errorLog("DockerUtils.start error: " + oEx.toString());
             return false;
         }
 
@@ -563,7 +563,7 @@ public class DockerUtils {
             RunTimeUtils.runCommand(sFolder, sCommand, true, true);
             
     	} catch (Exception oEx) {
-    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
+    		WasdiLog.errorLog("DockerWasdiLog.loginInRegistry: " + oEx.toString());
             return false;
         }
     	

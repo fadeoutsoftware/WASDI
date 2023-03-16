@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.managers.CondaPackageManagerImpl;
-import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
+import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

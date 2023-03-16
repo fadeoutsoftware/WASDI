@@ -1,7 +1,7 @@
 package wasdi.processors;
 
 import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.packagemanagers.IPackageManager;
 
 /**
  * Processor Engine dedicated to a C# Application

@@ -1,4 +1,4 @@
-package wasdi.shared.managers;
+package wasdi.shared.packagemanagers;
 
 import java.util.List;
 import java.util.Map;

@@ -32,7 +32,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
@@ -979,7 +979,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-
 		// Set the processor path
 		String sProcessorFolder = this.getProcessorFolder(sProcessorName);
 		File oProcessorFolder = new File(sProcessorFolder);
@@ -988,7 +987,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		if (!oProcessorFolder.exists()) {
 			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName
 					+ "] environment not updated in this node, return");
-			return true;
+			return false;
 		}
 
 		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;

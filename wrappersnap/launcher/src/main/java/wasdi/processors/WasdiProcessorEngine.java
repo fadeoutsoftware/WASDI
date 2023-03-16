@@ -378,7 +378,7 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
-	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait to let docker start");
 	        Thread.sleep(5000);
 
 //	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
