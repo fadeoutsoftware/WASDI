@@ -85,6 +85,8 @@ public class DockerUtils {
         m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
         if (!m_sWorkingRootPath.endsWith(File.separator)) m_sWorkingRootPath += File.separator; 
         m_sUser = sTomcatUser;
+        m_sDockerRegistry = sDockerRegistry;
+        WasdiLog.debugLog("SAVING REGISTRY " + m_sDockerRegistry);
     }    
     
     /**
@@ -206,6 +208,9 @@ public class DockerUtils {
             	// Yes, add it to the docker name
             	WasdiLog.debugLog("DockerUtils.build: using registry " + m_sDockerRegistry);
             	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
+            }
+            else {
+            	WasdiLog.debugLog("DockerUtils.build: registry is null or empty!!");
             }
             
             // Initialize Args

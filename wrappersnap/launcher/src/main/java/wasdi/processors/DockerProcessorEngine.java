@@ -188,7 +188,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             onAfterCopyTemplate(sProcessorFolder);
 
             // Generate the image
-            WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image");
+            WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image (Registry = " + m_sDockerRegistry + ")");
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
