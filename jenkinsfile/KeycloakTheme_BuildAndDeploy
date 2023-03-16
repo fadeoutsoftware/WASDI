@@ -42,11 +42,11 @@ pipeline {
 
     stage('MAVEN - BUILD') {
       steps {
-        sh script: '''
+        sh script: """
           cd keycloak
           cd theme
           mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define skipTests --update-snapshots clean package
-        ''',
+        """,
         label: "Build"
       }
     }
