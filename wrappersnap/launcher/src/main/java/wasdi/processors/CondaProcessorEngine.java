@@ -17,6 +17,11 @@ import wasdi.shared.managers.CondaPackageManagerImpl;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.utils.log.WasdiLog;
 
+/**
+ * Processor Engine dedicated to a python Conda Application
+ * @author p.campanella
+ *
+ */
 public class CondaProcessorEngine extends DockerProcessorEngine {
 	
 	public CondaProcessorEngine() {

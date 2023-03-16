@@ -43,6 +43,15 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
+/**
+ * Docker processor Engine
+ * 
+ * It implements method to deploy, redeploy and run applications in 
+ * Docker images
+ * 
+ * @author p.campanella
+ *
+ */
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	
 	/**
@@ -54,23 +63,42 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * Address of the docker registry in use
 	 */
 	protected String m_sDockerRegistry = "";
-
+	
+	/**
+	 * Create clean instance
+	 */
 	public DockerProcessorEngine() {
 		super();
 	}
 	
+	/**
+	 * Get the name of the docker image
+	 * @return
+	 */
 	public String getDockerImageName() {
 		return m_sDockerImageName;
 	}
 
+	/**
+	 * Set the name of the docker image
+	 * @param sDockerImageName
+	 */
 	public void setDockerImageName(String sDockerImageName) {
 		this.m_sDockerImageName = sDockerImageName;
 	}
-
+	
+	/**
+	 * Get the adress of the docker registry
+	 * @return
+	 */
 	public String getDockerRegistry() {
 		return m_sDockerRegistry;
 	}
 
+	/**
+	 * Set the address of the docker registry
+	 * @param sDockerRegistry
+	 */
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
 	}
@@ -78,28 +106,29 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     /**
      * Deploy a new Processor in WASDI
      *
-     * @param oParameter
+     * @param oParameter Processor Parameter with the info of the app to deploy
      */
     @Override
     public boolean deploy(ProcessorParameter oParameter) {
         return deploy(oParameter, true);
     }
-
+    
     /**
      * Deploy a new Processor in WASDI
      *
-     * @param oParameter
+     * @param oParameter Processor Parameter with the info of the app to deploy
+     * @param bFirstDeploy True if this is the first deploy. False if it is not
      */
     public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
 
         WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: start");
 
-        if (oParameter == null) return false;
+        if (oParameter == null) {
+        	return logDeployErrorAndClean("parameter is null, return false", bFirstDeploy);
+        }
 
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessorRepository oProcessorRepository = new ProcessorRepository();
-        ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
-
 
         String sProcessorName = oParameter.getName();
         String sProcessorId = oParameter.getProcessorID();
@@ -109,7 +138,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start Deploy of " + sProcessorName + " Type " + oParameter.getProcessorType());
             
             if (bFirstDeploy) {
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 0);
                 processWorkspaceLog("This is a first deploy of this app");
             }
 
@@ -121,48 +150,29 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 
-            WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: check processor exists");
+            WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: check processor exists in " + oProcessorZipFile.getAbsolutePath());
 
             // Check it
             if (oProcessorZipFile.exists() == false) {
-                WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor the Processor [" + sProcessorName + "] does not exists in path " + oProcessorZipFile.getPath());
-
-                processWorkspaceLog("Cannot find the processor file... something went wrong");
-                processWorkspaceLog(new EndMessageProvider().getBad());
-
-                if (bFirstDeploy) {
-                    oProcessorRepository.deleteProcessor(sProcessorId);
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                }
-                return false;
+            	return logDeployErrorAndClean("Cannot find the processor file... something went wrong", bFirstDeploy);
             }
 
             if (bFirstDeploy) {
-            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 2);
             }
                 
             WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor: unzip processor");
 
             // Unzip the processor (and check for entry point myProcessor.py)
             if (!unzipProcessor(sProcessorFolder, sProcessorId + ".zip", oParameter.getProcessObjId())) {
-                WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor error unzipping the Processor [" + sProcessorName + "]");
-
-                processWorkspaceLog("Error unzipping the processor");
-                processWorkspaceLog(new EndMessageProvider().getBad());
-
-                if (bFirstDeploy) {
-                    oProcessorRepository.deleteProcessor(sProcessorId);
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                }
-                return false;
+            	return logDeployErrorAndClean("error unzipping the Processor [" + sProcessorName + "]", bFirstDeploy);
             }
 
             onAfterUnzipProcessor(sProcessorFolder);
 
             if (bFirstDeploy) {
-            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 20);
             }
-                
             
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: copy container image template");
 
@@ -172,34 +182,39 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 
-            if (bFirstDeploy)
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+            if (bFirstDeploy) {
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 25);
+            }
+            
+            onAfterCopyTemplate(sProcessorFolder);
 
             // Generate the image
             WasdiLog.debugLog("DockerProcessorEngine.DeployProcessor: building image");
-            onAfterCopyTemplate(sProcessorFolder);
-
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
-            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.deploy();
+            
+            if (Utils.isNullOrEmpty(m_sDockerImageName)) {
+            	return logDeployErrorAndClean("the deploy returned an empyt image name, something went wrong", bFirstDeploy);            	
+            }
 
             onAfterDeploy(sProcessorFolder);
-
             processWorkspaceLog("Image done");
 
-            if (bFirstDeploy)
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
+            if (bFirstDeploy) {
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 70);
+            }
 
-            // Run the container: find the port and reconstruct the environment
+            // Find the processor port
             int iProcessorPort = oProcessorRepository.getNextProcessorPort();
             if (!bFirstDeploy) {
                 iProcessorPort = oProcessor.getPort();
             }
 
             if (m_bRunAfterDeploy) {
+            	// We need to start it
             	processWorkspaceLog("Start the docker");
                 oDockerUtils.run(iProcessorPort);
                 processWorkspaceLog("Application started");
@@ -209,27 +224,32 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             if (bFirstDeploy) {
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
+            	// In case of a first deploy we update the processor with the assigned port
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.RUNNING, 90);
                 oProcessor.setPort(iProcessorPort);
                 oProcessorRepository.updateProcessor(oProcessor);
             }
             else {
-            	waitForApplicationToStart(oParameter);
-            	reconstructEnvironment(oParameter, iProcessorPort);
+            	// Did we started?
+            	if (m_bRunAfterDeploy) {
+            		// Wait for it and re-create the environment
+                	waitForApplicationToStart(oParameter);
+                	reconstructEnvironment(oParameter, iProcessorPort);            		
+            	}
             }
 
             try {
                 DeployProcessorPayload oDeployPayload = new DeployProcessorPayload();
                 oDeployPayload.setProcessorName(sProcessorName);
                 oDeployPayload.setType(oParameter.getProcessorType());
-                oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oDeployPayload));
+                m_oProcessWorkspace.setPayload(LauncherMain.s_oMapper.writeValueAsString(oDeployPayload));
             } catch (Exception oPayloadException) {
                 WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor Exception creating payload ", oPayloadException);
             }
 
-            if (bFirstDeploy)
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-            
+            if (bFirstDeploy) {
+            	LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.DONE, 100);
+            }
             
             processWorkspaceLog(new EndMessageProvider().getGood());
 
@@ -247,7 +267,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                         WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor Exception", oInnerEx);
                     }
 
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.ERROR, 100);
                 }
             } catch (Exception e) {
                 WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor Exception", e);
@@ -408,7 +428,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oOutputStream.write(sJson.getBytes());
                 oOutputStream.flush();
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    printErrorMessageFromConnection(oConnection);
+                    logErrorMessageFromConnection(oConnection);
                     throw new Exception("DockerProcessorEngine.run: response code is: " + oConnection.getResponseCode());
                 }
             } catch (Exception oE) {
@@ -438,7 +458,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 oOutputStream.flush();
 
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    printErrorMessageFromConnection(oConnection);
+                    logErrorMessageFromConnection(oConnection);
                     // Nothing to do
                     throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
                 }
@@ -468,9 +488,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Here we can wait for the process to finish with the status check
             // we can also handle a timeout, that is property (with default) of the processor
-            long lTimeSpentMs = 0;
-            int iThreadSleepMs = 2000;
-
             String sStatus = oProcessWorkspace.getStatus();
 
             WasdiLog.debugLog("DockerProcessorEngine.run: process Status: " + sStatus);
@@ -509,57 +526,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                     // New, Asynch, Processor?
                     if (dVersion > 1.0) {
-
-                        boolean bForcedError = false;
-
                         // Yes
-                        WasdiLog.debugLog("DockerProcessorEngine.run: processor engine version > 1.0: wait for the processor to finish");
 
                         // Check the processId
                         String sProcId = oOutputJsonMap.get("processId");
-
-                        if (sProcId.equals("ERROR")) {
-                            // Force cycle to exit, leave flag as it is to send a rabbit message
-                            sStatus = ProcessStatus.ERROR.name();
-                            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-                        }
-
-                        // Wait for the process to finish, while checking timeout
-                        while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-                            oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-                            sStatus = oProcessWorkspace.getStatus();
-                            try {
-                                Thread.sleep(iThreadSleepMs);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                                Thread.currentThread().interrupt();
-                            }
-
-                            // Increase the time
-                            lTimeSpentMs += iThreadSleepMs;
-
-                            if (oProcessor.getTimeoutMs() > 0) {
-                                if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
-                                    // Timeout
-                                    WasdiLog.debugLog("DockerProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs);
-
-                                    // Update process and rabbit users
-                                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                                    bForcedError = true;
-                                    // Force cycle to exit
-                                    sStatus = ProcessStatus.ERROR.name();
-                                }
-                            }
-                        }
-
-                        // The process finished: alone of forced?
-                        if (!bForcedError) {
-                            // Alone: write again the status to be sure to update rabbit users
-                            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
-                        }
-
-                        WasdiLog.debugLog("DockerProcessorEngine.run: processor done");
+                        sStatus = waitForApplicationToFinish(oProcessor, sProcId, sStatus, oProcessWorkspace);
 
                     } else {
                         // Old processor engine: force safe status
@@ -600,15 +571,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         }
 
         return true;
-    }
-
-    protected void printErrorMessageFromConnection(HttpURLConnection oConnection) throws IOException, Exception {
-
-        InputStream oErrorStream = oConnection.getErrorStream();
-        try (Reader reader = new InputStreamReader(oErrorStream)) {
-            String sMessage = CharStreams.toString(reader);
-            WasdiLog.errorLog("DockerProcessorEngine.printErrorMessageFromConnection: connection failed with " + oConnection.getResponseCode() + ": " + sMessage);
-        }
     }
 
     /**
@@ -1055,8 +1017,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		return false;
 	}
 
+
 	/**
 	 * Waits some time to let application start
+	 * 
+	 * @param oParameter Processor Paramter
 	 */
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
@@ -1078,7 +1043,140 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
 		}
 	}
+	
+    /**
+     * Wait for a processor to finish.
+     *
+     * The method polls the status of the process workspace to detect when the app is finished.
+     * It implements also an internal timeout based on the max time allowed declared by the processor itself 
+     * 
+     * @param oProcessor Processor Entity
+     * @param sProcId Process Workspace Id
+     * @param sStatus Status
+     * @param oProcessWorkspace Process Workspace Entity
+     * @return New Status
+     */
+    protected String waitForApplicationToFinish(Processor oProcessor, String sProcId, String sStatus, ProcessWorkspace oProcessWorkspace) {
+    	
+    	WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: wait for the processor to finish");
+    	
+    	try {
+        	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        	
+            if (sProcId.equals("ERROR")) {
+                // Force cycle to exit, leave flag as it is to send a rabbit message
+                sStatus = ProcessStatus.ERROR.name();
+                oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+                return sStatus;
+            }
+            
+            long lTimeSpentMs = 0;
+            int iThreadSleepMs = 2000;
+            boolean bForcedError = false;
 
+            // Wait for the process to finish, while checking timeout
+            while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+                oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+
+                sStatus = oProcessWorkspace.getStatus();
+                try {
+                    Thread.sleep(iThreadSleepMs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                }
+
+                // Increase the time
+                lTimeSpentMs += iThreadSleepMs;
+
+                if (oProcessor.getTimeoutMs() > 0) {
+                    if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
+                        // Timeout
+                        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs);
+
+                        // Update process and rabbit users
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        bForcedError = true;
+                        // Force cycle to exit
+                        sStatus = ProcessStatus.ERROR.name();
+                    }
+                }
+            }
+
+            // The process finished: alone or forced?
+            if (!bForcedError) {
+                // Alone: write again the status to be sure to update rabbit users
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
+            }
+            
+            WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToFinish: processor done");
+            
+            return sStatus;    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerProcessorEngine.waitForApplicationToFinish error ", oEx);
+    		return ProcessStatus.ERROR.name();
+		}
+    }
+
+    /**
+     * Logs an error obtained by an Http Connection 
+     * @param oConnection
+     * @throws IOException
+     * @throws Exception
+     */
+    protected void logErrorMessageFromConnection(HttpURLConnection oConnection) {
+
+    	try {
+            InputStream oErrorStream = oConnection.getErrorStream();
+            try (Reader oReader = new InputStreamReader(oErrorStream)) {
+                String sMessage = CharStreams.toString(oReader);
+                WasdiLog.errorLog("DockerProcessorEngine.logErrorMessageFromConnection: connection failed with " + oConnection.getResponseCode() + ": " + sMessage);
+            }    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerProcessorEngine.logErrorMessageFromConnection: error ", oEx);
+		}
+    }	
+    
+    /**
+     * Log an error message both on node log files and on the online web interface.
+     * If it is the first deploy try to clean the processor from the db and closes the process workspace
+     * 
+     * @param sLogMessage Message to log
+     * @param bFirstDeploy True if this is a first deploy
+     */
+    protected boolean logDeployErrorAndClean(String sLogMessage, boolean bFirstDeploy) {
+    	
+    	try {
+            WasdiLog.errorLog("DockerProcessorEngine.logDeployErrorAndClean: " + sLogMessage);
+
+            processWorkspaceLog(sLogMessage);
+            processWorkspaceLog(new EndMessageProvider().getBad());
+
+            if (bFirstDeploy) {
+            	
+            	if (m_oParameter!=null) {
+            		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+            		oProcessorRepository.deleteProcessor(m_oParameter.getProcessorID());
+            	}
+            	
+            	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, m_oProcessWorkspace, ProcessStatus.ERROR, 100);
+            }    		
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.logDeployErrorAndClean: error " + oEx.toString());
+		}
+    
+    	return false;
+    }
+    
+    /**
+     * Check if the internal server on the docker is up
+     * @param oParameter
+     * @return
+     */
 	public boolean isDockerServerUp(ProcessorParameter oParameter) {
 		try {
 			String sProcessorId = oParameter.getProcessorID();

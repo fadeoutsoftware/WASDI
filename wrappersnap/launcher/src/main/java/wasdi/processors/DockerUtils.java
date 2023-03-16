@@ -55,11 +55,6 @@ public class DockerUtils {
     String m_sDockerRegistry = "";
     
     /**
-     * DIRTY flag to allow the run of a docker pulled from a registry
-     */
-    boolean m_bPullDuringRun = false;
-
-    /**
      * Create a new instance
      *
      * @param oProcessor       Processor
@@ -68,12 +63,25 @@ public class DockerUtils {
      * @param sTomcatUser      User
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser) {
+    	this(oProcessor, sProcessorFolder, sTomcatUser, "");
+    }
+    
+    /**
+     * Create a new instance
+     * 
+     * @param oProcessor       Processor
+     * @param sProcessorFolder Processor Folder
+     * @param sWorkingRootPath WASDI Working path
+     * @param sTomcatUser      User
+     * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
+     */
+    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder;
         m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
         if (!m_sWorkingRootPath.endsWith(File.separator)) m_sWorkingRootPath += File.separator; 
         m_sUser = sTomcatUser;
-    }
+    }    
     
     /**
      * Get the processor entity
@@ -155,11 +163,18 @@ public class DockerUtils {
 		this.m_sUser = sUser;
 	}    
 
+	/**
+	 * Address of the Docker Register in use. 
+	 * @return id of th
+	 */
 	public String getDockerRegistry() {
 		return m_sDockerRegistry;
 	}
 
-
+	/**
+	 * Get the Address of the docker registry in use. "" to refer local registry
+	 * @param sDockerRegistry
+	 */
 	public void setDockerRegistry(String sDockerRegistry) {
 		this.m_sDockerRegistry = sDockerRegistry;
 	}
@@ -185,6 +200,7 @@ public class DockerUtils {
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
+            	WasdiLog.debugLog("DockerUtils.deploy: using registry " + m_sDockerRegistry);
             	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
             }
             
@@ -339,12 +355,11 @@ public class DockerUtils {
                     		
                     		asArgs.add("--add-host=" + sExtraHost);
                     	}
-                		
                 	}
                 }
                 
                 // Add the pull command
-                if (m_bPullDuringRun) {	                	
+                if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {	                	
                 	asArgs.add("--pull always");
                 }
 
@@ -383,8 +398,8 @@ public class DockerUtils {
             }
             
             // Add the pull command
-            if (m_bPullDuringRun) {	
-            	WasdiLog.debugLog("DockerUtils.run: adding the pull always flag");
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+            	WasdiLog.debugLog("DockerUtils.run: log in in the registers");
             	
             	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
             	
@@ -679,13 +694,5 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.removeImageFromRegistry: error " + oEx.toString());
 		}
     }
-
-	public boolean getPullDuringRun() {
-		return m_bPullDuringRun;
-	}
-
-	public void setPullDuringRun(boolean bPullDuringRun) {
-		this.m_bPullDuringRun = bPullDuringRun;
-	}
 
 }

@@ -3,6 +3,12 @@ package wasdi.processors;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.managers.IPackageManager;
 
+/**
+ * Processor Engine dedicated to a C# Application
+ * 
+ * @author p.campanella
+ *
+ */
 public class CSharpProcessorEngine extends DockerProcessorEngine {
 	
 	public CSharpProcessorEngine() {

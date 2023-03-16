@@ -159,6 +159,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
         return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
         WasdiLog.debugLog("PythonPipProcessorEngine2.run: start");
@@ -184,7 +185,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		// And we work with our main register
 		m_sDockerRegistry = aoRegisters.get(0).address;
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Manager " + m_sDockerRegistry);
+		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry " + m_sDockerRegistry);
 
         // Get Repo and Process Workspace
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -286,7 +287,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
                 oOutputStream.write(sJson.getBytes());
                 oOutputStream.flush();
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    printErrorMessageFromConnection(oConnection);
+                    logErrorMessageFromConnection(oConnection);
                     throw new Exception("PythonPipProcessorEngine2.run: response code is: " + oConnection.getResponseCode());
                 }
             } catch (Exception oE) {
@@ -297,7 +298,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 
                 // Start it
                 DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
-                oDockerUtils.setPullDuringRun(true);
                 oDockerUtils.setDockerRegistry(m_sDockerRegistry);
                 oDockerUtils.run();
                 
@@ -317,7 +317,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
                 oOutputStream.flush();
 
                 if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    printErrorMessageFromConnection(oConnection);
+                    logErrorMessageFromConnection(oConnection);
                     // Nothing to do
                     throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
                 }
@@ -329,7 +329,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
             BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 
             String sJsonOutput = "";
-            String sOutputResult;
+            String sOutputResult = "";
 
             WasdiLog.debugLog("PythonPipProcessorEngine2.run: Output from Server .... \n");
 
@@ -344,16 +344,10 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 
             // Read Again Process Workspace: the user may have changed it!
             oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-            // Here we can wait for the process to finish with the status check
-            // we can also handle a timeout, that is property (with default) of the processor
-            long lTimeSpentMs = 0;
-            int iThreadSleepMs = 2000;
-
+            
             String sStatus = oProcessWorkspace.getStatus();
 
             WasdiLog.debugLog("PythonPipProcessorEngine2.run: process Status: " + sStatus);
-
             WasdiLog.debugLog("PythonPipProcessorEngine2.run: process output: " + sJsonOutput);
 
             Map<String, String> oOutputJsonMap = null;
@@ -365,111 +359,22 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
                 WasdiLog.debugLog("PythonPipProcessorEngine2.run: exception converting proc output in Json " + oEx);
             }
 
-            // Check if it is a processor > 1.0:
-            // first processors where blocking: docker server waited for the execution to end before going back to the launcher
-            // New processors (>=2.0) are asynch: returns just Engine Version
-            if (oOutputJsonMap != null) {
+            // Yes
+            WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor engine version > 1.0: wait for the processor to finish");
 
-                // Check if we have the engine version
-                if (oOutputJsonMap.containsKey("processorEngineVersion")) {
-
-                    String sProcessorEngineVersion = oOutputJsonMap.get("processorEngineVersion");
-
-                    // Try to convert the version
-                    double dVersion = 1.0;
-
-                    try {
-                        dVersion = Double.parseDouble(sProcessorEngineVersion);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor engine version " + dVersion);
-
-                    // New, Asynch, Processor?
-                    if (dVersion > 1.0) {
-
-                        boolean bForcedError = false;
-
-                        // Yes
-                        WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor engine version > 1.0: wait for the processor to finish");
-
-                        // Check the processId
-                        String sProcId = oOutputJsonMap.get("processId");
-
-                        if (sProcId.equals("ERROR")) {
-                            // Force cycle to exit, leave flag as it is to send a rabbit message
-                            sStatus = ProcessStatus.ERROR.name();
-                            oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-                        }
-
-                        // Wait for the process to finish, while checking timeout
-                        while (!(sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
-                            oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
-
-                            sStatus = oProcessWorkspace.getStatus();
-                            try {
-                                Thread.sleep(iThreadSleepMs);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                                Thread.currentThread().interrupt();
-                            }
-
-                            // Increase the time
-                            lTimeSpentMs += iThreadSleepMs;
-
-                            if (oProcessor.getTimeoutMs() > 0) {
-                                if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
-                                    // Timeout
-                                    WasdiLog.debugLog("PythonPipProcessorEngine2.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs);
-
-                                    // Update process and rabbit users
-                                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-                                    bForcedError = true;
-                                    // Force cycle to exit
-                                    sStatus = ProcessStatus.ERROR.name();
-                                }
-                            }
-                        }
-
-                        // The process finished: alone of forced?
-                        if (!bForcedError) {
-                            // Alone: write again the status to be sure to update rabbit users
-                            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
-                        }
-
-                        WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor done");
-
-                    } else {
-                        // Old processor engine: force safe status
-                        WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor engine v1.0 - force process as done");
-                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-                    }
-                } else {
-                    // Old processor engine: force safe status
-                    WasdiLog.debugLog("PythonPipProcessorEngine2.run: processor engine v1.0 - force process as done");
-                    LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-                }
-            } else {
-                // Old processor engine: force safe status
-                WasdiLog.debugLog("PythonPipProcessorEngine2.run: impossible to read processor output in a json. Force closed");
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-            }
+            // Check the processId
+            String sProcId = oOutputJsonMap.get("processId");
+            
+            sStatus = waitForApplicationToFinish(oProcessor, sProcId, sStatus, oProcessWorkspace);
 
             // Check and set the operation end-date
             if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
                 oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
-                // P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
-                //LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
             }
+            
         } catch (Exception oEx) {
             WasdiLog.errorLog("PythonPipProcessorEngine2.run Exception", oEx);
-            try {
-                LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-            } catch (Exception oInnerEx) {
-                WasdiLog.errorLog("PythonPipProcessorEngine2.run Exception", oInnerEx);
-            }
-
+            LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
             return false;
         }
         finally {
