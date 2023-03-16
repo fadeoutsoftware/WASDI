@@ -675,7 +675,7 @@ public class DockerUtils {
 					String sImageName = oContainerMap.get("Image");
 					
 					if (sImageName.endsWith(sMyImage)) {
-						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my image " + sMyImage + " Docker Image = " +sImageName);
+						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my container " + sMyImage + " Docker Image = " +sImageName);
 						return true;
 					}
 					
@@ -692,6 +692,70 @@ public class DockerUtils {
             return false;
         }
     }
+    
+    /**
+     * Check if an image is available on the local registry
+     * @param sProcessorName
+     * @param sVersion
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	public boolean isImageAvailable(String sProcessorName, String sVersion) {
+    	
+    	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "images/json";
+    		
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return false;
+    		}
+    		
+    		List<Object> aoOutputJsonMap = null;
+
+            try {
+                ObjectMapper oMapper = new ObjectMapper();
+                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.isImageAvailable: exception converting API result " + oEx);
+                return false;
+            }
+            
+            String sMyImage = "";
+            
+            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) sMyImage = m_sDockerRegistry + "/";
+            sMyImage += "wasdi/" + sProcessorName + ":" + sVersion;
+            
+            for (Object oImage : aoOutputJsonMap) {
+				try {
+					LinkedHashMap<String, String> oImageMap = (LinkedHashMap<String, String>) oImage;
+					
+					Object oRepoTags = oImageMap.get("RepoTags");
+					ArrayList<String> asRepoTags = (ArrayList<String>) oRepoTags;
+					
+					for (String sTag : asRepoTags) {
+						if (sTag.equals(sMyImage)) {
+							WasdiLog.debugLog("DockerUtils.isImageAvailable: found my image");
+							return true;							
+						}
+					}
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.isImageAvailable: error parsing a container json entity " + oEx.toString());
+		        }
+			}
+    		
+    		return false;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.isImageAvailable: " + oEx.toString());
+            return false;
+        }
+    }    
     
     /**
      * Remove an image from a Registry

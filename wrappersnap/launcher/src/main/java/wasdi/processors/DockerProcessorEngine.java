@@ -403,8 +403,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser);
-            oDockerUtils.setDockerRegistry(m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
             
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
             WasdiLog.debugLog("DockerProcessorEngine.run: Is Container started returned " + bIsContainerStarted);
@@ -1052,7 +1051,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 */
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
-	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait to let docker start");
 
 	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
 	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;

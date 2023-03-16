@@ -189,5 +189,33 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
         return super.run(oParameter, false);
 	}
 	
+	@Override
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
+		
+		try {
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+			
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
+			
+	        WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: wait to let docker start");
+
+	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+
+	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
+	        	
+	        	if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
+	        		return;
+	        	}
+	        }
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		}		
+		
+	}
 
 }
