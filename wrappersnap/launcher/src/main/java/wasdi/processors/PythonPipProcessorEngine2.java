@@ -24,6 +24,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -122,14 +123,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		if (aoRegisters.size() == 0) {
 			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: registers list is empty, return false.");
 			return false;			
-		}
-		
-		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
-			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
-			return false;			
-		}
-		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: call base class deploy");
+		}		
 		
 		// We do not need to start after the build
 		m_bRunAfterDeploy = false;
@@ -142,12 +136,26 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		// Read the processor from the db
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-				
+		
+		WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: delete run script. It will be recreated at the right moment");
+		String sProcFolder = getProcessorFolder(oProcessor);
+		WasdiFileUtils.deleteFile(sProcFolder+"runwasdidocker.sh");
+		
+		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
+			return false;			
+		}		
 
 		// Create utils
         DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
+        
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
-        	oDockerUtils.stop(oProcessor);
+        	WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: There is the previous version running, stop it");
+        	boolean bStop = oDockerUtils.stop(oProcessor);
+        	
+        	if (!bStop) {
+        		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: stop returned false, we try to proceed anyhow");
+        	}
         }
         
         
@@ -158,6 +166,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		// Save it
 		oProcessorRepository.updateProcessor(oProcessor);
         
+		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: call base class deploy. New Version " + sNewVersion);
 		
 		boolean bResult = super.redeploy(oParameter, false);
 		
