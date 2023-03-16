@@ -344,26 +344,7 @@ public class DockerUtils {
                 }
                 
                 // Add the pull command
-                if (m_bPullDuringRun) {	
-                	WasdiLog.debugLog("DockerUtils.run: adding the pull always flag");
-                	
-                	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-                	
-    				// For each register: ordered by priority
-    				for (int iRegisters=0; iRegisters<aoRegisters.size(); iRegisters++) {
-    					
-    					DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iRegisters);
-    					
-    					WasdiLog.debugLog("DockerUtils.run: try to push to " + oDockerRegistryConfig.id);
-    					
-    					// Try to login and push
-    					boolean bLogged = login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
-    					
-    					if (!bLogged) {
-    						WasdiLog.debugLog("DockerUtils.run: error in the login");
-    					}
-    				}
-                	
+                if (m_bPullDuringRun) {	                	
                 	asArgs.add("--pull always");
                 }
 
@@ -400,6 +381,29 @@ public class DockerUtils {
 
                 asArgs.clear();
             }
+            
+            // Add the pull command
+            if (m_bPullDuringRun) {	
+            	WasdiLog.debugLog("DockerUtils.run: adding the pull always flag");
+            	
+            	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+            	
+				// For each register: ordered by priority
+				for (int iRegisters=0; iRegisters<aoRegisters.size(); iRegisters++) {
+					
+					DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iRegisters);
+					
+					WasdiLog.debugLog("DockerUtils.run: logging in to " + oDockerRegistryConfig.id);
+					
+					// Try to login and push
+					boolean bLogged = login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, m_sProcessorFolder);
+					
+					if (!bLogged) {
+						WasdiLog.debugLog("DockerUtils.run: error in the login");
+					}
+				}
+            }
+            
 
             try {
                 if (!oRunFile.canExecute()) {

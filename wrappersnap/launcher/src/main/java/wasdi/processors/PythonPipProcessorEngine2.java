@@ -181,10 +181,10 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: call base class deploy");
-		
 		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;        
+		m_sDockerRegistry = aoRegisters.get(0).address;
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Manager " + m_sDockerRegistry);
 
         // Get Repo and Process Workspace
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -241,8 +241,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
             // Decode JSON
             String sEncodedJson = oParameter.getJson();
             String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-
-            WasdiLog.debugLog("PythonPipProcessorEngine2.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
 
             // Json sanity check
             if (Utils.isNullOrEmpty(sJson)) {
