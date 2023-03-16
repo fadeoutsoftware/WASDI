@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -656,11 +657,13 @@ public class DockerUtils {
     			return false;
     		}
     		
-            List<Map<String, String>> aoOutputJsonMap = null;
+    		WasdiLog.debugLog("DockerUtils.isContainerStarted: GOT RESULT " + oResponse.getResponseBody());
+    		
+    		List<Object> aoOutputJsonMap = null;
 
             try {
                 ObjectMapper oMapper = new ObjectMapper();
-                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Map<String, String>>>(){});
+                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
             } catch (Exception oEx) {
                 WasdiLog.errorLog("DockerUtils.isContainerStarted: exception converting API result " + oEx);
                 return false;
@@ -668,10 +671,10 @@ public class DockerUtils {
             
             String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
             
-            for (Map<String, String> oContainer : aoOutputJsonMap) {
+            for (Object oContainer : aoOutputJsonMap) {
 				try {
-					
-					String sImageName = oContainer.get("Image");
+					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
+					String sImageName = oContainerMap.get("Image");
 					
 					if (sImageName.endsWith(sMyImage)) {
 						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my image " + sMyImage + " Docker Image = " +sImageName);

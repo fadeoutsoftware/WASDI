@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -21,6 +22,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -65,6 +69,7 @@ import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -2093,6 +2098,39 @@ public class dbUtils {
 
         try {
         	System.out.println("Wasdi DB Utils");
+        	
+        	
+        	String sJson = WasdiFileUtils.fileToText("C:\\Temp\\containers.json");
+        	
+            List<Object> aoOutputJsonMap = null;
+
+            try {
+                ObjectMapper oMapper = new ObjectMapper();
+                aoOutputJsonMap = oMapper.readValue(sJson, new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.isContainerStarted: exception converting API result " + oEx);
+            }
+            
+            String sMyImage = "wasdi/hello_docker2:1";
+            
+            for (Object oContainer : aoOutputJsonMap) {
+				try {
+					
+					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
+					
+					String sImageName = oContainerMap.get("Image");
+					
+					if (sImageName.endsWith(sMyImage)) {
+						WasdiLog.debugLog("DockerUtils.isContainerStarted: found my image " + sMyImage + " Docker Image = " +sImageName);
+					}
+					
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.isContainerStarted: error parsing a container json entity " + oEx.toString());
+		        }
+			}
+        	
+        	
         	        	
             // create the parser
             CommandLineParser oParser = new DefaultParser();
