@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = "0.0.${env.BUILD_ID}"
+    currentRevision = env.currentRevision.toString().toUpperCase();
   }
 
   options {
@@ -17,7 +17,6 @@ pipeline {
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
         echo "env.currentRevision = " + env.currentRevision
-        echo "env.sourceBranch = " + env.sourceBranch
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE

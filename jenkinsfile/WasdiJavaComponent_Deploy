@@ -1,11 +1,3 @@
-def getCurrentRevision(environmentName) {
-    if ( "PROD".equals(environmentName) ) {
-        return "0.0.${env.BUILD_ID}"
-    } else {
-        return "0.0.${env.BUILD_ID}-SNAPSHOT"
-    }
-}
-
 pipeline {
   agent any
 
@@ -42,7 +34,11 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
+        sh script: """
+          cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/
+          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'
+        """,
+        label: "Execute ansible-playbook"
       }
     }
   }
