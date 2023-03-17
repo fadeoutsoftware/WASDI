@@ -43,14 +43,4 @@
             <url>${wasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
-
-<!--
-    <repositories>
-        <repository>
-            <id>wasdi-release</id>
-            <name>WASDI - INTERNAL REPOSITORY - RELEASE</name>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
-        </repository>
-    </repositories>
--->
 </project>
