@@ -1,0 +1,54 @@
+pipeline {
+  agent any
+
+  environment {
+    currentRevision = "0.0.${env.BUILD_ID}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.targetedEnvironment = " + env.targetedEnvironment
+        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
+        echo "env.WORKSPACE = " + env.WORKSPACE
+
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.description = "WASDI - DEPLOY OF KEYCLOAK THEME"
+        }
+      }
+    }
+
+    stage('DEPLOYMENT') {
+      steps {
+        sh script: """
+          cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/
+          ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'
+        """,
+        label: "Execute ansible-playbook"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

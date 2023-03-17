@@ -40,7 +40,7 @@ Build with Maven:
 Copy the theme in:
 
 ```
-# cp target/keycloak-theme-wasdi-*.jar /path/to/keycloak/themes/.
+# cp target/keycloak-theme-wasdi-*.jar /path/to/keycloak/providers/.
 ```
 
 Restart Keycloak:
@@ -48,3 +48,5 @@ Restart Keycloak:
 ```
 # systemctl restart keycloak
 ```
+
+Connect to Keycloak and enable the theme in: <your realm> > Realm settings > Themes
