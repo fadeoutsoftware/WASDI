@@ -23,6 +23,7 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
+import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
