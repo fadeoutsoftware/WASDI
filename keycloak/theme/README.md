@@ -22,6 +22,15 @@ To have:
 
 ## Create the JAR
 
+Enter in the right directory:
+
+```
+# cd /path/to/the/clone/of/the/WASDI/git/repository
+# cd keycloak/theme
+```
+
+Build with Maven:
+
 ```
 # mvn --batch-mode --define revision=1.0 --define skipTests --update-snapshots clean package
 ```
