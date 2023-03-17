@@ -1,0 +1,15 @@
+{
+    "themes": [
+        {
+            "name" : "WASDI",
+            "types": [
+                "account",
+                "admin",
+                "common",
+                "email",
+                "login",
+                "welcome"
+            ]
+        }
+    ]
+}
