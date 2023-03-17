@@ -22,6 +22,7 @@ public class ProcessorTypes {
 	public static String CSHARP = "csharp";
 	public static String EOEPCA = "eoepca";
 	public static String PYTHON_PIP_2 = "python_pip_2";
+	public static String PIP_ONESHOT = "pip_oneshot";
 	
 	/**
 	 * Obtains the name of the subfolder where the docker template is stored.
@@ -38,6 +39,7 @@ public class ProcessorTypes {
 		else if (sProcessorType.equals(CSHARP)) return "csharp";
 		else if (sProcessorType.equals(EOEPCA)) return "eoepca";
 		else if (sProcessorType.equals(PYTHON_PIP_2)) return "python_pip_2";
+		else if (sProcessorType.equals(PIP_ONESHOT)) return "pip_oneshot";
 		return "";
 	}
 	
@@ -82,6 +84,12 @@ public class ProcessorTypes {
 			aoFiles.add("deploywasdidocker.sh");
 			aoFiles.add("cleanwasdidocker.sh");			
 		}
+		else if (sProcessorType.equals(PIP_ONESHOT)) {
+			aoFiles.add("installUserPackage.sh");
+		}
+		else if (sProcessorType.equals(EOEPCA)) {
+			aoFiles.add("installUserPackage.sh");
+		}		
 
 		return aoFiles;
 	}

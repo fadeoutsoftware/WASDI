@@ -96,6 +96,9 @@ public abstract class WasdiProcessorEngine {
 		}
 		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2)) {
 			return new PythonPipProcessorEngine2();
+		}
+		else if (sType.equals(ProcessorTypes.PIP_ONESHOT)) {
+			return new PipOneShotProcessorEngine();
 		}		
 		else {
 			return new UbuntuPython37ProcessorEngine();
