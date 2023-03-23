@@ -41,6 +41,9 @@ public class PermissionsUtils {
 	 */
 	public static boolean userHasValidSubscription(User oUser) {
 		
+		return true;
+		
+		/*
 		if (oUser == null) return false;
 	
 		try {
@@ -55,6 +58,7 @@ public class PermissionsUtils {
 		}
 		
 		return false;
+		*/
 	}
 	
 	/**
@@ -372,6 +376,8 @@ public class PermissionsUtils {
 			if (oWorkflow == null) return false;
 			
 			if (oWorkflow.getUserId().equals(sUserId)) return true;
+			
+			if (oWorkflow.getIsPublic()) return true;
 			
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			return oUserResourcePermissionRepository.isWorkflowSharedWithUser(sUserId, sWorkflowId);			

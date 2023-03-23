@@ -3,12 +3,16 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.0.2] - 2023-03-23
+### Added
+- publish Band feature
 
 ## [0.8.0.1] - 2022-11-25
 ### Added
 - added separated timeout for the upload of files
 - added support to sessionId and procId in config
 - added "on external server" option
+
 ## [0.7.5.2] - 2022-11-29
 ### Added
 - publishBand
