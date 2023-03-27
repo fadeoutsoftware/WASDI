@@ -10,6 +10,7 @@
     "LOGIN_BUTTON_SIGN_IN_2":"Masuk dengan WASDI Login 2.0",
     "LOGIN_LINK_FORGOT_PASSWORD":"Lupa Kata Sandi Anda?",
     "LOGIN_LINK_FORM":"MASUK",
+	"LOGIN_REGISTER_FORM": "Mendaftar",
 	"LOGIN_LINK_WEBSITE":"INFO",
 	"LOGIN_LINK_NEW_USER":"Pengguna Baru? Daftar di sini!",
 	"LOGIN_LINK_BACK":"Kembali",

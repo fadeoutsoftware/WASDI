@@ -10,6 +10,7 @@
     "LOGIN_BUTTON_SIGN_IN_2":"Einloggen mit WASDI Login 2.0",
     "LOGIN_LINK_FORGOT_PASSWORD":"Passwort vergessen?",
     "LOGIN_LINK_FORM":"Anmelden",
+	"LOGIN_REGISTER_FORM": "Anmeldung",
 	"LOGIN_LINK_WEBSITE":"INFO",
 	"LOGIN_LINK_NEW_USER":"Neuer Benutzer? Erstellen Sie!",
 	"LOGIN_LINK_BACK":"Zurück",

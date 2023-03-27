@@ -10,6 +10,7 @@
     "LOGIN_BUTTON_SIGN_IN_2":"Autentificați-vă cu WASDI Login 2.0",
     "LOGIN_LINK_FORGOT_PASSWORD":"V-ați uitat parola?",
     "LOGIN_LINK_FORM":"AUTENTIFICARE",
+	"LOGIN_REGISTER_FORM": "INSCRIE-TE",
 	"LOGIN_LINK_WEBSITE":"INFORMAȚII",
 	"LOGIN_LINK_NEW_USER":"Utilizator nou? Înregistrați-vă aici!",
 	"LOGIN_LINK_BACK":"Înapoi",

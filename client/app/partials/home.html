@@ -4,7 +4,12 @@
             <nav class="navbar navbar-inverse bg_bluewasdi">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav navbar-right">
-
+                        <li class="link-login pull-right nav-item link-login-first"
+                            ng-show="m_oController.m_bVisualizeLink === true"
+                            ng-click="m_oController.keycloakRegister()">
+                            <a href="#" class="text-white"><span class="glyphicon glyphicon-user"></span>
+                                {{"LOGIN_REGISTER_FORM"|translate}}</a>
+                        </li>
 
                         <li class="link-login pull-right nav-item link-login-first"
                             ng-show="m_oController.m_bVisualizeLink === true"
@@ -118,6 +123,7 @@
                                 </ul>
                             </div>
                         </li>
+
                     </ul>
                 </div>
             </nav>
