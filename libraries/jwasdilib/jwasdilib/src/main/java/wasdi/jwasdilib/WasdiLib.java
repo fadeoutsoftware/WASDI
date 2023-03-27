@@ -275,6 +275,10 @@ public class WasdiLib {
 		}
 		
 		this.m_sBaseUrl = sBaseUrl;
+		
+		if (m_sBaseUrl.endsWith("/")) {
+			m_sBaseUrl = m_sBaseUrl.substring(0, m_sBaseUrl.length()-1);
+		}		
 	}
 
 	/**
@@ -536,6 +540,7 @@ public class WasdiLib {
 			m_sPassword = ConfigReader.getPropValue("PASSWORD", "");
 			m_sBasePath = ConfigReader.getPropValue("BASEPATH", "");
 			m_sBaseUrl = ConfigReader.getPropValue("BASEURL", "https://www.wasdi.net/wasdiwebserver/rest");
+			setBaseUrl(m_sBaseUrl);
 			m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
 			m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
 			m_sMyProcId = ConfigReader.getPropValue("MYPROCID","");

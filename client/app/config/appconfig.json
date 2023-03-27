@@ -597,7 +597,7 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m",
+                    "indexvalues": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m|cmems_obs_oc_med_bgc_geophy_nrt_l3-hr_P1D-m",
                     "regex": ".*",
                     "visibilityConditions": "producttype:OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS",
                     "indexvalue": "cmems_obs_oc_med_bgc_tur-spm-chl_nrt_l3-hr-mosaic_P1D-m"
@@ -605,10 +605,10 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "med-cmcc-cur-an-fc-d|med-cmcc-cur-an-fc-h|med-cmcc-cur-an-fc-hts|med-cmcc-cur-an-fc-m|med-cmcc-cur-an-fc-qm|med-cmcc-mld-an-fc-d|med-cmcc-mld-an-fc-hts|med-cmcc-mld-an-fc-m|med-cmcc-sal-an-fc-d|med-cmcc-sal-an-fc-h|med-cmcc-sal-an-fc-hts|med-cmcc-sal-an-fc-m|med-cmcc-ssh-an-fc-d|med-cmcc-ssh-an-fc-hts|med-cmcc-ssh-an-fc-m|med-cmcc-ssh-an-fc-qm|med-cmcc-tem-an-fc-d|med-cmcc-tem-an-fc-h|med-cmcc-tem-an-fc-hts|med-cmcc-tem-an-fc-m",
+                    "indexvalues": "cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|cmems_mod_med_phy-cur_anfc_4.2km_PT15M-i|cmems_mod_med_phy-mld_anfc_4.2km_P1D-m|cmems_mod_med_phy-mld_anfc_4.2km_PT1HTS-m|cmems_mod_med_phy-mld_anfc_4.2km_P1M-m|cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|cmems_mod_med_phy-sal_anfc_4.2km_P1M-m|cmems_mod_med_phy-ssh_anfc_4.2km_P1D-m|cmems_mod_med_phy-ssh_anfc_4.2km_PT1HTS-m|cmems_mod_med_phy-ssh_anfc_4.2km_P1M-m|cmems_mod_med_phy-ssh_anfc_4.2km_PT15M-i|cmems_mod_med_phy-tem_anfc_4.2km_P1D-m|cmems_mod_med_phy-tem_anfc_4.2km_PT1H-m|cmems_mod_med_phy-tem_anfc_4.2km_PT1HTS-m|cmems_mod_med_phy-tem_anfc_4.2km_P1M-m",
                     "regex": ".*",
                     "visibilityConditions": "producttype:MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS",
-                    "indexvalue": "med-cmcc-cur-an-fc-d"
+                    "indexvalue": "cmems_mod_med_phy-cur_anfc_4.2km_P1D-m"
                 },
                 {
                     "indexname": "dataset",
@@ -655,7 +655,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "mlotst",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-mld-an-fc-d|dataset:med-cmcc-mld-an-fc-hts|dataset:med-cmcc-mld-an-fc-m)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-mld_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-mld_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-mld_anfc_4.2km_P1M-m)&protocol:SUBS",
                     "indexvalue": "mlotst"
                 },
                 {
@@ -679,7 +679,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "zos+zos_detided|zos|zos_detided",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-ssh-an-fc-d|dataset:med-cmcc-ssh-an-fc-hts|dataset:med-cmcc-ssh-an-fc-qm)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-ssh_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-ssh_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-ssh_anfc_4.2km_PT15M-i)&protocol:SUBS",
                     "indexvalue": "zos+zos_detided"
                 },
                 {
@@ -719,7 +719,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "bottomT+thetao|bottomT|thetao",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-hts|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1M-m)&protocol:SUBS",
                     "indexvalue": "bottomT+thetao"
                 },
                 {
@@ -791,7 +791,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "so",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-sal-an-fc-m|dataset:global-analysis-forecast-phy-001-024-3dinst-so)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1M-m|dataset:global-analysis-forecast-phy-001-024-3dinst-so)&protocol:SUBS",
                     "indexvalue": "so"
                 },
                 {
@@ -799,7 +799,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "uo+vo|uo|vo",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-cur-an-fc-qm|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT15M-i|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo)&protocol:SUBS",
                     "indexvalue": "uo+vo"
                 },
                 {
@@ -815,7 +815,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "zos",
                     "regex": ".*",
-                    "visibilityConditions": "dataset:med-cmcc-ssh-an-fc-m&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_mod_med_phy-ssh_anfc_4.2km_P1M-m&protocol:SUBS",
                     "indexvalue": "zos"
                 },
                 {
@@ -855,7 +855,7 @@
                     "indexlabel": "Depth From",
                     "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375|4244.80419921875|4337.84765625|4432.017578125|4527.30419921875|4623.69873046875|4721.19140625|4819.77099609375|4919.42724609375|5020.1494140625|5121.92578125|5224.74462890625|5328.59375|5433.4609375|5539.33349609375|5646.19921875|5754.0439453125",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-m|dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1M-m)&protocol:SUBS",
                     "indexvalue": "1.0182366371154785"
                 },
                 {
@@ -863,7 +863,7 @@
                     "indexlabel": "Depth To",
                     "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|13.318384170532227|16.270586013793945|19.398210525512695|22.706392288208008|26.20039939880371|29.885643005371094|33.76767349243164|37.85219192504883|42.14503860473633|46.6522102355957|51.379859924316406|56.334285736083984|61.52195739746094|66.94949340820312|72.62368774414062|78.55149841308594|84.74004364013672|91.1966323852539|97.92872619628906|104.94397735595703|112.25020599365234|119.85543060302734|127.76783752441406|135.9958038330078|144.5478973388672|153.43284606933594|162.6596221923828|172.2373504638672|182.17535400390625|192.48313903808594|203.17044067382812|214.24716186523438|225.72340393066406|237.60946655273438|249.9158477783203|262.6532287597656|275.83251953125|289.46478271484375|303.5613098144531|318.133544921875|333.1931457519531|348.751953125|364.82196044921875|381.4154357910156|398.5447082519531|416.2223205566406|434.4610595703125|453.2737731933594|472.6734924316406|492.6734619140625|513.2869873046875|534.527587890625|556.4088745117188|578.944580078125|602.1486206054688|626.034912109375|650.6175537109375|675.9107055664062|701.9286499023438|728.6856079101562|756.196044921875|784.4743041992188|813.5348510742188|843.3921508789062|874.0606689453125|905.5548095703125|937.8890991210938|971.077880859375|1005.135498046875|1040.0762939453125|1075.914306640625|1112.6636962890625|1150.33837890625|1188.9521484375|1228.518798828125|1269.0517578125|1310.564208984375|1353.0693359375|1396.5799560546875|1441.108642578125|1486.6678466796875|1533.2694091796875|1580.9251708984375|1629.6466064453125|1679.44482421875|1730.330322265625|1782.3135986328125|1835.404541015625|1889.6126708984375|1944.9471435546875|2001.4166259765625|2059.029052734375|2117.79248046875|2177.714111328125|2238.80029296875|2301.0576171875|2364.49169921875|2429.107666015625|2494.91015625|2561.903076171875|2630.08984375|2699.4736328125|2770.056640625|2841.8408203125|2914.826904296875|2989.015869140625|3064.407470703125|3141.00146484375|3218.796142578125|3297.790283203125|3377.9814453125|3459.3662109375|3541.94189453125|3625.703857421875|3710.6474609375|3796.76806640625|3884.0595703125|3972.51611328125|4062.13037109375|4152.89599609375|4244.80419921875|4337.84765625|4432.017578125|4527.30419921875|4623.69873046875|4721.19140625|4819.77099609375|4919.42724609375|5020.1494140625|5121.92578125|5224.74462890625|5328.59375|5433.4609375|5539.33349609375|5646.19921875|5754.0439453125",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-d|dataset:med-cmcc-cur-an-fc-h|dataset:med-cmcc-cur-an-fc-m|dataset:med-cmcc-sal-an-fc-d|dataset:med-cmcc-sal-an-fc-h|dataset:med-cmcc-sal-an-fc-m|dataset:med-cmcc-tem-an-fc-d|dataset:med-cmcc-tem-an-fc-h|dataset:med-cmcc-tem-an-fc-m)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_P1M-m)&protocol:SUBS",
                     "indexvalue": "5754.0439453125"
                 },
                 {
@@ -871,7 +871,7 @@
                     "indexlabel": "Depth From",
                     "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|19.398210525512695|29.885643005371094|51.379859924316406|72.62368774414062|97.92872619628906|153.43284606933594|203.17044067382812|249.9158477783203|303.5613098144531|398.5447082519531",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-tem-an-fc-hts)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1HTS-m)&protocol:SUBS",
                     "indexvalue": "1.0182366371154785"
                 },
                 {
@@ -879,7 +879,7 @@
                     "indexlabel": "Depth To",
                     "indexvalues": "1.0182366371154785|3.1657474040985107|5.464963436126709|7.920377254486084|10.536603927612305|19.398210525512695|29.885643005371094|51.379859924316406|72.62368774414062|97.92872619628906|153.43284606933594|203.17044067382812|249.9158477783203|303.5613098144531|398.5447082519531",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:med-cmcc-cur-an-fc-hts|dataset:med-cmcc-sal-an-fc-hts|dataset:med-cmcc-tem-an-fc-hts)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-tem_anfc_4.2km_PT1HTS-m)&protocol:SUBS",
                     "indexvalue": "398.5447082519531"
                 },
                 {
