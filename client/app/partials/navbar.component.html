@@ -54,7 +54,7 @@
                             </div>
                             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
                                 <li role="presentation" ng-click="m_oController.editUserInfo()">
-                                   
+
                                     <a role="menuitem" tabindex="-1">
 
                                         <i class="far fa-user fa-lg" aria-hidden="true"></i>
@@ -90,8 +90,8 @@
                     <!------------------------------ LANGUAGE ------------------------------>
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
-                            <div class="dropdown-toggle ml-4 pt-2" type="button" id="dropdownMenuUser" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="true">
+                            <div class="dropdown-toggle ml-4 pt-2" type="button" id="dropdownMenuUser"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="far fa-flag fa-lg" aria-hidden="true"></i>
                             </div>
                             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
@@ -196,70 +196,77 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <!-- APPSTORE BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.marketplace')}">
+                        <li ng-class="{active:m_oController.activePageCss('root.marketplace')}"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_APPSTORE"|translate}}>
                             <a ng-click="m_oController.openMarketPlace();" href="">
                                 <i class="fa fa-rocket" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_APPSTORE"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_APPSTORE"|translate}}</span>
                             </a>
                         </li>
 
 
                         <!-- HOME BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}>
                             <a ng-click="m_oController.openWorkspaces();" href="">
                                 <i class="fa fa-save fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}</span>
                             </a>
                         </li>
                         <!-- PLAN BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}">
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}>
                             <!-- -->
                             <a ng-click="m_oController.openSearchorbit()" href="">
                                 <!---->
                                 <i class="fa fa-calendar fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}</span>
                             </a>
                         </li>
                         <!-- SEARCH BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.import')}">
+                        <li ng-class="{active:m_oController.activePageCss('root.import')}"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}>
                             <a ng-click="m_oController.openImportPage()" href="">
                                 <i class="fa fa-search fa-lg" aria-hidden="true"></i>
                                 <!--ui-sref="root.import"-->
-                                {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}</span>
                             </a>
                         </li>
                         <!-- EDITOR BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.editor')}"
-                            ng-disabled="m_oController.disableEditorButton()">
+                            ng-disabled="m_oController.disableEditorButton()"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}>
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href=""
                                 ng-style="{cursor:m_oController.cursorCss()}">
                                 <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}</span>
                             </a>
                         </li>
                         <!-- HELP BUTTON-->
-                        <li role="presentation" ng-click="m_oController.openDocumentatonCenter()">
+                        <li role="presentation" ng-click="m_oController.openDocumentatonCenter()"
+                            title={{"ROOT_VIEW_LINK_HELP"|translate}}>
                             <a role="menuitem" tabindex="-1" href="">
                                 <i class="fa fa-book fa-lg" aria-hidden="true"></i>
-                                <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
+                                <span class="icon-only">{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
                             </a>
                         </li>
                         <!-- SEND FEEDBACK BUTTON-->
-                        <li>
+                        <li title={{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}>
                             <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
                             <a ng-click="m_oController.openSendFeedbackDialog()" href="">
                                 <!---->
                                 <i class="fa fa-comment fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}</span>
                             </a>
                         </li>
 
                         <!-- ADMIN DASHBOARD BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
-                                ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0">
+                            ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}>
                             <a ng-click="m_oController.openAdminDashboard();" href="">
                                 <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}
+                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}</span>
                             </a>
                         </li>
 
