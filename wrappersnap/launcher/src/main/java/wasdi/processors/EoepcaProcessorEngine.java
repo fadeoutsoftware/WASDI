@@ -135,7 +135,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
 		}
 		
-		sBaseAddress += "wps3/processes/";
+		sBaseAddress += "wps3/";
 		
 		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 		
@@ -170,6 +170,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
 				Map<String, String> asNoCacheHeaders = new HashMap<>();
 				asNoCacheHeaders.put("Cache-Control", "no-cache");
+				asNoCacheHeaders.put("Accept", "application/json");
 				
 				// We need an openId Connection Token
 				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
