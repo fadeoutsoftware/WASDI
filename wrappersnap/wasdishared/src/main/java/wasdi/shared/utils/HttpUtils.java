@@ -1074,11 +1074,11 @@ public final class HttpUtils {
 				if (null != oInputStream) {
 					Util.copyStream(oInputStream, oBytearrayOutputStream);
 					String sResult = oBytearrayOutputStream.toString();
+					
+					WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: got result: "  + sResult);
 
 					JSONObject oJson = new JSONObject(sResult);
 					String sToken = oJson.optString("access_token", null);
-					
-					WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: got token: "  + sToken);
 
 					return sToken;
 				}
