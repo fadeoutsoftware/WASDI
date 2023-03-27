@@ -1077,6 +1077,8 @@ public final class HttpUtils {
 
 					JSONObject oJson = new JSONObject(sResult);
 					String sToken = oJson.optString("access_token", null);
+					
+					WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: got token: "  + sToken);
 
 					return sToken;
 				}

@@ -172,6 +172,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				asNoCacheHeaders.put("Cache-Control", "no-cache");
 				asNoCacheHeaders.put("Accept", "application/json");
 				
+				WasdiLog.debugLog("EoepcaProcessorEngin.loginInEOEpca: calling obtainOpenidConnectToken");
+				
 				// We need an openId Connection Token
 				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
 						, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
