@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -20,6 +22,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ogcprocesses.Execute;
 
 /**
  * EOEPCA Processor Engine.
@@ -124,32 +127,68 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		
-		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(WasdiConfig.Current.dockers.eoepca.adesServerAddress);
+		String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
 		
-		// Is this istance under authentication?		
-		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
-			// Authenticate to the eoepca installation
-			String sScope = "openid user_name is_operator";
-			
-			Map<String, String> asNoCacheHeaders = new HashMap<>();
-			asNoCacheHeaders.put("Cache-Control", "no-cache");
-			
-			// We need an openId Connection Token
-			String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
-					, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
-			
-			// And the relative headers
-			Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
-			
-			// That we inject in all the call to ADES/OGC Processes API
-			oOgcProcessesClient.setHeaders(asHeaders);
+		if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
+		
+		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
+			sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
 		}
 		
-		// Call the deploy function: is a post of the App Deploy Body
-		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+		sBaseAddress += "wps3/processes/";
 		
-        return bApiAnswer;
+		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
+		
+		// Login
+		if (loginInEOEpca(oOgcProcessesClient)) {
+			// Call the deploy function: is a post of the App Deploy Body
+			boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+			
+	        return bApiAnswer;			
+		}
+		else {
+			WasdiLog.debugLog("EoepcaProcessorEngine.deploy: error logging in Eoepca Server"); 
+			return false;
+		}		
 	}	
+	
+	/**
+	 * Logs in the EOEPCA server.
+	 * It adds the token headers to the OgcProcessesClient object
+	 * 
+	 * @param oOgcProcessesClient OgcProcessesClient object to initialize
+	 */
+	protected boolean loginInEOEpca(OgcProcessesClient oOgcProcessesClient) {
+		
+		if (oOgcProcessesClient==null) return true;
+		
+		try {
+			// Is this istance under authentication?		
+			if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
+				// Authenticate to the eoepca installation
+				String sScope = "openid user_name is_operator";
+				
+				Map<String, String> asNoCacheHeaders = new HashMap<>();
+				asNoCacheHeaders.put("Cache-Control", "no-cache");
+				
+				// We need an openId Connection Token
+				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
+						, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
+				
+				// And the relative headers
+				Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
+				
+				// That we inject in all the call to ADES/OGC Processes API
+				oOgcProcessesClient.setHeaders(asHeaders);
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.loginInEOEpca Exception ", oEx);
+			return false;
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * Renders the CWL (and app body) templates
@@ -277,8 +316,58 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
-		return false;
+		
+        WasdiLog.debugLog("EoepcaProcessorEngine.run: start");
+
+        if (oParameter == null) {
+            WasdiLog.errorLog("EoepcaProcessorEngine.run: parameter is null");
+            return false;
+        }
+        
+        // Get Repo and Process Workspace
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
+        
+		try {
+			String sProcessorFolder = getProcessorFolder(oParameter.getName());
+			
+			File oProcFolder = new File(sProcessorFolder);
+			
+			if (!oProcFolder.exists()) {
+				this.deploy(oParameter);
+			}
+			
+			String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
+			
+			if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
+			
+			if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
+				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
+			}
+			
+			sBaseAddress += "wps3/processes/";
+			
+			OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
+			
+			// Login
+			if (!loginInEOEpca(oOgcProcessesClient)) {
+				WasdiLog.debugLog("EoepcaProcessorEngine.deploy: error logging in Eoepca Server"); 
+				return false;
+			}
+			
+			//Execute
+			Execute oExecute = new Execute();
+			//oExecute.setInputs();
+			oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);			
+			
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.run: error " + oEx.toString());
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**

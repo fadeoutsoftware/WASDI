@@ -188,7 +188,7 @@ public class OgcProcessesClient {
 	 * @param oExecute Input parameters for the processor
 	 * @return StatusInfo View Model
 	 */
-	public StatusInfo executProcess(String sProcessId, Execute oExecute) {
+	public StatusInfo executeProcess(String sProcessId, Execute oExecute) {
 		try {
 			String sUrl = m_sBaseUrl + "processes/"+sProcessId+"/execution";
 			
