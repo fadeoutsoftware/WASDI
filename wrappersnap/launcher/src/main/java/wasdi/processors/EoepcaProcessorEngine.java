@@ -1,10 +1,13 @@
 package wasdi.processors;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import wasdi.LauncherMain;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
@@ -23,6 +26,8 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.jinja.JinjaTemplateRenderer;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.Execute;
+import wasdi.shared.viewmodels.ogcprocesses.StatusCode;
+import wasdi.shared.viewmodels.ogcprocesses.StatusInfo;
 
 /**
  * EOEPCA Processor Engine.
@@ -143,7 +148,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		if (loginInEOEpca(oOgcProcessesClient)) {
 			// Call the deploy function: is a post of the App Deploy Body
 			boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
-			
 	        return bApiAnswer;			
 		}
 		else {
@@ -331,6 +335,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = m_oProcessWorkspace;
         
+        ProcessorRepository oProcessorRepository = new ProcessorRepository();
+        Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+        
+        if (oProcessor == null) {
+            WasdiLog.errorLog("EoepcaProcessorEngine.run: processor is null");
+            return false;        	
+        }
+        
 		try {
 			String sProcessorFolder = getProcessorFolder(oParameter.getName());
 			
@@ -354,15 +366,84 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			// Login
 			if (!loginInEOEpca(oOgcProcessesClient)) {
-				WasdiLog.debugLog("EoepcaProcessorEngine.deploy: error logging in Eoepca Server"); 
+				WasdiLog.debugLog("EoepcaProcessorEngine.run: error logging in Eoepca Server"); 
 				return false;
 			}
 			
+			String sJsonParams = oParameter.getJson();
+			
+			String sDecodedParams = sJsonParams;
+			
+			try {
+			    sDecodedParams = java.net.URLDecoder.decode(sJsonParams, StandardCharsets.UTF_8.name());
+			} catch (Exception oEr) {
+			    WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters ", oEr);
+			}
+			
+			Map<String,Object> aoInputParams= (Map<String, Object>) MongoRepository.s_oMapper.readValue(sDecodedParams, Map.class);
+			
+			aoInputParams.put("wasdi__ws__id", oParameter.getWorkspace());
+			aoInputParams.put("wasdi__session__id", oParameter.getSessionID());
+			aoInputParams.put("wasdi__user__id", oParameter.getUserId());
+			aoInputParams.put("wasdi__proc__id", oParameter.getProcessObjId());
+			
 			//Execute
 			Execute oExecute = new Execute();
-			//oExecute.setInputs();
-			oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);			
+			oExecute.setInputs(aoInputParams);
 			
+			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);
+			String sJobId = oStatusInfo.getJobID();
+			
+            long lTimeSpentMs = 0;
+            int iThreadSleepMs = 2000;
+            boolean bForcedError = false;			
+			
+			while(true) {
+				
+				oStatusInfo = oOgcProcessesClient.getStatus(sJobId);
+				
+				if (oStatusInfo.getStatus() == StatusCode.DISMISSED || oStatusInfo.getStatus() == StatusCode.FAILED || oStatusInfo.getStatus() == StatusCode.SUCCESSFUL) {
+					break;
+				}
+				
+                try {
+                    Thread.sleep(iThreadSleepMs);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                }                
+
+                // Increase the time
+                lTimeSpentMs += iThreadSleepMs;
+
+                if (oProcessor.getTimeoutMs() > 0) {
+                    if (lTimeSpentMs > oProcessor.getTimeoutMs()) {
+                        // Timeout
+                        WasdiLog.debugLog("EoepcaProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + lTimeSpentMs);
+
+                        // Update process and rabbit users
+                        LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+                        bForcedError = true;
+                        break;
+                    }
+                }				
+			}
+			
+			if (oStatusInfo!=null) {
+				ProcessStatus oStatus = ProcessStatus.DONE;
+				
+				if (oStatusInfo.getStatus() == StatusCode.FAILED) oStatus = ProcessStatus.ERROR;
+				if (oStatusInfo.getStatus() == StatusCode.DISMISSED) oStatus = ProcessStatus.STOPPED;
+				
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, oStatus, 100);
+			}
+			
+            // Check and set the operation end-date
+            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
+                // P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
+                //LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
+            }			
 			
 		}
 		catch (Exception oEx) {

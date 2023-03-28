@@ -326,7 +326,18 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "processes";
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sBody, m_asHeaders);
+			HashMap<String, String> asHeaders = new HashMap<>();
+			
+			if (m_asHeaders!=null) {
+				for (String sKey : m_asHeaders.keySet()) {
+					asHeaders.put(sKey, m_asHeaders.get(sKey));
+				}				
+			}
+			
+			asHeaders.put("Accept", "application/json");
+			asHeaders.put("Content-Type", "application/json");
+			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sBody, asHeaders);
 			
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
