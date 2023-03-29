@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -30,7 +32,9 @@ import io.swagger.annotations.ApiModelProperty;
 import net.wasdi.openeoserver.viewmodels.Provider.RolesEnum;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.config.openEO.OpenEOCollection;
+import wasdi.shared.config.openEO.OpenEOCubeDimension;
 import wasdi.shared.config.openEO.OpenEOProvider;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -41,7 +45,7 @@ import wasdi.shared.utils.log.WasdiLog;
 	Collections.JSON_PROPERTY_COLLECTIONS,
 	Collections.JSON_PROPERTY_LINKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+
 public class Collections   {
 	public static final String JSON_PROPERTY_COLLECTIONS = "collections";
 	@JsonProperty(JSON_PROPERTY_COLLECTIONS)
@@ -142,78 +146,144 @@ public class Collections   {
 		return o.toString().replace("\n", "\n    ");
 	}
 
+	/**
+	 * Convert a Collection in the WASDI configuration in a open EO Collection View Model
+	 * @param oConfigCollection WASDI Configuration openEO Collection 
+	 * @return open EO Collection View Model
+	 */
+	public static Collection getCollectionVMFromConfig(OpenEOCollection oConfigCollection, boolean bBasic) {
+		Collection oCollectionView = new Collection();
+
+		try {
+			oCollectionView.setId(oConfigCollection.id);
+			oCollectionView.setDescription(oConfigCollection.description);
+			oCollectionView.setLicense(oConfigCollection.license);
+			oCollectionView.setKeywords(oConfigCollection.keywords);
+
+			CollectionExtent oExtent = new CollectionExtent();
+
+			if (oConfigCollection.extent.spatial.bbox != null) {
+				if (oConfigCollection.extent.spatial.bbox.size()>0) {
+					CollectionSpatialExtent oSpatial = new CollectionSpatialExtent();
+
+					List<BigDecimal> aoBboxValues = new ArrayList<BigDecimal>();
+
+					for (Double dValue : oConfigCollection.extent.spatial.bbox.get(0)) {
+						aoBboxValues.add(new BigDecimal(dValue));
+					}
+
+					List<List<BigDecimal>> aoBbox = new ArrayList<List<BigDecimal>>();
+					aoBbox.add(aoBboxValues);
+
+					oSpatial.setBbox(aoBbox);
+					oExtent.setSpatial(oSpatial);					
+				}					
+			}
+
+			if (oConfigCollection.extent.temporal.interval != null) {
+
+				if (oConfigCollection.extent.temporal.interval.size()>0) {
+
+					CollectionTemporalExtent oTemporal = new CollectionTemporalExtent();
+
+					List<Date> aoDateValues = new ArrayList<>();
+
+					for (String sDate : oConfigCollection.extent.temporal.interval.get(0)) {
+						Date oDate = TimeEpochUtils.fromISO8061DateStringToDate(sDate);
+						aoDateValues.add(oDate);
+					}
+
+					oTemporal.addIntervalItem(aoDateValues);
+				}					
+			}
+
+			oCollectionView.setExtent(oExtent);
+
+
+			List<Provider> aoProviders = new ArrayList<>();
+
+			for (OpenEOProvider oProvider : oConfigCollection.providers) {
+				Provider oProviderVM = new Provider();
+				oProviderVM.setName(oProvider.name);
+				oProviderVM.setUrl(new URI(oProvider.url));
+
+				oProviderVM.setRoles(new ArrayList<RolesEnum>());
+
+				for (String sRole : oProvider.roles) {
+					oProviderVM.getRoles().add(RolesEnum.fromValue(sRole));
+				}
+
+				aoProviders.add(oProviderVM);
+			}
+
+			oCollectionView.setProviders(aoProviders);
+			
+			if (!bBasic) {
+				
+				Map<String, STACCollectionCubeDimensions> aoDims = new HashMap<String, STACCollectionCubeDimensions>();
+				
+				if (oConfigCollection.cubeDimensions != null) {
+					
+					if (oConfigCollection.cubeDimensions.bands != null) {
+						STACCollectionCubeDimensions oSTACDim = new STACCollectionCubeDimensions();
+						oSTACDim.setType(Dimension.TypeEnum.fromValue(oConfigCollection.cubeDimensions.bands.type));
+						
+						oSTACDim.values = oConfigCollection.cubeDimensions.bands.values;
+						
+						aoDims.put("bands", oSTACDim);
+					}
+					
+					if (oConfigCollection.cubeDimensions.x != null) {
+						STACCollectionCubeDimensions oSTACDim = new STACCollectionCubeDimensions();
+						oSTACDim.setType(Dimension.TypeEnum.fromValue(oConfigCollection.cubeDimensions.x.type));
+						oSTACDim.extent = oConfigCollection.cubeDimensions.x.extent;
+						oSTACDim.reference_system = oConfigCollection.cubeDimensions.x.reference_system;
+						aoDims.put("x", oSTACDim);
+					}
+
+					if (oConfigCollection.cubeDimensions.y != null) {
+						STACCollectionCubeDimensions oSTACDim = new STACCollectionCubeDimensions();
+						oSTACDim.setType(Dimension.TypeEnum.fromValue(oConfigCollection.cubeDimensions.y.type));
+						aoDims.put("y", oSTACDim);
+					}
+
+					if (oConfigCollection.cubeDimensions.t != null) {
+						STACCollectionCubeDimensions oSTACDim = new STACCollectionCubeDimensions();
+						oSTACDim.setType(Dimension.TypeEnum.fromValue(oConfigCollection.cubeDimensions.t.type));
+						aoDims.put("t", oSTACDim);
+					}					
+				}
+				
+				oCollectionView.setCubeColonDimensions(aoDims);
+				
+				Map<String, STACSummariesCollectionProperties> aoSummaries = new HashMap<String, STACSummariesCollectionProperties>();
+				
+				if (oConfigCollection.summaries != null) {
+					STACSummariesCollectionProperties oSummary = new STACSummariesCollectionProperties();
+					//oSummary.set
+				}
+				
+				oCollectionView.setSummaries(aoSummaries);
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("getCollectionVMFromConfig error: ", oEx);
+		}
+
+		return oCollectionView;
+	}
+
+	/**
+	 * Converts the collections declared in the configuration in the equivalent View Model to be returned by the API 
+	 * @return open EO Collections View Model 
+	 */
 	public static Collections getCollectionsFromConfig() {
 		Collections oCollections = new Collections();
 		oCollections.setCollections(new ArrayList<Collection>());
 
 		try  {
 			for (OpenEOCollection oCollection: WasdiConfig.Current.openEO.collections) {
-				
-				Collection oCollectionView = new Collection();
-				
-				oCollectionView.setId(oCollection.id);
-				oCollectionView.setDescription(oCollection.description);
-				oCollectionView.setLicense(oCollection.license);
-				oCollectionView.setKeywords(oCollection.keywords);
-				
-				CollectionExtent oExtent = new CollectionExtent();
-				
-				if (oCollection.extent.spatial.bbox != null) {
-					if (oCollection.extent.spatial.bbox.size()>0) {
-						CollectionSpatialExtent oSpatial = new CollectionSpatialExtent();
-						
-						List<BigDecimal> aoBboxValues = new ArrayList<BigDecimal>();
-						
-						for (Double dValue : oCollection.extent.spatial.bbox.get(0)) {
-							aoBboxValues.add(new BigDecimal(dValue));
-						}
-						
-						List<List<BigDecimal>> aoBbox = new ArrayList<List<BigDecimal>>();
-						aoBbox.add(aoBboxValues);
-						
-						oSpatial.setBbox(aoBbox);
-						oExtent.setSpatial(oSpatial);					
-					}					
-				}
-				
-				if (oCollection.extent.temporal.interval != null) {
-					
-					if (oCollection.extent.temporal.interval.size()>0) {
-						
-						CollectionTemporalExtent oTemporal = new CollectionTemporalExtent();
-						
-						List<Date> aoDateValues = new ArrayList<>();
-						
-						for (String sDate : oCollection.extent.temporal.interval.get(0)) {
-							Date oDate = Utils.getYyyyMMddTZDate(sDate);
-							aoDateValues.add(oDate);
-						}
-						
-						oTemporal.addIntervalItem(aoDateValues);
-					}					
-				}
-				
-				oCollectionView.setExtent(oExtent);
-				
-				
-				List<Provider> aoProviders = new ArrayList<>();
-				
-				for (OpenEOProvider oProvider : oCollection.providers) {
-					Provider oProviderVM = new Provider();
-					oProviderVM.setName(oProvider.name);
-					oProviderVM.setUrl(new URI(oProvider.url));
-					
-					oProviderVM.setRoles(new ArrayList<RolesEnum>());
-					
-					for (String sRole : oProvider.roles) {
-						oProviderVM.getRoles().add(RolesEnum.fromValue(sRole));
-					}
-					
-					aoProviders.add(oProviderVM);
-				}
-				
-				oCollectionView.setProviders(aoProviders);	
-				
+				Collection oCollectionView = getCollectionVMFromConfig(oCollection, true);
 				oCollections.getCollections().add(oCollectionView);
 			}
 		}

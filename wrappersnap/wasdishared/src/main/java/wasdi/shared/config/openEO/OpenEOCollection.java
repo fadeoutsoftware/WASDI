@@ -13,7 +13,11 @@ public class OpenEOCollection {
 	
 	public OpenEOExtent extent; 
 	
-	public ArrayList<String> keywords;
+	public ArrayList<String> keywords = new ArrayList<>();
 	
-	public ArrayList<OpenEOProvider> providers;
+	public ArrayList<OpenEOProvider> providers = new ArrayList<>();
+	
+	public OpenEOCubeDimensions cubeDimensions;
+	
+	public OpenEOCollectionSummary summaries;
 }

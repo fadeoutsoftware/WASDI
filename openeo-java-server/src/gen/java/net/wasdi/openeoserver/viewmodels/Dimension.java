@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -30,140 +29,140 @@ import io.swagger.annotations.ApiModelProperty;
  * Dimension
  */
 @JsonPropertyOrder({
-  Dimension.JSON_PROPERTY_TYPE,
-  Dimension.JSON_PROPERTY_DESCRIPTION
+	Dimension.JSON_PROPERTY_TYPE,
+	Dimension.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
+
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = DimensionBands.class, name = "bands"),
-  @JsonSubTypes.Type(value = DimensionOther.class, name = "other"),
-  @JsonSubTypes.Type(value = DimensionSpatial.class, name = "spatial"),
-  @JsonSubTypes.Type(value = DimensionTemporal.class, name = "temporal"),
+	@JsonSubTypes.Type(value = DimensionBands.class, name = "bands"),
+	@JsonSubTypes.Type(value = DimensionOther.class, name = "other"),
+	@JsonSubTypes.Type(value = DimensionSpatial.class, name = "spatial"),
+	@JsonSubTypes.Type(value = DimensionTemporal.class, name = "temporal"),
 })
 
 public class Dimension   {
-  /**
-   * Type of the dimension.
-   */
-  public enum TypeEnum {
-    SPATIAL("spatial"),
-    
-    TEMPORAL("temporal"),
-    
-    BANDS("bands"),
-    
-    OTHER("other");
+	/**
+	 * Type of the dimension.
+	 */
+	public enum TypeEnum {
+		SPATIAL("spatial"),
 
-    private String value;
+		TEMPORAL("temporal"),
 
-    TypeEnum(String value) {
-      this.value = value;
-    }
+		BANDS("bands"),
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
+		OTHER("other");
 
-    @JsonCreator
-    public static TypeEnum fromValue(String value) {
-      for (TypeEnum b : TypeEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-  }
+		private String value;
 
-  public static final String JSON_PROPERTY_TYPE = "type";
-  @JsonProperty(JSON_PROPERTY_TYPE)
-  private TypeEnum type;
+		TypeEnum(String value) {
+			this.value = value;
+		}
 
-  public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @JsonProperty(JSON_PROPERTY_DESCRIPTION)
-  private String description;
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
 
-  public Dimension type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
+		@JsonCreator
+		public static TypeEnum fromValue(String value) {
+			for (TypeEnum b : TypeEnum.values()) {
+				if (b.value.equals(value)) {
+					return b;
+				}
+			}
+			throw new IllegalArgumentException("Unexpected value '" + value + "'");
+		}
+	}
 
-  /**
-   * Type of the dimension.
-   * @return type
-   **/
-  @JsonProperty(value = "type")
-  @ApiModelProperty(required = true, value = "Type of the dimension.")
-  @NotNull 
-  public TypeEnum getType() {
-    return type;
-  }
+	public static final String JSON_PROPERTY_TYPE = "type";
+	@JsonProperty(JSON_PROPERTY_TYPE)
+	private TypeEnum type;
 
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
+	public static final String JSON_PROPERTY_DESCRIPTION = "description";
+	@JsonProperty(JSON_PROPERTY_DESCRIPTION)
+	private String description;
 
-  public Dimension description(String description) {
-    this.description = description;
-    return this;
-  }
+	public Dimension type(TypeEnum type) {
+		this.type = type;
+		return this;
+	}
 
-  /**
-   * Detailed description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.
-   * @return description
-   **/
-  @JsonProperty(value = "description")
-  @ApiModelProperty(value = "Detailed description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.")
-  
-  public String getDescription() {
-    return description;
-  }
+	/**
+	 * Type of the dimension.
+	 * @return type
+	 **/
+	@JsonProperty(value = "type")
+	@ApiModelProperty(required = true, value = "Type of the dimension.")
+	@NotNull 
+	public TypeEnum getType() {
+		return type;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setType(TypeEnum type) {
+		this.type = type;
+	}
+
+	public Dimension description(String description) {
+		this.description = description;
+		return this;
+	}
+
+	/**
+	 * Detailed description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.
+	 * @return description
+	 **/
+	@JsonProperty(value = "description")
+	@ApiModelProperty(value = "Detailed description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.")
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Dimension dimension = (Dimension) o;
-    return Objects.equals(this.type, dimension.type) &&
-        Objects.equals(this.description, dimension.description);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Dimension dimension = (Dimension) o;
+		return Objects.equals(this.type, dimension.type) &&
+				Objects.equals(this.description, dimension.description);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(type, description);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, description);
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class Dimension {\n");
-    
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class Dimension {\n");
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+		sb.append("    type: ").append(toIndentedString(type)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
 

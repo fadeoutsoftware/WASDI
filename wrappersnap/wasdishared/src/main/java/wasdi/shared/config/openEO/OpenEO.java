@@ -12,6 +12,20 @@ public class OpenEO {
 	public String title = "";
 	public String description = "";
 	public boolean production = false;
-	public ArrayList<OpenEOCollection> collections;
+	public ArrayList<OpenEOCollection> collections = new ArrayList<>();
+	
+	/**
+	 * Return the configuration of a collection with
+	 * @param sId
+	 * @return
+	 */
+	public OpenEOCollection getCollection(String sId) {
+		
+		for (OpenEOCollection oCollection : collections) {
+			if (oCollection.id.equals(sId)) return oCollection;
+		}
+		
+		return null;
+	}
 	
 }

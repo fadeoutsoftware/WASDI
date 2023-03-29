@@ -22,10 +22,8 @@ import io.swagger.annotations.ApiModel;
 /**
  * The allowed basic data type(s) for a value according to [JSON Schema draft-07](https://json-schema.org/draft-07/json-schema-validation.html#rfc.section.6.1.1).  If this property is not present, all data types are allowed.
  */
-@ApiModel(description = "The allowed basic data type(s) for a value according to [JSON Schema draft-07](https://json-schema.org/draft-07/json-schema-validation.html#rfc.section.6.1.1).  If this property is not present, all data types are allowed.")
 @JsonPropertyOrder({
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
 public class JsonSchemaType1   {
 
   @Override

@@ -27,98 +27,98 @@ import io.swagger.annotations.ApiModelProperty;
  * STACSummariesCollectionProperties
  */
 @JsonPropertyOrder({
-  STACSummariesCollectionProperties.JSON_PROPERTY_MIN,
-  STACSummariesCollectionProperties.JSON_PROPERTY_MAX
+	STACSummariesCollectionProperties.JSON_PROPERTY_MIN,
+	STACSummariesCollectionProperties.JSON_PROPERTY_MAX
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+
 public class STACSummariesCollectionProperties   {
-  public static final String JSON_PROPERTY_MIN = "min";
-  @JsonProperty(JSON_PROPERTY_MIN)
-  private CollectionSummaryStatsMin min;
+	public static final String JSON_PROPERTY_MIN = "min";
+	@JsonProperty(JSON_PROPERTY_MIN)
+	private CollectionSummaryStatsMin min;
 
-  public static final String JSON_PROPERTY_MAX = "max";
-  @JsonProperty(JSON_PROPERTY_MAX)
-  private CollectionSummaryStatsMin max;
+	public static final String JSON_PROPERTY_MAX = "max";
+	@JsonProperty(JSON_PROPERTY_MAX)
+	private CollectionSummaryStatsMin max;
 
-  public STACSummariesCollectionProperties min(CollectionSummaryStatsMin min) {
-    this.min = min;
-    return this;
-  }
+	public STACSummariesCollectionProperties min(CollectionSummaryStatsMin min) {
+		this.min = min;
+		return this;
+	}
 
-  /**
-   * Get min
-   * @return min
-   **/
-  @JsonProperty(value = "min")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public CollectionSummaryStatsMin getMin() {
-    return min;
-  }
+	/**
+	 * Get min
+	 * @return min
+	 **/
+	@JsonProperty(value = "min")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull @Valid 
+	public CollectionSummaryStatsMin getMin() {
+		return min;
+	}
 
-  public void setMin(CollectionSummaryStatsMin min) {
-    this.min = min;
-  }
+	public void setMin(CollectionSummaryStatsMin min) {
+		this.min = min;
+	}
 
-  public STACSummariesCollectionProperties max(CollectionSummaryStatsMin max) {
-    this.max = max;
-    return this;
-  }
+	public STACSummariesCollectionProperties max(CollectionSummaryStatsMin max) {
+		this.max = max;
+		return this;
+	}
 
-  /**
-   * Get max
-   * @return max
-   **/
-  @JsonProperty(value = "max")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public CollectionSummaryStatsMin getMax() {
-    return max;
-  }
+	/**
+	 * Get max
+	 * @return max
+	 **/
+	@JsonProperty(value = "max")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull @Valid 
+	public CollectionSummaryStatsMin getMax() {
+		return max;
+	}
 
-  public void setMax(CollectionSummaryStatsMin max) {
-    this.max = max;
-  }
+	public void setMax(CollectionSummaryStatsMin max) {
+		this.max = max;
+	}
 
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    STACSummariesCollectionProperties stACSummariesCollectionProperties = (STACSummariesCollectionProperties) o;
-    return Objects.equals(this.min, stACSummariesCollectionProperties.min) &&
-        Objects.equals(this.max, stACSummariesCollectionProperties.max);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		STACSummariesCollectionProperties stACSummariesCollectionProperties = (STACSummariesCollectionProperties) o;
+		return Objects.equals(this.min, stACSummariesCollectionProperties.min) &&
+				Objects.equals(this.max, stACSummariesCollectionProperties.max);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(min, max);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(min, max);
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class STACSummariesCollectionProperties {\n");
-    
-    sb.append("    min: ").append(toIndentedString(min)).append("\n");
-    sb.append("    max: ").append(toIndentedString(max)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class STACSummariesCollectionProperties {\n");
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+		sb.append("    min: ").append(toIndentedString(min)).append("\n");
+		sb.append("    max: ").append(toIndentedString(max)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
 
