@@ -1,0 +1,93 @@
+package net.wasdi.openeoserver.api;
+
+import javax.servlet.ServletConfig;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response.Status;
+
+import net.wasdi.openeoserver.viewmodels.Error;
+import net.wasdi.openeoserver.viewmodels.ProcessGraphWithMetadata;
+import wasdi.shared.utils.log.WasdiLog;
+
+@Path("/process_graphs")
+
+
+public class ProcessGraphsApi  {
+
+   public ProcessGraphsApi(@Context ServletConfig servletContext) {
+   }
+
+    @javax.ws.rs.DELETE
+    @Path("/{process_graph_id}")    
+    @Produces({ "application/json" })
+    public Response deleteCustomProcess(@PathParam("process_graph_id") @NotNull  @Pattern(regexp="^\\w+$") String processGraphId,@Context SecurityContext securityContext) {
+    	
+    	try {
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProcessGraphsApi.method error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessGraphsApi.method", "InternalServerError", oEx.getMessage())).build();
+		}
+    	
+    	
+    	return Response.ok().build();
+    }
+    @javax.ws.rs.GET
+    @Path("/{process_graph_id}")
+    @Produces({ "application/json" })
+    public Response describeCustomProcess(@PathParam("process_graph_id") @NotNull  @Pattern(regexp="^\\w+$") String processGraphId,@Context SecurityContext securityContext) {
+    	
+    	try {
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProcessGraphsApi.method error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessGraphsApi.method", "InternalServerError", oEx.getMessage())).build();
+		}
+    	
+    	return Response.ok().build();
+    }
+    
+    @javax.ws.rs.GET
+    @Produces({ "application/json" })
+    public Response listCustomProcesses(@QueryParam("limit")  @Min(1) Integer limit,@Context SecurityContext securityContext) {
+    	
+    	try {
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProcessGraphsApi.method error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessGraphsApi.method", "InternalServerError", oEx.getMessage())).build();
+		}
+    	
+    	return Response.ok().build();
+    }
+    @javax.ws.rs.PUT
+    @Path("/{process_graph_id}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    public Response storeCustomProcess(@PathParam("process_graph_id") @NotNull  @Pattern(regexp="^\\w+$") String processGraphId, @NotNull @Valid  ProcessGraphWithMetadata processGraphWithMetadata,@Context SecurityContext securityContext) {
+    	
+    	try {
+    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProcessGraphsApi.method error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessGraphsApi.method", "InternalServerError", oEx.getMessage())).build();
+		}
+    	
+    	
+    	return Response.ok().build();
+    }
+}

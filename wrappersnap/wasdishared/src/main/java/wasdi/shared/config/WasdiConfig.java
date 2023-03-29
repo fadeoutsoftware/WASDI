@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import wasdi.shared.config.openEO.OpenEO;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -165,6 +166,11 @@ public class WasdiConfig {
 	 * Configuration of the OGC Processes API WASDI Server implementation
 	 */
 	public OGCProcessesAPIConfig ogcProcessesApi = new OGCProcessesAPIConfig();
+	
+	/**
+	 * Configuration of the openEO Backend WASDI Server Implementation
+	 */
+	public OpenEO openEO = new OpenEO();
 	
 	/**
 	 * Get the Catalogue Config for the specified Platform Type
