@@ -1,6 +1,13 @@
 package net.wasdi.openeoserver.api;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.validation.Valid;
@@ -18,14 +25,31 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.DescribeJob200Response;
+import net.wasdi.openeoserver.viewmodels.DescribeJob200Response.StatusEnum;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.StoreBatchJobRequest;
 import net.wasdi.openeoserver.viewmodels.UpdateBatchJobRequest;
+import wasdi.shared.business.OpenEOJob;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.OpenEOJobRepository;
+import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
+import wasdi.shared.viewmodels.PrimitiveResult;
 
 @Path("/jobs")
 
@@ -49,15 +73,32 @@ public class JobsApi  {
     	
     	try {
     		
-    		String sProcId = "123-1232-1231";
+    		// Create a name for the future Process Workspace
+    		String sProcId = Utils.getRandomName();
+
+    		// Create the Job Entity. For now not started and without workspace
+    		OpenEOJob oOpenEOJob = new OpenEOJob();
+    		oOpenEOJob.setJobId(sProcId);
+    		oOpenEOJob.setStarted(false);
+    		oOpenEOJob.setUserId(oUser.getUserId());
+    		// Dump the json as we have received it
+    		String sJSON = MongoRepository.s_oMapper.writeValueAsString(oOpenEOJob);
+    		oOpenEOJob.setParameters(sJSON);
     		
+    		// Insert the Job in the db
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		oOpenEOJobRepository.insertOpenEOJob(oOpenEOJob);
+    		
+    		// Link to get the status/description of this job
     		String sLocationHeader = WasdiConfig.Current.openEO.baseAddress;
     		if (!sLocationHeader.endsWith("/")) sLocationHeader += "/";
-    		sLocationHeader += "jobs/"+sProcId;
+    		sLocationHeader += "jobs/"+sProcId;    		
     		
+    		// Add the requested headers
     		ResponseBuilder oResponse = Response.created(new URI("sLocationHeader"));
     		oResponse.header("OpenEO-Identifier", sProcId);
     		
+    		// And we are done
     		return oResponse.build();
     	}
     	catch (Exception oEx) {
@@ -124,9 +165,13 @@ public class JobsApi  {
     	}
     	
     	try {
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
     		
     		DescribeJob200Response oDescribeJob200Response = new DescribeJob200Response();
     		oDescribeJob200Response.setId(sJobId);
+    		
+    		String sStatus = getProcessStatus(sJobId, WasdiConfig.Current.baseUrl, sSessionId);
+    		oDescribeJob200Response.setStatus(wasdiStateToOpenEOState(sStatus));
     		
     		return Response.ok().entity(oDescribeJob200Response).build();
     	}
@@ -134,8 +179,6 @@ public class JobsApi  {
     		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
-    	
-    	
     }
     
     @javax.ws.rs.GET
@@ -209,23 +252,101 @@ public class JobsApi  {
     @javax.ws.rs.POST
     @Path("/{job_id}/results")
     @Produces({ "application/json" })
-    public Response startJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @HeaderParam("Authorization") String sAuthorization) {
+    public Response startJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			WasdiLog.debugLog("JobsApi.startJob: invalid credentials");
 			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
     	}
     	
     	try {
     		
-    		// TODO: Create here the real process Workspace
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		OpenEOJob oOpenEOJob = oOpenEOJobRepository.getOpenEOJob(sJobId);
+    		
+    		if (oOpenEOJob == null) {
+        		WasdiLog.debugLog("JobsApi.startJob: EO Job not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.startJob", "InvalidJob", "Invalid Job")).build();    			
+    		}
+    		
+    		if (oOpenEOJob.isStarted()) {
+        		WasdiLog.debugLog("JobsApi.startJob: Job already started");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.startJob", "InvalidJob", "Alreay started")).build();
+    		}
+    		
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
+    		Workspace oWorkspace = createWorkspaceForAppliction(sSessionId,oUser, "openEO_");
+    		
+    		if (oWorkspace == null) {
+    			WasdiLog.debugLog("JobsApi.startJob: Impossible to create the workspace ");
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", "Error creating ws")).build();	
+    		}
+    		
+			WasdiLog.debugLog("JobsApi.startJob: created Workspace " + oWorkspace.getWorkspaceId());
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessorByName(WasdiConfig.Current.openEO.openEOWasdiAppName);
+			
+    		if (oProcessor == null) {
+    			WasdiLog.debugLog("JobsApi.startJob: Impossible to find ");
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", "Engine not available in this wasdi installation")).build();	
+    		}			
+			
+			// Create  the processor parameter
+			ProcessorParameter oParameter = new ProcessorParameter();
+			
+			oParameter.setExchange(oWorkspace.getWorkspaceId());
+			oParameter.setName(oProcessor.getName());
+			oParameter.setProcessObjId(oOpenEOJob.getJobId());
+			oParameter.setWorkspace(oWorkspace.getWorkspaceId());
+			oParameter.setWorkspaceOwnerId(oUser.getUserId());
+			oParameter.setProcessorID(oProcessor.getProcessorId());
+			oParameter.setProcessorType(oProcessor.getType());
+			oParameter.setSessionID(sSessionId);
+			oParameter.setUserId(oUser.getUserId());
+			oParameter.setVersion(oProcessor.getVersion());
+			oParameter.setOGCProcess(true);
+			
+			
+			oParameter.setJson(oOpenEOJob.getParameters());
+			
+			// Serialize the parameters
+			String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
+			
+			// We call WASDI to execute: there the platform will make the routing to the right node
+			String sUrl = WasdiConfig.Current.baseUrl;
+			if (sUrl.endsWith("/") == false) sUrl += "/";
+			sUrl += "processing/run?operation=RUNPROCESSOR&name=" + URLEncoder.encode(oProcessor.getName(), java.nio.charset.StandardCharsets.UTF_8.toString());
+			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId)); 
+			// call the API to really execute the processor 
+			String sResult = oHttpCallResponse.getResponseBody();
+			
+			WasdiLog.debugLog("JobsApi.startJob: execute request done");
+			
+        	// Get back the primitive result: it does not work right to go in the catch 
+            PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
+            
+            if (!oPrimitiveResult.getBoolValue()) {
+    			WasdiLog.debugLog("JobsApi.startJob: unable to start the app, create error status info");
+    			
+    			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", "Error starting the app")).build();    			
+            }
+            else {
+                String sProcessWorkspaceId = oPrimitiveResult.getStringValue();
+                WasdiLog.debugLog("JobsApi.startJob: got process workspace id " + sProcessWorkspaceId + " job Id = " +sJobId);
+                
+                oOpenEOJob.setWorkspaceId(oWorkspace.getWorkspaceId());
+                oOpenEOJob.setStarted(true);
+                oOpenEOJobRepository.updateOpenEOJob(oOpenEOJob);
+            }
     		
     		return Response.status(202).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
+    		WasdiLog.errorLog("JobsApi.startJob error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
     	
@@ -274,4 +395,170 @@ public class JobsApi  {
     	
     	return Response.ok().build();
     }
+    
+    /**
+     * Creates a workspace to execute the application.
+     * Calls the WASDI API to have the node where the workspace will be assigned
+     * creates the workspace unique name
+     * and creates the workspace entity
+     * @param sSessionId Actual Session
+     * @param oUser User 
+     * @param oProcessor Processor to run
+     * @return The Workspace object created or null in case of problems
+     */
+    protected Workspace createWorkspaceForAppliction(String sSessionId, User oUser, String sName) {
+    	
+    	try {
+    		// We create a Workspace for this user
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		Workspace oWorkspace = new Workspace();
+    		
+    		// We need the creation date
+    		Date oCreationDate = new Date(); 
+    		
+    		String sWorkspaceName = sName+"_" + oCreationDate.toString();
+
+    		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sWorkspaceName) != null) {
+    			sWorkspaceName = Utils.cloneWorkspaceName(sWorkspaceName);
+    			WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: a workspace with the same name already exists. Changing the name to " + sWorkspaceName);
+    		}
+
+    		// Default values
+    		oWorkspace.setCreationDate(Utils.nowInMillis());
+    		oWorkspace.setLastEditDate(Utils.nowInMillis());
+    		oWorkspace.setName(sWorkspaceName);
+    		oWorkspace.setUserId(oUser.getUserId());
+    		oWorkspace.setWorkspaceId(Utils.getRandomName());
+    		
+    		String sNodeCode = "";
+    			
+    		WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: search the best node");
+    		
+    		String sUrl = WasdiConfig.Current.baseUrl;
+    		if (sUrl.endsWith("/") == false) sUrl += "/";
+    		sUrl += "process/nodesByScore";
+    		
+    		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
+    		String sResponse = oHttpCallResponse.getResponseBody();
+    		
+    		ArrayList<LinkedHashMap<String, Object>> oGetClass = new ArrayList<>();
+    		
+    		List<LinkedHashMap<String, Object>> aoCandidates = (List<LinkedHashMap<String, Object>>) MongoRepository.s_oMapper.readValue(sResponse,oGetClass.getClass());
+    		
+    		if (aoCandidates!=null) {
+    			if (aoCandidates.size()>0) {
+    				sNodeCode = (String) aoCandidates.get(0).get("nodeCode");
+    			}
+    		}
+    		
+    		if (Utils.isNullOrEmpty(sNodeCode)) {
+    			WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: it was impossible to associate a Node: try user default");
+    			//get user's default nodeCode
+    			sNodeCode = oUser.getDefaultNode();
+    		}
+    		
+    		if (Utils.isNullOrEmpty(sNodeCode)) {
+    			WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: it was impossible to associate a Node: use system default");
+    			// default node code
+    			sNodeCode = "wasdi";
+    		}
+    		
+    		WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: selected node " + sNodeCode);
+    		oWorkspace.setNodeCode(sNodeCode);
+
+    		if (oWorkspaceRepository.insertWorkspace(oWorkspace)==false) {
+    			WasdiLog.errorLog("JobsApi.createWorkspaceForAppliction: it was impossible to create the workspace");
+    			return null;
+    		}
+    		else {
+    			return oWorkspace;
+    		}    		
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("JobsApi.createWorkspaceForAppliction: exception creating the workspace " + oEx.toString());
+		}
+    	return null;
+    }
+    
+	/**
+	 * Get WASDI Process Status 
+	 * @param sProcessId Process Id
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 */
+	protected String getProcessStatus(String sProcessId, String sBaseUrl, String sSessionId) {
+		WasdiLog.debugLog("ProcessesResource.getProcessStatus( " + sProcessId + " )");
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			WasdiLog.debugLog("ProcessesResource.getProcessStatus: process id null or empty, aborting");
+		}
+		try {
+			if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
+			// Create the API call
+			String sUrl = sBaseUrl + "process/byid?procws="+sProcessId;
+
+			// Add session token
+			Map<String, String> asHeaders = new HashMap<String, String>();
+			asHeaders.put("x-session-token", sSessionId);
+			
+			// Call the API
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+			String sResponse = oHttpCallResponse.getResponseBody();
+			
+			// Get result and extract status
+			Map<String, Object> aoJSONMap = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+
+			String sStatus = aoJSONMap.get("status").toString();
+			if(isThisAValidStatus(sStatus)) {
+				return sStatus;
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessesResource.getProcessStatus: " + oEx.toString());
+		}	  
+		return "";
+	}
+	
+	/**
+	 * Check if the input string is a Valid Status
+	 * @param sStatus
+	 * @return true if the status is valid, false otherwise
+	 */
+	private boolean isThisAValidStatus(String sStatus) {
+		return(null!=sStatus &&(
+				sStatus.equals(ProcessStatus.CREATED.name()) ||
+				sStatus.equals(ProcessStatus.RUNNING.name()) ||
+				sStatus.equals(ProcessStatus.DONE.name()) ||
+				sStatus.equals(ProcessStatus.STOPPED.name()) ||
+				sStatus.equals(ProcessStatus.ERROR.name()) ||
+				sStatus.equals(ProcessStatus.WAITING.name()) ||
+				sStatus.equals(ProcessStatus.READY.name())
+				));
+	}
+	
+	private StatusEnum wasdiStateToOpenEOState(String sState) {
+		StatusEnum oReturn = StatusEnum.QUEUED;
+		
+		if (sState.equals(ProcessStatus.CREATED.name())) {
+			oReturn = StatusEnum.QUEUED;
+		}
+		else if (sState.equals(ProcessStatus.DONE.name())) {
+			oReturn = StatusEnum.FINISHED;
+		}
+		else if (sState.equals(ProcessStatus.ERROR.name())) {
+			oReturn = StatusEnum.ERROR;
+		}
+		else if (sState.equals(ProcessStatus.READY.name())) {
+			oReturn = StatusEnum.RUNNING;
+		}
+		else if (sState.equals(ProcessStatus.RUNNING.name())) {
+			oReturn = StatusEnum.RUNNING;
+		}
+		else if (sState.equals(ProcessStatus.STOPPED.name())) {
+			oReturn = StatusEnum.CANCELED;
+		}
+		else if (sState.equals(ProcessStatus.WAITING.name())) {
+			oReturn = StatusEnum.RUNNING;
+		}
+		
+		return oReturn;
+	}
 }

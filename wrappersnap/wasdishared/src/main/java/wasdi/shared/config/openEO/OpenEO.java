@@ -12,6 +12,7 @@ public class OpenEO {
 	public String title = "";
 	public String description = "";
 	public boolean production = false;
+	public String openEOWasdiAppName = "wasdiopeneo";
 	public ArrayList<OpenEOCollection> collections = new ArrayList<>();
 	
 	/**
