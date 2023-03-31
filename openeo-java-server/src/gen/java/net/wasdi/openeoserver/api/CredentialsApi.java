@@ -26,9 +26,9 @@ public class CredentialsApi  {
 	@javax.ws.rs.GET
 	@Path("/basic")    
 	@Produces({ "application/json" })
-	public Response authenticateBasic(@Context SecurityContext oSecurityContext, @HeaderParam("Authorization") String sAuthorization) {
+	public Response authenticateBasic(@HeaderParam("Authorization") String sAuthorization) {
 		
-		UserSession oUserSession = WasdiOpenEoServer.getSessionFromBasicAuth(sAuthorization);
+		UserSession oUserSession = WasdiOpenEoServer.getLoginFromBasicAuth(sAuthorization);
 		
 		if (oUserSession == null) {
 			WasdiLog.debugLog("CredentialsApi.authenticateBasic: invalid credentials");

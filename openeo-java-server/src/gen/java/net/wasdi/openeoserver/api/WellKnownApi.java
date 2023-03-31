@@ -5,7 +5,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import net.wasdi.openeoserver.viewmodels.Error;
@@ -19,7 +18,7 @@ public class WellKnownApi  {
 
     @javax.ws.rs.GET
     @Produces({ "application/json" })
-    public Response connect(@Context SecurityContext securityContext) {
+    public Response connect() {
     	
     	try {
     		

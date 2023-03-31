@@ -2,6 +2,8 @@ package net.wasdi.openeoserver;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
@@ -19,8 +21,10 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class WasdiOpenEoServer extends ResourceConfig {
 	
@@ -161,7 +165,12 @@ public class WasdiOpenEoServer extends ResourceConfig {
 		return null;
 	}
 	
-	public static UserSession getSessionFromBasicAuth(String sAuthorization) {
+	/**
+	 * Get the WASDI Session from a Basic Authentication Header userid:session
+	 * @param sAuthorization
+	 * @return
+	 */
+	public static UserSession getLoginFromBasicAuth(String sAuthorization) {
 		
 		User oUser = null;
 		
@@ -238,5 +247,71 @@ public class WasdiOpenEoServer extends ResourceConfig {
 
 		return null;
 	}
+	
+	/**
+	 * Get the User object from the session Id
+	 * It checks first in Key Cloak and later on the local session mechanism.
+	 * @param sSessionId
+	 * @return
+	 */
+	public static User getUserFromAuthenticationHeader(String sAuthentication) {
+		
+		User oUser = null;
+		
+		if (Utils.isNullOrEmpty(sAuthentication)) return null;
+		
+		try {			
+			// Check The Session with Keycloak
+			String sUserId = null;
+			
+			String sSessionId = sAuthentication.substring("Bearer basic//".length());
+			
+			try  {
+				//introspect
+				String sPayload = "token=" + sSessionId;
+				Map<String,String> asHeaders = new HashMap<String,String>();
+				asHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+				HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(WasdiConfig.Current.keycloack.introspectAddress, sPayload, asHeaders, s_sClientId + ":" + s_sClientSecret); 
+				String sResponse = oHttpCallResponse.getResponseBody();
+				JSONObject oJSON = null;
+				if(!Utils.isNullOrEmpty(sResponse)) {
+					oJSON = new JSONObject(sResponse);
+				}
+				if(null!=oJSON) {
+					sUserId = oJSON.optString("preferred_username", null);
+				}				
+			}
+			catch (Exception oKeyEx) {
+				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+			}
+
+
+			if(!Utils.isNullOrEmpty(sUserId)) {
+				UserRepository oUserRepo = new UserRepository();
+				oUser = oUserRepo.getUser(sUserId);
+			} else {
+				//check session against DB
+				
+				SessionRepository oSessionRepository = new SessionRepository();
+				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
+				
+				if(null==oUserSession) {
+					return null;
+				} else {
+					sUserId = oUserSession.getUserId();
+				}
+				if(!Utils.isNullOrEmpty(sUserId)){
+					UserRepository oUserRepository = new UserRepository();
+					oUser = oUserRepository.getUser(sUserId);
+				} else {
+					return null;
+				}
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+		}
+
+		return oUser;
+	}	
 		
 }

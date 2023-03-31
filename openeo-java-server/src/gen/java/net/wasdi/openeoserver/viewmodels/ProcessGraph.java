@@ -56,7 +56,8 @@ public class ProcessGraph   {
 
   public static final String JSON_PROPERTY_ARGUMENTS = "arguments";
   @JsonProperty(JSON_PROPERTY_ARGUMENTS)
-  private Map<String, ProcessArgumentValue> arguments = new HashMap<>();
+  //private Map<String, ProcessArgumentValue> arguments = new HashMap<>();
+  private Map<String, Object> arguments = new HashMap<>();
 
   public ProcessGraph processId(String processId) {
     this.processId = processId;
@@ -138,16 +139,36 @@ public class ProcessGraph   {
     this.description = description;
   }
 
-  public ProcessGraph arguments(Map<String, ProcessArgumentValue> arguments) {
-    this.arguments = arguments;
-    return this;
-  }
+//  public ProcessGraph arguments(Map<String, ProcessArgumentValue> arguments) {
+//    this.arguments = arguments;
+//    return this;
+//  }
+  
+  public ProcessGraph arguments(Map<String, Object> arguments) {
+	    this.arguments = arguments;
+	    return this;
+	  }  
 
   public ProcessGraph putArgumentsItem(String key, ProcessArgumentValue argumentsItem) {
     this.arguments.put(key, argumentsItem);
     return this;
   }
 
+//  /**
+//   * Get arguments
+//   * @return arguments
+//   **/
+//  @JsonProperty(value = "arguments")
+//  @ApiModelProperty(required = true, value = "")
+//  @NotNull @Valid 
+//  public Map<String, ProcessArgumentValue> getArguments() {
+//    return arguments;
+//  }
+//
+//  public void setArguments(Map<String, ProcessArgumentValue> arguments) {
+//    this.arguments = arguments;
+//  }
+  
   /**
    * Get arguments
    * @return arguments
@@ -155,13 +176,13 @@ public class ProcessGraph   {
   @JsonProperty(value = "arguments")
   @ApiModelProperty(required = true, value = "")
   @NotNull @Valid 
-  public Map<String, ProcessArgumentValue> getArguments() {
+  public Map<String, Object> getArguments() {
     return arguments;
   }
 
-  public void setArguments(Map<String, ProcessArgumentValue> arguments) {
+  public void setArguments(Map<String, Object> arguments) {
     this.arguments = arguments;
-  }
+  }  
 
 
   @Override
