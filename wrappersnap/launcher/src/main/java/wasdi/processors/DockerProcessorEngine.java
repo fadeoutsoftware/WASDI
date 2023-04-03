@@ -1116,7 +1116,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// We need to reach the main server
 			String sBaseUrl = WasdiConfig.Current.baseUrl;
-			String sUrl = sBaseUrl + "/packageManager/environmentActions?name=" + oParameter.getName();
+			
+			if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
+			String sUrl = sBaseUrl + "packageManager/environmentActions?name=" + oParameter.getName();
 			
 			// Create the headers
 			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(oParameter.getSessionID());
