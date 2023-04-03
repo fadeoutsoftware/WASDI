@@ -407,7 +407,8 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	private static String buildCommandDockerComposeUpJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
 		StringBuilder oSB = new StringBuilder();
 
-		oSB.append("docker-compose \\");
+		
+		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
 		oSB.append(s_sLINE_SEPARATOR);
@@ -426,7 +427,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	private static String buildCommandDockerComposeStopJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
 		StringBuilder oSB = new StringBuilder();
 
-		oSB.append("docker-compose \\");
+		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
 		oSB.append(s_sLINE_SEPARATOR);
@@ -443,7 +444,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	private static String buildCommandDockerComposeRmJupyterNotebook(String sProcessorFolder, String sJupyterNotebookCode) {
 		StringBuilder oSB = new StringBuilder();
 
-		oSB.append("docker-compose \\");
+		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --project-name " + sJupyterNotebookCode + "\\");
 		oSB.append(s_sLINE_SEPARATOR);
@@ -511,7 +512,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	private static String buildCommandDockerComposeUpTraefik() {
 		StringBuilder oSB = new StringBuilder();
 
-		oSB.append("docker-compose \\");
+		oSB.append(WasdiConfig.Current.dockers.dockerComposeCommand + " \\");
 		oSB.append(s_sLINE_SEPARATOR);
 		oSB.append("    --file /data/wasdi/processors/traefik-notebook/docker-compose.yml \\");
 		oSB.append(s_sLINE_SEPARATOR);
