@@ -1,4 +1,4 @@
-package wasdi.shared.managers;
+package wasdi.shared.packagemanagers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 			sUrl += sFlag + "/";
 		}
 
-		WasdiLog.debugLog("PipPackageManagerImpl.callGetPackages | sUrl:" + sUrl + ".");
+		WasdiLog.debugLog("PipPackageManagerImpl.listPackages | sUrl:" + sUrl + ".");
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 
@@ -85,7 +85,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 	public PackageManagerViewModel getManagerVersion() {
 		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/managerVersion/";
 
-		WasdiLog.debugLog("PipPackageManagerImpl.callGetManagerVersion | sUrl:" + sUrl);
+		WasdiLog.debugLog("PipPackageManagerImpl.getManagerVersion | sUrl:" + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();
 

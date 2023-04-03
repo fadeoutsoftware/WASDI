@@ -14,7 +14,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.JsonUtils;

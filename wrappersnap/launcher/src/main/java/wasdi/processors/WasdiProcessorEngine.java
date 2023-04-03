@@ -94,6 +94,12 @@ public abstract class WasdiProcessorEngine {
 		else if (sType.equals(ProcessorTypes.EOEPCA)) {
 			return new EoepcaProcessorEngine();
 		}
+		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2)) {
+			return new PythonPipProcessorEngine2();
+		}
+		else if (sType.equals(ProcessorTypes.PIP_ONESHOT)) {
+			return new PipOneShotProcessorEngine();
+		}		
 		else {
 			return new UbuntuPython37ProcessorEngine();
 		}
@@ -375,17 +381,17 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public void waitForApplicationToStart(ProcessorParameter oParameter) {
 		try {
-	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait to let docker start");
 	        Thread.sleep(5000);
 
 //	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
 //	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
 //
-//	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
+//	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
 //	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
 		}
 	}
 	
@@ -407,7 +413,7 @@ public abstract class WasdiProcessorEngine {
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sZipFileName);
             if (!oProcessorZipFile.exists()) {
-                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
+                WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor: " + oProcessorZipFile.getCanonicalPath() + " does not exist, aborting");
                 return false;
             }
             try {
@@ -458,7 +464,7 @@ public abstract class WasdiProcessorEngine {
                     }
                 }
             } catch (Exception oE) {
-                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
+                WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor: could not unzip " + oProcessorZipFile.getCanonicalPath() + " due to: " + oE + ", aborting");
                 return false;
             }
 
@@ -473,20 +479,20 @@ public abstract class WasdiProcessorEngine {
 //				});
 //			}
 //		    if (!oMyProcessorExists.get()) {
-//		    	WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
+//		    	WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
 //		    	//return false;
 //		    }
 
             try {
                 // Remove the zip?
                 if (!oProcessorZipFile.delete()) {
-                    WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor error Deleting Zip File");
+                    WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor error Deleting Zip File");
                 }
             } catch (Exception e) {
-                WasdiLog.errorLog("DockerProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
+                WasdiLog.errorLog("WasdiProcessorEngine.UnzipProcessor Exception Deleting Zip File", e);
             }
         } catch (Exception oEx) {
-            WasdiLog.errorLog("DockerProcessorEngine.DeployProcessor Exception", oEx);
+            WasdiLog.errorLog("WasdiProcessorEngine.DeployProcessor Exception", oEx);
             return false;
         }
         return true;

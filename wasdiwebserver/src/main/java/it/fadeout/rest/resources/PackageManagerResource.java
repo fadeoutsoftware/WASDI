@@ -30,9 +30,9 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.managers.CondaPackageManagerImpl;
-import wasdi.shared.managers.IPackageManager;
-import wasdi.shared.managers.PipPackageManagerImpl;
+import wasdi.shared.packagemanagers.CondaPackageManagerImpl;
+import wasdi.shared.packagemanagers.IPackageManager;
+import wasdi.shared.packagemanagers.PipPackageManagerImpl;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
@@ -182,10 +182,7 @@ public class PackageManagerResource {
 			}
 		}
 
-
-
 		// Otherwise, if the Package Manager info from the packagesInfo.json file is not valid, make a live call.
-
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 		
@@ -232,13 +229,6 @@ public class PackageManagerResource {
 				WasdiLog.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-
-			// Allow an empty update command. it will simply refresh the list of libraries
-//			if (Utils.isNullOrEmpty(sUpdateCommand)) {
-//				return Response.status(Status.BAD_REQUEST).build();
-//			}
-
-			String sUserId = oUser.getUserId();
 			
 			WasdiLog.debugLog("PackageManagerResource.environmentupdate: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -264,6 +254,7 @@ public class PackageManagerResource {
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
 			
 			WasdiLog.debugLog("PackageManagerResource.environmentupdate: create local operation");
+			String sUserId = oUser.getUserId();
 			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToForceUpdate.getName());
@@ -277,8 +268,6 @@ public class PackageManagerResource {
 			asCommand.put("updateCommand", sUpdateCommand);
 			String sJson = MongoRepository.s_oMapper.writeValueAsString(asCommand);
 			oProcessorParameter.setJson(sJson);
-			WasdiLog.debugLog("PackageManagerResource.environmentupdate( sJson: " + sJson + " )");
-
 			oProcessorParameter.setProcessorType(oProcessorToForceUpdate.getType());
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
@@ -288,7 +277,6 @@ public class PackageManagerResource {
 			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
 				
 				// In the main node: start a thread to update all the computing nodes
-				
 				try {
 					WasdiLog.debugLog("PackageManagerResource.environmentupdate: this is the main node, starting Worker to update computing nodes");
 					
