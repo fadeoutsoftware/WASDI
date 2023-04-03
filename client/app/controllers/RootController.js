@@ -6,7 +6,7 @@ var RootController = (function() {
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
     function RootController($rootScope, $scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
-                            $timeout,oModalService,oRabbitStompService, $window, oTranslate) {
+                            $timeout,oModalService,oRabbitStompService, $window, oTranslate, oProjectService) {
                         
         this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
@@ -15,6 +15,7 @@ var RootController = (function() {
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
+        this.m_oProjectService = oProjectService; 
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
@@ -31,6 +32,12 @@ var RootController = (function() {
         this.m_oSummary = {};
         this.m_oWindow = $window;
         this.m_oTranslate = oTranslate;
+
+        this.m_aoUserProjects = []; 
+        this.m_aoUserProjectsMap = [];     
+        this.m_oSelectedProject = {}; 
+        this.m_bLoadingProjects = true; 
+
         var oController = this;
 
 
@@ -181,8 +188,46 @@ var RootController = (function() {
         this.getWorkspacesInfo();
         this.initTooltips();
         this.getSummary()
+        this.initializeProjectsInfo()
+        //check constants service for list of user projects (is it stored?)
     }
 
+    RootController.prototype.initializeProjectsInfo = function() {
+        this.m_bLoadingProjects = true;
+        this.m_oProjectService.getProjectsListByUser().then(data => {
+            
+            if(!utilsIsObjectNullOrUndefined(data.data)) {
+                this.m_aoUserProjects = data.data
+
+                const oFirstElement = { name: "No Active Project", projectId: null };
+
+                let aoProjects = [oFirstElement].concat(data.data); 
+
+                this.m_aoUserProjectsMap = aoProjects.map(item => {
+                   return ({name: item.name, projectId: item.projectId}); 
+                });
+
+                this.m_oProject = oFirstElement;
+
+                this.m_aoUserProjects.forEach((oValue) => {
+                    if (oValue.activeProject) {
+                        this.m_oSelectedProject = oValue;
+                    }
+                });
+
+                console.log(this.m_aoUserProjectsMap)
+            } else {
+                utilsVexDialogAlertTop(
+                    "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
+                );
+            }
+            this.m_bLoadingProjects = false; 
+        })
+    }
+
+    RootController.prototype.setActiveProject = function() {
+
+    }
     /*********************************** METHODS **************************************/
 
     RootController.prototype.openPayloadDialog = function (oProcess){
@@ -813,7 +858,8 @@ var RootController = (function() {
         'ModalService',
         'RabbitStompService',
         '$window',
-        '$translate'
+        '$translate', 
+        'ProjectService'
     ];
 
     return RootController;
