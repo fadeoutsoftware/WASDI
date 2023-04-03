@@ -60,6 +60,11 @@ public class DockersConfig {
 	public EOEPCAConfig eoepca;
 	
 	/**
+	 * Command to use to start docker compose
+	 */
+	public String dockerComposeCommand = "docker-compose";
+	
+	/**
 	 * List of docker registries supported
 	 */
 	public ArrayList<DockerRegistryConfig> registers;
