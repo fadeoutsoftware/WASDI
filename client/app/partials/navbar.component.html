@@ -275,9 +275,9 @@
                                 aria-haspopup="true" aria-expanded="false">
                                 <span>Projects</span>
                             </a>
-                            <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="z-index: 999">
                                 <li role="presentation" ng-repeat="oProject in m_oController.m_aoUserProjectsMap" ng-class="oProject.name === m_oController.m_oSelectedProject.name ? 'active' : ''">
-                                    <a href="" class="dropdown-item text-dark">{{oProject.name}}</a>
+                                    <a ng-click="m_oController.changeActiveProject(oProject)" class="dropdown-item text-dark" style="cursor: pointer">{{oProject.name}}</a>
                                 </li>
                             </ul>
                         </li>

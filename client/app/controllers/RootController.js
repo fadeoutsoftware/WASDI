@@ -215,18 +215,50 @@ var RootController = (function() {
                     }
                 });
 
-                console.log(this.m_aoUserProjectsMap)
             } else {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
                 );
             }
             this.m_bLoadingProjects = false; 
-        })
+            return true; 
+        }, function(error) {
+            let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS";
+
+            if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+            }
+
+            utilsVexDialogAlertTop(sErrorMessage);
+        }); 
     }
 
-    RootController.prototype.setActiveProject = function() {
+    RootController.prototype.changeActiveProject = function(oProject) {
+        var oController = this;
 
+        if (!utilsIsObjectNullOrUndefined(oProject)) {
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (response) {
+
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner(`ACTIVE PROJECT CHANGED TO ${oProject.name}<br>READY`);
+                    utilsVexCloseDialogAfter(2000, oDialog);
+
+                    this.m_oSelectedProject = oProject;
+                    oController.initializeProjectsInfo();
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+                }
+    
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
+            });
+        }
     }
     /*********************************** METHODS **************************************/
 
