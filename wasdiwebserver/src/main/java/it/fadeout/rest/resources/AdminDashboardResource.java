@@ -33,6 +33,7 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ErrorResponse;
@@ -479,7 +480,7 @@ public class AdminDashboardResource {
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
 		oUserVM.setUserId(oUser.getUserId());
-		oUserVM.setType(oUser.getType());
+		oUserVM.setType(PermissionsUtils.getUserType(oUser));
 
 		if (oUser.getRole() != null) {
 			oUserVM.setRole(StringUtils.capitalize(oUser.getRole().toLowerCase()));

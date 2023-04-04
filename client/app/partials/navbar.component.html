@@ -87,6 +87,7 @@
                         </div>
                     </div>
 
+
                     <!------------------------------ LANGUAGE ------------------------------>
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
@@ -259,7 +260,6 @@
                                 <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}</span>
                             </a>
                         </li>
-
                         <!-- ADMIN DASHBOARD BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
                             ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0"
@@ -269,11 +269,42 @@
                                 <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}</span>
                             </a>
                         </li>
+                        <!-- PROJECTS LIST DROPDOWN -->
+                        <li class="dropdown show">
+                        <!-- PROJECTS LIST DROPDOWN -->
+                        <li class="dropdown show" ng-if="m_oController.m_sUserAccount !== 'FREE'">
+                            <a href="" class="btn dropdown-toggle" id="projects-dropdown" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                                <span>Projects</span>
+                            </a>
 
+                            <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="z-index: 999">
+                                <li role="presentation" ng-repeat="oProject in m_oController.m_aoUserProjectsMap" ng-class="oProject.name === m_oController.m_oSelectedProject.name ? 'active' : ''">
+                                    <a ng-click="m_oController.changeActiveProject(oProject)" class="dropdown-item text-dark" style="cursor: pointer">{{oProject.name}}</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- ACCOUNT SUBSCRIPTION TYPE -->
+                        <li ng-class="m_oController.m_sUserAccount === 'PROFESSIONAL' ? 'bg-success' : 'bg-warning'">
+                            <a style="cursor: pointer" ng-click="m_oController.openSubscriptions()" ng-if="m_oController.m_sUserAccount === 'FREE'">
+                                PURCHASE SUBSCRIPTION
+                            </a>
+                            <a style="cursor: pointer" class="btn btn-dropdown" id="pro-menu-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'">
+                                PRO
+                            </a>
+                            <ul ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <li role="presentation">
+                                    <a class="dropdown-item text-dark">
+                                        Manage Subscriptions
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a ng-click="m_oController.openSubscriptions()" class="dropdown-item text-dark" style="cursor: pointer">Purchase Subscription</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
-
-
             </div>
         </nav>
     </div>

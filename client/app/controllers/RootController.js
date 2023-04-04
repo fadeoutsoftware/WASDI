@@ -6,7 +6,7 @@ var RootController = (function() {
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
     function RootController($rootScope, $scope, oConstantsService, oAuthService, $state, oProcessWorkspaceService, oWorkspaceService,
-                            $timeout,oModalService,oRabbitStompService, $window, oTranslate) {
+                            $timeout,oModalService,oRabbitStompService, $window, oTranslate, oProjectService) {
                         
         this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
@@ -15,6 +15,7 @@ var RootController = (function() {
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
         this.m_oProcessWorkspaceService = oProcessWorkspaceService;
+        this.m_oProjectService = oProjectService; 
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
@@ -31,6 +32,13 @@ var RootController = (function() {
         this.m_oSummary = {};
         this.m_oWindow = $window;
         this.m_oTranslate = oTranslate;
+
+        this.m_aoUserProjects = []; 
+        this.m_aoUserProjectsMap = [];     
+        this.m_oSelectedProject = {}; 
+        this.m_bLoadingProjects = true; 
+
+        this.m_sUserAccount = ""; 
         var oController = this;
 
 
@@ -181,8 +189,123 @@ var RootController = (function() {
         this.getWorkspacesInfo();
         this.initTooltips();
         this.getSummary()
+        this.initializeProjectsInfo();
+        this.getAccountType();
+        //check constants service for list of user projects (is it stored?)
     }
 
+    RootController.prototype.initializeProjectsInfo = function() {
+        this.m_bLoadingProjects = true;
+        this.m_oProjectService.getProjectsListByUser().then(data => {
+            
+            if(!utilsIsObjectNullOrUndefined(data.data)) {
+                this.m_aoUserProjects = data.data
+
+                const oFirstElement = { name: "No Active Project", projectId: null };
+
+                let aoProjects = [oFirstElement].concat(data.data); 
+
+                this.m_aoUserProjectsMap = aoProjects.map(item => {
+                   return ({name: item.name, projectId: item.projectId}); 
+                });
+
+                this.m_oProject = oFirstElement;
+
+                this.m_aoUserProjects.forEach((oValue) => {
+                    if (oValue.activeProject) {
+                        this.m_oSelectedProject = oValue;
+                    }
+                });
+
+            } else {
+                utilsVexDialogAlertTop(
+                    "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
+                );
+                const oFirstElement = { name: "No Active Project", projectId: null };
+
+                this.m_aoUserProjectsMap = [oFirstElement]; 
+                this.m_oProject = oFirstElement; 
+
+                console.log(this.m_aoUserProjectsMap);
+            }
+            this.m_bLoadingProjects = false; 
+            return true; 
+        }, function(error) {
+            let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS";
+
+            if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+            }
+
+            const oFirstElement = { name: "No Active Project", projectId: null };
+
+            this.m_aoUserProjectsMap = [oFirstElement]; 
+            this.m_oProject = oFirstElement; 
+
+            console.log(this.m_aoUserProjectsMap);
+            utilsVexDialogAlertTop(sErrorMessage);
+        }); 
+    }
+
+    RootController.prototype.changeActiveProject = function(oProject) {
+        var oController = this;
+
+        if (!utilsIsObjectNullOrUndefined(oProject)) {
+            this.m_oProjectService.changeActiveProject(oProject.projectId).then(function (response) {
+
+                if (!utilsIsObjectNullOrUndefined(response.data)) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner(`ACTIVE PROJECT CHANGED TO ${oProject.name}<br>READY`);
+                    utilsVexCloseDialogAfter(2000, oDialog);
+
+                    this.m_oSelectedProject = oProject;
+                    oController.initializeProjectsInfo();
+                } else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
+                }
+    
+            }, function (error) {
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT";
+
+                if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                    sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                }
+
+                utilsVexDialogAlertTop(sErrorMessage);
+            });
+        }
+    }
+
+    RootController.prototype.getAccountType = function() {
+        this.m_sUserAccount = this.m_oUser.type;  
+        console.log(this.m_sUserAccount); 
+    }
+
+    RootController.prototype.openSubscriptions = function() {
+        let oNewSubscription = {
+            subscriptionId: null,
+            typeId: "",
+            typeName: "",
+            buySuccess: false
+        };
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oNewSubscription,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        });
+    }
     /*********************************** METHODS **************************************/
 
     RootController.prototype.openPayloadDialog = function (oProcess){
@@ -813,7 +936,8 @@ var RootController = (function() {
         'ModalService',
         'RabbitStompService',
         '$window',
-        '$translate'
+        '$translate', 
+        'ProjectService'
     ];
 
     return RootController;

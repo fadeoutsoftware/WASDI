@@ -2,6 +2,8 @@ package wasdi.shared.business;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import wasdi.shared.utils.PermissionsUtils;
+
 /**
  * WASDI User
  * Created by p.campanella on 21/10/2016.
