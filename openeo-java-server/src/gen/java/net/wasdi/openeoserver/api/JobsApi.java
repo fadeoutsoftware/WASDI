@@ -1,5 +1,6 @@
 package net.wasdi.openeoserver.api;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import net.wasdi.openeoserver.viewmodels.DescribeJob200Response.StatusEnum;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.StoreBatchJobRequest;
 import net.wasdi.openeoserver.viewmodels.UpdateBatchJobRequest;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.OpenEOJob;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.Processor;
@@ -40,6 +42,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -50,6 +53,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
 @Path("/jobs")
 
@@ -82,7 +86,7 @@ public class JobsApi  {
     		oOpenEOJob.setStarted(false);
     		oOpenEOJob.setUserId(oUser.getUserId());
     		// Dump the json as we have received it
-    		String sJSON = MongoRepository.s_oMapper.writeValueAsString(oOpenEOJob);
+    		String sJSON = MongoRepository.s_oMapper.writeValueAsString(oStoreBatchJobRequest);
     		oOpenEOJob.setParameters(sJSON);
     		
     		// Insert the Job in the db
@@ -167,16 +171,55 @@ public class JobsApi  {
     	try {
     		String sSessionId = sAuthorization.substring("Bearer basic//".length());
     		
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		OpenEOJob oJob = oOpenEOJobRepository.getOpenEOJob(sJobId);
+    		
+    		if (oJob == null) {
+        		WasdiLog.debugLog("JobsApi.describeJob: EO Job not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidJob", "Invalid Job")).build();    			
+    		}
+    		
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oJob.getWorkspaceId());
+    		
+    		if (oWorkspace == null) {
+        		WasdiLog.debugLog("JobsApi.describeJob: Workspace not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
+    		}
+    		
+    		String sBaseUrl = WasdiConfig.Current.baseUrl;
+    		
+    		if (oWorkspace.getNodeCode().equals("wasdi") == false) {
+    			NodeRepository oNodeRepository = new NodeRepository();
+    			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+    			
+    			if (oNode == null) {
+            		WasdiLog.debugLog("JobsApi.describeJob: Node not found ");
+            		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidNode", "Invalid Node")).build();    			    				
+    			}
+    			
+    			sBaseUrl = oNode.getNodeBaseAddress();
+    		}
+    		
     		DescribeJob200Response oDescribeJob200Response = new DescribeJob200Response();
     		oDescribeJob200Response.setId(sJobId);
     		
-    		String sStatus = getProcessStatus(sJobId, WasdiConfig.Current.baseUrl, sSessionId);
-    		oDescribeJob200Response.setStatus(wasdiStateToOpenEOState(sStatus));
+    		ProcessWorkspaceViewModel oProcWS = getProcessWorkspace(sJobId, sBaseUrl, sSessionId);
+    		
+			if (oProcWS == null) {
+        		WasdiLog.debugLog("JobsApi.describeJob: Process not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidProcWS", "Invalid ProcWS")).build();    			    				
+			}
+			
+    		oDescribeJob200Response.setStatus(wasdiStateToOpenEOState(oProcWS.getStatus()));
+    		oDescribeJob200Response.setProgress(new BigDecimal(oProcWS.getProgressPerc()));
+    		oDescribeJob200Response.setCreated(Utils.getWasdiDate(oProcWS.getOperationDate()));
+    		oDescribeJob200Response.setUpdated(Utils.getWasdiDate(oProcWS.getLastChangeDate()));
     		
     		return Response.ok().entity(oDescribeJob200Response).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
+    		WasdiLog.errorLog("JobsApi.describeJob error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
     }
@@ -485,10 +528,11 @@ public class JobsApi  {
 	 * @param sProcessId Process Id
 	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
 	 */
-	protected String getProcessStatus(String sProcessId, String sBaseUrl, String sSessionId) {
+	protected ProcessWorkspaceViewModel getProcessWorkspace(String sProcessId, String sBaseUrl, String sSessionId) {
 		WasdiLog.debugLog("ProcessesResource.getProcessStatus( " + sProcessId + " )");
 		if(null==sProcessId || sProcessId.isEmpty()) {
 			WasdiLog.debugLog("ProcessesResource.getProcessStatus: process id null or empty, aborting");
+			return null;
 		}
 		try {
 			if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
@@ -504,17 +548,13 @@ public class JobsApi  {
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
 			// Get result and extract status
-			Map<String, Object> aoJSONMap = MongoRepository.s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-
-			String sStatus = aoJSONMap.get("status").toString();
-			if(isThisAValidStatus(sStatus)) {
-				return sStatus;
-			}
+			ProcessWorkspaceViewModel oProcWS = MongoRepository.s_oMapper.readValue(sResponse, ProcessWorkspaceViewModel.class);
+			return oProcWS;
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessesResource.getProcessStatus: " + oEx.toString());
 		}	  
-		return "";
+		return null;
 	}
 	
 	/**

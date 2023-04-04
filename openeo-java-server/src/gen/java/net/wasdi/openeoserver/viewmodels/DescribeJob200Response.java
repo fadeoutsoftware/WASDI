@@ -34,409 +34,409 @@ import io.swagger.annotations.ApiModelProperty;
  * DescribeJob200Response
  */
 @JsonPropertyOrder({
-  DescribeJob200Response.JSON_PROPERTY_ID,
-  DescribeJob200Response.JSON_PROPERTY_TITLE,
-  DescribeJob200Response.JSON_PROPERTY_DESCRIPTION,
-  DescribeJob200Response.JSON_PROPERTY_PROCESS,
-  DescribeJob200Response.JSON_PROPERTY_STATUS,
-  DescribeJob200Response.JSON_PROPERTY_PROGRESS,
-  DescribeJob200Response.JSON_PROPERTY_CREATED,
-  DescribeJob200Response.JSON_PROPERTY_UPDATED,
-  DescribeJob200Response.JSON_PROPERTY_PLAN,
-  DescribeJob200Response.JSON_PROPERTY_COSTS,
-  DescribeJob200Response.JSON_PROPERTY_BUDGET,
-  DescribeJob200Response.JSON_PROPERTY_USAGE
+	DescribeJob200Response.JSON_PROPERTY_ID,
+	DescribeJob200Response.JSON_PROPERTY_TITLE,
+	DescribeJob200Response.JSON_PROPERTY_DESCRIPTION,
+	DescribeJob200Response.JSON_PROPERTY_PROCESS,
+	DescribeJob200Response.JSON_PROPERTY_STATUS,
+	DescribeJob200Response.JSON_PROPERTY_PROGRESS,
+	DescribeJob200Response.JSON_PROPERTY_CREATED,
+	DescribeJob200Response.JSON_PROPERTY_UPDATED,
+	DescribeJob200Response.JSON_PROPERTY_PLAN,
+	DescribeJob200Response.JSON_PROPERTY_COSTS,
+	DescribeJob200Response.JSON_PROPERTY_BUDGET,
+	DescribeJob200Response.JSON_PROPERTY_USAGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+
 public class DescribeJob200Response   {
-  public static final String JSON_PROPERTY_ID = "id";
-  @JsonProperty(JSON_PROPERTY_ID)
-  private String id;
+	public static final String JSON_PROPERTY_ID = "id";
+	@JsonProperty(JSON_PROPERTY_ID)
+	private String id;
 
-  public static final String JSON_PROPERTY_TITLE = "title";
-  @JsonProperty(JSON_PROPERTY_TITLE)
-  private String title;
+	public static final String JSON_PROPERTY_TITLE = "title";
+	@JsonProperty(JSON_PROPERTY_TITLE)
+	private String title;
 
-  public static final String JSON_PROPERTY_DESCRIPTION = "description";
-  @JsonProperty(JSON_PROPERTY_DESCRIPTION)
-  private String description;
+	public static final String JSON_PROPERTY_DESCRIPTION = "description";
+	@JsonProperty(JSON_PROPERTY_DESCRIPTION)
+	private String description;
 
-  public static final String JSON_PROPERTY_PROCESS = "process";
-  @JsonProperty(JSON_PROPERTY_PROCESS)
-  private ProcessGraphWithMetadata process;
+	public static final String JSON_PROPERTY_PROCESS = "process";
+	@JsonProperty(JSON_PROPERTY_PROCESS)
+	private ProcessGraphWithMetadata process;
 
-  /**
-   * The current status of a batch job.  The following status changes can occur: * &#x60;POST /jobs&#x60;: The status is initialized as &#x60;created&#x60;. * &#x60;POST /jobs/{job_id}/results&#x60;: The status is set to &#x60;queued&#x60;, if processing doesn&#39;t start instantly.     * Once the processing starts the status is set to &#x60;running&#x60;.     * Once the data is available to download the status is set to &#x60;finished&#x60;.     * Whenever an error occurs during processing, the status MUST be set to &#x60;error&#x60;. * &#x60;DELETE /jobs/{job_id}/results&#x60;: The status is set to &#x60;canceled&#x60; if the status was &#x60;running&#x60; beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to &#x60;created&#x60;. 
-   */
-  public enum StatusEnum {
-    CREATED("created"),
-    
-    QUEUED("queued"),
-    
-    RUNNING("running"),
-    
-    CANCELED("canceled"),
-    
-    FINISHED("finished"),
-    
-    ERROR("error");
+	/**
+	 * The current status of a batch job.  The following status changes can occur: * &#x60;POST /jobs&#x60;: The status is initialized as &#x60;created&#x60;. * &#x60;POST /jobs/{job_id}/results&#x60;: The status is set to &#x60;queued&#x60;, if processing doesn&#39;t start instantly.     * Once the processing starts the status is set to &#x60;running&#x60;.     * Once the data is available to download the status is set to &#x60;finished&#x60;.     * Whenever an error occurs during processing, the status MUST be set to &#x60;error&#x60;. * &#x60;DELETE /jobs/{job_id}/results&#x60;: The status is set to &#x60;canceled&#x60; if the status was &#x60;running&#x60; beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to &#x60;created&#x60;. 
+	 */
+	public enum StatusEnum {
+		CREATED("created"),
 
-    private String value;
+		QUEUED("queued"),
 
-    StatusEnum(String value) {
-      this.value = value;
-    }
+		RUNNING("running"),
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
+		CANCELED("canceled"),
 
-    @JsonCreator
-    public static StatusEnum fromValue(String value) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-  }
+		FINISHED("finished"),
 
-  public static final String JSON_PROPERTY_STATUS = "status";
-  @JsonProperty(JSON_PROPERTY_STATUS)
-  private StatusEnum status = StatusEnum.CREATED;
+		ERROR("error");
 
-  public static final String JSON_PROPERTY_PROGRESS = "progress";
-  @JsonProperty(JSON_PROPERTY_PROGRESS)
-  private BigDecimal progress;
+		private String value;
 
-  public static final String JSON_PROPERTY_CREATED = "created";
-  @JsonProperty(JSON_PROPERTY_CREATED)
-  private Date created;
+		StatusEnum(String value) {
+			this.value = value;
+		}
 
-  public static final String JSON_PROPERTY_UPDATED = "updated";
-  @JsonProperty(JSON_PROPERTY_UPDATED)
-  private Date updated;
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
 
-  public static final String JSON_PROPERTY_PLAN = "plan";
-  @JsonProperty(JSON_PROPERTY_PLAN)
-  private String plan;
+		@JsonCreator
+		public static StatusEnum fromValue(String value) {
+			for (StatusEnum b : StatusEnum.values()) {
+				if (b.value.equals(value)) {
+					return b;
+				}
+			}
+			throw new IllegalArgumentException("Unexpected value '" + value + "'");
+		}
+	}
 
-  public static final String JSON_PROPERTY_COSTS = "costs";
-  @JsonProperty(JSON_PROPERTY_COSTS)
-  private BigDecimal costs;
+	public static final String JSON_PROPERTY_STATUS = "status";
+	@JsonProperty(JSON_PROPERTY_STATUS)
+	private StatusEnum status = StatusEnum.CREATED;
 
-  public static final String JSON_PROPERTY_BUDGET = "budget";
-  @JsonProperty(JSON_PROPERTY_BUDGET)
-  private BigDecimal budget;
+	public static final String JSON_PROPERTY_PROGRESS = "progress";
+	@JsonProperty(JSON_PROPERTY_PROGRESS)
+	private BigDecimal progress;
 
-  public static final String JSON_PROPERTY_USAGE = "usage";
-  @JsonProperty(JSON_PROPERTY_USAGE)
-  private BatchJobUsage usage;
+	public static final String JSON_PROPERTY_CREATED = "created";
+	@JsonProperty(JSON_PROPERTY_CREATED)
+	private Date created;
 
-  public DescribeJob200Response id(String id) {
-    this.id = id;
-    return this;
-  }
+	public static final String JSON_PROPERTY_UPDATED = "updated";
+	@JsonProperty(JSON_PROPERTY_UPDATED)
+	private Date updated;
 
-  /**
-   * Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.
-   * @return id
-   **/
-  @JsonProperty(value = "id")
-  @ApiModelProperty(example = "a3cca2b2aa1e3b5b", required = true, value = "Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.")
-  @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$")
-  public String getId() {
-    return id;
-  }
+	public static final String JSON_PROPERTY_PLAN = "plan";
+	@JsonProperty(JSON_PROPERTY_PLAN)
+	private String plan;
 
-  public void setId(String id) {
-    this.id = id;
-  }
+	public static final String JSON_PROPERTY_COSTS = "costs";
+	@JsonProperty(JSON_PROPERTY_COSTS)
+	private BigDecimal costs;
 
-  public DescribeJob200Response title(String title) {
-    this.title = title;
-    return this;
-  }
+	public static final String JSON_PROPERTY_BUDGET = "budget";
+	@JsonProperty(JSON_PROPERTY_BUDGET)
+	private BigDecimal budget;
 
-  /**
-   * A short description to easily distinguish entities.
-   * @return title
-   **/
-  @JsonProperty(value = "title")
-  @ApiModelProperty(example = "NDVI based on Sentinel 2", value = "A short description to easily distinguish entities.")
-  
-  public String getTitle() {
-    return title;
-  }
+	public static final String JSON_PROPERTY_USAGE = "usage";
+	@JsonProperty(JSON_PROPERTY_USAGE)
+	private BatchJobUsage usage;
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
+	public DescribeJob200Response id(String id) {
+		this.id = id;
+		return this;
+	}
 
-  public DescribeJob200Response description(String description) {
-    this.description = description;
-    return this;
-  }
+	/**
+	 * Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.
+	 * @return id
+	 **/
+	@JsonProperty(value = "id")
+	@ApiModelProperty(example = "a3cca2b2aa1e3b5b", required = true, value = "Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.")
+	@NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$")
+	public String getId() {
+		return id;
+	}
 
-  /**
-   * Detailed multi-line description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.
-   * @return description
-   **/
-  @JsonProperty(value = "description")
-  @ApiModelProperty(example = "Deriving minimum NDVI measurements over pixel time series of Sentinel 2", value = "Detailed multi-line description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.")
-  
-  public String getDescription() {
-    return description;
-  }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public DescribeJob200Response title(String title) {
+		this.title = title;
+		return this;
+	}
 
-  public DescribeJob200Response process(ProcessGraphWithMetadata process) {
-    this.process = process;
-    return this;
-  }
+	/**
+	 * A short description to easily distinguish entities.
+	 * @return title
+	 **/
+	@JsonProperty(value = "title")
+	@ApiModelProperty(example = "NDVI based on Sentinel 2", value = "A short description to easily distinguish entities.")
 
-  /**
-   * Get process
-   * @return process
-   **/
-  @JsonProperty(value = "process")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public ProcessGraphWithMetadata getProcess() {
-    return process;
-  }
+	public String getTitle() {
+		return title;
+	}
 
-  public void setProcess(ProcessGraphWithMetadata process) {
-    this.process = process;
-  }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-  public DescribeJob200Response status(StatusEnum status) {
-    this.status = status;
-    return this;
-  }
+	public DescribeJob200Response description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  /**
-   * The current status of a batch job.  The following status changes can occur: * &#x60;POST /jobs&#x60;: The status is initialized as &#x60;created&#x60;. * &#x60;POST /jobs/{job_id}/results&#x60;: The status is set to &#x60;queued&#x60;, if processing doesn&#39;t start instantly.     * Once the processing starts the status is set to &#x60;running&#x60;.     * Once the data is available to download the status is set to &#x60;finished&#x60;.     * Whenever an error occurs during processing, the status MUST be set to &#x60;error&#x60;. * &#x60;DELETE /jobs/{job_id}/results&#x60;: The status is set to &#x60;canceled&#x60; if the status was &#x60;running&#x60; beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to &#x60;created&#x60;. 
-   * @return status
-   **/
-  @JsonProperty(value = "status")
-  @ApiModelProperty(example = "running", required = true, value = "The current status of a batch job.  The following status changes can occur: * `POST /jobs`: The status is initialized as `created`. * `POST /jobs/{job_id}/results`: The status is set to `queued`, if processing doesn't start instantly.     * Once the processing starts the status is set to `running`.     * Once the data is available to download the status is set to `finished`.     * Whenever an error occurs during processing, the status MUST be set to `error`. * `DELETE /jobs/{job_id}/results`: The status is set to `canceled` if the status was `running` beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to `created`. ")
-  @NotNull 
-  public StatusEnum getStatus() {
-    return status;
-  }
+	/**
+	 * Detailed multi-line description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.
+	 * @return description
+	 **/
+	@JsonProperty(value = "description")
+	@ApiModelProperty(example = "Deriving minimum NDVI measurements over pixel time series of Sentinel 2", value = "Detailed multi-line description to explain the entity.  [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.")
 
-  public void setStatus(StatusEnum status) {
-    this.status = status;
-  }
+	public String getDescription() {
+		return description;
+	}
 
-  public DescribeJob200Response progress(BigDecimal progress) {
-    this.progress = progress;
-    return this;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  /**
-   * Indicates the process of a running batch job in percent. Can also be set for a job which stopped due to an error or was canceled by the user. In this case, the value indicates the progress at which the job stopped. The Property may not be available for the status codes &#x60;created&#x60; and &#x60;queued&#x60;. Submitted and queued jobs only allow the value &#x60;0&#x60;, finished jobs only allow the value &#x60;100&#x60;.
-   * minimum: 0
-   * maximum: 100
-   * @return progress
-   **/
-  @JsonProperty(value = "progress")
-  @ApiModelProperty(example = "75.5", value = "Indicates the process of a running batch job in percent. Can also be set for a job which stopped due to an error or was canceled by the user. In this case, the value indicates the progress at which the job stopped. The Property may not be available for the status codes `created` and `queued`. Submitted and queued jobs only allow the value `0`, finished jobs only allow the value `100`.")
-  @Valid  @DecimalMin("0") @DecimalMax("100")
-  public BigDecimal getProgress() {
-    return progress;
-  }
+	public DescribeJob200Response process(ProcessGraphWithMetadata process) {
+		this.process = process;
+		return this;
+	}
 
-  public void setProgress(BigDecimal progress) {
-    this.progress = progress;
-  }
+	/**
+	 * Get process
+	 * @return process
+	 **/
+	@JsonProperty(value = "process")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull @Valid 
+	public ProcessGraphWithMetadata getProcess() {
+		return process;
+	}
 
-  public DescribeJob200Response created(Date created) {
-    this.created = created;
-    return this;
-  }
+	public void setProcess(ProcessGraphWithMetadata process) {
+		this.process = process;
+	}
 
-  /**
-   * Date and time of creation, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.
-   * @return created
-   **/
-  @JsonProperty(value = "created")
-  @ApiModelProperty(example = "2017-01-01T09:32:12Z", required = true, value = "Date and time of creation, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.")
-  @NotNull 
-  public Date getCreated() {
-    return created;
-  }
+	public DescribeJob200Response status(StatusEnum status) {
+		this.status = status;
+		return this;
+	}
 
-  public void setCreated(Date created) {
-    this.created = created;
-  }
+	/**
+	 * The current status of a batch job.  The following status changes can occur: * &#x60;POST /jobs&#x60;: The status is initialized as &#x60;created&#x60;. * &#x60;POST /jobs/{job_id}/results&#x60;: The status is set to &#x60;queued&#x60;, if processing doesn&#39;t start instantly.     * Once the processing starts the status is set to &#x60;running&#x60;.     * Once the data is available to download the status is set to &#x60;finished&#x60;.     * Whenever an error occurs during processing, the status MUST be set to &#x60;error&#x60;. * &#x60;DELETE /jobs/{job_id}/results&#x60;: The status is set to &#x60;canceled&#x60; if the status was &#x60;running&#x60; beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to &#x60;created&#x60;. 
+	 * @return status
+	 **/
+	@JsonProperty(value = "status")
+	@ApiModelProperty(example = "running", required = true, value = "The current status of a batch job.  The following status changes can occur: * `POST /jobs`: The status is initialized as `created`. * `POST /jobs/{job_id}/results`: The status is set to `queued`, if processing doesn't start instantly.     * Once the processing starts the status is set to `running`.     * Once the data is available to download the status is set to `finished`.     * Whenever an error occurs during processing, the status MUST be set to `error`. * `DELETE /jobs/{job_id}/results`: The status is set to `canceled` if the status was `running` beforehand and partial or preliminary results are available to be downloaded. Otherwise the status is set to `created`. ")
+	@NotNull 
+	public StatusEnum getStatus() {
+		return status;
+	}
 
-  public DescribeJob200Response updated(Date updated) {
-    this.updated = updated;
-    return this;
-  }
+	public void setStatus(StatusEnum status) {
+		this.status = status;
+	}
 
-  /**
-   * Date and time of the last status change, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.
-   * @return updated
-   **/
-  @JsonProperty(value = "updated")
-  @ApiModelProperty(example = "2017-01-01T09:36:18Z", value = "Date and time of the last status change, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.")
-  
-  public Date getUpdated() {
-    return updated;
-  }
+	public DescribeJob200Response progress(BigDecimal progress) {
+		this.progress = progress;
+		return this;
+	}
 
-  public void setUpdated(Date updated) {
-    this.updated = updated;
-  }
+	/**
+	 * Indicates the process of a running batch job in percent. Can also be set for a job which stopped due to an error or was canceled by the user. In this case, the value indicates the progress at which the job stopped. The Property may not be available for the status codes &#x60;created&#x60; and &#x60;queued&#x60;. Submitted and queued jobs only allow the value &#x60;0&#x60;, finished jobs only allow the value &#x60;100&#x60;.
+	 * minimum: 0
+	 * maximum: 100
+	 * @return progress
+	 **/
+	@JsonProperty(value = "progress")
+	@ApiModelProperty(example = "75.5", value = "Indicates the process of a running batch job in percent. Can also be set for a job which stopped due to an error or was canceled by the user. In this case, the value indicates the progress at which the job stopped. The Property may not be available for the status codes `created` and `queued`. Submitted and queued jobs only allow the value `0`, finished jobs only allow the value `100`.")
+	@Valid  @DecimalMin("0") @DecimalMax("100")
+	public BigDecimal getProgress() {
+		return progress;
+	}
 
-  public DescribeJob200Response plan(String plan) {
-    this.plan = plan;
-    return this;
-  }
+	public void setProgress(BigDecimal progress) {
+		this.progress = progress;
+	}
 
-  /**
-   * The billing plan to process and charge the job or service with.  Billing plans MUST be accepted in a *case insensitive* manner.  The plans can be retrieved from &#x60;GET /&#x60;, but the value returned here may not be in the list of plans any longer.
-   * @return plan
-   **/
-  @JsonProperty(value = "plan")
-  @ApiModelProperty(example = "free", value = "The billing plan to process and charge the job or service with.  Billing plans MUST be accepted in a *case insensitive* manner.  The plans can be retrieved from `GET /`, but the value returned here may not be in the list of plans any longer.")
-  
-  public String getPlan() {
-    return plan;
-  }
+	public DescribeJob200Response created(Date created) {
+		this.created = created;
+		return this;
+	}
 
-  public void setPlan(String plan) {
-    this.plan = plan;
-  }
+	/**
+	 * Date and time of creation, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.
+	 * @return created
+	 **/
+	@JsonProperty(value = "created")
+	@ApiModelProperty(example = "2017-01-01T09:32:12Z", required = true, value = "Date and time of creation, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.")
+	@NotNull 
+	public Date getCreated() {
+		return created;
+	}
 
-  public DescribeJob200Response costs(BigDecimal costs) {
-    this.costs = costs;
-    return this;
-  }
+	public void setCreated(Date created) {
+		this.created = created;
+	}
 
-  /**
-   * An amount of money or credits. The value MUST be specified in the currency the back-end is working with. The currency can be retrieved by calling &#x60;GET /&#x60;. If no currency is set, this field MUST be &#x60;null&#x60;.
-   * @return costs
-   **/
-  @JsonProperty(value = "costs")
-  @ApiModelProperty(example = "12.98", value = "An amount of money or credits. The value MUST be specified in the currency the back-end is working with. The currency can be retrieved by calling `GET /`. If no currency is set, this field MUST be `null`.")
-  @Valid 
-  public BigDecimal getCosts() {
-    return costs;
-  }
+	public DescribeJob200Response updated(Date updated) {
+		this.updated = updated;
+		return this;
+	}
 
-  public void setCosts(BigDecimal costs) {
-    this.costs = costs;
-  }
+	/**
+	 * Date and time of the last status change, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.
+	 * @return updated
+	 **/
+	@JsonProperty(value = "updated")
+	@ApiModelProperty(example = "2017-01-01T09:36:18Z", value = "Date and time of the last status change, formatted as a [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html) date-time.")
 
-  public DescribeJob200Response budget(BigDecimal budget) {
-    this.budget = budget;
-    return this;
-  }
+	public Date getUpdated() {
+		return updated;
+	}
 
-  /**
-   * Maximum amount of costs the request is allowed to produce. The value MUST be specified in the currency of the back-end. No limits apply, if the value is &#x60;null&#x60; or the back-end has no currency set in &#x60;GET /&#x60;.
-   * @return budget
-   **/
-  @JsonProperty(value = "budget")
-  @ApiModelProperty(example = "100", value = "Maximum amount of costs the request is allowed to produce. The value MUST be specified in the currency of the back-end. No limits apply, if the value is `null` or the back-end has no currency set in `GET /`.")
-  @Valid 
-  public BigDecimal getBudget() {
-    return budget;
-  }
+	public void setUpdated(Date updated) {
+		this.updated = updated;
+	}
 
-  public void setBudget(BigDecimal budget) {
-    this.budget = budget;
-  }
+	public DescribeJob200Response plan(String plan) {
+		this.plan = plan;
+		return this;
+	}
 
-  public DescribeJob200Response usage(BatchJobUsage usage) {
-    this.usage = usage;
-    return this;
-  }
+	/**
+	 * The billing plan to process and charge the job or service with.  Billing plans MUST be accepted in a *case insensitive* manner.  The plans can be retrieved from &#x60;GET /&#x60;, but the value returned here may not be in the list of plans any longer.
+	 * @return plan
+	 **/
+	@JsonProperty(value = "plan")
+	@ApiModelProperty(example = "free", value = "The billing plan to process and charge the job or service with.  Billing plans MUST be accepted in a *case insensitive* manner.  The plans can be retrieved from `GET /`, but the value returned here may not be in the list of plans any longer.")
 
-  /**
-   * Get usage
-   * @return usage
-   **/
-  @JsonProperty(value = "usage")
-  @ApiModelProperty(value = "")
-  @Valid 
-  public BatchJobUsage getUsage() {
-    return usage;
-  }
+	public String getPlan() {
+		return plan;
+	}
 
-  public void setUsage(BatchJobUsage usage) {
-    this.usage = usage;
-  }
+	public void setPlan(String plan) {
+		this.plan = plan;
+	}
+
+	public DescribeJob200Response costs(BigDecimal costs) {
+		this.costs = costs;
+		return this;
+	}
+
+	/**
+	 * An amount of money or credits. The value MUST be specified in the currency the back-end is working with. The currency can be retrieved by calling &#x60;GET /&#x60;. If no currency is set, this field MUST be &#x60;null&#x60;.
+	 * @return costs
+	 **/
+	@JsonProperty(value = "costs")
+	@ApiModelProperty(example = "12.98", value = "An amount of money or credits. The value MUST be specified in the currency the back-end is working with. The currency can be retrieved by calling `GET /`. If no currency is set, this field MUST be `null`.")
+	@Valid 
+	public BigDecimal getCosts() {
+		return costs;
+	}
+
+	public void setCosts(BigDecimal costs) {
+		this.costs = costs;
+	}
+
+	public DescribeJob200Response budget(BigDecimal budget) {
+		this.budget = budget;
+		return this;
+	}
+
+	/**
+	 * Maximum amount of costs the request is allowed to produce. The value MUST be specified in the currency of the back-end. No limits apply, if the value is &#x60;null&#x60; or the back-end has no currency set in &#x60;GET /&#x60;.
+	 * @return budget
+	 **/
+	@JsonProperty(value = "budget")
+	@ApiModelProperty(example = "100", value = "Maximum amount of costs the request is allowed to produce. The value MUST be specified in the currency of the back-end. No limits apply, if the value is `null` or the back-end has no currency set in `GET /`.")
+	@Valid 
+	public BigDecimal getBudget() {
+		return budget;
+	}
+
+	public void setBudget(BigDecimal budget) {
+		this.budget = budget;
+	}
+
+	public DescribeJob200Response usage(BatchJobUsage usage) {
+		this.usage = usage;
+		return this;
+	}
+
+	/**
+	 * Get usage
+	 * @return usage
+	 **/
+	@JsonProperty(value = "usage")
+	@ApiModelProperty(value = "")
+	@Valid 
+	public BatchJobUsage getUsage() {
+		return usage;
+	}
+
+	public void setUsage(BatchJobUsage usage) {
+		this.usage = usage;
+	}
 
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    DescribeJob200Response describeJob200Response = (DescribeJob200Response) o;
-    return Objects.equals(this.id, describeJob200Response.id) &&
-        Objects.equals(this.title, describeJob200Response.title) &&
-        Objects.equals(this.description, describeJob200Response.description) &&
-        Objects.equals(this.process, describeJob200Response.process) &&
-        Objects.equals(this.status, describeJob200Response.status) &&
-        Objects.equals(this.progress, describeJob200Response.progress) &&
-        Objects.equals(this.created, describeJob200Response.created) &&
-        Objects.equals(this.updated, describeJob200Response.updated) &&
-        Objects.equals(this.plan, describeJob200Response.plan) &&
-        Objects.equals(this.costs, describeJob200Response.costs) &&
-        Objects.equals(this.budget, describeJob200Response.budget) &&
-        Objects.equals(this.usage, describeJob200Response.usage);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		DescribeJob200Response describeJob200Response = (DescribeJob200Response) o;
+		return Objects.equals(this.id, describeJob200Response.id) &&
+				Objects.equals(this.title, describeJob200Response.title) &&
+				Objects.equals(this.description, describeJob200Response.description) &&
+				Objects.equals(this.process, describeJob200Response.process) &&
+				Objects.equals(this.status, describeJob200Response.status) &&
+				Objects.equals(this.progress, describeJob200Response.progress) &&
+				Objects.equals(this.created, describeJob200Response.created) &&
+				Objects.equals(this.updated, describeJob200Response.updated) &&
+				Objects.equals(this.plan, describeJob200Response.plan) &&
+				Objects.equals(this.costs, describeJob200Response.costs) &&
+				Objects.equals(this.budget, describeJob200Response.budget) &&
+				Objects.equals(this.usage, describeJob200Response.usage);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, title, description, process, status, progress, created, updated, plan, costs, budget, usage);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, title, description, process, status, progress, created, updated, plan, costs, budget, usage);
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class DescribeJob200Response {\n");
-    
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    title: ").append(toIndentedString(title)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    process: ").append(toIndentedString(process)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
-    sb.append("    created: ").append(toIndentedString(created)).append("\n");
-    sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
-    sb.append("    plan: ").append(toIndentedString(plan)).append("\n");
-    sb.append("    costs: ").append(toIndentedString(costs)).append("\n");
-    sb.append("    budget: ").append(toIndentedString(budget)).append("\n");
-    sb.append("    usage: ").append(toIndentedString(usage)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class DescribeJob200Response {\n");
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+		sb.append("    id: ").append(toIndentedString(id)).append("\n");
+		sb.append("    title: ").append(toIndentedString(title)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    process: ").append(toIndentedString(process)).append("\n");
+		sb.append("    status: ").append(toIndentedString(status)).append("\n");
+		sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
+		sb.append("    created: ").append(toIndentedString(created)).append("\n");
+		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
+		sb.append("    plan: ").append(toIndentedString(plan)).append("\n");
+		sb.append("    costs: ").append(toIndentedString(costs)).append("\n");
+		sb.append("    budget: ").append(toIndentedString(budget)).append("\n");
+		sb.append("    usage: ").append(toIndentedString(usage)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
 
