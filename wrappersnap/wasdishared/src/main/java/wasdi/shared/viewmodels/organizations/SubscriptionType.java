@@ -12,6 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SubscriptionType {
 
+	Free("Free", "Free", "Free"),
 	OneDayStandard("OneDayStandard", "One Day Standard", "One Day Standard"),
 	OneWeekStandard("OneWeekStandard", "One Week Standard", "One Week Standard"),
 	OneMonthStandard("OneMonthStandard", "One Month Standard", "One Month Standard"),

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -175,25 +176,38 @@ public class SubscriptionResource {
 
 
 			if (!aoSubscriptionLVM.isEmpty()) {
-				Map<String, SubscriptionListViewModel> aoSubscriptionListViewModelMap = aoSubscriptionLVM.stream().collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, Function.identity()));
-
-				Set<String> asSubscriptionIds_2 = aoSubscriptionListViewModelMap.keySet();
-
-				Map<String, Map<String, Long>> aoRunningTimeBySubscriptionAndProject =
-						new ProcessWorkspaceResource().getRunningTimeBySubscriptionAndProject(sSessionId);
-
-				for (String sSubscriptionId : asSubscriptionIds_2) {
-					Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionAndProject.get(sSubscriptionId);
-
-					if (aoRunningTimeByProject != null) {
-						long lTotalRunningTime = 0;
-
-						for (Long lRunningTime : aoRunningTimeByProject.values()) {
-							lTotalRunningTime += lRunningTime;
+				try  {
+					//Map<String, SubscriptionListViewModel> aoSubscriptionListViewModelMap = aoSubscriptionLVM.stream().collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, Function.identity()));
+					
+					Map<String, SubscriptionListViewModel> aoSubscriptionListViewModelMap = new HashMap<String, SubscriptionListViewModel>();
+					
+					for (SubscriptionListViewModel oVMToAdd : aoSubscriptionLVM) {
+						if (aoSubscriptionListViewModelMap.containsKey(oVMToAdd.getSubscriptionId()) ==false) {
+							aoSubscriptionListViewModelMap.put(oVMToAdd.getSubscriptionId(), oVMToAdd);
 						}
-
-						aoSubscriptionListViewModelMap.get(sSubscriptionId).setRunningTime(lTotalRunningTime);
 					}
+
+					Set<String> asSubscriptionIds_2 = aoSubscriptionListViewModelMap.keySet();
+
+					Map<String, Map<String, Long>> aoRunningTimeBySubscriptionAndProject =
+							new ProcessWorkspaceResource().getRunningTimeBySubscriptionAndProject(sSessionId);
+
+					for (String sSubscriptionId : asSubscriptionIds_2) {
+						Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionAndProject.get(sSubscriptionId);
+
+						if (aoRunningTimeByProject != null) {
+							long lTotalRunningTime = 0;
+
+							for (Long lRunningTime : aoRunningTimeByProject.values()) {
+								lTotalRunningTime += lRunningTime;
+							}
+
+							aoSubscriptionListViewModelMap.get(sSubscriptionId).setRunningTime(lTotalRunningTime);
+						}
+					}					
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("SubscriptionResource.getListByUser: exception computing running time for projects ", oEx);
 				}
 			}
 
@@ -252,7 +266,7 @@ public class SubscriptionResource {
 
 			if (oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
+				Organization oOrganization = oOrganizationRepository.getById(oSubscription.getOrganizationId());
 				sOrganizationName = oOrganization.getName();
 			}
 

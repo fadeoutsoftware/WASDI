@@ -70,29 +70,6 @@ public class OrganizationRepository extends MongoRepository {
 	}
 
 	/**
-	 * Get an organization by its id.
-	 * @param sOrganizationId the id of the organization
-	 * @return the organization if found, null otherwise
-	 */
-	public Organization getOrganizationById(String sOrganizationId) {
-		try {
-			Document oWSDocument = getCollection(m_sThisCollection)
-					.find(new Document("organizationId", sOrganizationId))
-					.first();
-
-			if (oWSDocument != null) {
-				String sJSON = oWSDocument.toJson();
-
-				return s_oMapper.readValue(sJSON, Organization.class);
-			}
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-		}
-
-		return null;
-	}
-
-	/**
 	 * Get an organization by its Id.
 	 * @param sOrganizationId the Id of the organization
 	 * @return the organization if found, null otherwise
@@ -146,7 +123,7 @@ public class OrganizationRepository extends MongoRepository {
 	 * @param sUserId the owner of the organization
 	 * @return the organization if found, null otherwise
 	 */
-	public List<Organization> getOrganizationsByUser(String sUserId) {
+	public List<Organization> getOrganizationsOwnedByUser(String sUserId) {
 		final List<Organization> aoReturnList = new ArrayList<>();
 
 		try {

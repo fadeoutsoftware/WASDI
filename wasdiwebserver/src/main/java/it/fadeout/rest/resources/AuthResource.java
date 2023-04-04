@@ -30,6 +30,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -164,7 +165,7 @@ public class AuthResource {
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(oSession.getSessionId());
-				oUserVM.setType(oUser.getType());
+				oUserVM.setType(PermissionsUtils.getUserType(oUser));
 
 				if (oUser.getRole() != null) {
 					oUserVM.setRole(oUser.getRole());
@@ -210,7 +211,7 @@ public class AuthResource {
 			oUserVM.setName(oUser.getName());
 			oUserVM.setSurname(oUser.getSurname());
 			oUserVM.setUserId(oUser.getUserId());
-			oUserVM.setType(oUser.getType());
+			oUserVM.setType(PermissionsUtils.getUserType(oUser));
 			return oUserVM;
 		} catch (Exception oE) {
 			WasdiLog.errorLog("AuthResource.checkSession: " + oE);
@@ -693,7 +694,7 @@ public class AuthResource {
 			oOutputUserVM.setName(oUserId.getName());
 			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
-			oOutputUserVM.setType(oUserId.getType());
+			oOutputUserVM.setType(PermissionsUtils.getUserType(oUserId));
 			return oOutputUserVM;
 
 		} catch(Exception oEx) {

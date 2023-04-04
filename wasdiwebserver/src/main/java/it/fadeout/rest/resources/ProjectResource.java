@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import static wasdi.shared.business.UserApplicationPermission.PROJECT_READ;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,9 +79,18 @@ public class ProjectResource {
 			List<String> asSubscriptionIds = aoSubscriptionLVMs.stream()
 					.map(SubscriptionListViewModel::getSubscriptionId)
 					.collect(Collectors.toList());
+			
 
-			Map<String, String> aoSubscriptionNames = aoSubscriptionLVMs.stream()
-				      .collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, SubscriptionListViewModel::getName));
+			//Map<String, String> aoSubscriptionNames = aoSubscriptionLVMs.stream()
+			//	      .collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, SubscriptionListViewModel::getName));
+			
+			Map<String, String> aoSubscriptionNames = new HashMap<String, String>();
+			
+			for (SubscriptionListViewModel oVMToAdd : aoSubscriptionLVMs) {
+				if (!aoSubscriptionNames.containsKey(oVMToAdd.getSubscriptionId())) {
+					aoSubscriptionNames.put(oVMToAdd.getSubscriptionId(), oVMToAdd.getName());
+				}
+			}
 
 			List<Project> aoProjects = oProjectRepository.getProjectsBySubscriptions(asSubscriptionIds);
 
