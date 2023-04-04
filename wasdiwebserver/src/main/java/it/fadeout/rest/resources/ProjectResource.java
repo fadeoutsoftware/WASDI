@@ -75,11 +75,20 @@ public class ProjectResource {
 
 			@SuppressWarnings("unchecked")
 			List<SubscriptionListViewModel> aoSubscriptionLVMs = (List<SubscriptionListViewModel>) oResponse.getEntity();
+			
+			if (aoSubscriptionLVMs==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: aoSubscriptionLVMs is null");
+				return Response.ok(aoProjectList).build();
+			}
 
 			List<String> asSubscriptionIds = aoSubscriptionLVMs.stream()
 					.map(SubscriptionListViewModel::getSubscriptionId)
 					.collect(Collectors.toList());
-			
+
+			if (asSubscriptionIds==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: asSubscriptionIds is null");
+				return Response.ok(aoProjectList).build();
+			}
 
 			//Map<String, String> aoSubscriptionNames = aoSubscriptionLVMs.stream()
 			//	      .collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, SubscriptionListViewModel::getName));
@@ -93,6 +102,11 @@ public class ProjectResource {
 			}
 
 			List<Project> aoProjects = oProjectRepository.getProjectsBySubscriptions(asSubscriptionIds);
+			
+			if (aoProjects==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: aoProjects is null");
+				return Response.ok(aoProjectList).build();
+			}			
 
 			// For each
 			for (Project oProject : aoProjects) {
