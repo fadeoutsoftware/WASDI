@@ -38,6 +38,7 @@ var RootController = (function() {
         this.m_oSelectedProject = {}; 
         this.m_bLoadingProjects = true; 
 
+        this.m_sUserAccount = ""; 
         var oController = this;
 
 
@@ -188,7 +189,8 @@ var RootController = (function() {
         this.getWorkspacesInfo();
         this.initTooltips();
         this.getSummary()
-        this.initializeProjectsInfo()
+        this.initializeProjectsInfo();
+        this.getAccountType();
         //check constants service for list of user projects (is it stored?)
     }
 
@@ -219,6 +221,12 @@ var RootController = (function() {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"
                 );
+                const oFirstElement = { name: "No Active Project", projectId: null };
+
+                this.m_aoUserProjectsMap = [oFirstElement]; 
+                this.m_oProject = oFirstElement; 
+
+                console.log(this.m_aoUserProjectsMap);
             }
             this.m_bLoadingProjects = false; 
             return true; 
@@ -229,6 +237,12 @@ var RootController = (function() {
                 sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
             }
 
+            const oFirstElement = { name: "No Active Project", projectId: null };
+
+            this.m_aoUserProjectsMap = [oFirstElement]; 
+            this.m_oProject = oFirstElement; 
+
+            console.log(this.m_aoUserProjectsMap);
             utilsVexDialogAlertTop(sErrorMessage);
         }); 
     }
@@ -259,6 +273,38 @@ var RootController = (function() {
                 utilsVexDialogAlertTop(sErrorMessage);
             });
         }
+    }
+
+    RootController.prototype.getAccountType = function() {
+        this.m_sUserAccount = this.m_oUser.type;  
+        console.log(this.m_sUserAccount); 
+    }
+
+    RootController.prototype.openSubscriptions = function() {
+        let oNewSubscription = {
+            subscriptionId: null,
+            typeId: "",
+            typeName: "",
+            buySuccess: false
+        };
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oNewSubscription,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        });
     }
     /*********************************** METHODS **************************************/
 
