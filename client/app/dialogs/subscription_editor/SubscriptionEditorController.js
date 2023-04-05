@@ -2,8 +2,7 @@ SubscriptionEditorController = (function () {
     function SubscriptionEditorController(
         $scope,
         $window,
-        oClose,
-        oExtras,
+        oModalService, 
         oConstantsService,
         oSubscriptionService,
         oOrganizationService,
@@ -12,15 +11,16 @@ SubscriptionEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
-        this.m_oExtras = oExtras;
         this.m_oTranslate = oTranslate;
 
         this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
 
-        this.m_oEditSubscription = oExtras.subscription;
-        this.m_bEditMode = oExtras.editMode;
+        this.m_oModalService = oModalService;
+
+        // this.m_oEditSubscription = oExtras.subscription;
+        // this.m_bEditMode = oExtras.editMode;
 
 
         this.m_sBuyDate = null;
@@ -30,16 +30,50 @@ SubscriptionEditorController = (function () {
         
         this.m_bIsPaid = false;
 
-        this.initializeSubscriptionInfo();
+      //  this.initializeSubscriptionInfo();
 
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
-        $scope.close = function (result) {
-            oClose(result, 500);
-        }
+        this.getSubscriptionTypes();
+    
+    }
+
+    SubscriptionEditorController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
+        var oController = this;
+
+        let oNewSubscription = {
+            subscriptionId: null,
+            typeId: typeId,
+            typeName: typeName,
+            buySuccess: false
+        };
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oNewSubscription,
+                    editMode: true
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        });
+    }
+
+    SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
+        this.m_oSubscriptionService.getSubscriptionTypes().then(function(response) {
+            console.log(response);
+        })
     }
 
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
@@ -258,8 +292,7 @@ SubscriptionEditorController = (function () {
     SubscriptionEditorController.$inject = [
         '$scope',
         '$window',
-        'close',
-        'extras',
+        'ModalService',
         'ConstantsService',
         'SubscriptionService',
         'OrganizationService',

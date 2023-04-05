@@ -291,12 +291,7 @@ var RootController = (function() {
             buySuccess: false
         };
 
-        this.m_oState.go("root.subscriptions", {
-            extras: {
-                subscription: oNewSubscription, 
-                editMode: true
-            }
-        });
+        this.m_oState.go("root.subscriptions", {});
         // this.m_oModalService.showModal({
         //     templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
         //     controller: "SubscriptionEditorController",

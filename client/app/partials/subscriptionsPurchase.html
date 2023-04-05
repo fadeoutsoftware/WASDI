@@ -52,10 +52,10 @@
         <tbody>
             <tr>
                 <th scope="row">Standard</th>
-                <td><button class="btn btn-success btn-sm">50€</button></td>
-                <td><button class="btn btn-success btn-sm">150€</button></td>
-                <td><button class="btn btn-success btn-sm">500€</button></td>
-                <td><button class="btn btn-success btn-sm">5000€</button></td>
+                <td><button class="btn btn-success btn-sm"  ng-click="m_oController.showSubscriptionAddForm('OneDayStandard', 'One Day Standard')">50€</button></td>
+                <td><button class="btn btn-success btn-sm" ng-click="m_oController.showSubscriptionAddForm('OneWeekStandard', 'One Week Standard')">150€</button></td>
+                <td><button class="btn btn-success btn-sm" ng-click="m_oController.showSubscriptionAddForm('OneMonthStandard', 'One Month Standard')">500€</button></td>
+                <td><button class="btn btn-success btn-sm" ng-click="m_oController.showSubscriptionAddForm('OneYearStandard', 'One Year Standard')">5000€</button></td>
             </tr>
             <tr>
                 <th scope="row">Professional</th>
@@ -74,6 +74,9 @@
                     <tr>
                         <th scope="row">One Day Standard</td>
                         <td>50€</td>
+                        <td>
+                            <button class="btn btn-success">Buy</button>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row">One Day Standard</th>
