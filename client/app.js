@@ -216,6 +216,17 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvide
         }
     });
 
+    //SUBSCRIPTIONS PURCHASING 
+    $stateProvider.state('root.subscriptions', {
+        url: '/subscriptions', 
+        views: {
+            'maincontent': {
+                templateUrl: 'partials/subscriptionsPurchase.html', 
+                controller: 'SubscriptionEditorController'
+            }
+        }
+    });
+
 
 }]);
 
