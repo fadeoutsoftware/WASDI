@@ -37,44 +37,11 @@ SubscriptionEditorController = (function () {
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
-        this.getSubscriptionTypes();
+        //this.getSubscriptionTypes();
     
     }
 
-    SubscriptionEditorController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
-        var oController = this;
-
-        let oNewSubscription = {
-            subscriptionId: null,
-            typeId: typeId,
-            typeName: typeName,
-            buySuccess: false
-        };
-
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
-            controller: "SubscriptionEditorController",
-            inputs: {
-                extras: {
-                    subscription: oNewSubscription,
-                    editMode: true
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static'
-            })
-            modal.close.then(function () {
-                oController.initializeSubscriptionsInfo();
-            })
-        });
-    }
-
-    SubscriptionEditorController.prototype.getSubscriptionTypes = function () {
-        this.m_oSubscriptionService.getSubscriptionTypes().then(function(response) {
-            console.log(response);
-        })
-    }
+    
 
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
         if (utilsIsStrNullOrEmpty(this.m_oEditSubscription.subscriptionId)) {
