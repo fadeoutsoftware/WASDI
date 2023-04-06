@@ -2,7 +2,9 @@ SubscriptionEditorController = (function () {
     function SubscriptionEditorController(
         $scope,
         $window,
-        oModalService, 
+        oClose,
+        oExtras,
+        oModalService,
         oConstantsService,
         oSubscriptionService,
         oOrganizationService,
@@ -11,50 +13,76 @@ SubscriptionEditorController = (function () {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
         this.m_oScope.m_oController = this;
+        this.m_oClose = oClose;
         this.m_oTranslate = oTranslate;
-
         this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
 
         this.m_oModalService = oModalService;
 
-        // this.m_oEditSubscription = oExtras.subscription;
-        // this.m_bEditMode = oExtras.editMode;
-
+        this.m_oEditSubscription = oExtras.subscription;
+        this.m_bEditMode = oExtras.editMode;
+        this.m_iIndex = oExtras.index
 
         this.m_sBuyDate = null;
         this.m_sStartDate = null;
         this.m_sEndDate = null;
         this.m_lDurationDays = 0;
-        
-        this.m_bIsPaid = false;
 
-      //  this.initializeSubscriptionInfo();
+        this.m_bIsPaid = false;
 
         this.m_asOrganizations = [];
         this.m_aoOrganizationsMap = [];
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
-        //this.getSubscriptionTypes();
-    
+        this.initializeSubscriptionInfo();
+
+        //close function 
+        $scope.close = function (result, index) {
+            oClose(result, index, 500);
+        }
     }
 
-    
+
+    SubscriptionEditorController.prototype.createSubscriptionObject = function () {
+        if (!this.m_oEditSubscription.name) {
+            this.m_oEditSubscription.name = `${this.m_oEditSubscription.typeName} ${new Date().toISOString()}`
+        }
+        if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
+            this.m_oEditSubscription.organizationId = "";
+        } else {
+            this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
+            this.m_oEditSubscription.startDate = new Date(this.m_sStartDate);
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.endDate)) {
+            this.m_oEditSubscription.endDate = new Date(this.m_sEndDate);
+        }
+
+        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.durationDays)) {
+            this.m_oEditSubscription.durationDays = this.m_lDurationDays;
+        }
+    }
+
 
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
         if (utilsIsStrNullOrEmpty(this.m_oEditSubscription.subscriptionId)) {
             this.m_bIsPaid = this.m_oEditSubscription.buySuccess;
             this.initializeDates();
             this.getOrganizationsListByUser();
+
         } else {
             var oController = this;
 
             this.m_oSubscriptionService.getSubscriptionById(this.m_oEditSubscription.subscriptionId).then(
                 function (response) {
                     if (!utilsIsObjectNullOrUndefined(response)
-                            && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                         oController.m_oEditSubscription = response.data;
                         oController.m_bIsPaid = oController.m_oEditSubscription.buySuccess;
                         oController.initializeDates();
@@ -132,30 +160,13 @@ SubscriptionEditorController = (function () {
     }
 
     SubscriptionEditorController.prototype.saveSubscription = function () {
-
-        if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
-            this.m_oEditSubscription.organizationId = "";
-        } else {
-            this.m_oEditSubscription.organizationId = this.m_oOrganization.organizationId;
-        }
-
-        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.startDate)) {
-            this.m_oEditSubscription.startDate = new Date(this.m_sStartDate);
-        }
-
-        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.endDate)) {
-            this.m_oEditSubscription.endDate = new Date(this.m_sEndDate);
-        }
-
-        if (utilsIsObjectNullOrUndefined(this.m_oEditSubscription.durationDays)) {
-            this.m_oEditSubscription.durationDays = this.m_lDurationDays;
-        }
-
+        this.createSubscriptionObject();
+        console.log(this.m_oEditSubscription);
         let oController = this;
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
             if (!utilsIsObjectNullOrUndefined(response)
-                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
 
                 oController.m_oEditSubscription.subscriptionId = response.data.message;
 
@@ -164,6 +175,7 @@ SubscriptionEditorController = (function () {
 
                 let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
                 utilsVexCloseDialogAfter(4000, oDialog);
+                return true;
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
             }
@@ -185,18 +197,17 @@ SubscriptionEditorController = (function () {
             }
         });
 
-        if (this.m_bIsPaid) {
-            this.m_oEditSubscription = {};
-            this.m_oType = {};
-            this.m_oOrganization = {};
-        }
+        // if (this.m_bIsPaid) {
+        //     this.m_oEditSubscription = {};
+        //     this.m_oType = {};
+        //     this.m_oOrganization = {};
+        // }
     }
+    SubscriptionEditorController.prototype.getStripePaymentUrl = function () {
+        let oController = this;
 
-    SubscriptionEditorController.prototype.checkout = function () {
         let oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         let sActiveWorkspaceId = oActiveWorkspace == null ? null : oActiveWorkspace.workspaceId;
-
-        let oController = this;
 
         this.m_oSubscriptionService.getStripePaymentUrl(this.m_oEditSubscription.subscriptionId, sActiveWorkspaceId).then(function (response) {
             if (!utilsIsObjectNullOrUndefined(response.data) && response.data.message) {
@@ -208,13 +219,26 @@ SubscriptionEditorController = (function () {
                 oController.m_oWindow.open(sUrl, '_blank');
             }
 
-            oController.m_oScope.close();
+
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN RETRIEVING THE PAYMENT URL");
 
             oController.m_oScope.close();
         });
+    }
 
+    SubscriptionEditorController.prototype.checkout = function () {
+
+        if (!this.m_oEditSubscription.subscriptionId) {
+            this.saveSubscription();
+        //     if (this.saveSubscription()) {
+        //         this.getStripePaymentUrl();
+        //     }
+
+
+        }
+
+        //this.getStripePaymentUrl();
         this.m_oEditSubscription = {};
         this.m_oType = {};
         this.m_oOrganization = {};
@@ -259,6 +283,8 @@ SubscriptionEditorController = (function () {
     SubscriptionEditorController.$inject = [
         '$scope',
         '$window',
+        'close',
+        'extras',
         'ModalService',
         'ConstantsService',
         'SubscriptionService',

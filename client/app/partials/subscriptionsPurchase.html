@@ -77,11 +77,11 @@
         <div class="items-container" style="height: 20rem; overflow-y: scroll;">
             <table class="table" style="width: 40rem;">
                 <tbody>
-                    <tr ng-repeat="subscription in m_oController.m_aoSelectedSubscriptions">
+                    <tr ng-repeat="subscription in m_oController.m_aoSelectedSubscriptions track by $index">
                         <th scope="row">{{subscription.name}}</td>
                         <td>{{subscription.price}}€</td>
                         <td>
-                            <button class="btn btn-success">Buy</button>
+                            <button class="btn btn-success" ng-click="m_oController.showSubscriptionAddForm(subscription, $index)">Buy</button>
                         </td>
                     </tr>
                     <tr class="bg-light" style="position: sticky;bottom: 0">

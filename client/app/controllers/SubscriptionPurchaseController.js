@@ -27,7 +27,7 @@ SubscriptionPurchaseController = (function () {
 
         this.getSubscriptionTypes();
 
-        this.m_iTotalPrice = 0; 
+        this.m_iTotalPrice = 0;
     }
 
     SubscriptionPurchaseController.prototype.addToCart = function (sSubName, iSubPrice) {
@@ -45,18 +45,18 @@ SubscriptionPurchaseController = (function () {
             typeId: oMatchingSub.typeId,
             price: iSubPrice
         }
-        this.m_aoSelectedSubscriptions.push(oSubscriptionInfo); 
+        this.m_aoSelectedSubscriptions.push(oSubscriptionInfo);
 
         this.setPrice();
     }
 
-    SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
+    SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (oSubscription, iIndex) {
         var oController = this;
 
         let oNewSubscription = {
             subscriptionId: null,
-            typeId: typeId,
-            typeName: typeName,
+            typeId: oSubscription.typeId,
+            typeName: oSubscription.name,
             buySuccess: false
         };
 
@@ -66,28 +66,34 @@ SubscriptionPurchaseController = (function () {
             inputs: {
                 extras: {
                     subscription: oNewSubscription,
-                    editMode: true
+                    editMode: true,
+                    index: iIndex
                 }
             }
         }).then(function (modal) {
             modal.element.modal({
                 backdrop: 'static'
             })
-            modal.close.then(function () {
-                //oController.initializeSubscriptionsInfo();
+            modal.close.then(function (oSubscription) {
+                console.log(oSubscription);
+                if (utilsIsObjectNullOrUndefined(oSubscription)) {
+                    if(oSubscription.subscriptionId) {
+                    }
+                }
+                oController.initializeSubscriptionsInfo();
             })
         });
     }
 
     SubscriptionPurchaseController.prototype.setPrice = function () {
-        let iaPrice = []; 
+        let iaPrice = [];
         this.m_aoSelectedSubscriptions.forEach(oSubscription => {
-            iaPrice.push(oSubscription.price); 
-        }); 
+            iaPrice.push(oSubscription.price);
+        });
 
         let sum = iaPrice.reduce((a, b) => a + b, 0);
 
-        this.m_iTotalPrice = sum; 
+        this.m_iTotalPrice = sum;
     }
 
     SubscriptionPurchaseController.prototype.getSubscriptionTypes = function () {

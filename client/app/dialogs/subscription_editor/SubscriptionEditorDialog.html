@@ -1,6 +1,6 @@
 <div class="modal fade subscription_editor-dialog">
     <div class="modal-dialog" style="width: 50vw">
-        <div class="modal-content" >
+        <div class="modal-content">
             <div class="modal-header">
                 <h4 ng-show="m_oController.m_oEditSubscription.subscriptionId == null">
                     {{"DIALOG_ADD_SUBSCRIPTION"|translate}}</h4>
@@ -11,14 +11,16 @@
 
             </div>
             <div class="modal-body no-ale-style" style="height:40vh">
-
+                <div class="mb-3">
+                    <h3 ng-if="m_oController.m_bEditMode">{{m_oController.m_oEditSubscription.typeName}}</h3>
+                </div>
                 <form name="editSubscriptionForm" ng-hide="m_oController.isUserLoggedWithGoogle()">
                     <div class="form-v4-group row">
                         <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_NAME'|translate}}</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"
                                 ng-readonly="!m_oController.m_bEditMode"
-                                ng-model="m_oController.m_oEditSubscription.name" required />
+                                ng-model="m_oController.m_oEditSubscription.name" placeholder="Enter Name for Subscription" required />
                         </div>
                     </div>
 
@@ -28,7 +30,7 @@
                         <div class="col-sm-10">
                             <input type="text" class="form-v4-control-plaintext wasdi-input"
                                 ng-readonly="!m_oController.m_bEditMode"
-                                ng-model="m_oController.m_oEditSubscription.description" />
+                                ng-model="m_oController.m_oEditSubscription.description" placeholder="Enter a Description (optional)"/>
                         </div>
                     </div>
 
@@ -51,9 +53,8 @@
                     </div>
 
                     <div class="form-v4-group row" ng-show="m_oController.m_sBuyDate != null">
-                        <label
-                            class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_BUY_DATE'|translate}}</label>
-
+                        <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_SUBSCRIPTION_BUY_DATE'|translate}}
+                        </label>
                         <div class="col-sm-4">
                             <div class="time-picker-container">
                                 <div class="input-group" format="YYYY-MM-DD" moment-picker="m_oController.m_sBuyDate"
@@ -97,7 +98,7 @@
                             {{"DIALOG_EDIT_SUBSCRIPTION_ADD_TO_CART"|translate}}
                         </button>
                         <button type="submit" class="btn btn-primary btn-wasdi"
-                            ng-show="m_oController.m_bEditMode && m_oController.m_oEditSubscription.subscriptionId !== null && !m_oController.m_bIsPaid"
+                            ng-show="m_oController.m_bEditMode"
                             ng-click="m_oController.checkout()" data-dismiss="modal">
                             {{"DIALOG_EDIT_SUBSCRIPTION_CHECKOUT"|translate}}
                         </button>
@@ -110,7 +111,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
+                <button type="button" ng-click="close(m_oController.m_oEditSubscription)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
             </div>
