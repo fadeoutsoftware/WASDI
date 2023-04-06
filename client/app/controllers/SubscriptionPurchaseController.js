@@ -19,11 +19,36 @@ SubscriptionPurchaseController = (function () {
 
         this.m_oModalService = oModalService;
 
-        this.m_aoSubscriptionTypes = []; 
+        this.m_aoTypes = [];
+        this.m_aoTypesMap = [];
+        this.m_oType = {};
+
+        this.m_aoSelectedSubscriptions = [];
 
         this.getSubscriptionTypes();
+
+        this.m_iTotalPrice = 0; 
     }
 
+    SubscriptionPurchaseController.prototype.addToCart = function (sSubName, iSubPrice) {
+        let oSubscriptionInfo = {};
+        let oMatchingSub = {};
+
+        this.m_aoTypes.forEach(oSubscription => {
+            if (oSubscription.typeId === sSubName) {
+                oMatchingSub = oSubscription;
+            }
+        });
+        oSubscriptionInfo = {
+            description: oMatchingSub.description,
+            name: oMatchingSub.name,
+            typeId: oMatchingSub.typeId,
+            price: iSubPrice
+        }
+        this.m_aoSelectedSubscriptions.push(oSubscriptionInfo); 
+
+        this.setPrice();
+    }
 
     SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
         var oController = this;
@@ -54,13 +79,29 @@ SubscriptionPurchaseController = (function () {
         });
     }
 
+    SubscriptionPurchaseController.prototype.setPrice = function () {
+        let iaPrice = []; 
+        this.m_aoSelectedSubscriptions.forEach(oSubscription => {
+            iaPrice.push(oSubscription.price); 
+        }); 
+
+        let sum = iaPrice.reduce((a, b) => a + b, 0);
+
+        this.m_iTotalPrice = sum; 
+    }
+
     SubscriptionPurchaseController.prototype.getSubscriptionTypes = function () {
-        this.m_oSubscriptionService.getSubscriptionTypes().then(function (response) {
-           if(!utilsIsObjectNullOrUndefined(response)) {
-            this.m_aoSubscriptionTypes = response.data; 
-           }
+        let oController = this;
+        oController.m_oSubscriptionService.getSubscriptionTypes().then(function (response) {
+            if (!utilsIsObjectNullOrUndefined(response)
+                && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                oController.m_aoTypes = response.data;
+
+
+            }
         })
     }
+
 
     SubscriptionPurchaseController.$inject = [
         '$scope',
@@ -72,5 +113,5 @@ SubscriptionPurchaseController = (function () {
         '$translate'
     ];
     return SubscriptionPurchaseController
-})(); 
+})();
 window.SubscriptionPurchaseController = SubscriptionPurchaseController;
