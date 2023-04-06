@@ -706,7 +706,7 @@ public class DockerUtils {
         		if (!sUrl.endsWith("/")) sUrl += "/";
         		sUrl += "containers/" + sId + "/stop";
         		
-        		oResponse = HttpUtils.httpGet(sUrl);
+        		oResponse = HttpUtils.httpPost(sUrl, "");
         		
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
         			return false;
