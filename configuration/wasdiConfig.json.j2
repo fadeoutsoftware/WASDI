@@ -101,6 +101,146 @@
         "waitProcessMaxTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessMaxTimeout }},
         "waitProcessSleepTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessSleepTimeout }}
     },
+    "openEO": {
+        "baseAddress": "{{ dictWasdiConfiguration.openEO.baseAddress }}",
+        "api_version": "{{ dictWasdiConfiguration.openEO.api_version }}",
+        "backend_version": "{{ dictWasdiConfiguration.openEO.backend_version }}",
+        "stac_version": "{{ dictWasdiConfiguration.openEO.stac_version }}",
+        "type": "{{ dictWasdiConfiguration.openEO.type }}",
+        "id": "{{ dictWasdiConfiguration.openEO.id }}",
+        "title": "{{ dictWasdiConfiguration.openEO.title }}",
+        "production": {{ dictWasdiConfiguration.openEO.production | lower }},
+        "description": "{{ dictWasdiConfiguration.openEO.description }}",
+        "openEOWasdiAppName": "{{ dictWasdiConfiguration.openEO.openEOWasdiAppName }}",
+        "collections": [
+{% for oDictCurrentCollection in dictWasdiConfiguration.openEO.collections | default({}) %}
+            {
+                "stac_version": "{{ oDictCurrentCollection.stac_version }}",
+                "type": "{{ oDictCurrentCollection.type }}",
+                "id": "{{ oDictCurrentCollection.id }}",
+                "title": "{{ oDictCurrentCollection.title }}",
+                "description": "{{ oDictCurrentCollection.description }}",
+                "license": "{{ oDictCurrentCollection.license }}",
+                "extent": {
+                    "spatial": {
+                        "bbox": [
+{% for oDictCurrentExtentSpatialBbox in oDictCurrentCollection.extent.spatial.bbox | default([]) %}
+                            [
+{% for sValue in oDictCurrentExtentSpatialBbox %}
+                                {{ sValue }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                            ]{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ]
+                    },
+                    "temporal": {
+                        "interval": [
+{% for oDictCurrentExtentTemporalInterval in oDictCurrentCollection.extent.temporal.interval | default([]) %}
+                            [
+{% for sValue in oDictCurrentExtentTemporalInterval %}
+                                "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                            ]{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ]
+                    }
+                },
+{% if oDictCurrentCollection.keywords | default([]) | length > 0 %}
+                "keywords": [
+{% for sValue in oDictCurrentCollection.keywords %}
+                    "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% else %}
+                "keywords": [],
+{% endif %}
+{% if oDictCurrentCollection.providers | default([]) | length > 0 %}
+                "providers": [
+{% for oDictProvider in oDictCurrentCollection.providers %}
+                    {
+                        "name": "{{ oDictProvider.name }}",
+                        "roles": [
+{% for sValue in oDictProvider.roles %}
+                            "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ],
+                        "url": "{{ oDictProvider.url }}"
+                    }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% else %}
+                "providers": [],
+{% endif %}
+{% if oDictCurrentCollection.links | default([]) | length > 0 %}
+                "links": [
+{% for oDictCurrentLink in oDictCurrentCollection.links %}
+                    {
+                        "rel": "{{ oDictCurrentLink.rel }}",
+                        "href": "{{ oDictCurrentLink.href }}"
+                    }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ],
+{% else %}
+                "links": [],
+{% endif %}
+                "cubeDimensions": {},
+                "summaries": {
+{% if oDictCurrentCollection.summaries.constellation | default([]) | length > 0 %}
+                    "constellation": [
+{% for sValue in oDictCurrentCollection.summaries.constellation %}
+                        "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                    ],
+{% else %}
+                    "constellation": [],
+{% endif %}
+{% if oDictCurrentCollection.summaries.platform | default([]) | length > 0 %}
+                    "platform": [
+{% for sValue in oDictCurrentCollection.summaries.platform %}
+                        "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                    ],
+{% else %}
+                    "platform": [],
+{% endif %}
+{% if oDictCurrentCollection.summaries.instruments | default([]) | length > 0 %}
+                    "instruments": [
+{% for sValue in oDictCurrentCollection.summaries.instruments %}
+                        "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                    ]
+{% else %}
+                    "instruments": []
+{% endif %}
+                }
+            }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        ]
+    },
     "paths": {
         "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
         "downloadRootPath": "{{ dictWasdiConfiguration.paths.downloadRootPath }}",
@@ -228,6 +368,7 @@
 
         ],
 {% endif %}
+        "dockerComposeCommand": "{{ dictWasdiConfiguration.dockers.dockerComposeCommand }}",
         "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
         "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}",
         "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
