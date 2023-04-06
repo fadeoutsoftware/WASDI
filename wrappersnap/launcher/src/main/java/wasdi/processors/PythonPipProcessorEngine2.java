@@ -113,6 +113,12 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	 */
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
+		
+		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
+			return true;			
+		}
+		
 		// We read  the registers from the config
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 		
@@ -141,11 +147,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: delete run script. It will be recreated at the right moment");
 		String sProcFolder = getProcessorFolder(oProcessor);
 		WasdiFileUtils.deleteFile(sProcFolder+"runwasdidocker.sh");
-		
-		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
-			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
-			return false;			
-		}		
 
 		// Create utils
         DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
