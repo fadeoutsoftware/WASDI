@@ -278,5 +278,55 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		WasdiLog.debugLog("DockerProcessorEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
 		return redeploy(oParameter);
 	}
+	
+	@Override
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
+		
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: registers list is empty, return false.");
+			return false;			
+		}
+		
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: Docker Registry = " + m_sDockerRegistry);
+		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: call base class environmentUpdate");
+
+		return super.environmentUpdate(oParameter);
+	}
+	
+	@Override
+	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.refreshPackagesInfo: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.refreshPackagesInfo: registers list is empty, return false.");
+			return false;			
+		}
+		
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: Docker Registry = " + m_sDockerRegistry);
+		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: call base class refreshPackagesInfo");
+		
+		return super.refreshPackagesInfo(oParameter);
+	}
+	
 
 }
