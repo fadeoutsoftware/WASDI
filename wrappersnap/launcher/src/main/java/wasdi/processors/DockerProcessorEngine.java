@@ -416,8 +416,15 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (sJson.equals("\"\"")) {
                 sJson = "{}";
             }
+            
+            String sJsonCopy = sJson;
+            
+            if (sJsonCopy.length()>200) {
+            	sJsonCopy = sJsonCopy.substring(0, 200);
+            	sJsonCopy += "\n ... [TRUNCATED]";
+            }
 
-            WasdiLog.debugLog("DockerProcessorEngine.run: Decoded JSON Parameter " + sJson);
+            WasdiLog.debugLog("DockerProcessorEngine.run: Decoded JSON Parameter " + sJsonCopy);
 
             // Call localhost:port
             String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
