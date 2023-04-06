@@ -37,6 +37,8 @@ SubscriptionEditorController = (function () {
         this.m_oOrganization = {};
         this.m_bLoadingOrganizations = true;
 
+        this.m_bCheckoutNow = false;
+
         this.initializeSubscriptionInfo();
 
         //close function 
@@ -161,7 +163,7 @@ SubscriptionEditorController = (function () {
 
     SubscriptionEditorController.prototype.saveSubscription = function () {
         this.createSubscriptionObject();
-        console.log(this.m_oEditSubscription);
+
         let oController = this;
 
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
@@ -172,16 +174,19 @@ SubscriptionEditorController = (function () {
 
                 oController.initializeSubscriptionInfo();
                 oController.initializeDates();
+                if (!oController.m_bCheckoutNow) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
+                    utilsVexCloseDialogAfter(4000, oDialog);
+                } else {
+                    oController.getStripePaymentUrl();
+                }
 
-                let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
-                utilsVexCloseDialogAfter(4000, oDialog);
-                return true;
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
             }
 
             if (oController.m_bIsPaid) {
-                oController.m_oScope.close();
+                //oController.m_oScope.close();
             }
         }, function (error) {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION";
@@ -193,7 +198,7 @@ SubscriptionEditorController = (function () {
             utilsVexDialogAlertTop(sErrorMessage);
 
             if (oController.m_bIsPaid) {
-                oController.m_oScope.close();
+                //oController.m_oScope.close();
             }
         });
 
@@ -223,25 +228,21 @@ SubscriptionEditorController = (function () {
         }, function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN RETRIEVING THE PAYMENT URL");
 
-            oController.m_oScope.close();
+            //oController.m_oScope.close();
         });
     }
 
     SubscriptionEditorController.prototype.checkout = function () {
-
+        let oController = this;
         if (!this.m_oEditSubscription.subscriptionId) {
+            oController.m_bCheckoutNow= true;
             this.saveSubscription();
-        //     if (this.saveSubscription()) {
-        //         this.getStripePaymentUrl();
-        //     }
-
-
+        } else {
+            this.getStripePaymentUrl();
         }
-
-        //this.getStripePaymentUrl();
-        this.m_oEditSubscription = {};
-        this.m_oType = {};
-        this.m_oOrganization = {};
+        // this.m_oEditSubscription = {};
+        // this.m_oType = {};
+        // this.m_oOrganization = {};
     }
 
     SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
