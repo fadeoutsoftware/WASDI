@@ -200,19 +200,47 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 		
 		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is null, return false.");
+			WasdiLog.errorLog("PythonPipProcessorEngine2.run: registers list is null, return false.");
 			return false;
 		}
 		
 		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is empty, return false.");
+			WasdiLog.errorLog("PythonPipProcessorEngine2.run: registers list is empty, return false.");
 			return false;			
 		}
 		
 		// And we work with our main register
 		m_sDockerRegistry = aoRegisters.get(0).address;
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry " + m_sDockerRegistry);
+		WasdiLog.debugLog("PythonPipProcessorEngine2.run: Docker Registry " + m_sDockerRegistry);
+		
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+		
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath, m_sTomcatUser);
+		
+		if (!oDockerUtils.isContainerStarted(oProcessor)) {
+			
+			WasdiLog.debugLog("PythonPipProcessorEngine2.run: the processor is not started. Check if there are old versions up");
+			
+			try {
+				String sVersion = oProcessor.getVersion();
+				Integer iVersion = Integer.parseInt(sVersion);
+				
+				while (iVersion>1) {
+					iVersion = iVersion - 1;
+					
+					if (oDockerUtils.isContainerStarted(oProcessor.getName(), "" + iVersion)) {
+						WasdiLog.debugLog("PythonPipProcessorEngine2.run: found version " + iVersion + " running, stop it");
+						oDockerUtils.stop(oProcessor.getName(), "" + iVersion);
+						break;
+					}
+				}
+			}
+			catch (Exception oEx) {
+				WasdiLog.errorLog("PythonPipProcessorEngine2.run error searching old versions: ", oEx);
+			}
+		}
 
         return super.run(oParameter, false);
 	}

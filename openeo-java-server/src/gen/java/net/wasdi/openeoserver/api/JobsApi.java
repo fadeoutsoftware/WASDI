@@ -26,14 +26,20 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import net.wasdi.openeoserver.WasdiOpenEoServer;
+import net.wasdi.openeoserver.viewmodels.Asset;
+import net.wasdi.openeoserver.viewmodels.BatchJobResult;
+import net.wasdi.openeoserver.viewmodels.BatchJobResultGeometry;
 import net.wasdi.openeoserver.viewmodels.DescribeJob200Response;
 import net.wasdi.openeoserver.viewmodels.DescribeJob200Response.StatusEnum;
 import net.wasdi.openeoserver.viewmodels.Error;
+import net.wasdi.openeoserver.viewmodels.GeoJsonGeometry.TypeEnum;
+import net.wasdi.openeoserver.viewmodels.GeoJsonPolygon;
+import net.wasdi.openeoserver.viewmodels.ItemProperties;
+import net.wasdi.openeoserver.viewmodels.Link;
 import net.wasdi.openeoserver.viewmodels.StoreBatchJobRequest;
 import net.wasdi.openeoserver.viewmodels.UpdateBatchJobRequest;
+import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.OpenEOJob;
 import wasdi.shared.business.ProcessStatus;
@@ -41,6 +47,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OpenEOJobRepository;
@@ -272,24 +279,157 @@ public class JobsApi  {
     @javax.ws.rs.GET
     @Path("/{job_id}/results")
     @Produces({ "application/json", "application/geo+json" })
-    public Response listResults(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @HeaderParam("Authorization") String sAuthorization) {
+    public Response listResults(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			WasdiLog.debugLog("JobsApi.listResults: invalid credentials");
 			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
     	}
     	
     	try {
     		
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
+    		
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		OpenEOJob oJob = oOpenEOJobRepository.getOpenEOJob(sJobId);
+    		
+    		if (oJob == null) {
+        		WasdiLog.debugLog("JobsApi.listResults: EO Job not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.listResults", "InvalidJob", "Invalid Job")).build();    			
+    		}
+    		
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oJob.getWorkspaceId());
+    		
+    		if (oWorkspace == null) {
+        		WasdiLog.debugLog("JobsApi.listResults: Workspace not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.listResults", "InvalidWorkspace", "Invalid Workspace")).build();    			
+    		}
+    		
+    		String sBaseUrl = WasdiConfig.Current.baseUrl;
+    		
+    		if (oWorkspace.getNodeCode().equals("wasdi") == false) {
+    			NodeRepository oNodeRepository = new NodeRepository();
+    			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+    			
+    			if (oNode == null) {
+            		WasdiLog.debugLog("JobsApi.listResults: Node not found ");
+            		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.listResults", "InvalidNode", "Invalid Node")).build();    			    				
+    			}
+    			
+    			sBaseUrl = oNode.getNodeBaseAddress();
+    		}
+    		
+    		if (!sBaseUrl.endsWith("/")) sBaseUrl+="/";
+    		
+    		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+    		List<DownloadedFile> aoWorkspaceFiles = oDownloadedFilesRepository.getByWorkspace(oJob.getWorkspaceId());
+    		
+    		BatchJobResult oResult = new BatchJobResult();
+    		
+    		oResult.setStacVersion("1.0.0");
+    		oResult.id(sJobId);
+    		oResult.setType(net.wasdi.openeoserver.viewmodels.BatchJobResult.TypeEnum.FEATURE);
+    		
+    		HashMap<String, Asset> aoAssets = new HashMap<>();
+    		
+    		GeoJsonPolygon oGeometry = new GeoJsonPolygon();
+    		
+    		boolean bAddedGeometry = false;
+    		
+    		for (DownloadedFile oProduct : aoWorkspaceFiles) {
+    			if (oProduct.getFilePath().endsWith(".tif")) {
+					Asset oAsset = new Asset();
+					oAsset.setTitle("Final");
+					
+					oAsset.setType("image/tiff; application=geotiff");
+					
+					String sUrl = sBaseUrl + "catalog/downloadbyname?filename=" + oProduct.getFileName() + "&workspace=" + oWorkspace.getWorkspaceId() + "&token=" + sSessionId; 
+					oAsset.setHref(sUrl);
+					oAsset.getRoles().add("data");
+					
+					aoAssets.put(oProduct.getFileName(), oAsset);
+					
+					String sBbox = oProduct.getBoundingBox();
+					
+					if (bAddedGeometry) continue;
+					
+					if (!Utils.isNullOrEmpty(sBbox)) {
+						
+						String [] asParts = sBbox.split(",");
+						
+						if (asParts != null) {
+							oGeometry.setType(TypeEnum.POLYGON);
+							List<List<BigDecimal>> aoPoints = new ArrayList<List<BigDecimal>>();
+							
+							int iParts = asParts.length;
+							
+							for (int iPoints = 0; iPoints<iParts; iPoints+=2) {
+								if (iPoints+1>=iParts) break;
+								
+								try {
+									Double oValue1 = Double.parseDouble(asParts[iPoints]);
+									Double oValue2 = Double.parseDouble(asParts[iPoints+1]);
+									
+									List<BigDecimal> aoPointList = new ArrayList<BigDecimal>();
+									aoPointList.add(new BigDecimal(oValue1));
+									aoPointList.add(new BigDecimal(oValue2));
+									aoPoints.add(aoPointList);
+								}
+								catch (Exception oParseError) {
+									WasdiLog.errorLog("JobsApi.listResults: Error parsing bbox numbers ", oParseError);
+								}
+							}
+							
+							oGeometry.addCoordinatesItem(aoPoints);
+							bAddedGeometry = true;
+						}
+						
+					}
+    			}
+			}
+    		
+    		oResult.setGeometry(oGeometry);
+    		
+    		oResult.setAssets(aoAssets);
+    		
+    		List<Link> aoLinks = new ArrayList<Link>();
+    		Link oLink = new Link();
+    		oLink.setHref(new URI(WasdiConfig.Current.openEO.baseAddress));
+    		oLink.setRel("related");
+    		oLink.setType("text/html");
+    		oLink.setTitle("WASDI open EO Backend");
+    		aoLinks.add(oLink);
+    		
+    		oResult.setLinks(aoLinks);
+    		    		    		
+    		ProcessWorkspaceViewModel oProcWS = getProcessWorkspace(sJobId, sBaseUrl, sSessionId);
+    		
+			if (oProcWS == null) {
+        		WasdiLog.debugLog("JobsApi.listResults: Process not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.listResults", "InvalidProcWS", "Invalid ProcWS")).build();    			    				
+			}    		
+    		
+    		ItemProperties oItemProperties = new ItemProperties();
+    		oItemProperties.setCreated(Utils.getWasdiDate(oProcWS.getOperationDate()));
+    		oItemProperties.setStartDatetime(Utils.getWasdiDate(oProcWS.getOperationStartDate()));
+    		oItemProperties.setEndDatetime(Utils.getWasdiDate(oProcWS.getOperationEndDate()));
+    		
+    		oResult.setProperties(oItemProperties);
+    		
+    		ResponseBuilder oBuilder = Response.ok(oResult);
+    		oBuilder.header("OpenEO-Costs", 0);
+    	
+    		return oBuilder.build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		WasdiLog.errorLog("JobsApi.listResults error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.listResults", "InternalServerError", oEx.getMessage())).build();
 		}
     	
-    	return Response.ok().build();
+    	
     }
     
     @javax.ws.rs.POST

@@ -38,343 +38,343 @@ import io.swagger.annotations.ApiModelProperty;
  * BatchJobResult
  */
 @JsonPropertyOrder({
-  BatchJobResult.JSON_PROPERTY_STAC_VERSION,
-  BatchJobResult.JSON_PROPERTY_STAC_EXTENSIONS,
-  BatchJobResult.JSON_PROPERTY_ID,
-  BatchJobResult.JSON_PROPERTY_TYPE,
-  BatchJobResult.JSON_PROPERTY_BBOX,
-  BatchJobResult.JSON_PROPERTY_GEOMETRY,
-  BatchJobResult.JSON_PROPERTY_PROPERTIES,
-  BatchJobResult.JSON_PROPERTY_ASSETS,
-  BatchJobResult.JSON_PROPERTY_LINKS
+	BatchJobResult.JSON_PROPERTY_STAC_VERSION,
+	BatchJobResult.JSON_PROPERTY_STAC_EXTENSIONS,
+	BatchJobResult.JSON_PROPERTY_ID,
+	BatchJobResult.JSON_PROPERTY_TYPE,
+	BatchJobResult.JSON_PROPERTY_BBOX,
+	BatchJobResult.JSON_PROPERTY_GEOMETRY,
+	BatchJobResult.JSON_PROPERTY_PROPERTIES,
+	BatchJobResult.JSON_PROPERTY_ASSETS,
+	BatchJobResult.JSON_PROPERTY_LINKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+
 public class BatchJobResult   {
-  public static final String JSON_PROPERTY_STAC_VERSION = "stac_version";
-  @JsonProperty(JSON_PROPERTY_STAC_VERSION)
-  private String stacVersion;
+	public static final String JSON_PROPERTY_STAC_VERSION = "stac_version";
+	@JsonProperty(JSON_PROPERTY_STAC_VERSION)
+	private String stacVersion;
 
-  public static final String JSON_PROPERTY_STAC_EXTENSIONS = "stac_extensions";
-  @JsonProperty(JSON_PROPERTY_STAC_EXTENSIONS)
-  private Set<StacExtensionsInner> stacExtensions = null;
+	public static final String JSON_PROPERTY_STAC_EXTENSIONS = "stac_extensions";
+	@JsonProperty(JSON_PROPERTY_STAC_EXTENSIONS)
+	private Set<StacExtensionsInner> stacExtensions = null;
 
-  public static final String JSON_PROPERTY_ID = "id";
-  @JsonProperty(JSON_PROPERTY_ID)
-  private String id;
+	public static final String JSON_PROPERTY_ID = "id";
+	@JsonProperty(JSON_PROPERTY_ID)
+	private String id;
 
-  /**
-   * The GeoJSON type that applies to this metadata document, which MUST always be a \&quot;Feature\&quot; according to the STAC specification. This type does **not** describe the spatial data type of the assets.
-   */
-  public enum TypeEnum {
-    FEATURE("Feature");
+	/**
+	 * The GeoJSON type that applies to this metadata document, which MUST always be a \&quot;Feature\&quot; according to the STAC specification. This type does **not** describe the spatial data type of the assets.
+	 */
+	public enum TypeEnum {
+		FEATURE("Feature");
 
-    private String value;
+		private String value;
 
-    TypeEnum(String value) {
-      this.value = value;
-    }
+		TypeEnum(String value) {
+			this.value = value;
+		}
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
 
-    @JsonCreator
-    public static TypeEnum fromValue(String value) {
-      for (TypeEnum b : TypeEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-  }
+		@JsonCreator
+		public static TypeEnum fromValue(String value) {
+			for (TypeEnum b : TypeEnum.values()) {
+				if (b.value.equals(value)) {
+					return b;
+				}
+			}
+			throw new IllegalArgumentException("Unexpected value '" + value + "'");
+		}
+	}
 
-  public static final String JSON_PROPERTY_TYPE = "type";
-  @JsonProperty(JSON_PROPERTY_TYPE)
-  private TypeEnum type;
+	public static final String JSON_PROPERTY_TYPE = "type";
+	@JsonProperty(JSON_PROPERTY_TYPE)
+	private TypeEnum type;
 
-  public static final String JSON_PROPERTY_BBOX = "bbox";
-  @JsonProperty(JSON_PROPERTY_BBOX)
-  private List<BigDecimal> bbox = null;
+	public static final String JSON_PROPERTY_BBOX = "bbox";
+	@JsonProperty(JSON_PROPERTY_BBOX)
+	private List<BigDecimal> bbox = null;
 
-  public static final String JSON_PROPERTY_GEOMETRY = "geometry";
-  @JsonProperty(JSON_PROPERTY_GEOMETRY)
-  private BatchJobResultGeometry geometry;
+	public static final String JSON_PROPERTY_GEOMETRY = "geometry";
+	@JsonProperty(JSON_PROPERTY_GEOMETRY)
+	private GeoJsonGeometry geometry;
 
-  public static final String JSON_PROPERTY_PROPERTIES = "properties";
-  @JsonProperty(JSON_PROPERTY_PROPERTIES)
-  private ItemProperties properties;
+	public static final String JSON_PROPERTY_PROPERTIES = "properties";
+	@JsonProperty(JSON_PROPERTY_PROPERTIES)
+	private ItemProperties properties;
 
-  public static final String JSON_PROPERTY_ASSETS = "assets";
-  @JsonProperty(JSON_PROPERTY_ASSETS)
-  private Map<String, Asset> assets = new HashMap<>();
+	public static final String JSON_PROPERTY_ASSETS = "assets";
+	@JsonProperty(JSON_PROPERTY_ASSETS)
+	private Map<String, Asset> assets = new HashMap<>();
 
-  public static final String JSON_PROPERTY_LINKS = "links";
-  @JsonProperty(JSON_PROPERTY_LINKS)
-  private List<Link> links = new ArrayList<>();
+	public static final String JSON_PROPERTY_LINKS = "links";
+	@JsonProperty(JSON_PROPERTY_LINKS)
+	private List<Link> links = new ArrayList<>();
 
-  public BatchJobResult stacVersion(String stacVersion) {
-    this.stacVersion = stacVersion;
-    return this;
-  }
+	public BatchJobResult stacVersion(String stacVersion) {
+		this.stacVersion = stacVersion;
+		return this;
+	}
 
-  /**
-   * The [version of the STAC specification](https://github.com/radiantearth/stac-spec/releases), which MAY not be equal to the [STAC API version](#section/STAC). Supports versions 0.9.x and 1.x.x.
-   * @return stacVersion
-   **/
-  @JsonProperty(value = "stac_version")
-  @ApiModelProperty(required = true, value = "The [version of the STAC specification](https://github.com/radiantearth/stac-spec/releases), which MAY not be equal to the [STAC API version](#section/STAC). Supports versions 0.9.x and 1.x.x.")
-  @NotNull  @Pattern(regexp="^(0\\.9.\\d+|1\\.\\d+.\\d+)")
-  public String getStacVersion() {
-    return stacVersion;
-  }
+	/**
+	 * The [version of the STAC specification](https://github.com/radiantearth/stac-spec/releases), which MAY not be equal to the [STAC API version](#section/STAC). Supports versions 0.9.x and 1.x.x.
+	 * @return stacVersion
+	 **/
+	@JsonProperty(value = "stac_version")
+	@ApiModelProperty(required = true, value = "The [version of the STAC specification](https://github.com/radiantearth/stac-spec/releases), which MAY not be equal to the [STAC API version](#section/STAC). Supports versions 0.9.x and 1.x.x.")
+	@NotNull  @Pattern(regexp="^(0\\.9.\\d+|1\\.\\d+.\\d+)")
+	public String getStacVersion() {
+		return stacVersion;
+	}
 
-  public void setStacVersion(String stacVersion) {
-    this.stacVersion = stacVersion;
-  }
+	public void setStacVersion(String stacVersion) {
+		this.stacVersion = stacVersion;
+	}
 
-  public BatchJobResult stacExtensions(Set<StacExtensionsInner> stacExtensions) {
-    this.stacExtensions = stacExtensions;
-    return this;
-  }
+	public BatchJobResult stacExtensions(Set<StacExtensionsInner> stacExtensions) {
+		this.stacExtensions = stacExtensions;
+		return this;
+	}
 
-  public BatchJobResult addStacExtensionsItem(StacExtensionsInner stacExtensionsItem) {
-    if (this.stacExtensions == null) {
-      this.stacExtensions = new LinkedHashSet<>();
-    }
-    this.stacExtensions.add(stacExtensionsItem);
-    return this;
-  }
+	public BatchJobResult addStacExtensionsItem(StacExtensionsInner stacExtensionsItem) {
+		if (this.stacExtensions == null) {
+			this.stacExtensions = new LinkedHashSet<>();
+		}
+		this.stacExtensions.add(stacExtensionsItem);
+		return this;
+	}
 
-  /**
-   * A list of implemented STAC extensions. The list contains URLs to the JSON Schema files it can be validated against. For STAC &lt; 1.0.0-rc.1  shortcuts such as &#x60;sar&#x60; can be used instead of the schema URL.
-   * @return stacExtensions
-   **/
-  @JsonProperty(value = "stac_extensions")
-  @ApiModelProperty(value = "A list of implemented STAC extensions. The list contains URLs to the JSON Schema files it can be validated against. For STAC < 1.0.0-rc.1  shortcuts such as `sar` can be used instead of the schema URL.")
-  @Valid 
-  public Set<StacExtensionsInner> getStacExtensions() {
-    return stacExtensions;
-  }
+	/**
+	 * A list of implemented STAC extensions. The list contains URLs to the JSON Schema files it can be validated against. For STAC &lt; 1.0.0-rc.1  shortcuts such as &#x60;sar&#x60; can be used instead of the schema URL.
+	 * @return stacExtensions
+	 **/
+	@JsonProperty(value = "stac_extensions")
+	@ApiModelProperty(value = "A list of implemented STAC extensions. The list contains URLs to the JSON Schema files it can be validated against. For STAC < 1.0.0-rc.1  shortcuts such as `sar` can be used instead of the schema URL.")
+	@Valid 
+	public Set<StacExtensionsInner> getStacExtensions() {
+		return stacExtensions;
+	}
 
-  @JsonDeserialize(as = LinkedHashSet.class)
-  public void setStacExtensions(Set<StacExtensionsInner> stacExtensions) {
-    this.stacExtensions = stacExtensions;
-  }
+	@JsonDeserialize(as = LinkedHashSet.class)
+	public void setStacExtensions(Set<StacExtensionsInner> stacExtensions) {
+		this.stacExtensions = stacExtensions;
+	}
 
-  public BatchJobResult id(String id) {
-    this.id = id;
-    return this;
-  }
+	public BatchJobResult id(String id) {
+		this.id = id;
+		return this;
+	}
 
-  /**
-   * Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.
-   * @return id
-   **/
-  @JsonProperty(value = "id")
-  @ApiModelProperty(example = "a3cca2b2aa1e3b5b", required = true, value = "Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.")
-  @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$")
-  public String getId() {
-    return id;
-  }
+	/**
+	 * Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.
+	 * @return id
+	 **/
+	@JsonProperty(value = "id")
+	@ApiModelProperty(example = "a3cca2b2aa1e3b5b", required = true, value = "Unique identifier of the batch job, generated by the back-end during creation. MUST match the specified pattern.")
+	@NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$")
+	public String getId() {
+		return id;
+	}
 
-  public void setId(String id) {
-    this.id = id;
-  }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-  public BatchJobResult type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
+	public BatchJobResult type(TypeEnum type) {
+		this.type = type;
+		return this;
+	}
 
-  /**
-   * The GeoJSON type that applies to this metadata document, which MUST always be a \&quot;Feature\&quot; according to the STAC specification. This type does **not** describe the spatial data type of the assets.
-   * @return type
-   **/
-  @JsonProperty(value = "type")
-  @ApiModelProperty(required = true, value = "The GeoJSON type that applies to this metadata document, which MUST always be a \"Feature\" according to the STAC specification. This type does **not** describe the spatial data type of the assets.")
-  @NotNull 
-  public TypeEnum getType() {
-    return type;
-  }
+	/**
+	 * The GeoJSON type that applies to this metadata document, which MUST always be a \&quot;Feature\&quot; according to the STAC specification. This type does **not** describe the spatial data type of the assets.
+	 * @return type
+	 **/
+	@JsonProperty(value = "type")
+	@ApiModelProperty(required = true, value = "The GeoJSON type that applies to this metadata document, which MUST always be a \"Feature\" according to the STAC specification. This type does **not** describe the spatial data type of the assets.")
+	@NotNull 
+	public TypeEnum getType() {
+		return type;
+	}
 
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
+	public void setType(TypeEnum type) {
+		this.type = type;
+	}
 
-  public BatchJobResult bbox(List<BigDecimal> bbox) {
-    this.bbox = bbox;
-    return this;
-  }
+	public BatchJobResult bbox(List<BigDecimal> bbox) {
+		this.bbox = bbox;
+		return this;
+	}
 
-  public BatchJobResult addBboxItem(BigDecimal bboxItem) {
-    if (this.bbox == null) {
-      this.bbox = new ArrayList<>();
-    }
-    this.bbox.add(bboxItem);
-    return this;
-  }
+	public BatchJobResult addBboxItem(BigDecimal bboxItem) {
+		if (this.bbox == null) {
+			this.bbox = new ArrayList<>();
+		}
+		this.bbox.add(bboxItem);
+		return this;
+	}
 
-  /**
-   * Potential *spatial extent* covered by the data.  The bounding box is provided as four or six numbers. Six numbers are specified, if the coordinate reference system includes a vertical axis (height or depth). The order of the elements in the array:  - West (lower left corner, coordinate axis 1) - South (lower left corner, coordinate axis 2) - Base (optional, lower left corner, coordinate axis 3) - East (upper right corner, coordinate axis 1) - North (upper right corner, coordinate axis 2) - Height (optional, upper right corner, coordinate axis 3)  The coordinate reference system of the values is WGS84 longitude/latitude.  Specifying the &#x60;bbox&#x60; is strongly RECOMMENDED for STAC compliance, but can be omitted if the result is unlocated and the &#x60;geometry&#x60; is set to &#x60;null&#x60;.
-   * @return bbox
-   **/
-  @JsonProperty(value = "bbox")
-  @ApiModelProperty(example = "[-180,-90,180,90]", value = "Potential *spatial extent* covered by the data.  The bounding box is provided as four or six numbers. Six numbers are specified, if the coordinate reference system includes a vertical axis (height or depth). The order of the elements in the array:  - West (lower left corner, coordinate axis 1) - South (lower left corner, coordinate axis 2) - Base (optional, lower left corner, coordinate axis 3) - East (upper right corner, coordinate axis 1) - North (upper right corner, coordinate axis 2) - Height (optional, upper right corner, coordinate axis 3)  The coordinate reference system of the values is WGS84 longitude/latitude.  Specifying the `bbox` is strongly RECOMMENDED for STAC compliance, but can be omitted if the result is unlocated and the `geometry` is set to `null`.")
-  @Valid 
-  public List<BigDecimal> getBbox() {
-    return bbox;
-  }
+	/**
+	 * Potential *spatial extent* covered by the data.  The bounding box is provided as four or six numbers. Six numbers are specified, if the coordinate reference system includes a vertical axis (height or depth). The order of the elements in the array:  - West (lower left corner, coordinate axis 1) - South (lower left corner, coordinate axis 2) - Base (optional, lower left corner, coordinate axis 3) - East (upper right corner, coordinate axis 1) - North (upper right corner, coordinate axis 2) - Height (optional, upper right corner, coordinate axis 3)  The coordinate reference system of the values is WGS84 longitude/latitude.  Specifying the &#x60;bbox&#x60; is strongly RECOMMENDED for STAC compliance, but can be omitted if the result is unlocated and the &#x60;geometry&#x60; is set to &#x60;null&#x60;.
+	 * @return bbox
+	 **/
+	@JsonProperty(value = "bbox")
+	@ApiModelProperty(example = "[-180,-90,180,90]", value = "Potential *spatial extent* covered by the data.  The bounding box is provided as four or six numbers. Six numbers are specified, if the coordinate reference system includes a vertical axis (height or depth). The order of the elements in the array:  - West (lower left corner, coordinate axis 1) - South (lower left corner, coordinate axis 2) - Base (optional, lower left corner, coordinate axis 3) - East (upper right corner, coordinate axis 1) - North (upper right corner, coordinate axis 2) - Height (optional, upper right corner, coordinate axis 3)  The coordinate reference system of the values is WGS84 longitude/latitude.  Specifying the `bbox` is strongly RECOMMENDED for STAC compliance, but can be omitted if the result is unlocated and the `geometry` is set to `null`.")
+	@Valid 
+	public List<BigDecimal> getBbox() {
+		return bbox;
+	}
 
-  public void setBbox(List<BigDecimal> bbox) {
-    this.bbox = bbox;
-  }
+	public void setBbox(List<BigDecimal> bbox) {
+		this.bbox = bbox;
+	}
 
-  public BatchJobResult geometry(BatchJobResultGeometry geometry) {
-    this.geometry = geometry;
-    return this;
-  }
+	public BatchJobResult geometry(BatchJobResultGeometry geometry) {
+		this.geometry = geometry;
+		return this;
+	}
 
-  /**
-   * Get geometry
-   * @return geometry
-   **/
-  @JsonProperty(value = "geometry")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public BatchJobResultGeometry getGeometry() {
-    return geometry;
-  }
+	/**
+	 * Get geometry
+	 * @return geometry
+	 **/
+	@JsonProperty(value = "geometry")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull @Valid 
+	public GeoJsonGeometry getGeometry() {
+		return geometry;
+	}
 
-  public void setGeometry(BatchJobResultGeometry geometry) {
-    this.geometry = geometry;
-  }
+	public void setGeometry(GeoJsonGeometry geometry) {
+		this.geometry = geometry;
+	}
 
-  public BatchJobResult properties(ItemProperties properties) {
-    this.properties = properties;
-    return this;
-  }
+	public BatchJobResult properties(ItemProperties properties) {
+		this.properties = properties;
+		return this;
+	}
 
-  /**
-   * Get properties
-   * @return properties
-   **/
-  @JsonProperty(value = "properties")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public ItemProperties getProperties() {
-    return properties;
-  }
+	/**
+	 * Get properties
+	 * @return properties
+	 **/
+	@JsonProperty(value = "properties")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull @Valid 
+	public ItemProperties getProperties() {
+		return properties;
+	}
 
-  public void setProperties(ItemProperties properties) {
-    this.properties = properties;
-  }
+	public void setProperties(ItemProperties properties) {
+		this.properties = properties;
+	}
 
-  public BatchJobResult assets(Map<String, Asset> assets) {
-    this.assets = assets;
-    return this;
-  }
+	public BatchJobResult assets(Map<String, Asset> assets) {
+		this.assets = assets;
+		return this;
+	}
 
-  public BatchJobResult putAssetsItem(String key, Asset assetsItem) {
-    this.assets.put(key, assetsItem);
-    return this;
-  }
+	public BatchJobResult putAssetsItem(String key, Asset assetsItem) {
+		this.assets.put(key, assetsItem);
+		return this;
+	}
 
-  /**
-   * Dictionary of asset objects for data that can be downloaded, each with a unique key. The keys MAY be used by clients as file names.
-   * @return assets
-   **/
-  @JsonProperty(value = "assets")
-  @ApiModelProperty(example = "{\"preview.png\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/preview.png\",\"type\":\"image/png\",\"title\":\"Thumbnail\",\"roles\":[\"thumbnail\"]},\"process.json\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/process.json\",\"type\":\"application/json\",\"title\":\"Original Process\",\"roles\":[\"process\",\"reproduction\"]},\"1.tif\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/1.tif\",\"type\":\"image/tiff; application=geotiff\",\"title\":\"Band 1\",\"roles\":[\"data\"]},\"2.tif\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/2.tif\",\"type\":\"image/tiff; application=geotiff\",\"title\":\"Band 2\",\"roles\":[\"data\"]},\"inspire.xml\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/inspire.xml\",\"type\":\"application/xml\",\"title\":\"INSPIRE metadata\",\"description\":\"INSPIRE compliant XML metadata\",\"roles\":[\"metadata\"]}}", required = true, value = "Dictionary of asset objects for data that can be downloaded, each with a unique key. The keys MAY be used by clients as file names.")
-  @NotNull @Valid 
-  public Map<String, Asset> getAssets() {
-    return assets;
-  }
+	/**
+	 * Dictionary of asset objects for data that can be downloaded, each with a unique key. The keys MAY be used by clients as file names.
+	 * @return assets
+	 **/
+	@JsonProperty(value = "assets")
+	@ApiModelProperty(example = "{\"preview.png\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/preview.png\",\"type\":\"image/png\",\"title\":\"Thumbnail\",\"roles\":[\"thumbnail\"]},\"process.json\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/process.json\",\"type\":\"application/json\",\"title\":\"Original Process\",\"roles\":[\"process\",\"reproduction\"]},\"1.tif\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/1.tif\",\"type\":\"image/tiff; application=geotiff\",\"title\":\"Band 1\",\"roles\":[\"data\"]},\"2.tif\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/2.tif\",\"type\":\"image/tiff; application=geotiff\",\"title\":\"Band 2\",\"roles\":[\"data\"]},\"inspire.xml\":{\"href\":\"https://example.openeo.org/api/download/583fba8b2ce583fba8b2ce/inspire.xml\",\"type\":\"application/xml\",\"title\":\"INSPIRE metadata\",\"description\":\"INSPIRE compliant XML metadata\",\"roles\":[\"metadata\"]}}", required = true, value = "Dictionary of asset objects for data that can be downloaded, each with a unique key. The keys MAY be used by clients as file names.")
+	@NotNull @Valid 
+	public Map<String, Asset> getAssets() {
+		return assets;
+	}
 
-  public void setAssets(Map<String, Asset> assets) {
-    this.assets = assets;
-  }
+	public void setAssets(Map<String, Asset> assets) {
+		this.assets = assets;
+	}
 
-  public BatchJobResult links(List<Link> links) {
-    this.links = links;
-    return this;
-  }
+	public BatchJobResult links(List<Link> links) {
+		this.links = links;
+		return this;
+	}
 
-  public BatchJobResult addLinksItem(Link linksItem) {
-    this.links.add(linksItem);
-    return this;
-  }
+	public BatchJobResult addLinksItem(Link linksItem) {
+		this.links.add(linksItem);
+		return this;
+	}
 
-  /**
-   * Links related to this batch job result, e.g. a link to an  invoice, additional log files or external documentation. The links MUST NOT contain links to the processed and downloadable data. Instead specify these in the &#x60;assets&#x60; property. Clients MUST NOT download the data referenced in the links by default. For relation types see the lists of [common relation types in openEO](#section/API-Principles/Web-Linking).
-   * @return links
-   **/
-  @JsonProperty(value = "links")
-  @ApiModelProperty(required = true, value = "Links related to this batch job result, e.g. a link to an  invoice, additional log files or external documentation. The links MUST NOT contain links to the processed and downloadable data. Instead specify these in the `assets` property. Clients MUST NOT download the data referenced in the links by default. For relation types see the lists of [common relation types in openEO](#section/API-Principles/Web-Linking).")
-  @NotNull @Valid 
-  public List<Link> getLinks() {
-    return links;
-  }
+	/**
+	 * Links related to this batch job result, e.g. a link to an  invoice, additional log files or external documentation. The links MUST NOT contain links to the processed and downloadable data. Instead specify these in the &#x60;assets&#x60; property. Clients MUST NOT download the data referenced in the links by default. For relation types see the lists of [common relation types in openEO](#section/API-Principles/Web-Linking).
+	 * @return links
+	 **/
+	@JsonProperty(value = "links")
+	@ApiModelProperty(required = true, value = "Links related to this batch job result, e.g. a link to an  invoice, additional log files or external documentation. The links MUST NOT contain links to the processed and downloadable data. Instead specify these in the `assets` property. Clients MUST NOT download the data referenced in the links by default. For relation types see the lists of [common relation types in openEO](#section/API-Principles/Web-Linking).")
+	@NotNull @Valid 
+	public List<Link> getLinks() {
+		return links;
+	}
 
-  public void setLinks(List<Link> links) {
-    this.links = links;
-  }
+	public void setLinks(List<Link> links) {
+		this.links = links;
+	}
 
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    BatchJobResult batchJobResult = (BatchJobResult) o;
-    return Objects.equals(this.stacVersion, batchJobResult.stacVersion) &&
-        Objects.equals(this.stacExtensions, batchJobResult.stacExtensions) &&
-        Objects.equals(this.id, batchJobResult.id) &&
-        Objects.equals(this.type, batchJobResult.type) &&
-        Objects.equals(this.bbox, batchJobResult.bbox) &&
-        Objects.equals(this.geometry, batchJobResult.geometry) &&
-        Objects.equals(this.properties, batchJobResult.properties) &&
-        Objects.equals(this.assets, batchJobResult.assets) &&
-        Objects.equals(this.links, batchJobResult.links);
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		BatchJobResult batchJobResult = (BatchJobResult) o;
+		return Objects.equals(this.stacVersion, batchJobResult.stacVersion) &&
+				Objects.equals(this.stacExtensions, batchJobResult.stacExtensions) &&
+				Objects.equals(this.id, batchJobResult.id) &&
+				Objects.equals(this.type, batchJobResult.type) &&
+				Objects.equals(this.bbox, batchJobResult.bbox) &&
+				Objects.equals(this.geometry, batchJobResult.geometry) &&
+				Objects.equals(this.properties, batchJobResult.properties) &&
+				Objects.equals(this.assets, batchJobResult.assets) &&
+				Objects.equals(this.links, batchJobResult.links);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(stacVersion, stacExtensions, id, type, bbox, geometry, properties, assets, links);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(stacVersion, stacExtensions, id, type, bbox, geometry, properties, assets, links);
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class BatchJobResult {\n");
-    
-    sb.append("    stacVersion: ").append(toIndentedString(stacVersion)).append("\n");
-    sb.append("    stacExtensions: ").append(toIndentedString(stacExtensions)).append("\n");
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    bbox: ").append(toIndentedString(bbox)).append("\n");
-    sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
-    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
-    sb.append("    assets: ").append(toIndentedString(assets)).append("\n");
-    sb.append("    links: ").append(toIndentedString(links)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class BatchJobResult {\n");
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+		sb.append("    stacVersion: ").append(toIndentedString(stacVersion)).append("\n");
+		sb.append("    stacExtensions: ").append(toIndentedString(stacExtensions)).append("\n");
+		sb.append("    id: ").append(toIndentedString(id)).append("\n");
+		sb.append("    type: ").append(toIndentedString(type)).append("\n");
+		sb.append("    bbox: ").append(toIndentedString(bbox)).append("\n");
+		sb.append("    geometry: ").append(toIndentedString(geometry)).append("\n");
+		sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
+		sb.append("    assets: ").append(toIndentedString(assets)).append("\n");
+		sb.append("    links: ").append(toIndentedString(links)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
 

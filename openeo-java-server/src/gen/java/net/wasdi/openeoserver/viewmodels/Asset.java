@@ -54,7 +54,7 @@ public class Asset   {
 
   public static final String JSON_PROPERTY_ROLES = "roles";
   @JsonProperty(JSON_PROPERTY_ROLES)
-  private List<String> roles = null;
+  private List<String> roles = new ArrayList<String>();
 
   public Asset href(String href) {
     this.href = href;

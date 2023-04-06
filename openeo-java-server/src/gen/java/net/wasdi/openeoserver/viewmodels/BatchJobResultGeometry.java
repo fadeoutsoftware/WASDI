@@ -17,51 +17,46 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModel;
-
 /**
  * Defines the full footprint of the asset represented by this item as GeoJSON Geometry.  Results without a known location can set this value to &#x60;null&#x60;.
  */
-@ApiModel(description = "Defines the full footprint of the asset represented by this item as GeoJSON Geometry.  Results without a known location can set this value to `null`.")
-@JsonPropertyOrder({
-})
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+@JsonPropertyOrder({})
 public class BatchJobResultGeometry extends GeoJsonGeometry  {
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		return true;
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode());
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode());
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class BatchJobResultGeometry {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class BatchJobResultGeometry {\n");
+		sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
 
