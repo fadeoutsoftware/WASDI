@@ -1,9 +1,9 @@
 {
-    "nodeCode": "{{ dictWasdiConfiguration.nodeCode }}",
-    "mainNodeCloud": "{{ dictWasdiConfiguration.mainNodeCloud }}",
-    "usersDefaultNode": "{{ dictWasdiConfiguration.usersDefaultNode }}",
-    "tomcatUser": "{{ dictWasdiConfiguration.tomcatUser }}",
-    "baseUrl": "{{ dictWasdiConfiguration.baseUrl }}",
+    "nodeCode": "{{ dictWasdiConfiguration['nodeCode'] }}",
+    "mainNodeCloud": "{{ dictWasdiConfiguration['mainNodeCloud'] }}",
+    "usersDefaultNode": "{{ dictWasdiConfiguration['usersDefaultNode'] }}",
+    "tomcatUser": "{{ dictWasdiConfiguration['tomcatUser'] }}",
+    "baseUrl": "{{ dictWasdiConfiguration['baseUrl'] }}",
     "connectionTimeout": {{ dictWasdiConfiguration.connectionTimeout }},
     "readTimeout": {{ dictWasdiConfiguration.readTimeout }},
     "msWaitAfterChmod": {{ dictWasdiConfiguration.msWaitAfterChmod }},
@@ -102,29 +102,32 @@
         "waitProcessSleepTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessSleepTimeout }}
     },
     "openEO": {
-        "baseAddress": "{{ dictWasdiConfiguration.openEO.baseAddress }}",
-        "api_version": "{{ dictWasdiConfiguration.openEO.api_version }}",
-        "backend_version": "{{ dictWasdiConfiguration.openEO.backend_version }}",
-        "stac_version": "{{ dictWasdiConfiguration.openEO.stac_version }}",
-        "type": "{{ dictWasdiConfiguration.openEO.type }}",
-        "id": "{{ dictWasdiConfiguration.openEO.id }}",
-        "title": "{{ dictWasdiConfiguration.openEO.title }}",
-        "production": {{ dictWasdiConfiguration.openEO.production | lower }},
-        "description": "{{ dictWasdiConfiguration.openEO.description }}",
-        "openEOWasdiAppName": "{{ dictWasdiConfiguration.openEO.openEOWasdiAppName }}",
+        "baseAddress": "{{ dictWasdiConfiguration['openEO']['baseAddress'] }}",
+        "api_version": "{{ dictWasdiConfiguration['openEO']['api_version'] }}",
+        "backend_version": "{{ dictWasdiConfiguration['openEO']['backend_version'] }}",
+        "stac_version": "{{ dictWasdiConfiguration['openEO']['stac_version'] }}",
+        "type": "{{ dictWasdiConfiguration['openEO']['type'] }}",
+        "id": "{{ dictWasdiConfiguration['openEO']['id'] }}",
+        "title": "{{ dictWasdiConfiguration['openEO']['title'] }}",
+        "production": {{ dictWasdiConfiguration['openEO']['production'] | lower }},
+        "description": "{{ dictWasdiConfiguration['openEO']['description'] }}",
+        "openEOWasdiAppName": "{{ dictWasdiConfiguration['openEO']['openEOWasdiAppName'] }}",
         "collections": [
-{% for oDictCurrentCollection in dictWasdiConfiguration.openEO.collections | default({}) %}
+{% for oDictCurrentCollection in dictWasdiConfiguration['openEO']['collections'] | default({}) %}
             {
-                "stac_version": "{{ oDictCurrentCollection.stac_version }}",
-                "type": "{{ oDictCurrentCollection.type }}",
-                "id": "{{ oDictCurrentCollection.id }}",
-                "title": "{{ oDictCurrentCollection.title }}",
-                "description": "{{ oDictCurrentCollection.description }}",
-                "license": "{{ oDictCurrentCollection.license }}",
+                "stac_version": "{{ oDictCurrentCollection['stac_version'] }}",
+                "type": "{{ oDictCurrentCollection['type'] }}",
+                "id": "{{ oDictCurrentCollection['id'] }}",
+                "title": "{{ oDictCurrentCollection['title'] }}",
+                "description": "{{ oDictCurrentCollection['description'] }}",
+                "license": "{{ oDictCurrentCollection['license'] }}",
                 "extent": {
                     "spatial": {
+{% if oDictCurrentCollection['extent']['spatial']['bbox'] | length == 0 %}
+                        "bbox": []
+{% else %}
                         "bbox": [
-{% for oDictCurrentExtentSpatialBbox in oDictCurrentCollection.extent.spatial.bbox | default([]) %}
+{% for oDictCurrentExtentSpatialBbox in oDictCurrentCollection['extent']['spatial']['bbox'] | default([]) %}
                             [
 {% for sValue in oDictCurrentExtentSpatialBbox %}
                                 {{ sValue }}{% if not loop.last %},
@@ -136,10 +139,11 @@
 {% endfor %}
 
                         ]
+{% endif %}
                     },
                     "temporal": {
                         "interval": [
-{% for oDictCurrentExtentTemporalInterval in oDictCurrentCollection.extent.temporal.interval | default([]) %}
+{% for oDictCurrentExtentTemporalInterval in oDictCurrentCollection['extent']['temporal']['interval'] | default([]) %}
                             [
 {% for sValue in oDictCurrentExtentTemporalInterval %}
                                 "{{ sValue }}"{% if not loop.last %},
@@ -153,55 +157,124 @@
                         ]
                     }
                 },
-{% if oDictCurrentCollection.keywords | default([]) | length > 0 %}
+{% if oDictCurrentCollection['keywords'] | default([]) | length == 0 %}
+                "keywords": [],
+{% else %}
                 "keywords": [
-{% for sValue in oDictCurrentCollection.keywords %}
+{% for sValue in oDictCurrentCollection['keywords'] %}
                     "{{ sValue }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
                 ],
-{% else %}
-                "keywords": [],
 {% endif %}
-{% if oDictCurrentCollection.providers | default([]) | length > 0 %}
+{% if oDictCurrentCollection['providers'] | default([]) | length == 0 %}
+                "providers": [],
+{% else %}
                 "providers": [
-{% for oDictProvider in oDictCurrentCollection.providers %}
+{% for oDictCurrentProvider in oDictCurrentCollection['providers'] %}
                     {
-                        "name": "{{ oDictProvider.name }}",
+                        "name": "{{ oDictCurrentProvider['name'] }}",
                         "roles": [
-{% for sValue in oDictProvider.roles %}
+{% for sValue in oDictCurrentProvider['roles'] %}
                             "{{ sValue }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
                         ],
-                        "url": "{{ oDictProvider.url }}"
+                        "url": "{{ oDictCurrentProvider['url'] }}"
                     }{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
                 ],
-{% else %}
-                "providers": [],
 {% endif %}
-{% if oDictCurrentCollection.links | default([]) | length > 0 %}
-                "links": [
-{% for oDictCurrentLink in oDictCurrentCollection.links %}
-                    {
-                        "rel": "{{ oDictCurrentLink.rel }}",
-                        "href": "{{ oDictCurrentLink.href }}"
-                    }{% if not loop.last %},
-{% endif %}
-{% endfor %}
-
-                ],
-{% else %}
+{% if oDictCurrentCollection['links'] | default([]) | length == 0 %}
                 "links": [],
+{% else %}
+                "links": [
+{% for oDictCurrentLink in oDictCurrentCollection['links'] %}
+                    {
+                        "rel": "{{ oDictCurrentLink['rel'] }}",
+                        "href": "{{ oDictCurrentLink['href'] }}"
+                    }{% if not loop.last %},
 {% endif %}
+{% endfor %}
+
+                ],
+{% endif %}
+{% if ( oDictCurrentCollection['cubeDimensions'] | default('') ) == '' %}
                 "cubeDimensions": {},
+{% else %}
+                "cubeDimensions": {
+                    "x": {
+                        "type": "{{ oDictCurrentCollection['cubeDimensions']['x']['type'] }}",
+                        "axis": "{{ oDictCurrentCollection['cubeDimensions']['x']['axis'] }}",
+{% if oDictCurrentCollection['cubeDimensions']['x']['extent'] | length == 0 %}
+                        "extent": [],
+{% else %}
+                        "extent": [
+{% for sValue in oDictCurrentCollection['cubeDimensions']['x']['extent'] %}
+                            {{ sValue }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ],
+{% endif %}
+                        "reference_system": {{ oDictCurrentCollection['cubeDimensions']['x']['reference_system'] }}
+                    },
+                    "y": {
+                        "type": "{{ oDictCurrentCollection['cubeDimensions']['y']['type'] }}",
+                        "axis": "{{ oDictCurrentCollection['cubeDimensions']['y']['axis'] }}",
+{% if oDictCurrentCollection['cubeDimensions']['y']['extent'] | length == 0 %}
+                        "extent": [],
+{% else %}
+                        "extent": [
+{% for sValue in oDictCurrentCollection['cubeDimensions']['y']['extent'] %}
+                            {{ sValue }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ],
+{% endif %}
+                        "reference_system": {{ oDictCurrentCollection['cubeDimensions']['y']['reference_system'] }}
+                    },
+                    "t": {
+                        "type": "{{ oDictCurrentCollection['cubeDimensions']['t']['type'] }}",
+{% if oDictCurrentCollection['cubeDimensions']['t']['extent'] | length == 0 %}
+                        "extent": [],
+{% else %}
+                        "extent": [
+{% for sValue in oDictCurrentCollection['cubeDimensions']['t']['extent'] %}
+                            {% if sValue is none %}null{% else %}"{{ sValue }}"{% endif %}{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ],
+{% endif %}
+                        "step": {% if oDictCurrentCollection['cubeDimensions']['t']['step'] is none %}null{% else %}oDictCurrentCollection['cubeDimensions']['t']['step']{% endif %}
+
+                    },
+                    "bands": {
+                        "type": "{{ oDictCurrentCollection['cubeDimensions']['bands']['type'] }}",
+{% if oDictCurrentCollection['cubeDimensions']['bands']['values'] | length == 0 %}
+                        "values": [],
+{% else %}
+                        "values": [
+{% for sValue in oDictCurrentCollection['cubeDimensions']['bands']['values'] %}
+                            "{{ sValue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                        ]
+{% endif %}
+                    }
+                },
+{% endif %}
                 "summaries": {
-{% if oDictCurrentCollection.summaries.constellation | default([]) | length > 0 %}
+{% if oDictCurrentCollection.summaries.constellation | default([]) | length == 0 %}
+                    "constellation": [],
+{% else %}
                     "constellation": [
 {% for sValue in oDictCurrentCollection.summaries.constellation %}
                         "{{ sValue }}"{% if not loop.last %},
@@ -209,8 +282,6 @@
 {% endfor %}
 
                     ],
-{% else %}
-                    "constellation": [],
 {% endif %}
 {% if oDictCurrentCollection.summaries.platform | default([]) | length > 0 %}
                     "platform": [
