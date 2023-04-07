@@ -11,6 +11,7 @@ import javax.ws.rs.core.Context;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import net.wasdi.openeoserver.providers.JacksonJsonProvider;
 import net.wasdi.openeoserver.services.KeycloakService;
@@ -74,14 +75,23 @@ public class WasdiOpenEoServer extends ResourceConfig {
 				
 		// Read MongoDb Configuration
 		try {
-
             MongoRepository.readConfig();
-
 			WasdiLog.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
-
 		} catch (Throwable oEx) {
 			WasdiLog.errorLog("Read MongoDb Configuration exception " + oEx.toString());
 		}
+		
+		try {
+			ch.qos.logback.classic.Logger oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver.cluster");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);	
+			
+			oMongoLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.mongodb.driver");
+			oMongoLogger.setLevel(ch.qos.logback.classic.Level.WARN);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("Disabling mongo driver logging exception " + oEx.toString());
+		}
+		
 		
 		// Read the code of this Node
 		try {
@@ -112,8 +122,7 @@ public class WasdiOpenEoServer extends ResourceConfig {
 			WasdiLog.errorLog("Local Database config exception " + oEx.toString());
 		}
 
-		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
-		
+		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);		
 		
 		WasdiLog.debugLog("-------- WASDI Open EO Server Init done -------\n\n");
 		WasdiLog.debugLog("-----------------------------------------------");

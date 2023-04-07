@@ -83,7 +83,7 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @PathParam("valid") Boolean bValid) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
 		
 		if (bValid == null) bValid = false;
 
