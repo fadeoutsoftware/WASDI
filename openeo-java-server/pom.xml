@@ -2,18 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.wasdi.openeo</groupId>
   <artifactId>wasdi-openeo-server</artifactId>
-  <packaging>jar</packaging>
-  <name>openapi-jaxrs-server</name>
-  <version>1.1.0</version>
-
-  <licenses>
-    <license>
-      <name>Unlicense</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
+  <packaging>war</packaging>
+  <name>wasdi-openeo-server</name>
+  <version>1.0.0</version>
+  
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>
