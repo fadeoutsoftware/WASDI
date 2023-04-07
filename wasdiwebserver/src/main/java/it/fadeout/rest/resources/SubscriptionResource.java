@@ -101,7 +101,7 @@ public class SubscriptionResource {
 
 		try {
 
-			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId());
+			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId() + " Valid = " + bValid);
 
 
 			// 1. subscriptions directly owned by the user

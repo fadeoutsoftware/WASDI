@@ -89,9 +89,6 @@ public class ProjectResource {
 				WasdiLog.debugLog("ProjectResource.getListByUser: asSubscriptionIds is null");
 				return Response.ok(aoProjectList).build();
 			}
-
-			//Map<String, String> aoSubscriptionNames = aoSubscriptionLVMs.stream()
-			//	      .collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, SubscriptionListViewModel::getName));
 			
 			Map<String, String> aoSubscriptionNames = new HashMap<String, String>();
 			
