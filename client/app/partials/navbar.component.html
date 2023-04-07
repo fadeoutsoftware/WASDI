@@ -271,35 +271,48 @@
                         </li>
                         <!-- PROJECTS LIST DROPDOWN -->
                         <li class="dropdown show">
-                        <!-- PROJECTS LIST DROPDOWN -->
-                        <li class="dropdown show" ng-if="m_oController.m_sUserAccount !== 'FREE'">
+                            <!-- PROJECTS LIST DROPDOWN -->
+                        <li class="dropdown show" ng-if="m_oController.m_sUserAccount !== 'NONE'">
                             <a href="" class="btn dropdown-toggle" id="projects-dropdown" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
-                                <span>Projects</span>
+                                <span
+                                    ng-if="m_oController.m_oSelectedProject.name">{{m_oController.m_oSelectedProject.name}}</span>
+                                <span ng-if="!m_oController.m_oSelectedProject.name">No Active Project</span>
                             </a>
 
-                            <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="z-index: 999">
-                                <li role="presentation" ng-repeat="oProject in m_oController.m_aoUserProjectsMap" ng-class="oProject.name === m_oController.m_oSelectedProject.name ? 'active' : ''">
-                                    <a ng-click="m_oController.changeActiveProject(oProject)" class="dropdown-item text-dark" style="cursor: pointer">{{oProject.name}}</a>
+                            <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu"
+                                aria-labelledby="dropdownMenuLink" style="z-index: 999">
+                                <li role="presentation" ng-repeat="oProject in m_oController.m_aoUserProjectsMap"
+                                    ng-class="oProject.name === m_oController.m_oSelectedProject.name ? 'active' : ''">
+                                    <a ng-click="m_oController.changeActiveProject(oProject)"
+                                        class="dropdown-item text-dark" style="cursor: pointer">{{oProject.name}}</a>
                                 </li>
                             </ul>
                         </li>
                         <!-- ACCOUNT SUBSCRIPTION TYPE -->
-                        <li ng-class="m_oController.m_sUserAccount === 'PROFESSIONAL' ? 'bg-success' : 'bg-warning'">
-                            <a style="cursor: pointer" ng-click="m_oController.openSubscriptions()" ng-if="m_oController.m_sUserAccount === 'FREE'">
-                                PURCHASE SUBSCRIPTION
+                        <li
+                            ng-class="m_oController.m_sUserAccount === 'PROFESSIONAL' ||m_oController.m_sUserAccount === 'STANDARD' ? 'bg-success' : 'bg-warning'">
+                            <a style="cursor: pointer" ng-click="m_oController.openSubscriptions()"
+                                ng-if="m_oController.m_sUserAccount === 'NONE'">
+                                <span>PURCHASE SUBSCRIPTION</span>
                             </a>
-                            <a style="cursor: pointer" class="btn btn-dropdown" id="pro-menu-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'">
-                                PRO
+                            <a style="cursor: pointer" class="btn btn-dropdown" id="pro-menu-dropdown"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                ng-if="m_oController.m_sUserAccount !== 'NONE'">
+                                <span ng-if="m_oController.m_sUserAccount === 'FREE'">FREE</span>
+                                <span ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'">PRO</span>
+                                <span ng-if="m_oController.m_sUserAccount === 'STANDARD'">STND</span>
                             </a>
-                            <ul ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <ul ng-if="m_oController.m_sUserAccount !== 'NONE'" class="dropdown-menu"
+                                aria-labelledby="dropdownMenuLink">
                                 <li role="presentation">
-                                    <a class="dropdown-item text-dark">
+                                    <a class="dropdown-item text-dark" style="cursor: pointer">
                                         Manage Subscriptions
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a ng-click="m_oController.openSubscriptions()" class="dropdown-item text-dark" style="cursor: pointer">Purchase Subscription</a>
+                                    <a ng-click="m_oController.openSubscriptions()" class="dropdown-item text-dark"
+                                        style="cursor: pointer">Purchase Subscription</a>
                                 </li>
                             </ul>
                         </li>

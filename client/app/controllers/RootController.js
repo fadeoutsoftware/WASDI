@@ -212,10 +212,18 @@ var RootController = (function() {
                 this.m_oProject = oFirstElement;
 
                 this.m_aoUserProjects.forEach((oValue) => {
+                    //FRONTEND FIX FOR NO ACTIVE PROJECT SELECT: 
+                    if(oValue.projectId === this.m_oSelectedProject.projectId) {
+                        this.m_oSelectedProject = {}; 
+                    }
+
                     if (oValue.activeProject) {
                         this.m_oSelectedProject = oValue;
-                    }
+                    }; 
                 });
+                if(utilsIsObjectNullOrUndefined(this.m_oSelectedProject)) {
+                    this.m_oSelectedProject = this.m_aoUserProjectsMap[0];
+                }
 
             } else {
                 utilsVexDialogAlertTop(
@@ -225,8 +233,6 @@ var RootController = (function() {
 
                 this.m_aoUserProjectsMap = [oFirstElement]; 
                 this.m_oProject = oFirstElement; 
-
-                console.log(this.m_aoUserProjectsMap);
             }
             this.m_bLoadingProjects = false; 
             return true; 
@@ -241,8 +247,6 @@ var RootController = (function() {
 
             this.m_aoUserProjectsMap = [oFirstElement]; 
             this.m_oProject = oFirstElement; 
-
-            console.log(this.m_aoUserProjectsMap);
             utilsVexDialogAlertTop(sErrorMessage);
         }); 
     }
@@ -277,7 +281,6 @@ var RootController = (function() {
 
     RootController.prototype.getAccountType = function() {
         this.m_sUserAccount = this.m_oUser.type;  
-        console.log(this.m_sUserAccount); 
     }
 
     RootController.prototype.openSubscriptions = function() {
@@ -288,23 +291,24 @@ var RootController = (function() {
             buySuccess: false
         };
 
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
-            controller: "SubscriptionEditorController",
-            inputs: {
-                extras: {
-                    subscription: oNewSubscription,
-                    editMode: true
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static'
-            })
-            modal.close.then(function () {
-                oController.initializeSubscriptionsInfo();
-            })
-        });
+        this.m_oState.go("root.subscriptions", {});
+        // this.m_oModalService.showModal({
+        //     templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
+        //     controller: "SubscriptionEditorController",
+        //     inputs: {
+        //         extras: {
+        //             subscription: oNewSubscription,
+        //             editMode: true
+        //         }
+        //     }
+        // }).then(function (modal) {
+        //     modal.element.modal({
+        //         backdrop: 'static'
+        //     })
+        //     modal.close.then(function () {
+        //         oController.initializeSubscriptionsInfo();
+        //     })
+        // });
     }
     /*********************************** METHODS **************************************/
 

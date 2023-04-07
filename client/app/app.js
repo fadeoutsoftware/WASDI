@@ -202,6 +202,17 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
+    //SUBSCRIPTIONS PURCHASING 
+    $stateProvider.state('root.subscriptions', {
+        url: '/subscriptions', 
+        views: {
+            'maincontent': {
+                templateUrl: 'partials/subscriptionsPurchase.html', 
+                controller: 'SubscriptionPurchaseController'
+            }
+        }
+    });
+
 
 }]);
 
@@ -216,6 +227,7 @@ wasdiApp.controller("ValidateUserController",ValidateUserController);
 wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
 wasdiApp.controller("MarketPlaceController",MarketPlaceController);
 wasdiApp.controller("WasdiApplicationDetailsController",WasdiApplicationDetailsController);
+wasdiApp.controller("SubscriptionPurchaseController", SubscriptionPurcaseController); 
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);

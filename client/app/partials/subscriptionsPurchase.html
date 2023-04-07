@@ -1,0 +1,96 @@
+<div style="margin: 6rem 6rem">
+    <h3 class="mb-0">Features</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Node</th>
+                <th scope="col">Cores</th>
+                <th scope="col">Storage</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Assistance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Free</th>
+                <td>Shared</td>
+                <td>up to 8</td>
+                <td>20GB</td>
+                <td>Low</td>
+                <td>Discord</td>
+            </tr>
+            <tr>
+                <th scope="row">Standard</th>
+                <td>Shared</td>
+                <td>up to 48</td>
+                <td>100GB</td>
+                <td>Medium</td>
+                <td>Discord/Email</td>
+            </tr>
+            <tr>
+                <th scope="row">Professional</th>
+                <td>Dedicated</td>
+                <td>up to 96</td>
+                <td>2TB</td>
+                <td>Highest</td>
+                <td>Dedicated Team</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3 class="mb-0">Click to Purchase</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">1 Day</th>
+                <th scope="col">1 Week</th>
+                <th scope="col">1 Month</th>
+                <th scope="col">1 Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Standard</th>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.addToCart('OneDayStandard', 50)">50€</button></td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.addToCart('OneWeekStandard', 150)">150€</button></td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.addToCart('OneMonthStandard', 500)">500€</button></td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.addToCart('OneYearStandard', 5000)">5000€</button></td>
+            </tr>
+            <tr>
+                <th scope="row">Professional</th>
+                <td>--</td>
+                <td>--</td>
+                <td><button class="btn btn-warning btn-sm"
+                        ng-click="m_oController.addToCart('OneMonthProfessional', 2000)">2000€</button></td>
+                <td><button class="btn btn-warning btn-sm"
+                        ng-click="m_oController.addToCart('OneYearProfessional', 20000)">20000€</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="cart-container d-flex flex-row">
+        <i class="fa fa-shopping-cart" aria-hidden="true" style="font-size: 10rem; margin-right: 3rem"></i>
+        <div class="items-container" style="height: 20rem; overflow-y: scroll;">
+            <table class="table" style="width: 40rem;">
+                <tbody>
+                    <tr ng-repeat="subscription in m_oController.m_aoSelectedSubscriptions track by $index">
+                        <th scope="row">{{subscription.name}}</td>
+                        <td>{{subscription.price}}€</td>
+                        <td>
+                            <button class="btn btn-success" ng-click="m_oController.showSubscriptionAddForm(subscription, $index)">Buy</button>
+                        </td>
+                    </tr>
+                    <tr class="bg-light" style="position: sticky;bottom: 0">
+                        <th scope="row">Total</th>
+                        <td>{{m_oController.m_iTotalPrice}} €</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

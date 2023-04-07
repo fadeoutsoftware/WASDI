@@ -10,6 +10,7 @@ require('./app/controllers/ValidateUserController.js');
 require('./app/controllers/WasdiApplicationUIController.js');
 require('./app/controllers/MarketPlaceController.js');
 require('./app/controllers/WasdiApplicationDetailsController.js');
+require('/app/controllers/SubscriptionPurchaseController.js');
 
 //-------- DIALOG CONTROLLERS ---------------
 require('./app/dialogs/orbit_info/OrbitInfoController.js');
