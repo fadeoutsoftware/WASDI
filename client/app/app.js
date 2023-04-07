@@ -273,6 +273,7 @@ wasdiApp.controller("SubscriptionProjectsController", window.SubscriptionProject
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);
+wasdiApp.controller("SubscriptionsManageController", window.SubscriptionsManageController);
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){

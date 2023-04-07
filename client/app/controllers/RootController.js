@@ -195,6 +195,7 @@ var RootController = (function() {
     }
 
     RootController.prototype.initializeProjectsInfo = function() {
+        let oController = this;
         this.m_bLoadingProjects = true;
         this.m_oProjectService.getProjectsListByUser().then(data => {
             
@@ -284,31 +285,21 @@ var RootController = (function() {
     }
 
     RootController.prototype.openSubscriptions = function() {
-        let oNewSubscription = {
-            subscriptionId: null,
-            typeId: "",
-            typeName: "",
-            buySuccess: false
-        };
-
         this.m_oState.go("root.subscriptions", {});
-        // this.m_oModalService.showModal({
-        //     templateUrl: "dialogs/subscriptions_buy/SubscriptionsBuyDialog.html",
-        //     controller: "SubscriptionEditorController",
-        //     inputs: {
-        //         extras: {
-        //             subscription: oNewSubscription,
-        //             editMode: true
-        //         }
-        //     }
-        // }).then(function (modal) {
-        //     modal.element.modal({
-        //         backdrop: 'static'
-        //     })
-        //     modal.close.then(function () {
-        //         oController.initializeSubscriptionsInfo();
-        //     })
-        // });
+    }
+
+    RootController.prototype.openManageSubscriptions = function() {
+        console.log("Manage Subs")
+        let oController = this; 
+
+        oController.m_oModalService.showModal({
+            templateUrl: 'dialogs/subscriptions_manage/SubscriptionsManageDialog.html',
+            controller: 'SubscriptionsManageController'
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+            });
+        })
     }
     /*********************************** METHODS **************************************/
 

@@ -50,3 +50,4 @@ require('./app/dialogs/subscription-projects/SubscriptionProjectsController.js')
 require('./app/dialogs/organization_editor/OrganizationEditorController.js');
 require('./app/dialogs/subscription_editor/SubscriptionEditorController.js');
 require('./app/dialogs/project_editor/ProjectEditorController.js');
+require('./app/dialogs/subscriptions_manage/SubscriptionsManageController.js')

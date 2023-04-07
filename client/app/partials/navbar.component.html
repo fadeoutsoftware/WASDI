@@ -306,7 +306,7 @@
                             <ul ng-if="m_oController.m_sUserAccount !== 'NONE'" class="dropdown-menu"
                                 aria-labelledby="dropdownMenuLink">
                                 <li role="presentation">
-                                    <a class="dropdown-item text-dark" style="cursor: pointer">
+                                    <a class="dropdown-item text-dark" ng-click="m_oController.openManageSubscriptions()" style="cursor: pointer">
                                         Manage Subscriptions
                                     </a>
                                 </li>
