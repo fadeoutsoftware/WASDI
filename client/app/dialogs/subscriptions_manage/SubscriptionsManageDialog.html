@@ -1,17 +1,112 @@
 <div class="modal fade subscriptions-buy-dialog">
-    <div class="modal-dialog" style="width: 80vw">
+    <div class="modal-dialog" style="width: 90vw">
         <div class="modal-content">
             <div class="modal-header">
                 <h4>Manage Subscriptions</h4>
             </div>
             <div class="modal-body no-ale style px-5">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Owner ID</th>
+                            <th scope="col">Organization</th>
+                            <th scope="col">Payment Status</th>
+                            <th scope="col">Permission</th>
+                            <th scope="col">Time</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index"
+                            style="cursor: pointer;">
+                            <td title="{{oSubscription.name}}" style="width: 7rem;">{{oSubscription.name}}</td>
+                            <td>{{oSubscription.typeName}}</td>
+                            <td>{{oSubscription.ownerUserId}}</td>
+                            <td style="width: 3rem;">{{oSubscription.organizationName}}</td>
+                            <td>
+                                <span class="text-success" ng-if="oSubscription.buySuccess">Paid</span>
+                                <span class="text-warning" ng-if="!oSubscription.buySuccess">Pending...</span>
+                            </td>
+                            <td style="width: 3rem">{{oSubscription.reason}}</td>
+                            <td></td>
+                            <td>
+                                <button ng-show="oSubscription.adminRole === true" class="btn btn-primary btn-wasdi"
+                                    title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}
+                                    ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId)">
+                                    <!--Show Users-->
+                                    <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <!--
+                                        <span class="ng-binding"
+                                            >{{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}</span
+                                        >
+                                        -->
+                                </button>
+                                <button class="btn btn-primary btn-wasdi"
+                                    title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
+                                    ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name)">
+                                    <!--Show Projects-->
+                                    <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <!--
+                                        <span class="ng-binding"
+                                            >{{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}</span
+                                        >
+                                        -->
+                                </button>
 
 
-                <div class="modal-footer">
-                    <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
-                        {{"DIALOG_CLOSE_BUTTON"|translate}}
-                    </button>
-                </div>
+
+                                <button class="btn btn-primary btn-wasdi"
+                                    title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
+                                    ng-show="!oSubscription.adminRole"
+                                    ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
+                                    <!--Edit Subscription-->
+                                    <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <!--
+                                        <span class="ng-binding"
+                                            >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
+                                        >
+                                        -->
+                                </button>
+                                <button class="btn btn-primary btn-wasdi"
+                                    title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
+                                    ng-show="oSubscription.adminRole"
+                                    ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, true)">
+                                    <!--Edit Subscription-->
+                                    <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <!--
+                                        <span class="ng-binding"
+                                            >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
+                                        >
+                                        -->
+                                </button>
+
+
+
+                                <button class="btn btn-danger btn-wasdi"
+                                    title={{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}
+                                    ng-click="m_oController.deleteSubscription(oSubscription.subscriptionId)">
+                                    <!--Delete Subscription-->
+                                    <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <!--
+                                        <span class="ng-binding"
+                                            >{{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}</span
+                                        >
+                                        -->
+                                </button>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
             </div>
         </div>
     </div>
