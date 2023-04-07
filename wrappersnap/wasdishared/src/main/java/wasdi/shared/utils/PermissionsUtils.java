@@ -94,7 +94,7 @@ public class PermissionsUtils {
 			for (Subscription oSubscription : aoUserSubscriptions) {
 				
 				// If it is valid
-				if (SubscriptionRepository.checkValidSubscription(oSubscription)) {
+				if (oSubscription.isValid()) {
 					// Free can replace None
 					if (oSubscription.getRelatedUserType().equals(UserType.FREE.name())) {
 						if (oUserType.name().equals(UserType.NONE.name())) {

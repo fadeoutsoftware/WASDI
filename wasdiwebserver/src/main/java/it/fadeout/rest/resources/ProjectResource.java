@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.PROJECT_READ;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +12,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -23,7 +22,6 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -50,7 +48,9 @@ public class ProjectResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @PathParam("valid") Boolean bValid) {
+		
+		if (bValid == null) bValid = false;
 
 		WasdiLog.debugLog("ProjectResource.getListByUser");
 
@@ -71,7 +71,7 @@ public class ProjectResource {
 			// Create repo
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
-			Response oResponse = new SubscriptionResource().getListByUser(sSessionId);
+			Response oResponse = new SubscriptionResource().getListByUser(sSessionId, bValid);
 
 			@SuppressWarnings("unchecked")
 			List<SubscriptionListViewModel> aoSubscriptionLVMs = (List<SubscriptionListViewModel>) oResponse.getEntity();

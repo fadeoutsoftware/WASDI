@@ -125,28 +125,14 @@ public class SubscriptionRepository extends MongoRepository {
 		}
 
 		Subscription oSubscription = this.getSubscriptionById(sSubscriptionId);
-
-		return checkValidSubscription(oSubscription);
-	}
-
-	/**
-	 * Check whether or not a subscription is valid.
-	 * @param oSubscription the subscription
-	 * @return true if the subscription if valid, false otherwise
-	 */
-	public static boolean checkValidSubscription(Subscription oSubscription) {
-		if (oSubscription == null
-				|| oSubscription.getStartDate() == null
-				|| oSubscription.getEndDate() == null) {
+		
+		if (oSubscription == null) {
 			return false;
 		}
 
-		double dNowInMillis = Utils.nowInMillis();
-
-		return dNowInMillis >= oSubscription.getStartDate()
-				&& dNowInMillis <= oSubscription.getEndDate();
+		return oSubscription.isValid();
 	}
-
+	
 	/**
 	 * Get the subscriptions by owner.
 	 * @param sUserId the owner of the subscriptions

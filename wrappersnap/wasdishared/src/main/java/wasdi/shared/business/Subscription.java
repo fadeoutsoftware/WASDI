@@ -30,6 +30,22 @@ public class Subscription {
 	}
 	
 	/**
+	 * Check if a subscription is valid or not
+	 * @return
+	 */
+	public boolean isValid() {
+		if (this.getStartDate() == null
+				|| this.getEndDate() == null) {
+			return false;
+		}
+
+		double dNowInMillis = Utils.nowInMillis();
+
+		return dNowInMillis >= this.getStartDate()
+				&& dNowInMillis <= this.getEndDate();		
+	}
+	
+	/**
 	 * Converts a Subscription Type to the corresponding user type
 	 * @param sSubscriptionType
 	 * @return
