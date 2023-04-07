@@ -276,12 +276,12 @@
                             <a href="" class="btn dropdown-toggle" id="projects-dropdown" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
                                 <span
-                                    ng-if="m_oController.m_oSelectedProject.name">{{m_oController.m_oSelectedProject.name}}</span>
+                                    ng-if="m_oController.m_oSelectedProject.name">Active Project: {{m_oController.m_oSelectedProject.name}}</span>
                                 <span ng-if="!m_oController.m_oSelectedProject.name">No Active Project</span>
                             </a>
 
                             <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu"
-                                aria-labelledby="dropdownMenuLink" style="z-index: 999">
+                                aria-labelledby="dropdownMenuLink" style="z-index: 10000">
                                 <li role="presentation" ng-repeat="oProject in m_oController.m_aoUserProjectsMap"
                                     ng-class="oProject.name === m_oController.m_oSelectedProject.name ? 'active' : ''">
                                     <a ng-click="m_oController.changeActiveProject(oProject)"
@@ -304,9 +304,9 @@
                                 <span ng-if="m_oController.m_sUserAccount === 'STANDARD'">STND</span>
                             </a>
                             <ul ng-if="m_oController.m_sUserAccount !== 'NONE'" class="dropdown-menu"
-                                aria-labelledby="dropdownMenuLink">
+                                aria-labelledby="dropdownMenuLink" style="z-index: 10000">
                                 <li role="presentation">
-                                    <a class="dropdown-item text-dark" style="cursor: pointer">
+                                    <a class="dropdown-item text-dark" ng-click="m_oController.openManageSubscriptions()" style="cursor: pointer">
                                         Manage Subscriptions
                                     </a>
                                 </li>

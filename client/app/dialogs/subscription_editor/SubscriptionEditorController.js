@@ -42,8 +42,8 @@ SubscriptionEditorController = (function () {
         this.initializeSubscriptionInfo();
 
         //close function 
-        $scope.close = function (result, index) {
-            oClose(result, index, 500);
+        $scope.close = function (result) {
+            oClose(result, 500);
         }
     }
 
