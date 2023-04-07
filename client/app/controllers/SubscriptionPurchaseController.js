@@ -74,14 +74,7 @@ SubscriptionPurchaseController = (function () {
             modal.element.modal({
                 backdrop: 'static'
             })
-            modal.close.then(function (oSubscription) {
-                console.log(oSubscription);
-                if (utilsIsObjectNullOrUndefined(oSubscription)) {
-                    if(oSubscription.subscriptionId) {
-                    }
-                }
-                oController.initializeSubscriptionsInfo();
-            })
+            modal.close.then(function (oResult) {})
         });
     }
 
