@@ -8,7 +8,7 @@ EULA - Privacy policy
 ---------------------------
 1.1. WASDI is a cloud service provided by WASDI Sarl (“WASDI”, “we”, or “us”). By using the WASDI platform services (“Services”), you agree to be bound by the following Terms of Service and any future modifications (collectively, the “Terms”). 
 
-1.2. **Please read these Terms carefully:** This end user agreement represents a legal between (a) you (either an individual or single entity) and (b) use (WASDI) that governs the use of our Services.  **If you the Services, you agreed to these Terms.**
+1.2. **Please read these Terms carefully:** This end user agreement represents a legal between (a) you (either an individual or single entity) and (b) use (WASDI) that governs the use of our Services.  **If you use the Services, you agreed to these Terms.**
 
 2. Signing Up 
 ---------------------------
@@ -68,7 +68,7 @@ f. In the event of a temporary suspension of the Service, you remain responsible
 
 7. Unlawful or Unauthorized Uses
 -------------------------------------
-7.1. You may not use the Services for any unlawful purpose. Your use of the Services must comply with all local rule regarding online conduct and acceptable content.
+7.1. You may not use the Services for any unlawful purpose. Your use of the Services must comply with all local rules regarding online conduct and acceptable content.
 
 7.2. You may not use the Services in any manner that could damage or overburden the Services or interfere with any other party’s use of the Services. 
 
@@ -84,7 +84,7 @@ h. Engaging in any other activity deemed by WASDI to be in conflict with the spi
 
 8. User-Supplied Applications
 --------------------------------
-8.1. The user supplied applications remains a full property of the user. 
+8.1. Any user-supplied application remains a full property of the user. 
 
 8.2. Limited to the purpose of hosting your content so that we can provide the Services to you, you hereby grant WASDI a non-exclusive, worldwide, royalty-free, transferable right and license (with the right to sublicence), to host, copy and back-up your code.
 
