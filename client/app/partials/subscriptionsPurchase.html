@@ -53,44 +53,29 @@
             <tr>
                 <th scope="row">Standard</th>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.addToCart('OneDayStandard', 50)">50€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[1], 50)">50€</button>
+                </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.addToCart('OneWeekStandard', 150)">150€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[2], 150)">150€</button>
+                </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.addToCart('OneMonthStandard', 500)">500€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[3], 500)">500€</button>
+                </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.addToCart('OneYearStandard', 5000)">5000€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[4], 5000)">5000€</button>
+                </td>
             </tr>
             <tr>
                 <th scope="row">Professional</th>
                 <td>--</td>
                 <td>--</td>
                 <td><button class="btn btn-warning btn-sm"
-                        ng-click="m_oController.addToCart('OneMonthProfessional', 2000)">2000€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[5], 2000)">2000€</button>
+                </td>
                 <td><button class="btn btn-warning btn-sm"
-                        ng-click="m_oController.addToCart('OneYearProfessional', 20000)">20000€</button></td>
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[6], 20000)">20000€</button>
+                </td>
             </tr>
         </tbody>
     </table>
-    <div class="cart-container d-flex flex-row">
-        <i class="fa fa-shopping-cart" aria-hidden="true" style="font-size: 10rem; margin-right: 3rem"></i>
-        <div class="items-container" style="height: 20rem; overflow-y: scroll;">
-            <table class="table" style="width: 40rem;">
-                <tbody>
-                    <tr ng-repeat="subscription in m_oController.m_aoSelectedSubscriptions track by $index">
-                        <th scope="row">{{subscription.name}}</td>
-                        <td>{{subscription.price}}€</td>
-                        <td>
-                            <button class="btn btn-success" ng-click="m_oController.showSubscriptionAddForm(subscription, $index)">Buy</button>
-                        </td>
-                    </tr>
-                    <tr class="bg-light" style="position: sticky;bottom: 0">
-                        <th scope="row">Total</th>
-                        <td>{{m_oController.m_iTotalPrice}} €</td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>

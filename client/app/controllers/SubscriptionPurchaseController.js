@@ -26,8 +26,10 @@ SubscriptionPurchaseController = (function () {
         this.m_aoSelectedSubscriptions = [];
 
         this.getSubscriptionTypes();
+        this.setPrice();
 
         this.m_iTotalPrice = 0;
+        console.log(this.m_aoTypes);
     }
 
     SubscriptionPurchaseController.prototype.addToCart = function (sSubName, iSubPrice) {
@@ -50,25 +52,25 @@ SubscriptionPurchaseController = (function () {
         this.setPrice();
     }
 
-    SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (oSubscription, iIndex) {
+    SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (oSubscription, price) {
         var oController = this;
+        console.log(oSubscription)
 
         let oNewSubscription = {
             subscriptionId: null,
             typeId: oSubscription.typeId,
             typeName: oSubscription.name,
             buySuccess: false,
-            price: oSubscription.price
+            price: price
         };
-
+console.log(oNewSubscription)
         this.m_oModalService.showModal({
             templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
             controller: "SubscriptionEditorController",
             inputs: {
                 extras: {
                     subscription: oNewSubscription,
-                    editMode: true,
-                    index: iIndex
+                    editMode: true
                 }
             }
         }).then(function (modal) {
