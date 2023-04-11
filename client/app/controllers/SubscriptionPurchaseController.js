@@ -57,7 +57,8 @@ SubscriptionPurchaseController = (function () {
             subscriptionId: null,
             typeId: oSubscription.typeId,
             typeName: oSubscription.name,
-            buySuccess: false
+            buySuccess: false,
+            price: oSubscription.price
         };
 
         this.m_oModalService.showModal({
