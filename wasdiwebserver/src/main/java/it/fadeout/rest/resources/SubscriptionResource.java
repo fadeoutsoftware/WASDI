@@ -879,6 +879,8 @@ public class SubscriptionResource {
 		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
 		oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionListViewModel.setReason(sReason);
+		oSubscriptionListViewModel.setStartDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getStartDate()));
+		oSubscriptionListViewModel.setEndDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getEndDate()));		
 		oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
 		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));

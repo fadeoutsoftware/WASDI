@@ -34,7 +34,7 @@
                             <td>
                                 <button ng-show="oSubscription.adminRole === true" class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}
-                                    ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId)">
+                                    ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId, false)">
                                     <!--Show Users-->
                                     <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                                     <!--
@@ -86,7 +86,7 @@
 
                                 <button class="btn btn-danger btn-wasdi"
                                     title={{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}
-                                    ng-click="m_oController.deleteSubscription(oSubscription.subscriptionId)">
+                                    ng-click="m_oController.deleteSubscription(oSubscription)">
                                     <!--Delete Subscription-->
                                     <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
                                     <!--

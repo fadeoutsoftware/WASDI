@@ -197,10 +197,11 @@ var RootController = (function() {
     RootController.prototype.initializeProjectsInfo = function() {
         let oController = this;
         this.m_bLoadingProjects = true;
-        this.m_oProjectService.getProjectsListByUser().then(data => {
+        this.m_oProjectService.getValidProjectsListByUser().then(data => {
             
             if(!utilsIsObjectNullOrUndefined(data.data)) {
                 this.m_aoUserProjects = data.data
+                console.log(this.m_aoUserProjects)
 
                 const oFirstElement = { name: "No Active Project", projectId: null };
 

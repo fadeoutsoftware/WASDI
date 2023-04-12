@@ -18,8 +18,8 @@ public class SubscriptionListViewModel {
 	private String typeId;
 	private String typeName;
 //	private Double buyDate;
-//	private Double startDate;
-//	private Double endDate;
+	private String startDate;
+	private String endDate;
 //	private int durationDays;
 //	private String userId;
 //	private String organizationId;

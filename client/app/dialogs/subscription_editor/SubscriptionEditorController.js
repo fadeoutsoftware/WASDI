@@ -50,7 +50,7 @@ SubscriptionEditorController = (function () {
 
     SubscriptionEditorController.prototype.createSubscriptionObject = function () {
         if (!this.m_oEditSubscription.name) {
-            this.m_oEditSubscription.name = `${this.m_oEditSubscription.typeName} ${new Date().toISOString()}`
+            this.m_oEditSubscription.name = this.m_oEditSubscription.typeName;
         }
         if (utilsIsObjectNullOrUndefined(this.m_oOrganization)) {
             this.m_oEditSubscription.organizationId = "";
@@ -174,12 +174,11 @@ SubscriptionEditorController = (function () {
 
                 oController.initializeSubscriptionInfo();
                 oController.initializeDates();
-                if (!oController.m_bCheckoutNow) {
-                    let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>READY");
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
                     utilsVexCloseDialogAfter(4000, oDialog);
-                } else {
+              
                     oController.getStripePaymentUrl();
-                }
+                
 
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
