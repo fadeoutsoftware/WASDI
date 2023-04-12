@@ -108,7 +108,13 @@ public class ResponseTranslatorTerrascope extends ResponseTranslator {
 				if (oResult.getProperties().containsKey("format"))   {
 					Object oValue = oResult.getProperties().get("format");
 					if (oValue != null) {
-						oResult.setTitle(oResult.getTitle() + "." + oValue.toString());
+						
+						if (oValue.toString().equals("tif") && oResult.getTitle().startsWith("ESA_WorldCover_")) {
+							oResult.setTitle(oResult.getTitle() + "_Map." + oValue.toString());
+						}
+						else {
+							oResult.setTitle(oResult.getTitle() + "." + oValue.toString());
+						}
 					}
 				}
 			}
