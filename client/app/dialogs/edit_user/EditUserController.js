@@ -434,31 +434,31 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showSubscriptionEditForm = function (sSubscriptionId, sEditMode) {
-        var oController = this;
+    // EditUserController.prototype.showSubscriptionEditForm = function (sSubscriptionId, sEditMode) {
+    //     var oController = this;
 
-        let oOldSubscription = {
-            subscriptionId: sSubscriptionId
-        };
+    //     let oOldSubscription = {
+    //         subscriptionId: sSubscriptionId
+    //     };
 
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
-            controller: "SubscriptionEditorController",
-            inputs: {
-                extras: {
-                    subscription: oOldSubscription,
-                    editMode: sEditMode
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static'
-            })
-            modal.close.then(function () {
-                oController.initializeSubscriptionsInfo();
-            })
-        })
-    }
+    //     oController.m_oModalService.showModal({
+    //         templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+    //         controller: "SubscriptionEditorController",
+    //         inputs: {
+    //             extras: {
+    //                 subscription: oOldSubscription,
+    //                 editMode: sEditMode
+    //             }
+    //         }
+    //     }).then(function (modal) {
+    //         modal.element.modal({
+    //             backdrop: 'static'
+    //         })
+    //         modal.close.then(function () {
+    //             oController.initializeSubscriptionsInfo();
+    //         })
+    //     })
+    // }
 
     EditUserController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
         var oController = this;

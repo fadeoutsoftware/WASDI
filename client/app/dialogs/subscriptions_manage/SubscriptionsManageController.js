@@ -91,8 +91,30 @@ SubscriptionsManageController = (function () {
 
     }
 
-    SubscriptionsManageController.prototype.showSubscriptionEditForm = function (sSubscriptionId, bIsOwner) {
+    SubscriptionsManageController.prototype.showSubscriptionEditForm = function (sSubscriptionId, bEditMode) {
+        var oController = this;
 
+        let oOldSubscription = {
+            subscriptionId: sSubscriptionId
+        };
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+            controller: "SubscriptionEditorController",
+            inputs: {
+                extras: {
+                    subscription: oOldSubscription,
+                    editMode: bEditMode
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeSubscriptionsInfo();
+            })
+        })
     }
 
 
