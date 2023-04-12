@@ -8,6 +8,7 @@ SubscriptionsManageController = (function () {
         oOrganizationService,
         oTranslate,
         oProjectService,
+        oModalService
     ) {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
@@ -18,6 +19,7 @@ SubscriptionsManageController = (function () {
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
         this.m_oProjectService = oProjectService;
+        this.m_oModalService = oModalService;
 
         this.m_bLoadingOrganizations = true;
         this.m_bLoadingSubscriptions = true;
@@ -64,7 +66,25 @@ SubscriptionsManageController = (function () {
     }
 
     SubscriptionsManageController.prototype.showUsersBySubscription = function (sSubscriptionId) {
+        if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
+            return false;
+        }
 
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
+            controller: 'SubscriptionUsersController',
+            inputs: {
+                extras: {
+                    subscriptionId: sSubscriptionId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+            });
+        });
     }
 
     SubscriptionsManageController.prototype.showProjectsBySubscription = function (sSubscriptionId, sSubscriptionName) {
@@ -122,11 +142,6 @@ SubscriptionsManageController = (function () {
 
     }
 
-
-
-
-
-
     SubscriptionsManageController.$inject = [
         '$scope',
         '$window',
@@ -135,7 +150,8 @@ SubscriptionsManageController = (function () {
         'SubscriptionService',
         'OrganizationService',
         '$translate',
-        'ProjectService'
+        'ProjectService',
+        'ModalService'
     ];
     return SubscriptionsManageController
 })();

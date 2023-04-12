@@ -534,28 +534,28 @@ var EditUserController = (function () {
         this.m_oEditSubscription = {}
     }
 
-    EditUserController.prototype.showUsersBySubscription = function (sSubscriptionId) {
-        if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
-            return false;
-        }
+    // EditUserController.prototype.showUsersBySubscription = function (sSubscriptionId) {
+    //     if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
+    //         return false;
+    //     }
 
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
-            controller: 'SubscriptionUsersController',
-            inputs: {
-                extras: {
-                    subscriptionId: sSubscriptionId
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static'
-            })
-            modal.close.then(function () {
-            })
+    //     this.m_oModalService.showModal({
+    //         templateUrl: "dialogs/subscription-users/SubscriptionUsersDialog.html",
+    //         controller: 'SubscriptionUsersController',
+    //         inputs: {
+    //             extras: {
+    //                 subscriptionId: sSubscriptionId
+    //             }
+    //         }
+    //     }).then(function (modal) {
+    //         modal.element.modal({
+    //             backdrop: 'static'
+    //         })
+    //         modal.close.then(function () {
+    //         })
 
-        })
-    }
+    //     })
+    // }
 
     EditUserController.prototype.cancelSharingSubscriptionForm = function () {
         this.m_oEditSubscription = {}
