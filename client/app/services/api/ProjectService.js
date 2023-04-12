@@ -14,7 +14,7 @@ service('ProjectService', ['$http',  'ConstantsService', function ($http, oConst
 
     this.getValidProjectsListByUser = function () {
         return this.m_oHttp.get(this.APIURL + '/projects/byuser?valid=true');
-    }
+    };
 
     this.getProjectsListBySubscription = function (sSubscriptionId) {
         return this.m_oHttp.get(this.APIURL + '/projects/bysubscription?subscription=' + sSubscriptionId);

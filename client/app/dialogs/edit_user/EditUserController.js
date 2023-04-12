@@ -96,20 +96,17 @@ var EditUserController = (function () {
     /*
         getUserAuthProvider
      */
-    EditUserController.prototype.getUserAuthProvider = function()
-    {
+    EditUserController.prototype.getUserAuthProvider = function () {
         return this.m_oUser.authProvider;
     };
-    EditUserController.prototype.isUserLoggedWithGoogle = function()
-    {
-        return ((this.m_oUser.authProvider === "google") ? true: false);
+    EditUserController.prototype.isUserLoggedWithGoogle = function () {
+        return ((this.m_oUser.authProvider === "google") ? true : false);
     };
 
     /*
         changePassword
      */
-    EditUserController.prototype.changePassword = function()
-    {
+    EditUserController.prototype.changePassword = function () {
 
         var oJsonToSend = this.getPasswordsJSON();
         var oController = this;
@@ -117,37 +114,31 @@ var EditUserController = (function () {
         this.m_bEditingPassword = true;
         this.m_oAuthService.changePassword(oJsonToSend)
             .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) === false)
-                {
-                    if(data.data.boolValue ===  false)
-                    {
+                if (utilsIsObjectNullOrUndefined(data) === false) {
+                    if (data.data.boolValue === false) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                     }
-                    else
-                    {
+                    else {
                         var oVexWindow = utilsVexDialogAlertBottomRightCorner("PASSWORD CHANGED");
-                        utilsVexCloseDialogAfter(3000,oVexWindow);
+                        utilsVexCloseDialogAfter(3000, oVexWindow);
 
                     }
 
                 }
-                else
-                {
+                else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                 }
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
 
-            },(function (error)
-            {
+            }, (function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
             }));
     }
 
-    EditUserController.prototype.changeUserInfo = function()
-    {
+    EditUserController.prototype.changeUserInfo = function () {
 
         var oJsonToSend = this.getUserInfo();
         var oController = this;
@@ -155,84 +146,73 @@ var EditUserController = (function () {
         this.m_bEditingUserInfo = true;
         this.m_oAuthService.changeUserInfo(oJsonToSend)
             .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false ||  data.data.userId !== "" )
-                {
-                    if(data.data.boolValue ===  false)
-                    {
+                if (utilsIsObjectNullOrUndefined(data.data) === false || data.data.userId !== "") {
+                    if (data.data.boolValue === false) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>IMPOSSIBLE TO CHANGE USER INFO");
                     }
-                    else
-                    {
+                    else {
                         var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED USER INFO");
-                        utilsVexCloseDialogAfter(3000,oVexWindow);
+                        utilsVexCloseDialogAfter(3000, oVexWindow);
                         oController.m_oUser = data.data;
                         oController.m_oConstantsService.setUser(data.data);//save in cookie
                     }
 
 
                 }
-                else
-                {
+                else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE USER INFO");
                 }
                 oController.m_bEditingUserInfo = false;
                 oController.initializeEditUserInfo();
 
-            },(function (error)
-            {
+            }, (function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE USER INFO");
                 oController.m_bEditingUserInfo = false;
                 oController.initializeEditUserInfo();
             }));
     }
 
-    EditUserController.prototype.getPasswordsJSON = function()
-    {
+    EditUserController.prototype.getPasswordsJSON = function () {
         return {
             newPassword: this.m_oEditUser.newPassword,
             currentPassword: this.m_oEditUser.currentPassword,
         }
     }
-    EditUserController.prototype.getUserInfo = function()
-    {
+    EditUserController.prototype.getUserInfo = function () {
         return {
             name: this.m_oEditUser.name,
             surname: this.m_oEditUser.surname,
         }
     };
 
-    EditUserController.prototype.cleanPasswordsInEditUserObject= function()
-    {
+    EditUserController.prototype.cleanPasswordsInEditUserObject = function () {
         this.m_oEditUser.newPassword = "";
         this.m_oEditUser.repeatNewPassword = "";
         this.m_oEditUser.currentPassword = "";
     };
 
-    EditUserController.prototype.cleanInfoInEditUserObject= function()
-    {
+    EditUserController.prototype.cleanInfoInEditUserObject = function () {
         this.m_oEditUser.name = "";
         this.m_oEditUser.surname = "";
 
     };
 
-    EditUserController.prototype.initializeEditUserInfo = function()
-    {
+    EditUserController.prototype.initializeEditUserInfo = function () {
         this.m_oEditUser = {
-            name:"",
-            surname:"",
-            newPassword:"",
-            repeatNewPassword:"",
-            currentPassword:"",
+            name: "",
+            surname: "",
+            newPassword: "",
+            repeatNewPassword: "",
+            currentPassword: "",
         }
 
-        if( utilsIsObjectNullOrUndefined(this.m_oUser) === false )
-        {
+        if (utilsIsObjectNullOrUndefined(this.m_oUser) === false) {
             this.m_oEditUser.name = this.m_oUser.name;
             this.m_oEditUser.surname = this.m_oUser.surname;
         }
     };
 
-    EditUserController.prototype.initializeUserRuntimeInfo = function() {
+    EditUserController.prototype.initializeUserRuntimeInfo = function () {
         let oController = this;
         if (utilsIsStrNullOrEmpty(this.m_oUser.userId) === true) {
             utilsVexDialogAlertTop(
@@ -242,11 +222,11 @@ var EditUserController = (function () {
             return false;
         }
 
-        
+
         this.m_oProcessWorkspaceService.getProcessWorkspaceTotalRunningTimeByUserAndInterval(this.m_oUser.userId).then(
             function (data) {
                 if (!utilsIsObjectNullOrUndefined(data)
-                        && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(data.data) && data.status === 200) {
                     oController.m_lTotalRuntime = data.data;
                 } else {
                     utilsVexDialogAlertTop(
@@ -256,7 +236,7 @@ var EditUserController = (function () {
 
                 return true;
             }, function (error) {
-                let sErrorMessage =  "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME";
+                let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE TOTAL RUNNING TIME";
 
                 utilsVexDialogAlertTop(sErrorMessage);
             }
@@ -264,13 +244,13 @@ var EditUserController = (function () {
     };
 
 
-    EditUserController.prototype.initializeOrganizationsInfo = function() {
+    EditUserController.prototype.initializeOrganizationsInfo = function () {
         var oController = this;
 
         this.m_oOrganizationService.getOrganizationsListByUser().then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_aoOrganizations = response.data;
                 } else {
                     utilsVexDialogAlertTop(
@@ -293,7 +273,7 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showUsersByOrganization = function(sOrganizationId) {
+    EditUserController.prototype.showUsersByOrganization = function (sOrganizationId) {
         if (utilsIsStrNullOrEmpty(sOrganizationId)) {
             return false;
         }
@@ -316,13 +296,13 @@ var EditUserController = (function () {
         })
     }
 
-    EditUserController.prototype.showOrganizationEditForm = function(sOrganizationId, sEditMode) {
+    EditUserController.prototype.showOrganizationEditForm = function (sOrganizationId, sEditMode) {
         let oController = this;
 
         this.m_oOrganizationService.getOrganizationById(sOrganizationId).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_oEditOrganization = response.data;
                     oController.m_oModalService.showModal({
                         templateUrl: "dialogs/organization_editor/OrganizationEditorDialog.html",
@@ -361,7 +341,7 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showOrganizationAddForm = function() {
+    EditUserController.prototype.showOrganizationAddForm = function () {
         var oController = this;
 
         let oNewOrganization = {};
@@ -385,53 +365,53 @@ var EditUserController = (function () {
         });
     }
 
-    EditUserController.prototype.deleteOrganization = function(sOrganizationId) {
+    EditUserController.prototype.deleteOrganization = function (sOrganizationId) {
         let sConfirmMsg = "Delete this Organization?"
 
         var oController = this;
 
-        let oCallbackFunction = function(value) {
-            if(value) {
+        let oCallbackFunction = function (value) {
+            if (value) {
                 oController.m_oOrganizationService.deleteOrganization(sOrganizationId)
-                .then(function (response) {
-                    if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
-                        utilsVexCloseDialogAfter(4000, oDialog);
-                    } else {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
-                    }
+                    .then(function (response) {
+                        if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
+                            var oDialog = utilsVexDialogAlertBottomRightCorner("ORGANIZATION DELETED<br>READY");
+                            utilsVexCloseDialogAfter(4000, oDialog);
+                        } else {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION");
+                        }
 
-                    oController.initializeOrganizationsInfo();
-                }, function (error) {
-                    let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION";
+                        oController.initializeOrganizationsInfo();
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING ORGANIZATION";
 
-                    if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                        sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
-                    }
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                        }
 
-                    utilsVexDialogAlertTop(sErrorMessage);
-                })
+                        utilsVexDialogAlertTop(sErrorMessage);
+                    })
             }
         };
 
         utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
     }
 
-    EditUserController.prototype.cancelEditOrganizationForm = function() {
+    EditUserController.prototype.cancelEditOrganizationForm = function () {
         this.m_oEditOrganization = {}
     }
 
-    EditUserController.prototype.cancelSharingOrganizationForm = function() {
+    EditUserController.prototype.cancelSharingOrganizationForm = function () {
         this.m_oEditOrganization = {}
     }
 
-    EditUserController.prototype.initializeSubscriptionsInfo = function() {
+    EditUserController.prototype.initializeSubscriptionsInfo = function () {
         var oController = this;
 
         this.m_oSubscriptionService.getSubscriptionsListByUser().then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_aoSubscriptions = response.data;
                 } else {
                     utilsVexDialogAlertTop(
@@ -454,7 +434,7 @@ var EditUserController = (function () {
         );
     }
 
-    EditUserController.prototype.showSubscriptionEditForm = function(sSubscriptionId, sEditMode) {
+    EditUserController.prototype.showSubscriptionEditForm = function (sSubscriptionId, sEditMode) {
         var oController = this;
 
         let oOldSubscription = {
@@ -480,7 +460,7 @@ var EditUserController = (function () {
         })
     }
 
-    EditUserController.prototype.showSubscriptionAddForm = function(typeId, typeName) {
+    EditUserController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
         var oController = this;
 
         let oNewSubscription = {
@@ -509,52 +489,52 @@ var EditUserController = (function () {
         });
     }
 
-    EditUserController.prototype.deleteSubscription = function(sSubscriptionId) {
+    // EditUserController.prototype.deleteSubscription = function(sSubscriptionId) {
 
-        let sConfirmMsg = "Delete this Subscription?"
+    //     let sConfirmMsg = "Delete this Subscription?"
 
-        var oController = this;
-        
-        let oCallbackFunction = function(value) {
-            if (value) {
-                oController.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
-                    .then(function (response) {
-                        if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
-                            let sMessage = "SUBSCRIPTION DELETED<br>READY";
+    //     var oController = this;
 
-                            if (!utilsIsObjectNullOrUndefined(response.data) && !utilsIsStrNullOrEmpty(response.data.message)) {
-                                if (response.data.message !== "Done") {
-                                    sMessage += "<br><br>" + oController.m_oTranslate.instant(response.data.message);
-                                }
-                            }
+    //     let oCallbackFunction = function(value) {
+    //         if (value) {
+    //             oController.m_oSubscriptionService.deleteSubscription(sSubscriptionId)
+    //                 .then(function (response) {
+    //                     if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
+    //                         let sMessage = "SUBSCRIPTION DELETED<br>READY";
 
-                            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
-                            utilsVexCloseDialogAfter(4000, oDialog);
-                        } else {
-                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
-                        }
+    //                         if (!utilsIsObjectNullOrUndefined(response.data) && !utilsIsStrNullOrEmpty(response.data.message)) {
+    //                             if (response.data.message !== "Done") {
+    //                                 sMessage += "<br><br>" + oController.m_oTranslate.instant(response.data.message);
+    //                             }
+    //                         }
 
-                        oController.initializeSubscriptionsInfo();
-                    }, function (error) {
-                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION";
+    //                         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+    //                         utilsVexCloseDialogAfter(4000, oDialog);
+    //                     } else {
+    //                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
+    //                     }
 
-                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
-                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
-                        }
+    //                     oController.initializeSubscriptionsInfo();
+    //                 }, function (error) {
+    //                     let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION";
 
-                        utilsVexDialogAlertTop(sErrorMessage);
-                    });
-            }
-        };
+    //                     if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+    //                         sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+    //                     }
 
-        utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
-    }
+    //                     utilsVexDialogAlertTop(sErrorMessage);
+    //                 });
+    //         }
+    //     };
 
-    EditUserController.prototype.cancelEditSubscriptionForm = function() {
+    //     utilsVexDialogConfirm(sConfirmMsg, oCallbackFunction);
+    // }
+
+    EditUserController.prototype.cancelEditSubscriptionForm = function () {
         this.m_oEditSubscription = {}
     }
 
-    EditUserController.prototype.showUsersBySubscription = function(sSubscriptionId) {
+    EditUserController.prototype.showUsersBySubscription = function (sSubscriptionId) {
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
         }
@@ -577,11 +557,11 @@ var EditUserController = (function () {
         })
     }
 
-    EditUserController.prototype.cancelSharingSubscriptionForm = function() {
+    EditUserController.prototype.cancelSharingSubscriptionForm = function () {
         this.m_oEditSubscription = {}
     }
 
-    EditUserController.prototype.changeActiveProjectWithButton = function(oProject) {
+    EditUserController.prototype.changeActiveProjectWithButton = function (oProject) {
         var oController = this;
 
         if (!utilsIsObjectNullOrUndefined(oProject)) {
@@ -595,7 +575,7 @@ var EditUserController = (function () {
                 } else {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT");
                 }
-    
+
             }, function (error) {
                 let sErrorMessage = "GURU MEDITATION<br>ERROR IN CHANGING THE ACTIVE PROJECT";
 
@@ -608,13 +588,13 @@ var EditUserController = (function () {
         }
     }
 
-    EditUserController.prototype.initializeProjectsInfo = function() {
+    EditUserController.prototype.initializeProjectsInfo = function () {
         var oController = this;
 
         this.m_oProjectService.getProjectsListByUser().then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_aoProjects = response.data;
 
                     const oFirstElement = { name: "No Active Project", projectId: null };
@@ -656,7 +636,7 @@ var EditUserController = (function () {
     }
 
 
-    EditUserController.prototype.showProjectsBySubscription = function(sSubscriptionId, sSubscriptionName) {
+    EditUserController.prototype.showProjectsBySubscription = function (sSubscriptionId, sSubscriptionName) {
         this.m_oEditSubscription = {};
 
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
@@ -685,7 +665,7 @@ var EditUserController = (function () {
         })
     }
 
-    EditUserController.prototype.cancelEditProjectForm = function() {
+    EditUserController.prototype.cancelEditProjectForm = function () {
     }
 
     EditUserController.prototype.getSubscriptionTypes = function () {
@@ -694,7 +674,7 @@ var EditUserController = (function () {
         oController.m_oSubscriptionService.getSubscriptionTypes().then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response)
-                        && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
+                    && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                     oController.m_aoTypes = response.data;
                     oController.m_aoTypesMap = oController.m_aoTypes.map(
                         (item) => ({ name: item.name, typeId: item.typeId })
@@ -704,7 +684,7 @@ var EditUserController = (function () {
                         if (oValue.typeId == oController.m_oEditSubscription.typeId) {
                             oController.m_oType = oValue;
                         }
-                    });                
+                    });
                 } else {
                     var oDialog = utilsVexDialogAlertBottomRightCorner(
                         "GURU MEDITATION<br>ERROR GETTING SUBSCRIPTION TYPES"
@@ -762,6 +742,6 @@ var EditUserController = (function () {
         '$translate',
         "RabbitStompService"
     ];
-    return EditUserController ;
+    return EditUserController;
 })();
-window.EditUserController= EditUserController;
+window.EditUserController = EditUserController;

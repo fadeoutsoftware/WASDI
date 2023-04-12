@@ -6,7 +6,8 @@ SubscriptionsManageController = (function () {
         oConstantsService,
         oSubscriptionService,
         oOrganizationService,
-        oTranslate
+        oTranslate,
+        oProjectService,
     ) {
         this.m_oScope = $scope;
         this.m_oWindow = $window;
@@ -16,12 +17,14 @@ SubscriptionsManageController = (function () {
         this.m_oConstantsService = oConstantsService;
         this.m_oSubscriptionService = oSubscriptionService;
         this.m_oOrganizationService = oOrganizationService;
+        this.m_oProjectService = oProjectService;
 
         this.m_bLoadingOrganizations = true;
         this.m_bLoadingSubscriptions = true;
         this.m_bLoadingProjects = true;
         this.m_bIsLoading = false;
 
+        this.m_aoSubscriptionProjects = [];
 
         this.m_aoSubscriptions = [];
         this.m_bLoadingSubscriptions = true;
@@ -72,9 +75,57 @@ SubscriptionsManageController = (function () {
 
     }
 
-    SubscriptionsManageController.prototype.deleteSubscription = function (sSubscriptionId) {
-        
+
+
+    SubscriptionsManageController.prototype.deleteSubscription = function (oSubscription) {
+        let sConfirmMsgOwner = "Are you sure you want to delete this subscription?";
+        let sConfirmMsgShare = "Are you sure you want to remove your permissions for this subscription?";
+        let oController = this;
+
+        let oCallbackFunction = function (value) {
+            if (value) {
+                oController.m_oSubscriptionService.deleteSubscription(oSubscription.subscriptionId)
+                    .then(function (response) {
+                        if (!utilsIsObjectNullOrUndefined(response) && response.status === 200) {
+                            let sMessage = "SUBSCRIPTION DELETED<br>READY";
+
+                            if (!utilsIsObjectNullOrUndefined(response.data) && !utilsIsStrNullOrEmpty(response.data.message)) {
+                                if (response.data.message !== "Done") {
+                                    sMessage += "<br><br>" + oController.m_oTranslate.instant(response.data.message);
+                                }
+                            }
+                            var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+                            utilsVexCloseDialogAfter(4000, oDialog);
+                        } else {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION");
+                        }
+
+                        oController.initializeSubscriptionsInfo();
+                    }, function (error) {
+                        let sErrorMessage = "GURU MEDITATION<br>ERROR IN DELETING SUBSCRIPTION";
+
+                        if (!utilsIsObjectNullOrUndefined(error.data) && !utilsIsStrNullOrEmpty(error.data.message)) {
+                            sErrorMessage += "<br><br>" + oController.m_oTranslate.instant(error.data.message);
+                        }
+                        utilsVexDialogAlertTop(sErrorMessage);
+                    })
+            }
+
+        }
+        if (oSubscription.adminRole === true) {
+            console.log(sConfirmMsgOwner)
+            utilsVexDialogConfirm(sConfirmMsgOwner, oCallbackFunction);
+        } else {
+            console.log(sConfirmMsgShare)
+            utilsVexDialogConfirm(sConfirmMsgShare, oCallbackFunction);
+        }
+
     }
+
+
+
+
+
 
     SubscriptionsManageController.$inject = [
         '$scope',
@@ -83,7 +134,8 @@ SubscriptionsManageController = (function () {
         'ConstantsService',
         'SubscriptionService',
         'OrganizationService',
-        '$translate'
+        '$translate',
+        'ProjectService'
     ];
     return SubscriptionsManageController
 })();
