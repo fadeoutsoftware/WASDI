@@ -140,10 +140,10 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 					if (!Utils.isNullOrEmpty(sResult)) {
 						String sDesiredFileName = this.getFileName(sFileURL);
 
-						String renamedFile = WasdiFileUtils.renameFile(sResult, sDesiredFileName);
-						ZipFileUtils.fixZipFileInnerSafePath(renamedFile);
+						String sRenamedFile = WasdiFileUtils.renameFile(sResult, sDesiredFileName);
+						ZipFileUtils.fixZipFileInnerSafePath(sRenamedFile);
 
-						return renamedFile;
+						return sRenamedFile;
 					}
 
 				}
