@@ -88,7 +88,32 @@ SubscriptionsManageController = (function () {
     }
 
     SubscriptionsManageController.prototype.showProjectsBySubscription = function (sSubscriptionId, sSubscriptionName) {
+        this.m_oEditSubscription = {};
 
+        if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
+            return false;
+        }
+
+        var oController = this;
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
+            controller: 'SubscriptionProjectsController',
+            inputs: {
+                extras: {
+                    subscriptionId: sSubscriptionId,
+                    subscriptionName: sSubscriptionName
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal({
+                backdrop: 'static'
+            })
+            modal.close.then(function () {
+                oController.initializeProjectsInfo();
+            })
+
+        })
     }
 
     SubscriptionsManageController.prototype.showSubscriptionEditForm = function (sSubscriptionId, bEditMode) {

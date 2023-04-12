@@ -460,34 +460,34 @@ var EditUserController = (function () {
     //     })
     // }
 
-    EditUserController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
-        var oController = this;
+    // EditUserController.prototype.showSubscriptionAddForm = function (typeId, typeName) {
+    //     var oController = this;
 
-        let oNewSubscription = {
-            subscriptionId: null,
-            typeId: typeId,
-            typeName: typeName,
-            buySuccess: false
-        };
+    //     let oNewSubscription = {
+    //         subscriptionId: null,
+    //         typeId: typeId,
+    //         typeName: typeName,
+    //         buySuccess: false
+    //     };
 
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
-            controller: "SubscriptionEditorController",
-            inputs: {
-                extras: {
-                    subscription: oNewSubscription,
-                    editMode: true
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal({
-                backdrop: 'static'
-            })
-            modal.close.then(function () {
-                oController.initializeSubscriptionsInfo();
-            })
-        });
-    }
+    //     this.m_oModalService.showModal({
+    //         templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
+    //         controller: "SubscriptionEditorController",
+    //         inputs: {
+    //             extras: {
+    //                 subscription: oNewSubscription,
+    //                 editMode: true
+    //             }
+    //         }
+    //     }).then(function (modal) {
+    //         modal.element.modal({
+    //             backdrop: 'static'
+    //         })
+    //         modal.close.then(function () {
+    //             oController.initializeSubscriptionsInfo();
+    //         })
+    //     });
+    // }
 
     // EditUserController.prototype.deleteSubscription = function(sSubscriptionId) {
 
