@@ -201,7 +201,6 @@ var RootController = (function() {
             
             if(!utilsIsObjectNullOrUndefined(data.data)) {
                 this.m_aoUserProjects = data.data
-                console.log(this.m_aoUserProjects)
 
                 const oFirstElement = { name: "No Active Project", projectId: null };
 
@@ -221,11 +220,14 @@ var RootController = (function() {
 
                     if (oValue.activeProject) {
                         this.m_oSelectedProject = oValue;
+                        this.m_oConstantsService.setActiveProject(oValue);
                     }; 
                 });
                 if(utilsIsObjectNullOrUndefined(this.m_oSelectedProject)) {
                     this.m_oSelectedProject = this.m_aoUserProjectsMap[0];
                 }
+
+                console.log(this.m_oConstantsService.getActiveProject());
 
             } else {
                 utilsVexDialogAlertTop(

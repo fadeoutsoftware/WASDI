@@ -61,6 +61,12 @@ service('ConstantsService', [function () {
     this.m_aoUserProjects = []; 
 
     /**
+     * User's active project
+     * @type {*}
+     */
+    this.m_oActiveProject = {};
+
+    /**
      * User Account Type
      * @type {string}
      */
@@ -289,6 +295,23 @@ service('ConstantsService', [function () {
      */
     this.setUserProjects = function(aoProjects) {
         this.m_aoUserProjects = aoProjects; 
+    }
+
+    /**
+     * Set the user's active project
+     * @param {*} oProject
+     */
+    this.setActiveProject = function(oProject) {
+        this.m_oActiveProject = oProject
+    }
+
+    /**
+     * Returns the user's active project
+     * @param {*} 
+     * @
+     */
+    this.getActiveProject = function() {
+        return this.m_oActiveProject; 
     }
 
     /**
