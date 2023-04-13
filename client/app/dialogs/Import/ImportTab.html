@@ -42,7 +42,8 @@
     <div class="row-v4"> 
         <div class="col-v4 container">
             <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi"
-            ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false">
+            ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false"
+            ng-attr-data-dismiss="{{m_oController.m_aoActiveSubscriptions.length === 0 ? 'modal' : ''}}">
             {{'DIALOG_IMPORT_UPLOAD_UPLOAD'|translate}}
             </button>
         </div>
