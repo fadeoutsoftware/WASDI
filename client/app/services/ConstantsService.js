@@ -55,6 +55,12 @@ service('ConstantsService', [function () {
     this.m_oUser = null;
 
     /**
+     * User's active subscriptions
+     * 
+     */
+    this.m_aoActiveSubscriptions = []; 
+
+    /**
      * User Projects List
      * @type {*}
      */
@@ -64,7 +70,7 @@ service('ConstantsService', [function () {
      * User's active project
      * @type {*}
      */
-    this.m_oActiveProject = {};
+    this.m_oActiveProject = null;
 
     /**
      * User Account Type
@@ -280,9 +286,24 @@ service('ConstantsService', [function () {
 
         return true;
     };
+    /**
+     * Return array of user's active subscriptions
+     * @returns  {aoSubscriptions}
+     */
+    this.getActiveSubscriptions = function () {
+        return this.m_aoActiveSubscriptions;
+    }
 
     /**
-     * Return the array of user's projects
+     * Set the user's active subscriptions
+     * @param {sActiveSubscriptions}
+     */
+    this.setActiveSubscriptions = function (asSubscriptions) {
+        this.m_aoActiveSubscriptions = asSubscriptions; 
+    }
+
+    /**
+     * Return the array of user's active projects
      * @returns {aoProjects}
      */
     this.getUserProjects = function() {

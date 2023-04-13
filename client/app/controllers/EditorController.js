@@ -1285,6 +1285,20 @@
             oController = oWindow;
         }
 
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
+        if(asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                oController.m_oState.go("root.subscriptions", {});
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlterTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
         oController.m_oConsoleService.createConsole(oController.m_oActiveWorkspace.workspaceId)
         .then(
             function (data) {
@@ -1322,6 +1336,44 @@
         );
 
         return true;
+
+        // oController.m_oConsoleService.createConsole(oController.m_oActiveWorkspace.workspaceId)
+        // .then(
+        //     function (data) {
+        //         if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+        //             // Request accepted
+        //             if (data.data.stringValue.includes("http")) {
+        //                 oController.m_oWindow.open(data.data.stringValue, '_blank');
+        //             } else {
+        //                 sMessage = "WASDI IS PREPARING YOUR NOTEBOOK"
+        
+        //                 if (utilsIsObjectNullOrUndefined(data.data) === false) {
+        //                     if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+        //                         sMessage = sMessage + "<BR>" + data.data.stringValue;
+        //                     }
+        //                 }
+        //                 oController.m_bNotebookIsReady = true;
+        //                 utilsVexDialogAlertTop(sMessage);
+        //             }
+        //         } else {
+        //             sMessage = "GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK"
+
+        //             if (utilsIsObjectNullOrUndefined(data.data) === false) {
+        //                 if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+        //                     sMessage = sMessage + ": " + data.data.stringValue;
+        //                 }
+        //             }
+
+        //             utilsVexDialogAlertTop(sMessage);
+        //         }
+
+        //     },
+        //     function (error) {
+        //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK");
+        //     }
+        // );
+
+        // return true;
     };
 
     /**
