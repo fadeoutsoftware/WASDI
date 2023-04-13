@@ -6,7 +6,7 @@
 
 var WorkFlowManagerController = (function () {
 
-    function WorkFlowManagerController($scope, oClose, oExtras, oWorkflowService, oConstantsService, oHttp, oModalService) {
+    function WorkFlowManagerController($scope, oClose, oExtras, oWorkflowService, oConstantsService, oHttp, oModalService, $state) {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
@@ -15,6 +15,7 @@ var WorkFlowManagerController = (function () {
         this.m_oModalService = oModalService;
         this.m_oFile = null;
         this.m_aoProducts = this.m_oExtras.products;
+        this.m_oState = $state;
 
 
         this.m_sWorkspaceId = this.m_oExtras.workflowId;
@@ -100,6 +101,26 @@ var WorkFlowManagerController = (function () {
      */
     WorkFlowManagerController.prototype.runWorkFlowPerProducts = function () {
         var iNumberOfProducts = this.m_asSelectedProducts.length;
+
+        let oController = this;
+
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
+        if(asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                if(value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
+
         if (utilsIsObjectNullOrUndefined(this.m_oSelectedWorkflow) === true) {
             return false;
         }
@@ -131,6 +152,24 @@ var WorkFlowManagerController = (function () {
     };
 
     WorkFlowManagerController.prototype.runMultiInputWorkFlow = function () {
+        let oController = this;
+
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
+        if(asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                if(value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
         for (var sNodeName in this.m_aoMultiInputSelectedProducts) {
             // check if the property/key is defined in the object itself, not in parent
             if (this.m_aoMultiInputSelectedProducts.hasOwnProperty(sNodeName)) {
@@ -145,8 +184,6 @@ var WorkFlowManagerController = (function () {
         } else {
             utilsVexDialogAlertTop("GURU MEDITATION<br>YOU HAVE TO INSERT A PRODUCT FOR EACH INPUT NODE.");
         }
-
-
     };
 
     WorkFlowManagerController.prototype.getObjectExecuteGraph = function (sWorkflowId, sName, sDescription, asInputNodeNames,
@@ -478,6 +515,7 @@ var WorkFlowManagerController = (function () {
         'ConstantsService',
         '$http',
         'ModalService',
+        '$state'
 
     ];
     return WorkFlowManagerController;
