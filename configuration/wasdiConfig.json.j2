@@ -447,6 +447,9 @@
         "millisWaitAfterDelete": {{ dictWasdiConfiguration.dockers.millisWaitAfterDelete }},
         "millisWaitAfterDeployScriptCreated": {{ dictWasdiConfiguration.dockers.millisWaitAfterDeployScriptCreated }},
         "millisWaitForLogin": {{ dictWasdiConfiguration.dockers.millisWaitForLogin }},
+{% if dictWasdiConfiguration.dockers.registers | length == 0 %}
+        "registers": [],
+{% else %}
         "registers": [
 {% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.registers %}
             {
@@ -461,6 +464,7 @@
 {% endfor %}
 
         ],
+{% endif %}
         "eoepca": {
             "dockerWriteFolder": "{{ dictWasdiConfiguration.dockers.eoepca.dockerWriteFolder }}",
             "adesServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.adesServerAddress }}",
@@ -513,7 +517,7 @@
     },
     "traefik": {
 {% if dictWasdiConfiguration.traefik.firewallWhiteList == [] %}
-        "firewallWhiteList": [],
+        "firewallWhiteList": []
 {% else %}
         "firewallWhiteList": [
 {% for sCurrentFirewallWhiteIp in dictWasdiConfiguration.traefik.firewallWhiteList %}
