@@ -47,7 +47,7 @@
         <!-- CONFIG FILE -->
         <init-param>
             <param-name>ConfigFilePath</param-name>
-            <param-value>/data/wasdi/wasdiConfig.json</param-value>
+            <param-value>/etc/wasdi/wasdiConfig.json</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
