@@ -63,27 +63,26 @@
             }
         }
     },
-	"Sentinel-3": {
-		"keys": {
-			"platformname": "Sentinel3/search.json?",
-			"producttype": "&",
-			"productlevel ": "&"
-		},
-		"values":{
-			"indexvalue": {
-				"Sentinel-3": ""
-			},
-			"producttype": {
-				"SR_1_SRA___": "SR_1_SRA___",
-				"SR_1_SRA_A_": "SR_1_SRA_A_",
-				"SR_1_SRA_BS": "SR_1_SRA_BS",
-				"SR_2_LAN___": "SR_2_LAN___"
-			},
-			"productlevel ": {
-				"L1": "L1",
-				"L2": "L2"
-			}
-			
-		}
-	}
+    "Sentinel-3": {
+        "keys": {
+            "platformname": "Sentinel3/search.json?",
+            "producttype": "&",
+            "productlevel ": "&"
+        },
+        "values": {
+            "indexvalue": {
+                "Sentinel-3": ""
+            },
+            "producttype": {
+                "SR_1_SRA___": "SR_1_SRA___",
+                "SR_1_SRA_A_": "SR_1_SRA_A_",
+                "SR_1_SRA_BS": "SR_1_SRA_BS",
+                "SR_2_LAN___": "SR_2_LAN___"
+            },
+            "productlevel ": {
+                "L1": "L1",
+                "L2": "L2"
+            }
+        }
+    }
 }
