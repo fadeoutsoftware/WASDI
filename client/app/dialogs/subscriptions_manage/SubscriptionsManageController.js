@@ -45,6 +45,7 @@ SubscriptionsManageController = (function () {
             if (!utilsIsObjectNullOrUndefined(response)
                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 oController.m_aoSubscriptions = response.data;
+                console.log(oController.m_aoSubscriptions)
             } else {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"

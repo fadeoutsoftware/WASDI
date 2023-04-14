@@ -13,6 +13,8 @@
                             <th scope="col">Owner ID</th>
                             <th scope="col">Organization</th>
                             <th scope="col">Payment Status</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
                             <th scope="col">Permission</th>
                             <th scope="col">Time</th>
                             <th scope="col"></th>
@@ -22,13 +24,15 @@
                         <tr ng-repeat="oSubscription in m_oController.m_aoSubscriptions track by $index"
                             style="cursor: pointer;">
                             <td title="{{oSubscription.name}}" style="width: 7rem;">{{oSubscription.name}}</td>
-                            <td>{{oSubscription.typeName}}</td>
+                            <td  style="width: 5rem;">{{oSubscription.typeName}}</td>
                             <td>{{oSubscription.ownerUserId}}</td>
                             <td style="width: 3rem;">{{oSubscription.organizationName}}</td>
-                            <td>
+                            <td class="text-center">
                                 <span class="text-success" ng-if="oSubscription.buySuccess">Paid</span>
                                 <span class="text-warning" ng-if="!oSubscription.buySuccess">Pending...</span>
                             </td>
+                            <td>{{oSubscription.startDate}}</td>
+                            <td>{{oSubscription.endDate}}</td>
                             <td style="width: 3rem">{{oSubscription.reason}}</td>
                             <td></td>
                             <td>
