@@ -325,6 +325,23 @@ var WasdiApplicationUIController = (function () {
             let oDialog = utilsVexDialogAlertBottomRightCorner(sErrorOpenWs);
             utilsVexCloseDialogAfter(4000, oDialog);
         }
+        
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
+        if(asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                if(value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
 
         // Set the active workspace
         oController.m_oConstantsService.setActiveWorkspace(oWorkspace);
