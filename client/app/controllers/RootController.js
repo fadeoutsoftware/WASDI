@@ -201,7 +201,6 @@ var RootController = (function() {
             
             if(!utilsIsObjectNullOrUndefined(data.data)) {
                 this.m_aoUserProjects = data.data
-                console.log(this.m_aoUserProjects)
 
                 const oFirstElement = { name: "No Active Project", projectId: null };
 
@@ -212,8 +211,12 @@ var RootController = (function() {
                 });
 
                 this.m_oProject = oFirstElement;
+                let asSubscriptionNames = []
 
                 this.m_aoUserProjects.forEach((oValue) => {
+                    //Add subscription name to the array
+                    asSubscriptionNames.push(oValue.subscriptionName)
+                  
                     //FRONTEND FIX FOR NO ACTIVE PROJECT SELECT: 
                     if(oValue.projectId === this.m_oSelectedProject.projectId) {
                         this.m_oSelectedProject = {}; 
@@ -221,12 +224,14 @@ var RootController = (function() {
 
                     if (oValue.activeProject) {
                         this.m_oSelectedProject = oValue;
+                        this.m_oConstantsService.setActiveProject(oValue);
                     }; 
                 });
+
+                this.m_oConstantsService.setActiveSubscriptions(asSubscriptionNames); 
                 if(utilsIsObjectNullOrUndefined(this.m_oSelectedProject)) {
                     this.m_oSelectedProject = this.m_aoUserProjectsMap[0];
                 }
-
             } else {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF PROJECTS"

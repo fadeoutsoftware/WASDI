@@ -29,6 +29,7 @@ SubscriptionEditorController = (function () {
         this.m_sStartDate = null;
         this.m_sEndDate = null;
         this.m_lDurationDays = 0;
+        this.m_iDaysRemaining = 0;
 
         this.m_bIsPaid = false;
 
@@ -46,7 +47,6 @@ SubscriptionEditorController = (function () {
             oClose(result, 500);
         }
     }
-
 
     SubscriptionEditorController.prototype.createSubscriptionObject = function () {
         if (!this.m_oEditSubscription.name) {
@@ -71,7 +71,6 @@ SubscriptionEditorController = (function () {
         }
     }
 
-
     SubscriptionEditorController.prototype.initializeSubscriptionInfo = function () {
         if (utilsIsStrNullOrEmpty(this.m_oEditSubscription.subscriptionId)) {
             this.m_bIsPaid = this.m_oEditSubscription.buySuccess;
@@ -89,6 +88,7 @@ SubscriptionEditorController = (function () {
                         oController.m_bIsPaid = oController.m_oEditSubscription.buySuccess;
                         oController.initializeDates();
                         oController.getOrganizationsListByUser();
+                        oController.getDaysRemaining(oController.m_oEditSubscription.startDate, oController.m_oEditSubscription.endDate);
                     } else {
                         utilsVexDialogAlertTop(
                             "GURU MEDITATION<br>ERROR IN GETTING THE SUBSCRIPTION BY ID"
@@ -174,11 +174,11 @@ SubscriptionEditorController = (function () {
 
                 oController.initializeSubscriptionInfo();
                 oController.initializeDates();
-                    let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-              
-                    oController.getStripePaymentUrl();
-                
+                let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
+                utilsVexCloseDialogAfter(4000, oDialog);
+
+                oController.getStripePaymentUrl();
+
 
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
@@ -207,6 +207,7 @@ SubscriptionEditorController = (function () {
         //     this.m_oOrganization = {};
         // }
     }
+
     SubscriptionEditorController.prototype.getStripePaymentUrl = function () {
         let oController = this;
 
@@ -234,7 +235,7 @@ SubscriptionEditorController = (function () {
     SubscriptionEditorController.prototype.checkout = function () {
         let oController = this;
         if (!this.m_oEditSubscription.subscriptionId) {
-            oController.m_bCheckoutNow= true;
+            oController.m_bCheckoutNow = true;
             this.saveSubscription();
         } else {
             this.getStripePaymentUrl();
@@ -279,6 +280,16 @@ SubscriptionEditorController = (function () {
             }
         );
     }
+
+    SubscriptionEditorController.prototype.getDaysRemaining = function (sStartDate, sEndDate) {
+        let sCurrentDate = Date.now();
+        let sEndTimestamp = Date.parse(sEndDate);
+
+        let iRemaningDays = Math.ceil((sEndTimestamp - sCurrentDate) / (1000 * 3600 * 24));
+
+        this.m_iDaysRemaining = iRemaningDays;
+    }
+
 
     SubscriptionEditorController.$inject = [
         '$scope',

@@ -5,7 +5,7 @@
 
 var WappsController = (function() {
 
-    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService, $timeout, oRabbitStompService) {
+    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService, $timeout, oRabbitStompService, $state) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -26,7 +26,10 @@ var WappsController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oTimeout = $timeout; 
         this.m_oRabbitStompService = oRabbitStompService; 
+        this.m_oState = $state;
 
+        this.m_bActiveSubscription = false;
+        this.m_aoActiveSubscriptions = this.m_oConstantsService.getActiveSubscriptions(); 
         // this.m_sSearchTextApp = "";
 
         /* 
@@ -132,9 +135,26 @@ var WappsController = (function() {
 
     WappsController.prototype.runProcessor = function()
     {
-        console.log("RUN - " + this._selectedProcessor.processorName);
-
         var oController = this;
+
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
+        if(asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                if(value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
+    
+        console.log("RUN - " + this._selectedProcessor.processorName);
 
         let sJSON = null;
         if(this.m_bIsJsonEditModeActive == true){
@@ -366,7 +386,8 @@ var WappsController = (function() {
         'ConstantsService',
         'ModalService',
         '$timeout',
-        'RabbitStompService'
+        'RabbitStompService',
+        '$state'
     ];
     return WappsController;
 })();

@@ -4,7 +4,7 @@
 
 var UploadController = (function() {
 
-    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService, oStyleService) {
+    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService, oStyleService, $state) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
@@ -26,6 +26,8 @@ var UploadController = (function() {
         this.m_oStyle = "";
         this.m_asStyles = [];
         this.m_aoStylesMap = {};
+        this.m_oState = $state;
+        this.m_aoActiveSubscriptions = this.m_oConstantsService.getActiveSubscriptions();
 
         this.isCreatedAccountUpload();
 
@@ -50,6 +52,7 @@ var UploadController = (function() {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
         $scope.run = function() {
+           
             oController.uploadFile();
             // oClose("close", 500); // close, but give 500ms for bootstrap to animate
         };
@@ -62,6 +65,26 @@ var UploadController = (function() {
     };
 
     UploadController.prototype.uploadFile = function(){
+        let oController = this;
+
+        let oActiveProject = this.m_oConstantsService.getActiveProject();
+       
+
+        if(this.m_aoActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function(value) {
+                if(value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            }); 
+            return false;
+        }
+
+        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
+
         if( utilsIsObjectNullOrUndefined(this.m_oFile) || utilsIsObjectNullOrUndefined(this.m_oFile[0]) )
         {
             return false;
@@ -74,7 +97,6 @@ var UploadController = (function() {
         oBody.append('file', this.m_oFile[0]);
 
         this.m_bIsUploading = true;
-        var oController = this;
 
         var sStyle = "";
 
@@ -267,7 +289,8 @@ var UploadController = (function() {
         'ConstantsService',
         'CatalogService',
         'ProductService',
-        'StyleService'
+        'StyleService', 
+        '$state'
     ];
     return UploadController;
 })();
