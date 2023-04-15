@@ -2,7 +2,7 @@ package wasdi.asynch;
 
 import java.util.ArrayList;
 
-import wasdi.processors.DockerUtils;
+import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -82,7 +82,7 @@ public class PushDockerImagesThread extends Thread {
 	 */
 	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
 		try {
-			boolean bLogged = oDockerUtils.login(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
 			
 			if (!bLogged) {
 				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error logging in, return false.");

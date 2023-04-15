@@ -156,7 +156,7 @@ public class OrganizationResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			// Get requested organization
-			Organization oOrganization = oOrganizationRepository.getOrganizationById(sOrganizationId);
+			Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
 			oVM = convert(oOrganization);
 
@@ -373,7 +373,7 @@ public class OrganizationResource {
 		
 		// Check if the organization exists
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-		Organization oOrganization = oOrganizationRepository.getOrganizationById(sOrganizationId);
+		Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 		
 		if (oOrganization == null) {
 			WasdiLog.debugLog("OrganizationResource.ShareOrganization: invalid organization");
@@ -634,7 +634,7 @@ public class OrganizationResource {
 	private List<Organization> getOrganizationsOwnedByUser(String sUserId) {
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		return oOrganizationRepository.getOrganizationsByUser(sUserId);
+		return oOrganizationRepository.getOrganizationsOwnedByUser(sUserId);
 	}
 
 	private Set<String> getIdsOfOrganizationsOwnedByUser(String sUserId) {

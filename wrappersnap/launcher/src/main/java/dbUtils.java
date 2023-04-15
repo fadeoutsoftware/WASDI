@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -22,6 +23,10 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import wasdi.processors.PythonPipProcessorEngine2;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -65,7 +70,9 @@ import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -2062,8 +2069,20 @@ public class dbUtils {
     public static void testEOEPCALogin() {
     	
     	String sDeployBody = "{ \"executionUnit\": { \"href\": \"https://test.wasdi.net/wasdiwebserver/rest/processors/getcwl?processorName=hello_eoepca2\", \"type\": \"application/cwl\" }}";
+    	//String sDeployBody = "{ \"executionUnit\": { \"href\": \"https://raw.githubusercontent.com/EOEPCA/convert/main/convert-url-app.cwl\", \"type\": \"application/cwl\" }}";
     	
-		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(WasdiConfig.Current.dockers.eoepca.adesServerAddress);
+    	
+		String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
+		
+		if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
+		
+		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
+			sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
+		}
+		
+		sBaseAddress += "wps3/";
+    	
+		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 		
 		// Is this istance under authentication?		
 		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user) && !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.password)) {
@@ -2085,6 +2104,8 @@ public class dbUtils {
 			oOgcProcessesClient.setHeaders(asHeaders);
 		}
 		
+		ProcessList oProcList = oOgcProcessesClient.getProcesses();
+		
 		// Call the deploy function: is a post of the App Deploy Body
 		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);    	
     }
@@ -2092,6 +2113,9 @@ public class dbUtils {
     public static void main(String[] args) {
 
         try {
+        	
+        	WasdiProcessorEngine oEngine = new  PythonPipProcessorEngine2();
+        	
         	System.out.println("Wasdi DB Utils");
         	        	
             // create the parser
@@ -2230,5 +2254,5 @@ public class dbUtils {
 			e.printStackTrace();
 		}
 	}
-
+	
 }

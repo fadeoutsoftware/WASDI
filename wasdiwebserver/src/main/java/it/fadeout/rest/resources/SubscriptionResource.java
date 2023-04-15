@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,9 @@ public class SubscriptionResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
+		
+		if (bValid == null) bValid = false;
 
 		WasdiLog.debugLog("SubscriptionResource.getListByUser");
 
@@ -98,7 +101,7 @@ public class SubscriptionResource {
 
 		try {
 
-			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId());
+			WasdiLog.debugLog("SubscriptionResource.getListByUser: subscriptions for " + oUser.getUserId() + " Valid = " + bValid);
 
 
 			// 1. subscriptions directly owned by the user
@@ -108,8 +111,9 @@ public class SubscriptionResource {
 
 
 			// Get the list of Subscriptions owned by the user
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-			List<Subscription> aoOwnedSubscriptions = getSubscriptionsOwnedByUser(oUser.getUserId());
+			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
 
 			Set<String> asOwnedSubscriptionIds = aoOwnedSubscriptions.stream()
 					.map(Subscription::getSubscriptionId)
@@ -124,6 +128,10 @@ public class SubscriptionResource {
 
 			// For each
 			for (Subscription oSubscription : aoOwnedSubscriptions) {
+				
+				if (bValid) {
+					if (!oSubscription.isValid()) continue;
+				}
 				// Create View Model
 				SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
 
@@ -138,17 +146,23 @@ public class SubscriptionResource {
 			Map<String, String> aoOrganizationNamesOfOwnedByOrSharedWithUser = getOrganizationNamesById(asOrganizationIdsOfOwnedByOrSharedWithUser);
 
 			List<Subscription> aoOrganizationalSubscriptions = getSubscriptionsSharedByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
-
-			aoOrganizationalSubscriptions.forEach((Subscription oSubscription) -> {
+			
+			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
 				if (!asOwnedSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
-					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
-					aoSubscriptionLVM.add(oSubscriptionViewModel);
+					boolean bToAdd=true;
+					if (bValid) {
+						bToAdd = oSubscription.isValid();
+					}
+					
+					if (bToAdd) {
+						SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
+						aoSubscriptionLVM.add(oSubscriptionViewModel);						
+					}
 				}
-			});
-
+			}
+			
 
 			// Get the list of Subscriptions shared with this user
-
 			List<Subscription> aoSharedSubscriptions = getSubscriptionsSharedWithUser(oUser.getUserId());
 
 
@@ -166,34 +180,53 @@ public class SubscriptionResource {
 			Map<String, String> asNamesOfOrganizationsOfDirectSubscriptionSharings = getOrganizationNamesById(asOrganizationIdsOfDirectSubscriptionSharings);
 
 			for (Subscription oSubscription : aoSharedSubscriptions) {
-				SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(),
-						asNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
-						"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
-
-				aoSubscriptionLVM.add(oSubscriptionViewModel);
+				boolean bToAdd=true;
+				if (bValid) {
+					bToAdd = oSubscription.isValid();
+				}				
+				
+				if (bToAdd) {
+					SubscriptionListViewModel oSubscriptionViewModel = convert(oSubscription, oUser.getUserId(),
+							asNamesOfOrganizationsOfDirectSubscriptionSharings.get(oSubscription.getOrganizationId()),
+							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
+	
+					aoSubscriptionLVM.add(oSubscriptionViewModel);
+				}
 			}
 
 
 			if (!aoSubscriptionLVM.isEmpty()) {
-				Map<String, SubscriptionListViewModel> aoSubscriptionListViewModelMap = aoSubscriptionLVM.stream().collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, Function.identity()));
-
-				Set<String> asSubscriptionIds_2 = aoSubscriptionListViewModelMap.keySet();
-
-				Map<String, Map<String, Long>> aoRunningTimeBySubscriptionAndProject =
-						new ProcessWorkspaceResource().getRunningTimeBySubscriptionAndProject(sSessionId);
-
-				for (String sSubscriptionId : asSubscriptionIds_2) {
-					Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionAndProject.get(sSubscriptionId);
-
-					if (aoRunningTimeByProject != null) {
-						long lTotalRunningTime = 0;
-
-						for (Long lRunningTime : aoRunningTimeByProject.values()) {
-							lTotalRunningTime += lRunningTime;
+				try  {
+					
+					Map<String, SubscriptionListViewModel> aoSubscriptionListViewModelMap = new HashMap<String, SubscriptionListViewModel>();
+					
+					for (SubscriptionListViewModel oVMToAdd : aoSubscriptionLVM) {
+						if (aoSubscriptionListViewModelMap.containsKey(oVMToAdd.getSubscriptionId()) ==false) {
+							aoSubscriptionListViewModelMap.put(oVMToAdd.getSubscriptionId(), oVMToAdd);
 						}
-
-						aoSubscriptionListViewModelMap.get(sSubscriptionId).setRunningTime(lTotalRunningTime);
 					}
+
+					Set<String> asSubscriptionIds_2 = aoSubscriptionListViewModelMap.keySet();
+
+					Map<String, Map<String, Long>> aoRunningTimeBySubscriptionAndProject =
+							new ProcessWorkspaceResource().getRunningTimeBySubscriptionAndProject(sSessionId);
+
+					for (String sSubscriptionId : asSubscriptionIds_2) {
+						Map<String, Long> aoRunningTimeByProject = aoRunningTimeBySubscriptionAndProject.get(sSubscriptionId);
+
+						if (aoRunningTimeByProject != null) {
+							long lTotalRunningTime = 0;
+
+							for (Long lRunningTime : aoRunningTimeByProject.values()) {
+								lTotalRunningTime += lRunningTime;
+							}
+
+							aoSubscriptionListViewModelMap.get(sSubscriptionId).setRunningTime(lTotalRunningTime);
+						}
+					}					
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("SubscriptionResource.getListByUser: exception computing running time for projects ", oEx);
 				}
 			}
 
@@ -252,7 +285,7 @@ public class SubscriptionResource {
 
 			if (oSubscription.getOrganizationId() != null) {
 				OrganizationRepository oOrganizationRepository = new OrganizationRepository();
-				Organization oOrganization = oOrganizationRepository.getOrganizationById(oSubscription.getOrganizationId());
+				Organization oOrganization = oOrganizationRepository.getById(oSubscription.getOrganizationId());
 				sOrganizationName = oOrganization.getName();
 			}
 
@@ -846,6 +879,8 @@ public class SubscriptionResource {
 		oSubscriptionListViewModel.setTypeName(SubscriptionType.get(oSubscription.getType()).getTypeName());
 		oSubscriptionListViewModel.setOrganizationName(sOrganizationName);
 		oSubscriptionListViewModel.setReason(sReason);
+		oSubscriptionListViewModel.setStartDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getStartDate()));
+		oSubscriptionListViewModel.setEndDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getEndDate()));		
 		oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
 		oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
 		oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
@@ -891,14 +926,12 @@ public class SubscriptionResource {
 				.collect(Collectors.toMap(Organization::getOrganizationId, Organization::getName));
 	}
 
-	private List<Subscription> getSubscriptionsOwnedByUser(String sUserId) {
+	private Set<String> getIdsOfSubscriptionsOwnedByUser(String sUserId) {
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 
-		return oSubscriptionRepository.getSubscriptionsByUser(sUserId);
-	}
+		List<Subscription> aoSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(sUserId);
 
-	private Set<String> getIdsOfSubscriptionsOwnedByUser(String sUserId) {
-		return getSubscriptionsOwnedByUser(sUserId).stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
+		return aoSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
 	}
 
 	private List<Subscription> getSubscriptionsSharedWithUser(String sUserId) {

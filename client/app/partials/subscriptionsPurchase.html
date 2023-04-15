@@ -1,0 +1,81 @@
+<div style="margin: 6rem 6rem">
+    <h3 class="mb-0">Features</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Node</th>
+                <th scope="col">Cores</th>
+                <th scope="col">Storage</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Assistance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Free</th>
+                <td>Shared</td>
+                <td>up to 8</td>
+                <td>20GB</td>
+                <td>Low</td>
+                <td>Discord</td>
+            </tr>
+            <tr>
+                <th scope="row">Standard</th>
+                <td>Shared</td>
+                <td>up to 48</td>
+                <td>100GB</td>
+                <td>Medium</td>
+                <td>Discord/Email</td>
+            </tr>
+            <tr>
+                <th scope="row">Professional</th>
+                <td>Dedicated</td>
+                <td>up to 96</td>
+                <td>2TB</td>
+                <td>Highest</td>
+                <td>Dedicated Team</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3 class="mb-0">Click to Purchase</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">1 Day</th>
+                <th scope="col">1 Week</th>
+                <th scope="col">1 Month</th>
+                <th scope="col">1 Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Standard</th>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[1], 50)">50€</button>
+                </td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[2], 150)">150€</button>
+                </td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[3], 500)">500€</button>
+                </td>
+                <td><button class="btn btn-success btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[4], 5000)">5000€</button>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Professional</th>
+                <td>--</td>
+                <td>--</td>
+                <td><button class="btn btn-warning btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[5], 2000)">2000€</button>
+                </td>
+                <td><button class="btn btn-warning btn-sm"
+                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[6], 20000)">20000€</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

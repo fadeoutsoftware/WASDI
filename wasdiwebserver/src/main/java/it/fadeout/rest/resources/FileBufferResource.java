@@ -689,10 +689,10 @@ public class FileBufferResource {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-				WasdiLog.debugLog("FileBufferResource.uploadStyle: No valid Subscription");
-				return Response.status(Status.UNAUTHORIZED).build();				
-			}			
+//			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+//				WasdiLog.debugLog("FileBufferResource.uploadStyle: No valid Subscription");
+//				return Response.status(Status.UNAUTHORIZED).build();				
+//			}			
 
 			// Get Download Path
 			String sDownloadRootPath = Wasdi.getDownloadPath();

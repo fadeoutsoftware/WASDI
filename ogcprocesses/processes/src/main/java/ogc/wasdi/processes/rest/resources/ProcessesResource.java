@@ -1028,7 +1028,7 @@ public class ProcessesResource {
     		
     		String sUrl = WasdiConfig.Current.baseUrl;
     		if (sUrl.endsWith("/") == false) sUrl += "/";
-    		sUrl += "/process/nodesByScore";
+    		sUrl += "process/nodesByScore";
     		
     		HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, HttpUtils.getStandardHeaders(sSessionId)); 
     		String sResponse = oHttpCallResponse.getResponseBody();

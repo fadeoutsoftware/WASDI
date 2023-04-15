@@ -6,12 +6,15 @@
  */
 package wasdi.shared.utils;
 
+import java.util.List;
+
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.UserType;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
@@ -41,9 +44,6 @@ public class PermissionsUtils {
 	 */
 	public static boolean userHasValidSubscription(User oUser) {
 		
-		return true;
-		
-		/*
 		if (oUser == null) return false;
 	
 		try {
@@ -58,7 +58,70 @@ public class PermissionsUtils {
 		}
 		
 		return false;
-		*/
+	}
+	
+	
+	public static String getUserType(User oUser) {
+		if (oUser == null) return UserType.NONE.name();
+		return getUserType(oUser.getUserId());
+	}
+	
+	
+	/**
+	 * Get the user type detecting it from the available subscriptions
+	 * @param sUserId
+	 * @return
+	 */
+	public static String getUserType(String sUserId) {
+		
+		// Check the user id
+		if (Utils.isNullOrEmpty(sUserId)) return UserType.NONE.name();
+		
+		try {
+			
+			// Take ALL the subscriptions related to this user
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			List<Subscription> aoUserSubscriptions = oSubscriptionRepository.getAllSubscriptionsOfUser(sUserId);
+			
+			// No Subscription No Party
+			if (aoUserSubscriptions == null) return UserType.NONE.name();
+			if (aoUserSubscriptions.size() == 0) return UserType.NONE.name();
+			
+			// Initialize our user as NONE (the lower)
+			UserType oUserType = UserType.NONE;
+			
+			// For each subscription
+			for (Subscription oSubscription : aoUserSubscriptions) {
+				
+				// If it is valid
+				if (oSubscription.isValid()) {
+					// Free can replace None
+					if (oSubscription.getRelatedUserType().equals(UserType.FREE.name())) {
+						if (oUserType.name().equals(UserType.NONE.name())) {
+							oUserType = UserType.FREE;
+						}
+					}
+					else if (oSubscription.getRelatedUserType().equals(UserType.STANDARD.name())) {
+						// Std can replace none and free
+						if (oUserType.name().equals(UserType.NONE.name()) || oUserType.name().equals(UserType.FREE.name())) {
+							oUserType = UserType.STANDARD;
+						}						
+					}
+					else if (oSubscription.getRelatedUserType().equals(UserType.PROFESSIONAL.name())) {
+						// Pro wins and also no need to search anymore
+						oUserType = UserType.PROFESSIONAL;
+						break;
+					}					
+				}
+			}
+			
+			return oUserType.name();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.getUserType: error: " + oEx);
+		}
+		
+		return UserType.NONE.name();		
 	}
 	
 	/**

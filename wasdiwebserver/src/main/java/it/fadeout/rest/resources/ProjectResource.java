@@ -1,8 +1,7 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.PROJECT_READ;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +12,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -22,7 +22,6 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
@@ -49,7 +48,9 @@ public class ProjectResource {
 	@GET
 	@Path("/byuser")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("valid") Boolean bValid) {
+		
+		if (bValid == null) bValid = false;
 
 		WasdiLog.debugLog("ProjectResource.getListByUser");
 
@@ -70,19 +71,39 @@ public class ProjectResource {
 			// Create repo
 			ProjectRepository oProjectRepository = new ProjectRepository();
 
-			Response oResponse = new SubscriptionResource().getListByUser(sSessionId);
+			Response oResponse = new SubscriptionResource().getListByUser(sSessionId, bValid);
 
 			@SuppressWarnings("unchecked")
 			List<SubscriptionListViewModel> aoSubscriptionLVMs = (List<SubscriptionListViewModel>) oResponse.getEntity();
+			
+			if (aoSubscriptionLVMs==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: aoSubscriptionLVMs is null");
+				return Response.ok(aoProjectList).build();
+			}
 
 			List<String> asSubscriptionIds = aoSubscriptionLVMs.stream()
 					.map(SubscriptionListViewModel::getSubscriptionId)
 					.collect(Collectors.toList());
 
-			Map<String, String> aoSubscriptionNames = aoSubscriptionLVMs.stream()
-				      .collect(Collectors.toMap(SubscriptionListViewModel::getSubscriptionId, SubscriptionListViewModel::getName));
+			if (asSubscriptionIds==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: asSubscriptionIds is null");
+				return Response.ok(aoProjectList).build();
+			}
+			
+			Map<String, String> aoSubscriptionNames = new HashMap<String, String>();
+			
+			for (SubscriptionListViewModel oVMToAdd : aoSubscriptionLVMs) {
+				if (!aoSubscriptionNames.containsKey(oVMToAdd.getSubscriptionId())) {
+					aoSubscriptionNames.put(oVMToAdd.getSubscriptionId(), oVMToAdd.getName());
+				}
+			}
 
 			List<Project> aoProjects = oProjectRepository.getProjectsBySubscriptions(asSubscriptionIds);
+			
+			if (aoProjects==null) {
+				WasdiLog.debugLog("ProjectResource.getListByUser: aoProjects is null");
+				return Response.ok(aoProjectList).build();
+			}			
 
 			// For each
 			for (Project oProject : aoProjects) {

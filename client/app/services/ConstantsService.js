@@ -55,6 +55,18 @@ service('ConstantsService', [function () {
     this.m_oUser = null;
 
     /**
+     * User Projects List
+     * @type {*}
+     */
+    this.m_aoUserProjects = []; 
+
+    /**
+     * User Account Type
+     * @type {string}
+     */
+    this.m_sAccountType = ""; 
+
+    /**
      * Active Workspace
      * @type {null}
      */
@@ -249,7 +261,7 @@ service('ConstantsService', [function () {
     };
 
     /**
-     * Chek if the user is logged or not
+     * Check if the user is logged or not
      * @returns {boolean}
      */
     this.isUserLogged = function () {
@@ -262,6 +274,22 @@ service('ConstantsService', [function () {
 
         return true;
     };
+
+    /**
+     * Return the array of user's projects
+     * @returns {aoProjects}
+     */
+    this.getUserProjects = function() {
+        return this.m_aoUserProjects; 
+    }
+
+    /**
+     * Set the user projects array
+     * @param {*} aoProjects 
+     */
+    this.setUserProjects = function(aoProjects) {
+        this.m_aoUserProjects = aoProjects; 
+    }
 
     /**
      * Set Active Workspace Object

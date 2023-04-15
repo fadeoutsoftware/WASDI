@@ -10,6 +10,7 @@ require('./app/controllers/ValidateUserController.js');
 require('./app/controllers/WasdiApplicationUIController.js');
 require('./app/controllers/MarketPlaceController.js');
 require('./app/controllers/WasdiApplicationDetailsController.js');
+require('/app/controllers/SubscriptionPurchaseController.js');
 
 //-------- DIALOG CONTROLLERS ---------------
 require('./app/dialogs/orbit_info/OrbitInfoController.js');
@@ -49,3 +50,4 @@ require('./app/dialogs/subscription-projects/SubscriptionProjectsController.js')
 require('./app/dialogs/organization_editor/OrganizationEditorController.js');
 require('./app/dialogs/subscription_editor/SubscriptionEditorController.js');
 require('./app/dialogs/project_editor/ProjectEditorController.js');
+require('./app/dialogs/subscriptions_manage/SubscriptionsManageController.js')

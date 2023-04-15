@@ -8,7 +8,7 @@ import java.io.IOException;
 import com.google.common.io.Files;
 
 import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.managers.IPackageManager;
+import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 

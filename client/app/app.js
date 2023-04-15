@@ -202,6 +202,17 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
+    //SUBSCRIPTIONS PURCHASING 
+    $stateProvider.state('root.subscriptions', {
+        url: '/subscriptions', 
+        views: {
+            'maincontent': {
+                templateUrl: 'partials/subscriptionsPurchase.html', 
+                controller: 'SubscriptionPurchaseController'
+            }
+        }
+    });
+
 
 }]);
 
@@ -216,6 +227,7 @@ wasdiApp.controller("ValidateUserController",ValidateUserController);
 wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
 wasdiApp.controller("MarketPlaceController",MarketPlaceController);
 wasdiApp.controller("WasdiApplicationDetailsController",WasdiApplicationDetailsController);
+wasdiApp.controller("SubscriptionPurchaseController", SubscriptionPurcaseController); 
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);
@@ -261,6 +273,7 @@ wasdiApp.controller("SubscriptionProjectsController", window.SubscriptionProject
 wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorController);
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);
+wasdiApp.controller("SubscriptionsManageController", window.SubscriptionsManageController);
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){

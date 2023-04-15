@@ -14,7 +14,9 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -38,7 +40,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.insertSubscription: error " + oEx.toString());
 		}
 
 		return false;
@@ -63,7 +65,7 @@ public class SubscriptionRepository extends MongoRepository {
 			if (oResult.getModifiedCount() == 1)
 				return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.updateSubscription: error " + oEx.toString());
 		}
 
 		return false;
@@ -86,7 +88,7 @@ public class SubscriptionRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, Subscription.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionById: error " + oEx.toString());
 		}
 
 		return null;
@@ -106,7 +108,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsBySubscriptionIds : error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -123,28 +125,14 @@ public class SubscriptionRepository extends MongoRepository {
 		}
 
 		Subscription oSubscription = this.getSubscriptionById(sSubscriptionId);
-
-		return checkValidSubscription(oSubscription);
-	}
-
-	/**
-	 * Check whether or not a subscription is valid.
-	 * @param oSubscription the subscription
-	 * @return true if the subscription if valid, false otherwise
-	 */
-	public static boolean checkValidSubscription(Subscription oSubscription) {
-		if (oSubscription == null
-				|| oSubscription.getStartDate() == null
-				|| oSubscription.getEndDate() == null) {
+		
+		if (oSubscription == null) {
 			return false;
 		}
 
-		double dNowInMillis = Utils.nowInMillis();
-
-		return dNowInMillis >= oSubscription.getStartDate()
-				&& dNowInMillis <= oSubscription.getEndDate();
+		return oSubscription.isValid();
 	}
-
+	
 	/**
 	 * Get the subscriptions by owner.
 	 * @param sUserId the owner of the subscriptions
@@ -154,12 +142,11 @@ public class SubscriptionRepository extends MongoRepository {
 		final List<Subscription> aoReturnList = new ArrayList<>();
 
 		try {
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
-					.find(new Document("userId", sUserId));
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.checkValidSubscription : error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -179,7 +166,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsByOrganization : error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -197,7 +184,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			return lCounter > 0;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.organizationHasSubscriptions : error " + oEx.toString());
 		}
 
 		return true;
@@ -217,7 +204,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsByOrganizations : error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -271,7 +258,7 @@ public class SubscriptionRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.deleteSubscription : error " + oEx.toString());
 		}
 
 		return false;
@@ -293,7 +280,7 @@ public class SubscriptionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.deleteByUser : error " + oEx.toString());
 		}
 
 		return 0;
@@ -315,8 +302,7 @@ public class SubscriptionRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog(
-					"SubscriptionRepository.belongsToUser( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
+			WasdiLog.debugLog("SubscriptionRepository.isOwnedByUser( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
 		}
 
 		return false;
@@ -334,7 +320,7 @@ public class SubscriptionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.getSubscriptionsList : error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -365,10 +351,129 @@ public class SubscriptionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("SubscriptionRepository.findSubscriptionsByPartialName : error " + oEx.toString());
 		}
 
 		return aoReturnList;
+	}
+	
+	/**
+	 * Get a List of all the subscriptions avaiable for one user.
+	 * Can be the owner, or linked in an organization, or shared by a user
+	 * @param sUserId
+	 * @return
+	 */
+	public List<Subscription> getAllSubscriptionsOfUser(String sUserId) {
+		
+		// Create the return list
+		final List<Subscription> aoReturnList = new ArrayList<>();
+		// Check our user Id 
+		if (Utils.isNullOrEmpty(sUserId)) return aoReturnList;
+		
+		// Get all the subscription owned by the user
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
+			fillList(aoReturnList, oWSDocuments, Subscription.class);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error " + oEx.toString());
+		}
+		
+		try {
+			
+			// Create the Organization Repository 
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			
+			// Get the orgs owned by the user 
+			List<Organization> aoOwnedOrgs =  oOrganizationRepository.getOrganizationsOwnedByUser(sUserId);
+			
+			// Now the the orgs shared with the user
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoSharedOrgs = oUserResourcePermissionRepository.getOrganizationSharingsByUserId(sUserId);
+			
+			// Merge the two list avoiding duplicates
+			for (UserResourcePermission oSharedOrg : aoSharedOrgs) {
+				
+				boolean bFound = false;
+				
+				// Has this already be added?
+				for (Organization oOrganization : aoOwnedOrgs) {
+					if (oOrganization.getOrganizationId().equals(oSharedOrg.getResourceId())) {
+						bFound = true;
+						break;
+					}
+				}
+				
+				if (!bFound) {
+					// Add the org to our list
+					Organization oToAdd = oOrganizationRepository.getById(oSharedOrg.getResourceId());
+					aoOwnedOrgs.add(oToAdd);
+				}
+			}
+			
+			// Extract a list of only Organization Ids
+			ArrayList<String> asOrgsId = new ArrayList<>();
+			for (Organization oOrganization : aoOwnedOrgs) {
+				asOrgsId.add(oOrganization.getOrganizationId());
+			}
+			
+			
+			// Get the list of subscriptions related to organizations
+			List<Subscription> aoSubscriptionsSharedWithUser =  this.getSubscriptionsByOrganizations(asOrgsId);
+			
+			// Get the list of subscription shared directly by users
+			List<UserResourcePermission> aoSharedSub = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(sUserId);
+			
+			// Merge the two list avoiding duplicates
+			for (UserResourcePermission oSharedSub : aoSharedSub) {
+				
+				boolean bFound = false;
+				
+				// Has this already be added?
+				for (Subscription oSubscription : aoSubscriptionsSharedWithUser) {
+					if (oSubscription.getSubscriptionId().equals(oSharedSub.getResourceId())) {
+						bFound = true;
+						break;
+					}
+				}
+				
+				if (!bFound) {
+					// Add the subscription to our list
+					Subscription oToAdd = this.getSubscriptionById(oSharedSub.getResourceId());
+					aoSubscriptionsSharedWithUser.add(oToAdd);
+				}
+			}
+			
+			
+			// Finally we need to merge the owned list with the shared ones
+			
+			// Merge the two list avoiding duplicates
+			for (Subscription oSharedSub : aoSubscriptionsSharedWithUser) {
+				
+				boolean bFound = false;
+				
+				// Has this already be added?
+				for (Subscription oSubscription : aoReturnList) {
+					if (oSubscription.getSubscriptionId().equals(oSharedSub.getSubscriptionId())) {
+						bFound = true;
+						break;
+					}
+				}
+				
+				if (!bFound) {
+					// Add the to our list
+					aoReturnList.add(oSharedSub);
+				}
+			}			
+						
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error searching not-owned subscriptions " + oEx.toString());
+		}
+		
+		
+
+		return aoReturnList;
+		
 	}
 
 }
