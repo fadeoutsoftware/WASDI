@@ -404,27 +404,18 @@ public class GeoServerManager {
     	}
         
     	if (sEpsg == null) {
-    		oLogger.error("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
+    		oLogger.error("GeoServerManager.publishShapeFile: sEpsg is null");
     		return false;
     	}
     	
-    	
-    	// This will return false: there is a bug in the library when tries to create the feature store
-    	// This has been overloaded by our own method to create the resource.
-    	// We use anyhow publishShp for convenience creating the datastore (first step)
-    	//boolean bRes1 = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
-//    	if (!bRes) {
-//    		createDbDataStore(oShpFile.getPath(), sStoreName);
-//    		bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
-//    	}  
-    	
     	boolean bRes = createDbDataStore(oShpFile.getPath(), sStoreName);
-    	if (!bRes) return false;
     	
-    	//bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
-        //final GSLayerEncoder oLayerEncoder = configureDefaultStyle(sStyle);
-        //bRes = configureLayer(m_sWorkspace, sStoreName, oLayerEncoder);
-
+    	if (bRes) {
+        	if (!configureLayerStyle(sStoreName, sStyle)) {
+        		oLogger.error("GeoServerManager.publishShapeFile: there was an error configuring the style");
+        	}    		
+    	}
+    	
 		return bRes;
 	}
     
@@ -519,17 +510,17 @@ public class GeoServerManager {
     
     /**
      * Taken from geotools lib since it is private and we need it for configureLayer
-     * @param defaultStyle Style to apply
+     * @param sDefaultStyle Style to apply
      * @return
      */
-    private GSLayerEncoder configureDefaultStyle(String defaultStyle) {
+    private GSLayerEncoder configureDefaultStyle(String sDefaultStyle) {
         final GSLayerEncoder layerEncoder = new GSLayerEncoder();
-        if (defaultStyle != null && !defaultStyle.isEmpty()) {
-            if(defaultStyle.indexOf(":") != -1) {
-                String[] wsAndName = defaultStyle.split(":");
+        if (sDefaultStyle != null && !sDefaultStyle.isEmpty()) {
+            if(sDefaultStyle.indexOf(":") != -1) {
+                String[] wsAndName = sDefaultStyle.split(":");
                 layerEncoder.setDefaultStyle(wsAndName[0], wsAndName[1]);
             } else {
-                layerEncoder.setDefaultStyle(defaultStyle);
+                layerEncoder.setDefaultStyle(sDefaultStyle);
             }
         }
         return layerEncoder;

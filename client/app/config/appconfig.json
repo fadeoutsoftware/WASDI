@@ -514,7 +514,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt|GHS_BUILT_S_P2030LIN_GLOBE_R2022A_54009_100_V1_0|GHS_POP_P2030_GLOBE_R2022A_54009_100_V1_0|GHS_BUILT_H_AGBH_E2018_GLOBE_R2022A_54009_100_V1_0|WORLD_POP_2020_1km",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
                 }
