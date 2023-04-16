@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -17,9 +18,8 @@ import org.opengis.feature.type.AttributeType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
-import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Format;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
-import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.StoreType;
+import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.UploadMethod;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.HTTPUtils;
 import it.geosolutions.geoserver.rest.decoder.RESTBoundingBox;
@@ -412,14 +412,90 @@ public class GeoServerManager {
     	// This will return false: there is a bug in the library when tries to create the feature store
     	// This has been overloaded by our own method to create the resource.
     	// We use anyhow publishShp for convenience creating the datastore (first step)
-    	boolean bRes = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
+    	//boolean bRes1 = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
+//    	if (!bRes) {
+//    		createDbDataStore(oShpFile.getPath(), sStoreName);
+//    		bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
+//    	}  
     	
-    	if (!bRes) {
-    		bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
-    	}
+    	boolean bRes = createDbDataStore(oShpFile.getPath(), sStoreName);
+    	if (!bRes) return false;
+    	
+    	//bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
+        //final GSLayerEncoder oLayerEncoder = configureDefaultStyle(sStyle);
+        //bRes = configureLayer(m_sWorkspace, sStoreName, oLayerEncoder);
 
 		return bRes;
 	}
+    
+    
+    private boolean createDbDataStore(String sShapeFilePath, String sStoreName)  {
+    	
+        StringBuilder sUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
+                .append(m_sWorkspace).append("/datastores/").append(sStoreName).append("/file.shp");//?charset=ISO-8859-1
+        
+        final File oFile = new File(sShapeFilePath);
+        
+        String sResult = HTTPUtils.put(sUrl.toString(), oFile, "application/zip", m_sRestUser, m_sRestPassword);
+        
+        if (sResult != null) {
+        	WasdiLog.debugLog(sResult);
+        } 
+
+        return sResult != null;
+    }        
+    
+    
+    /**
+     * Re-Creation of the createResource: taken from the geosolutions lib, it 
+     * fix the problem to create a valid feature Type
+     * 
+     * @param sShapeFilePath Full path of the shape file NOT zipped
+     * @param sStoreName Name of store and layer 
+     * @param sEPSG Projection
+     * @
+     * return
+     */
+    private boolean createResource(String sShapeFilePath, String sStoreName, String sEPSG)  {
+    	
+        StringBuilder sbUrl = new StringBuilder(m_sRestUrl).append("/rest/workspaces/")
+                .append(m_sWorkspace).append("/").append("datastores").append("/").append(sStoreName)
+                .append("/").append("featuretypes");
+        
+        
+        final String sXmlBody = getFeatureTypeFromShapeFile(sShapeFilePath, sStoreName, sEPSG);
+        final String sResult = HTTPUtils.postXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
+        //final String sResult = HTTPUtils.putXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
+        if (sResult != null) {
+        	WasdiLog.debugLog(sResult);
+        } 
+
+        return sResult != null;
+    }
+    
+    public boolean configureLayer(final String workspace, final String resourceName,
+            final GSLayerEncoder layer) throws IllegalArgumentException {
+
+        if (workspace == null || resourceName == null || layer == null) {
+            throw new IllegalArgumentException("Null argument");
+        }
+        // TODO: check this usecase, layer should always be defined
+        if (workspace.isEmpty() || resourceName.isEmpty() || layer.isEmpty()) {
+            throw new IllegalArgumentException("Empty argument");
+        }
+
+        final String fqLayerName = workspace + ":" + resourceName;
+
+        final String url = m_sRestUrl + "/rest/layers/" + fqLayerName;
+
+        String layerXml = layer.toString();
+        String sendResult = HTTPUtils.putXml(url, layerXml, m_sRestUser, m_sRestPassword);
+        if (sendResult != null) {
+        } else {
+        }
+
+        return sendResult != null;
+    }    
     
     /**
      * Configure a new style for a layer 
@@ -439,31 +515,7 @@ public class GeoServerManager {
 		}
     	
     	return false;
-    }
-    
-    /**
-     * Re-Creation of the createResource: taken from the geosolutions lib, it 
-     * fix the problem to create a valid feature Type
-     * 
-     * @param sShapeFilePath Full path of the shape file NOT zipped
-     * @param sStoreName Name of store and layer 
-     * @param sEPSG Projection
-     * @return
-     */
-    private boolean createResource(String sShapeFilePath, String sStoreName, String sEPSG)  {
-    	
-        StringBuilder sbUrl = new StringBuilder(WasdiConfig.Current.geoserver.address).append("/rest/workspaces/")
-                .append(m_sWorkspace).append("/").append(StoreType.DATASTORES).append("/").append(sStoreName)
-                .append("/").append(StoreType.DATASTORES.getTypeNameWithFormat(Format.XML));
-        
-        final String sXmlBody = getFeatureTypeFromShapeFile(sShapeFilePath, sStoreName, sEPSG);
-        final String sResult = HTTPUtils.postXml(sbUrl.toString(), sXmlBody, m_sRestUser, m_sRestPassword);
-        if (sResult != null) {
-        	WasdiLog.debugLog(sResult);
-        } 
-
-        return sResult != null;
-    }
+    }    
     
     /**
      * Taken from geotools lib since it is private and we need it for configureLayer
@@ -493,6 +545,12 @@ public class GeoServerManager {
     	String sXML = "<featureType>\n";
     	
     	try {
+    		
+    		// This code needs the real shp, not the zipped. It is in the same folder so no problem
+    		if (sShapeFile.endsWith(".zip")) {
+    			sShapeFile = sShapeFile.replace(".zip", ".shp");
+    		}
+    		
     		File oShapeFile = new File(sShapeFile);
     		
     		// Try to read the shape
@@ -535,8 +593,8 @@ public class GeoServerManager {
             
             sXML += "<nativeBoundingBox>" + sBbox + "</nativeBoundingBox>";
             sXML += "<latLonBoundingBox>" + sBbox + "</latLonBoundingBox>";
-            sXML += "<nativeCRS>" +  StringEscapeUtils.escapeXml(oCrs.toWKT()) + "</nativeCRS>";
-            //sXML += "<nativeCRS>" +  "GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], AUTHORITY[\"EPSG\",\"6326\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]" + "</nativeCRS>";
+            //sXML += "<nativeCRS>" +  StringEscapeUtils.escapeXml(oCrs.toWKT()) + "</nativeCRS>";
+            sXML += "<nativeCRS>" +  "GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], AUTHORITY[\"EPSG\",\"6326\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4326\"]]" + "</nativeCRS>";
             
             sXML += "<simpleConversionEnabled>false</simpleConversionEnabled>";
             sXML += "<attributes>";

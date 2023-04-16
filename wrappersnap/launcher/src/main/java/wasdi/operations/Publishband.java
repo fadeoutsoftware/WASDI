@@ -115,13 +115,7 @@ public class Publishband extends Operation {
             // set file size
             setFileSizeToProcess(oInputFile, oProcessWorkspace);
 
-            // Generate Layer Id: filename_band
-//            sLayerId = Utils.getFileNameWithoutLastExtension(sInputFile);
-//            
-//            if (WasdiFileUtils.isShapeFile(sInputFile) == false) {
-//            	sLayerId += "_" + oParameter.getBandName();
-//            }
-            
+            // Generate a random Layer Id
             sLayerId = Utils.getRandomName();
 
             // Is already published?
