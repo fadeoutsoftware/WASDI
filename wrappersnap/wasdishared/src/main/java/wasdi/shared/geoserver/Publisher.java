@@ -12,6 +12,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -244,17 +245,32 @@ public class Publisher {
         if (Utils.isNullOrEmpty(sStore)) return  "";
         if (asShapeFiles == null) return "";
         
+        String sBaseName = Utils.getFileNameWithoutLastExtension(sFileName);
+        
+        ArrayList<String> asRenamedShapeFiles = new ArrayList<>();
+        
+        for (String sShapeFile : asShapeFiles) {
+        	
+        	String sExtension = Utils.GetFileNameExtension(sShapeFile);
+        	String sNewName = sShapeFile.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
+        	File oNewFile = new File(sNewName);
+        	
+        	WasdiFileUtils.renameFile(sShapeFile, oNewFile.getName());
+        	asRenamedShapeFiles.add(sNewName);
+		}
+        
+        String sExtension = Utils.GetFileNameExtension(sFileName);
+        sFileName = sFileName.replace(sBaseName+"."+sExtension, sStore+"."+sExtension);
+        
         String sZipFile = sFileName.replace(".shp", ".zip");
         sZipFile = sZipFile.replace(".SHP", ".zip");
 
         File oZippedShapeFile = new File(sZipFile);
         
-        ZipFileUtils.zipFiles(asShapeFiles, oZippedShapeFile.getPath());
+        ZipFileUtils.zipFiles(asRenamedShapeFiles, oZippedShapeFile.getPath());
         
-        //publish image pyramid
+        //Publish Shape File
         try {
-        	
-            //Pubblico il layer
             if (!oManager.publishShapeFile(sStore, oZippedShapeFile, sEPSG, sStyle, s_oLogger)) {
             	WasdiLog.errorLog("Publisher.publishShapeFile: unable to publish shapefile " + sStore);
             	return null;
