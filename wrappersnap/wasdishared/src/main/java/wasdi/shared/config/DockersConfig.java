@@ -75,6 +75,11 @@ public class DockersConfig {
 	public String internalDockerAPIAddress = "http://127.0.0.1:2375/";
 	
 	/**
+	 * Path of file with logs of the dockers build 
+	 */
+	public String dockersDeployLogFilePath = "/var/log/wasdi/dockers.log";
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */

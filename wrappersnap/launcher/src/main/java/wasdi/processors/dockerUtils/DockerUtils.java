@@ -46,7 +46,7 @@ public class DockerUtils {
     /**
      * Log file for docker operations
      */
-    String m_sDockerLogFile = "/usr/lib/wasdi/launcher/logs/dockers.log";
+    String m_sDockerLogFile = WasdiConfig.Current.dockers.dockersDeployLogFilePath;
 
     /**
      * User that run the docker
