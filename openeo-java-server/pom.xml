@@ -34,7 +34,7 @@
     </properties>
 
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
+        <sourceDirectory>src/gen/java</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
