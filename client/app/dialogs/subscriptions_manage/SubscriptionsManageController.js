@@ -45,15 +45,12 @@ SubscriptionsManageController = (function () {
             if (!utilsIsObjectNullOrUndefined(response)
                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 oController.m_aoSubscriptions = response.data;
-                console.log(oController.m_aoSubscriptions)
             } else {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
                 );
             }
             oController.m_bLoadingSubscriptions = false;
-            console.log(oController.m_aoSubscriptions)
-
             return true;
         }, function (error) {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS";
@@ -64,6 +61,11 @@ SubscriptionsManageController = (function () {
 
             utilsVexDialogAlertTop(sErrorMessage);
         });
+    }
+
+    SubscriptionsManageController.prototype.configureDates = function (sDate) {
+       let aDataArray = sDate.split("T"); 
+       return aDataArray[0]
     }
 
     SubscriptionsManageController.prototype.showUsersBySubscription = function (sSubscriptionId) {
@@ -143,8 +145,6 @@ SubscriptionsManageController = (function () {
         })
     }
 
-
-
     SubscriptionsManageController.prototype.deleteSubscription = function (oSubscription) {
         let sConfirmMsgOwner = "Are you sure you want to delete this subscription?";
         let sConfirmMsgShare = "Are you sure you want to remove your permissions for this subscription?";
@@ -181,10 +181,8 @@ SubscriptionsManageController = (function () {
 
         }
         if (oSubscription.adminRole === true) {
-            console.log(sConfirmMsgOwner)
             utilsVexDialogConfirm(sConfirmMsgOwner, oCallbackFunction);
         } else {
-            console.log(sConfirmMsgShare)
             utilsVexDialogConfirm(sConfirmMsgShare, oCallbackFunction);
         }
 
