@@ -40,10 +40,6 @@
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
-                <configuration>
-                    <warSourceDirectory>WebContent</warSourceDirectory>
-                    <failOnMissingWebXml>true</failOnMissingWebXml>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
