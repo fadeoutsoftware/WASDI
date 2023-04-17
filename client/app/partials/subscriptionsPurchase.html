@@ -1,7 +1,164 @@
-<div style="margin: 6rem 6rem">
-    <h3 class="mb-0">Features</h3>
-    <table class="table">
-        <thead>
+<div class="pricing-wrapper">
+
+    <!--TOOLBAR-->
+    <div class="row-v4 justify-content-end toolbar">
+    </div>
+
+    <!--PRICE-->
+    <div class="row-v4 row-price">
+        <div class="col-xs-12 col-md-4 col-lg-3">
+            <div class="single-price">
+                <div class="price-title free-bg">
+                    <h3>FREE<br>Subscription</h3>
+                </div>
+                <div class="features-wrapper">
+                    <div class="features">
+                        <div class="single-feature"><strong>Shared</strong> Node</div>
+                            <div class="single-feature"><strong>Up to 8</strong> Cores</div>
+                            <div class="single-feature"><strong>20GB</strong> Storage</div>
+                            <div class="single-feature"><strong>Low</strong> Priority</div>
+                            <div class="single-feature"><strong>Discord</strong> Assistance</div>
+                    </div>
+                </div>
+                <div class="btn-wrapper">
+                    <div class="btn-row" style="justify-content: center">
+                        <div class="btn-group">
+                            <button class="btn btn-primary free-bg price-disabled">0€</button>
+                            <button class="btn btn-primary free-bg" style="pointer-events: none">3 MONTHS FREE TRIAL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-4 col-lg-3">
+            <div class="single-price">
+                <div class="price-title standard-bg">
+                    <h3>STANDARD<br>Subscription</h3>
+                </div>
+                <div class="features-wrapper">
+                    <div class="features">
+                        <div class="single-feature"><strong>Shared</strong> Node</div>
+                            <div class="single-feature"><strong>Up to 48</strong> Cores</div>
+                            <div class="single-feature"><strong>100GB</strong> Storage</div>
+                            <div class="single-feature"><strong>Medium</strong> Priority</div>
+                            <div class="single-feature"><strong>Discord/Email</strong> Assistance</div>
+                    </div>
+                </div>
+                <div class="btn-wrapper">
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Day
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success price-disabled">50€</button>
+                            <button class="btn btn-success"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[1], 50)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Week
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success price-disabled">150€</button>
+                            <button class="btn btn-success"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[2], 150)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Month
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success price-disabled">500€</button>
+                            <button class="btn btn-success"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[3], 500)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Year
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-success price-disabled">5000€</button>
+                            <button class="btn btn-success"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[4], 5000)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-4 col-lg-3">
+            <div class="single-price">
+                <div class="price-title professional-bg">
+                    <h3>PROFESSIONAL<br>Subscription</h3>
+                </div>
+                <div class="features-wrapper">
+                    <div class="features">
+                        <div class="single-feature"><strong>Dedicated</strong> Node</div>
+                            <div class="single-feature"><strong>Up to 96</strong> Cores</div>
+                            <div class="single-feature"><strong>2TB</strong> Storage</div>
+                            <div class="single-feature"><strong>Highest</strong> Priority</div>
+                            <div class="single-feature"><strong>Dedicated Team</strong> Assistance</div>
+                    </div>
+                </div>
+                <div class="btn-wrapper">
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Day
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-warning professional-bg disabled" style="pointer-events: none">
+                                NOT AVAILABLE
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Week
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-warning professional-bg disabled" style="pointer-events: none">
+                                NOT AVAILABLE
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Month
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-warning professional-bg price-disabled">2000€</button>
+                            <button class="btn btn-warning professional-bg"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[5], 2000)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <div class="price-desc">
+                            1 Year
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-warning professional-bg price-disabled">20000€</button>
+                            <button class="btn btn-warning professional-bg"
+                                    ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[6], 20000)">BUY NOW <span class="fas fa-cart-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--    <div style="margin: 6rem 6rem">
+        <h3 class="mb-0">Features</h3>
+        <table class="table">
+            <thead>
             <tr>
                 <th scope="col"></th>
                 <th scope="col">Node</th>
@@ -10,8 +167,8 @@
                 <th scope="col">Priority</th>
                 <th scope="col">Assistance</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             <tr>
                 <th scope="row">Free</th>
                 <td>Shared</td>
@@ -36,11 +193,11 @@
                 <td>Highest</td>
                 <td>Dedicated Team</td>
             </tr>
-        </tbody>
-    </table>
-    <h3 class="mb-0">Click to Purchase</h3>
-    <table class="table">
-        <thead>
+            </tbody>
+        </table>
+        <h3 class="mb-0">Click to Purchase</h3>
+        <table class="table">
+            <thead>
             <tr>
                 <th scope="col"></th>
                 <th scope="col">1 Day</th>
@@ -48,34 +205,39 @@
                 <th scope="col">1 Month</th>
                 <th scope="col">1 Year</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             <tr>
                 <th scope="row">Standard</th>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[1], 50)">50€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[1], 50)">50€</button>
                 </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[2], 150)">150€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[2], 150)">150€</button>
                 </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[3], 500)">500€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[3], 500)">500€</button>
                 </td>
                 <td><button class="btn btn-success btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[4], 5000)">5000€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[4], 5000)">5000€</button>
                 </td>
             </tr>
             <tr>
                 <th scope="row">Professional</th>
-                <td>--</td>
-                <td>--</td>
+                <td>&#45;&#45;</td>
+                <td>&#45;&#45;</td>
                 <td><button class="btn btn-warning btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[5], 2000)">2000€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[5], 2000)">2000€</button>
                 </td>
                 <td><button class="btn btn-warning btn-sm"
-                        ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[6], 20000)">20000€</button>
+                            ng-click="m_oController.showSubscriptionAddForm(m_oController.m_aoTypes[6], 20000)">20000€</button>
                 </td>
             </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>-->
+
 </div>
+
+
+

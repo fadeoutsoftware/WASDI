@@ -28,6 +28,7 @@
 @import "application_detail";
 @import "applicationUi";
 @import "organizations";
+@import "subscriptions";
 
 
 
@@ -117,7 +118,7 @@ html, body, #cesiumContainer {
 }
 
 h1 {
-    font-family: $wasdi-font-web; 
+    font-family: $wasdi-font-web;
     font-weight: $wasdi-font-weight;
 }
 
@@ -1070,7 +1071,7 @@ textarea{
         //font-weight: bold;
         max-width: 500px;
         overflow-wrap: break-word;
-        
+
     }
     /* Hide arrow */
     .tooltip.blueWasdi .tooltip-arrow {
@@ -1081,3 +1082,4 @@ textarea{
     .tooltip.top .tooltip-arrow {
         border-top-color: #43516A;;
     }
+
