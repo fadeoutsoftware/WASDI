@@ -300,8 +300,8 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                                 ng-if="m_oController.m_sUserAccount !== 'NONE'">
                                 <span ng-if="m_oController.m_sUserAccount === 'FREE'">FREE</span>
-                                <span ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'">PRO</span>
-                                <span ng-if="m_oController.m_sUserAccount === 'STANDARD'">STND</span>
+                                <span ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'"><i class="fa fa-star text-warning"></i> PRO</span>
+                                <span ng-if="m_oController.m_sUserAccount === 'STANDARD'"><i class="fa fa-certificate"></i> STND</span>
                             </a>
                             <ul ng-if="m_oController.m_sUserAccount !== 'NONE'" class="dropdown-menu"
                                 aria-labelledby="dropdownMenuLink" style="z-index: 10000">
