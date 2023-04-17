@@ -1,27 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-	id="WebApp_ID" version="3.1">
-	
- 	<display-name>WasdiOgcProcesses</display-name>
- 	
- 	<listener>  
-    	<listener-class>
-        	ogc.wasdi.processes.OgcProcessesLifeCycleListener
-    	</listener-class>
-	</listener>
-		
- 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.htm</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
-		<welcome-file>default.html</welcome-file>
-		<welcome-file>default.htm</welcome-file>
-		<welcome-file>default.jsp</welcome-file>
-	</welcome-file-list>
-			
-	<servlet>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+    <display-name>WasdiOgcProcesses</display-name>
+    <listener>
+        <listener-class>
+            ogc.wasdi.processes.OgcProcessesLifeCycleListener
+        </listener-class>
+    </listener>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.htm</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>default.html</welcome-file>
+        <welcome-file>default.htm</welcome-file>
+        <welcome-file>default.jsp</welcome-file>
+    </welcome-file-list>
+    <servlet>
         <servlet-name>ogcprocesses</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
@@ -32,18 +25,18 @@
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>ogc.wasdi.processes.rest.resources</param-value>
         </init-param>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>ogc.wasdi.processes.viewmodels</param-value>
-		</init-param>
-		<init-param>
-			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>ogc.wasdi.processes.OgcProcesses</param-value>
-		</init-param>		
-         <init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>ogc.wasdi.processes.viewmodels</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>ogc.wasdi.processes.OgcProcesses</param-value>
+        </init-param>
+        <init-param>
             <param-name>ConfigFilePath</param-name>
             <param-value>/etc/wasdi/wasdiConfig.json</param-value>
-         </init-param>		
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
