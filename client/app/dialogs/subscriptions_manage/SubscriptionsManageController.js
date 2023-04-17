@@ -45,15 +45,12 @@ SubscriptionsManageController = (function () {
             if (!utilsIsObjectNullOrUndefined(response)
                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
                 oController.m_aoSubscriptions = response.data;
-                console.log(oController.m_aoSubscriptions)
             } else {
                 utilsVexDialogAlertTop(
                     "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS"
                 );
             }
             oController.m_bLoadingSubscriptions = false;
-            console.log(oController.m_aoSubscriptions)
-
             return true;
         }, function (error) {
             let sErrorMessage = "GURU MEDITATION<br>ERROR IN GETTING THE LIST OF SUBSCRIPTIONS";
@@ -181,10 +178,8 @@ SubscriptionsManageController = (function () {
 
         }
         if (oSubscription.adminRole === true) {
-            console.log(sConfirmMsgOwner)
             utilsVexDialogConfirm(sConfirmMsgOwner, oCallbackFunction);
         } else {
-            console.log(sConfirmMsgShare)
             utilsVexDialogConfirm(sConfirmMsgShare, oCallbackFunction);
         }
 
