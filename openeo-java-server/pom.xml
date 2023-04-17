@@ -34,7 +34,6 @@
     </properties>
 
     <build>
-        <finalName>processes</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
