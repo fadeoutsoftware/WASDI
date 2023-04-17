@@ -287,7 +287,13 @@ SubscriptionEditorController = (function () {
 
         let iRemaningDays = Math.ceil((sEndTimestamp - sCurrentDate) / (1000 * 3600 * 24));
 
-        this.m_iDaysRemaining = iRemaningDays;
+        if (iRemaningDays <= 0) {
+            this.m_iDaysRemaining = "Expired"
+        } else {
+            this.m_iDaysRemaining = iRemaningDays;
+        }
+
+
     }
 
 
