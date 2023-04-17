@@ -31,8 +31,8 @@
                                 <span class="text-success" ng-if="oSubscription.buySuccess">Paid</span>
                                 <span class="text-warning" ng-if="!oSubscription.buySuccess">Pending...</span>
                             </td>
-                            <td>{{oSubscription.startDate}}</td>
-                            <td>{{oSubscription.endDate}}</td>
+                            <td>{{m_oController.configureDates(oSubscription.startDate)}}</td>
+                            <td>{{m_oController.configureDates(oSubscription.endDate)}}</td>
                             <td style="width: 3rem">{{oSubscription.reason}}</td>
                             <td></td>
                             <td>

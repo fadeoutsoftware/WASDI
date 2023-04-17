@@ -63,6 +63,11 @@ SubscriptionsManageController = (function () {
         });
     }
 
+    SubscriptionsManageController.prototype.configureDates = function (sDate) {
+       let aDataArray = sDate.split("T"); 
+       return aDataArray[0]
+    }
+
     SubscriptionsManageController.prototype.showUsersBySubscription = function (sSubscriptionId) {
         if (utilsIsStrNullOrEmpty(sSubscriptionId)) {
             return false;
@@ -139,8 +144,6 @@ SubscriptionsManageController = (function () {
             })
         })
     }
-
-
 
     SubscriptionsManageController.prototype.deleteSubscription = function (oSubscription) {
         let sConfirmMsgOwner = "Are you sure you want to delete this subscription?";
