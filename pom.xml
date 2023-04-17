@@ -19,6 +19,7 @@
         <module>libraries/jwasdilib/jwasdilib</module>
         <module>wasditrigger</module>
         <module>ogcprocesses/processes</module>
+        <module>openeo-java-server</module>
     </modules>
 
     <properties>
