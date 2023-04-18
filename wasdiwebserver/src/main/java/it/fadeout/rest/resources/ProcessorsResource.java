@@ -2048,7 +2048,7 @@ public class ProcessorsResource  {
 			return oResult;
 		}
 		
-		if (oRequesterUser.getUserId().equals(sUserId)) {
+		if (oRequesterUser.getUserId().equals(sUserId) && !oRequesterUser.getRole().equals(UserApplicationRole.ADMIN.name())) {
 			WasdiLog.debugLog("ProcessorsResource.shareProcessor: auto sharing not so smart");
 			oResult.setStringValue("Impossible to autoshare.");
 			return oResult;
