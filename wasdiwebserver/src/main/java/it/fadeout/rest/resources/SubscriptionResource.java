@@ -333,7 +333,7 @@ public class SubscriptionResource {
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
-			oProjectEditorViewModel.setName(oSubscription.getName());
+			oProjectEditorViewModel.setName(sName);
 			oProjectEditorViewModel.setDescription("Project automatically created for the " + oSubscription.getName() + " subscription");
 			oProjectEditorViewModel.setSubscriptionId(oSubscription.getSubscriptionId());
 			oProjectEditorViewModel.setActiveProject(oUser.getActiveProjectId() == null);
