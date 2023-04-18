@@ -318,13 +318,14 @@ public class SubscriptionResource {
 		}
 
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-		Subscription oExistingSubscription = oSubscriptionRepository.getByName(oSubscriptionViewModel.getName());
-
-		if (oExistingSubscription != null) {
-			WasdiLog.debugLog("SubscriptionResource.createSubscription: a different subscription with the same name already exists");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("A subscription with the same name already exists.")).build();
+		
+		String sName = oSubscriptionViewModel.getName();
+		
+		while (oSubscriptionRepository.getByNameAndUserId(sName, oUser.getUserId()) != null) {
+			sName = Utils.cloneName(sName);
+			WasdiLog.debugLog("WorkspaceResource.createWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 		}
+		
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());

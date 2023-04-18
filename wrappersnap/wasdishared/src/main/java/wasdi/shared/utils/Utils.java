@@ -531,35 +531,35 @@ public class Utils {
 	 * Get a clone of the workspace name.
 	 * If the name ends with an ordinal (i.e. 1) it is increased (i.e. 2).
 	 * Otherwise, it appends the (1) termination
-	 * @param originalName the original name of the workspace
+	 * @param sOriginalName the original name of the workspace
 	 * @return the new name of the workspace
 	 */
-	public static String cloneWorkspaceName(String originalName) {
+	public static String cloneName(String sOriginalName) {
 
-		if (originalName == null || originalName.isEmpty()) {
+		if (sOriginalName == null || sOriginalName.isEmpty()) {
 			return "Untitled Workspace";
 		}
 
-		List<String> tokens = Arrays.asList(originalName.split("[\\(\\)]"));
+		List<String> asTokens = Arrays.asList(sOriginalName.split("[\\(\\)]"));
 
-		String newName;
+		String sNewName;
 
-		if (tokens.size() == 1) {
-			newName = originalName + "(1)";
+		if (asTokens.size() == 1) {
+			sNewName = sOriginalName + "(1)";
 		} else {
-			String lastToken = tokens.get(tokens.size() - 1);
+			String sLastToken = asTokens.get(asTokens.size() - 1);
 
 			try {
-				int ordinal = Integer.parseInt(lastToken);
-				int incrementedOrdinal = ordinal + 1;
-				int index = originalName.lastIndexOf(lastToken);
-				newName = originalName.substring(0, index) + incrementedOrdinal + ")";
+				int iOrdinal = Integer.parseInt(sLastToken);
+				int iIncrementedOrdinal = iOrdinal + 1;
+				int iIndex = sOriginalName.lastIndexOf(sLastToken);
+				sNewName = sOriginalName.substring(0, iIndex) + iIncrementedOrdinal + ")";
 			} catch (NumberFormatException e) {
-				newName = originalName + "(1)";
+				sNewName = sOriginalName + "(1)";
 			}
 		}
 
-		return newName;
+		return sNewName;
 	}
 
 	public static String generateJupyterNotebookCode(String sUserId, String sWorkspaceId) {

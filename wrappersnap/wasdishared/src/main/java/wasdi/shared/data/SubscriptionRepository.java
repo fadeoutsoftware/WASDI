@@ -238,6 +238,35 @@ public class SubscriptionRepository extends MongoRepository {
 
 		return null;
 	}
+	
+	/**
+	 * Get an subscription by its name and the user id
+	 * @param sName the name of the subscription
+	 * @return the subscription if found, null otherwise
+	 */
+	public Subscription getByNameAndUserId(String sName, String sUserId) {
+		try {
+			Document oWSDocument = getCollection(m_sThisCollection)
+					.find(Filters.and(Filters.eq("userId", sUserId), Filters.eq("name", sName))).first();
+
+			if (null != oWSDocument) {
+				String sJSON = oWSDocument.toJson();
+
+				Subscription oSubscription = null;
+				try {
+					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				return oSubscription;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("SubscriptionRepository.getByName( " + sName + "): error: " + oE);
+		}
+
+		return null;
+	}	
 
 	/**
 	 * Delete the subscription.

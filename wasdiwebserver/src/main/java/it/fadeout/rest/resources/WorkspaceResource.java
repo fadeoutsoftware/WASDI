@@ -388,7 +388,7 @@ public class WorkspaceResource {
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 
 		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName) != null) {
-			sName = Utils.cloneWorkspaceName(sName);
+			sName = Utils.cloneName(sName);
 			WasdiLog.debugLog("WorkspaceResource.createWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 		}
 
@@ -488,7 +488,7 @@ public class WorkspaceResource {
 			Workspace oExistingWorkspace = oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName);
 
 			while (oExistingWorkspace != null && !oExistingWorkspace.getWorkspaceId().equals(oWorkspaceEditorViewModel.getWorkspaceId())) {
-				sName = Utils.cloneWorkspaceName(sName);
+				sName = Utils.cloneName(sName);
 				WasdiLog.debugLog("WorkspaceResource.updateWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
 
 				oExistingWorkspace = oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sName);

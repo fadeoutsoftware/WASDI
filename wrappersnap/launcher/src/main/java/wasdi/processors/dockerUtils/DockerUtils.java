@@ -324,8 +324,6 @@ public class DockerUtils {
             // Processor Script File
             String sRunFile = m_sProcessorFolder + "runwasdidocker.sh";
             File oRunFile = new File(sRunFile);
-            
-            
 
             // Check if it is already done:
 
