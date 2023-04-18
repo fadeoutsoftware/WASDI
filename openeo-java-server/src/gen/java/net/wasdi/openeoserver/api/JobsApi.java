@@ -602,7 +602,7 @@ public class JobsApi  {
     		String sWorkspaceName = sName+"_" + oCreationDate.toString();
 
     		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sWorkspaceName) != null) {
-    			sWorkspaceName = Utils.cloneWorkspaceName(sWorkspaceName);
+    			sWorkspaceName = Utils.cloneName(sWorkspaceName);
     			WasdiLog.debugLog("JobsApi.createWorkspaceForAppliction: a workspace with the same name already exists. Changing the name to " + sWorkspaceName);
     		}
 
