@@ -739,6 +739,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
 
             onAfterCopyTemplate(sProcessorFolder);
+            
+            // Delete the run script: it will be recreated at the right moment
+            WasdiFileUtils.deleteFile(sProcessorFolder+"runwasdidocker.sh");
 
             // Create utils
             DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
@@ -755,8 +758,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             m_sDockerImageName = oDockerUtils.build();
 
             onAfterDeploy(sProcessorFolder);
-            
-            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
