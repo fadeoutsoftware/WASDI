@@ -323,13 +323,14 @@ public class SubscriptionResource {
 		
 		while (oSubscriptionRepository.getByNameAndUserId(sName, oUser.getUserId()) != null) {
 			sName = Utils.cloneName(sName);
-			WasdiLog.debugLog("WorkspaceResource.createWorkspace: a workspace with the same name already exists. Changing the name to " + sName);
+			WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
 		}
 		
 
 		Subscription oSubscription = convert(oSubscriptionViewModel);
 		oSubscription.setUserId(oUser.getUserId());
 		oSubscription.setSubscriptionId(Utils.getRandomName());
+		oSubscription.setName(sName);
 
 		if (oSubscriptionRepository.insertSubscription(oSubscription)) {
 			ProjectEditorViewModel oProjectEditorViewModel = new ProjectEditorViewModel();
