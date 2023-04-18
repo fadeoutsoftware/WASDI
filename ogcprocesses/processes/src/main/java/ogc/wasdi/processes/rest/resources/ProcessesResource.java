@@ -1011,7 +1011,7 @@ public class ProcessesResource {
     		String sWorkspaceName = oProcessor.getName()+"_" + oCreationDate.toString();
 
     		while (oWorkspaceRepository.getByUserIdAndWorkspaceName(oUser.getUserId(), sWorkspaceName) != null) {
-    			sWorkspaceName = Utils.cloneWorkspaceName(sWorkspaceName);
+    			sWorkspaceName = Utils.cloneName(sWorkspaceName);
     			WasdiLog.debugLog("ProcessesResource.createWorkspaceForAppliction: a workspace with the same name already exists. Changing the name to " + sWorkspaceName);
     		}
 
