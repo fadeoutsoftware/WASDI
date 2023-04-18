@@ -392,30 +392,37 @@ public class WasdiFileUtils {
 
 		return oNewFile.getAbsolutePath();
 	}
-
+	
 	/**
 	 * Delete a file from the filesystem. If the file is a directory, also delete the child directories and files.
 	 * @param sFileFullPath the absolute path of the file
 	 * @return true if the file was deleted, false otherwise
 	 */
 	public static boolean deleteFile(String sFileFullPath) {
-		if (sFileFullPath == null) {
-			WasdiLog.errorLog("WasdiFileUtils.deleteFile: filePath is null");
-			return false;
-		} else if (!fileExists(sFileFullPath)) {
-			WasdiLog.errorLog("WasdiFileUtils.deleteFile: file does not exist: " + sFileFullPath);
-			return false;
-		}
-
-		File oFile = new File(sFileFullPath);
-
-		if (oFile.isDirectory()) {
-			for (File child : oFile.listFiles()) {
-				deleteFile(child.getPath());
+		try {
+			
+			if (sFileFullPath == null) {
+				WasdiLog.errorLog("WasdiFileUtils.deleteFile: filePath is null");
+				return false;
+			} else if (!fileExists(sFileFullPath)) {
+				WasdiLog.errorLog("WasdiFileUtils.deleteFile: file does not exist: " + sFileFullPath);
+				return false;
 			}
-		}
 
-		return oFile.delete();
+			File oFile = new File(sFileFullPath);
+
+			if (oFile.isDirectory()) {
+				for (File child : oFile.listFiles()) {
+					deleteFile(child.getPath());
+				}
+			}
+
+			return oFile.delete();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiFileUtils.deleteFile: error: ", oEx);
+			return false;
+		}
 	}
 
 	/**

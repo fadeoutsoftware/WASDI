@@ -34,16 +34,11 @@
     </properties>
 
     <build>
-        <finalName>processes</finalName>
-        <sourceDirectory>src/main/java</sourceDirectory>
+        <sourceDirectory>src/gen/java</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
-                <configuration>
-                    <warSourceDirectory>WebContent</warSourceDirectory>
-                    <failOnMissingWebXml>true</failOnMissingWebXml>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
