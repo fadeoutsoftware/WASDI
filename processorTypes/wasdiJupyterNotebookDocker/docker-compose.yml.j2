@@ -9,14 +9,14 @@ networks:
     external:
       name: "wasdi-network"
 
-services:
+{% raw %}services:
   nb_{{ wasdiNotebookId }}:
     environment:
       - WASDI_NOTEBOOK_ID={{ wasdiNotebookId }}
     image: "${sContainerName:?err}:${sContainerVersion:?err}"
     container_name: "nb_{{ wasdiNotebookId }}"
     restart: "unless-stopped"
-    user: "tomcat:tomcat"
+    user: "{% endraw %}{{ sWasdiSystemUser }}:{{ sWasdiSystemGroup }}{% raw %}"
     stdin_open: true
     tty: true
 {%- if extraHosts | default([]) != [] %}
@@ -28,4 +28,4 @@ services:
     volumes:
       - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}:/home/wasdi/.wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}"
       - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}/notebook:/home/wasdi/notebook"
-      - "./sysadmin/etc_supervisor_supervisord.conf:/etc/supervisor/supervisord.conf:ro"
+      - "./sysadmin/etc_supervisor_supervisord.conf:/etc/supervisor/supervisord.conf:ro"{% endraw %}
