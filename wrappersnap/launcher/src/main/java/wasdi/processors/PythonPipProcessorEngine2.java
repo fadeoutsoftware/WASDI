@@ -222,7 +222,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
-			WasdiLog.debugLog("PythonPipProcessorEngine2.run: the processor is not started. Check if there are old versions up");
+			WasdiLog.debugLog("PythonPipProcessorEngine2.run: the processor is not started. Check if there are old versions up [Actual Version = " + oProcessor.getVersion() + "]");
 			
 			try {
 				String sVersion = oProcessor.getVersion();
