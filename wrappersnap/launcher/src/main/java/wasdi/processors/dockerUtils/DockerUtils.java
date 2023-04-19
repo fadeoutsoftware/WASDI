@@ -327,7 +327,8 @@ public class DockerUtils {
 
             // Check if it is already done:
 
-            if (!oRunFile.exists() || oRunFile.length() == 0L) {
+            //if (!oRunFile.exists() || oRunFile.length() == 0L) {
+            if (true) {
 
                 // Command
                 asArgs.add(sCommand);
