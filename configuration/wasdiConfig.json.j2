@@ -101,6 +101,9 @@
         "waitProcessMaxTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessMaxTimeout }},
         "waitProcessSleepTimeout": {{ dictWasdiConfiguration.ogcProcessesApi.waitProcessSleepTimeout }}
     },
+{% if dictWasdiConfiguration['openEO'] | length == 0 %}
+    "openEO": {},
+{% else %}
     "openEO": {
         "baseAddress": "{{ dictWasdiConfiguration['openEO']['baseAddress'] }}",
         "api_version": "{{ dictWasdiConfiguration['openEO']['api_version'] }}",
@@ -312,22 +315,23 @@
 
         ]
     },
+{% endif %}
     "paths": {
-        "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
-        "downloadRootPath": "{{ dictWasdiConfiguration.paths.downloadRootPath }}",
-        "serializationPath": "{{ dictWasdiConfiguration.paths.serializationPath }}",
-        "metadataPath": "{{ dictWasdiConfiguration.paths.metadataPath }}",
         "dockerTemplatePath": "{{ dictWasdiConfiguration.paths.dockerTemplatePath }}",
-        "sftpRootPath": "{{ dictWasdiConfiguration.paths.sftpRootPath }}",
-        "geoserverDataDir": "{{ dictWasdiConfiguration.paths.geoserverDataDir }}",
-        "matlabRuntimePath": "{{ dictWasdiConfiguration.paths.matlabRuntimePath }}",
-        "sen2CorePath": "{{ dictWasdiConfiguration.paths.sen2CorePath }}",
-        "userHomePath": "{{ dictWasdiConfiguration.paths.userHomePath }}",
-        "missionsConfigFilePath": "{{ dictWasdiConfiguration.paths.missionsConfigFilePath }}",
+        "downloadRootPath": "{{ dictWasdiConfiguration.paths.downloadRootPath }}",
         "gdalPath": "{{ dictWasdiConfiguration.paths.gdalPath }}",
+        "geoserverDataDir": "{{ dictWasdiConfiguration.paths.geoserverDataDir }}",
         "jinjaTemplateRenderTool": "{{ dictWasdiConfiguration.paths.jinjaTemplateRenderTool }}",
+        "matlabRuntimePath": "{{ dictWasdiConfiguration.paths.matlabRuntimePath }}",
+        "metadataPath": "{{ dictWasdiConfiguration.paths.metadataPath }}",
+        "missionsConfigFilePath": "{{ dictWasdiConfiguration.paths.missionsConfigFilePath }}",
         "pythonExecPath": "{{ dictWasdiConfiguration.paths.pythonExecPath }}",
+        "sen2CorePath": "{{ dictWasdiConfiguration.paths.sen2CorePath }}",
+        "serializationPath": "{{ dictWasdiConfiguration.paths.serializationPath }}",
+        "sftpRootPath": "{{ dictWasdiConfiguration.paths.sftpRootPath }}",
+        "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
         "traefikMountedVolume": "{{ dictWasdiConfiguration.paths.traefikMountedVolume }}",
+        "userHomePath": "{{ dictWasdiConfiguration.paths.userHomePath }}",
         "wasdiTempFolder": "{{ dictWasdiConfiguration.paths.wasdiTempFolder }}"
     },
     "rabbit": {
@@ -428,6 +432,17 @@
         "gdalRetileCommand": "{{ dictWasdiConfiguration.geoserver.gdalRetileCommand }}"
     },
     "dockers": {
+        "dockerComposeCommand": "{{ dictWasdiConfiguration.dockers.dockerComposeCommand }}",
+        "dockersDeployLogFilePath": "{{ dictWasdiConfiguration.dockers.dockersDeployLogFilePath }}",
+        "eoepca": {
+            "dockerWriteFolder": "{{ dictWasdiConfiguration.dockers.eoepca.dockerWriteFolder }}",
+            "adesServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.adesServerAddress }}",
+            "authServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.authServerAddress }}",
+            "user": "{{ dictWasdiConfiguration.dockers.eoepca.user }}",
+            "password": "{{ dictWasdiConfiguration.dockers.eoepca.password }}",
+            "clientId": "{{ dictWasdiConfiguration.dockers.eoepca.clientId }}",
+            "clientSecret": "{{ dictWasdiConfiguration.dockers.eoepca.clientSecret }}"
+        },
 {% if dictWasdiConfiguration.dockers.extraHosts == [] %}
         "extraHosts": [],
 {% else %}
@@ -439,16 +454,15 @@
 
         ],
 {% endif %}
-        "dockerComposeCommand": "{{ dictWasdiConfiguration.dockers.dockerComposeCommand }}",
-        "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
         "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}",
-        "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
         "millisBetweenAttmpts": {{ dictWasdiConfiguration.dockers.millisBetweenAttmpts }},
         "millisWaitAfterDelete": {{ dictWasdiConfiguration.dockers.millisWaitAfterDelete }},
         "millisWaitAfterDeployScriptCreated": {{ dictWasdiConfiguration.dockers.millisWaitAfterDeployScriptCreated }},
         "millisWaitForLogin": {{ dictWasdiConfiguration.dockers.millisWaitForLogin }},
+        "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration.dockers.numberOfAttemptsToPingTheServer }},
+        "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
 {% if dictWasdiConfiguration.dockers.registers | length == 0 %}
-        "registers": [],
+        "registers": []
 {% else %}
         "registers": [
 {% for sCurrentDockerRegistry in dictWasdiConfiguration.dockers.registers %}
@@ -463,17 +477,8 @@
 {% endif %}
 {% endfor %}
 
-        ],
+        ]
 {% endif %}
-        "eoepca": {
-            "dockerWriteFolder": "{{ dictWasdiConfiguration.dockers.eoepca.dockerWriteFolder }}",
-            "adesServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.adesServerAddress }}",
-            "authServerAddress": "{{ dictWasdiConfiguration.dockers.eoepca.authServerAddress }}",
-            "user": "{{ dictWasdiConfiguration.dockers.eoepca.user }}",
-            "password": "{{ dictWasdiConfiguration.dockers.eoepca.password }}",
-            "clientId": "{{ dictWasdiConfiguration.dockers.eoepca.clientId }}",
-            "clientSecret": "{{ dictWasdiConfiguration.dockers.eoepca.clientSecret }}"
-        }
     },
     "scheduler": {
         "processingThreadWaitStartMS": "{{ dictWasdiConfiguration.scheduler.processingThreadWaitStartMS }}",
