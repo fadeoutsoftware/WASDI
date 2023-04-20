@@ -16,7 +16,7 @@ networks:
     image: "${sContainerName:?err}:${sContainerVersion:?err}"
     container_name: "nb_{{ wasdiNotebookId }}"
     restart: "unless-stopped"
-    user: "{% endraw %}{{ sWasdiSystemUser }}:{{ sWasdiSystemGroup }}{% raw %}"
+    user: "{% endraw %}{{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }}{% raw %}"
     stdin_open: true
     tty: true
 {%- if extraHosts | default([]) != [] %}

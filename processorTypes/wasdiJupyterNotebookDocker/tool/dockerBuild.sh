@@ -92,10 +92,10 @@ fi
 echo "[INFO] Building the container '${sContainerName}'"
 
 docker build \
-    --build-arg USR_NAME={% endraw %}{{ sWasdiSystemUser }} \
-    --build-arg USR_ID=$(id -u {{ sWasdiSystemUser }}) \
-    --build-arg GRP_NAME={{ sWasdiSystemUser }} \
-    --build-arg GRP_ID=$(id -g {{ sWasdiSystemUser }}{% raw %}) \
+    --build-arg USR_NAME={% endraw %}{{ sWasdiSystemUserName }} \
+    --build-arg USR_ID=$(id -u {{ sWasdiSystemUserName }}) \
+    --build-arg GRP_NAME={{ sWasdiSystemGroupName }} \
+    --build-arg GRP_ID=$(id -g {{ sWasdiSystemGroupName }}{% raw %}) \
     ${sDockerAdditionalTag} \
     --tag ${sContainerName}:${sContainerVersion} \
     --tag ${sContainerName}:latest \
