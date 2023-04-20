@@ -67,7 +67,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 #   - create the internal group
 #   - create the internal user
 #   - create all directories
-#   - create a sudo configuration to become root with tomcat
 RUN groupadd --gid $sContainerGroupId --non-unique $sContainerGroupName && \
     useradd --create-home --home-dir $sContainerUserHomeDirectory --uid $sContainerUserId --gid $sContainerGroupId --non-unique --shell /bin/bash $sContainerUserName && \
     mkdir -p $sContainerUserHomeDirectory/application && \

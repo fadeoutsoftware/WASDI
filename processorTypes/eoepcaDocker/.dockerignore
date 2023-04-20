@@ -1,4 +1,7 @@
-*.j2
 cleanwasdidocker.sh
 deploywasdidocker.sh
-Dockerfile
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+*.j2
+runwasdidocker.sh

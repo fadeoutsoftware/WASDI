@@ -77,14 +77,14 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 #   - create the internal group
 #   - create the internal user
 #   - create all directories
-#   - create a sudo configuration to become root with tomcat
+#   - create a sudo configuration to become root with ${sContainerUserName}
 RUN groupadd --gid ${sContainerGroupId} --non-unique ${sContainerGroupName} && \
     useradd --create-home --home-dir ${sContainerUserHomeDirectory} --uid ${sContainerUserId} --gid ${sContainerGroupId} --non-unique --shell /bin/bash ${sContainerUserName} && \
     mkdir -p ${sContainerUserHomeDirectory}/application && \
     chown -R ${sContainerUserName}:${sContainerGroupName} ${sContainerUserHomeDirectory}/ && \
     chmod -R 755 ${sContainerUserHomeDirectory}/ && \
-    echo -e "${sContainerUserName} ALL=(ALL:ALL) NOPASSWD:/usr/bin/apt\n${sContainerUserName} ALL=(ALL:ALL) NOPASSWD:/usr/bin/apt-get" > /etc/sudoers.d/01_tomcat && \
-    chmod 644 /etc/sudoers.d/01_tomcat
+    echo -e "${sContainerUserName} ALL=(ALL:ALL) NOPASSWD:/usr/bin/apt\n${sContainerUserName} ALL=(ALL:ALL) NOPASSWD:/usr/bin/apt-get" > /etc/sudoers.d/01_wasdi && \
+    chmod 644 /etc/sudoers.d/01_wasdi
 
 
 # Set the workdir to ${sContainerUserHomeDirectory}
