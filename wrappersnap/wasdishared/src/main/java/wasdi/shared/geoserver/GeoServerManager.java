@@ -345,16 +345,20 @@ public class GeoServerManager {
      * @param sStyleFile
      * @return
      */
-    public boolean updateStyle(String sStyleFile) {
-    	File oFile = new File(sStyleFile);
+    public boolean updateStyle(String sName, String sStyleFile) {
     	
-    	if (oFile.exists()) {
-    		String sStyleName = Utils.getFileNameWithoutLastExtension(oFile.getName());
-    		return m_oGsPublisher.updateStyle(WasdiFileUtils.fileToText(sStyleFile), sStyleName);
+    	try {
+    		String sBody = WasdiFileUtils.fileToText(sStyleFile);
+    		
+    		String sUrl = m_sRestUrl + "/rest/styles/" + sName + "?raw=true";
+    		final String sResult = HTTPUtils.put(sUrl, sBody, "application/vnd.ogc.sld+xml", m_sRestUser, m_sRestPassword);
+    		return sResult != null;    		
     	}
-    	else {
-    		return false;
-    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("GeoServerManager.updateStyle: exception ", oEx);
+		}
+    	
+    	return false;
     }
     
     /**
