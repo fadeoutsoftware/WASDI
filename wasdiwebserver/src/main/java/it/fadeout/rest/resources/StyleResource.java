@@ -908,7 +908,7 @@ public class StyleResource {
 			WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: style exists, update it");
 			
 			
-			if (!oGeoServerManager.updateStyle(sStyleFilePath)) {
+			if (!oGeoServerManager.updateStyle(sName, sStyleFilePath)) {
 				WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists: update style returned false!!");
 			}
 		}

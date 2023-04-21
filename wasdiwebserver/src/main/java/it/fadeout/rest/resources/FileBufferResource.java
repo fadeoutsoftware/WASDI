@@ -34,12 +34,14 @@ import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.Style;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
@@ -624,9 +626,17 @@ public class FileBufferResource {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			StyleRepository oStyleRepository = new StyleRepository();
+			Style oStyle = oStyleRepository.getStyleByName(sStyle);
+			
+			if (oStyle == null) {
+				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: invalid style");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
 			//check the user can access the workspace
-			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyle)) {
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: user cannot access workspace");
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), oStyle.getStyleId())) {
+				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: user cannot access style");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}			
 

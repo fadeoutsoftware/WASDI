@@ -11,6 +11,7 @@ import java.util.List;
 import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
@@ -234,13 +235,23 @@ public class PermissionsUtils {
 			}
 
 			StyleRepository oStyleRepository = new StyleRepository();
+			Style oStyle = oStyleRepository.getStyle(sStyleId);
+			
+			if (oStyle == null) {
+				return false;
+			}
+			
+			if (oStyle.getIsPublic()) {
+				return true;
+			}
+			
 			if (oStyleRepository.isStyleOwnedByUser(sUserId, sStyleId)) {
 				return true;
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
 			return oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId);
+			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("PermissionsUtils.canUserAccessStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
 		}
