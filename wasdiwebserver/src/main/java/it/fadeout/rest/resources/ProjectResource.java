@@ -250,12 +250,11 @@ public class ProjectResource {
 
 		ProjectRepository oProjectRepository = new ProjectRepository();
 
-		Project oExistingProject = oProjectRepository.getByName(oProjectEditorViewModel.getName());
-
-		if (oExistingProject != null) {
-			WasdiLog.debugLog("ProjectResource.createProject: a different project with the same name already exists");
-
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("A project with the same name already exists.")).build();
+		String sName = oProjectEditorViewModel.getName();
+		
+		while (oProjectRepository.getByName(sName) != null) {
+			sName = Utils.cloneName(sName);
+			WasdiLog.debugLog("ProjectResource.createProject: a Project with the same name already exists. Changing the name to " + sName);
 		}
 
 		Project oProject = convert(oProjectEditorViewModel);
