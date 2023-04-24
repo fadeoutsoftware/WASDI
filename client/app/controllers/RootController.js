@@ -191,8 +191,21 @@ var RootController = (function() {
         this.getSummary()
         this.initializeProjectsInfo();
         this.getAccountType();
-        //check constants service for list of user projects (is it stored?)
+
+        /* 
+        RabbitStomp Service call
+        */
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "SUBSCRIPTION",
+            this,
+            this.rabbitMessageHook
+        );
+
     }
+    RootController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
+        console.log("RootController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
+        oController.initializeProjectsInfo();
+    };
 
     RootController.prototype.initializeProjectsInfo = function() {
         let oController = this;
