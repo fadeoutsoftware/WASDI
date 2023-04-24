@@ -113,7 +113,7 @@ SubscriptionsManageController = (function () {
                 backdrop: 'static'
             })
             modal.close.then(function () {
-                oController.initializeProjectsInfo();
+               
             })
 
         })
