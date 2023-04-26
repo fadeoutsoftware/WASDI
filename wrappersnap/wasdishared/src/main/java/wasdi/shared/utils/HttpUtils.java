@@ -1025,6 +1025,7 @@ public final class HttpUtils {
 		return obtainOpenidConnectToken(sUrl, sUser, sPassword, sClientId, null, null, null);
 	}
 	
+	
 	/**
 	 * 
 	 * Obtains an OpenId Connection Token
@@ -1035,8 +1036,27 @@ public final class HttpUtils {
 	 * @param sScope Scope 
 	 * @param sClientSecret Client Secret
 	 * @return The token, or null in case of errors
+	 * 
+	 * @return The token, or null in case of errors
 	 */
 	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId, String sScope, String sClientSecret, Map<String, String> asOtherHeaders) {
+		return obtainOpenidConnectToken(sUrl, sUser, sPassword, sClientId, sScope, sClientSecret, asOtherHeaders, "access_token");
+	}
+	
+	/**
+	 * 
+	 * Obtains an OpenId Connection Token
+	 * @param sUrl Url to call
+	 * @param sUser User
+	 * @param sPassword Password
+	 * @param sClientId Client Id
+	 * @param sScope Scope 
+	 * @param sClientSecret Client Secret
+	 * @param sTokeKey key of the json where to read the token
+	 * 
+	 * @return The token, or null in case of errors
+	 */
+	public static String obtainOpenidConnectToken(String sUrl, String sUser, String sPassword, String sClientId, String sScope, String sClientSecret, Map<String, String> asOtherHeaders, String sTokeKey) {
 		try {
 			URL oURL = new URL(sUrl);
 
@@ -1078,7 +1098,7 @@ public final class HttpUtils {
 					WasdiLog.debugLog("HttpUtils.obtainOpenidConnectToken: got result: "  + sResult);
 
 					JSONObject oJson = new JSONObject(sResult);
-					String sToken = oJson.optString("access_token", null);
+					String sToken = oJson.optString(sTokeKey, null);
 
 					return sToken;
 				}

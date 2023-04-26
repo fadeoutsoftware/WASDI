@@ -180,7 +180,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
 				// We need an openId Connection Token
 				String sToken = HttpUtils.obtainOpenidConnectToken(WasdiConfig.Current.dockers.eoepca.authServerAddress, WasdiConfig.Current.dockers.eoepca.user, WasdiConfig.Current.dockers.eoepca.password
-						, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders);
+						, WasdiConfig.Current.dockers.eoepca.clientId, sScope, WasdiConfig.Current.dockers.eoepca.clientSecret, asNoCacheHeaders, "id_token");
 				
 				// And the relative headers
 				Map<String, String> asHeaders = HttpUtils.getOpenIdConnectHeaders(sToken);
