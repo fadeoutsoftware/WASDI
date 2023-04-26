@@ -2,6 +2,7 @@ package wasdi.processors;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Build the image of the docker
 		boolean bResult = super.deploy(oParameter, bFirstDeploy);
+		//boolean bResult = true;
 		
 		if (!bResult) {
 			// This is not good
@@ -98,6 +100,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
+		//String sPushedImageAddress = "ImageAddress";
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to push the image.");
@@ -105,16 +108,16 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		// Prepare the args for the j2 template
-		String sAppParametersDeclaration = getParametersInputDescription(oProcessor);
-		
+		List<Map<String,Object>> aoProcessorParameters = getParametersInputDescription(oProcessor);
 
-		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
+		if (aoProcessorParameters == null) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: empty args, not good");
 			return false;
 		}
 		
 		// Render the template for CWL
-		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
+		
+		boolean bTemplates = renderCWLTemplates(oProcessor, aoProcessorParameters);
 		
 		if (!bTemplates) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: problems rendering the template");
@@ -203,7 +206,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @param sAppParametersDeclaration Description of the parameters
 	 * @return true or false
 	 */
-	protected boolean renderCWLTemplates(Processor oProcessor, String sAppParametersDeclaration) {
+	protected boolean renderCWLTemplates(Processor oProcessor, List<Map<String,Object>> aoProcessorParameters) {
 		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate csw file");
 		
 		String sProcessorName = oProcessor.getName();
@@ -217,7 +220,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// Valorize the parameters
 		aoCWLParameters.put("wasdiAppId", sProcessorName);
 		aoCWLParameters.put("wasdiAppDescription", oProcessor.getDescription());
-		aoCWLParameters.put("wasdiAppParametersDeclaration", sAppParametersDeclaration);
+		aoCWLParameters.put("wasdiAppParametersDeclaration", aoProcessorParameters);
 		aoCWLParameters.put("wasdiOutputFolder", WasdiConfig.Current.dockers.eoepca.dockerWriteFolder);
 		aoCWLParameters.put("wasdiProcessorImage", m_sDockerImageName);
 		
@@ -262,7 +265,73 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @param oProcessor Processor that takes the inputs
 	 * @return String with yaml representation of these inputs
 	 */
-	protected String getParametersInputDescription(Processor oProcessor) {
+	protected List<Map<String,Object>> getParametersInputDescription(Processor oProcessor) {
+		// Prepare the args for the j2 template
+		
+		// Get the parameters json sample
+		String sEncodedJson= oProcessor.getParameterSample();
+		String sJsonSample = sEncodedJson;
+		
+		ArrayList<Map<String,Object>> aoCWLParameters = new ArrayList<Map<String, Object>>();
+		
+		try {
+			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+			return null;
+		}
+				
+		
+		try {
+			// Translate it in a Map
+			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
+			
+			// For each parameter
+			for (String sKey : aoProcessorParams.keySet()) {
+				
+				Map<String,Object> oOutputParam = new HashMap<String, Object>();
+				oOutputParam.put("key", sKey);
+				
+				String sType = "string";
+				
+				// Set the type
+				Object oValue = aoProcessorParams.get(sKey);
+				
+				if (oValue instanceof String) {
+					sType = "string";
+				}
+				else if (oValue instanceof Integer) {
+					sType = "int";
+				}
+				else if (oValue instanceof Float) {
+					sType = "float";
+				}
+				else if (oValue instanceof Double) {
+					sType = "double";
+				}
+				
+				oOutputParam.put("type", sType);
+				
+				aoCWLParameters.add(oOutputParam);
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
+			return null;
+		}
+		
+		return aoCWLParameters;
+	}	
+	
+	/**
+	 * Translates the WASDI JSON Parameters of this application in
+	 * the equivalent text for the CSW Yaml template.
+	 * The output can be used to fill the csw j2 template 
+	 * @param oProcessor Processor that takes the inputs
+	 * @return String with yaml representation of these inputs
+	 */
+	protected String getParametersInputDescription3(Processor oProcessor) {
 		// Prepare the args for the j2 template
 		String sAppParametersDeclaration = "";
 		
@@ -606,15 +675,15 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		// Prepare the args for the j2 template
-		String sAppParametersDeclaration = getParametersInputDescription(oProcessor);
-		
+		List<Map<String,Object>> aoProcessorParameters = getParametersInputDescription(oProcessor);
 
-		if (Utils.isNullOrEmpty(sAppParametersDeclaration)) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: empty args, not good");
+		if (aoProcessorParameters == null) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: empty args, not good");
 			return false;
 		}
 		
-		boolean bTemplates = renderCWLTemplates(oProcessor, sAppParametersDeclaration);
+		// Render the template for CWL
+		boolean bTemplates = renderCWLTemplates(oProcessor, aoProcessorParameters);
 		
 		if (!bTemplates) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.redeploy: problems rendering the template");
