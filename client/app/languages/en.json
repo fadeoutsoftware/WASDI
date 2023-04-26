@@ -390,7 +390,7 @@
 	"DIALOG_LOGS_OPERATION": "Operation: ",	
 	"DIALOG_LOGS_NAME": "Name: ",	
 	"DIALOG_LOGS_STATUS": "Status: ",	
-	"DIALOG_LOGS_DOWNLOAD": "Search by text: ",	
+	"DIALOG_LOGS_DOWNLOAD": "Download",	
 	"DIALOG_LOGS_DATE": "Date: ",	
 	"DIALOG_LOGS_ROW": "Row",	
 	"DIALOG_LOGS_REFRESH": "Refresh",	

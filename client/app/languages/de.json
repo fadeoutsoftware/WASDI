@@ -388,7 +388,7 @@
 	"DIALOG_LOGS_OPERATION": "Operation: ",	
 	"DIALOG_LOGS_NAME": "Name: ",	
 	"DIALOG_LOGS_STATUS": "Status: ",	
-	"DIALOG_LOGS_DOWNLOAD": "Suche nach Text: ",	
+	"DIALOG_LOGS_DOWNLOAD": "Herunterladen",	
 	"DIALOG_LOGS_DATE": "Datum: ",	
 	"DIALOG_LOGS_ROW": "Reihe",	
 	"DIALOG_LOGS_REFRESH": "Aktualisieren",	
