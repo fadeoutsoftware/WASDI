@@ -520,7 +520,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			Execute oExecute = new Execute();
 			oExecute.setInputs(aoInputParams);
 			
-			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);
+			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName()+"-1_0", oExecute);
 			String sJobId = oStatusInfo.getJobID();
 			
             long lTimeSpentMs = 0;
