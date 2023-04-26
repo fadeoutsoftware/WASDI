@@ -303,7 +303,9 @@
                                 ng-if="m_oController.m_sUserAccount !== 'NONE'">
                                 <!-- Catch for users with freshly verified WASDI accounts - no return value -->
                                 <span
-                                    ng-if="m_oController.m_sUserAccount !== 'FREE' && m_oController.m_sUserAccount !== 'PROFESSIONAL' && m_oController.m_sUserAccount !==  'STANDARD'"></span>
+                                    ng-if="m_oController.m_sUserAccount !== 'FREE' && m_oController.m_sUserAccount !== 'PROFESSIONAL' && m_oController.m_sUserAccount !==  'STANDARD'">
+                                    PURCHASE SUBSCRIPTION
+                                </span>
                                 <span ng-if="m_oController.m_sUserAccount === 'FREE'">FREE</span>
                                 <span ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'"><i
                                         class="fa fa-star text-warning"></i> PRO</span>
