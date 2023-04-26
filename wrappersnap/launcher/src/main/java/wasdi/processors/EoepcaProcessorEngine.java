@@ -535,11 +535,32 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
-            boolean bForcedError = false;			
+            boolean bForcedError = false;
+            
+            
 			
 			while(true) {
 				
 				oStatusInfo = oOgcProcessesClient.getStatus(sJobId);
+				
+				if (oStatusInfo == null) {
+					WasdiLog.debugLog("EoepcaProcessorEngine.run: Status Info returned null. Try to login again ");
+					
+					if (loginInEOEpca(oOgcProcessesClient)) {
+						WasdiLog.debugLog("EoepcaProcessorEngine.run: new login done, try again");
+						
+						oStatusInfo = oOgcProcessesClient.getStatus(sJobId);
+						
+						if (oStatusInfo == null) {
+							WasdiLog.errorLog("EoepcaProcessorEngine.run: Status Info null also after new login");
+							break;
+						}
+					}
+					else {
+						WasdiLog.debugLog("EoepcaProcessorEngine.run: impossible to login again");
+						break;
+					}
+				}
 				
 				if (oStatusInfo.getStatus() == StatusCode.DISMISSED || oStatusInfo.getStatus() == StatusCode.FAILED || oStatusInfo.getStatus() == StatusCode.SUCCESSFUL) {
 					break;
@@ -547,8 +568,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
                 try {
                     Thread.sleep(iThreadSleepMs);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException oEx) {
+                    WasdiLog.errorLog("EoepcaProcessorEngine.run: Thread sleep exception ", oEx);
                     Thread.currentThread().interrupt();
                 }                
 
