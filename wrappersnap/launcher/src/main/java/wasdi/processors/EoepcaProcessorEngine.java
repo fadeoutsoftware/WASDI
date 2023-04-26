@@ -283,6 +283,66 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			// Translate it in a Map
 			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
 			
+			sAppParametersDeclaration = "[\n";
+			
+			// For each parameter
+			for (String sKey : aoProcessorParams.keySet()) {
+				// Declare the parameter
+				sAppParametersDeclaration += "\t{\n";
+				sAppParametersDeclaration += "\t\t\"key\": \"" + sKey + "\",\n";
+				sAppParametersDeclaration += "\t\t\"type\": \"";
+				
+				// Set the type
+				Object oValue = aoProcessorParams.get(sKey);
+				
+				if (oValue instanceof String) {
+					sAppParametersDeclaration += "string";
+				}
+				else if (oValue instanceof Integer) {
+					sAppParametersDeclaration += "int";
+				}
+				else if (oValue instanceof Float) {
+					sAppParametersDeclaration += "float";
+				}
+				else if (oValue instanceof Double) {
+					sAppParametersDeclaration += "double";
+				}
+				
+				sAppParametersDeclaration += "\"\n},\n";
+			}
+			
+			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-2);
+			sAppParametersDeclaration += "\n]";
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
+			return "";
+		}
+		
+		return sAppParametersDeclaration;
+	}
+	
+	protected String getParametersInputDescription2(Processor oProcessor) {
+		// Prepare the args for the j2 template
+		String sAppParametersDeclaration = "";
+		
+		// Get the parameters json sample
+		String sEncodedJson= oProcessor.getParameterSample();
+		String sJsonSample = sEncodedJson;
+		
+		try {
+			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
+			return sAppParametersDeclaration;
+		}
+				
+		
+		try {
+			// Translate it in a Map
+			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
+			
 			// For each parameter
 			for (String sKey : aoProcessorParams.keySet()) {
 				// Declare the parameter
