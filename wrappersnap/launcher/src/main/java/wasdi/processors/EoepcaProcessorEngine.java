@@ -489,7 +489,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
 			}
 			
-			sBaseAddress += "wps3/processes/";
+			sBaseAddress += "wps3/";
 			
 			OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 			

@@ -187,7 +187,11 @@ public final class HttpUtils {
 	 */
 	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
 		return httpPost(sUrl, sPayload, asHeaders, null);
-	}	
+	}
+	
+	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+		return httpPost(sUrl, sPayload, asHeaders, null, null);
+	}
 	
 	/**
 	 * Standard http post utility function
@@ -197,7 +201,7 @@ public final class HttpUtils {
 	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
+	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth, Map<String, List<String>> aoOutputHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 
@@ -248,6 +252,23 @@ public final class HttpUtils {
 				if (bLog) WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
+				
+				if (aoOutputHeaders!=null) {
+					try {
+						
+						// Get the Response headers
+						Map<String, List<String>> aoReceivedHeaders = oConnection.getHeaderFields();
+						
+						// Copy in the ouput dictionary
+						for (Map.Entry<String, List<String>> oEntry : aoReceivedHeaders.entrySet()) {
+							aoOutputHeaders.put(oEntry.getKey(), oEntry.getValue());
+						}
+					}
+					catch (Exception oEx) {
+						WasdiLog.errorLog("HttpUtils.httpPost: Exception getting the output headers ", oEx);
+					}
+				}
+				
 
 				if (iResponseCode >= 200 && iResponseCode <=299) {
 					InputStream oInputStream = oConnection.getInputStream();

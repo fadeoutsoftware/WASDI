@@ -1,7 +1,11 @@
 package wasdi.shared.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.abdera.util.AbderaDataSource;
+import org.apache.xerces.dom3.as.ASObject;
 
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
@@ -194,17 +198,50 @@ public class OgcProcessesClient {
 			
 			String sPayload = MongoRepository.s_oMapper.writeValueAsString(oExecute);
 			
-			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, m_asHeaders); 
+			Map<String, List<String>> aoOuputHeaders = new HashMap<>(); 
+			
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, m_asHeaders, null, aoOuputHeaders); 
 			String sResponse = oHttpCallResponse.getResponseBody();
 			
+			boolean bFoundJobId = false;
+			
 			if (Utils.isNullOrEmpty(sResponse)) {
-				WasdiLog.debugLog("OgcProcessesClient.executProcess: empty response, return null");
+				
+				WasdiLog.debugLog("OgcProcessesClient.executProcess: empty response, search Job Id in headers");
+				
+				if (aoOuputHeaders.containsKey("Location")) {
+					WasdiLog.debugLog("OgcProcessesClient.executProcess: found location header");
+					
+					List<String> asLocationValues = aoOuputHeaders.get("Location");
+					
+					if (asLocationValues != null) {
+						if (asLocationValues.size()>0) {
+							String sLocation = asLocationValues.get(0);
+							
+							WasdiLog.debugLog("OgcProcessesClient.executProcess: location header value " + sLocation);
+							
+							String [] asLocationParts = sLocation.split("/");
+							
+							if (asLocationParts!=null) {
+								if (asLocationParts.length>0) {
+									String sJobId = asLocationParts[asLocationParts.length-1];
+									StatusInfo oStatusInfo = new StatusInfo();
+									oStatusInfo.setProcessID(sProcessId);
+									oStatusInfo.setJobID(sJobId);
+									WasdiLog.debugLog("OgcProcessesClient.executProcess: use job id: " + sJobId);
+									return oStatusInfo;
+								}
+							}
+						}
+					}
+				}
+				
 				return null;
 			}
 			
-			StatusInfo oProcessList = MongoRepository.s_oMapper.readValue(sResponse, StatusInfo.class);
+			StatusInfo oStatusInfo = MongoRepository.s_oMapper.readValue(sResponse, StatusInfo.class);
 			
-			return oProcessList;
+			return oStatusInfo;
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("OgcProcessesClient.executProcess: Exception " + oEx.toString());
