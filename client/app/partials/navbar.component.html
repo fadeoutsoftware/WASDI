@@ -278,7 +278,8 @@
                                 aria-haspopup="true" aria-expanded="false">
                                 <span ng-if="m_oController.m_oSelectedProject.name">{{"ROOT_VIEW_LABEL_PROJECT" |
                                     translate}}: {{m_oController.m_oSelectedProject.name}}</span>
-                                <span ng-if="!m_oController.m_oSelectedProject.name">{{"ROOT_VIEW_LABEL_NO_PROJECT" | translate}}</span>
+                                <span ng-if="!m_oController.m_oSelectedProject.name">{{"ROOT_VIEW_LABEL_NO_PROJECT" |
+                                    translate}}</span>
                             </a>
 
                             <ul ng-if="!m_oController.m_bLoadingProjects" class="dropdown-menu"
@@ -300,6 +301,9 @@
                             <a style="cursor: pointer" class="btn btn-dropdown" id="pro-menu-dropdown"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                                 ng-if="m_oController.m_sUserAccount !== 'NONE'">
+                                <!-- Catch for users with freshly verified WASDI accounts - no return value -->
+                                <span
+                                    ng-if="m_oController.m_sUserAccount !== 'FREE' && m_oController.m_sUserAccount !== 'PROFESSIONAL' && m_oController.m_sUserAccount !==  'STANDARD'"></span>
                                 <span ng-if="m_oController.m_sUserAccount === 'FREE'">FREE</span>
                                 <span ng-if="m_oController.m_sUserAccount === 'PROFESSIONAL'"><i
                                         class="fa fa-star text-warning"></i> PRO</span>
