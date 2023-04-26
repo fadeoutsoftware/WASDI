@@ -520,8 +520,18 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			Execute oExecute = new Execute();
 			oExecute.setInputs(aoInputParams);
 			
+			if (oOgcProcessesClient.getHeaders() != null) {
+				oOgcProcessesClient.getHeaders().put("Content-Type", "application/json");
+				oOgcProcessesClient.getHeaders().put("Prefer", "respond-async");				
+			}
+			
 			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName()+"-1_0", oExecute);
 			String sJobId = oStatusInfo.getJobID();
+			
+			if (Utils.isNullOrEmpty(sJobId)) {
+				WasdiLog.errorLog("EoepcaProcessorEngine.run: unable to get a valid Job Id");
+				return false;
+			}
 			
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
