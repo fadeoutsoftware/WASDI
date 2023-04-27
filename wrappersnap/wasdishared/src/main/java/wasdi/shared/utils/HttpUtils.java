@@ -190,7 +190,7 @@ public final class HttpUtils {
 	}
 	
 	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
-		return httpPost(sUrl, sPayload, asHeaders, null, null);
+		return httpPost(sUrl, sPayload, asHeaders, sAuth, null);
 	}
 	
 	/**
