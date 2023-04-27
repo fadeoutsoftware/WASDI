@@ -44,7 +44,7 @@ class WASDIEventListenerProvider implements EventListenerProvider {
 
             okhttp3.RequestBody oBody = RequestBody.create(JSON, oStringBuilder.toString());
             okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url("https://www.wasdi.net/wasdiwebserver/rest/auth/register")
+                    .url("{{ sWasdiEntrypointUrlHttp }}/wasdiwebserver/rest/auth/register")
                     .post(oBody)
                     .build();
             try (Response oResponse = client.newCall(request).execute()) {
