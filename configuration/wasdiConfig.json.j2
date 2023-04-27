@@ -56,12 +56,18 @@
         },
         "debug": {{ dictWasdiConfiguration.metrics.debug | lower }},
         "metric": {
+{% if dictWasdiConfiguration['metrics']['metric']['license'] | default({}) | length == 0 %}
+            "license": {},
+{% else %}
             "license": {
-{% for sCurrentLicense in dictWasdiConfiguration.metrics.metric.license %}
+{% for sCurrentLicense in dictWasdiConfiguration['metrics']['metric']['license'] %}
                 "{{ sCurrentLicense }}": {
-                    "fileToRead": "{{ dictWasdiConfiguration.metrics.metric.license[sCurrentLicense].fileToRead }}",
+                    "fileToRead": "{{ dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['fileToRead'] }}",
+{% if dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] | length == 0 %}
+                    "valuesToConsiderTrue": []
+{% else %}
                     "valuesToConsiderTrue": [
-{% for sCurrentValueToConsiderTrue in dictWasdiConfiguration.metrics.metric.license[sCurrentLicense].valuesToConsiderTrue %}
+{% for sCurrentValueToConsiderTrue in dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] %}
                         "{{ sCurrentValueToConsiderTrue }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -69,9 +75,14 @@
                     ]
                 }{% if not loop.last %},
 {% endif %}
+{% endif %}
 {% endfor %}
 
             },
+{% endif %}
+{% if dictWasdiConfiguration['metrics']['metric']['partition'] | default([]) | length == 0 %}
+            "partition": []
+{% else %}
             "partition": [
 {% for sCurrentPartition in dictWasdiConfiguration.metrics.metric.partition %}
                 "{{ sCurrentPartition }}"{% if not loop.last %},
@@ -79,6 +90,7 @@
 {% endfor %}
 
             ]
+{% endif %}
         },
         "waitingTime": {{ dictWasdiConfiguration.metrics.waitingTime }}
     },
