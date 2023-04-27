@@ -5,11 +5,10 @@ $schemas:
   - https://schema.org/version/latest/schemaorg-current-https.rdf
 $graph:
   - class: Workflow
-    id: main
+    id: {{ wasdiAppId }}
     label: "Workflow for the WASDI Processor"
     doc: "Workflow for the WASDI Processor"
     inputs:
-      {{ wasdiAppParametersDeclaration }}
       wasdi__proc__id:
         type: string
       wasdi__session__id:
@@ -18,6 +17,9 @@ $graph:
         type: string
       wasdi__ws__id:
         type: string
+{%- for sCurrentParameter in wasdiAppParametersDeclaration | default([]) %}
+      {{ sCurrentParameter['key'] }}:
+        type: {{ sCurrentParameter['type'] }}{% endfor %}
     outputs:
       - id: results
         outputSource:
@@ -30,6 +32,8 @@ $graph:
           wasdi__session__id: wasdi__session__id
           wasdi__user__id: wasdi__user__id
           wasdi__ws__id: wasdi__ws__id
+{%- for sCurrentParameter in wasdiAppParametersDeclaration | default([]) %}
+          {{ sCurrentParameter['key'] }}: {{ sCurrentParameter['key'] }}{% endfor %}
         out:
           - results
         run: "#app_{{ wasdiAppId }}"
@@ -37,7 +41,6 @@ $graph:
     id: app_{{ wasdiAppId }}
     label: executes the WASDI Processor
     inputs:
-      {{ wasdiAppParametersDeclaration }}
       wasdi__proc__id:
         type: string
       wasdi__session__id:
@@ -46,6 +49,9 @@ $graph:
         type: string
       wasdi__ws__id:
         type: string
+{%- for sCurrentParameter in wasdiAppParametersDeclaration | default([]) %}
+      {{ sCurrentParameter['key'] }}:
+        type: {{ sCurrentParameter['type'] }}{% endfor %}
     outputs:
       results:
         type: Directory
