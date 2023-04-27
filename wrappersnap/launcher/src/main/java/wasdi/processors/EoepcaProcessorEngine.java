@@ -489,7 +489,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
 			}
 			
-			sBaseAddress += "wps3/processes/";
+			sBaseAddress += "wps3/";
 			
 			OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 			
@@ -520,16 +520,47 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			Execute oExecute = new Execute();
 			oExecute.setInputs(aoInputParams);
 			
-			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName(), oExecute);
+			if (oOgcProcessesClient.getHeaders() != null) {
+				oOgcProcessesClient.getHeaders().put("Content-Type", "application/json");
+				oOgcProcessesClient.getHeaders().put("Prefer", "respond-async");				
+			}
+			
+			StatusInfo oStatusInfo = oOgcProcessesClient.executeProcess(oParameter.getName()+"-1_0", oExecute);
 			String sJobId = oStatusInfo.getJobID();
+			
+			if (Utils.isNullOrEmpty(sJobId)) {
+				WasdiLog.errorLog("EoepcaProcessorEngine.run: unable to get a valid Job Id");
+				return false;
+			}
 			
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
-            boolean bForcedError = false;			
+            boolean bForcedError = false;
+            
+            
 			
 			while(true) {
 				
 				oStatusInfo = oOgcProcessesClient.getStatus(sJobId);
+				
+				if (oStatusInfo == null) {
+					WasdiLog.debugLog("EoepcaProcessorEngine.run: Status Info returned null. Try to login again ");
+					
+					if (loginInEOEpca(oOgcProcessesClient)) {
+						WasdiLog.debugLog("EoepcaProcessorEngine.run: new login done, try again");
+						
+						oStatusInfo = oOgcProcessesClient.getStatus(sJobId);
+						
+						if (oStatusInfo == null) {
+							WasdiLog.errorLog("EoepcaProcessorEngine.run: Status Info null also after new login");
+							break;
+						}
+					}
+					else {
+						WasdiLog.debugLog("EoepcaProcessorEngine.run: impossible to login again");
+						break;
+					}
+				}
 				
 				if (oStatusInfo.getStatus() == StatusCode.DISMISSED || oStatusInfo.getStatus() == StatusCode.FAILED || oStatusInfo.getStatus() == StatusCode.SUCCESSFUL) {
 					break;
@@ -537,8 +568,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
                 try {
                     Thread.sleep(iThreadSleepMs);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException oEx) {
+                    WasdiLog.errorLog("EoepcaProcessorEngine.run: Thread sleep exception ", oEx);
                     Thread.currentThread().interrupt();
                 }                
 
