@@ -205,6 +205,23 @@ var RootController = (function() {
     RootController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
         console.log("RootController.rabbitMessageHook | oRabbitMessage:", oRabbitMessage);
         oController.initializeProjectsInfo();
+
+       if (!utilsIsObjectNullOrUndefined(oRabbitMessage)) {
+            let sRabbitMessage = JSON.stringify(oRabbitMessage);
+            console.log(oRabbitMessage);
+
+            var oVexWindow = utilsVexDialogAlertBottomRightCorner(`Payment Status: ${oRabbitMessage.payload.paymentStatus}`);
+            utilsVexCloseDialogAfter(5000, oVexWindow);
+
+            if (!utilsIsObjectNullOrUndefined(oRabbitMessage.payload)) {
+                if (!utilsIsStrNullOrEmpty(oRabbitMessage.payload.invoicePdfUrl)) {
+                    let sUrl = oRabbitMessage.payload.invoicePdfUrl;
+                    console.log("EditUserController.rabbitMessageHook | sUrl: ", sUrl);
+
+                    oController.m_oWindow.open(sUrl, '_blank');
+                }
+            }
+        }
     };
 
     RootController.prototype.initializeProjectsInfo = function() {
