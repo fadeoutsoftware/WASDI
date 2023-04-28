@@ -250,22 +250,22 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		List<Double> adGrid = Arrays.asList(0.25, 0.25);
 
-		Map<String, Object> root = new HashMap<>();
-		root.put("product_type", sProductType);
-		root.put("variable", asVariables);
-		root.put("year", sYear);
-		root.put("month", sMonth);
-		root.put("day", sDay);
-		root.put("time", oaTimeHours);
-		root.put("grid", adGrid);
-		root.put("format", sFormat);
+		Map<String, Object> aoHashMap = new HashMap<>();
+		if (sProductType != null) aoHashMap.put("product_type", sProductType);
+		aoHashMap.put("variable", asVariables);
+		aoHashMap.put("year", sYear);
+		aoHashMap.put("month", sMonth);
+		aoHashMap.put("day", sDay);
+		aoHashMap.put("time", oaTimeHours);
+		aoHashMap.put("grid", adGrid);
+		aoHashMap.put("format", sFormat);
 
 		if (sBoundingBox != null && !sBoundingBox.contains("null")) {
 			List<Double> originalBbox = BoundingBoxUtils.parseBoundingBox(sBoundingBox);
 			List<Double> expandedBbox = BoundingBoxUtils.expandBoundingBoxUpToAQuarterDegree(originalBbox);
 
 			if (expandedBbox != null) {
-				root.put("area", expandedBbox);
+				aoHashMap.put("area", expandedBbox);
 			}
 		}
 
@@ -273,10 +273,10 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			String sPresureLevels = JsonUtils.getProperty(aoWasdiPayload, "presureLevels");
 			List<String> oaPressureLevels = Arrays.asList(sPresureLevels.split(" "));
 
-			root.put("pressure_level", oaPressureLevels);
+			aoHashMap.put("pressure_level", oaPressureLevels);
 		}
 
-		return root;
+		return aoHashMap;
 	}
 
 	private static String inflateVariable(String sVariable) {

@@ -48,6 +48,6 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     }
 
     this.getStyles = function() {
-        return this.m_oHttp.get(this.APIURL + '/filebuffer//styles');
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/styles');
     }
 }]);
