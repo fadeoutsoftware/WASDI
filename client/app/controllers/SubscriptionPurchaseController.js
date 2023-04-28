@@ -29,7 +29,6 @@ SubscriptionPurchaseController = (function () {
         this.setPrice();
 
         this.m_iTotalPrice = 0;
-        console.log(this.m_aoTypes);
     }
 
     SubscriptionPurchaseController.prototype.addToCart = function (sSubName, iSubPrice) {
