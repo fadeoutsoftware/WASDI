@@ -99,12 +99,22 @@ public final class S3BucketUtils {
 	private static EcoStressItemForWriting parseEntry(String sBucketName, String sEntryKey) {
 		String[] asTokens = sEntryKey.split("/");
 
-		if (asTokens.length < 4) {
+		if (asTokens.length < 3) {
 			return null;
 		}
 
-		String sDirectoryName = asTokens[0] + "/" + asTokens[1];
-		String sFileName = asTokens[3].substring(0, asTokens[3].length() - 4);
+		String sDirectoryName = "";
+		String sFileName = "";
+		
+		if (asTokens.length>=4) {
+			sDirectoryName = asTokens[0] + "/" + asTokens[1];
+			sFileName = asTokens[3].substring(0, asTokens[3].length() - 4);
+			
+		}
+		else {
+			sDirectoryName = asTokens[0];
+			sFileName = asTokens[2].substring(0, asTokens[2].length() - 4);			
+		}
 
 		String sXmlFilePath = sDirectoryName + "/xml/" + sFileName + ".xml";
 		String sH5FilePath = sDirectoryName + "/" + sFileName;
