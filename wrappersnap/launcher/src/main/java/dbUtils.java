@@ -2114,8 +2114,6 @@ public class dbUtils {
 
         try {
         	
-        	WasdiProcessorEngine oEngine = new  PythonPipProcessorEngine2();
-        	
         	System.out.println("Wasdi DB Utils");
         	        	
             // create the parser
