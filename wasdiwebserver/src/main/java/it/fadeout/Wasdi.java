@@ -132,7 +132,7 @@ public class Wasdi extends ResourceConfig {
 		register(JerseyMapperProvider.class);
 		packages(true, "it.fadeout.rest.resources");
 	}
-	
+
 	/**
 	 * Web Server intialization: it loads the main web-server configuration
 	 */
@@ -140,9 +140,9 @@ public class Wasdi extends ResourceConfig {
 	public void initWasdi() {
 
 		WasdiLog.debugLog("----------- Welcome to WASDI - Web Advanced Space Developer Interface");
-		
-		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
-		
+
+		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
+
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
 		}

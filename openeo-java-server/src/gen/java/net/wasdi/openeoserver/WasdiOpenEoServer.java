@@ -63,7 +63,7 @@ public class WasdiOpenEoServer extends ResourceConfig {
 	public void initWasdiOpenEoServer() {
 		WasdiLog.debugLog("----------- Welcome to WASDI OPEN EO SERVER - The WASDI OpenEo Backend");
 		
-		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
+		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");

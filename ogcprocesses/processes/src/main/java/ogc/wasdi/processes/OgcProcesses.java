@@ -65,7 +65,7 @@ public class OgcProcesses extends ResourceConfig {
 		System.out.println(sPath);
 		WasdiLog.debugLog("WASDI OGC-Processes Server start");
 		
-		String sConfigFilePath = "/data/wasdi/wasdiConfig.json"; 
+		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 		
 		if (Utils.isNullOrEmpty(m_oServletConfig.getInitParameter("ConfigFilePath")) == false){
 			sConfigFilePath = m_oServletConfig.getInitParameter("ConfigFilePath");
