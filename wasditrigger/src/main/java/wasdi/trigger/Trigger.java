@@ -86,7 +86,7 @@ public class Trigger {
 		oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
 		String sScheduleId = "";
-		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
+		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
 		try {
 

@@ -63,7 +63,7 @@ public class WasdiScheduler
 	public static void main(String[] args) {		
 		System.out.println("---------------------------- WASDI SCHEDULER START ----------------------------\n");
 		
-		String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
+		String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 		
 		try {
 			

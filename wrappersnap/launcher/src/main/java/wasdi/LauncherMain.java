@@ -56,8 +56,8 @@ import wasdi.shared.utils.log.WasdiLog;
  * The Launcher takes as input:
  *
  * -operation -> Uppercase Name of the WASDI Operation. ie "DOWNLOAD"
- * -parameter -> Path of the parameter file. ie /usr/lib/wasdi/params/fab5028a-341b-4bd3-ba7e-a321d6eb54ca
- * -config -> Path of te WASDI JSON Config file. ie /data/wasdi/config.json
+ * -parameter -> Path of the parameter file. ie /data/wasdi/params/fab5028a-341b-4bd3-ba7e-a321d6eb54ca
+ * -config -> Path of te WASDI JSON Config file. ie /etc/wasdi/config.json
  *
  * The parameter file should be named as guid that is the same guid of the corresponding ProcessWorkspace.
  *
@@ -149,7 +149,7 @@ public class LauncherMain  {
         // Default initialization
         String sOperation = "ND";
         String sParameter = "ND";
-        String sConfigFilePath = "/data/wasdi/wasdiConfig.json";
+        String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
         // parse the command line arguments
         CommandLine oLine = oParser.parse(oOptions, args);
