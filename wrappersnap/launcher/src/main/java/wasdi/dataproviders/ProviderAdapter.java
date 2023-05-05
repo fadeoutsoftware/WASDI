@@ -186,7 +186,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     		String sPlatformType = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sFileName);
     		
     		if (Utils.isNullOrEmpty(sPlatformType)) {
-    			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized");
+    			WasdiLog.debugLog("ProviderAdapter.getScoreForFile: platform not recognized. DataProvider: " + m_sDataProviderCode + " File: " + sFileName);
     			return -1;
     		}
     		

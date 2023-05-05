@@ -80,6 +80,11 @@ public class DockersConfig {
 	public String dockersDeployLogFilePath = "/var/log/wasdi/dockers.log";
 	
 	/**
+	 * Additional run paramters for the run docker command
+	 */
+	public String additionalDockerRunParameter = "";
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */

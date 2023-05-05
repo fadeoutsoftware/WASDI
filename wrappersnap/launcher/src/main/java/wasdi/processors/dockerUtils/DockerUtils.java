@@ -363,10 +363,14 @@ public class DockerUtils {
                     	}
                 	}
                 }
-                
+				
                 // Add the pull command
                 if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {	                	
                 	asArgs.add("--pull always");
+                }				
+                
+                if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.additionalDockerRunParameter)) {
+                	asArgs.add(WasdiConfig.Current.dockers.additionalDockerRunParameter);
                 }
 
                 // Docker name

@@ -53,15 +53,15 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					HashMap<String,Object> oConfig = MongoRepository.s_oMapper.readValue(oConfigFile, oMapType);
 					
 					if (oConfig.containsKey("retrySleepSeconds")) {
-						m_lRetrySleepSeconds = (long) oConfig.get("retrySleepSeconds");
+						m_lRetrySleepSeconds = ((Number) oConfig.get("retrySleepSeconds")).longValue();
 					}
 					
 					if (oConfig.containsKey("maxActivationCycles")) {
-						m_iMaxActivationCycles = (int) oConfig.get("maxActivationCycles");
+						m_iMaxActivationCycles = ((Number) oConfig.get("maxActivationCycles")).intValue();
 					}
 					
 					if (oConfig.containsKey("activationCyclesSleepSeconds")) {
-						m_lActivationCyclesSleepSeconds = (long) oConfig.get("activationCyclesSleepSeconds");
+						m_lActivationCyclesSleepSeconds = ((Number) oConfig.get("activationCyclesSleepSeconds")).longValue();
 					}
 				}
 			}
