@@ -336,7 +336,11 @@ public class DockerUtils {
                     	}
                 		
                 	}
-                }                
+                }
+                
+                if (Utils.isNullOrEmpty(WasdiConfig.Current.dockers.additionalDockerRunParameter) == false) {
+                	asArgs.add(WasdiConfig.Current.dockers.additionalDockerRunParameter);
+                }
 
                 // Docker name
                 asArgs.add(sDockerName);

@@ -745,7 +745,8 @@ public class WasdiFileUtils {
 					|| sFileName.toUpperCase().startsWith("EEHSTIC")
 					|| sFileName.toUpperCase().startsWith("EEHSW")
 					|| sFileName.toUpperCase().startsWith("EEHTES")
-					|| sFileName.toUpperCase().startsWith("EEHTSEB")) {
+					|| sFileName.toUpperCase().startsWith("EEHTSEB")
+					|| sFileName.toUpperCase().startsWith("ECOSTRESS")) {
 				return Platforms.ECOSTRESS;
 			}
 			else if (sFileName.toLowerCase().endsWith(".nc")) {

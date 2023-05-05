@@ -65,6 +65,11 @@ public class DockersConfig {
 	public ArrayList<DockerRegistryConfig> registers;
 	
 	/**
+	 * Additional run paramters for the run docker command
+	 */
+	public String additionalDockerRunParameter = "";
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */

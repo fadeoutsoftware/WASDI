@@ -44,7 +44,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 				|| sProduct.toUpperCase().startsWith("EEHSTIC")
 				|| sProduct.toUpperCase().startsWith("EEHSW")
 				|| sProduct.toUpperCase().startsWith("EEHTES")
-				|| sProduct.toUpperCase().startsWith("EEHTSEB")) {
+				|| sProduct.toUpperCase().startsWith("EEHTSEB")
+				|| sProduct.toUpperCase().startsWith("ECOSTRESS")) {
 			return sOriginalUrl;
 		}
 		return null;
