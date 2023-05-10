@@ -234,15 +234,22 @@ SubscriptionEditorController = (function () {
 
     SubscriptionEditorController.prototype.checkout = function () {
         let oController = this;
-        if (!this.m_oEditSubscription.subscriptionId) {
-            oController.m_bCheckoutNow = true;
-            this.saveSubscription();
-        } else {
-            this.getStripePaymentUrl();
-        }
-        // this.m_oEditSubscription = {};
-        // this.m_oType = {};
-        // this.m_oOrganization = {};
+        let sMessage = "You will be re-directed to our payment partner, Stripe. Click 'OK' to continue or 'CANCEL' to end the payment process."
+        //Notification that user will be re-directed to Stripe
+        utilsVexDialogConfirm(sMessage, function (value) {
+            if (value) {
+               
+                if (!oController.m_oEditSubscription.subscriptionId) {
+                    oController.m_bCheckoutNow = true;
+                    oController.saveSubscription();
+                } else {
+                    oController.getStripePaymentUrl();
+                }
+                // this.m_oEditSubscription = {};
+                // this.m_oType = {};
+                // this.m_oOrganization = {};
+            }
+        })
     }
 
     SubscriptionEditorController.prototype.getOrganizationsListByUser = function () {
