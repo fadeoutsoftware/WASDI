@@ -1,73 +1,73 @@
 {
-    "nodeCode": "{{ dictWasdiConfiguration['nodeCode'] }}",
-    "mainNodeCloud": "{{ dictWasdiConfiguration['mainNodeCloud'] }}",
-    "usersDefaultNode": "{{ dictWasdiConfiguration['usersDefaultNode'] }}",
-    "tomcatUser": "{{ dictWasdiConfiguration['tomcatUser'] }}",
-    "baseUrl": "{{ dictWasdiConfiguration['baseUrl'] }}",
-    "connectionTimeout": {{ dictWasdiConfiguration['connectionTimeout'] }},
-    "readTimeout": {{ dictWasdiConfiguration['readTimeout'] }},
-    "msWaitAfterChmod": {{ dictWasdiConfiguration['msWaitAfterChmod'] }},
+    "nodeCode": "{{ aoWasdiConfiguration['nodeCode'] }}",
+    "mainNodeCloud": "{{ aoWasdiConfiguration['mainNodeCloud'] }}",
+    "usersDefaultNode": "{{ aoWasdiConfiguration['usersDefaultNode'] }}",
+    "tomcatUser": "{{ aoWasdiConfiguration['tomcatUser'] }}",
+    "baseUrl": "{{ aoWasdiConfiguration['baseUrl'] }}",
+    "connectionTimeout": {{ aoWasdiConfiguration['connectionTimeout'] }},
+    "readTimeout": {{ aoWasdiConfiguration['readTimeout'] }},
+    "msWaitAfterChmod": {{ aoWasdiConfiguration['msWaitAfterChmod'] }},
     "mongoMain": {
-        "address": "{{ dictWasdiConfiguration['mongoMain']['address'] }}",
-        "dbName": "{{ dictWasdiConfiguration['mongoMain']['dbName'] }}",
-        "replicaName": "{{ dictWasdiConfiguration['mongoMain']['replicaName'] }}",
-        "user": "{{ dictWasdiConfiguration['mongoMain']['user'] }}",
-        "password": "{{ dictWasdiConfiguration['mongoMain']['password'] }}"
+        "address": "{{ aoWasdiConfiguration['mongoMain']['address'] }}",
+        "dbName": "{{ aoWasdiConfiguration['mongoMain']['dbName'] }}",
+        "replicaName": "{{ aoWasdiConfiguration['mongoMain']['replicaName'] }}",
+        "user": "{{ aoWasdiConfiguration['mongoMain']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['mongoMain']['password'] }}"
     },
     "mongoLocal": {
-        "address": "{{ dictWasdiConfiguration['mongoLocal']['address'] }}",
-        "dbName": "{{ dictWasdiConfiguration['mongoLocal']['dbName'] }}",
-        "replicaName": "{{ dictWasdiConfiguration['mongoLocal']['replicaName'] }}",
-        "user": "{{ dictWasdiConfiguration['mongoLocal']['user'] }}",
-        "password": "{{ dictWasdiConfiguration['mongoLocal']['password'] }}"
+        "address": "{{ aoWasdiConfiguration['mongoLocal']['address'] }}",
+        "dbName": "{{ aoWasdiConfiguration['mongoLocal']['dbName'] }}",
+        "replicaName": "{{ aoWasdiConfiguration['mongoLocal']['replicaName'] }}",
+        "user": "{{ aoWasdiConfiguration['mongoLocal']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['mongoLocal']['password'] }}"
     },
     "mongoEcostress": {
-        "address": "{{ dictWasdiConfiguration['mongoEcostress']['address'] }}",
-        "dbName": "{{ dictWasdiConfiguration['mongoEcostress']['dbName'] }}",
-        "replicaName": "{{ dictWasdiConfiguration['mongoEcostress']['replicaName'] }}",
-        "user": "{{ dictWasdiConfiguration['mongoEcostress']['user'] }}",
-        "password": "{{ dictWasdiConfiguration['mongoEcostress']['password'] }}"
+        "address": "{{ aoWasdiConfiguration['mongoEcostress']['address'] }}",
+        "dbName": "{{ aoWasdiConfiguration['mongoEcostress']['dbName'] }}",
+        "replicaName": "{{ aoWasdiConfiguration['mongoEcostress']['replicaName'] }}",
+        "user": "{{ aoWasdiConfiguration['mongoEcostress']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['mongoEcostress']['password'] }}"
     },
     "keycloack": {
-        "address": "{{ dictWasdiConfiguration['keycloak']['baseUrl'] }}{{ dictWasdiConfiguration['keycloak']['address'] }}",
-        "cliSecret": "{{ dictWasdiConfiguration['keycloak']['cliSecret'] }}",
-        "authTokenAddress": "{{ dictWasdiConfiguration['keycloak']['baseUrl'] }}{{ dictWasdiConfiguration['keycloak']['authTokenAddress'] }}",
-        "introspectAddress": "{{ dictWasdiConfiguration['keycloak']['baseUrl'] }}{{ dictWasdiConfiguration['keycloak']['introspectAddress'] }}",
-        "confidentialClient": "{{ dictWasdiConfiguration['keycloak']['confidentialClient'] }}",
-        "client": "{{ dictWasdiConfiguration['keycloak']['client'] }}",
-        "clientSecret": "{{ dictWasdiConfiguration['keycloak']['clientSecret'] }}",
-        "realm": "{{ dictWasdiConfiguration['keycloak']['realm'] }}"
+        "address": "{{ aoWasdiConfiguration['keycloak']['baseUrl'] }}{{ aoWasdiConfiguration['keycloak']['address'] }}",
+        "cliSecret": "{{ aoWasdiConfiguration['keycloak']['cliSecret'] }}",
+        "authTokenAddress": "{{ aoWasdiConfiguration['keycloak']['baseUrl'] }}{{ aoWasdiConfiguration['keycloak']['authTokenAddress'] }}",
+        "introspectAddress": "{{ aoWasdiConfiguration['keycloak']['baseUrl'] }}{{ aoWasdiConfiguration['keycloak']['introspectAddress'] }}",
+        "confidentialClient": "{{ aoWasdiConfiguration['keycloak']['confidentialClient'] }}",
+        "client": "{{ aoWasdiConfiguration['keycloak']['client'] }}",
+        "clientSecret": "{{ aoWasdiConfiguration['keycloak']['clientSecret'] }}",
+        "realm": "{{ aoWasdiConfiguration['keycloak']['realm'] }}"
     },
     "metrics": {
         "api": {
             "authentication": {
-                "authenticationSystem": "{{ dictWasdiConfiguration['metrics']['api']['authentication']['authenticationSystem'] }}",
-                "username": "{{ dictWasdiConfiguration['metrics']['api']['authentication']['username'] }}",
-                "password": "{{ dictWasdiConfiguration['metrics']['api']['authentication']['password'] }}",
-                "path": "{{ dictWasdiConfiguration['metrics']['api']['authentication']['path'] }}",
-                "method": "{{ dictWasdiConfiguration['metrics']['api']['authentication']['method'] }}",
-                "timeout": {{ dictWasdiConfiguration['metrics']['api']['authentication']['timeout'] }}
+                "authenticationSystem": "{{ aoWasdiConfiguration['metrics']['api']['authentication']['authenticationSystem'] }}",
+                "username": "{{ aoWasdiConfiguration['metrics']['api']['authentication']['username'] }}",
+                "password": "{{ aoWasdiConfiguration['metrics']['api']['authentication']['password'] }}",
+                "path": "{{ aoWasdiConfiguration['metrics']['api']['authentication']['path'] }}",
+                "method": "{{ aoWasdiConfiguration['metrics']['api']['authentication']['method'] }}",
+                "timeout": {{ aoWasdiConfiguration['metrics']['api']['authentication']['timeout'] }}
             },
             "endpoint": {
-                "path": "{{ dictWasdiConfiguration['metrics']['api']['endpoint']['path'] }}",
-                "method": "{{ dictWasdiConfiguration['metrics']['api']['endpoint']['method'] }}",
-                "timeout": {{ dictWasdiConfiguration['metrics']['api']['endpoint']['timeout'] }}
+                "path": "{{ aoWasdiConfiguration['metrics']['api']['endpoint']['path'] }}",
+                "method": "{{ aoWasdiConfiguration['metrics']['api']['endpoint']['method'] }}",
+                "timeout": {{ aoWasdiConfiguration['metrics']['api']['endpoint']['timeout'] }}
             }
         },
-        "debug": {{ dictWasdiConfiguration['metrics']['debug'] | lower }},
+        "debug": {{ aoWasdiConfiguration['metrics']['debug'] | lower }},
         "metric": {
-{% if dictWasdiConfiguration['metrics']['metric']['license'] | default({}) | length == 0 %}
+{% if aoWasdiConfiguration['metrics']['metric']['license'] | default({}) | length == 0 %}
             "license": {},
 {% else %}
             "license": {
-{% for sCurrentLicense in dictWasdiConfiguration['metrics']['metric']['license'] %}
+{% for sCurrentLicense in aoWasdiConfiguration['metrics']['metric']['license'] %}
                 "{{ sCurrentLicense }}": {
-                    "fileToRead": "{{ dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['fileToRead'] }}",
-{% if dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] | length == 0 %}
+                    "fileToRead": "{{ aoWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['fileToRead'] }}",
+{% if aoWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] | length == 0 %}
                     "valuesToConsiderTrue": []
 {% else %}
                     "valuesToConsiderTrue": [
-{% for sCurrentValueToConsiderTrue in dictWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] %}
+{% for sCurrentValueToConsiderTrue in aoWasdiConfiguration['metrics']['metric']['license'][sCurrentLicense]['valuesToConsiderTrue'] %}
                         "{{ sCurrentValueToConsiderTrue }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -80,11 +80,11 @@
 
             },
 {% endif %}
-{% if dictWasdiConfiguration['metrics']['metric']['partition'] | default([]) | length == 0 %}
+{% if aoWasdiConfiguration['metrics']['metric']['partition'] | default([]) | length == 0 %}
             "partition": []
 {% else %}
             "partition": [
-{% for sCurrentPartition in dictWasdiConfiguration['metrics']['metric']['partition'] %}
+{% for sCurrentPartition in aoWasdiConfiguration['metrics']['metric']['partition'] %}
                 "{{ sCurrentPartition }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -92,43 +92,43 @@
             ]
 {% endif %}
         },
-        "waitingTime": {{ dictWasdiConfiguration['metrics']['waitingTime'] }}
+        "waitingTime": {{ aoWasdiConfiguration['metrics']['waitingTime'] }}
     },
     "ogcProcessesApi": {
-        "baseAddress": "{{ dictWasdiConfiguration['ogcProcessesApi']['baseAddress'] }}",
-        "conformsTo": "{{ dictWasdiConfiguration['ogcProcessesApi']['conformsTo'] }}",
-        "defaultLinksLang": "{{ dictWasdiConfiguration['ogcProcessesApi']['defaultLinksLang'] }}",
-        "defaultLinksType": "{{ dictWasdiConfiguration['ogcProcessesApi']['defaultLinksType'] }}",
-        "landingDescription": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingDescription'] }}",
-        "landingLinkConformance": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingLinkConformance'] }}",
-        "landingLinkJobs": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingLinkJobs'] }}",
-        "landingLinkProcesses": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingLinkProcesses'] }}",
-        "landingLinkServiceDefinition": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingLinkServiceDefinition'] }}",
-        "landingLinkServiceDescription": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingLinkServiceDescription'] }}",
-        "landingTitle": "{{ dictWasdiConfiguration['ogcProcessesApi']['landingTitle'] }}",
-        "validationEchoProcessId": "{{ dictWasdiConfiguration['ogcProcessesApi']['validationEchoProcessId'] }}",
-        "validationModeOn": {{ dictWasdiConfiguration['ogcProcessesApi']['validationModeOn'] | lower }},
-        "validationSessionId": "{{ dictWasdiConfiguration['ogcProcessesApi']['validationSessionId'] }}",
-        "validationUserId": "{{ dictWasdiConfiguration['ogcProcessesApi']['validationUserId'] }}",
-        "waitProcessMaxTimeout": {{ dictWasdiConfiguration['ogcProcessesApi']['waitProcessMaxTimeout'] }},
-        "waitProcessSleepTimeout": {{ dictWasdiConfiguration['ogcProcessesApi']['waitProcessSleepTimeout'] }}
+        "baseAddress": "{{ aoWasdiConfiguration['ogcProcessesApi']['baseAddress'] }}",
+        "conformsTo": "{{ aoWasdiConfiguration['ogcProcessesApi']['conformsTo'] }}",
+        "defaultLinksLang": "{{ aoWasdiConfiguration['ogcProcessesApi']['defaultLinksLang'] }}",
+        "defaultLinksType": "{{ aoWasdiConfiguration['ogcProcessesApi']['defaultLinksType'] }}",
+        "landingDescription": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingDescription'] }}",
+        "landingLinkConformance": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingLinkConformance'] }}",
+        "landingLinkJobs": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingLinkJobs'] }}",
+        "landingLinkProcesses": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingLinkProcesses'] }}",
+        "landingLinkServiceDefinition": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingLinkServiceDefinition'] }}",
+        "landingLinkServiceDescription": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingLinkServiceDescription'] }}",
+        "landingTitle": "{{ aoWasdiConfiguration['ogcProcessesApi']['landingTitle'] }}",
+        "validationEchoProcessId": "{{ aoWasdiConfiguration['ogcProcessesApi']['validationEchoProcessId'] }}",
+        "validationModeOn": {{ aoWasdiConfiguration['ogcProcessesApi']['validationModeOn'] | lower }},
+        "validationSessionId": "{{ aoWasdiConfiguration['ogcProcessesApi']['validationSessionId'] }}",
+        "validationUserId": "{{ aoWasdiConfiguration['ogcProcessesApi']['validationUserId'] }}",
+        "waitProcessMaxTimeout": {{ aoWasdiConfiguration['ogcProcessesApi']['waitProcessMaxTimeout'] }},
+        "waitProcessSleepTimeout": {{ aoWasdiConfiguration['ogcProcessesApi']['waitProcessSleepTimeout'] }}
     },
-{% if dictWasdiConfiguration['openEO'] | length == 0 %}
+{% if aoWasdiConfiguration['openEO'] | length == 0 %}
     "openEO": {},
 {% else %}
     "openEO": {
-        "baseAddress": "{{ dictWasdiConfiguration['openEO']['baseAddress'] }}",
-        "api_version": "{{ dictWasdiConfiguration['openEO']['api_version'] }}",
-        "backend_version": "{{ dictWasdiConfiguration['openEO']['backend_version'] }}",
-        "stac_version": "{{ dictWasdiConfiguration['openEO']['stac_version'] }}",
-        "type": "{{ dictWasdiConfiguration['openEO']['type'] }}",
-        "id": "{{ dictWasdiConfiguration['openEO']['id'] }}",
-        "title": "{{ dictWasdiConfiguration['openEO']['title'] }}",
-        "production": {{ dictWasdiConfiguration['openEO']['production'] | lower }},
-        "description": "{{ dictWasdiConfiguration['openEO']['description'] }}",
-        "openEOWasdiAppName": "{{ dictWasdiConfiguration['openEO']['openEOWasdiAppName'] }}",
+        "baseAddress": "{{ aoWasdiConfiguration['openEO']['baseAddress'] }}",
+        "api_version": "{{ aoWasdiConfiguration['openEO']['api_version'] }}",
+        "backend_version": "{{ aoWasdiConfiguration['openEO']['backend_version'] }}",
+        "stac_version": "{{ aoWasdiConfiguration['openEO']['stac_version'] }}",
+        "type": "{{ aoWasdiConfiguration['openEO']['type'] }}",
+        "id": "{{ aoWasdiConfiguration['openEO']['id'] }}",
+        "title": "{{ aoWasdiConfiguration['openEO']['title'] }}",
+        "production": {{ aoWasdiConfiguration['openEO']['production'] | lower }},
+        "description": "{{ aoWasdiConfiguration['openEO']['description'] }}",
+        "openEOWasdiAppName": "{{ aoWasdiConfiguration['openEO']['openEOWasdiAppName'] }}",
         "collections": [
-{% for oDictCurrentCollection in dictWasdiConfiguration['openEO']['collections'] | default({}) %}
+{% for oDictCurrentCollection in aoWasdiConfiguration['openEO']['collections'] | default({}) %}
             {
                 "stac_version": "{{ oDictCurrentCollection['stac_version'] }}",
                 "type": "{{ oDictCurrentCollection['type'] }}",
@@ -329,70 +329,70 @@
     },
 {% endif %}
     "paths": {
-        "dockerTemplatePath": "{{ dictWasdiConfiguration['paths']['dockerTemplatePath'] }}",
-        "downloadRootPath": "{{ dictWasdiConfiguration['paths']['downloadRootPath'] }}",
-        "gdalPath": "{{ dictWasdiConfiguration['paths']['gdalPath'] }}",
-        "geoserverDataDir": "{{ dictWasdiConfiguration['paths']['geoserverDataDir'] }}",
-        "jinjaTemplateRenderTool": "{{ dictWasdiConfiguration['paths']['jinjaTemplateRenderTool'] }}",
-        "matlabRuntimePath": "{{ dictWasdiConfiguration['paths']['matlabRuntimePath'] }}",
-        "metadataPath": "{{ dictWasdiConfiguration['paths']['metadataPath'] }}",
-        "missionsConfigFilePath": "{{ dictWasdiConfiguration['paths']['missionsConfigFilePath'] }}",
-        "pythonExecPath": "{{ dictWasdiConfiguration['paths']['pythonExecPath'] }}",
-        "sen2CorePath": "{{ dictWasdiConfiguration['paths']['sen2CorePath'] }}",
-        "serializationPath": "{{ dictWasdiConfiguration['paths']['serializationPath'] }}",
-        "sftpRootPath": "{{ dictWasdiConfiguration['paths']['sftpRootPath'] }}",
-        "tomcatWebAppPath": "{{ dictWasdiConfiguration['paths']['tomcatWebAppPath'] }}",
-        "traefikMountedVolume": "{{ dictWasdiConfiguration['paths']['traefikMountedVolume'] }}",
-        "userHomePath": "{{ dictWasdiConfiguration['paths']['userHomePath'] }}",
-        "wasdiTempFolder": "{{ dictWasdiConfiguration['paths']['wasdiTempFolder'] }}"
+        "dockerTemplatePath": "{{ aoWasdiConfiguration['paths']['dockerTemplatePath'] }}",
+        "downloadRootPath": "{{ aoWasdiConfiguration['paths']['downloadRootPath'] }}",
+        "gdalPath": "{{ aoWasdiConfiguration['paths']['gdalPath'] }}",
+        "geoserverDataDir": "{{ aoWasdiConfiguration['paths']['geoserverDataDir'] }}",
+        "jinjaTemplateRenderTool": "{{ aoWasdiConfiguration['paths']['jinjaTemplateRenderTool'] }}",
+        "matlabRuntimePath": "{{ aoWasdiConfiguration['paths']['matlabRuntimePath'] }}",
+        "metadataPath": "{{ aoWasdiConfiguration['paths']['metadataPath'] }}",
+        "missionsConfigFilePath": "{{ aoWasdiConfiguration['paths']['missionsConfigFilePath'] }}",
+        "pythonExecPath": "{{ aoWasdiConfiguration['paths']['pythonExecPath'] }}",
+        "sen2CorePath": "{{ aoWasdiConfiguration['paths']['sen2CorePath'] }}",
+        "serializationPath": "{{ aoWasdiConfiguration['paths']['serializationPath'] }}",
+        "sftpRootPath": "{{ aoWasdiConfiguration['paths']['sftpRootPath'] }}",
+        "tomcatWebAppPath": "{{ aoWasdiConfiguration['paths']['tomcatWebAppPath'] }}",
+        "traefikMountedVolume": "{{ aoWasdiConfiguration['paths']['traefikMountedVolume'] }}",
+        "userHomePath": "{{ aoWasdiConfiguration['paths']['userHomePath'] }}",
+        "wasdiTempFolder": "{{ aoWasdiConfiguration['paths']['wasdiTempFolder'] }}"
     },
     "rabbit": {
-        "user": "{{ dictWasdiConfiguration['rabbit']['user'] }}",
-        "password": "{{ dictWasdiConfiguration['rabbit']['password'] }}",
-        "host": "{{ dictWasdiConfiguration['rabbit']['host'] }}",
-        "port": {{ dictWasdiConfiguration['rabbit']['port'] }},
-        "exchange": "{{ dictWasdiConfiguration['rabbit']['exchange'] }}"
+        "user": "{{ aoWasdiConfiguration['rabbit']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['rabbit']['password'] }}",
+        "host": "{{ aoWasdiConfiguration['rabbit']['host'] }}",
+        "port": {{ aoWasdiConfiguration['rabbit']['port'] }},
+        "exchange": "{{ aoWasdiConfiguration['rabbit']['exchange'] }}"
     },
     "s3Bucket": {
-        "accessKey": "{{ dictWasdiConfiguration['s3Bucket']['accessKey'] }}",
-        "secretKey": "{{ dictWasdiConfiguration['s3Bucket']['secretKey'] }}",
-        "endpoint": "{{ dictWasdiConfiguration['s3Bucket']['endpoint'] }}",
-        "bucketName": "{{ dictWasdiConfiguration['s3Bucket']['bucketName'] }}",
-        "folders": "{{ dictWasdiConfiguration['s3Bucket']['folders'] }}"
+        "accessKey": "{{ aoWasdiConfiguration['s3Bucket']['accessKey'] }}",
+        "secretKey": "{{ aoWasdiConfiguration['s3Bucket']['secretKey'] }}",
+        "endpoint": "{{ aoWasdiConfiguration['s3Bucket']['endpoint'] }}",
+        "bucketName": "{{ aoWasdiConfiguration['s3Bucket']['bucketName'] }}",
+        "folders": "{{ aoWasdiConfiguration['s3Bucket']['folders'] }}"
     },
     "snap": {
-        "auxPropertiesFile": "{{ dictWasdiConfiguration['snap']['auxPropertiesFile'] }}",
-        "launcherLogActive": {{ dictWasdiConfiguration['snap']['launcherLogActive'] | lower }},
-        "webLogActive": {{ dictWasdiConfiguration['snap']['webLogActive'] | lower }},
-        "launcherLogFile": "{{ dictWasdiConfiguration['snap']['launcherLogFile'] }}",
-        "webLogFile": "{{ dictWasdiConfiguration['snap']['webLogFile'] }}",
-        "launcherLogLevel": "{{ dictWasdiConfiguration['snap']['launcherLogLevel'] }}",
-        "webLogLevel": "{{ dictWasdiConfiguration['snap']['webLogLevel'] }}"
+        "auxPropertiesFile": "{{ aoWasdiConfiguration['snap']['auxPropertiesFile'] }}",
+        "launcherLogActive": {{ aoWasdiConfiguration['snap']['launcherLogActive'] | lower }},
+        "webLogActive": {{ aoWasdiConfiguration['snap']['webLogActive'] | lower }},
+        "launcherLogFile": "{{ aoWasdiConfiguration['snap']['launcherLogFile'] }}",
+        "webLogFile": "{{ aoWasdiConfiguration['snap']['webLogFile'] }}",
+        "launcherLogLevel": "{{ aoWasdiConfiguration['snap']['launcherLogLevel'] }}",
+        "webLogLevel": "{{ aoWasdiConfiguration['snap']['webLogLevel'] }}"
     },
     "sftp": {
-        "sftpManagementWSServiceAddress": "{{ dictWasdiConfiguration['sftp']['sftpManagementWSServiceAddress'] }}"
+        "sftpManagementWSServiceAddress": "{{ aoWasdiConfiguration['sftp']['sftpManagementWSServiceAddress'] }}"
     },
     "notifications": {
-        "mercuriusAPIAddress": "{{ dictWasdiConfiguration['notifications']['mercuriusAPIAddress'] }}",
-        "pwRecoveryMailTitle": "{{ dictWasdiConfiguration['notifications']['pwRecoveryMailTitle'] }}",
-        "pwRecoveryMailSender": "{{ dictWasdiConfiguration['notifications']['pwRecoveryMailSender'] }}",
-        "pwRecoveryMailText": "{{ dictWasdiConfiguration['notifications']['pwRecoveryMailText'] }}",
-        "sftpMailTitle": "{{ dictWasdiConfiguration['notifications']['sftpMailTitle'] }}",
-        "sftpManagementMailSender": "{{ dictWasdiConfiguration['notifications']['sftpManagementMailSender'] }}",
-        "sftpMailText": "{{ dictWasdiConfiguration['notifications']['sftpMailText'] }}",
-        "wasdiAdminMail": "{{ dictWasdiConfiguration['notifications']['wasdiAdminMail'] }}"
+        "mercuriusAPIAddress": "{{ aoWasdiConfiguration['notifications']['mercuriusAPIAddress'] }}",
+        "pwRecoveryMailTitle": "{{ aoWasdiConfiguration['notifications']['pwRecoveryMailTitle'] }}",
+        "pwRecoveryMailSender": "{{ aoWasdiConfiguration['notifications']['pwRecoveryMailSender'] }}",
+        "pwRecoveryMailText": "{{ aoWasdiConfiguration['notifications']['pwRecoveryMailText'] }}",
+        "sftpMailTitle": "{{ aoWasdiConfiguration['notifications']['sftpMailTitle'] }}",
+        "sftpManagementMailSender": "{{ aoWasdiConfiguration['notifications']['sftpManagementMailSender'] }}",
+        "sftpMailText": "{{ aoWasdiConfiguration['notifications']['sftpMailText'] }}",
+        "wasdiAdminMail": "{{ aoWasdiConfiguration['notifications']['wasdiAdminMail'] }}"
     },
     "loadBalancer": {
-        "includeMainClusterAsNode": {{ dictWasdiConfiguration['loadBalancer']['includeMainClusterAsNode'] | lower }},
-        "diskOccupiedSpaceMaxPercentage": {{ dictWasdiConfiguration['loadBalancer']['diskOccupiedSpaceMaxPercentage'] }},
-        "metricsMaxAgeSeconds": {{ dictWasdiConfiguration['loadBalancer']['metricsMaxAgeSeconds'] }}
+        "includeMainClusterAsNode": {{ aoWasdiConfiguration['loadBalancer']['includeMainClusterAsNode'] | lower }},
+        "diskOccupiedSpaceMaxPercentage": {{ aoWasdiConfiguration['loadBalancer']['diskOccupiedSpaceMaxPercentage'] }},
+        "metricsMaxAgeSeconds": {{ aoWasdiConfiguration['loadBalancer']['metricsMaxAgeSeconds'] }}
     },
     "catalogues": [
-{% for sCurrentCatalogue in dictWasdiConfiguration['catalogues'] | default({}) %}
+{% for sCurrentCatalogue in aoWasdiConfiguration['catalogues'] | default({}) %}
         {
             "platform": "{{ sCurrentCatalogue }}",
             "catalogues": [
-{% for sCurrentCatalogue in dictWasdiConfiguration['catalogues'][sCurrentCatalogue]['catalogues'] %}
+{% for sCurrentCatalogue in aoWasdiConfiguration['catalogues'][sCurrentCatalogue]['catalogues'] %}
                 "{{ sCurrentCatalogue }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -404,25 +404,25 @@
 
     ],
     "dataProviders": [
-{% for sCurrentDataProvider in dictWasdiConfiguration['dataProviders'] | sort %}
+{% for sCurrentDataProvider in aoWasdiConfiguration['dataProviders'] | sort %}
         {
             "name": "{{ sCurrentDataProvider }}",
-            "description": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['description'] }}",
-            "link": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['link'] }}",
-            "searchListPageSize": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['searchListPageSize'] }}",
-            "defaultProtocol": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['defaultProtocol'] }}",
-            "parserConfig": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['parserConfig'] }}",
-            "user": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['user'] }}",
-            "password": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['password'] }}",
-            "apiKey": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['apiKey'] }}",
-            "localFilesBasePath": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['localFilesBasePath'] }}",
-            "urlDomain": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['urlDomain'] }}",
-            "connectionTimeout": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['connectionTimeout'] }}",
-            "readTimeout": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['readTimeout'] }}",
-            "adapterConfig": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['adapterConfig'] }}",
-            "cloudProvider": "{{ dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['cloudProvider'] }}",
+            "description": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['description'] }}",
+            "link": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['link'] }}",
+            "searchListPageSize": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['searchListPageSize'] }}",
+            "defaultProtocol": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['defaultProtocol'] }}",
+            "parserConfig": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['parserConfig'] }}",
+            "user": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['user'] }}",
+            "password": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['password'] }}",
+            "apiKey": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['apiKey'] }}",
+            "localFilesBasePath": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['localFilesBasePath'] }}",
+            "urlDomain": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['urlDomain'] }}",
+            "connectionTimeout": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['connectionTimeout'] }}",
+            "readTimeout": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['readTimeout'] }}",
+            "adapterConfig": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['adapterConfig'] }}",
+            "cloudProvider": "{{ aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['cloudProvider'] }}",
             "supportedPlatforms": [
-{% for sCurrentSupportedPlatform in dictWasdiConfiguration['dataProviders'][sCurrentDataProvider]['supportedPlatforms'] %}
+{% for sCurrentSupportedPlatform in aoWasdiConfiguration['dataProviders'][sCurrentDataProvider]['supportedPlatforms'] %}
                 "{{ sCurrentSupportedPlatform }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -434,57 +434,57 @@
 
     ],
     "plan": {
-        "listOfSatellites": "{{ dictWasdiConfiguration['plan']['listOfSatellites'] }}"
+        "listOfSatellites": "{{ aoWasdiConfiguration['plan']['listOfSatellites'] }}"
     },
     "geoserver": {
-        "address": "{{ dictWasdiConfiguration['geoserver']['address'] }}",
-        "user": "{{ dictWasdiConfiguration['geoserver']['user'] }}",
-        "password": "{{ dictWasdiConfiguration['geoserver']['password'] }}",
-        "maxGeotiffDimensionPyramid": "{{ dictWasdiConfiguration['geoserver']['maxGeotiffDimensionPyramid'] }}",
-        "gdalRetileCommand": "{{ dictWasdiConfiguration['geoserver']['gdalRetileCommand'] }}"
+        "address": "{{ aoWasdiConfiguration['geoserver']['address'] }}",
+        "user": "{{ aoWasdiConfiguration['geoserver']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['geoserver']['password'] }}",
+        "maxGeotiffDimensionPyramid": "{{ aoWasdiConfiguration['geoserver']['maxGeotiffDimensionPyramid'] }}",
+        "gdalRetileCommand": "{{ aoWasdiConfiguration['geoserver']['gdalRetileCommand'] }}"
     },
     "dockers": {
-        "dockerComposeCommand": "{{ dictWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
-        "dockersDeployLogFilePath": "{{ dictWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
+        "dockerComposeCommand": "{{ aoWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
+        "dockersDeployLogFilePath": "{{ aoWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
         "eoepca": {
-            "dockerWriteFolder": "{{ dictWasdiConfiguration['dockers']['eoepca']['dockerWriteFolder'] }}",
-            "adesServerAddress": "{{ dictWasdiConfiguration['dockers']['eoepca']['adesServerAddress'] }}",
-            "authServerAddress": "{{ dictWasdiConfiguration['dockers']['eoepca']['authServerAddress'] }}",
-            "user": "{{ dictWasdiConfiguration['dockers']['eoepca']['user'] }}",
-            "password": "{{ dictWasdiConfiguration['dockers']['eoepca']['password'] }}",
-            "clientId": "{{ dictWasdiConfiguration['dockers']['eoepca']['clientId'] }}",
-            "clientSecret": "{{ dictWasdiConfiguration['dockers']['eoepca']['clientSecret'] }}"
+            "dockerWriteFolder": "{{ aoWasdiConfiguration['dockers']['eoepca']['dockerWriteFolder'] }}",
+            "adesServerAddress": "{{ aoWasdiConfiguration['dockers']['eoepca']['adesServerAddress'] }}",
+            "authServerAddress": "{{ aoWasdiConfiguration['dockers']['eoepca']['authServerAddress'] }}",
+            "user": "{{ aoWasdiConfiguration['dockers']['eoepca']['user'] }}",
+            "password": "{{ aoWasdiConfiguration['dockers']['eoepca']['password'] }}",
+            "clientId": "{{ aoWasdiConfiguration['dockers']['eoepca']['clientId'] }}",
+            "clientSecret": "{{ aoWasdiConfiguration['dockers']['eoepca']['clientSecret'] }}"
         },
-{% if dictWasdiConfiguration['dockers']['extraHosts'] == [] %}
+{% if aoWasdiConfiguration['dockers']['extraHosts'] == [] %}
         "extraHosts": [],
 {% else %}
         "extraHosts": [
-{% for sCurrentExtraHost in dictWasdiConfiguration['dockers']['extraHosts'] %}
+{% for sCurrentExtraHost in aoWasdiConfiguration['dockers']['extraHosts'] %}
             "{{ sCurrentExtraHost }}"{% if not loop.last %},
 {% endif %}
 {% endfor %}
 
         ],
 {% endif %}
-        "internalDockersBaseAddress": "{{ dictWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
-        "millisBetweenAttmpts": {{ dictWasdiConfiguration['dockers']['millisBetweenAttmpts'] }},
-        "millisWaitAfterDelete": {{ dictWasdiConfiguration['dockers']['millisWaitAfterDelete'] }},
-        "millisWaitAfterDeployScriptCreated": {{ dictWasdiConfiguration['dockers']['millisWaitAfterDeployScriptCreated'] }},
-        "millisWaitForLogin": {{ dictWasdiConfiguration['dockers']['millisWaitForLogin'] }},
-        "numberOfAttemptsToPingTheServer": {{ dictWasdiConfiguration['dockers']['numberOfAttemptsToPingTheServer'] }},
-        "pipInstallWasdiAddress": "{{ dictWasdiConfiguration['dockers']['pipInstallWasdiAddress'] }}",
-{% if dictWasdiConfiguration['dockers']['registers'] | length == 0 %}
+        "internalDockersBaseAddress": "{{ aoWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
+        "millisBetweenAttmpts": {{ aoWasdiConfiguration['dockers']['millisBetweenAttmpts'] }},
+        "millisWaitAfterDelete": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDelete'] }},
+        "millisWaitAfterDeployScriptCreated": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDeployScriptCreated'] }},
+        "millisWaitForLogin": {{ aoWasdiConfiguration['dockers']['millisWaitForLogin'] }},
+        "numberOfAttemptsToPingTheServer": {{ aoWasdiConfiguration['dockers']['numberOfAttemptsToPingTheServer'] }},
+        "pipInstallWasdiAddress": "{{ aoWasdiConfiguration['dockers']['pipInstallWasdiAddress'] }}",
+{% if aoWasdiConfiguration['dockers']['registers'] | length == 0 %}
         "registers": []
 {% else %}
         "registers": [
-{% for sCurrentDockerRegistry in dictWasdiConfiguration['dockers']['registers'] %}
+{% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['registers'] %}
             {
                 "id": "{{ sCurrentDockerRegistry }}",
-                "address": "{{ dictWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['address'] }}",
-                "apiAddress": "{{ dictWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['apiAddress'] }}",
-                "user": "{{ dictWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['user'] }}",
-                "password": "{{ dictWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['password'] }}",
-                "priority": {{ dictWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['priority'] }}
+                "address": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['address'] }}",
+                "apiAddress": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['apiAddress'] }}",
+                "user": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['user'] }}",
+                "password": "{{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['password'] }}",
+                "priority": {{ aoWasdiConfiguration['dockers']['registers'][sCurrentDockerRegistry]['priority'] }}
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -493,22 +493,22 @@
 {% endif %}
     },
     "scheduler": {
-        "processingThreadWaitStartMS": "{{ dictWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
-        "processingThreadSleepingTimeMS": "{{ dictWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
-        "launcherPath": "{{ dictWasdiConfiguration['scheduler']['launcherPath'] }}",
-        "javaExe": "{{ dictWasdiConfiguration['scheduler']['javaExe'] }}",
-        "killCommand": "{{ dictWasdiConfiguration['scheduler']['killCommand'] }}",
-        "maxQueue": "{{ dictWasdiConfiguration['scheduler']['maxQueue'] }}",
-        "timeoutMs": "{{ dictWasdiConfiguration['scheduler']['timeoutMs'] }}",
+        "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
+        "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
+        "launcherPath": "{{ aoWasdiConfiguration['scheduler']['launcherPath'] }}",
+        "javaExe": "{{ aoWasdiConfiguration['scheduler']['javaExe'] }}",
+        "killCommand": "{{ aoWasdiConfiguration['scheduler']['killCommand'] }}",
+        "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
+        "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['timeoutMs'] }}",
         "schedulers": [
-{% for sCurrentScheduler in dictWasdiConfiguration['scheduler']['schedulers'] %}
+{% for sCurrentScheduler in aoWasdiConfiguration['scheduler']['schedulers'] %}
             {
                 "name": "{{ sCurrentScheduler }}",
-                "maxQueue": "{{ dictWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxQueue'] }}",
-                "timeoutMs": "{{ dictWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['timeoutMs'] }}",
-                "opTypes": "{{ dictWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opTypes'] }}",
-                "opSubType": "{{ dictWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opSubType'] }}",
-                "enabled": "{{ dictWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}"
+                "maxQueue": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxQueue'] }}",
+                "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['timeoutMs'] }}",
+                "opTypes": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opTypes'] }}",
+                "opSubType": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['opSubType'] }}",
+                "enabled": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['enabled'] }}"
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -516,15 +516,15 @@
         ]
     },
     "stripe": {
-        "apiKey": "{{ dictWasdiConfiguration['stripe']['apiKey'] }}",
-{% if dictWasdiConfiguration['stripe']['products'] | length == 0 %}
+        "apiKey": "{{ aoWasdiConfiguration['stripe']['apiKey'] }}",
+{% if aoWasdiConfiguration['stripe']['products'] | length == 0 %}
         "products": []
 {% else %}
         "products": [
-{% for sCurrentProduct in dictWasdiConfiguration['stripe']['products'] %}
+{% for sCurrentProduct in aoWasdiConfiguration['stripe']['products'] %}
             {
                 "id": "{{ sCurrentProduct }}",
-                "url": "{{ dictWasdiConfiguration['stripe']['products'][sCurrentProduct]['url'] }}"
+                "url": "{{ aoWasdiConfiguration['stripe']['products'][sCurrentProduct]['url'] }}"
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -533,11 +533,11 @@
 {% endif %}
     },
     "traefik": {
-{% if dictWasdiConfiguration['traefik']['firewallWhiteList'] | length == 0 %}
+{% if aoWasdiConfiguration['traefik']['firewallWhiteList'] | length == 0 %}
         "firewallWhiteList": []
 {% else %}
         "firewallWhiteList": [
-{% for sCurrentFirewallWhiteIp in dictWasdiConfiguration['traefik']['firewallWhiteList'] %}
+{% for sCurrentFirewallWhiteIp in aoWasdiConfiguration['traefik']['firewallWhiteList'] %}
 {% if sCurrentFirewallWhiteIp != "" %}
             "{{ sCurrentFirewallWhiteIp }}"{% if not loop.last %},
 {% endif %}
