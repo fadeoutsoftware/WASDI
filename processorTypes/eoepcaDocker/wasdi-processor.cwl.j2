@@ -60,19 +60,18 @@ $graph:
     requirements:
       EnvVarRequirement:
         envDef:
-          WASDI_OUTPUT: {{ wasdiOutputFolder }}
+          WASDI_OUTPUT: $(runtime.outdir)
       NetworkAccess:
         networkAccess: true
       DockerRequirement:
         dockerPull: {{ wasdiProcessorImage }}
-        dockerOutputDirectory: {{ wasdiOutputFolder }}
       ResourceRequirement:
         coresMax: 4
         ramMax: 36000
       InlineJavascriptRequirement: {}
       InitialWorkDirRequirement:
         listing:
-          - entryname: params.json
+          - entryname: /tmp/params.json
             entry: |-
                 ${
                     var sParamsJson = "{";
@@ -94,11 +93,10 @@ $graph:
                             sParamsJson += oValue;
                         }
 
-                        if ( i < asKeys.length - 1 ) {
-                            sParamsJson += ","
-                        }
+                        sParamsJson += ",";
                     }
 
+                    sParamsJson = sParamsJson.substring(0, sParamsJson.length - 1);
                     sParamsJson += "}"
                     return sParamsJson;
                 }
@@ -109,7 +107,7 @@ $graph:
                     "WORKSPACEID": "$( inputs.wasdi__ws__id )",
                     "SESSIONID": "$( inputs.wasdi__session__id )",
                     "MYPROCID": "$( inputs.wasdi__proc__id )",
-                    "PARAMETERSFILEPATH": "{{ wasdiOutputFolder.rstrip('/') }}/params.json"
+                    "PARAMETERSFILEPATH": "/tmp/params.json"
                 }
     baseCommand:
       - "python3"
