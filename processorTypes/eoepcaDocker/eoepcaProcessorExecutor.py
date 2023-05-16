@@ -205,5 +205,5 @@ if __name__ == '__main__':
 
     wasdi.init(sConfigPath)
 
-    print("called init, staring processor")
+    print("called init, starting processor")
     executeProcessor()

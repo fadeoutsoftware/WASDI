@@ -23,17 +23,22 @@ import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.Project;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
@@ -629,6 +634,8 @@ public class AuthResource {
 					oResult.setStringValue(oUser.getUserId());
 
 					notifyNewUserInWasdi(oUser, true);
+					
+					createFirstSubscription(oUser);
 
 					return oResult;
 				} else {
@@ -640,6 +647,52 @@ public class AuthResource {
 		return PrimitiveResult.getInvalid();
 	}
 	
+	/**
+	 * Creates the first FREE Subscription for the actual User
+	 * @param oUser
+	 */
+	private void createFirstSubscription(User oUser) {
+		try {
+			Subscription oSubscription = new Subscription();
+			
+			oSubscription.setType(SubscriptionType.Free.getTypeName());
+			oSubscription.setBuyDate(null);
+			oSubscription.setUserId(oUser.getUserId());
+			oSubscription.setSubscriptionId(Utils.getRandomName());
+			oSubscription.setName("WASDI Trial");
+			oSubscription.setBuySuccess(true);
+			oSubscription.setBuyDate(Utils.getDateAsDouble(new Date()));
+			oSubscription.setDescription("WASDI Trial");
+			oSubscription.setDurationDays(90);
+			double dStartDate = Utils.getDateAsDouble(new Date());
+			oSubscription.setStartDate(dStartDate);
+			double dEndDate = dStartDate + 90*24*60*60*1000;
+			oSubscription.setEndDate(dEndDate);
+			
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			oSubscriptionRepository.insertSubscription(oSubscription);
+			
+			Project oProject = new Project();
+			oProject.setDescription("WASDI Trial");
+			oProject.setName("WASDI Trial");
+			oProject.setSubscriptionId(oSubscription.getSubscriptionId());
+			oProject.setProjectId(Utils.getRandomName());
+			
+			ProjectRepository oProjectRepository = new  ProjectRepository();
+			oProjectRepository.insertProject(oProject);
+			
+			UserRepository oUserRepository = new UserRepository();
+			oUser.setActiveProjectId(oProject.getProjectId());
+			oUser.setActiveSubscriptionId(oSubscription.getSubscriptionId());
+			oUserRepository.updateUser(oUser);
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("AuthResources.createFirstSubscription: exception " + oEx.toString());
+		}
+		
+	}
+
 	/**
 	 * Edit user info
 	 * @param sSessionId User Session
