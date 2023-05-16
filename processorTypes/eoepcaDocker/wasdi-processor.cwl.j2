@@ -94,11 +94,10 @@ $graph:
                             sParamsJson += oValue;
                         }
 
-                        if ( i < asKeys.length - 1 ) {
-                            sParamsJson += ","
-                        }
+                        sParamsJson += ",";
                     }
 
+                    sParamsJson = sParamsJson.substring(0, sParamsJson.length - 1);
                     sParamsJson += "}"
                     return sParamsJson;
                 }
