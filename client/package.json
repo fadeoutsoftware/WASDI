@@ -30,7 +30,8 @@
         "preupdate-webdriver": "npm install",
         "update-webdriver": "webdriver-manager update",
         "preprotractor": "npm run update-webdriver",
-        "protractor": "protractor e2e-tests/protractor.conf.js"
+        "protractor": "protractor e2e-tests/protractor.conf.js",
+        "maintenance" : "webpack --config webpack.config.maintenance"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.4",
