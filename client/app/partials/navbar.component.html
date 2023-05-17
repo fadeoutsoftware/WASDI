@@ -244,35 +244,9 @@
                                 <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}</span>
                             </a>
                         </li>
-                        <!-- HELP BUTTON-->
-                        <li role="presentation" ng-click="m_oController.openDocumentatonCenter()"
-                            title={{"ROOT_VIEW_LINK_HELP"|translate}}>
-                            <a role="menuitem" tabindex="-1" href="">
-                                <i class="fa fa-book fa-lg" aria-hidden="true"></i>
-                                <span class="icon-only">{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
-                            </a>
-                        </li>
-                        <!-- SEND FEEDBACK BUTTON-->
-                        <li title={{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}>
-                            <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
-                            <a ng-click="m_oController.openSendFeedbackDialog()" href="">
-                                <!---->
-                                <i class="fa fa-comment fa-lg" aria-hidden="true"></i>
-                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}</span>
-                            </a>
-                        </li>
-                        <!-- ADMIN DASHBOARD BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
-                            ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0"
-                            title={{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}>
-                            <a ng-click="m_oController.openAdminDashboard();" href="">
-                                <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
-                                <span class="icon-only">{{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}</span>
-                            </a>
-                        </li>
+
+
                         <!-- PROJECTS LIST DROPDOWN -->
-                        <li class="dropdown show">
-                            <!-- PROJECTS LIST DROPDOWN -->
                         <li class="dropdown show" ng-if="m_oController.m_sUserAccount !== 'NONE'">
                             <a href="" class="btn dropdown-toggle" id="projects-dropdown" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
@@ -326,6 +300,30 @@
                                 </li>
                             </ul>
                         </li>
+                        <!-- HELP BUTTON-->
+                        <li role="presentation" ng-click="m_oController.openDocumentatonCenter()"
+                            title={{"ROOT_VIEW_LINK_HELP"|translate}}>
+                            <a role="menuitem" tabindex="-1" href="">
+                                <i class="fa fa-book fa-lg" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <!-- SEND FEEDBACK BUTTON-->
+                        <li title={{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}>
+                            <!-- ng-class="{active:m_oController.activePageCss('root.sendFeedback')}"-->
+                            <a ng-click="m_oController.openSendFeedbackDialog()" href="">
+                                <!---->
+                                <i class="fa fa-comment fa-lg" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <!-- ADMIN DASHBOARD BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
+                            ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0"
+                            title={{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}>
+                            <a ng-click="m_oController.openAdminDashboard();" href="">
+                                <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
+                            </a>
+                        </li>
+
                     </ul>
                 </div>
             </div>
