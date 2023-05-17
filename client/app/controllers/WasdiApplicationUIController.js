@@ -13,7 +13,7 @@ var WasdiApplicationUIController = (function () {
      * @param oProcessorService
      * @constructor
      */
-    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService, 
+    function WasdiApplicationUIController($scope, oConstantsService, oAuthService, oProcessorService, oWorkspaceService,
         oRabbitStompService, $state, oProductService, oProcessWorkspaceService, oModalService, $sce, $rootScope, oTranslate, oImagesService) {
         /**
          * Angular Scope
@@ -251,7 +251,7 @@ var WasdiApplicationUIController = (function () {
                     sHelpMessage = sNoHelp;
                 }
 
-                var oConverter = new showdown.Converter({tables: true});
+                var oConverter = new showdown.Converter({ tables: true });
 
                 oController.m_sHelpHtml = oController.m_oSceService.trustAsHtml(oConverter.makeHtml(sHelpMessage));
             } else {
@@ -318,61 +318,48 @@ var WasdiApplicationUIController = (function () {
         var sScheduled = this.m_oTranslate.instant("MSG_MKT_PROC_SCHEDULED");
         var sError = this.m_oTranslate.instant("MSG_MKT_RUN_ERROR");
 
-        try {
-            // Subscribe to the asynch notifications
-            oController.m_oRabbitStompService.subscribe(oWorkspace.workspaceId);
-        } catch (error) {
-            let oDialog = utilsVexDialogAlertBottomRightCorner(sErrorOpenWs);
-            utilsVexCloseDialogAfter(4000, oDialog);
-        }
-        
-        let oActiveProject = oController.m_oConstantsService.getActiveProject();
-        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions(); 
-        if(asActiveSubscriptions.length === 0) {
-            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
-            utilsVexDialogConfirm(sMessage, function(value) {
-                if(value) {
-                    oController.m_oState.go("root.subscriptions", {});
-                }
-            }); 
-            return false;
-        }
 
-        if(utilsIsObjectNullOrUndefined(oActiveProject)) {
-            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
-            return false;
-        }
+    
+            try {
+                // Subscribe to the asynch notifications
+                oController.m_oRabbitStompService.subscribe(oWorkspace.workspaceId);
+            } catch (error) {
+                let oDialog = utilsVexDialogAlertBottomRightCorner(sErrorOpenWs);
+                utilsVexCloseDialogAfter(4000, oDialog);
+            }
 
-        // Set the active workspace
-        oController.m_oConstantsService.setActiveWorkspace(oWorkspace);
 
-        // Run the processor
-        oController.m_oProcessorService.runProcessor(sApplicationName, JSON.stringify(oProcessorInput)).then(function (data, status) {
-            if (utilsIsObjectNullOrUndefined(data.data) == false) {
-                if (data.data.status === "CREATED") {
-                    // Ok, processor scheduled, notify the user
-                    var oDialog = utilsVexDialogAlertBottomRightCorner(sScheduled);
-                    utilsVexCloseDialogAfter(4000, oDialog);
+            // Set the active workspace
+            oController.m_oConstantsService.setActiveWorkspace(oWorkspace);
 
-                    oController.m_oConstantsService.setActiveWorkspace(null);
+            // Run the processor
+            oController.m_oProcessorService.runProcessor(sApplicationName, JSON.stringify(oProcessorInput)).then(function (data, status) {
+                if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                    if (data.data.status === "CREATED") {
+                        // Ok, processor scheduled, notify the user
+                        var oDialog = utilsVexDialogAlertBottomRightCorner(sScheduled);
+                        utilsVexCloseDialogAfter(4000, oDialog);
 
-                    // Move to the editor
-                    oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
-                } else if (data.data.status === "ERROR") {
-                    if (utilsIsStrNullOrEmpty(data.data.processingIdentifier)) {
-                        utilsVexDialogAlertTop(sError);
+                        oController.m_oConstantsService.setActiveWorkspace(null);
+
+                        // Move to the editor
+                        oController.m_oState.go("root.editor", { workSpace: oWorkspace.workspaceId });
+                    } else if (data.data.status === "ERROR") {
+                        if (utilsIsStrNullOrEmpty(data.data.processingIdentifier)) {
+                            utilsVexDialogAlertTop(sError);
+                        } else {
+                            utilsVexDialogAlertTop(sError + "<br><br>" + oController.m_oTranslate.instant(data.data.processingIdentifier));
+                        }
                     } else {
-                        utilsVexDialogAlertTop(sError + "<br><br>" + oController.m_oTranslate.instant(data.data.processingIdentifier));
+                        console.log("WasdiApplicationUIController.executeProcessorInWorkspace | unexpected status: ", data.data.status);
                     }
                 } else {
-                    console.log("WasdiApplicationUIController.executeProcessorInWorkspace | unexpected status: ", data.data.status);
+                    utilsVexDialogAlertTop(sError);
                 }
-            } else {
+            }, function () {
                 utilsVexDialogAlertTop(sError);
-            }
-        }, function () {
-            utilsVexDialogAlertTop(sError);
-        });
+            });
+
     }
 
     WasdiApplicationUIController.prototype.checkParams = function (asMessages) {
@@ -415,7 +402,7 @@ var WasdiApplicationUIController = (function () {
                 }
 
                 //checks wether the function exists 
-                if (typeof oElement.isValid === "function") { 
+                if (typeof oElement.isValid === "function") {
                     if (!oElement.isValid(asMessages)) bReturn = false;
                 }
             }
@@ -455,7 +442,25 @@ var WasdiApplicationUIController = (function () {
      * Generate the JSON that has to be sent to the Procesor
      */
     WasdiApplicationUIController.prototype.generateParamsAndRun = function (sUserProvidedWorkspaceName) {
+        // Reference to this controller
+        let oController = this;
+        let oActiveProject = oController.m_oConstantsService.getActiveProject();
+        let asActiveSubscriptions = oController.m_oConstantsService.getActiveSubscriptions();
+        console.log(oActiveProject);
+        if (asActiveSubscriptions.length === 0) {
+            let sMessage = "You do not have an Active Subscription right now.<br>Click 'OK' to visit our purchase page";
+            utilsVexDialogConfirm(sMessage, function (value) {
+                if (value) {
+                    oController.m_oState.go("root.subscriptions", {});
+                }
+            });
+            return false;
+        }
 
+        if (utilsIsObjectNullOrUndefined(oActiveProject)) {
+            utilsVexDialogAlertTop("You do not have an active project right now.<br>Please make a selection.")
+            return false;
+        }
         let asMessages = [];
 
         let bCheck = this.checkParams(asMessages);
@@ -466,11 +471,11 @@ var WasdiApplicationUIController = (function () {
 
             let bLongMessage = false;
 
-            if (utilsIsObjectNullOrUndefined(asMessages) == false){
-                if (asMessages.length>0) {
+            if (utilsIsObjectNullOrUndefined(asMessages) == false) {
+                if (asMessages.length > 0) {
                     sMessage = this.m_oTranslate.instant("MSG_MKT_GURU");
                     let iCount = 0;
-                    for (iCount = 0; iCount<asMessages.length; iCount++) {
+                    for (iCount = 0; iCount < asMessages.length; iCount++) {
                         sMessage = sMessage + asMessages[iCount] + "<br>";
                     }
 
@@ -483,7 +488,7 @@ var WasdiApplicationUIController = (function () {
             }
             else {
                 var oVexWindow = utilsVexDialogAlertBottomRightCorner(sMessage);
-                utilsVexCloseDialogAfter(4000, oVexWindow);    
+                utilsVexCloseDialogAfter(4000, oVexWindow);
             }
 
             return;
@@ -495,8 +500,7 @@ var WasdiApplicationUIController = (function () {
         // Log the parameters
         //console.log(oProcessorInput);
 
-        // Reference to this controller
-        let oController = this;
+       
         // Reference to the application name
         let sApplicationName = this.m_oConstantsService.getSelectedApplication();
 
@@ -535,9 +539,9 @@ var WasdiApplicationUIController = (function () {
                 oController.m_oRootScope.title = sWorkspaceName;
 
             }
-            , function () {
-                utilsVexDialogAlertTop(sCreateError);
-            });
+                , function () {
+                    utilsVexDialogAlertTop(sCreateError);
+                });
         } else {
             if (this.m_oSelectedWorkspace) {
                 this.m_oRootScope.title = this.m_oSelectedWorkspace.workspaceName;
