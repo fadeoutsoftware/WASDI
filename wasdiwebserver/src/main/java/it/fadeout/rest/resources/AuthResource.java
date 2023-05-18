@@ -666,7 +666,7 @@ public class AuthResource {
 			oSubscription.setDurationDays(90);
 			double dStartDate = Utils.getDateAsDouble(new Date());
 			oSubscription.setStartDate(dStartDate);
-			double dEndDate = dStartDate + 90*24*60*60*1000;
+			double dEndDate = dStartDate + 90.0*24.0*60.0*60.0*1000.0;
 			oSubscription.setEndDate(dEndDate);
 			
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();

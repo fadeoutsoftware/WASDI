@@ -53,7 +53,9 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MultiselectDropdownMenuDirective',
     'wasdi.SquaresDirective',
     'wasdi.MultiRadioButtonDropdownMenuDirective',
+    //'wasdi.ImagePreviewDirective',
     'wasdi.ToggleSwitch',
+    //'wasdi.ImageEditorDirective',
     'wasdi.DropdownMenuDirective',
     'wasdi.wapTextBox',
     'wasdi.wapNumericBox',
@@ -66,6 +68,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.wapCheckBox',
     'wasdi.wapSlider',
     'wasdi.wapListBox',
+    'wasdi.wapTable',
     'wasdi.angularLightSlider',
     'wasdi.insertableTextArea',
     /*'wasdi.ChipsListDirective',*/
@@ -88,7 +91,7 @@ var wasdiApp = angular.module('wasdi', [
 ]);
 
 
-wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {
+wasdiApp.config(['$httpProvider', '$translateProvider', function ($httpProvider, $translateProvider) {
     $httpProvider.interceptors.push('sessionInjector');
 
     //language configuration
@@ -99,13 +102,12 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, 
 
     $translateProvider.preferredLanguage('en');
     $translateProvider.useSanitizeValueStrategy('escaped');
-    $translateProvider.fallbackLanguage('en');
 
 }]);
 
 
 //ROUTER
-wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
 
     //set default page
@@ -130,14 +132,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         url: '',
         abstract: true,
         templateUrl: 'partials/RootView.html',
-        controller : 'RootController',
+        controller: 'RootController',
     });
 
     //WORKSPACES
     $stateProvider.state('root.workspaces', {
         url: '/workspaces',
-        views:{
-            'maincontent' : { templateUrl : 'partials/workspaces.html', controller  : 'WorkspaceController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/workspaces.html', controller: 'WorkspaceController'}
         }
     });
 
@@ -147,58 +149,70 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         views: {
             'maincontent': {templateUrl: 'partials/adminDashboard.html', controller: 'AdminDashboardController'}
         }
-    });    
+    });
 
     //EDITOR
     $stateProvider.state('root.editor', {
         url: '/{workSpace}/editor',
-        views:{
-            'maincontent' : { templateUrl : 'partials/editor.html', controller  : 'EditorController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/editor.html', controller: 'EditorController'}
         }
     });
 
     //IMPORT
-    $stateProvider.state('root.import',{
+    $stateProvider.state('root.import', {
         url: '/import', // /{workSpace}
 
-        views:{
-            'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/import.html', controller: 'ImportController'}
         }
     });
 
     //SEARCH ORBIT
-    $stateProvider.state('root.searchorbit',{
+    $stateProvider.state('root.searchorbit', {
         url: '/searchorbit',// /{workSpace}
 
-        views:{
-            'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/searchorbit.html', controller: 'SearchOrbitController'}
+        }
+    });
+
+    //CATALOG
+    $stateProvider.state('root.catalog', {
+        url: '/catalog',
+
+        views: {
+            'maincontent': {templateUrl: 'partials/catalog.html', controller: 'CatalogController'}
         }
     });
 
     //MARKET PLACE
-    $stateProvider.state('root.marketplace',{
+    $stateProvider.state('root.marketplace', {
         url: '/marketplace',
 
-        views:{
-            'maincontent' : { templateUrl : 'partials/marketplace.html', controller  : 'MarketPlaceController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/marketplace.html', controller: 'MarketPlaceController'}
         }
     });
 
     //APP DETAILS
-    $stateProvider.state('root.appdetails',{
+    $stateProvider.state('root.appdetails', {
         url: '/{processorName}/appdetails',
 
-        views:{
-            'maincontent' : { templateUrl : 'partials/wasdiapplicationdetails.html', controller  : 'WasdiApplicationDetailsController'}
+        views: {
+            'maincontent': {
+                templateUrl: 'partials/wasdiapplicationdetails.html',
+                controller: 'WasdiApplicationDetailsController'
+            }
         }
     });
 
     //APPLICATION AUTOMATIC USER INTERFACE
-    $stateProvider.state('root.appui',{
+    $stateProvider.state('root.appui', {
         url: '/{processorName}/appui',
 
-        views:{
-            'maincontent' : { templateUrl : 'partials/wasdiapplicationui.html', controller  : 'WasdiApplicationUIController'}
+        views: {
+            'maincontent': {templateUrl: 'partials/wasdiapplicationui.html', controller: 'WasdiApplicationUIController'}
         }
     });
 
@@ -216,50 +230,58 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
 }]);
 
-wasdiApp.controller("HomeController", HomeController);
-wasdiApp.controller("WorkspaceController", WorkspaceController);
-wasdiApp.controller("AdminDashboardController", AdminDashboardController);
-wasdiApp.controller("EditorController", EditorController);
-wasdiApp.controller("RootController",RootController);
-wasdiApp.controller("ImportController",ImportController);
-wasdiApp.controller("SearchOrbitController",SearchOrbitController);
-wasdiApp.controller("ValidateUserController",ValidateUserController);
-wasdiApp.controller("WasdiApplicationUIController",WasdiApplicationUIController);
-wasdiApp.controller("MarketPlaceController",MarketPlaceController);
-wasdiApp.controller("WasdiApplicationDetailsController",WasdiApplicationDetailsController);
-wasdiApp.controller("SubscriptionPurchaseController", SubscriptionPurcaseController); 
+wasdiApp.controller("HomeController", window.HomeController);
+wasdiApp.controller("MarketPlaceController", window.MarketPlaceController);
+//wasdiApp.controller("CatalogController", window.CatalogController);
+wasdiApp.controller("WorkspaceController", window.WorkspaceController);
+wasdiApp.controller("AdminDashboardController", window.AdminDashboardController);
+wasdiApp.controller("EditorController", window.EditorController);
+wasdiApp.controller("RootController", window.RootController);
+wasdiApp.controller("ImportController", window.ImportController);
+wasdiApp.controller("SearchOrbitController", window.SearchOrbitController);
+wasdiApp.controller("ValidateUserController", window.ValidateUserController);
+wasdiApp.controller("WasdiApplicationUIController", window.WasdiApplicationUIController);
+wasdiApp.controller("WasdiApplicationDetailsController", window.WasdiApplicationDetailsController);
+wasdiApp.controller("SubscriptionPurchaseController", window.SubscriptionPurchaseController);
 
 //dialogs
-wasdiApp.controller("OrbitInfoController",OrbitInfoController);
-wasdiApp.controller("ProductInfoController",ProductInfoController);
-wasdiApp.controller("GetCapabilitiesController",GetCapabilitiesController);
-wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
-wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
-wasdiApp.controller("SftpUploadController",SftpUploadController);
-wasdiApp.controller("DeleteProcessController",DeleteProcessController);
-wasdiApp.controller("WorkspaceProcessesList",WorkspaceProcessesList);
-wasdiApp.controller("SnakeController",SnakeController);
-wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
-wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersController);
-wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
-wasdiApp.controller("StyleManagerController",StyleManagerController);
-wasdiApp.controller("StyleController",StyleController);
-wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
-wasdiApp.controller("ProcessorController", ProcessorController);
-wasdiApp.controller("ProcessorParametersTemplateController", ProcessorParametersTemplateController);
-wasdiApp.controller("WorkflowController", WorkflowController);
-wasdiApp.controller("WorkspaceDetailsController", WorkspaceDetailsController);
-wasdiApp.controller("WappsController", WappsController);
-wasdiApp.controller("EditUserController", EditUserController);
-wasdiApp.controller("FTPController", FTPController);
-wasdiApp.controller("UploadController", UploadController);
-wasdiApp.controller("MosaicController", MosaicController);
-wasdiApp.controller("ProcessorLogsController", ProcessorLogsController);
-wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
-wasdiApp.controller("SendFeedbackController", SendFeedbackController);
-wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
-wasdiApp.controller("PayloadDialogController", PayloadDialogController);
-wasdiApp.controller("ProcessParamsShareController", ProcessParamsShareController)
+wasdiApp.controller("OrbitInfoController", window.OrbitInfoController);
+wasdiApp.controller("ProductInfoController", window.ProductInfoController);
+wasdiApp.controller("GetCapabilitiesController", window.GetCapabilitiesController);
+//wasdiApp.controller("MergeProductsController", window.MergeProductsController);
+wasdiApp.controller("ProductEditorInfoController", window.ProductEditorInfoController);
+wasdiApp.controller("AttributesMetadataController", window.AttributesMetadataController);
+wasdiApp.controller("SftpUploadController", window.SftpUploadController);
+wasdiApp.controller("DeleteProcessController", window.DeleteProcessController);
+wasdiApp.controller("WorkspaceProcessesList", window.WorkspaceProcessesList);
+wasdiApp.controller("SnakeController", window.SnakeController);
+//wasdiApp.controller("GetInfoProductCatalogController", window.GetInfoProductCatalogController);
+wasdiApp.controller("DownloadProductInWorkspaceController", window.DownloadProductInWorkspaceController);
+//wasdiApp.controller("FilterBandController", window.FilterBandController);
+//wasdiApp.controller("MaskManagerController", window.MaskManagerController);
+wasdiApp.controller("ImportAdvanceFiltersController", window.ImportAdvanceFiltersController);
+wasdiApp.controller("WorkFlowManagerController", window.WorkFlowManagerController);
+wasdiApp.controller("StyleManagerController", window.StyleManagerController);
+wasdiApp.controller("StyleController", window.StyleController);
+wasdiApp.controller("GetListOfWorkspacesController", window.GetListOfWorkspacesController);
+wasdiApp.controller("ProcessorController", window.ProcessorController);
+wasdiApp.controller("WorkflowController", window.WorkflowController);
+wasdiApp.controller("WorkspaceDetailsController", window.WorkspaceDetailsController);
+//wasdiApp.controller("WpsController", window.WpsController);
+wasdiApp.controller("WappsController", window.WappsController);
+wasdiApp.controller("EditUserController", window.EditUserController);
+wasdiApp.controller("FTPController", window.FTPController);
+wasdiApp.controller("UploadController", window.UploadController);
+wasdiApp.controller("MosaicController", window.MosaicController);
+//wasdiApp.controller("EditPanelController", window.EditPanelController);
+wasdiApp.controller("ProcessorLogsController", window.ProcessorLogsController);
+wasdiApp.controller("ShareWorkspaceController", window.ShareWorkspaceController);
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
+wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxController);
+wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
+
+wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
+wasdiApp.controller("ProcessParamsShareController", window.ProcessParamsShareController);
 
 wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 
@@ -274,9 +296,11 @@ wasdiApp.controller("OrganizationEditorController", window.OrganizationEditorCon
 wasdiApp.controller("SubscriptionEditorController", window.SubscriptionEditorController);
 wasdiApp.controller("ProjectEditorController", window.ProjectEditorController);
 wasdiApp.controller("SubscriptionsManageController", window.SubscriptionsManageController);
-wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
-    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){
+
+wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {
+
+    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 
     })
 }])

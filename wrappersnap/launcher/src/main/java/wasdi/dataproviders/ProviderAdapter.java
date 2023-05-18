@@ -11,6 +11,7 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.datamodel.Product;
 
 import com.google.common.base.Charsets;
@@ -676,8 +678,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			//todo retrieve error
 			InputStream oErrorStream = oHttpConn.getErrorStream();
 			if(null != oErrorStream) {
-				InputStreamReader oReader = new InputStreamReader(oErrorStream);
-				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + oReader.toString() );
+				//InputStreamReader oReader = new InputStreamReader(oErrorStream);
+				String sResult = IOUtils.toString(oErrorStream, StandardCharsets.UTF_8.toString());
+				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: error message: " + sResult );
 			} else {
 				WasdiLog.debugLog("ProviderAdapter.downloadViaHttp: provider did not send an error message");
 			}

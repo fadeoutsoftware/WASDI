@@ -39,8 +39,10 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.Project;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
@@ -56,9 +58,11 @@ import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ProcessorUIRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
@@ -73,6 +77,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
+import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
@@ -2109,6 +2114,183 @@ public class dbUtils {
 		// Call the deploy function: is a post of the App Deploy Body
 		boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);    	
     }
+    
+
+	private static void subscriptions() {
+		try {
+			
+            System.out.println("This tool will parse the config file and ingest in WASDI the Ecostress data hosted on the creodias S3 Bucket. ");
+
+            System.out.println("\t1 - Create New Subscription");
+            System.out.println("\t2 - Generate Free Subscription for All the User");
+            System.out.println("\tx - back");
+            System.out.println("");
+
+            String sInputString = s_oScanner.nextLine();
+
+            if (sInputString.equals("x")) {
+                return;
+            }
+
+            else if (sInputString.equals("1")) {
+                System.out.println("Insert User Id:");
+                String sUserId = s_oScanner.nextLine();
+                
+                System.out.println("Subscription Type:");
+                System.out.println("1: Free");
+                System.out.println("2: 1 Day Standard");
+                System.out.println("3: 1 Week Standard");
+                System.out.println("4: 1 Month Standard");
+                System.out.println("5: 1 Year Standard");
+                System.out.println("6: 1 Month Professional");
+                System.out.println("7: 1 Year Professional");
+                String sSubscriptionType = s_oScanner.nextLine();
+                
+                if (sSubscriptionType.equals("1")) {
+                	sSubscriptionType = SubscriptionType.Free.toString();
+                }
+                else if (sSubscriptionType.equals("2")) {
+                	sSubscriptionType = SubscriptionType.OneDayStandard.name();
+                } 
+                else if (sSubscriptionType.equals("3")) {
+                	sSubscriptionType = SubscriptionType.OneWeekStandard.name();
+                } 
+                else if (sSubscriptionType.equals("4")) {
+                	sSubscriptionType = SubscriptionType.OneMonthStandard.name();
+                } 
+                else if (sSubscriptionType.equals("5")) {
+                	sSubscriptionType = SubscriptionType.OneYearStandard.name();
+                } 
+                else if (sSubscriptionType.equals("6")) {
+                	sSubscriptionType = SubscriptionType.OneMonthProfessional.name();
+                } 
+                else if (sSubscriptionType.equals("7")) {
+                	sSubscriptionType = SubscriptionType.OneYearProfessional.name();
+                } 
+                else {
+                	System.out.println("Invalid Subscription type");
+                	return;
+                }
+                
+                System.out.println("Name - Description:");
+                String sName = s_oScanner.nextLine();                
+                
+                createSubscription(sUserId, sSubscriptionType, sName);
+            }
+            else if (sInputString.equals("2")) {
+            	
+            	System.out.println("Are you really sure you want to give a FREE subscription to ALL the users? (y/n)");
+            	
+            	sInputString = s_oScanner.nextLine();
+
+                if (sInputString.equals("y")) {
+                	System.out.println("So, lets do it!");
+                	
+                    UserRepository oUserRepo = new UserRepository();
+                    ArrayList<User> aoUsers = oUserRepo.getAllUsers();
+
+                    for (User oUser : aoUsers) {
+                    	createSubscription(oUser.getUserId(), "Free", "WASDI Trial");
+                    }                	
+                }
+                else {
+                	System.out.println("Ah, ok");
+                	return;
+                }
+            }
+            
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private static void createSubscription(String sUserId, String sSubscriptionType, String sName) {
+        UserRepository oUserRepo = new UserRepository();
+        User oUser = oUserRepo.getUser(sUserId);
+        
+        if (oUser==null) {
+        	System.out.println("Impossible to find user " + sUserId);
+        	return;
+        }
+        
+        SubscriptionType oType = SubscriptionType.valueOf(sSubscriptionType);
+        
+        if (oType == null) {
+        	System.out.println("Impossible to find Subscription type " + sSubscriptionType);
+        	return;
+        }
+        
+        int iDays = 1;
+        
+        if (oType.equals(SubscriptionType.Free)) iDays = 90;
+        else if (oType.equals(SubscriptionType.OneDayStandard)) iDays = 1;
+        else if (oType.equals(SubscriptionType.OneWeekStandard)) iDays = 7;
+        else if (oType.equals(SubscriptionType.OneMonthProfessional)) iDays = 30;
+        else if (oType.equals(SubscriptionType.OneMonthStandard)) iDays = 30;
+        else if (oType.equals(SubscriptionType.OneYearProfessional)) iDays = 365;
+        else if (oType.equals(SubscriptionType.OneYearStandard)) iDays = 365;
+        
+		Subscription oSubscription = new Subscription();
+		
+		oSubscription.setType(oType.getTypeId());
+		oSubscription.setBuyDate(null);
+		oSubscription.setUserId(sUserId);
+		oSubscription.setSubscriptionId(Utils.getRandomName());
+		oSubscription.setName(sName);
+		oSubscription.setBuySuccess(true);
+		oSubscription.setBuyDate(Utils.getDateAsDouble(new Date()));
+		oSubscription.setDescription(sName);
+		oSubscription.setDurationDays(iDays);
+		double dStartDate = Utils.getDateAsDouble(new Date());
+		oSubscription.setStartDate(dStartDate);
+		double dEndDate = dStartDate + ((double)iDays)*24.0*60.0*60.0*1000.0;
+		oSubscription.setEndDate(dEndDate);
+		
+		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+		oSubscriptionRepository.insertSubscription(oSubscription);
+		
+		Project oProject = new Project();
+		oProject.setDescription(sName);
+		oProject.setName(sName);
+		oProject.setSubscriptionId(oSubscription.getSubscriptionId());
+		oProject.setProjectId(Utils.getRandomName());
+		
+		ProjectRepository oProjectRepository = new  ProjectRepository();
+		oProjectRepository.insertProject(oProject);
+		
+		UserRepository oUserRepository = new UserRepository();
+		oUser.setActiveProjectId(oProject.getProjectId());
+		oUser.setActiveSubscriptionId(oSubscription.getSubscriptionId());
+		oUserRepository.updateUser(oUser);
+		
+		System.out.println("Subscription Added for user " + sUserId);		
+	}
+
+	private static void ecoStress() {
+
+		try {
+			
+            System.out.println("This tool will parse the config file and ingest in WASDI the Ecostress data hosted on the creodias S3 Bucket. ");
+
+            System.out.println("\t1 - Proceed with import");
+            System.out.println("\tx - back");
+            System.out.println("");
+
+            String sInputString = s_oScanner.nextLine();
+
+            if (sInputString.equals("x")) {
+                return;
+            }
+
+            if (sInputString.equals("1")) {
+            	S3BucketUtils.parseS3Bucket();
+            }
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}    
 
     public static void main(String[] args) {
 
@@ -2193,6 +2375,7 @@ public class dbUtils {
                 System.out.println("\t11 - ProcessWorkspace");
                 System.out.println("\t12 - Logs");
                 System.out.println("\t13 - EcoStress");
+                System.out.println("\t14 - Subscriptions");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2225,7 +2408,10 @@ public class dbUtils {
                     logs();
                 } else if (sInputString.equals("13")) {
                     ecoStress();
-                } else if (sInputString.toLowerCase().equals("x")) {
+                } else if (sInputString.equals("14")) {
+                    subscriptions();
+                }  
+                else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {
                     System.out.println("Please select a valid option or x to exit");
@@ -2243,14 +2429,5 @@ public class dbUtils {
             e.printStackTrace();
         }
     }
-
-	private static void ecoStress() {
-
-		try {
-			S3BucketUtils.parseS3Bucket();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 }

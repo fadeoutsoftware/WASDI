@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import ogc.wasdi.processes.OgcProcesses;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.business.ProcessStatus;
@@ -36,6 +37,7 @@ import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.OgcProcessesTaskRepository;
@@ -307,10 +309,29 @@ public class ProcessesResource {
 			
     		// Narrative Description
     		oProcessViewModel.setDescription(oProcessor.getDescription());
+    		
+    		AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+    		
+    		List<AppCategory> aoCategories = oAppsCategoriesRepository.getCategories();
+    		HashMap<String, String> asCategories = new HashMap<>();
+    		
+    		for (AppCategory oCategory : aoCategories) {
+				String sKey = oCategory.getId();
+				String sDescription = oCategory.getCategory();
+				
+				if (!asCategories.containsKey(sKey)) {
+					asCategories.put(sKey, sDescription);
+				}
+			}
+    		
     		// Keywords
     		for (String sCategory : oProcessor.getCategories()) {
-    			oProcessViewModel.getKeywords().add(sCategory);
+    			
+    			if (asCategories.containsKey(sCategory)) {
+    				oProcessViewModel.getKeywords().add(asCategories.get(sCategory));
+    			}
 			}
+    		
     		// Version
     		oProcessViewModel.setVersion(oProcessor.getVersion());
     		// Execution mode
