@@ -1,0 +1,994 @@
+#!/usr/bin/python3
+
+
+'''
+Import needed libraries
+'''
+import argparse
+import cpuinfo
+import datetime
+import logging
+import inspect
+import json
+import os
+import psutil
+import requests
+import signal
+import sys
+import traceback
+import time
+
+from collections import OrderedDict
+from keycloak import KeycloakOpenID
+
+
+
+
+'''
+This class is used to format
+exceptions received.
+'''
+class EngineException(object):
+    def __init__(self, **kwargs):
+        self.oLogging = kwargs['oLogging']
+
+        self.oLogging.error(
+            'Script: %(errorScript)s'
+            %{
+                'errorScript': kwargs['dictError']['inspectError'][0][1]
+            }
+        )
+
+        self.oLogging.error(
+            'Line (approximately): %(errorInLine)s'
+            %{
+                'errorInLine': kwargs['dictError']['inspectError'][0][2]
+            }
+        )
+
+        self.oLogging.error(
+            'Method: %(errorFunctionName)s'
+            %{
+                'errorFunctionName': kwargs['dictError']['inspectError'][0][3]
+            }
+        )
+
+        self.oLogging.error(
+            'Type of error: %(errorType)s'
+            %{
+                'errorType': kwargs['dictError']['sysError'][0]
+            }
+        )
+
+        self.oLogging.error(
+            'Error message: %(errorMessage)s'
+            %{
+                'errorMessage': kwargs['dictError']['sysError'][1]
+            }
+        )
+
+        tracebackIndex = 1
+        for currentTracebackMessage in traceback.format_tb(kwargs['dictError']['sysError'][2]):
+            self.oLogging.error(
+                'Traceback - Line %(tracebackIndex)s: %(traceBackMessage)s'
+                %{
+                    'traceBackMessage': currentTracebackMessage.strip(),
+                    'tracebackIndex': tracebackIndex
+                }
+            )
+
+            tracebackIndex += 1
+
+        if 'iExitCode' in kwargs and kwargs['iExitCode'] >= 0:
+            sys.exit(kwargs['iExitCode'])
+
+
+
+
+'''
+This class is an abstraction for logging.
+It is used to manage all log messages.
+'''
+class Logging(object):
+
+    def __init__(self):
+        self.oLogging = logging.getLogger('wasdi-system-resource')
+        self.oLogging.setLevel(logging.INFO)
+
+        ## ADD LOG ON SCREEN ##
+        oLoggingFormatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s')
+
+        streamTty = logging.StreamHandler()
+        streamTty.setFormatter(oLoggingFormatter)
+
+        self.oLogging.addHandler(streamTty)
+
+
+    def debug(self, message):
+        self.oLogging.debug(message)
+
+
+    def error(self, message):
+        self.oLogging.error(message)
+
+
+    def info(self, message):
+        self.oLogging.info(message)
+
+
+    def setLevel(self, level):
+        self.oLogging.setLevel(level)
+
+
+
+
+'''
+This class is used to produce the
+dictionnary with metrics taken.
+'''
+class SystemResourceMetric(object):
+    def __init__(self, **kwargs):
+        self.oLogging = kwargs['oLogging']
+        self.listPartition = []
+        self.listLicense = []
+
+        if 'listLicense' in kwargs:
+            for value in kwargs['listLicense']:
+                dictToAppend = OrderedDict(
+                    {
+                        "name": value,
+                        "fileToRead": kwargs['listLicense'][value]['fileToRead'],
+                        "valuesToConsiderTrue": [(value.lower()) for value in kwargs['listLicense'][value]['valuesToConsiderTrue']]
+                    }
+                )
+
+                self.listLicense.append(dictToAppend)
+
+            # deduplicate the list
+            self.listLicense = list(
+                map(
+                    json.loads, set(
+                        map(json.dumps,
+                            self.listLicense
+                        )
+                    )
+                )
+            )
+
+        if 'listPartition' in kwargs:
+            for value in kwargs['listPartition']:
+                if value not in self.listPartition:
+                    self.listPartition.append(value)
+
+        # this dict must be created after all others
+        self.dictMetric = OrderedDict(
+            {
+                "node": kwargs['dictData']['node'],
+                "timestamp": OrderedDict(
+                    {
+                        "seconds": kwargs['dictData']['timestamp'],
+                        "millis": kwargs['dictData']['timestamp'] * 1000
+                    }
+                ),
+                "cpu": self.getCpu(),
+                "disks": self.getDiskUsage(),
+                "licenses": self.getLicense(),
+                "memory": self.getMemory()
+            }
+        )
+
+    def get(self):
+        return self.dictMetric
+
+
+    def getCpu(self):
+        dictResult = OrderedDict()
+
+        self.oLogging.info('Get CPU information')
+
+        try:
+            dictCpuInfo = cpuinfo.get_cpu_info()
+            tupleCpuLoad = psutil.getloadavg()
+
+            dictResult = OrderedDict(
+                {
+                    "count": OrderedDict(
+                        {
+                            "physical": psutil.cpu_count(logical = False),
+                            "logical": psutil.cpu_count(logical = True) - psutil.cpu_count(logical = False),
+                            "total": psutil.cpu_count(logical = True)
+                        }
+                    ),
+                    "frequency": OrderedDict(
+                        {
+                            "hz": dictCpuInfo['hz_advertised_raw'][0],
+                            "mhz": round(dictCpuInfo['hz_advertised_raw'][0] / 1000000),
+                            "ghz": round(dictCpuInfo['hz_advertised_raw'][0] / 1000000000, 2)
+                        }
+                    ),
+                    "load": OrderedDict(
+                        {
+                            "absolute": OrderedDict(
+                                {
+                                    "load1": tupleCpuLoad[0],
+                                    "load5": tupleCpuLoad[1],
+                                    "load15": tupleCpuLoad[2],
+                                }
+                            ),
+                            "percentage": OrderedDict(
+                                {
+                                    "load1": round(tupleCpuLoad[0] / psutil.cpu_count(logical = True) * 100, 2),
+                                    "load5": round(tupleCpuLoad[1] / psutil.cpu_count(logical = True) * 100, 2),
+                                    "load15": round(tupleCpuLoad[2] / psutil.cpu_count(logical = True) * 100, 2)
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+
+            self.oLogging.info('OK')
+        except:
+            self.oLogging.error('Unable to get datas')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return dictResult
+
+
+    def getDiskUsage(self):
+        listResult = []
+
+        for sCurrentPartition in self.listPartition:
+            self.oLogging.info(
+                'Get disk usage for \'%(sCurrentPartition)s\''
+                %{
+                    'sCurrentPartition': sCurrentPartition
+                }
+            )
+
+            try:
+                oDiskUsage = psutil.disk_usage(sCurrentPartition)
+
+                listResult.append(OrderedDict(
+                    {
+                        "mountpoint": sCurrentPartition,
+                        "absolute": OrderedDict(
+                            {
+                                "available": OrderedDict(
+                                    {
+                                        "unit": "bytes",
+                                        "value": oDiskUsage.free
+                                    }
+                                ),
+                                "total": OrderedDict(
+                                    {
+                                        "unit": "bytes",
+                                        "value": oDiskUsage.total
+                                    }
+                                ),
+                                "used": OrderedDict(
+                                    {
+                                        "unit": "bytes",
+                                        "value": oDiskUsage.used
+                                    }
+                                )
+                            }
+                        ),
+                        "percentage": OrderedDict(
+                            {
+                                "available": OrderedDict(
+                                    {
+                                        "value": round(100 - oDiskUsage.percent, 2)
+                                    }
+                                ),
+                                "used": OrderedDict(
+                                    {
+                                        "value": round(oDiskUsage.percent, 2)
+                                    }
+                                )
+                            }
+                        )
+                    }
+                ))
+
+                self.oLogging.info('OK')
+            except:
+                self.oLogging.error('Unable to get datas')
+
+                EngineException(
+                    oLogging = self.oLogging,
+                    dictError = {
+                        'inspectError': inspect.stack(),
+                        'sysError': sys.exc_info()
+                    }
+                )
+
+        return listResult
+
+    def getLicense(self):
+        listResult = []
+
+        self.oLogging.info('Get license information')
+
+        try:
+            for dictCurrentLicense in self.listLicense:
+                try:
+                    with open(dictCurrentLicense['fileToRead'], 'r', encoding='utf-8') as oLicenseFile:
+                        if oLicenseFile.read().strip().lower() in dictCurrentLicense['valuesToConsiderTrue']:
+                            listResult.append(
+                                OrderedDict(
+                                    {
+                                        "name": dictCurrentLicense['name'].lower(),
+                                        "status": True
+                                    }
+                                )
+                            )
+                        else:
+                            listResult.append(
+                                OrderedDict(
+                                    {
+                                        "name": dictCurrentLicense['name'].lower(),
+                                        "status": False
+                                    }
+                                )
+                            )
+                except FileNotFoundError:
+                    listResult.append(
+                        OrderedDict(
+                            {
+                                "name": dictCurrentLicense['name'].lower(),
+                                "status": False
+                            }
+                        )
+                    )
+        except:
+            self.oLogging.error('Unable to get datas')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return listResult
+
+    def getMemory(self):
+        dictResult = OrderedDict()
+
+        self.oLogging.info('Get memory information')
+
+        try:
+            oMemory = psutil.virtual_memory()
+
+            dictResult = OrderedDict(
+                {
+                    "absolute": OrderedDict(
+                        {
+                            "available": OrderedDict(
+                                {
+                                    "unit": "bytes",
+                                    "value": oMemory.available
+                                }
+                            ),
+                            "free": OrderedDict(
+                                {
+                                    "unit": "bytes",
+                                    "value": oMemory.free
+                                }
+                            ),
+                            "total": OrderedDict(
+                                {
+                                    "unit": "bytes",
+                                    "value": oMemory.total
+                                }
+                            ),
+                            "used": OrderedDict(
+                                {
+                                    "unit": "bytes",
+                                    "value": oMemory.used
+                                }
+                            )
+                        }
+                    ),
+                    "percentage": OrderedDict(
+                        {
+                            "available": OrderedDict(
+                                {
+                                    "value": round(100 - oMemory.percent, 2)
+                                }
+                            ),
+                            "used": OrderedDict(
+                                {
+                                    "value": round(oMemory.percent, 2)
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+
+            self.oLogging.info('OK')
+        except:
+            self.oLogging.error('Unable to get datas')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return dictResult
+
+
+
+
+'''
+This class is the main class
+It is used to:
+    - get the configuration
+    - manage signal
+    - etc
+'''
+class WasdiSystemResourceMain(object):
+
+    def __init__(self, **kwargs):
+        self.bReleased = False
+        self.dictConfiguration = None
+        self.oKeycloakOpenId = None
+        self.oLogging = kwargs['oLogging']
+        self.sConfigurationFilePath = kwargs['sConfigurationFilePath']
+
+
+
+
+    '''
+    This method:
+        - checks if the configuration file exists
+        - if exists:
+            - tries to read it
+            - set self.dictConfiguration with datas
+        - if not exists:
+            - set self.dictConfiguration to None
+    '''
+    def getConfiguration(self):
+        try:
+            with open(self.sConfigurationFilePath, 'r') as oConfigurationFile:
+                self.dictConfiguration = json.load(oConfigurationFile)
+
+                if 'keycloack' in self.dictConfiguration and 'keycloak' not in self.dictConfiguration:
+                    self.dictConfiguration['keycloak'] = self.dictConfiguration['keycloack']
+        except FileNotFoundError:
+            self.dictConfiguration = None
+        except:
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                },
+                iExitCode = 1
+            )
+
+
+    '''
+    This method is executed when one of
+    these signals is sent to the PID:
+        - SIGINT (kill -2)
+        - SIGQUIT (kill -3)
+        - SIGKILL (kill -9)
+        - SIGTERM (kill -15)
+
+    The object property bReleased is setted
+    to True: it will force the main loop
+    to stop.
+    '''
+    def signalRelease(self, signalNumber, frame):
+        self.oLogging.info('Releasing the process: it will stop in few seconds')
+        self.bReleased = True
+
+
+    '''
+    This method is executed when one of these signals
+    is sent to the PID:
+        - SIGHUP (kill -1)
+        - SIGUSR1 (kill -16)
+        - SIGUSR2 (kill -17)
+
+    The configuration is updated in the
+    object property.
+    '''
+    def signalReload(self, signalNumber, frame):
+        self.oLogging.info('Reloading the configuration file: new datas will be used in the next loop')
+        self.getConfiguration()
+
+
+
+
+    '''
+    This method builds and returns a complete URL.
+    Example:
+        - prefix = https://www.example.com/
+        - suffix = /rest/login
+        --> return: https://www.example.com/rest/login
+    '''
+    def apiBuildUrl(self, prefix, suffix):
+        if prefix[-1] == '/' and suffix[0] == '/':
+            return prefix[:-1] + suffix
+        else:
+            return prefix + suffix
+
+
+
+
+    '''
+    This method is a generic method to call an API.
+
+    Input:
+        - kwargs['sAction']:
+            - the endpoint to call
+            - the prefix (the base URL) is taken from the WASDI configuration file
+        - kwargs['dictData']:
+            - dictionnary passed as 'json' when
+            sMethod is post or patch
+            - if defined, we pass what was setted
+            - else we pass an empty directionnary
+        - kwargs['dictHeaders'];
+            - if defined, we pass what was setted
+            - else, we generate a default headers
+        - kwargs['dictParameters']:
+            - if defined, we pass what was setted
+            - else we pass an empty directionnary
+        - kwargs['sMethod']:
+            - get
+            - post
+            - patch
+
+    Return:
+        - the HTTP return code
+        - the answer (format = JSON): could be None too
+    '''
+    def wasdiApiExecute(self, **kwargs):
+        sUrl = self.apiBuildUrl(self.dictConfiguration['baseUrl'], kwargs['sAction'])
+
+        self.oLogging.info(
+            'Calling \'%(sUrl)s\''
+            %{
+                'sUrl': sUrl
+            }
+        )
+
+        try:
+            if 'dictData' not in kwargs:
+                kwargs['dictData'] = {}
+
+            if 'dictHeaders' not in kwargs:
+                kwargs['dictHeaders'] = {
+                    'Content-type': 'application/json'
+                }
+
+            if 'sSessionId' in kwargs:
+                kwargs['dictHeaders']['x-session-token'] = kwargs['sSessionId']
+
+            if 'dictParameters' not in kwargs:
+                kwargs['dictParameters'] = {}
+
+
+            if kwargs['sMethod'].lower() == 'get':
+                oRequests = requests.request(
+                    kwargs['sMethod'].upper(),
+                    sUrl,
+                    headers = kwargs['dictHeaders'],
+                    params = kwargs['dictParameters'],
+                    timeout = self.dictConfiguration['metrics']['api']['endpoint']['timeout']
+                )
+            elif kwargs['sMethod'].lower() in ['patch', 'post', 'put']:
+                oRequests = requests.request(
+                    kwargs['sMethod'].upper(),
+                    sUrl,
+                    headers = kwargs['dictHeaders'],
+                    json = kwargs['dictData'],
+                    params = kwargs['dictParameters'],
+                    timeout = self.dictConfiguration['metrics']['api']['endpoint']['timeout']
+                )
+            else:
+                # other methods not implemented in this example
+                raise ValueError('Method should be \'get\', \'patch\', \'post\' or \'put\'.')
+
+            self.oLogging.info(
+                'OK (return code = %(returnCode)s)'
+                %{
+                    'returnCode': str(oRequests.status_code)
+                }
+            )
+
+            if oRequests.status_code < 300:
+                if kwargs['sMethod'].lower() == 'patch':
+                    return oRequests.status_code, None
+                else:
+                    try:
+                        return oRequests.status_code, oRequests.json()
+                    except:
+                        return oRequests.status_code, None
+            else:
+                return oRequests.status_code, None
+        except:
+            self.oLogging.error('Unable to call the URL')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return None
+
+
+
+
+    '''
+    This method connects to WASDI using one of these methods:
+      - direct call to Keycloak
+      - using a WASDI native API
+
+    It depends of the parameter loadBalancer > api > method:
+        - if present and value == 'keycloak': we request Keycloak directly
+        - else: we request the WASDI's native API
+
+    Return:
+        - the session ID if the authentication worked successfully
+        - None if the authentication failed
+    '''
+    def wasdiConnect(self):
+        if 'authenticationSystem' in self.dictConfiguration['metrics']['api']['authentication'] and self.dictConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
+            return self.wasdiConnectWithKeycloak()
+
+        return self.wasdiConnectWithApi()
+
+
+
+
+    '''
+    This method connects to WASDI using the appropriate
+    API.
+
+    Return:
+        - the session ID if the authentication worked successfully
+        - None if the authentication failed
+    '''
+    def wasdiConnectWithApi(self):
+        self.oLogging.info('Connecting to WASDI using the WASDI API')
+
+        try:
+            dictData = {
+                'userId': self.dictConfiguration['metrics']['api']['authentication']['username'],
+                'userPassword': self.dictConfiguration['metrics']['api']['authentication']['password']
+            }
+
+            iReturnStatusCode, dictReturnValue = self.wasdiApiExecute(
+                sAction = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['authentication']['path'],
+                sMethod = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['authentication']['method'].lower(),
+                dictData = dictData
+            )
+
+            if dictReturnValue == None or 'sessionId' not in dictReturnValue or dictReturnValue['sessionId'] == None:
+                self.oLogging.error('Unable to connect')
+                return None
+
+            self.oLogging.info('OK: we are connected')
+            return dictReturnValue['sessionId']
+        except:
+            self.oLogging.error('Unable to connect')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return None
+
+
+
+
+    '''
+    This method connects to WASDI using a direct request to Keycloak.
+
+    Return:
+        - the session ID if the authentication worked successfully
+        - None if the authentication failed
+    '''
+    def wasdiConnectWithKeycloak(self):
+        self.oLogging.info('Connecting to WASDI using Keycloak')
+
+        try:
+            self.oKeycloakOpenId = KeycloakOpenID(
+                server_url = self.dictConfiguration['keycloak']['address'],
+                client_id = self.dictConfiguration['keycloak']['client'],
+                realm_name = self.dictConfiguration['keycloak']['realm'],
+                client_secret_key = self.dictConfiguration['keycloak']['clientSecret']
+            )
+
+            self.sKeycloakToken = self.oKeycloakOpenId.token(
+                self.dictConfiguration['metrics']['api']['authentication']['username'],
+                self.dictConfiguration['metrics']['api']['authentication']['password']
+            )
+
+            self.oLogging.info('OK')
+            return self.sKeycloakToken['access_token']
+        except:
+            self.oLogging.error('Unable to connect')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+        return None
+
+
+
+
+    '''
+    This method disconnects from WASDI using one of these methods:
+      - direct call to Keycloak
+
+    It depends of the parameter loadBalancer > api > method:
+        - if present and value == 'keycloak': we request Keycloak directly
+        - else: we return True because we have nothing to do
+
+    Return:
+        - True if disconnection worked
+        - False else
+    '''
+    def wasdiDisconnect(self):
+        if 'authenticationSystem' in self.dictConfiguration['metrics']['api']['authentication'] and self.dictConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
+            return self.wasdiDisconnectFromKeycloak()
+
+        return True
+
+
+
+
+    '''
+    This method disconnects to WASDI calling directly
+    Keycloak.
+
+    Return:
+        - True if disconnection worked
+        - False else
+    '''
+    def wasdiDisconnectFromKeycloak(self):
+        self.oLogging.info('Disconnecting the session from Keycloak')
+
+        if self.oKeycloakOpenId is None:
+            self.oLogging.info('Nothing to do')
+            return True
+
+        try:
+            self.oKeycloakOpenId.logout(self.sKeycloakToken['refresh_token'])
+            self.oLogging.info('OK')
+            return True
+        except:
+            self.oLogging.error('Unable to connect')
+
+            EngineException(
+                oLogging = self.oLogging,
+                dictError = {
+                    'inspectError': inspect.stack(),
+                    'sysError': sys.exc_info()
+                }
+            )
+
+            return False
+
+
+
+
+'''
+ENTRYPOINT OF THE SCRIPT
+'''
+if __name__ == '__main__':
+    '''
+    INITIALIZE THE LOGGING OBJECT
+    '''
+    oLogging = Logging()
+    '''
+    /INITIALIZE THE LOGGING OBJECT
+    '''
+
+
+    '''
+    INITIALIZE THE ARGUMENT PARSER AND PARSE ARGUMENTS
+    '''
+    oArgumentParser = argparse.ArgumentParser()
+
+    oArgumentParser.add_argument(
+        '-c',
+        '--configuration-file',
+        type = str,
+        required = False,
+        dest = 'sConfigurationFilePath',
+        default = '{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json',
+        help = 'Full path to the WASDI\' configuration file'
+    )
+
+    oArgumentParsed = oArgumentParser.parse_args()
+    '''
+    /INITIALIZE THE ARGUMENT PARSER AND PARSE ARGUMENTS
+    '''
+
+
+    oWasdiSystemResourceMain = WasdiSystemResourceMain(
+        oLogging = oLogging,
+        sConfigurationFilePath = oArgumentParsed.sConfigurationFilePath
+    )
+
+
+    '''
+    TRAP SIGNALS
+    '''
+    # Reload configuration
+    signal.signal(signal.SIGHUP, oWasdiSystemResourceMain.signalReload)
+    signal.signal(signal.SIGUSR1, oWasdiSystemResourceMain.signalReload)
+    signal.signal(signal.SIGUSR2, oWasdiSystemResourceMain.signalReload)
+
+    # Exit
+    signal.signal(signal.SIGINT, oWasdiSystemResourceMain.signalRelease)
+    signal.signal(signal.SIGQUIT, oWasdiSystemResourceMain.signalRelease)
+    signal.signal(signal.SIGTERM, oWasdiSystemResourceMain.signalRelease)
+    '''
+    /TRAP SIGNALS
+    '''
+
+
+    '''
+    PARSE THE WASDI CONFIGURATION FILE
+    '''
+    oLogging.info('Read the WASDI configuration file')
+    oWasdiSystemResourceMain.getConfiguration()
+
+    if type(oWasdiSystemResourceMain.dictConfiguration) == dict:
+        oLogging.info('OK')
+    else:
+        oLogging.error('Unable to read the configuration file')
+        sys.exit(1)
+    '''
+    /PARSE THE WASDI CONFIGURATION FILE
+    '''
+
+
+    '''
+    INFINITE LOOP
+    '''
+    while oWasdiSystemResourceMain.bReleased == False:
+        '''
+        CHANGE LOGGING MODE
+        '''
+        if 'debug' in oWasdiSystemResourceMain.dictConfiguration['metrics'] and oWasdiSystemResourceMain.dictConfiguration['metrics']['debug'] == True:
+            oLogging.setLevel(logging.DEBUG)
+            oLogging.debug('The debug mode is enabled')
+        else:
+            oLogging.setLevel(logging.INFO)
+            oLogging.debug('The debug mode is disabled')
+
+        '''
+        /CHANGE LOGGING MODE
+        '''
+
+        oSystemResourceMetric = SystemResourceMetric(
+            oLogging = oLogging,
+            dictData = {
+                "node": oWasdiSystemResourceMain.dictConfiguration['nodeCode'],
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).timestamp()
+            },
+            listPartition = oWasdiSystemResourceMain.dictConfiguration['metrics']['metric']['partition'],
+            listLicense = oWasdiSystemResourceMain.dictConfiguration['metrics']['metric']['license']
+        )
+
+
+        '''
+        CREATE THE DATA TO SEND TO WASDI
+        '''
+        dictData = oSystemResourceMetric.get()
+        '''
+        /CREATE THE DATA TO SEND TO WASDI
+        '''
+
+
+        '''
+        DELETE THE OBJECT TO SAVE MEMORY
+        '''
+        del(oSystemResourceMetric)
+        '''
+        /DELETE THE OBJECT TO SAVE MEMORY
+        '''
+
+
+        '''
+        AUTHENTICATE TO WASDI
+        '''
+        sSessionId = oWasdiSystemResourceMain.wasdiConnect()
+
+        if sSessionId is None:
+            time.sleep(oWasdiSystemResourceMain.dictConfiguration['metrics']['waitingTime'])
+            continue
+        '''
+        /AUTHENTICATE TO WASDI
+        '''
+
+
+        '''
+        SEND DATA TO WASDI
+        '''
+        iReturnStatusCode, dictReturnValue = oWasdiSystemResourceMain.wasdiApiExecute(
+            sAction = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['endpoint']['path'],
+            sMethod = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['endpoint']['method'].lower(),
+            sSessionId = sSessionId,
+            dictData = dictData
+        )
+
+        oLogging.info('Response:')
+        oLogging.info(
+            '- return code: %(returnCode)s'
+            %{
+                'returnCode': str(iReturnStatusCode)
+            }
+        )
+
+        if dictReturnValue != None:
+            for sKey, sValue in dictReturnValue.items():
+                oLogging.info(
+                    '- key \'%(key)s\' = \'%(value)s\''
+                    %{
+                        'key': sKey,
+                        'value': sValue
+                    }
+                )
+
+        oLogging.debug('DATA:')
+        oLogging.debug(json.dumps(dictData, indent=4, default=str))
+        '''
+        /SEND DATA TO WASDI
+        '''
+
+
+        '''
+        DISCONNECT THE SESSON
+        '''
+        oWasdiSystemResourceMain.wasdiDisconnect()
+        '''
+        /DISCONNECT THE SESSON
+        '''
+
+
+        '''
+        The 'if' condition is a little tip to avoid to enter
+        in the 'sleep': the idea consists to exit directly
+        the main loop if bReleased was changed to True
+        + if we haven't entered in the 'sleep' function
+        '''
+        if oWasdiSystemResourceMain.bReleased == False:
+            time.sleep(oWasdiSystemResourceMain.dictConfiguration['metrics']['waitingTime'])
+    '''
+    /INFINITE LOOP
+    '''
+
+    sys.exit(0)

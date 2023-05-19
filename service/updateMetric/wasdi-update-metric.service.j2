@@ -1,0 +1,30 @@
+[Unit]
+Description="WASDI - UPDATE METRIC"
+After=network.target
+
+
+
+
+[Service]
+Environment=PYTHONDONTWRITEBYTECODE=False
+Environment=PYTHONUNBUFFERED=True
+Environment=PYTHONPATH={{ sWasdiComponentUpdateMetricPythonVirtualEnvironmentRootDirectoryPath }}/{{ sWasdiComponentUpdateMetricPythonVirtualEnvironmentName }}/lib/python3.8/site-packages:${PYTHONPATH}
+User=root
+Group=root
+
+LimitNOFILE=327680
+
+Type=simple
+ExecStart=/usr/bin/python3 {{ sWasdiComponentUpdateMetricTargetFilePath }} --configuration-file {{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+RestartSec=5
+
+SuccessExitStatus=0
+
+
+
+
+[Install]
+WantedBy=multi-user.target
