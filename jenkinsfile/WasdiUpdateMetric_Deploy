@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = env.currentRevision.toString().toUpperCase();
+    currentRevision = "0.0.${env.BUILD_ID}";
   }
 
   options {
@@ -14,7 +14,6 @@ pipeline {
     stage('DEBUG') {
       steps {
         sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
         echo "env.currentRevision = " + env.currentRevision
         echo "env.targetedEnvironment = " + env.targetedEnvironment
