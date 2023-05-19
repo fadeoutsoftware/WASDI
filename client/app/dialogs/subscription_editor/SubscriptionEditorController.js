@@ -169,17 +169,16 @@ SubscriptionEditorController = (function () {
         this.m_oSubscriptionService.saveSubscription(this.m_oEditSubscription).then(function (response) {
             if (!utilsIsObjectNullOrUndefined(response)
                 && !utilsIsObjectNullOrUndefined(response.data) && response.status === 200) {
-
                 oController.m_oEditSubscription.subscriptionId = response.data.message;
-
                 oController.initializeSubscriptionInfo();
                 oController.initializeDates();
-                let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
-                utilsVexCloseDialogAfter(4000, oDialog);
+                //If creatimg a subscription:
+                if (oController.m_bEditMode === false) {
+                    let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
+                    utilsVexCloseDialogAfter(4000, oDialog);
 
-                oController.getStripePaymentUrl();
-
-
+                    oController.getStripePaymentUrl();
+                }
             } else {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SAVING SUBSCRIPTION");
             }
@@ -238,7 +237,6 @@ SubscriptionEditorController = (function () {
         //Notification that user will be re-directed to Stripe
         utilsVexDialogConfirm(sMessage, function (value) {
             if (value) {
-               
                 if (!oController.m_oEditSubscription.subscriptionId) {
                     oController.m_bCheckoutNow = true;
                     oController.saveSubscription();
