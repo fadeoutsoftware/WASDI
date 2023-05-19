@@ -16,7 +16,6 @@
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
                             <th scope="col">Permission</th>
-                            <th scope="col">Time</th>
                             <th scope="col"></th>
                         </tr>
                     </thead>
@@ -34,7 +33,6 @@
                             <td>{{m_oController.configureDates(oSubscription.startDate)}}</td>
                             <td>{{m_oController.configureDates(oSubscription.endDate)}}</td>
                             <td style="width: 3rem">{{oSubscription.reason}}</td>
-                            <td></td>
                             <td>
                                 <button ng-show="oSubscription.adminRole === true" class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}

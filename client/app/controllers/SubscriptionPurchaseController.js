@@ -54,7 +54,6 @@ SubscriptionPurchaseController = (function () {
 
     SubscriptionPurchaseController.prototype.showSubscriptionAddForm = function (oSubscription, price) {
         var oController = this;
-        console.log(oSubscription)
 
         let oNewSubscription = {
             subscriptionId: null,
@@ -63,7 +62,6 @@ SubscriptionPurchaseController = (function () {
             buySuccess: false,
             price: price
         };
-console.log(oNewSubscription)
         this.m_oModalService.showModal({
             templateUrl: "dialogs/subscription_editor/SubscriptionEditorDialog.html",
             controller: "SubscriptionEditorController",
