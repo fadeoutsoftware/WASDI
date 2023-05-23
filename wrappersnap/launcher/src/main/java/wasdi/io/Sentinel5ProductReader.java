@@ -272,14 +272,14 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				File oTargetDirectory = new File(sTargetDirectoryPath);
 				ZipFileUtils.cleanUnzipFile(oSourceFile, oTargetDirectory);
 
-				String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
-				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
+				//String sFolderName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
+				//WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 				
-				sFileName = sFolderName + ".nc";
-				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: File Name changed in: " + sFileName);
+				sFileName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
+				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: File Name: " + sFileName);
 				
-				String sCdlFileName = sFolderName + ".cdl";
-				
+				String sCdlFileName = sFileName.replace(".nc", ".cdl");
+					
 				File oCdlFile = new File(sCdlFileName);
 				
 				if (oCdlFile.exists()) {

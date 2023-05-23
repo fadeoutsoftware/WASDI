@@ -114,7 +114,13 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 				}
 				
 				if (!Utils.isNullOrEmpty(oQueryViewModel.productName)) {
-					sResult += "&productIdentifier=%25" +oQueryViewModel.productName+"%25";
+					
+					String sFileName = oQueryViewModel.productName;
+					if (sFileName.endsWith(".nc")) {
+						sFileName = sFileName.split("\\.")[0];
+					}
+					
+					sResult += "&productIdentifier=%25" +sFileName+"%25";
 				}
 				
 			}

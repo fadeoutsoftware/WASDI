@@ -163,7 +163,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 	DataProviderConfig oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig(oProviderAdapter.getCode());
                 	
                     // Download the File
-                	sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+                	//sFileName = oProviderAdapter.executeDownloadFile(oParameter.getUrl(), oDataProviderConfig.user, oDataProviderConfig.password, sDownloadPath, oProcessWorkspace, oParameter.getMaxRetry());
+                	
+                	sFileName = "C:\\Users\\p.campanella\\.wasdi\\paolo\\782aa64c-52dd-4d65-9792-3aba05c864fb\\S5P_OFFL_L2__NO2____20230201T085151_20230201T103321_27481_03_020400_20230203T011437.zip";
                     
                     // Is it null?!?
                     if (Utils.isNullOrEmpty(sFileName)) {
