@@ -11,7 +11,7 @@ pipeline {
 
   environment {
     currentRevision = getCurrentRevision(env.targetedEnvironment)
-    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
+    mavenSettingsFile = "/etc/wasdi/maven_settings.xml"
   }
 
   options {
