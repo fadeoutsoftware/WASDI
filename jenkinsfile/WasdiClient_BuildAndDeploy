@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     currentRevision = "0.0.${env.BUILD_ID}"
-    mavenSettingsFile = "/etc/wasdi/maven_settings.xml"
   }
 
   options {
