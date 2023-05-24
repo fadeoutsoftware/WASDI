@@ -20,6 +20,7 @@ pipeline {
   }
 
   tools {
+    jdk "WASDI_JDK_8"
     maven "WASDI_MAVEN"
   }
 
@@ -36,6 +37,8 @@ pipeline {
         echo "env.WORKSPACE = " + env.WORKSPACE
 
         sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
       }
     }
 
