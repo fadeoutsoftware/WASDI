@@ -10,6 +10,10 @@ pipeline {
     disableConcurrentBuilds()
   }
 
+  tools {
+    maven "WASDI_MAVEN"
+  }
+
   stages {
     stage('DEBUG') {
       steps {
@@ -19,6 +23,8 @@ pipeline {
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
+
+        sh script: "mvn --version", label: "Tool > mvn > current version"
       }
     }
 
