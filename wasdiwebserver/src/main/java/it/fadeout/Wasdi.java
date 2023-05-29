@@ -324,7 +324,7 @@ public class Wasdi extends ResourceConfig {
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
-			/*
+			
 			try  {
 				//introspect
 				String sPayload = "token=" + sSessionId;
@@ -343,7 +343,7 @@ public class Wasdi extends ResourceConfig {
 			catch (Exception oKeyEx) {
 				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
-			*/
+			
 
 
 			if(!Utils.isNullOrEmpty(sUserId)) {

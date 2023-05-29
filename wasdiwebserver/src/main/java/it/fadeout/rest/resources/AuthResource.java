@@ -121,10 +121,9 @@ public class AuthResource {
 			}
 
 			// First try to Authenticate using keycloak
-			//String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
-			String sAuthResult = "";
+			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			
-			boolean bLoginSuccess = true;
+			boolean bLoginSuccess = false;
 
 			if(!Utils.isNullOrEmpty(sAuthResult)) { 
 				bLoginSuccess = true;
