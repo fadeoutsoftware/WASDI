@@ -356,7 +356,58 @@ public class WasdiFileUtils {
 
 		if (oSourceFile.isDirectory()) {
 			for (File oFile : oSourceFile.listFiles()) {
-				bOutcome = bOutcome & moveFile(oFile.getAbsolutePath(), sDestinationDirectoryPath + oSourceFile.getName());
+				bOutcome = bOutcome & moveFile(oFile.getAbsolutePath(), sDestinationDirectoryPath+ oSourceFile.getName());
+			}
+
+			if (oSourceFile.listFiles().length == 0) {
+				deleteFile(sSourcePath);
+			}
+		} else {
+			File oDestinationFile = new File(sDestinationDirectoryPath + oSourceFile.getName());
+			bOutcome = oSourceFile.renameTo(oDestinationFile);
+		}
+
+		return bOutcome;
+	}
+	
+	
+	/**
+	 * Move a file to a destination directory.
+	 * @param sSourcePath the path of the file to be moved
+	 * @param sDestinationDirectoryPath the path of the destination directory
+	 * @return true if the operation was successful, false otherwise
+	 */
+	public static boolean moveFile2(String sSourcePath, String sDestinationDirectoryPath) {
+		if (sSourcePath == null) {
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourcePath is null");
+			return false;
+		}
+
+		if (sDestinationDirectoryPath == null) {
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: destinationDirectoryPath is null");
+			return false;
+		}
+
+		if (!sDestinationDirectoryPath.endsWith(File.separator)) {
+			sDestinationDirectoryPath += File.separator;
+		}
+
+		File oSourceFile = new File(sSourcePath);
+		if (!fileExists(oSourceFile)) {
+			WasdiLog.errorLog("WasdiFileUtils.moveFile: sourceFile does not exist");
+			return false;
+		}
+
+		File oDestinationDirectory = new File(sDestinationDirectoryPath);
+		if (!oDestinationDirectory.exists()) {
+			oDestinationDirectory.mkdirs();
+		}
+
+		boolean bOutcome = true;
+
+		if (oSourceFile.isDirectory()) {
+			for (File oFile : oSourceFile.listFiles()) {
+				bOutcome = bOutcome & moveFile2(oFile.getAbsolutePath(), sDestinationDirectoryPath);
 			}
 
 			if (oSourceFile.listFiles().length == 0) {
