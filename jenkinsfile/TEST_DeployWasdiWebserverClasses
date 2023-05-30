@@ -11,7 +11,6 @@ pipeline {
       steps {
         sh script: "pwd", label: "Current location"
 
-        echo "env.sourceBranch = " + env.sourceBranch
         echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
