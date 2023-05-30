@@ -10,8 +10,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = getCurrentRevision(env.targetedEnvironment)
-    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
+    sCurrentRevision = getCurrentRevision(env.targetedEnvironment)
   }
 
   options {
@@ -30,8 +29,9 @@ pipeline {
         sh script: "pwd", label: "Current location"
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
-        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
         echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
@@ -45,7 +45,7 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
           currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + DEPLOY THEM"
         }
       }
@@ -53,13 +53,13 @@ pipeline {
 
     stage('MAVEN - BUILD') {
       steps {
-        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots clean package", label: "Create packages"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package", label: "Create packages"
       }
     }
 
     stage('MAVEN - EXECUTE TEST') {
       steps {
-        sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --update-snapshots test", label: "Execute unit test"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
       }
     }
 
@@ -67,9 +67,9 @@ pipeline {
       steps {
         script {
           if ( env.targetedEnvironment.toLowerCase() == 'prod' ) {
-            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
           } else {
-            sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${currentRevision} --define currentEnvironment=${env.targetedEnvironment} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
           }
         }
       }
@@ -77,7 +77,11 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Execute ansible-playbook"
       }
     }
 
@@ -91,7 +95,7 @@ pipeline {
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
                 string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
             ]) {
-                sh script: "mvn --batch-mode --settings ${mavenSettingsFile} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} sonar:sonar --define revision=${currentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
+                sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} sonar:sonar --define revision=${env.sCurrentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
             }
           } else {
             echo "Nothing to do."
