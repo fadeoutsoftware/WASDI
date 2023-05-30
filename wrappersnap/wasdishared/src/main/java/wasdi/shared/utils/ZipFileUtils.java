@@ -554,42 +554,42 @@ public class ZipFileUtils {
 
 	/**
 	 * Extract the content of a zip file, removing the initial file.
-	 * @param zipFile the zip file to be extracted
-	 * @param destDir the destination directory where the content should be moved
+	 * @param oZipFile the zip file to be extracted
+	 * @param sDestDir the destination directory where the content should be moved
 	 * @throws Exception 
 	 */
-	public static void cleanUnzipFile(File zipFile, File destDir) throws Exception {
-		if (zipFile == null) {
+	public static void cleanUnzipFile(File oZipFile, File sDestDir) throws Exception {
+		if (oZipFile == null) {
 			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile is null");
 			return;
-		} else if (!zipFile.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + zipFile.getAbsolutePath());
+		} else if (!oZipFile.exists()) {
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: zipFile does not exist: " + oZipFile.getAbsolutePath());
 		}
 
-		if (destDir == null) {
+		if (sDestDir == null) {
 			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir is null");
 			return;
-		} else if (!destDir.exists()) {
-			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + destDir.getAbsolutePath());
+		} else if (!sDestDir.exists()) {
+			WasdiLog.log("ERROR", "ZipFileUtils.cleanUnzipFile: destDir does not exist: " + sDestDir.getAbsolutePath());
 		}
 
 		ZipFileUtils oZipExtractor = new ZipFileUtils();
 
-		String sFilename = zipFile.getAbsolutePath();
-		String sPath = destDir.getAbsolutePath();
+		String sFilename = oZipFile.getAbsolutePath();
+		String sPath = sDestDir.getAbsolutePath();
 		oZipExtractor.unzip(sFilename, sPath);
 
-		String dirPath = completeDirPath(destDir.getAbsolutePath());
-		String fileZipPath = dirPath + zipFile.getName();
+		String sDirPath = completeDirPath(sDestDir.getAbsolutePath());
+		String sFileZipPath = sDirPath + oZipFile.getName();
 
-		String unzippedDirectoryPath = dirPath + removeZipExtension(zipFile.getName());
+		String sUnzippedDirectoryPath = sDirPath + removeZipExtension(oZipFile.getName());
 
-		if (fileExists(unzippedDirectoryPath)) {
-			boolean filesMovedFlag = moveFile(unzippedDirectoryPath, dirPath);
+		if (fileExists(sUnzippedDirectoryPath)) {
+			boolean filesMovedFlag = WasdiFileUtils.moveFile2(sUnzippedDirectoryPath, sDirPath);
 
 			if (filesMovedFlag) {
-				deleteFile(unzippedDirectoryPath);
-				deleteFile(fileZipPath);
+				deleteFile(sUnzippedDirectoryPath);
+				deleteFile(sFileZipPath);
 			}
 		}
 	}

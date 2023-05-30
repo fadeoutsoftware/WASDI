@@ -138,6 +138,20 @@ public class ProcessesResource {
     		oProcessList.getLinks().add(oHtmlLink);
     		aoAllLinks.add(oHtmlLink);
 
+    		// Read the categories
+    		AppsCategoriesRepository oAppsCategoriesRepository = new AppsCategoriesRepository();
+    		
+    		List<AppCategory> aoCategories = oAppsCategoriesRepository.getCategories();
+    		HashMap<String, String> asCategories = new HashMap<>();
+    		
+    		for (AppCategory oCategory : aoCategories) {
+				String sKey = oCategory.getId();
+				String sDescription = oCategory.getCategory();
+				
+				if (!asCategories.containsKey(sKey)) {
+					asCategories.put(sKey, sDescription);
+				}
+			}
 			
     		// Take all the processors
     		ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -180,9 +194,13 @@ public class ProcessesResource {
 					oSummary.setVersion(oProcessor.getVersion());
 					oSummary.getJobControlOptions().add(JobControlOptions.ASYNC_EXECUTE);
 					oSummary.getOutputTransmission().add(TransmissionMode.REFERENCE);
-					
-					for (String sCategory : oProcessor.getCategories()) {
-						oSummary.getKeywords().add(sCategory);
+							    		
+		    		// Keywords
+		    		for (String sCategory : oProcessor.getCategories()) {
+		    			
+		    			if (asCategories.containsKey(sCategory)) {
+		    				oSummary.getKeywords().add(asCategories.get(sCategory));
+		    			}
 					}
 					
 					// Add a link to the specific description
