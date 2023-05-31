@@ -64,7 +64,7 @@ pipeline {
 
     stage('NPM - COMPILE SCSS FILES') {
       steps {
-        sh script: "bash /data/tool/continuousDelivery/compileScss.sh ${env.WORKSPACE}", label: "Compile SCSS files in CSS"
+        sh script: "bash /opt/wasdi/cicd/scripts/compileScss.sh ${env.WORKSPACE}/client/app/css", label: "Compile SCSS files in CSS"
       }
     }
 
