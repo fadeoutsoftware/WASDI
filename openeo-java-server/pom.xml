@@ -34,7 +34,7 @@
     </properties>
 
     <build>
-        <finalName>wasdi-openeo-server-${revision}.war</finalName>
+        <finalName>wasdi-openeo-server</finalName>
         <sourceDirectory>src/gen/java</sourceDirectory>
         <plugins>
             <plugin>
