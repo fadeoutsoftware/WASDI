@@ -95,6 +95,11 @@ public final class HttpUtils {
 			// We accept all
 			oConnection.setRequestProperty("Accept", "*/*");
 			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);
+			
 			// Do we have input headers?
 			if (asHeaders != null) {
 				// Yes: add all to our request
@@ -189,6 +194,14 @@ public final class HttpUtils {
 		return httpPost(sUrl, sPayload, asHeaders, null);
 	}
 	
+	/**
+	 * Standard http post utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
+	 * @return object that contains the Response Body and the Response Code
+	 */
 	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
 		return httpPost(sUrl, sPayload, asHeaders, sAuth, null);
 	}
@@ -210,11 +223,15 @@ public final class HttpUtils {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
+			
 			if(!Utils.isNullOrEmpty(sAuth)) {
 				String sEncodedAuth = Base64.getEncoder().encodeToString(sAuth.getBytes(StandardCharsets.UTF_8));
 				String sAuthHeaderValue = "Basic " + sEncodedAuth;
 				oConnection.setRequestProperty("Authorization", sAuthHeaderValue);
-
 			}
 			
 			// optional default is GET
@@ -307,132 +324,7 @@ public final class HttpUtils {
 
 		return oHttpCallResponse;
 	}
-
-
-
-	public static HttpCallResponse newStandardHttpDelete(String sUrl, Map<String, String> asHeaders) {
-		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
-
-		String sResult = null;
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("DELETE");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			WasdiLog.debugLog("Sending 'DELETE' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.newStandardHttpDelete: Response Code : " + iResponseCode);
-
-				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
-
-				if (200 <= iResponseCode && 299 >= iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-						oHttpCallResponse.setResponseBody(sResult);
-					}
-				} else {
-					WasdiLog.debugLog("HttpUtils.standardHttpDelete: provider did not return 20x but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
-				}
-			} catch (Exception oEint) {
-				WasdiLog.errorLog("HttpUtils.newStandardHttpDelete: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-		} catch (Exception oE) {
-			WasdiLog.errorLog("HttpUtils.newStandardHttpDelete: " + oE);
-		}
-
-		return oHttpCallResponse;
-	}
-
-	public static HttpCallResponse newStandardHttpPOSTQuery(String sUrl, Map<String, String> asHeaders, String sPayload) {
-		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
-
-		String sResult = null;
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			oConnection.setDoOutput(true);
-			byte[] ayBytes = sPayload.getBytes();
-			oConnection.setFixedLengthStreamingMode(ayBytes.length);
-//			oConnection.setRequestProperty("Content-Type", "application/xml");
-			oConnection.connect();
-			try (OutputStream os = oConnection.getOutputStream()) {
-				os.write(ayBytes);
-			}
-
-			WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: Sending 'POST' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: Response Code : " + iResponseCode);
-				
-				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
-
-				if (200 <= iResponseCode && 299 >= iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-						oHttpCallResponse.setResponseBody(sResult);
-					}
-				} else {
-					WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
-				}
-			} catch (Exception oEint) {
-				WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-
-		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.newStandardHttpPOSTQuery: " + oE);
-		}
-
-		return oHttpCallResponse;
-	}
+	
 
 	/**
 	 * Standard http post file utility function
@@ -608,6 +500,11 @@ public final class HttpUtils {
 
 			oConnection.setDoOutput(true);
 			oConnection.setRequestMethod("PUT");
+			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
 
 			if (asHeaders != null) {
 				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
@@ -641,12 +538,13 @@ public final class HttpUtils {
 	 * @param asHeaders headers dictionary
 	 * @return server response
 	 */
-	public static String httpDelete(String sUrl, Map<String, String> asHeaders) {
+	public static HttpCallResponse httpDelete(String sUrl, Map<String, String> asHeaders) {
+		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		String sMessage = "";
 
 		if (sUrl == null || sUrl.isEmpty()) {
 			WasdiLog.debugLog("HttpUtils.httpDelete: invalid URL, aborting");
-			return sMessage;
+			return oHttpCallResponse;
 		}
 
 		try {
@@ -654,6 +552,11 @@ public final class HttpUtils {
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 
 			oConnection.setRequestMethod("DELETE");
+			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
 
 			if (asHeaders != null) {
 				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
@@ -664,6 +567,8 @@ public final class HttpUtils {
 			oConnection.connect();
 
 			int iResponseCode =  oConnection.getResponseCode();
+			
+			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 
 			if (200 <= iResponseCode && 299 >= iResponseCode) {
 				BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
@@ -674,76 +579,20 @@ public final class HttpUtils {
 					oResponse.append(sInputLine);
 				}
 				oInputBuffer.close();
-
-				return oResponse.toString();
+				
+				oHttpCallResponse.setResponseBody(oResponse.toString());
+				
 			} else {
 				sMessage = oConnection.getResponseMessage();
 				WasdiLog.debugLog("HttpUtils.httpDelete:  connection failed, message follows");
 				WasdiLog.debugLog(sMessage);
-
-				sMessage = "";
+				
+				oHttpCallResponse.setResponseBody(sMessage);
 			}
 
 			oConnection.disconnect();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("HttpUtils.httpDelete: Exception " + oEx.toString());
-		}
-
-		return sMessage;
-	}	
-
-	public static HttpCallResponse newStandardHttpGETQuery(String sUrl, Map<String, String> asHeaders) {
-		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
-
-		String sResult = null;
-
-		try {
-			URL oURL = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-			// optional default is GET
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-
-			if (asHeaders != null) {
-				for (Entry<String, String> asEntry : asHeaders.entrySet()) {
-					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
-				}
-			}
-
-			WasdiLog.debugLog("Sending 'GET' request to URL : " + sUrl);
-
-			try {
-				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: Response Code : " + iResponseCode);
-
-				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
-
-				if (200 <= iResponseCode && 299 >= iResponseCode) {
-					InputStream oInputStream = oConnection.getInputStream();
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					if (null != oInputStream) {
-						Util.copyStream(oInputStream, oBytearrayOutputStream);
-						sResult = oBytearrayOutputStream.toString();
-						oHttpCallResponse.setResponseBody(sResult);
-					}
-				} else {
-					WasdiLog.debugLog("HttpUtils.standardHttpGETQuery: provider did not return 200 but "
-							+ iResponseCode + " (1/2) and the following message:\n" + oConnection.getResponseMessage());
-
-					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-					InputStream oErrorStream = oConnection.getErrorStream();
-					Util.copyStream(oErrorStream, oBytearrayOutputStream);
-
-					sResult = oBytearrayOutputStream.toString();
-					oHttpCallResponse.setResponseBody(sResult);
-				}
-			} catch (Exception oEint) {
-				WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: " + oEint);
-			} finally {
-				oConnection.disconnect();
-			}
-		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.newStandardHttpGETQuery: " + oE);
 		}
 
 		return oHttpCallResponse;
@@ -1084,6 +933,11 @@ public final class HttpUtils {
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			
+			// Set Read Timeout
+			oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
+			// Set Connection Timeout
+			oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);			
 			
 			if (asOtherHeaders!=null) {
 				for (String sKey : asOtherHeaders.keySet()) {

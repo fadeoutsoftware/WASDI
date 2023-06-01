@@ -311,9 +311,12 @@ public class OgcProcessesClient {
 		try {
 			String sUrl = m_sBaseUrl + "jobs/"+sJobId;
 			
-			String sResponse = HttpUtils.httpDelete(sUrl, m_asHeaders);
+			HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl, m_asHeaders); 
 			
-			if (Utils.isNullOrEmpty(sResponse)) {
+			String sResponse = oResponse.getResponseBody();
+			int iResponseCode = oResponse.getResponseCode();
+			
+			if (Utils.isNullOrEmpty(sResponse) || (iResponseCode < 200 && iResponseCode > 299)) {
 				WasdiLog.debugLog("OgcProcessesClient.dismiss: empty response, return null");
 				return null;
 			}

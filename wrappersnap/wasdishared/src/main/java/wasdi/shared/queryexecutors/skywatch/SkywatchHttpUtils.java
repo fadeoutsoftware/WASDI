@@ -106,7 +106,7 @@ public class SkywatchHttpUtils {
 		try {
 			String sPayload = s_oMapper.writeValueAsString(oSearchRequest);
 
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpPOSTQuery(sUrl, asHeaders, sPayload);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && (iResult.intValue() == 200 || iResult.intValue() == 400)) {
@@ -137,7 +137,7 @@ public class SkywatchHttpUtils {
 		asHeaders.put("x-api-key", sApiKey);
 
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && iResult.intValue() == 200) {
@@ -339,7 +339,7 @@ public class SkywatchHttpUtils {
 			s_oMapper.setSerializationInclusion(Include.NON_NULL);
 			String sPayload = s_oMapper.writeValueAsString(oPipelineRequest);
 
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpPOSTQuery(sUrl, asHeaders, sPayload);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && (iResult.intValue() == 201 || iResult.intValue() == 400)) {
@@ -366,7 +366,7 @@ public class SkywatchHttpUtils {
 		asHeaders.put("x-api-key", sApiKey);
 
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && iResult.intValue() == 200) {
@@ -393,7 +393,7 @@ public class SkywatchHttpUtils {
 		asHeaders.put("x-api-key", sApiKey);
 
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && iResult.intValue() == 200) {
@@ -420,7 +420,7 @@ public class SkywatchHttpUtils {
 		asHeaders.put("x-api-key", sApiKey);
 
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && iResult.intValue() == 200) {
@@ -447,7 +447,7 @@ public class SkywatchHttpUtils {
 		asHeaders.put("x-api-key", sApiKey);
 
 		try {
-			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpDelete(sUrl, asHeaders);
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpDelete(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
 			if (iResult != null && iResult.intValue() == 204) {
