@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = env.currentRevision.toString().toUpperCase();
+    sCurrentRevision = env.sCurrentRevision.toString().toUpperCase();
   }
 
   options {
@@ -16,19 +16,18 @@ pipeline {
         sh script: "pwd", label: "Current location"
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
-        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
-
-        sh script: "mvn --version", label: "Tool > mvn > current version"
       }
     }
 
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY OF KEYCLOAK THEME"
         }
       }
@@ -37,8 +36,8 @@ pipeline {
     stage('DEPLOYMENT') {
       steps {
         sh script: """
-          cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/
-          ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Execute ansible-playbook"
       }
