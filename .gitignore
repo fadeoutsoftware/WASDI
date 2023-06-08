@@ -1010,3 +1010,4 @@ wrappersnap/launcher/.flattened-pom.xml
 wrappersnap/wasdishared/.flattened-pom.xml
 processorTypes/pipOneShotDocker/.dockerignore
 processorTypes/pipOneShotDocker/.pydevproject
+keycloak-events/target/
