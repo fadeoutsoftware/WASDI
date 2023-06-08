@@ -2,8 +2,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = "0.0.${env.BUILD_ID}"
-    mavenSettingsFile = "/etc/jenkins/maven_settings.xml"
+    sCurrentRevision = "0.0.${env.BUILD_ID}"
   }
 
   options {
@@ -12,7 +11,7 @@ pipeline {
   }
 
   tools {
-    nodejs "WASDI_NODEJS"
+    nodejs "WASDI_NODEJS_V14"
   }
 
   stages {
@@ -20,10 +19,12 @@ pipeline {
       steps {
         sh script: "pwd", label: "Current location"
 
-        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
         echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
+        echo "env.PYTHONPATH = " + env.PYTHONPATH
         echo "env.WORKSPACE = " + env.WORKSPACE
 
         sh script: "node --version", label: "Tool > node > current version"
@@ -35,7 +36,7 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
           currentBuild.description = "WASDI - BUILD OF THE CLIENT"
         }
       }
@@ -53,13 +54,17 @@ pipeline {
 
     stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, DELETE TEMPLATES)') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sourceDirectory=${WORKSPACE}/client currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Prepare the client"
+        sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Prepare the WASDI client"
       }
     }
 
     stage('NPM - COMPILE SCSS FILES') {
       steps {
-        sh script: "bash /data/tool/continuousDelivery/compileScss.sh ${env.WORKSPACE}", label: "Compile SCSS files in CSS"
+        sh script: "bash /opt/wasdi/cicd/scripts/compileScss.sh ${env.WORKSPACE}/client/app/css", label: "Compile SCSS files in CSS"
       }
     }
 
@@ -75,7 +80,11 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sourceDirectory=${WORKSPACE} currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision}'", label: "Deploy the builded client"
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the WASDI client"
       }
     }
   }

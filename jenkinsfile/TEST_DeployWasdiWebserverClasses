@@ -11,7 +11,7 @@ pipeline {
       steps {
         sh script: "pwd", label: "Current location"
 
-        echo "env.sourceBranch = " + env.sourceBranch
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
       }
@@ -28,7 +28,11 @@ pipeline {
 
     stage('BUILD') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiWebserverClasses.yml --inventory inventories/wasdi.yml --limit test --diff", label: "Execute ansible-playbook"
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/deployWasdiWebserverClasses.yml --inventory inventories/wasdi.yml --limit test --diff
+        """,
+        label: "Execute ansible-playbook"
       }
     }
   }

@@ -27,7 +27,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY TOOLS (renderJinjaTemplate.py, etc)"
+          currentBuild.description = "WASDI - DEPLOY TOOLS (cleanSnapDirectories.sh, renderJinjaTemplate.py, etc)"
         }
       }
     }
@@ -36,7 +36,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiTool.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/deployWasdiCrontab.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Execute ansible-playbook"
       }

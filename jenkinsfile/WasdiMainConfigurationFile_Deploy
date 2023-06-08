@@ -10,7 +10,7 @@ pipeline {
   agent any
 
   environment {
-    currentRevision = "0.0.${env.BUILD_ID}"
+    sCurrentRevision = "0.0.${env.BUILD_ID}"
   }
 
   options {
@@ -23,7 +23,8 @@ pipeline {
       steps {
         sh script: "pwd", label: "Current location"
 
-        echo "env.currentRevision = " + env.currentRevision
+        echo "env.sCurrentRevision = " + env.sCurrentRevision
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.targetedEnvironment = " + env.targetedEnvironment
         echo "env.GIT_BRANCH = " + env.GIT_BRANCH
         echo "env.WORKSPACE = " + env.WORKSPACE
@@ -33,7 +34,7 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${currentRevision}"
+          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY CONFIGURATION FILE"
         }
       }
@@ -41,7 +42,11 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: "cd /opt/companyExploitation/specific/automation/continuousDelivery/ansible/ && ansible-playbook playbooks/deployWasdiMainConfigurationFile.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'currentEnvironment=${env.targetedEnvironment.toLowerCase()} currentRevision=${currentRevision} sourceDirectory=${WORKSPACE}'", label: "Execute ansible-playbook"
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/deployWasdiMainConfigurationFile.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Execute ansible-playbook"
       }
     }
   }
