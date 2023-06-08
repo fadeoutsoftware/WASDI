@@ -165,7 +165,7 @@ public class ZipFileUtils {
 			Enumeration<? extends ZipArchiveEntry> aoZipArchiveEntries) throws Exception {
 		try {
 			ZipArchiveEntry oEntry = aoZipArchiveEntries.nextElement();
-			WasdiLog.infoLog(m_sLoggerPrefix + "unzip: extracting: " + oEntry);
+			//WasdiLog.infoLog(m_sLoggerPrefix + "unzip: extracting: " + oEntry);
 
 			String sName = validateFilename(sTempAbsolutePath + oEntry.getName(), sTempAbsolutePath); // throws exception in case
 
