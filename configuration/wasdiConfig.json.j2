@@ -502,7 +502,7 @@
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
         "schedulers": [
-{% for sCurrentScheduler in aoWasdiConfiguration['scheduler']['schedulers'] %}
+{% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {
                 "name": "{{ sCurrentScheduler }}",
                 "maxQueue": "{{ aoWasdiConfiguration['scheduler']['schedulers'][sCurrentScheduler]['maxQueue'] }}",
