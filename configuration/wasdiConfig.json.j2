@@ -494,13 +494,13 @@
 {% endif %}
     },
     "scheduler": {
-        "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
-        "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
-        "launcherPath": "{{ aoWasdiConfiguration['scheduler']['launcherPath'] }}",
         "javaExe": "{{ aoWasdiConfiguration['scheduler']['javaExe'] }}",
         "killCommand": "{{ aoWasdiConfiguration['scheduler']['killCommand'] }}",
+        "lastStateChangeDateOrderBy": {{ aoWasdiConfiguration['scheduler']['lastStateChangeDateOrderBy'] }},
+        "launcherPath": "{{ aoWasdiConfiguration['scheduler']['launcherPath'] }}",
         "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
-        "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['timeoutMs'] }}",
+        "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
+        "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
         "schedulers": [
 {% for sCurrentScheduler in aoWasdiConfiguration['scheduler']['schedulers'] %}
             {
@@ -514,7 +514,8 @@
 {% endif %}
 {% endfor %}
 
-        ]
+        ],
+        "timeoutMs": "{{ aoWasdiConfiguration['scheduler']['timeoutMs'] }}"
     },
     "stripe": {
         "apiKey": "{{ aoWasdiConfiguration['stripe']['apiKey'] }}",
