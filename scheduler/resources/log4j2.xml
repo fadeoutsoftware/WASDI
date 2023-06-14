@@ -6,7 +6,7 @@
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
 		</Console>
 		
-		<RollingFile name="scheduler" append="false" fileName="/var/log/wasdi/scheduler.log" filePattern="/var/log/wasdi/scheduler-%d{yyyy-MM-dd}.log">
+		<RollingFile name="scheduler" append="false" fileName="C:/log-test/scheduler.log" filePattern="C:/log-test/scheduler-%d{yyyy-MM-dd}.log">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10 MB" />
 			</Policies>

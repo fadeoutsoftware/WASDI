@@ -6,7 +6,7 @@
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
 		</Console>
 		
-		<RollingFile name="fileLauncher" append="true" fileName="/var/log/wasdi/trigger.log" filePattern="/var/log/wasdi/trigger-%d{yyyy-MM-dd}.log">
+		<RollingFile name="fileLauncher" append="true" fileName="C:/log-test/trigger.log" filePattern="C:/log-test/trigger-%d{yyyy-MM-dd}.log">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10 MB" />
 			</Policies>
@@ -14,7 +14,7 @@
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
 		</RollingFile>
 		
-		<RollingFile name="filePublisher" append="false" fileName="/var/log/wasdi/publisher.log" filePattern="/var/log/wasdi/publisher-%d{yyyy-MM-dd}.log">
+		<RollingFile name="filePublisher" append="false" fileName="C:/log-test/publisher.log" filePattern="C:/log-test/publisher-%d{yyyy-MM-dd}.log">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10 MB" />
 			</Policies>
