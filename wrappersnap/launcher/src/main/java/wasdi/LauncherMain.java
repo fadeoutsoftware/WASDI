@@ -1,6 +1,5 @@
 package wasdi;
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -17,8 +16,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.runtime.Config;
@@ -68,7 +66,7 @@ public class LauncherMain  {
     /**
      * Static Logger that references the "MyApp" logger
      */
-    public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(LauncherMain.class));
+    public static LoggerWrapper s_oLogger = new LoggerWrapper(LogManager.getLogger(LauncherMain.class));
 
     /**
      * Static reference to Send To Rabbit utility class.
@@ -112,18 +110,8 @@ public class LauncherMain  {
         try {
         	// Set crypto Policy for sftp connections
             Security.setProperty("crypto.policy", "unlimited");
-
-            // Serach the local log4j file
-
-            // get jar directory
-            File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            // configure log
-            String sThisFilePath = oCurrentFile.getParentFile().getPath();
-            DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
-
         } catch (Exception exp) {
-            // no log4j configuration
-            System.err.println("Launcher Main - Error loading log configuration.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+            System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
         }
 
         WasdiLog.debugLog("WASDI Launcher Main Start");

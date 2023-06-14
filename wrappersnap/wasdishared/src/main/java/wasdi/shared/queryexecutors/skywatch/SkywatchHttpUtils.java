@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ public class SkywatchHttpUtils {
 	/**
 	 * Static logger reference
 	 */
-	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(SkywatchHttpUtils.class));
+	public static LoggerWrapper s_oLogger = new LoggerWrapper(LogManager.getLogger(SkywatchHttpUtils.class));
 
 	private static ObjectMapper s_oMapper = new ObjectMapper();
 	private static DataProviderConfig s_oDataProviderConfig = WasdiConfig.Current.getDataProviderConfig("SKYWATCH");
