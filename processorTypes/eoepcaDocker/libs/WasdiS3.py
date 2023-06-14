@@ -13,8 +13,8 @@ support the object storage S3 protocol.
 '''
 class WasdiS3():
     def __init__(self, **kwargs):
-        self.oLogging     = oLogging = WasdiLogging(
-            sLoggerName = 'wasdiProcessor'
+        self.oLogging = oLogging = WasdiLogging(
+            sLoggerName = kwargs['sLoggerName']
         )
         self.sAccessKey   = kwargs['sAccessKey']
         self.sBucketName  = kwargs['sBucketName']

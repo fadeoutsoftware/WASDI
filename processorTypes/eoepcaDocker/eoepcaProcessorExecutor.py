@@ -235,8 +235,9 @@ if __name__ == '__main__':
     to be able to retrieve it later
     thanks to the Singleton
     '''
+    sLoggerName = 'wasdiProcessor'
     oLogging = WasdiLogging(
-        sLoggerName = 'wasdiProcessor',
+        sLoggerName = sLoggerName,
         aoLogOnScreen = {
             'bEnable': True
         }
@@ -298,6 +299,7 @@ if __name__ == '__main__':
     Prepare the S3 configuration
     '''
     aoS3Configuration = {
+        'sLoggerName'  : sLoggerName,
         'sAccessKey'   : getEnvironmentVariable('S_S3_ACCESS_KEY',   sDefault = ''),
         'sBucketName'  : getEnvironmentVariable('S_S3_BUCKET_NAME',  sDefault = ''),
         'sEndpointUrl' : getEnvironmentVariable('S_S3_ENDPOINT_URL', sDefault = ''),
