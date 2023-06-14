@@ -4,23 +4,28 @@ Created on 24 Nov 2022
 @author: p.campanella
 '''
 
-import wasdi
-import os
-import zipfile
-import sys
-import urllib.parse
 import json
-import traceback
+import os
 import requests
+import sys
+import traceback
+import urllib.parse
+import wasdi
+import zipfile
+
+from libs.WasdiLogging import WasdiLogging
+from libs.WasdiS3 import WasdiS3
+
+
 def _unzip(sAttachmentName, sPath):
-    """
+    '''
     Unzips a file
 
     :param sAttachmentName: filename to unzip
 
     :param sPath: both the path where the file is and where it must be unzipped
     :return: None
-    """
+    '''
     wasdi.wasdiLog('[INFO] waspy._unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
         print('[ERROR] waspy._unzip: path is None' +
@@ -142,23 +147,46 @@ def _downloadProcessor(sFileName):
 
     return
 
-def executeProcessor():
 
+def getEnvironmentVariable(sKey, **kwargs):
+    try:
+        return os.environ[sKey]
+    except KeyError:
+        return kwargs['sDefault']
+
+
+def isS3CanBeActivated(aoS3Configuration):
+    if aoS3Configuration['sAccessKey']       == '' \
+        or aoS3Configuration['sBucketName']  == '' \
+        or aoS3Configuration['sEndpointUrl'] == '' \
+        or aoS3Configuration['sRegionName']  == '' \
+        or aoS3Configuration['sSecretKey']   == '':
+        return False
+
+    return True
+
+
+def executeProcessor(aoS3Configuration):
     sProcessId = wasdi.getProcId()
+
     # First of all be sure to be in the right path
     #sProcessorDirPath = os.path.dirname(os.path.realpath(__file__))
     #os.chdir(sProcessorDirPath)
 
-    if sProcessId is None:
-        sProcessId = "test"
+    if sProcessId is None or sProcessId.strip() == '':
+        sProcessId = 'test'
 
-    if sProcessId == "":
-        sProcessId = ""
+    # Get the logging object
+    oLogging = WasdiLogging(
+        sLoggerName = 'wasdiProcessor'
+    )
 
-    print("[" + sProcessId+ "] wasdi.executeProcessor: processor folder set")
-    
-    #Init Wasdi
-    print("[" + sProcessId+ "] wasdi.executeProcessor: init waspy lib")
+    # Add a prefix to all logs we will produce
+    oLogging.sPrefixDefault = '[' + sProcessId + ']'
+    oLogging.info('wasdi.executeProcessor: processor folder set')
+
+    # Init Wasdi
+    oLogging.info('wasdi.executeProcessor: init waspy lib')
     wasdi.setIsOnServer(False)
     wasdi.setIsOnExternalServer(True)
     wasdi.setDownloadActive(True)
@@ -166,44 +194,128 @@ def executeProcessor():
 
     sForceStatus = 'ERROR'
 
-    #Run the processor
+    # Run the processor
     try:
-        import myProcessor        
-        wasdi.wasdiLog("wasdi.executeProcessor RUN " + sProcessId)
+        import myProcessor
+
+        wasdi.wasdiLog('wasdi.executeProcessor RUN ' + sProcessId)
         myProcessor.run()
-        wasdi.wasdiLog("wasdi.executeProcessor Done")
-        
+        wasdi.wasdiLog('wasdi.executeProcessor Done')
+
+        if isS3CanBeActivated(aoS3Configuration):
+            # Init S3
+            oWasdiS3 = WasdiS3(**aoS3Configuration)
+
+            # Push files
+            asProducts = wasdi.getProductsByActiveWorkspace()
+
+            for sFile in asProducts:
+                sFullPath = wasdi.getPath(sFile)
+                oWasdiS3.uploadFile(sFullPath)
+
         sForceStatus = 'DONE'
-        
     except Exception as oEx:
-        wasdi.wasdiLog("wasdi.executeProcessor EXCEPTION")
+        wasdi.wasdiLog('wasdi.executeProcessor EXCEPTION')
         wasdi.wasdiLog(repr(oEx))
         wasdi.wasdiLog(traceback.format_exc())
     except:
-        wasdi.wasdiLog("wasdi.executeProcessor generic EXCEPTION")
+        wasdi.wasdiLog('wasdi.executeProcessor generic EXCEPTION')
     finally:
         sFinalStatus = wasdi.getProcessStatus(sProcessId)
-        
+
         if sFinalStatus != 'STOPPED' and sFinalStatus != 'DONE' and sFinalStatus != 'ERROR':
-            wasdi.wasdiLog("wasdi.executeProcessor Process finished. Forcing status to " + sForceStatus)
+            wasdi.wasdiLog('wasdi.executeProcessor Process finished. Forcing status to ' + sForceStatus)
             wasdi.updateProcessStatus(sProcessId, sForceStatus, 100)
 
     return
 
 if __name__ == '__main__':
-    sWriteDir = os.environ['WASDI_OUTPUT']
+    '''
+    Initialize a named logger
+    to be able to retrieve it later
+    thanks to the Singleton
+    '''
+    oLogging = WasdiLogging(
+        sLoggerName = 'wasdiProcessor',
+        aoLogOnScreen = {
+            'bEnable': True
+        }
+    )
 
-    print("eoepcaProcessorExecutor: Write Dir " + sWriteDir)
 
-    if not sWriteDir.endswith("/"):
-        sWriteDir = sWriteDir + "/"
+    '''
+    Configure the directory in
+    which we can write
+    '''
+    oLogging.info('Configure the directory in which we can write')
+
+    sWriteDir = os.path.realpath(
+        os.environ['WASDI_OUTPUT']
+    ) + os.sep
 
     wasdi.setBasePath(sWriteDir)
+    oLogging.info('OK: %s' %(sWriteDir))
 
-    sConfigPath = sWriteDir + "config.json"
-    print("eoepcaProcessorExecutor: config path: " + sConfigPath)
 
-    wasdi.init(sConfigPath)
+    '''
+    Set the path to the configuration file to parse
+    '''
+    oLogging.info('Create the path to the configuration file')
+    sConfigPath = os.path.join(sWriteDir, 'config.json')
+    oLogging.info('OK: %s' %(sConfigPath))
 
-    print("called init, starting processor")
-    executeProcessor()
+
+    '''
+    Check if the configuration file exists
+    '''
+    oLogging.info('Check if \'%s\' exists' %(sConfigPath))
+
+    if os.path.exists(sConfigPath):
+        oLogging.info('OK')
+    else:
+        if getEnvironmentVariable('S_INTERACTIVE', sDefault = '') == '':
+            oLogging.error('The file does not exist: we stop now')
+            sys.exit(1)
+        else:
+            oLogging.error('The file does not exist but we continue as we are in the interactive mode')
+
+
+    '''
+    Initialize the WASDI library
+    '''
+    oLogging.info('Initialize the WASDI engine')
+
+    try:
+        wasdi.init(sConfigPath)
+    except Exception as oException:
+        oLogging.error('Unable to initialize the WASDI engine: we stop now')
+        oLogging.error('Exception: %s' %(repr(oException)))
+        oLogging.error(traceback.format_exc())
+        sys.exit(1)
+
+
+    '''
+    Prepare the S3 configuration
+    '''
+    aoS3Configuration = {
+        'sAccessKey'   : getEnvironmentVariable('S_S3_ACCESS_KEY',   sDefault = ''),
+        'sBucketName'  : getEnvironmentVariable('S_S3_BUCKET_NAME',  sDefault = ''),
+        'sEndpointUrl' : getEnvironmentVariable('S_S3_ENDPOINT_URL', sDefault = ''),
+        'sRegionName'  : getEnvironmentVariable('S_S3_REGION_NAME',  sDefault = ''),
+        'sSecretKey'   : getEnvironmentVariable('S_S3_SECRET_KEY',   sDefault = ''),
+    }
+
+
+    '''
+    Start the processor
+    '''
+    oLogging.info('Start the processor')
+
+    try:
+        executeProcessor(aoS3Configuration)
+        oLogging.info('The processor was executed successfully')
+    except Exception as oException:
+        oLogging.error('The processor failed')
+        oLogging.error('Exception: %s' %(repr(oException)))
+        oLogging.error(traceback.format_exc())
+        sys.exit(1)
