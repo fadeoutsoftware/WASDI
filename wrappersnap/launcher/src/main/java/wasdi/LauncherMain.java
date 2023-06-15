@@ -1,5 +1,6 @@
 package wasdi;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -42,6 +43,7 @@ import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -110,6 +112,12 @@ public class LauncherMain  {
         try {
         	// Set crypto Policy for sftp connections
             Security.setProperty("crypto.policy", "unlimited");
+            
+            // configure log4j2
+            File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            String sThisFilePath = oCurrentFile.getParentFile().getPath();
+            WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+            
         } catch (Exception exp) {
             System.err.println("Launcher Main - Error setting the crypto policy.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
         }
@@ -118,6 +126,7 @@ public class LauncherMain  {
         
         // Set the logger for the shared lib
         WasdiLog.setLoggerWrapper(s_oLogger);
+        WasdiLog.debugLog("Logger added");
 
         // We need to read the command line parameters.
 

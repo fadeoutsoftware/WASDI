@@ -1,5 +1,7 @@
 package wasdi.trigger;
 
+import java.io.File;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -18,6 +20,7 @@ import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -53,6 +56,20 @@ public class Trigger {
 	
 	public static void main(String[] args) {
 		System.out.println("WASDI TRIGGER START");	
+		
+		try {
+			//get jar directory
+			File oCurrentFile = new File(Trigger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			String sThisFilePath = oCurrentFile.getParentFile().getPath();
+			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+
+		}
+		catch(Exception oEx)
+		{
+			//no log4j configuration
+			System.err.println( "Trigger - Error loading log.  Reason: " + ExceptionUtils.getStackTrace(oEx) );
+			System.exit(-1);
+		}
 
 		WasdiLog.setLoggerWrapper(new LoggerWrapper(s_oLogger));
 
