@@ -14,7 +14,10 @@ import wasdi
 import zipfile
 
 from libs.WasdiLogging import WasdiLogging
+'''
+DISABLE FOR THE MOMENT
 from libs.WasdiS3 import WasdiS3
+'''
 
 
 def _unzip(sAttachmentName, sPath):
@@ -202,6 +205,8 @@ def executeProcessor(aoS3Configuration):
         myProcessor.run()
         wasdi.wasdiLog('wasdi.executeProcessor Done')
 
+        '''
+        DISABLE FOR THE MOMENT
         if isS3CanBeActivated(aoS3Configuration):
             # Init S3
             oWasdiS3 = WasdiS3(**aoS3Configuration)
@@ -212,6 +217,7 @@ def executeProcessor(aoS3Configuration):
             for sFile in asProducts:
                 sFullPath = wasdi.getPath(sFile)
                 oWasdiS3.uploadFile(sFullPath)
+        '''
 
         sForceStatus = 'DONE'
     except Exception as oEx:
