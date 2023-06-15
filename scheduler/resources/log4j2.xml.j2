@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </Console>
 
-	<Appenders>
-		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-		</Console>
-		
-		<RollingFile name="scheduler" append="false" fileName="{{ sWasdiComponentSchedulerLogFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogFilePath }}-%d{yyyy-MM-dd}">
-			<Policies>
-				<SizeBasedTriggeringPolicy size="10 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="10"/>
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-		</RollingFile>
-	</Appenders>
-	
-	<Loggers>
-		<Root level="debug">
-			<AppenderRef ref="console" />
-        	<AppenderRef ref="scheduler" />
-		</Root>
-	</Loggers>
-	
+        <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogFilePath }}-%d{yyyy-MM-dd}">
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </RollingFile>
+
+        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" format="RFC5424" host="127.0.0.1" port="514"
+            protocol="UDP" appName="{{ sWasdiComponentSchedulerServiceName }}" facility="local0" />
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
+            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-syslog" />
+        </Root>
+    </Loggers>
 </Configuration>
