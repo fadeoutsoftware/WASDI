@@ -6,7 +6,7 @@
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
 		</Console>
 		
-		<RollingFile name="fileLauncher" append="true" fileName="C:\WASDI\logs\trigger.log" filePattern="C:\WASDI\logs\trigger-%d{yyyy-MM-dd}.log">
+		<RollingFile name="fileLauncher" append="true" fileName="{{ sWasdiComponentTriggerLogFilePath }}" filePattern="{{ sWasdiComponentTriggerLogFilePath }}-%d{yyyy-MM-dd}">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10 MB" />
 			</Policies>
@@ -14,7 +14,7 @@
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
 		</RollingFile>
 		
-		<RollingFile name="filePublisher" append="false" fileName="C:\WASDI\logs\publisher.log" filePattern="C:\WASDI\logs\publisher-%d{yyyy-MM-dd}.log">
+		<RollingFile name="filePublisher" append="false" fileName="{{ sWasdiComponentPublisherLogFilePath }}" filePattern="{{ sWasdiComponentPublisherLogFilePath }}-%d{yyyy-MM-dd}">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10 MB" />
 			</Policies>
