@@ -66,8 +66,8 @@ $graph:
       DockerRequirement:
         dockerPull: {{ wasdiProcessorImage }}
       ResourceRequirement:
-        coresMax: 1
-        ramMax: 100
+        coresMin: 1
+        ramMin: 1024
       InlineJavascriptRequirement: {}
       InitialWorkDirRequirement:
         listing:
