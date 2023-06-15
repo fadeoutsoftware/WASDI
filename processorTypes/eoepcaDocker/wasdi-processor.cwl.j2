@@ -107,8 +107,8 @@ $graph:
                     "WORKSPACEID": "$( inputs.wasdi__ws__id )",
                     "SESSIONID": "$( inputs.wasdi__session__id )",
                     "MYPROCID": "$( inputs.wasdi__proc__id )",
-                    "PARAMETERSFILEPATH": "$(runtime.outdir)/params.json",
-                    "BASEURL": "https://test-private.wasdi.net/wasdiwebserver/rest"
+                    "PARAMETERSFILEPATH": "$(runtime.outdir)/params.json"{% if inventory_hostname in groups['test'] %},
+                    "BASEURL": "https://test.wasdi.net/wasdiwebserver/rest"{% endif %}
                 }
     baseCommand:
       - "python3"
