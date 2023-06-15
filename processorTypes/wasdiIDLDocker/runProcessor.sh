@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #### PARAMETER ####
-commandIdl="/usr/local/bin/idl"
-wasdiHome="/home/wasdi"
-scriptFile="${wasdiHome}/call_idl.pro"
+sCommandIdl="/usr/local/bin/idl"
+sWasdiHome="/home/wasdi"
+sScriptFile="${sWasdiHome}/call_idl.pro"
 sStatus="RUNNING"
 iDuration=-1
-loopMax=5
+iLoopMax=5
 #### /PARAMETER ####
 
 
@@ -154,16 +154,16 @@ wasdiLog "---- WASDI IDL SCRIPT ----"
 wasdiLog "Session ID is: ${sSessionId}"
 wasdiLog "[${sProcessObjId}] Process Obj Id is: ${sProcessObjId}"
 
-for currentLoop in $(seq 1 ${loopMax})
+for currentLoop in $(seq 1 ${iLoopMax})
 do
-    wasdiLog "-- [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+    wasdiLog "-- [${sProcessObjId}] LOOP ${currentLoop}/${iLoopMax} --"
     wasdiLog "[${sProcessObjId}] Control the process status"
     sStatus="$(getStatus "${sProcessObjId}" "${sSessionId}")"
 
     if [[ "${sStatus}" == "DONE" || "${sStatus}" == "ERROR" || "${sStatus}" == "STOPPED" ]]
     then
         wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we stop now"
-        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${iLoopMax} --"
         break
     else
         wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we will execute the IDL script"
@@ -173,7 +173,7 @@ do
     idlScriptStart="$(date +%s)"
 
     # execute in background to be able to retrieve the PID directly (needed by WASDI)
-    umask 000 ; ${commandIdl} ${scriptFile} -args "${sProcessObjId}.config" &
+    umask 000 ; ${sCommandIdl} ${sScriptFile} -args "${sProcessObjId}.config" &
     currentPid=${!}
     echo "${currentPid}" > ${pidFile}
     wasdiLog "[${sProcessObjId}] PID = ${currentPid}"
@@ -205,11 +205,11 @@ do
         sleep 1m
     else
         wasdiLog "[${sProcessObjId}] The status is '${sStatus}': we stop the loop"
-        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+        wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${iLoopMax} --"
         break
     fi
 
-    wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${loopMax} --"
+    wasdiLog "-- END [${sProcessObjId}] LOOP ${currentLoop}/${iLoopMax} --"
 done
 
 wasdiLog "[${sProcessObjId}] Remove the file '${pidFile}'"
@@ -228,13 +228,13 @@ else
     wasdiLog "[${sProcessObjId}] ERROR WITH THE VARIABLE VALUE"
 fi
 
-wasdiLog "[${sProcessObjId}] Remove the file '${wasdiHome}/${sProcessObjId}.config'"
+wasdiLog "[${sProcessObjId}] Remove the file '${sWasdiHome}/${sProcessObjId}.config'"
 
-if [[ "$(realpath -m ${wasdiHome}/${sProcessObjId}.config)" != "/" ]]
+if [[ "$(realpath -m ${sWasdiHome}/${sProcessObjId}.config)" != "/" ]]
 then
-    rm -f ${wasdiHome}/${sProcessObjId}.config
+    rm -f ${sWasdiHome}/${sProcessObjId}.config
 
-    if [[ ${?} -eq 0 && ! -f "${wasdiHome}/${sProcessObjId}.config" ]]
+    if [[ ${?} -eq 0 && ! -f "${sWasdiHome}/${sProcessObjId}.config" ]]
     then
         wasdiLog "[${sProcessObjId}] OK"
     else
@@ -244,13 +244,13 @@ else
     wasdiLog "[${sProcessObjId}] ERROR WITH THE VARIABLE VALUE"
 fi
 
-wasdiLog "[${sProcessObjId}] Remove the file '${wasdiHome}/${sProcessObjId}.params'"
+wasdiLog "[${sProcessObjId}] Remove the file '${sWasdiHome}/${sProcessObjId}.params'"
 
-if [[ "$(realpath -m ${wasdiHome}/${sProcessObjId}.params)" != "/" ]]
+if [[ "$(realpath -m ${sWasdiHome}/${sProcessObjId}.params)" != "/" ]]
 then
-    rm -f ${wasdiHome}/${sProcessObjId}.params
+    rm -f ${sWasdiHome}/${sProcessObjId}.params
 
-    if [[ ${?} -eq 0 && ! -f "${wasdiHome}/${sProcessObjId}.params" ]]
+    if [[ ${?} -eq 0 && ! -f "${sWasdiHome}/${sProcessObjId}.params" ]]
     then
         wasdiLog "[${sProcessObjId}] OK"
     else
