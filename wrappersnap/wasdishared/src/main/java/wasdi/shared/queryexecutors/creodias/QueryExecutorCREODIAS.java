@@ -6,11 +6,14 @@
  */
 package wasdi.shared.queryexecutors.creodias;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -40,13 +43,35 @@ public class QueryExecutorCREODIAS extends QueryExecutorHttpGet {
 		try {
 			String sClientQuery = "";
 			
-			sClientQuery = sProduct + " AND ( beginPosition:[1893-09-07T00:00:00.000Z TO 2893-09-07T00:00:00.000Z] AND endPosition:[1893-09-07T23:59:59.999Z TO 2893-09-07T23:59:59.999Z] ) ";
-			
 			String sPlatform = WasdiFileUtils.getPlatformFromSatelliteImageFileName(sProduct);
+			
+			Date oProductDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sProduct);
+			
+			String sBeginPositionStart = "1893-09-07T00:00:00.000Z";
+			String sBeginPositionEnd = "2893-09-07T00:00:00.000Z";
+			
+			String sEndPositionStart = "1893-09-07T23:59:59.999Z";
+			String sEndPositionEnd = "2893-09-07T23:59:59.999Z";
+			
+			if (oProductDate != null) {
+				Date oEndDate = new Date();
+				Date oStartDate = TimeEpochUtils.getPreviousDate(oProductDate, 30);
+				
+				String sStart = new SimpleDateFormat("yyyy-MM-dd").format(oStartDate);
+				String sEnd = new SimpleDateFormat("yyyy-MM-dd").format(oEndDate);
+				
+				sBeginPositionStart = sStart + "T00:00:00.000Z";
+				sBeginPositionEnd =  sEnd + "T00:00:00.000Z";
+				
+				sEndPositionStart = sStart + "T23:59:59.999Z";
+				sEndPositionEnd = sEnd + "T23:59:59.999Z";
+			}
+			
+			sClientQuery = sProduct + " AND ( beginPosition:[" + sBeginPositionStart + " TO " + sBeginPositionEnd + "] AND endPosition:[" + sEndPositionStart + " TO " + sEndPositionEnd + "] ) ";
 			
 			if (!Utils.isNullOrEmpty(sPlatform)) {
 				sClientQuery = sClientQuery + "AND (platformname:" + sPlatform + " )";
-			}
+			}			
 			
 			PaginatedQuery oQuery = new PaginatedQuery(sClientQuery, "0", "10", null, null);
 			List<QueryResultViewModel> aoResults = executeAndRetrieve(oQuery);
