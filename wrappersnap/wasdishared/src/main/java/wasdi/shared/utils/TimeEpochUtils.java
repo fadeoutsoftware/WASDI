@@ -125,6 +125,36 @@ public class TimeEpochUtils {
 	}
 	
 	/**
+	 * Get a date in in the past obtained by subtracting a specified number of days to the specified starting date.
+	 * 
+	 * @param lTimeInMillis the time in millis of the starting date
+	 * @param iDaysBefore the number of days to be subtracted
+	 * @return the new date
+	 */
+	public static Date getPreviousDate(long lTimeInMillis, int iDaysBefore) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(lTimeInMillis);
+		cal.add(Calendar.DATE, -1*iDaysBefore);
+
+		return cal.getTime();
+	}
+
+	/**
+	 * Get a date in in the past obtained by subtracting a specified number of days to the specified starting date.
+	 * 
+	 * @param oCurrentDate the starting date
+	 * @param iDaysBefore the number of days to be added
+	 * @return the new date
+	 */
+	public static Date getPreviousDate(Date oCurrentDate, int iDaysBefore) {
+		if (oCurrentDate == null) {
+			return null;
+		}
+
+		return getPreviousDate(oCurrentDate.getTime(), iDaysBefore);
+	}	
+	
+	/**
 	 * Converts a string based date in ISO8601 format to an Instant Object
 	 * @param sDate
 	 * @return

@@ -26,7 +26,7 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 /**
  * GPM Query Executor.
- * This class queries the GPM Catalogue from https://cds.climate.copernicus.eu/api/v2/
+ * This class queries the GPM Catalogue from "https://jsimpsonhttps.pps.eosdis.nasa.gov
  * 
  * The query in this case is local: the catalogue does not have API.
  * GPM are regular (half-hourly, monthly) maps in a full world format.
