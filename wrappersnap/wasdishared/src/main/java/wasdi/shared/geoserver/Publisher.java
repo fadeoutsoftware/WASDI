@@ -30,7 +30,16 @@ public class Publisher {
     public long m_lMaxMbTiffPyramid = 50L;
 
     public Publisher() {
-        
+		 try {
+	         //get jar directory
+	        File oCurrentFile = new File(Publisher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			String sThisFilePath = oCurrentFile.getParentFile().getPath();
+			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+	     } catch(Exception oEx) {
+	         //no log4j configuration
+	     	WasdiLog.debugLog( "Publisher: Error loading log.  Reason: " + oEx.getMessage() );
+	     }
+    	 
         // Set the publisher 
         try {
             m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.Current.geoserver.maxGeotiffDimensionPyramid);

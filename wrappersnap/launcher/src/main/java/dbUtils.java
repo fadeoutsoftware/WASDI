@@ -2328,6 +2328,18 @@ public class dbUtils {
             if (!Utils.isNullOrEmpty(sNode)) {
                 s_sMyNodeCode = sNode;
             }
+            
+            try {
+                // get jar directory
+                File oCurrentFile = new File(dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                String sThisFilePath = oCurrentFile.getParentFile().getPath();
+    			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+    			
+            } catch (Exception exp) {
+                // no log4j configuration
+                System.err.println("DbUtils - Error loading log configuration.  Reason: "
+                        + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
+            }
 
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
