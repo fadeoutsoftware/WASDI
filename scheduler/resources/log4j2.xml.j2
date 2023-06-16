@@ -5,23 +5,28 @@
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </Console>
 
-        <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogFilePath }}-%d{yyyy-MM-dd}">
+        <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogNativeFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
             <DefaultRolloverStrategy max="10" />
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </RollingFile>
+{% if bWasdiSyslogEnabled == true %}
 
-        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" format="RFC5424" host="127.0.0.1" port="514"
-            protocol="UDP" appName="{{ sWasdiComponentSchedulerServiceName }}" facility="local0" />
+        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" format="RFC5424" host="{{ sWasdiComponentSchedulerLogSyslogServerAddress }}" port="{{ sWasdiComponentSchedulerLogSyslogServerPort }}"
+            protocol="{{ sWasdiComponentSchedulerLogSyslogProtocol }}" appName="{{ sWasdiComponentSchedulerServiceName }}" facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" />
+{% endif %}
     </Appenders>
 
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="console" />
-            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
+{% if bWasdiSyslogEnabled == true %}
             <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
+{% endif %}
         </Root>
     </Loggers>
 </Configuration>

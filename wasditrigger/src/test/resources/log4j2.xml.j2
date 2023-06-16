@@ -5,23 +5,28 @@
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </Console>
 
-        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogFilePath }}" filePattern="{{ sWasdiComponentTriggerLogFilePath }}-%d{yyyy-MM->
+        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentTriggerLogNativeFilePath }}-%d{yyyy-MM->
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
             <DefaultRolloverStrategy max="10" />
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </RollingFile>
+{% if bWasdiSyslogEnabled == true %}
 
-        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" format="RFC5424" host="127.0.0.1" port="514"
-            protocol="UDP" appName="{{ sWasdiComponentTriggerServiceName }}" facility="local0" />
+        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" format="RFC5424" host="{{ sWasdiComponentTriggerLogSyslogServerAddress }}" port="{{ sWasdiComponentTriggerLogSyslogServerPort }}"
+            protocol="{{ sWasdiComponentTriggerLogSyslogProtocol }}" appName="{{ sWasdiComponentTriggerServiceName }}" facility="{{ sWasdiComponentTriggerLogSyslogFacility }}" />
+{% endif %}
     </Appenders>
 
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="console" />
-            <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-native" />
+{% if bWasdiSyslogEnabled == true %}
             <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-native" />
+{% endif %}
         </Root>
     </Loggers>
 </Configuration>
