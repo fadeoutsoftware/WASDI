@@ -14,7 +14,8 @@
         </RollingFile>
 {% if bWasdiSyslogEnabled == true %}
 
-        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" format="RFC5424" host="{{ sWasdiComponentTriggerLogSyslogServerAddress }}" port="{{ sWasdiComponentTriggerLogSyslogServerPort }}"
+        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" format="RFC5424" connectTimeoutMillis="30000"
+            host="{{ sWasdiComponentTriggerLogSyslogServerAddress }}" port="{{ sWasdiComponentTriggerLogSyslogServerPort }}"
             protocol="{{ sWasdiComponentTriggerLogSyslogProtocol }}" appName="{{ sWasdiComponentTriggerServiceName }}" facility="{{ sWasdiComponentTriggerLogSyslogFacility }}" />
 {% endif %}
     </Appenders>
