@@ -29,6 +29,7 @@ import com.mongodb.client.model.Filters;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspaceAggregatorByUserIdResult;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
@@ -1139,7 +1140,11 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
-
+        
+        if (WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy==1) {
+        	Collections.reverse(aoReturnList);
+        }
+        
         return aoReturnList;
     }    
     

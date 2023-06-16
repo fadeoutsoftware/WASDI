@@ -42,7 +42,12 @@ public class SchedulerConfig {
 	/**
 	 * Default Queue timeout in ms
 	 */
-	public String timeoutMs;	
+	public String timeoutMs;
+	
+	/**
+	 * Direction to use to order the list of process workspaces in the queue of the scheduler 
+	 */
+	public int lastStateChangeDateOrderBy = -1;
 	
 	/**
 	 * List of configured schedulers

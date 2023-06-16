@@ -107,6 +107,8 @@ public class WasdiScheduler
 		WasdiLog.setLoggerWrapper(oLoggerWrapper);
 		
 		WasdiLog.infoLog("main: Logger configured :-)\n");
+				
+		WasdiLog.infoLog("main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
 		
 		
 		//mongo config
