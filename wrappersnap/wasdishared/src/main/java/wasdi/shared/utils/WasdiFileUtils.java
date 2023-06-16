@@ -971,21 +971,19 @@ public class WasdiFileUtils {
 	}
 	
 	/**
-	 * Load the log4j2 configuration file for the logger, looking for it first in the parameters passed to the JVM or in the
-	 * folder of the current jar being executed
-	 * @param sCurrentJarPath the path of the current 
+	 * Load the log4j2 configuration file for the logger, looking for it first in the parameters passed to the JVM. If the parameter
+	 * was not set, then it looks for file in the folder of the current jar being executed
+	 * @param sCurrentJarPath the path of the current jar being executed
 	 */
 	public static void loadLogConfigFile(String sCurrentJarDirectory) {
         String sLogConfigFilePath = null;
         String sPropertyValue = System.getProperty("log4j2.configurationFile");
 
-    	// if the path of the log file was not passed from command line, try to find it in the jar's directory
         if (Utils.isNullOrEmpty(sPropertyValue) || !fileExists(sPropertyValue)) {
         	sLogConfigFilePath = sCurrentJarDirectory + "/log4j2.xml";
         	LoggerContext oContext = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false); 
             File oLogConfigFile = new File(sLogConfigFilePath);
             oContext.setConfigLocation(oLogConfigFile.toURI());
-
 	    }
 	}
 }
