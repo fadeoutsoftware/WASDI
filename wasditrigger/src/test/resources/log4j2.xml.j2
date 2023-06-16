@@ -5,7 +5,7 @@
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </Console>
 
-        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentTriggerLogNativeFilePath }}-%d{yyyy-MM->
+        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentLauncherLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
