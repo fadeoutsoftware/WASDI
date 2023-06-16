@@ -69,12 +69,7 @@
 {% endif %}
         </Logger>
 
-        <Logger name="wasdi.geoserver" level="debug">
-        	<AppenderRef ref="filePublisher" />
-        </Logger>
-
         <Logger name="wasdi.shared.utils" level="debug">
-            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
 {% if bWasdiSyslogEnabled == true %}
             <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
 {% else %}
@@ -96,6 +91,10 @@
 {% else %}
             <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
 {% endif %}
+        </Logger>
+
+        <Logger name="wasdi.geoserver" level="debug">
+        	<AppenderRef ref="filePublisher" />
         </Logger>
     </Loggers>
 </Configuration>
