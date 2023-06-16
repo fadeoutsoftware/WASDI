@@ -1,64 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </Console>
 
-	<Appenders>
-		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-		</Console>
-		
-		<RollingFile name="fileLauncher" append="true" fileName="{{ sWasdiComponentLauncherLogFilePath }}" filePattern="{{ sWasdiComponentLauncherLogFilePath }}-%d{yyyy-MM-dd}">
-			<Policies>
-				<SizeBasedTriggeringPolicy size="10 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="10"/>
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-		</RollingFile>
-		
-		<RollingFile name="filePublisher" append="false" fileName="{{ sWasdiComponentPublisherLogFilePath }}" filePattern="{{ sWasdiComponentPublisherLogFilePath }}-%d{yyyy-MM-dd}">
-			<Policies>
-				<SizeBasedTriggeringPolicy size="10 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="10"/>
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-		</RollingFile>
-	</Appenders>
-	
-	<Loggers>
-		<Root level="debug">
-			<AppenderRef ref="console" />
-		</Root>
-		
-		<Logger name="wasdi" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-	
-    	<Logger name="wasdi.rabbit" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-    	
-    	<Logger name="wasdi.filebuffer" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-    	
-    	<Logger name="wasdi.snapopearations" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-    	
-    	<Logger name="wasdi.geoserver" level="debug">
+        <RollingFile name="{{ sWasdiComponentLauncherServiceName }}-native" append="true" fileName="{{ sWasdiComponentLauncherLogNativeFilePath }}" filePattern="{{ sWasdiComponentLauncherLogNativeFilePath }}-%d{yyyy-MM->
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </RollingFile>
+
+        <RollingFile name="filePublisher" append="false" fileName="{{ sWasdiComponentPublisherLogNativeFilePath }}" filePattern="{{ sWasdiComponentPublisherLogNativeFilePath }}-%d{yyyy-MM-dd}">
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+        </RollingFile>
+{% if bWasdiSyslogEnabled == true %}
+
+        <Syslog name="{{ sWasdiComponentLauncherServiceName }}-syslog" format="RFC5424" host="{{ sWasdiComponentLauncherLogSyslogServerAddress }}" port="{{ sWasdiComponentLauncherLogSyslogServerPort }}"
+            protocol="{{ sWasdiComponentLauncherLogSyslogProtocol }}" appName="{{ sWasdiComponentLauncherServiceName }}" facility="{{ sWasdiComponentLauncherLogSyslogFacility }}" />
+{% endif %}
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="console" />
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Root>
+
+        <Logger name="wasdi" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.rabbit" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.filebuffer" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.snapopearations" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.geoserver" level="debug">
         	<AppenderRef ref="filePublisher" />
-    	</Logger>
-    	
-     	<Logger name="wasdi.shared.utils" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-    	
-     	<Logger name="wasdi.shared.rabbit" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-    	
-     	<Logger name="wasdi.shared.managers" level="debug">
-        	<AppenderRef ref="fileLauncher" />
-    	</Logger>
-	</Loggers>
-	
+        </Logger>
+
+        <Logger name="wasdi.shared.utils" level="debug">
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.shared.rabbit" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+
+        <Logger name="wasdi.shared.managers" level="debug">
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentLauncherServiceName }}-native" />
+{% endif %}
+        </Logger>
+    </Loggers>
 </Configuration>

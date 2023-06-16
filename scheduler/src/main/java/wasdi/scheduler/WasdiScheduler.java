@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
@@ -15,6 +15,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -27,7 +28,7 @@ public class WasdiScheduler
 	/**
 	 * Static Logger that references the "MyApp" logger
 	 */
-	public static Logger s_oLogger = Logger.getLogger(WasdiScheduler.class);
+	public static Logger s_oLogger = LogManager.getLogger(WasdiScheduler.class);
 	
 	/**
 	 * Process Workpsace Repository
@@ -84,25 +85,24 @@ public class WasdiScheduler
         if (!WasdiConfig.readConfig(sConfigFilePath)) {
             System.err.println("WasdiScheduler.main - config file not available. Exit");
             System.exit(-1);            	
-        }		
-
-		
-		//logger config
-		try {
-			System.out.println("WasdiScheduler.main: configuring logger...");
-			//get jar directory
-			File oCurrentFile = new File(WasdiScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			//configure log
-			String sThisFilePath = oCurrentFile.getParentFile().getPath();
-			DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
-		}
-		catch(Exception oEx)
-		{
-			//no log4j configuration
-			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
-			oEx.printStackTrace();
-		}
-		
+        }
+        
+        //logger config
+  		try {
+  			System.out.println("WasdiScheduler.main: configuring logger...");
+  			//get jar directory
+  			File oCurrentFile = new File(WasdiScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+  			String sThisFilePath = oCurrentFile.getParentFile().getPath();
+  			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+  		}
+  		catch(Exception oEx)
+  		{
+  			//no log4j configuration
+  			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
+  			oEx.printStackTrace();
+  		}
+        
+	
 		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
 		WasdiLog.setLoggerWrapper(oLoggerWrapper);
 		

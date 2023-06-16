@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+		</Console>
+		
+		<RollingFile name="fileLauncher" append="true" fileName="C:\WASDI\logs\trigger.log" filePattern="C:\WASDI\logs\trigger-%d{yyyy-MM-dd}.log">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10"/>
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+		</RollingFile>
+		
+		<RollingFile name="filePublisher" append="false" fileName="C:\WASDI\logs\publisher.log" filePattern="C:\WASDI\logs\publisher-%d{yyyy-MM-dd}.log">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10"/>
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+		</RollingFile>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="console" />
+		</Root>
+		
+		<Logger name="wasdi" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+    	<Logger name="wasdi.rabbit" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+    	<Logger name="wasdi.filebuffer" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+    	<Logger name="wasdi.snapopearations" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+     	<Logger name="wasdi.shared.utils" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+     	<Logger name="wasdi.shared.rabbit" level="debug">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+     	<Logger name="org.esa.snap" level="all">
+        	<AppenderRef ref="fileLauncher" />
+    	</Logger>
+    	
+    	<Logger name="wasdi.geoserver" level="debug">
+        	<AppenderRef ref="filePublisher" />
+    	</Logger>
+	</Loggers>
+	
+</Configuration>
