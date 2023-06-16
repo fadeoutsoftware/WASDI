@@ -6,14 +6,15 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class ShapeFileUtils {
 	String m_sLoggerPrefix = "ShapeFileUtils."; 
-	static Logger s_oLogger = Logger.getLogger(ShapeFileUtils.class);
+	static Logger s_oLogger = LogManager.getLogger(ShapeFileUtils.class);
 		
 	/**
 	 * Constructor that initialize the prefix for logger

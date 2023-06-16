@@ -21,7 +21,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -2329,14 +2328,13 @@ public class dbUtils {
             if (!Utils.isNullOrEmpty(sNode)) {
                 s_sMyNodeCode = sNode;
             }
-
+            
             try {
                 // get jar directory
                 File oCurrentFile = new File(dbUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-                // configure log
                 String sThisFilePath = oCurrentFile.getParentFile().getPath();
-                DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
-
+    			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+    			
             } catch (Exception exp) {
                 // no log4j configuration
                 System.err.println("DbUtils - Error loading log configuration.  Reason: "

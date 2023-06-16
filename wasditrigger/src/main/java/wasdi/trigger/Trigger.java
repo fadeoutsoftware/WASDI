@@ -8,8 +8,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import wasdi.jwasdilib.WasdiLib;
 import wasdi.shared.business.Schedule;
@@ -20,6 +20,7 @@ import wasdi.shared.data.ScheduleRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.LoggerWrapper;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -36,7 +37,7 @@ public class Trigger {
 	/**
 	 * Static Logger that references the "Trigger" logger
 	 */
-	public static Logger s_oLogger = Logger.getLogger(Trigger.class);
+	public static Logger s_oLogger = LogManager.getLogger(Trigger.class);
 	
 	
 	public Trigger() {
@@ -54,14 +55,13 @@ public class Trigger {
 
 	
 	public static void main(String[] args) {
-		System.out.println("WASDI TRIGGER START");
+		System.out.println("WASDI TRIGGER START");	
 		
 		try {
 			//get jar directory
 			File oCurrentFile = new File(Trigger.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			//configure log
 			String sThisFilePath = oCurrentFile.getParentFile().getPath();
-			DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
+			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
 
 		}
 		catch(Exception oEx)
@@ -70,7 +70,7 @@ public class Trigger {
 			System.err.println( "Trigger - Error loading log.  Reason: " + ExceptionUtils.getStackTrace(oEx) );
 			System.exit(-1);
 		}
-		
+
 		WasdiLog.setLoggerWrapper(new LoggerWrapper(s_oLogger));
 
 		WasdiLog.debugLog("Trigger Start");

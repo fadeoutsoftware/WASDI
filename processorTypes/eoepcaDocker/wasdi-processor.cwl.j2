@@ -66,8 +66,8 @@ $graph:
       DockerRequirement:
         dockerPull: {{ wasdiProcessorImage }}
       ResourceRequirement:
-        coresMax: 1
-        ramMax: 100
+        coresMin: 1
+        ramMin: 1024
       InlineJavascriptRequirement: {}
       InitialWorkDirRequirement:
         listing:
@@ -108,7 +108,7 @@ $graph:
                     "SESSIONID": "$( inputs.wasdi__session__id )",
                     "MYPROCID": "$( inputs.wasdi__proc__id )",
                     "PARAMETERSFILEPATH": "$(runtime.outdir)/params.json",
-                    "BASEURL": "https://test-private.wasdi.net/wasdiwebserver/rest"
+                    "BASEURL": "https://test.wasdi.net/wasdiwebserver/rest"
                 }
     baseCommand:
       - "python3"

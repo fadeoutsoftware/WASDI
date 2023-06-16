@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,7 +23,7 @@ public class CondaPackageManagerImpl implements IPackageManager {
 	/**
 	 * Static logger reference
 	 */
-	public static LoggerWrapper s_oLogger = new LoggerWrapper(Logger.getLogger(CondaPackageManagerImpl.class));
+	public static LoggerWrapper s_oLogger = new LoggerWrapper(LogManager.getLogger(CondaPackageManagerImpl.class));
 
 	private String m_sTargetIp;
 	private int m_iTargetPort;

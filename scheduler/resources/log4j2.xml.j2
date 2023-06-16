@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </Console>
+
+        <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogNativeFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogNativeFilePath }}-%d{yyyy-MM-dd}">
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
+        </RollingFile>
+{% if bWasdiSyslogEnabled == true %}
+
+        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" format="RFC5424" connectTimeoutMillis="30000"
+            host="{{ sWasdiComponentSchedulerLogSyslogServerAddress }}" port="{{ sWasdiComponentSchedulerLogSyslogServerPort }}"
+            protocol="{{ sWasdiComponentSchedulerLogSyslogProtocol }}" appName="{{ sWasdiComponentSchedulerServiceName }}" facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" />
+{% endif %}
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="console" />
+{% if bWasdiSyslogEnabled == true %}
+            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-syslog" />
+{% else %}
+            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
+{% endif %}
+        </Root>
+    </Loggers>
+</Configuration>

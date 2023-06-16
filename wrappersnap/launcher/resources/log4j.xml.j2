@@ -11,7 +11,7 @@
         <param name="append" value="true" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <param name="file" value="/var/log/wasdi/launcher.log" />
+        <param name="file" value="{{ sWasdiComponentLauncherLogFilePath }}" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
@@ -21,7 +21,7 @@
         <param name="append" value="false" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <param name="file" value="/var/log/wasdi/publisher.log" />
+        <param name="file" value="{{ sWasdiComponentPublisherLogFilePath }}" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
@@ -66,11 +66,9 @@
         <level value="debug" />
         <appender-ref ref="fileLauncher" />
     </logger>
-{% if ( companyEnvironmentName | lower ) in ["local", "test"] %}
 
     <logger name="wasdi.shared.managers">
         <level value="debug" />
         <appender-ref ref="fileLauncher" />
     </logger>
-{% endif %}
 </log4j:configuration>

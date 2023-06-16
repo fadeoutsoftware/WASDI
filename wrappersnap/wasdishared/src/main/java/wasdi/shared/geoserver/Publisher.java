@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
@@ -25,22 +25,21 @@ public class Publisher {
 
     // Define a static logger variable so that it references the
     // Logger instance named "MyApp".
-    static Logger s_oLogger = Logger.getLogger(Publisher.class);
+    static Logger s_oLogger = LogManager.getLogger(Publisher.class);
     
     public long m_lMaxMbTiffPyramid = 50L;
 
     public Publisher() {
-        try {
-            //get jar directory
-            File oCurrentFile = new File(Publisher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            //configure log
-            DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
-
-        } catch(Exception oEx) {
-            //no log4j configuration
-        	WasdiLog.debugLog( "Publisher: Error loading log.  Reason: " + oEx.getMessage() );
-        }
-        
+		 try {
+	         //get jar directory
+	        File oCurrentFile = new File(Publisher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			String sThisFilePath = oCurrentFile.getParentFile().getPath();
+			WasdiFileUtils.loadLogConfigFile(sThisFilePath);
+	     } catch(Exception oEx) {
+	         //no log4j configuration
+	     	WasdiLog.debugLog( "Publisher: Error loading log.  Reason: " + oEx.getMessage() );
+	     }
+    	 
         // Set the publisher 
         try {
             m_lMaxMbTiffPyramid = Long.parseLong(WasdiConfig.Current.geoserver.maxGeotiffDimensionPyramid);
