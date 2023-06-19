@@ -369,7 +369,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	boolean bResult = true;
             	
             	if (bBuildLocally) {
-            		bResult = deploy(oParameter, false);                		
+            		bResult = deploy(oParameter, false);
+            		reconstructEnvironment(oParameter, oProcessor.getPort());
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
