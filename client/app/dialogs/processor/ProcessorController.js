@@ -103,14 +103,14 @@ var ProcessorController = (function () {
          * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
          */
         this.m_aoProcessorTypes = [
-            { name: "Python 3.x Pip 2", id:"python_pip_2"},
-            { name: "Python 3.x Pip One Shot", id:"pip_oneshot"},
+            { name: "Python 3.7 Pip", id: "ubuntu_python37_snap" },
+            // { name: "Python 3.x Pip 2", id:"python_pip_2"},
+            // { name: "Python 3.x Pip One Shot", id:"pip_oneshot"},
             { name: "IDL 3.7.2", id: "ubuntu_idl372" },
             { name: "OCTAVE 6.x", id: "octave" },
             { name: "Python 3.x Conda", id: "conda" },
             { name: "C# .NET Core", id: "csharp" },
-            { name: "OGC Application Package", id: "eoepca" },
-            { name: "Python 3.7 Pip", id: "ubuntu_python37_snap" }            
+            { name: "OGC Application Package", id: "eoepca" }
         ];
         /**
          * Selected Processor Type
@@ -309,7 +309,7 @@ var ProcessorController = (function () {
                 var oParsed = JSON.parse(this.m_sJSONSample);
                 sPrettyPrint = JSON.stringify(oParsed, null, 2);
                 this.m_sJSONSample = sPrettyPrint;
-            } catch (oError) {}
+            } catch (oError) { }
 
             // Get the list of Enabled users for sharing
             this.getListOfEnableUsers(this.m_sProcessorId);
@@ -352,7 +352,7 @@ var ProcessorController = (function () {
                                 function (oData) {
                                     oController.m_aoCategories = oData.data;
                                 },
-                                function (error) {}
+                                function (error) { }
                             );
                     } else {
                         utilsVexDialogAlertTop(
@@ -412,7 +412,7 @@ var ProcessorController = (function () {
             if (oJsonParsedObject && typeof oJsonParsedObject === "object") {
                 return oJsonParsedObject;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         return false;
     };
@@ -1023,40 +1023,40 @@ var ProcessorController = (function () {
     ProcessorController.prototype.packageManagerClick = function () {
         let oController = this
         oController.m_oProcessorService.getDeployedProcessor(oController.m_sProcessorId).then(function (data) {
-           oController.m_oModalService
-            .showModal({
-                templateUrl: "dialogs/package_manager/PackageManagerView.html",
-                controller: "PackageManagerController",
-                inputs: {
-                    extras: {
-                        processor: data.data
+            oController.m_oModalService
+                .showModal({
+                    templateUrl: "dialogs/package_manager/PackageManagerView.html",
+                    controller: "PackageManagerController",
+                    inputs: {
+                        extras: {
+                            processor: data.data
+                        }
                     }
-                }
-            })
-            .then(function (modal) {
-                modal.element.modal( {
-                    backdrop: 'static',
-                    keyboard: false
+                })
+                .then(function (modal) {
+                    modal.element.modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    modal.close;
                 });
-                modal.close;
-            }); 
         })
-        
+
     };
-    ProcessorController.prototype.formatJson = function() {
-        let oController = this; 
+    ProcessorController.prototype.formatJson = function () {
+        let oController = this;
         let sStringParsed = ""
-        
+
         if (oController.m_sSelectedTab === "Base") {
-            oController.m_sJSONSample = JSON.stringify(JSON.parse(oController.m_sJSONSample.replaceAll("'", '"')),null, 2);
+            oController.m_sJSONSample = JSON.stringify(JSON.parse(oController.m_sJSONSample.replaceAll("'", '"')), null, 2);
         } else if (oController.m_sSelectedTab === "UI") {
-            
+
             sStringParsed = oController.m_sProcessorUI = JSON.stringify(
                 JSON.parse(oController.m_sProcessorUI.replaceAll("'", '"')),
                 null,
                 4
-            );  
-        }  
+            );
+        }
     }
     ProcessorController.$inject = [
         "$scope",
