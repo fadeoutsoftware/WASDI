@@ -348,6 +348,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;                    
             }
+            
+            boolean bMustReconstructEnvironment = false;
 
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
@@ -370,7 +372,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	
             	if (bBuildLocally) {
             		bResult = deploy(oParameter, false);
-            		reconstructEnvironment(oParameter, oProcessor.getPort());
+            		bMustReconstructEnvironment = true;
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
@@ -400,6 +402,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 
                 // Wait for it
                 waitForApplicationToStart(oParameter);
+                
+                if (bMustReconstructEnvironment) {
+                	WasdiLog.errorLog("DockerProcessorEngine.run: Processor just built and started, reconstruct the environment");
+                	reconstructEnvironment(oParameter, oProcessor.getPort());
+                }
             }
 
             // Decode JSON
