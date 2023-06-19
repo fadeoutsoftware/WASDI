@@ -49,6 +49,17 @@ public class TimeEpochUtils {
 	}
 	
 	/**
+	 * Return a Date object from the Epoch milliseconds
+	 * @param lTimeInMillis the EpochMilliseconds
+	 * @return the Date object corresponding to the Epoch milliseconds
+	 */
+	public static Date fromEpochToDateObject(long lTimeInMillis) {
+		Calendar oCal = Calendar.getInstance();
+		oCal.setTimeInMillis(lTimeInMillis);
+		return oCal.getTime();
+	}
+	
+	/**
 	 * Return the Epoch Milli Seconds of a String date with the sDateFormat
 	 * @param sDate String representing the date
 	 * @param sDateFormat String Date Format

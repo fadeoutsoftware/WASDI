@@ -5,11 +5,13 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
@@ -234,6 +236,9 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
 		String sProductType = JsonUtils.getProperty(aoWasdiPayload, "productType");
 		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables");
+		String sMonthlyAggregation = JsonUtils.getProperty(aoWasdiPayload, "monthlyAggregation");
+		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");
+		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate");
 		String sDate = JsonUtils.getProperty(aoWasdiPayload, "date");
 		String sBoundingBox = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
@@ -242,9 +247,25 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				.map(CDSProviderAdapter::inflateVariable)
 				.collect(Collectors.toList());
 
-		String sYear = sDate.substring(0, 4);
-		String sMonth = sDate.substring(4, 6);
-		String sDay = sDate.substring(6, 8);
+		String sYear = "";
+		String sMonth = "";
+		String sDay = "";
+		List<String> asDays = Collections.emptyList();
+		
+		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
+			sYear = sStartDate.substring(0, 4);
+			sMonth = sStartDate.substring(4, 6);
+			int iStartDay = Integer.parseInt(sStartDate.substring(6,  8));
+			int iEndDate = Integer.parseInt(sEndDate.substring(6,  8));
+			asDays = IntStream.rangeClosed(iStartDay, iEndDate)
+					.mapToObj(String::valueOf)
+					.collect(Collectors.toList());
+		} else {
+			sYear = sDate.substring(0, 4);
+			sMonth = sDate.substring(4, 6);
+			sDay = sDate.substring(6, 8);
+		}
+		
 
 		List<String> oaTimeHours = Arrays.asList("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00");
 
@@ -255,7 +276,11 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		aoHashMap.put("variable", asVariables);
 		aoHashMap.put("year", sYear);
 		aoHashMap.put("month", sMonth);
-		aoHashMap.put("day", sDay);
+		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
+			aoHashMap.put("day", sDay);
+		} else {
+			aoHashMap.put("day", sDay);
+		}
 		aoHashMap.put("time", oaTimeHours);
 		aoHashMap.put("grid", adGrid);
 		aoHashMap.put("format", sFormat);
