@@ -12,13 +12,13 @@ chown --recursive {{ sWasdiDataTemporarySnapTomcatRootDirectoryOwner }}:{{ sWasd
 chmod {{ sWasdiDataTemporarySnapCacheRootDirectoryMode }} {{ sWasdiDataTemporarySnapTomcatRootDirectoryPath }}
 
 # check link from /tmp exists and recreate if necessary
-if [[ ! -h "/tmp/snap-tomcat" ]]
+if [[ ! -h "/tmp/snap-{{ sWasdiSystemUserName }}" ]]
 then
-    ln --symbolic {{ sWasdiDataTemporarySnapTomcatRootDirectoryPath }} /tmp/snap-tomcat
+    ln --symbolic {{ sWasdiDataTemporarySnapTomcatRootDirectoryPath }} /tmp/snap-{{ sWasdiSystemUserName }}
 fi
 
 # change owner and group of the symbolic link
-chown --no-dereference {{ sWasdiDataTemporarySnapTomcatRootDirectoryOwner }}:{{ sWasdiDataTemporarySnapTomcatRootDirectoryGroup }} /tmp/snap-tomcat
+chown --no-dereference {{ sWasdiDataTemporarySnapTomcatRootDirectoryOwner }}:{{ sWasdiDataTemporarySnapTomcatRootDirectoryGroup }} /tmp/snap-{{ sWasdiSystemUserName }}
 
 # find and delete snap cache files accessed last time more than 5 minutes ago
 if [[ -d "{{ sWasdiDataTemporarySnapCacheRootDirectoryPath }}" ]]
