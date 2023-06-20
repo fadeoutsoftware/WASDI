@@ -14,9 +14,10 @@
         </RollingFile>
 {% if bWasdiSyslogEnabled == true %}
 
-        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" format="RFC5424" connectTimeoutMillis="30000"
-            host="{{ sWasdiComponentSchedulerLogSyslogServerAddress }}" port="{{ sWasdiComponentSchedulerLogSyslogServerPort }}"
-            protocol="{{ sWasdiComponentSchedulerLogSyslogProtocol }}" appName="{{ sWasdiComponentSchedulerServiceName }}" facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" />
+        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" appName="{{ sWasdiComponentSchedulerServiceName }}"
+            host="{{ sWasdiComponentSchedulerLogSyslogServerAddress }}" port="{{ sWasdiComponentSchedulerLogSyslogServerPort }}" protocol="{{ sWasdiComponentSchedulerLogSyslogProtocol }}"
+            connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
+            facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" format="RFC5424" />
 {% endif %}
     </Appenders>
 
