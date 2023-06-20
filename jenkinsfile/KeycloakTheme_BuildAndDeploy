@@ -1,8 +1,19 @@
+def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
+  if ( bLower ) {
+    return sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+  
+  return sAnsibleLimit.split('-')[0].toUpperCase()
+}
+
 pipeline {
   agent any
 
   environment {
-    sCurrentRevision = "0.0.${env.BUILD_ID}"
+    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
+    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentRevision         = "0.0.${env.BUILD_ID}"
+    sMavenProfile            = 'wasdi-' + ${env.sCurrentEnvironmentLower}
   }
 
   options {
@@ -18,13 +29,15 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        echo "env.GIT_BRANCH          = " + env.GIT_BRANCH
-        echo "env.sAnsibleLimit       = " + env.sAnsibleLimit
-        echo "env.sCurrentRevision    = " + env.sCurrentRevision
-        echo "env.sSourceBranch       = " + env.sSourceBranch
-        echo "env.sWasdiAnsiblePath   = " + env.sWasdiAnsiblePath
-        echo "env.sWasdiMavenSettings = " + env.sWasdiMavenSettings
-        echo "env.WORKSPACE           = " + env.WORKSPACE
+        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentRevision         = " + env.sCurrentRevision
+        echo "env.sMavenProfile            = " + env.sMavenProfile
+        echo "env.sSourceBranch            = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
+        echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
@@ -49,7 +62,7 @@ pipeline {
       steps {
         sh script: """
           cd ./keycloak/theme
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.sAnsibleLimit} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
+          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
         """,
         label: "Build"
       }
@@ -59,7 +72,7 @@ pipeline {
       steps {
         sh script: """
           cd ./keycloak/theme
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.sAnsibleLimit} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy
+          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy
         """,
         label: "Deploy in Nexus"
       }
