@@ -12,14 +12,6 @@
             <DefaultRolloverStrategy max="10" />
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </RollingFile>
-
-        <RollingFile name="filePublisher" append="false" fileName="{{ sWasdiComponentPublisherLogNativeFilePath }}" filePattern="{{ sWasdiComponentPublisherLogNativeFilePath }}-%d{yyyy-MM-dd}">
-            <Policies>
-                <SizeBasedTriggeringPolicy size="10 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="10"/>
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
-        </RollingFile>
 {% if bWasdiSyslogEnabled == true %}
 
         <Syslog name="{{ sWasdiComponentLauncherServiceName }}-syslog" format="RFC5424" connectTimeoutMillis="30000"
