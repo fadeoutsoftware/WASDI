@@ -26,7 +26,7 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
+          currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY TOOLS (renderJinjaTemplate.py, etc)"
         }
       }
