@@ -17,18 +17,21 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
+        echo "env.GIT_BRANCH        = " + env.GIT_BRANCH
+        echo "env.PYTHONPATH        = " + env.PYTHONPATH
+        echo "env.sAnsibleLimit     = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision  = " + env.sCurrentRevision
+        echo "env.sSourceBranch     = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE         = " + env.WORKSPACE
+
         sh script: "pwd", label: "Current location"
 
-        echo "env.sCurrentRevision = " + env.sCurrentRevision
-        echo "env.sourceBranch = " + env.sourceBranch
-        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
-        echo "env.targetedEnvironment = " + env.targetedEnvironment
-        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
-        echo "env.PYTHONPATH = " + env.PYTHONPATH
-        echo "env.WORKSPACE = " + env.WORKSPACE
-
+        sh script: "which node", label: "Tool > node > path"
         sh script: "node --version", label: "Tool > node > current version"
+        sh script: "which npm", label: "Tool > npm > path"
         sh script: "npm --version", label: "Tool > npm > current version"
+        sh script: "which sass", label: "Tool > sass > path"
         sh script: "sass --version", label: "Tool > sass > current version"
       }
     }
@@ -56,7 +59,7 @@ pipeline {
       steps {
         sh script: """
             cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+            ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Prepare the WASDI client"
       }
@@ -82,7 +85,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/deployWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Deploy the WASDI client"
       }
