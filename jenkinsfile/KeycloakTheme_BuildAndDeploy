@@ -2,7 +2,7 @@ def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
   if ( bLower ) {
     return sAnsibleLimit.split('-')[0].toLowerCase()
   }
-  
+
   return sAnsibleLimit.split('-')[0].toUpperCase()
 }
 
@@ -32,6 +32,7 @@ pipeline {
         echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
         echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
         echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
         echo "env.sCurrentRevision         = " + env.sCurrentRevision
         echo "env.sMavenProfile            = " + env.sMavenProfile
         echo "env.sSourceBranch            = " + env.sSourceBranch
