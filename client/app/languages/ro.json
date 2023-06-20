@@ -179,8 +179,7 @@
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_FRIENDLY_NAME_LABEL":"Numele prietenos",
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_STYLE":"Stil:",
 	
-	"DIALOG_WAPPS_ITEMS_FILTER": "Filtrați numele aplicației...",
-	"DIALOG_WAPPS_ITEMS_FILTER": "Vizualizați șabloane de parametri",
+	"DIALOG_WAPPS_ITEMS_FILTER": "Căutați după numele aplicației...",
 	"DIALOG_WAPPS_JSON_PARAMS": " Parametrii (JSON)",
 	"DIALOG_WAPPS_JSON_EDITOR": "Editor JSON",
 	"DIALOG_WAPPS_JSON_RUN": "Execută",

@@ -176,8 +176,7 @@
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_FRIENDLY_NAME_LABEL":"Friendly Name",
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_STYLE":"Style:",
 	
-	"DIALOG_WAPPS_ITEMS_FILTER": "Filter App Name...",
-	"DIALOG_WAPPS_ITEMS_FILTER": "View Parameters Templates",
+	"DIALOG_WAPPS_ITEMS_FILTER": "Buscar por nombre de la aplicación...",
 	"DIALOG_WAPPS_JSON_PARAMS": " Parameters (JSON)",
 	"DIALOG_WAPPS_JSON_EDITOR": "JSON Editor",
 	"DIALOG_WAPPS_JSON_RUN": "Run",
