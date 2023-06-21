@@ -13,9 +13,11 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
@@ -29,6 +31,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -308,6 +311,48 @@ public class Utils {
 		}
 
 		return sDate +  " " + getLocalDateOffsetFromUTCForJS();
+	}
+	
+	/**
+	 * Split the time range represented by the two input Date objects in monthly intervals.
+	 * Each Date array represents an interval and is made of two elements. Element at index 0 represent the start Date of the interval,
+	 * while the element at index 1 represents the end Date of the interval. 
+	 * E.g. if the input parameters represent an interval from 22/05/2023 to 10/07/203, then the monthly intervals will be: 
+	 * [22/05/2023-31/05/2023], [01/06/2023-30/06/2023], [01/07/2023-10/07/2023]
+	 * @param oStartDate the start date of the time range
+	 * @param oEndDate the end date of the time range
+	 * @return a list of monthly intervals included in the time range, represented by 2-dimensional Date arrays.
+	 */
+	public static List<Date[]> splitTimeRangeInMonthyIntervals(Date oStartDate, Date oEndDate) {
+		List<Date[]> aaoIntervals = new LinkedList<>();
+		Calendar oStartCalendar = Calendar.getInstance();
+		oStartCalendar.setTime(oStartDate);
+		Calendar oEndCalendar = Calendar.getInstance();
+		oEndCalendar.setTime(oEndDate);
+		
+		while (oStartCalendar.before(oEndCalendar)) {
+			int iStartMonth = oStartCalendar.get(Calendar.MONTH);
+			int iEndMonth = oEndCalendar.get(Calendar.MONTH);
+			int iStartYear = oStartCalendar.get(Calendar.YEAR);
+			int iEndYear = oEndCalendar.get(Calendar.YEAR);
+			
+			if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
+				Date oStartIntervalDate = oStartCalendar.getTime();
+				Date oEndIntervalDate = oEndCalendar.getTime();
+				Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
+				aaoIntervals.add(aoInterval);
+				break;
+			} else {
+				int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+				Date oStartIntervalDate = oStartCalendar.getTime();
+				oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
+				Date oEndIntervalDate = oStartCalendar.getTime();
+				Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
+				aaoIntervals.add(aoInterval);
+				oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
+			}
+		}
+		return aaoIntervals;
 	}
 	
 

@@ -79,7 +79,11 @@ public class QueryExecutorCDS extends QueryExecutor {
 			boolean bIsMonthlyAggregation = oCDSQuery.absoluteOrbit == 1;
 			
 			if (bIsMonthlyAggregation) {
-				iCount = TimeEpochUtils.countMonthsIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
+				long lStart = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.startFromDate);
+				long lEnd = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate);
+				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
+				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(lEnd);
+				iCount = Utils.splitTimeRangeInMonthyIntervals(oStartDate, oEndDate).size();
 			} else {
 				int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
 				iCount = iDays;
@@ -142,43 +146,19 @@ public class QueryExecutorCDS extends QueryExecutor {
 				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
 				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate));
 				
-				Calendar oStartCalendar = Calendar.getInstance();
-				oStartCalendar.setTime(oStartDate);
-				Calendar oEndCalendar = Calendar.getInstance();
-				oEndCalendar.setTime(oEndDate);
+				List<Date[]> aaoIntervals = Utils.splitTimeRangeInMonthyIntervals(oStartDate, oEndDate);
 				
-				while (oStartCalendar.before(oEndCalendar)) {
-					int iStartMonth = oStartCalendar.get(Calendar.MONTH);
-					int iEndMonth = oEndCalendar.get(Calendar.MONTH);
-					int iStartYear = oStartCalendar.get(Calendar.YEAR);
-					int iEndYear = oEndCalendar.get(Calendar.YEAR);
+				for (Date[] aoInterval : aaoIntervals) {
+					Date oStartIntervalDate = aoInterval[0];
+					Date oEndIntervalDate = aoInterval[1];
+					String sStartDate = Utils.formatToYyyyMMdd(oStartIntervalDate);
+					String sEndDate = Utils.formatToYyyyMMdd(oEndIntervalDate);
 					
-					if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
-						Date oStartIntervalDate = oStartCalendar.getTime();
-						Date oEndIntervalDate = oEndCalendar.getTime();
-						String sStartDate = Utils.formatToYyyyMMdd(oStartIntervalDate);
-						String sEndDate = Utils.formatToYyyyMMdd(oEndCalendar.getTime());
-						
-						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat);
-						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oStartIntervalDate, oEndIntervalDate);
-						aoResults.add(oResult);
-						break;
-					} else {
-						int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-						Date oStartIntervalDate = oStartCalendar.getTime();
-						oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
-						Date oEndIntervalDate = oStartCalendar.getTime();
-						String sStartDate = Utils.formatToYyyyMMdd(oStartIntervalDate);
-						String sEndDate = Utils.formatToYyyyMMdd(oEndIntervalDate);
-						
-						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat);
-						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oStartIntervalDate, oEndIntervalDate);
-						aoResults.add(oResult);
-						
-						oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
-					}
-					
+					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat);
+					QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oStartIntervalDate, oEndIntervalDate);
+					aoResults.add(oResult);
 				}
+				
 			} else {
 				int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
 				for (int i = 0; i < iDays; i++) {
@@ -210,8 +190,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables,
 			String sPresureLevels, String sStartDate, String sEndDate, String sBoundingBox, String sFormat) {
-		String sMonthlyAggregation = String.valueOf(!Utils.isNullOrEmpty(sEndDate)); // if sEndDate is not null, then we
-																						// do the monthly aggregation
+		String sMonthlyAggregation = String.valueOf(!Utils.isNullOrEmpty(sEndDate)); // if sEndDate is not null, then we do the monthly aggregation
 		Map<String, String> aoPayload = new HashMap<>();
 		aoPayload.put("dataset", sDataset); // reanalysis-era5-pressure-levels
 		aoPayload.put("productType", sProductType); // Reanalysis

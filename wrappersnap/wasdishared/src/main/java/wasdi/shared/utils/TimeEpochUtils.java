@@ -105,46 +105,6 @@ public class TimeEpochUtils {
 
 		return (int) lDays;
 	}
-	
-	/**
-	 * Count the months of an interval, considering both the start and the end dates.
-	 * In the start and the end date belongs to the same month of the same year, then the mothod returns 1.
-	 * @param sFromDate the start of the interval
-	 * @param sToDate the end of the ionterval
-	 * @return
-	 */
-	public static int countMonthsIncluding(String sFromDate, String sToDate) {
-		long lStart = fromDateStringToEpoch(sFromDate);
-		long lEnd = fromDateStringToEpoch(sToDate);
-
-		Date oStartDate = fromEpochToDateObject(lStart);
-		Date oEndDate = fromEpochToDateObject(lEnd);
-		
-		Calendar oStartCalendar = Calendar.getInstance();
-		oStartCalendar.setTime(oStartDate);
-		Calendar oEndCalendar = Calendar.getInstance();
-		oEndCalendar.setTime(oEndDate);
-		
-		int count = 0;
-		while (oStartCalendar.before(oEndCalendar)) {
-			int iStartMonth = oStartCalendar.get(Calendar.MONTH);
-			int iEndMonth = oEndCalendar.get(Calendar.MONTH);
-			int iStartYear = oStartCalendar.get(Calendar.YEAR);
-			int iEndYear = oEndCalendar.get(Calendar.YEAR);
-			
-			if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
-				count++;
-				break;
-			} else {
-				int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-				Date oStartIntervalDate = oStartCalendar.getTime();
-				oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
-				oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
-				count++;
-			}
-		}
-		return count;
-	}
 
 	/**
 	 * Get a date in in the future obtained by adding a specified number of days to the specified starting date.
