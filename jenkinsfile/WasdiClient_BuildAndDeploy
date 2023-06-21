@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    sCurrentRevision = "0.0.${env.BUILD_ID}"
+    sCurrentRevision = "${env.BUILD_ID}"
   }
 
   options {
