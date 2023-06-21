@@ -166,7 +166,7 @@
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_ORIGINAL_NAME_LABEL":"Nom d'origine:",
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_FRIENDLY_NAME_LABEL":"Nom familier",
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_STYLE":"Style:",
-	"DIALOG_WAPPS_ITEMS_FILTER": "Nom de l'application pour filtrer...",
+	"DIALOG_WAPPS_ITEMS_FILTER": "Rechercher par nom d'application...",
 	"DIALOG_WAPPS_JSON_PARAMS": " Paramètres (JSON)",
 	"DIALOG_WAPPS_JSON_EDITOR": "Éditeur JSON",
 	"DIALOG_WAPPS_JSON_RUN": "Exécuter",

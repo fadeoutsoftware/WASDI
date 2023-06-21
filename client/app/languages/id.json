@@ -179,8 +179,7 @@
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_FRIENDLY_NAME_LABEL":"Nama Panggilan",
     "DIALOG_PRODUCT_EDITOR_INFO_DIALOG_STYLE": "Gelar:",
 	
-	"DIALOG_WAPPS_ITEMS_FILTER": "Filter Nama Aplikasi",
-	"DIALOG_WAPPS_ITEMS_FILTER": "Lihat Template Parameter",
+	"DIALOG_WAPPS_ITEMS_FILTER": "Telusuri menurut Nama Aplikasi...",
 	"DIALOG_WAPPS_JSON_PARAMS": "Parameter (JSON)",
 	"DIALOG_WAPPS_JSON_EDITOR": "JSON Editor",
 	"DIALOG_WAPPS_JSON_RUN":"Jalankan",

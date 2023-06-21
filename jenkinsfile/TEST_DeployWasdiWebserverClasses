@@ -9,18 +9,18 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        sh script: "pwd", label: "Current location"
-
+        echo "env.GIT_BRANCH        = " + env.GIT_BRANCH
         echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
-        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
-        echo "env.WORKSPACE = " + env.WORKSPACE
+        echo "env.WORKSPACE         = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
       }
     }
 
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "Rebuild #${env.BUILD_ID}"
+          currentBuild.displayName = "${env.BUILD_ID}"
           currentBuild.description = "WASDI - UPDATE WASDI WEB SERVER CLASSES - ${env.BUILD_ID}"
         }
       }

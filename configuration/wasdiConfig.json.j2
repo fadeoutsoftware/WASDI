@@ -334,6 +334,7 @@
         "gdalPath": "{{ aoWasdiConfiguration['paths']['gdalPath'] }}",
         "geoserverDataDir": "{{ aoWasdiConfiguration['paths']['geoserverDataDir'] }}",
         "jinjaTemplateRenderTool": "{{ aoWasdiConfiguration['paths']['jinjaTemplateRenderTool'] }}",
+        "logBasePath": "{{ aoWasdiConfiguration['paths']['logBasePath'] }}",
         "matlabRuntimePath": "{{ aoWasdiConfiguration['paths']['matlabRuntimePath'] }}",
         "metadataPath": "{{ aoWasdiConfiguration['paths']['metadataPath'] }}",
         "missionsConfigFilePath": "{{ aoWasdiConfiguration['paths']['missionsConfigFilePath'] }}",
@@ -501,6 +502,7 @@
         "maxQueue": "{{ aoWasdiConfiguration['scheduler']['maxQueue'] }}",
         "processingThreadSleepingTimeMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadSleepingTimeMS'] }}",
         "processingThreadWaitStartMS": "{{ aoWasdiConfiguration['scheduler']['processingThreadWaitStartMS'] }}",
+        "redirectLauncherOutput": {{ aoWasdiConfiguration['scheduler']['redirectLauncherOutput'] }},
         "schedulers": [
 {% for sCurrentScheduler in ( aoWasdiConfiguration['scheduler']['schedulers'] | sort ) %}
             {

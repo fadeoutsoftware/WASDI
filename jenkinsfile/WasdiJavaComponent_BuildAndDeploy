@@ -1,16 +1,27 @@
-def getCurrentRevision(environmentName) {
-    if ( "PROD".equals(environmentName) ) {
-        return "0.0.${env.BUILD_ID}"
-    } else {
-        return "0.0.${env.BUILD_ID}-SNAPSHOT"
-    }
+def getCurrentRevision(sEnvironmentName) {
+  if ( sEnvironmentName.toLowerCase() == 'prod' ) {
+    return "0.0.${env.BUILD_ID}"
+  }
+
+  return "0.0.${env.BUILD_ID}-SNAPSHOT"
+}
+
+def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
+  if ( bLower ) {
+    return sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+
+  return sAnsibleLimit.split('-')[0].toUpperCase()
 }
 
 pipeline {
   agent any
 
   environment {
-    sCurrentRevision = getCurrentRevision(env.targetedEnvironment)
+    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
+    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentRevision         = getCurrentRevision(env.sCurrentEnvironmentLower)
+    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
   options {
@@ -26,17 +37,20 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
+        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision         = " + env.sCurrentRevision
+        echo "env.sSourceBranch            = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
+        echo "env.WORKSPACE                = " + env.WORKSPACE
+
         sh script: "pwd", label: "Current location"
         sh script: "cat pom.xml", label: "Content of the main pom.xml file"
 
-        echo "env.sCurrentRevision = " + env.sCurrentRevision
-        echo "env.sourceBranch = " + env.sourceBranch
-        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
-        echo "env.sWasdiMavenSettings = " + env.sWasdiMavenSettings
-        echo "env.targetedEnvironment = " + env.targetedEnvironment
-        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
-        echo "env.WORKSPACE = " + env.WORKSPACE
-
+        sh script: "which mvn", label: "Tool > mvn > path"
         sh script: "mvn --version", label: "Tool > mvn > current version"
         sh script: "which java", label: "Tool > java > path"
         sh script: "java -version", label: "Tool > java > current version"
@@ -46,7 +60,7 @@ pipeline {
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
+          currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + DEPLOY THEM"
         }
       }
@@ -54,23 +68,23 @@ pipeline {
 
     stage('MAVEN - BUILD') {
       steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package", label: "Create packages"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package", label: "Create packages"
       }
     }
 
     stage('MAVEN - EXECUTE TEST') {
       steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
       }
     }
 
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
         script {
-          if ( env.targetedEnvironment.toLowerCase() == 'prod' ) {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
+          if ( env.sCurrentEnvironmentLower == 'prod' ) {
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
           } else {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
           }
         }
       }
@@ -80,7 +94,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Execute ansible-playbook"
       }
@@ -96,7 +110,7 @@ pipeline {
                 string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
                 string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
             ]) {
-                sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles wasdi-${env.targetedEnvironment.toLowerCase()} sonar:sonar --define revision=${env.sCurrentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
+                sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} sonar:sonar --define revision=${env.sCurrentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
             }
           } else {
             echo "Nothing to do."

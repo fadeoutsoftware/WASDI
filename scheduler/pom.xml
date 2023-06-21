@@ -29,8 +29,8 @@
                 <excludes>
                     <exclude>log4j.xml</exclude>
                     <exclude>log4j.xml.j2</exclude>
-					<exclude>log4j2.xml</exclude>
-					<exclude>log4j2.xml.j2</exclude>
+                    <exclude>log4j2.xml</exclude>
+                    <exclude>log4j2.xml.j2</exclude>
                     <exclude>config.properties</exclude>
                 </excludes>
             </resource>

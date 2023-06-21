@@ -219,6 +219,33 @@ def executeProcessor(aoS3Configuration):
                 oWasdiS3.uploadFile(sFullPath)
         '''
 
+        '''
+        CREATE THE DIRECTORY TO WRITE IN S3
+        '''
+        sWriteDir = os.path.realpath(
+            os.path.join(
+                os.environ['WASDI_OUTPUT'],
+                's3_results'
+            )
+        )
+
+        if not os.path.isdir(sWriteDir):
+            wasdi.wasdiLog('Create the directory: %s' %(sWriteDir))
+            os.mkdir(sWriteDir)
+            wasdi.wasdiLog('The directory %s is created' %(sWriteDir))
+
+
+        '''
+        TEST TO WRITE A FILE
+        '''
+        sFileToWrite = os.path.join(sWriteDir, 'myfile.txt')
+        wasdi.wasdiLog('Write a file %s' %(sFileToWrite))
+
+        with open(sFileToWrite, 'w') as oFile:
+            oFile.write("Hello World!\n")
+
+        wasdi.wasdiLog('The file %s is written' %(sFileToWrite))
+
         sForceStatus = 'DONE'
     except Exception as oEx:
         wasdi.wasdiLog('wasdi.executeProcessor EXCEPTION')
