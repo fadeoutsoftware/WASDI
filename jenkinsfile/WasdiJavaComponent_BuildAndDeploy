@@ -1,9 +1,9 @@
 def getCurrentRevision(sEnvironmentName) {
   if ( sEnvironmentName.toLowerCase() == 'prod' ) {
-    return "0.0.${env.BUILD_ID}"
+    return "${env.BUILD_ID}"
   }
 
-  return "0.0.${env.BUILD_ID}-SNAPSHOT"
+  return "${env.BUILD_ID}-SNAPSHOT"
 }
 
 def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
