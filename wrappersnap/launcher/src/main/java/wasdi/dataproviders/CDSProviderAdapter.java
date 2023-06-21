@@ -276,14 +276,14 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		aoHashMap.put("variable", asVariables);
 		aoHashMap.put("year", sYear);
 		aoHashMap.put("month", sMonth);
-		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
-			aoHashMap.put("day", sDay);
-		} else {
-			aoHashMap.put("day", sDay);
-		}
 		aoHashMap.put("time", oaTimeHours);
 		aoHashMap.put("grid", adGrid);
 		aoHashMap.put("format", sFormat);
+		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
+			aoHashMap.put("day", asDays);
+		} else {
+			aoHashMap.put("day", sDay);
+		}
 
 		if (sBoundingBox != null && !sBoundingBox.contains("null")) {
 			List<Double> originalBbox = BoundingBoxUtils.parseBoundingBox(sBoundingBox);

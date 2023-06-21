@@ -1,5 +1,6 @@
 package wasdi.shared.utils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Calendar;
@@ -65,5 +66,12 @@ public class TestUtils {
 		}
 	}
 	
+	@Test
+	public void testSplitTimeRangeInMonthyIntervalsSameRange() {
+		Date oStartDate = new Date(1687345755000L); // Wednesday, June 21, 2023 11:09:15 AM (GMT)
+		Date oEndDate = new Date(1687345755000L); // Wednesday, June 21, 2023 11:09:15 AM (GMT)
+		List<Date[]> aaoRes = Utils.splitTimeRangeInMonthyIntervals(oStartDate, oEndDate);
+		assertTrue(aaoRes.isEmpty());
+	}
 
 }

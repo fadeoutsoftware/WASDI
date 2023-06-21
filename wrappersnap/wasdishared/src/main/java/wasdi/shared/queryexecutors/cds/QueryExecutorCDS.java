@@ -1,7 +1,6 @@
 package wasdi.shared.queryexecutors.cds;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -168,8 +167,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 						String sDate = Utils.formatToYyyyMMdd(oActualDay);
 						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, null, sBoundingBox, sFormat);
 
-						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint,
-								oActualDay, null);
+						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oActualDay, null);
 						aoResults.add(oResult);
 					}
 
@@ -242,6 +240,11 @@ public class QueryExecutorCDS extends QueryExecutor {
 			Date oStartDate, Date oEndDate) {
 		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
 		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
+		String sEndDateTime = null;
+		if (oEndDate != null) {
+			sEndDateTime = TimeEpochUtils.fromEpochToDateString(oEndDate.getTime());
+		}
+
 		String sExtension = "." + oQuery.timeliness;
 		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate).replaceAll("[\\W]", "_") + sExtension; // TODO: does the fileName change for the aggregated results?
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
@@ -251,7 +254,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.setId(sFileName);
 		oResult.setTitle(sFileName);
 		oResult.setLink(sEncodedUrl);
-		oResult.setSummary("Date: " + sStartDateTime + ", Mode: " + oQuery.sensorMode + ", Instrument: " + oQuery.timeliness); // TODO: does the summary change for the aggregated results?
+		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, oQuery.sensorMode, oQuery.timeliness)); // TODO: does the summary change for the aggregated results?
 		oResult.setProvider(m_sProvider);
 		oResult.setFootprint(sFootPrint);
 		oResult.getProperties().put("platformname", Platforms.ERA5);
@@ -264,11 +267,16 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.getProperties().put("beginposition", sStartDateTime);
 
 		if (oEndDate != null) { // TODO: is it ok to add this properties when we have aggregated results?
-			String sEndDateTime = TimeEpochUtils.fromEpochToDateString(oEndDate.getTime());
 			oResult.getProperties().put("endDate", sEndDateTime);
 			oResult.getProperties().put("endposition", sEndDateTime);
 		}
 		return oResult;
+	}
+	
+	private String getSummary(String sStartDateTime, String sEndDateTime, String sMode, String timeliness) {
+		return Utils.isNullOrEmpty(sEndDateTime) 
+				? "Date: " + sStartDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness 
+				: "Start date: " + sStartDateTime + ",End date: " + sEndDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness;
 	}
 	
 }
