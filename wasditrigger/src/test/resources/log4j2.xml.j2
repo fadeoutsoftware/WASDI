@@ -2,15 +2,15 @@
 <Configuration status="WARN">
     <Appenders>
 {% if bWasdiSyslogEnabled == true %}
-        <Syslog name="{{ sWasdiComponentLauncherServiceName }}-syslog" appName="{{ sWasdiComponentLauncherServiceName }}"
-            host="{{ sWasdiComponentLauncherLogSyslogServerAddress }}" port="{{ sWasdiComponentLauncherLogSyslogServerPort }}" protocol="{{ sWasdiComponentLauncherLogSyslogProtocol }}"
+        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" appName="{{ sWasdiComponentTriggerServiceName }}"
+            host="{{ sWasdiComponentTriggerLogSyslogServerAddress }}" port="{{ sWasdiComponentTriggerLogSyslogServerPort }}" protocol="{{ sWasdiComponentTriggerLogSyslogProtocol }}"
             connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
-            facility="{{ sWasdiComponentLauncherLogSyslogFacility }}" format="RFC5424" />
+            facility="{{ sWasdiComponentTriggerLogSyslogFacility }}" format="RFC5424" />
 {% else %}
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </Console>
-        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentLauncherLogNativeFilePath }}-%d{yyyy-MM-dd}">
+        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentTriggerLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
