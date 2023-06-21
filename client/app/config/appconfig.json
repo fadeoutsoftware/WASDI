@@ -433,6 +433,13 @@
                     "regex": ".*",
                     "indexvalue":"netcdf"
                 }
+				{
+					"indexname": "absoluteorbit",
+                    "indexlabel": "Aggregation",
+                    "indexhint" : "0 for one result file per day, 1 for one result per month",
+                    "indexvalues": "0|1",
+                    "regex": ".*"
+				}
             ]
         },        
         {
