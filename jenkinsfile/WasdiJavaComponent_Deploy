@@ -13,21 +13,21 @@ pipeline {
   stages {
     stage('DEBUG') {
       steps {
-        sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+        echo "env.GIT_BRANCH          = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit       = " + env.sAnsibleLimit
+        echo "env.sCurrentRevision    = " + env.sCurrentRevision
+        echo "env.sSourceBranch       = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath   = " + env.sWasdiAnsiblePath
+        echo "env.WORKSPACE           = " + env.WORKSPACE
 
-        echo "env.sCurrentRevision = " + env.sCurrentRevision
-        echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
-        echo "env.targetedEnvironment = " + env.targetedEnvironment
-        echo "env.GIT_BRANCH = " + env.GIT_BRANCH
-        echo "env.WORKSPACE = " + env.WORKSPACE
+        sh script: "pwd", label: "Current location"
       }
     }
 
     stage('INITIALIZATION') {
       steps {
         script {
-          currentBuild.displayName = "WASDI ${env.sCurrentRevision}"
+          currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY JAVA PACKAGES (.jar, .war, etc)"
         }
       }
@@ -37,7 +37,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.targetedEnvironment.toLowerCase()} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Execute ansible-playbook"
       }
