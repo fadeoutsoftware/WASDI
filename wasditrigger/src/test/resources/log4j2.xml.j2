@@ -1,10 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Configuration status="WARN">
     <Appenders>
+{% if bWasdiSyslogEnabled == true %}
+        <Syslog name="{{ sWasdiComponentLauncherServiceName }}-syslog" appName="{{ sWasdiComponentLauncherServiceName }}"
+            host="{{ sWasdiComponentLauncherLogSyslogServerAddress }}" port="{{ sWasdiComponentLauncherLogSyslogServerPort }}" protocol="{{ sWasdiComponentLauncherLogSyslogProtocol }}"
+            connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
+            facility="{{ sWasdiComponentLauncherLogSyslogFacility }}" format="RFC5424" />
+{% else %}
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </Console>
-
         <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentLauncherLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
@@ -12,21 +17,15 @@
             <DefaultRolloverStrategy max="10" />
             <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
         </RollingFile>
-{% if bWasdiSyslogEnabled == true %}
-
-        <Syslog name="{{ sWasdiComponentLauncherServiceName }}-syslog" appName="{{ sWasdiComponentLauncherServiceName }}"
-            host="{{ sWasdiComponentLauncherLogSyslogServerAddress }}" port="{{ sWasdiComponentLauncherLogSyslogServerPort }}" protocol="{{ sWasdiComponentLauncherLogSyslogProtocol }}"
-            connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
-            facility="{{ sWasdiComponentLauncherLogSyslogFacility }}" format="RFC5424" />
 {% endif %}
     </Appenders>
 
     <Loggers>
         <Root level="debug">
-            <AppenderRef ref="console" />
 {% if bWasdiSyslogEnabled == true %}
             <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-syslog" />
 {% else %}
+            <AppenderRef ref="console" />
             <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-native" />
 {% endif %}
         </Root>
