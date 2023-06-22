@@ -11,7 +11,7 @@ pipeline {
   }
 
   tools {
-    nodejs "WASDI_NODEJS_V14"
+    nodejs "WASDI_NODEJS_V16"
   }
 
   stages {
