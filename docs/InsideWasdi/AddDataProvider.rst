@@ -79,7 +79,7 @@ Each mission is a JSON similar to this one:
 
 Filters can be added to the search form of the data provider. Each filter has an indexname that represents the name of the filter and a indexvalue will contain the value of filter selected by the user.
 
-*indexname* - *indexvalue* are an arrau used to create a new variable from the client to the server. 
+*indexname* - *indexvalue* is an array used to create a new variable from the client to the server. 
 
 *indexname:"platformname"*  is a filter that *must* be used to set the Platform Code as defined in the Java Platforms object.  *"indexvalue"* for platformname is, so, the code of the Platform in WASDI. 
 
@@ -95,14 +95,12 @@ This section is needed to make wasdi search the new Data Provider. WASDI receive
 
 When the user wants to donwload a file, QueryExecutor will pass to the ProviderAdapter the link and the filename that must be imported. 
 
-In general, the name is the key element: since WASDI supports automatic data provider selection, the system will search the highest priority provider adapter that supports that plaform. The Download Operation will use the QueryExecutor to obtain the url to use for downloadfrom the filename. 
+In general, the name is the key element: since WASDI supports automatic data provider selection, the system will search the highest priority provider adapter that supports that plaform. The Download Operation will use the QueryExecutor to obtain the url to use for download from the filename. 
 Since a platform can be supported by many Data Providers, this method assures to get always the right file also from different sources.
 
-In the particular situation where a single platform is supported only by One Data Provider, in the name and in the link the developer can decide to store more complete informations that may be needed to interoperate with the external API.
+In the particular situation where a single platform is supported only by One Data Provider, in the name and in the link, the developer can decide to store more complete informations that may be needed to interoperate with the external API.
 
-To create a new QueryExecutor:
-
-Add a new package in wasdi.shared.queryexecutors
+To create a new QueryExecutor, add a new package in wasdi.shared.queryexecutors
 
 Create 3 objects:
 
@@ -139,9 +137,9 @@ QueryExecutor base class implements:
 	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) 
 	
 This method is very important for the auto data provider selection: it takes the name of the product returned by any catalogue that supports that platform, the original url returned by the same catalogue and must return the URI to access the file for the Provider Adapter. 
-URI is usually an http link but can be a file path or a ftp link or other, depending by the linked DataProvider that takes the file with that URI in the executeDownloadFile method.
+URI is usually an http link but can be a file path or a ftp link or other, depending on the linked DataProvider that takes the file with that URI in the executeDownloadFile method.
 
-Basic implementantion just makes a query filtering the exact product name and uses to get the relative URI: it MUST be overridden if this does not work.
+The basic implementantion just performs a query filtering by the exact product name and uses the result to get the relative URI: it MUST be overridden if this does not work.
 
 There are at least 2 QueryExecutors base classes that can be used other than the abstract one:
 
@@ -257,12 +255,12 @@ PROVIDER ADAPTER
 
 The ProviderAdapter has the goal to ingest the file: can be a download or a file copy, it depends. Each ProviderAdapter is linked to the relative QueryExecutor using the same DataProviderCode.
 
-WASDI supports automatic DataProvider selection so, each ProviderAdapter, must be able also to get the uri link a file from the file name, and also to be able to declare its "score" in the ability to fetch a file: this scored will be used by WASDI to select the best DataProvider for the file that is downloading.
+WASDI supports automatic DataProvider selection so each ProviderAdapter must be able to get the URI link of a file from the file name. The ProviderAdapter must also be able to declare its "score" in the ability to fetch a file: this score will be used by WASDI to select the best DataProvider for the file that is downloading.
 
 Scores are definied as int in the wasdi.dataproviders.DataProviderScores enum. The higher number means the best possibility to get the file. At the moment values are:
 FILE_ACCESS(100), SAME_CLOUD_DOWNLOAD(90), DOWNLOAD(80), SLOW_DOWNLOAD(50), LTA(10);
 
-The typical empty implementation of ProviderAdapter is:
+The typical empty implementation of a ProviderAdapter is:
 
 .. code-block:: java
 
@@ -311,14 +309,15 @@ internalReadConfig can be used to read from WasdiConfig specific configurations.
 
 getDownloadFileSize receives the file URI and must return the size of the file. Useful to give progress to the user.
 
-executeDownloadFile is the main method: it receives the sFileURL OBTAINED BY THE LINKED DATA PROVIDER, the credentials, the local folder, the process workspace and the max number of retry allowed. Must return the valid file full path or "" if was not possible.
+executeDownloadFile is the main method: it receives the sFileURL OBTAINED BY THE LINKED DATA PROVIDER, the credentials, the local folder, the process workspace and the max number of retry allowed. Must return the valid file full path or "" if the download was not possible.
 
 getFileName extracts the file name from the URL
 
 internalGetScoreForFile returns the score auto-evaluated by the Provider Adapter to download sFileName of sPlatformType.
 
 The base class has many utility functions ready for many common cases:
-* downloadViaHttp: std http dowload
+
+* downloadViaHttp: std http download
 * getFileSizeViaHttp: request file size to http
 * copyStream: copy a stream to another
 * localFileCopy: makes a local file copy
@@ -328,6 +327,7 @@ The base class has many utility functions ready for many common cases:
 The provider adapter MUST be added to the ProviderAdapterFactory
 
 CONFIGURATION
+
 Each Data provider is listed in the dataProviders section of wasdiConfig.json. 
 An example is:
 
@@ -358,6 +358,7 @@ An example is:
 *user* and *password*, if present, are the credentials of the Data Provider.
 
 *cloudProvider* is the unique code of the cloud where the DataProvider is hosted. Can be used to set the score of the performance for a specific file download. 
+
 *supportedPlatforms* is an array if strings. Each String is a valid entry of the Plaforms supported by WASDI: here is written the list of plaforms that this DataProvider supports.
 
 Since each Platform can be supported by many data providers, as we can select the best data provider, WASDI also define the best catalogue to use to query that specific Platform. This is done in the catalogues section of wasdiConfig.
