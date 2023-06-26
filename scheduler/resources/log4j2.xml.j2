@@ -7,10 +7,6 @@
             connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
             facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" format="RFC5424" />
 {% else %}
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%processId] %d{yyyy-MM-dd HH:mm:ss} | %-8level | %logger{1}:%line | %message%n" />
-        </Console>
-
         <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogNativeFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
@@ -26,7 +22,6 @@
 {% if bWasdiSyslogEnabled == true %}
             <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-syslog" />
 {% else %}
-            <AppenderRef ref="console" />
             <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
 {% endif %}
         </Root>
