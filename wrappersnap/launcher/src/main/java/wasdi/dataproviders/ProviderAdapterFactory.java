@@ -29,7 +29,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
 		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
 		aoDownloaders.put("CREODIAS", CREODIASProviderAdapter::new);
-		aoDownloaders.put("CREODIAS2", CreoDias2ProviderAdapter::new)
+		aoDownloaders.put("CREODIAS2", CreoDias2ProviderAdapter::new);
 		aoDownloaders.put("SOBLOO", SOBLOOProviderAdapter::new);
 		aoDownloaders.put("EODC", EODCProviderAdapter::new);
 		aoDownloaders.put("LSA", LSAProviderAdapter::new);
