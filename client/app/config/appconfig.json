@@ -434,11 +434,12 @@
                     "indexvalue":"netcdf"
                 }
 				{
-					"indexname": "absoluteorbit",
+					"indexname": "aggregation",
                     "indexlabel": "Aggregation",
-                    "indexhint" : "0 for one result file per day, 1 for one result per month",
-                    "indexvalues": "0|1",
+                    "indexhint" : "one file per day or one file per calendar's month",
+                    "indexvalues": "daily|monthly",
                     "regex": ".*"
+					"indexvalue": "daily"
 				}
             ]
         },        

@@ -138,8 +138,8 @@ public class QueryExecutorCDS extends QueryExecutor {
 			String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
 			String sFootPrint = extractFootprint(oQuery.getQuery());
 
-			// we use the absolute orbit parameter to decide if the data should be aggregated monthly
-			boolean bIsMonthlyAggregation = oCDSQuery.absoluteOrbit == 1;
+			// we use the "startToDate" parameter to decide if the data should be aggregated monthly
+			boolean bIsMonthlyAggregation = oCDSQuery.startToDate.equals("monthly");
 
 			if (bIsMonthlyAggregation) {
 				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
