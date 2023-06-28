@@ -47,7 +47,7 @@
         <!-- CONFIG FILE -->
         <init-param>
             <param-name>ConfigFilePath</param-name>
-            <param-value>C:\<path to the local file>\wasdiConfig.json</param-value>
+            <param-value>C:\WASDI\configuration\wasdiConfig.json</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
