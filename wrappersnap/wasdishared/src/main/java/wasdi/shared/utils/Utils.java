@@ -321,38 +321,55 @@ public class Utils {
 	 * [22/05/2023-31/05/2023], [01/06/2023-30/06/2023], [01/07/2023-10/07/2023]
 	 * @param oStartDate the start date of the time range
 	 * @param oEndDate the end date of the time range
+	 * @param iOffset offset for the pagination
+	 * @param iLimit maximum number of results per page
 	 * @return a list of monthly intervals included in the time range, represented by 2-dimensional Date arrays.
 	 */
-	public static List<Date[]> splitTimeRangeInMonthyIntervals(Date oStartDate, Date oEndDate) {
+	public static List<Date[]> splitTimeRangeInMonthlyIntervals(Date oStartDate, Date oEndDate, int iOffset, int iLimit) {
 		List<Date[]> aaoIntervals = new LinkedList<>();
 		Calendar oStartCalendar = Calendar.getInstance();
 		oStartCalendar.setTime(oStartDate);
 		Calendar oEndCalendar = Calendar.getInstance();
 		oEndCalendar.setTime(oEndDate);
 		
+		int iCurrentInterval = 0;
 		while (oStartCalendar.before(oEndCalendar)) {
-			int iStartMonth = oStartCalendar.get(Calendar.MONTH);
-			int iEndMonth = oEndCalendar.get(Calendar.MONTH);
-			int iStartYear = oStartCalendar.get(Calendar.YEAR);
-			int iEndYear = oEndCalendar.get(Calendar.YEAR);
+			Date[] aoCurrentInterval = getMonthIntervalFromDate(oStartCalendar, oEndCalendar);
 			
-			if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
-				Date oStartIntervalDate = oStartCalendar.getTime();
-				Date oEndIntervalDate = oEndCalendar.getTime();
-				Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
-				aaoIntervals.add(aoInterval);
+			if (aoCurrentInterval.length == 0) {
 				break;
-			} else {
-				int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-				Date oStartIntervalDate = oStartCalendar.getTime();
-				oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
-				Date oEndIntervalDate = oStartCalendar.getTime();
-				Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
-				aaoIntervals.add(aoInterval);
-				oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
 			}
+			
+			if (iCurrentInterval >= iOffset && iCurrentInterval < iOffset + iLimit) {
+				aaoIntervals.add(aoCurrentInterval);
+			}
+			oStartCalendar.setTime(aoCurrentInterval[1]);
+			oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
+			iCurrentInterval++;
 		}
 		return aaoIntervals;
+	}
+	
+	
+	private static Date[] getMonthIntervalFromDate(Calendar oStartCalendar, Calendar oEndCalendar) {
+		int iStartMonth = oStartCalendar.get(Calendar.MONTH);
+		int iEndMonth = oEndCalendar.get(Calendar.MONTH);
+		int iStartYear = oStartCalendar.get(Calendar.YEAR);
+		int iEndYear = oEndCalendar.get(Calendar.YEAR);
+		
+		if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
+			Date oStartIntervalDate = oStartCalendar.getTime();
+			Date oEndIntervalDate = oEndCalendar.getTime();
+			Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
+			return aoInterval;
+		} else {
+			int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			Date oStartIntervalDate = oStartCalendar.getTime();
+			oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
+			Date oEndIntervalDate = oStartCalendar.getTime();
+			Date[] aoIntervals = new Date[] {oStartIntervalDate, oEndIntervalDate};
+			return aoIntervals;
+		}
 	}
 	
 

@@ -75,14 +75,14 @@ public class QueryExecutorCDS extends QueryExecutor {
 			}
 			
 			// we use the absolute orbit parameter to decide if the data should be aggregated monthly
-			boolean bIsMonthlyAggregation = oCDSQuery.absoluteOrbit == 1;
+			boolean bIsMonthlyAggregation = oCDSQuery.startToDate.equals("monthly");
 			
 			if (bIsMonthlyAggregation) {
 				long lStart = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.startFromDate);
 				long lEnd = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate);
 				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
 				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(lEnd);
-				iCount = Utils.splitTimeRangeInMonthyIntervals(oStartDate, oEndDate).size();
+				iCount = Utils.splitTimeRangeInMonthlyIntervals(oStartDate, oEndDate, 0, Integer.MAX_VALUE).size();
 			} else {
 				int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
 				iCount = iDays;
@@ -145,7 +145,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
 				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate));
 				
-				List<Date[]> aaoIntervals = Utils.splitTimeRangeInMonthyIntervals(oStartDate, oEndDate);
+				List<Date[]> aaoIntervals = Utils.splitTimeRangeInMonthlyIntervals(oStartDate, oEndDate, iOffset, iLimit);
 				
 				for (Date[] aoInterval : aaoIntervals) {
 					Date oStartIntervalDate = aoInterval[0];
