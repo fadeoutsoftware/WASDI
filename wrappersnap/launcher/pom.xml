@@ -244,7 +244,22 @@
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing</artifactId>
+            <artifactId>s1tbx-cloud</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s1tbx</groupId>
+            <artifactId>s1tbx-commons</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s1tbx</groupId>
+            <artifactId>s1tbx-io</artifactId>
+            <version>${sVersionS1tbx}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s1tbx</groupId>
+            <artifactId>s1tbx-io-ephemeris</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
@@ -254,17 +269,7 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sentinel1-ui</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-utilities</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing-ui</artifactId>
+            <artifactId>s1tbx-op-feature-extraction</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
@@ -279,48 +284,38 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-io</artifactId>
+            <artifactId>s1tbx-op-sar-processing</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-feature-extraction</artifactId>
+            <artifactId>s1tbx-op-sar-processing-ui</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-io-ephemeris</artifactId>
+            <artifactId>s1tbx-op-sentinel1-ui</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-cloud</artifactId>
+            <artifactId>s1tbx-op-utilities</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-commons</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>        
         <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-spot-reader</artifactId>
+            <artifactId>s2tbx-biophysical</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-spot6-reader</artifactId>
+            <artifactId>s2tbx-cache</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>9.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-rapideye-reader</artifactId>
+            <artifactId>s2tbx-forest-cover-change</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
@@ -335,27 +330,32 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>8.0.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-mosaic</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-cache</artifactId>
+            <artifactId>s2tbx-radiometric-indices</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-biophysical</artifactId>
+            <artifactId>s2tbx-rapideye-reader</artifactId>
             <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-forest-cover-change</artifactId>
+            <artifactId>s2tbx-s2msi-reader</artifactId>
+            <version>9.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-spot-reader</artifactId>
+            <version>8.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-spot6-reader</artifactId>
             <version>8.0.7</version>
         </dependency>
         <!-- S3 -->
