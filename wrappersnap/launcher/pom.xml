@@ -123,10 +123,6 @@
                         <manifest>
                             <mainClass>wasdi.LauncherMain</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <OpenIDE-Module-Implementation-Version>8.0.4</OpenIDE-Module-Implementation-Version>
-                            <OpenIDE-Module-Specification-Version>8.0.4</OpenIDE-Module-Specification-Version>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -327,11 +323,6 @@
             <artifactId>s2tbx-rapideye-reader</artifactId>
             <version>8.0.7</version>
         </dependency>
-        <!-- dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-jp2-reader</artifactId>
-            <version>5.0.0</version>
-        </dependency> -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-reader</artifactId>
@@ -564,12 +555,14 @@
             <artifactId>juniversalchardet</artifactId>
             <version>${sVersionJUniversalChardet}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${sVersionLombok}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>wasdishared</artifactId>

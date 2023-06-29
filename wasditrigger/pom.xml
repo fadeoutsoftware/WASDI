@@ -112,6 +112,7 @@
     </build>
 
     <dependencies>
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>jwasdilib</artifactId>
@@ -141,6 +142,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>${sVersionCommonsLang3}</version>
         </dependency>
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>wasdishared</artifactId>

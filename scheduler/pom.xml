@@ -137,6 +137,7 @@
             <version>${sVersionJunit}</version>
             <scope>test</scope>
         </dependency>
+        <!-- WASDI's REPOSITORY OR LOCAL BUILD -->
         <dependency>
             <groupId>fadeout.software.wasdi</groupId>
             <artifactId>wasdishared</artifactId>

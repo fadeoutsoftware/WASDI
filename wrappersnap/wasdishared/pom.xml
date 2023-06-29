@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+          https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -17,12 +18,39 @@
     <packaging>jar</packaging>
 
     <properties>
-        <revision>${revision}</revision>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <jackson.version>2.14.1</jackson.version>
-        <probav.version>2.2.0</probav.version>
-        <s1tbx.version>9.0.2</s1tbx.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>1.0</revision>
+        <sVersionAbderaClient>1.1.3</sVersionAbderaClient>
+        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
+        <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
+        <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.21</sVersionCommonsCompress>
+        <sVersionCommonsLang>2.6</sVersionCommonsLang>
+        <sVersionCommonsLang3>3.12.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.4.1</sVersionCommonsValidator>
+        <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
+        <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
+        <sVersionGson>2.10.1</sVersionGson>
+        <sVersionGuava>29.0-jre</sVersionGuava>
+        <sVersionJackson>2.14.1</sVersionJackson>
+        <sVersionJaxbApi>2.3.1</sVersionJaxbApi>
+        <sVersionJson>20230227</sVersionJson>
+        <sVersionJunit>4.13.1</sVersionJunit>
+        <sVersionJunitJupiterApi>5.7.0</sVersionJunitJupiterApi>
+        <sVersionJunitJupiterParams>5.7.0</sVersionJunitJupiterParams>
+        <sVersionLog4j>2.20.0</sVersionLog4j>
+        <sVersionLombok>1.18.22</sVersionLombok>
+        <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
+        <sVersionMongodbDriverSync>4.3.4</sVersionMongodbDriverSync>
+        <sVersionProbav>2.2.0</sVersionProbav>
+        <sVersionS1tbx>9.0.2</sVersionS1tbx>
+        <sVersionS2tbx>8.0.7</sVersionS2tbx>
+        <sVersionSnap>9.0.4</sVersionSnap>
     </properties>
 
     <build>
@@ -30,7 +58,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.3.0</version>
+                <version>${sVersionFlattenMavenPlugin}</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>
@@ -73,176 +101,194 @@
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
-        <!-- dependency> <groupId>org.mongodb</groupId> <artifactId>mongo-java-driver</artifactId>
-            <version>3.12.8</version> </dependency -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.3.4</version>
+            <version>${sVersionMongodbDriverSync}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${sVersionJackson}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-core</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaCore}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-client -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-client</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaClient}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-extensions-json -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-extensions-json</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaExtensionsJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.20.0</version>
+            <version>${sVersionLog4j}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.20.0</version>
+            <version>${sVersionLog4j}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.18.0</version>
+            <version>${sVersionAmqpClient}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${sVersionCommonsLang}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>${sVersionGuava}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/it.geosolutions/geoserver-manager -->
         <dependency>
             <groupId>it.geosolutions</groupId>
             <artifactId>geoserver-manager</artifactId>
-            <version>1.7.0</version>
+            <version>${sVersionGeoserverManager}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>${sVersionJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>${sVersionGson}</version>
         </dependency>
-        <!-- ESA SNAP -->
+        <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>${s1tbx.version}</version>
+            <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-calibration</artifactId>
-            <version>${s1tbx.version}</version>
+            <version>${sVersionS1tbx}</version>
         </dependency>
+        <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
+        <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
-            <version>9.0.4</version>
+            <version>${sVersionSnap}</version>
         </dependency>
+        <!-- PROBAV -->
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-kit</artifactId>
-            <version>${probav.version}</version>
+            <version>${sVersionProbav}</version>
         </dependency>
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-reader</artifactId>
-            <version>${probav.version}</version>
+            <version>${sVersionProbav}</version>
         </dependency>
-        <!-- END OF ESA SNAP -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>${sVersionCommonsCompress}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.4.1</version>
+            <version>${sVersionCommonsValidator}</version>
         </dependency>
-        <!-- FTP mock server + tests -->
+        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.9.0</version>
+            <version>${sVersionCommonsNet}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>${sVersionJunit}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
+            <version>${sVersionJunitJupiterApi}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.7.0</version>
+            <version>${sVersionJunitJupiterParams}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
         <dependency>
             <groupId>org.mockftpserver</groupId>
             <artifactId>MockFtpServer</artifactId>
-            <version>2.7.1</version>
+            <version>${sVersionMockFtpServer}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.18.1</version>
+            <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <version>${sVersionJaxbApi}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${sVersionCommonsLang3}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>${sVersionLombok}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.392</version>
+            <version>${sVersionAwsJavaSdkS3}</version>
         </dependency>
     </dependencies>
 
