@@ -432,13 +432,13 @@
                     "indexvalues":"grib|netcdf",
                     "regex": ".*",
                     "indexvalue":"netcdf"
-                }
+                },
 				{
 					"indexname": "aggregation",
                     "indexlabel": "Aggregation",
                     "indexhint" : "one file per day or one file per calendar's month",
                     "indexvalues": "daily|monthly",
-                    "regex": ".*"
+                    "regex": ".*",
 					"indexvalue": "daily"
 				}
             ]
