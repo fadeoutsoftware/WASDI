@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+          https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>fadeout.software.wasdi</groupId>
@@ -58,11 +59,11 @@
     <distributionManagement>
         <repository>
             <id>wasdi-release</id>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
+            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-release/</url>
         </repository>
         <snapshotRepository>
             <id>wasdi-snapshot</id>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
+            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -107,7 +108,7 @@
         <repository>
             <id>wasdi-library</id>
             <name>WASDI - INTERNAL REPOSITORY - LIBRARY</name>
-            <url>${wasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
+            <url>${sWasdiNexusRepositoryUrl}/repository/wasdi-library/</url>
         </repository>
     </repositories>
 </project>

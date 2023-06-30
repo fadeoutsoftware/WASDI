@@ -7,6 +7,7 @@ Created on 24 Nov 2022
 import json
 import os
 import requests
+import shutil
 import sys
 import traceback
 import urllib.parse
@@ -222,29 +223,35 @@ def executeProcessor(aoS3Configuration):
         '''
         CREATE THE DIRECTORY TO WRITE IN S3
         '''
-        sWriteDir = os.path.realpath(
+        sObjectStorageDirectory = os.path.realpath(
             os.path.join(
                 os.environ['WASDI_OUTPUT'],
                 's3_results'
             )
         )
 
-        if not os.path.isdir(sWriteDir):
-            wasdi.wasdiLog('Create the directory: %s' %(sWriteDir))
-            os.mkdir(sWriteDir)
-            wasdi.wasdiLog('The directory %s is created' %(sWriteDir))
+        if not os.path.isdir(sObjectStorageDirectory):
+            wasdi.wasdiLog('Create the directory: %s' %(sObjectStorageDirectory))
+            os.mkdir(sObjectStorageDirectory)
+            wasdi.wasdiLog('The directory %s is created' %(sObjectStorageDirectory))
 
 
         '''
-        TEST TO WRITE A FILE
+        PUBLISH FILES PRODUCED IN THE S3 BUCKET
         '''
-        sFileToWrite = os.path.join(sWriteDir, 'myfile.txt')
-        wasdi.wasdiLog('Write a file %s' %(sFileToWrite))
+        asProducts = wasdi.getProductsByActiveWorkspace()
 
-        with open(sFileToWrite, 'w') as oFile:
-            oFile.write("Hello World!\n")
+        for sFile in asProducts:
+            wasdi.wasdiLog('Copy the file %s in the S3 bucket' %(sFile))
+            shutil.copy(
+                wasdi.getPath(sFile),
+                os.path.join(
+                    sObjectStorageDirectory,
+                    sFile
+                )
+            )
 
-        wasdi.wasdiLog('The file %s is written' %(sFileToWrite))
+            wasdi.wasdiLog('The file %s is written' %(sFile))
 
         sForceStatus = 'DONE'
     except Exception as oEx:

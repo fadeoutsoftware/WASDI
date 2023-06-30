@@ -1,9 +1,9 @@
 def getCurrentRevision(sEnvironmentName) {
   if ( sEnvironmentName.toLowerCase() == 'prod' ) {
-    return "0.0.${env.BUILD_ID}"
+    return "${env.BUILD_ID}"
   }
 
-  return "0.0.${env.BUILD_ID}-SNAPSHOT"
+  return "${env.BUILD_ID}-SNAPSHOT"
 }
 
 def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
@@ -82,9 +82,9 @@ pipeline {
       steps {
         script {
           if ( env.sCurrentEnvironmentLower == 'prod' ) {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Upload in Nexus"
           } else {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Deploy in Nexus"
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
           }
         }
       }

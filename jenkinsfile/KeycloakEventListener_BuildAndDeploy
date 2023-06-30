@@ -22,8 +22,8 @@ pipeline {
   }
 
   tools {
-    jdk "WASDI_JDK_8"
-    maven "WASDI_MAVEN"
+    jdk "WASDI_JDK_17"
+    maven "WASDI_MAVEN_STANDALONE"
   }
 
   stages {
@@ -54,15 +54,25 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF KEYCLOAK THEME + DEPLOY IT"
+          currentBuild.description = "WASDI - BUILD OF KEYCLOAK EVENT LISTENER + DEPLOY IT"
         }
+      }
+    }
+
+    stage('ANSIBLE - PREPARE THE CODE (RENDER TEMPLATES, ETC)') {
+      steps {
+        sh script: """
+            cd ${env.sWasdiAnsiblePath}
+            ansible-playbook playbooks/prepareKeycloakEventListener.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Prepare the code"
       }
     }
 
     stage('MAVEN - BUILD') {
       steps {
         sh script: """
-          cd ./keycloak/theme
+          cd ./keycloak/events
           mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
         """,
         label: "Build"
@@ -72,7 +82,7 @@ pipeline {
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
         sh script: """
-          cd ./keycloak/theme
+          cd ./keycloak/events
           mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy
         """,
         label: "Upload in Nexus"
@@ -83,7 +93,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/deployKeycloakEventListener.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'keycloakDeploymentSpecificEventListener=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Execute ansible-playbook"
       }
