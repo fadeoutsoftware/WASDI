@@ -238,7 +238,6 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint, Date oStartDate, Date oEndDate) {
 		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
-		String sEndDate = Utils.formatToYyyyMMdd(oEndDate);
 		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
 		String sEndDateTime = null;
 		if (oEndDate != null) {
@@ -246,7 +245,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 
 		String sExtension = "." + oQuery.timeliness;
-		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension; 
+		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate).replaceAll("[\\W]", "_") + sExtension; 
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
