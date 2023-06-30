@@ -256,8 +256,8 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			sYear = sStartDate.substring(0, 4);
 			sMonth = sStartDate.substring(4, 6);
 			int iStartDay = Integer.parseInt(sStartDate.substring(6,  8));
-			int iEndDate = Integer.parseInt(sEndDate.substring(6,  8));
-			asDays = IntStream.rangeClosed(iStartDay, iEndDate)
+			int iEndDay = Integer.parseInt(sEndDate.substring(6,  8));
+			asDays = IntStream.rangeClosed(iStartDay, iEndDay)
 					.mapToObj(String::valueOf)
 					.collect(Collectors.toList());
 		} else {
