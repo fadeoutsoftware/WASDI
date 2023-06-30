@@ -236,9 +236,9 @@ public class QueryExecutorCDS extends QueryExecutor {
 	}
 	
 
-	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint,
-			Date oStartDate, Date oEndDate) {
+	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint, Date oStartDate, Date oEndDate) {
 		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
+		String sEndDate = Utils.formatToYyyyMMdd(oEndDate);
 		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
 		String sEndDateTime = null;
 		if (oEndDate != null) {
@@ -246,7 +246,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 
 		String sExtension = "." + oQuery.timeliness;
-		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate).replaceAll("[\\W]", "_") + sExtension; // TODO: does the fileName change for the aggregated results?
+		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension; 
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
@@ -254,7 +254,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.setId(sFileName);
 		oResult.setTitle(sFileName);
 		oResult.setLink(sEncodedUrl);
-		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, oQuery.sensorMode, oQuery.timeliness)); // TODO: does the summary change for the aggregated results?
+		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, oQuery.sensorMode, oQuery.timeliness)); 
 		oResult.setProvider(m_sProvider);
 		oResult.setFootprint(sFootPrint);
 		oResult.getProperties().put("platformname", Platforms.ERA5);
@@ -266,7 +266,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.getProperties().put("startDate", sStartDateTime);
 		oResult.getProperties().put("beginposition", sStartDateTime);
 
-		if (oEndDate != null) { // TODO: is it ok to add this properties when we have aggregated results?
+		if (oEndDate != null) { 
 			oResult.getProperties().put("endDate", sEndDateTime);
 			oResult.getProperties().put("endposition", sEndDateTime);
 		}

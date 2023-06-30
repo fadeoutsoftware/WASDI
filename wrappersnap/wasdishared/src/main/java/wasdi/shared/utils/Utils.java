@@ -335,7 +335,6 @@ public class Utils {
 		int iCurrentInterval = 0;
 		while (oStartCalendar.before(oEndCalendar)) {
 			Date[] aoCurrentInterval = getMonthIntervalFromDate(oStartCalendar, oEndCalendar);
-			
 			if (aoCurrentInterval.length == 0) {
 				break;
 			}
@@ -343,8 +342,10 @@ public class Utils {
 			if (iCurrentInterval >= iOffset && iCurrentInterval < iOffset + iLimit) {
 				aaoIntervals.add(aoCurrentInterval);
 			}
+			
 			oStartCalendar.setTime(aoCurrentInterval[1]);
-			oStartCalendar.add(Calendar.DAY_OF_MONTH, 1);
+			oStartCalendar.add(Calendar.MILLISECOND, 1);
+			
 			iCurrentInterval++;
 		}
 		return aaoIntervals;
@@ -352,24 +353,42 @@ public class Utils {
 	
 	
 	private static Date[] getMonthIntervalFromDate(Calendar oStartCalendar, Calendar oEndCalendar) {
-		int iStartMonth = oStartCalendar.get(Calendar.MONTH);
+		Calendar oStartCalendarClone = Calendar.getInstance();
+		oStartCalendarClone.setTime(oStartCalendar.getTime());
+		int iStartMonth = oStartCalendarClone.get(Calendar.MONTH);
 		int iEndMonth = oEndCalendar.get(Calendar.MONTH);
-		int iStartYear = oStartCalendar.get(Calendar.YEAR);
+		int iStartYear = oStartCalendarClone.get(Calendar.YEAR);
 		int iEndYear = oEndCalendar.get(Calendar.YEAR);
 		
 		if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
-			Date oStartIntervalDate = oStartCalendar.getTime();
+			Date oStartIntervalDate = oStartCalendarClone.getTime();
 			Date oEndIntervalDate = oEndCalendar.getTime();
 			Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
 			return aoInterval;
 		} else {
-			int iLastDayOfMonth = oStartCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			Date oStartIntervalDate = oStartCalendar.getTime();
-			oStartCalendar.set(Calendar.DAY_OF_MONTH, iLastDayOfMonth);
-			Date oEndIntervalDate = oStartCalendar.getTime();
+			Date oStartIntervalDate = oStartCalendarClone.getTime();
+			// jump to the last day of the month		
+			oStartCalendarClone.set(Calendar.DAY_OF_MONTH, 1);
+			oStartCalendarClone.set(Calendar.MONTH, (iStartMonth + 1) % 12);
+			adjustCalendar(oStartCalendarClone);
+			oStartCalendarClone.add(Calendar.MILLISECOND, -1);
+
+		
+			Date oEndIntervalDate = oStartCalendarClone.getTime();
 			Date[] aoIntervals = new Date[] {oStartIntervalDate, oEndIntervalDate};
 			return aoIntervals;
 		}
+	}
+	
+	private static void adjustCalendar(Calendar oCalendar) {
+		if (oCalendar.get(Calendar.MONTH) == 3) {
+			oCalendar.add(Calendar.HOUR_OF_DAY, 1);
+		} else if (oCalendar.get(Calendar.MONTH) == 10) {
+			oCalendar.add(Calendar.HOUR_OF_DAY, -1);
+		} else if (oCalendar.get(Calendar.MONTH) == 0) {
+			oCalendar.add(Calendar.YEAR, 1);
+		}
+
 	}
 	
 
