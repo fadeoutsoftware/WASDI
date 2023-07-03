@@ -20,6 +20,7 @@
         <revision>${revision}</revision>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
         <jackson.version>2.14.1</jackson.version>
         <probav.version>2.2.0</probav.version>
         <s1tbx.version>9.0.2</s1tbx.version>
@@ -113,10 +114,11 @@
             <artifactId>log4j-core</artifactId>
             <version>2.20.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.12.0</version>
+            <version>${sVersionAmqpClient}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
