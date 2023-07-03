@@ -353,15 +353,23 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
 		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables");
-		String sDate = JsonUtils.getProperty(aoWasdiPayload, "date");
+		String sDate =  JsonUtils.getProperty(aoWasdiPayload, "date");
+		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");
+		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
 
 		String sExtension = "." + sFormat;
 
 		// filename: reanalysis-era5-pressure-levels_UV_20211201
-		String sFileName = String.join("_", Platforms.ERA5, sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
-
+		String sFileName = getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension);
+			
 		return sFileName;
+	}
+	
+	private String getFileName(String sDataset, String sVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension) {
+	return Utils.isNullOrEmpty(sStartDate) || Utils.isNullOrEmpty(sEndDate) 
+			? String.join("_", Platforms.ERA5, sDataset, sVariables, sDailyDate).replaceAll("[\\W]", "_") + sExtension
+			: String.join("_", Platforms.ERA5, sDataset, sVariables, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
 	}
 
 

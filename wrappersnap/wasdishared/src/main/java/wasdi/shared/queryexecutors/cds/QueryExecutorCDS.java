@@ -234,10 +234,13 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 		return sFootprint;
 	}
-	
 
-	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint, Date oStartDate, Date oEndDate) {
+	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint,
+			Date oStartDate, Date oEndDate) {
 		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
+		String sEndDate = oEndDate != null 
+				? Utils.formatToYyyyMMdd(oStartDate) 
+				: "";
 		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
 		String sEndDateTime = null;
 		if (oEndDate != null) {
@@ -245,7 +248,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 
 		String sExtension = "." + oQuery.timeliness;
-		String sFileName = String.join("_", Platforms.ERA5, oQuery.productName, oQuery.sensorMode, sStartDate).replaceAll("[\\W]", "_") + sExtension; 
+		String sFileName = getFileName(oQuery.productName, oQuery.sensorMode, sStartDate, sEndDate, sExtension);
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
@@ -265,17 +268,24 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.getProperties().put("startDate", sStartDateTime);
 		oResult.getProperties().put("beginposition", sStartDateTime);
 
-		if (oEndDate != null) { 
+		if (oEndDate != null) {
 			oResult.getProperties().put("endDate", sEndDateTime);
 			oResult.getProperties().put("endposition", sEndDateTime);
 		}
 		return oResult;
 	}
-	
+
 	private String getSummary(String sStartDateTime, String sEndDateTime, String sMode, String timeliness) {
-		return Utils.isNullOrEmpty(sEndDateTime) 
-				? "Date: " + sStartDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness 
-				: "Start date: " + sStartDateTime + ",End date: " + sEndDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness;
+		return Utils.isNullOrEmpty(sEndDateTime)
+				? "Date: " + sStartDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness
+				: "Start date: " + sStartDateTime + ",End date: " + sEndDateTime + ", Mode: " + sMode + ", Instrument: "
+						+ timeliness;
 	}
 	
+	private String getFileName(String sProductName, String sSensoreMode, String sStartDate, String sEndDate, String sExtension) {
+		return Utils.isNullOrEmpty(sEndDate) 
+				? String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate).replaceAll("[\\W]", "_") + sExtension
+				: String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
+	}
+
 }
