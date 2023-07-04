@@ -239,7 +239,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 			Date oStartDate, Date oEndDate) {
 		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
 		String sEndDate = oEndDate != null 
-				? Utils.formatToYyyyMMdd(oStartDate) 
+				? Utils.formatToYyyyMMdd(oEndDate) 
 				: "";
 		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
 		String sEndDateTime = null;
