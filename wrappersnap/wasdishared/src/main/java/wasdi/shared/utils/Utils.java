@@ -381,11 +381,7 @@ public class Utils {
 	}
 	
 	private static void adjustCalendar(Calendar oCalendar) {
-		if (oCalendar.get(Calendar.MONTH) == 3) {
-			oCalendar.add(Calendar.HOUR_OF_DAY, 1);
-		} else if (oCalendar.get(Calendar.MONTH) == 10) {
-			oCalendar.add(Calendar.HOUR_OF_DAY, -1);
-		} else if (oCalendar.get(Calendar.MONTH) == 0) {
+		if (oCalendar.get(Calendar.MONTH) == 0) {
 			oCalendar.add(Calendar.YEAR, 1);
 		}
 
