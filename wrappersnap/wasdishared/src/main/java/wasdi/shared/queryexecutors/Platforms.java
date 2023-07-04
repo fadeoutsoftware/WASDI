@@ -13,8 +13,13 @@ public class Platforms {
 	public static String SENTINEL2 = "Sentinel-2";
 	public static String SENTINEL3 = "Sentinel-3";
 	public static String SENTINEL5P = "Sentinel-5P";
+	// Creodias 2 new platforms
+	public static String SENTINEL6 = "Sentinel-6";
+	public static String SENTINEL_1_RTC = "Sentinel-1-RTC";
 	
 	public static String PROBAV = "Proba-V";
+	public static String LANDSAT5 = "Landsat-5"; // Creodias 2 new platforms
+	public static String LANDSAT7 = "Landsat-7"; // Creodias 2 new platforms
 	public static String LANDSAT8 = "Landsat-8";
 	public static String ENVISAT = "Envisat";
 	
@@ -37,5 +42,12 @@ public class Platforms {
 	public static String ECOSTRESS = "ECOSTRESS";
 
 	public static String EARTHCACHE = "Earthcache";
+	
+	// Creodias 2 new platforms
+	public static String SMOS = "SMOS";
+	public static String TERRAAQUA = "Terraaqua";
+	public static String COP_DEM = "COP_DEM";
+	public static String S2GLC = "S2GLC";
+	
 
 }
