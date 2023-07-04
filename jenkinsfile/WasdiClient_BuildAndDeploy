@@ -11,7 +11,7 @@ pipeline {
   }
 
   tools {
-    nodejs "WASDI_NODEJS_V16"
+    nodejs "WASDI_NODEJS_V18"
   }
 
   stages {
@@ -55,19 +55,13 @@ pipeline {
       }
     }
 
-    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, DELETE TEMPLATES)') {
+    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, COMPILE SCSS, DELETE TEMPLATES, ETC)') {
       steps {
         sh script: """
             cd ${env.sWasdiAnsiblePath}
             ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Prepare the WASDI client"
-      }
-    }
-
-    stage('NPM - COMPILE SCSS FILES') {
-      steps {
-        sh script: "bash /opt/wasdi/cicd/scripts/compileScss.sh ${env.WORKSPACE}/client/app/css", label: "Compile SCSS files in CSS"
       }
     }
 
