@@ -81,11 +81,20 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-        """,
-        label: "Execute ansible-playbook"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook playbooks/deployKeycloakTheme.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'keycloakDeploymentSpecificTheme=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Execute ansible-playbook"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
   }

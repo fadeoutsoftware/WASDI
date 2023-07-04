@@ -96,7 +96,7 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployKeycloakEventListener.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff2 --extra-vars 'keycloakDeploymentSpecificEventListener=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook playbooks/deployKeycloakEventListener.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'keycloakDeploymentSpecificEventListener=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
