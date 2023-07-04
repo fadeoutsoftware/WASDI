@@ -57,11 +57,11 @@
 
         <div ng-if="layer.summary && layer.summary.Date">
             {{layer.properties.endDate? "Start Date:" : ""}}
-            {{layer.properties.endDate? layer.properties.startDate: "" |date:'medium'}}
+            {{layer.properties.endDate? layer.properties.startDate: "" |date:'medium': 'GMT'}}
             <br ng-if="layer.properties.endDate">
             {{layer.properties.endDate? "End Date:": ""}}
             {{ layer.properties.endDate? layer.properties.endDate:
-            layer.summary.Date|date:'medium'}}
+            layer.summary.Date|date:'medium': 'GMT'}}
         </div><!--Date-->
         </br>
 
