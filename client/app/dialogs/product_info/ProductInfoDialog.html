@@ -17,7 +17,7 @@
                             <tbody>
                                 <tr ng-repeat="property in m_oController.m_oPropertiesList" ng-hide="m_oController.m_oPropertiesList.length === 0">
                                     <td>{{property.label}}</td>
-                                    <td>{{property.value}}</td>
+                                    <td>{{property.label === 'Date' ? (property.value|date:'medium': 'GMT') : property.value}}</td>
                                 </tr>
                             </tbody>
                             <tfoot></tfoot>
