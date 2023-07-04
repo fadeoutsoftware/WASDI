@@ -101,6 +101,7 @@ pipeline {
               label: "Execute ansible-playbook"
             } catch (oError) {
               echo oError.getMessage()
+              throw oError
             }
           }
         }
