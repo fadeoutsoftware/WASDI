@@ -91,7 +91,7 @@ pipeline {
 
     stage('DEPLOYMENT') {
       steps {
-        script {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           try {
             sh script: """
               cd ${env.sWasdiAnsiblePath}
