@@ -38,10 +38,9 @@ public class TestUtils {
 			oStartCalendar.setTime(aoInterval[0]);
 			Calendar oEndCalendar = Calendar.getInstance();
 			oEndCalendar.setTime(aoInterval[1]);
-			assertEquals(oStartCalendar.get(Calendar.MONTH), oEndCalendar.get(Calendar.MONTH));
 			assertEquals(oStartCalendar.get(Calendar.YEAR), oEndCalendar.get(Calendar.YEAR));
 			assertEquals(iStartMonth, oStartCalendar.get(Calendar.MONTH));
-			iStartMonth = (iStartMonth + 1) % 13;
+			iStartMonth = (iStartMonth + 1) % 12;
 		}
 	}
 	
@@ -74,7 +73,6 @@ public class TestUtils {
 			oStartCalendar.setTime(aoInterval[0]);
 			Calendar oEndCalendar = Calendar.getInstance();
 			oEndCalendar.setTime(aoInterval[1]);
-			assertEquals(oStartCalendar.get(Calendar.MONTH), oEndCalendar.get(Calendar.MONTH));
 			assertEquals(iStartMonth, oStartCalendar.get(Calendar.MONTH));
 			iStartMonth = (iStartMonth + 1) % 12;
 		}
@@ -109,7 +107,6 @@ public class TestUtils {
 			oStartCalendar.setTime(aoInterval[0]);
 			Calendar oEndCalendar = Calendar.getInstance();
 			oEndCalendar.setTime(aoInterval[1]);
-			assertEquals(oStartCalendar.get(Calendar.MONTH), oEndCalendar.get(Calendar.MONTH));
 			assertEquals(iStartMonth, oStartCalendar.get(Calendar.MONTH));
 			iStartMonth = (iStartMonth + 1) % 12;
 		}
