@@ -17,13 +17,22 @@ public class QueryExecutorCreoDias2 extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) {
+		// MUST
 		// TODO Auto-generated method stub
 		// receive in input the WASDI query, must return the number of results for the provider 
+		String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
+		
+		// execute standard http query
+		String sResults = standardHttpGETQuery(sOutputQuery);
+		
+		if (sResults == null) return -1;
+		
 		return 0;
 	}
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+		// MUST
 		// TODO Auto-generated method stub
 		//  receive in input the WASDI query, must return the list of provider's results  as a list of QueryResultViewModel
 		// (there, the important fields are title and link).
