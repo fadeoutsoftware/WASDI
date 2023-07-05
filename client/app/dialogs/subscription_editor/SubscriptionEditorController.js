@@ -172,8 +172,8 @@ SubscriptionEditorController = (function () {
                 oController.m_oEditSubscription.subscriptionId = response.data.message;
                 oController.initializeSubscriptionInfo();
                 oController.initializeDates();
-                //If creatimg a subscription:
-                if (oController.m_bEditMode === false) {
+                //If creating a subscription:
+                if (oController.m_bCheckoutNow === true) {
                     let oDialog = utilsVexDialogAlertBottomRightCorner("SUBSCRIPTION SAVED<br>REDIRECTING TO PAYMENT");
                     utilsVexCloseDialogAfter(4000, oDialog);
 
