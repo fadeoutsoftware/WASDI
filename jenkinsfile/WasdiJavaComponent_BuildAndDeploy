@@ -68,45 +68,51 @@ pipeline {
 
     stage('MAVEN - BUILD') {
       steps {
-        sh script: """
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
-        """,
-        label: "Create packages"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package", label: "Create packages"
       }
     }
 
     stage('MAVEN - EXECUTE TEST') {
       steps {
-        sh script: """
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test
-        """,
-        label: "Execute unit test"
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
       }
     }
 
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
-        sh script: """
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy
-        """,
-        label: "Upload in Nexus"
+        script {
+          if ( env.sCurrentEnvironmentLower == 'prod' ) {
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Upload in Nexus"
+          } else {
+            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
+          }
+        }
       }
     }
 
     stage('DEPLOYMENT') {
       steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-        """,
-        label: "Execute ansible-playbook"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Execute ansible-playbook"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
 
     stage('ANALYZE THE CODE WITH SONARQUBE') {
       steps {
         script {
-          if ( env.executeSonarqube.toBoolean() ) {
+          if ( env.executeSonarqube.toBoolean() && env.sCurrentEnvironmentLower == 'test' ) {
             withCredentials([
                 string(credentialsId: 'SONARQUBE_JDK_HOME', variable: 'SONARQUBE_JDK_HOME'),
                 string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
