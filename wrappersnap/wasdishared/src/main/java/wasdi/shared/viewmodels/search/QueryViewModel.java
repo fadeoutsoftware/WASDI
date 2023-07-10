@@ -90,5 +90,10 @@ public class QueryViewModel {
 	 * Timeliness (ie Sentinel 3 filter)
 	 */
 	public String timeliness = "";
+	
+	/**
+	 * Polarisation
+	 */
+	public String polarisation;
 
 }

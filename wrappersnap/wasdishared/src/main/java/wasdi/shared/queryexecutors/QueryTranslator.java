@@ -7,6 +7,7 @@
 package wasdi.shared.queryexecutors;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -619,7 +620,7 @@ public abstract class QueryTranslator {
 							+ " ): error while parsing product type: " + oE);
 				}
 
-				// check for product type
+				// check for sensor mode
 				try {
 					if (sQuery.contains(QueryTranslator.s_sSENSORMODE)) {
 						int iStart = sQuery.indexOf(s_sSENSORMODE);
@@ -680,6 +681,41 @@ public abstract class QueryTranslator {
 								+ " ): error while parsing relative orbit: " + oE);
 					}
 				}
+				
+				// check for polarisation mode
+				String sPolarisation = "polarisationmode:";
+				if (sQuery.contains(sPolarisation)) {
+					try {
+						int iStart = sQuery.indexOf(sPolarisation);
+						if (iStart < 0) {
+							throw new IllegalArgumentException("Could not find polarisation mode");
+						}
+						iStart += sPolarisation.length();
+						int iEnd = sQuery.indexOf(" AND ", iStart);
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(')');
+						}
+						if (iEnd < 0) {
+							iEnd = sQuery.indexOf(' ', iStart);
+						}
+						if (iEnd < 0) {
+							// if anything else failed check for the valid chars used to form a polarisation value
+							iEnd = iStart;
+							List<Character> sLegitChars = Arrays.asList('H', 'V', '&');
+							while (iEnd < sQuery.length() && sLegitChars.contains(sQuery.charAt(iEnd))) {
+								iEnd++;
+							}
+						}
+						String sPolarisationMode = sQuery.substring(iStart, iEnd);
+
+						oResult.polarisation = sPolarisationMode;
+
+					} catch (Exception oE) {
+						WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery(" + sQuery
+								+ " ): error while parsing polarisation mode: " + oE);
+					}
+				}
+				
 			}
 		} catch (Exception oE) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery( " + sQuery + " ): " + oE);
