@@ -1,6 +1,5 @@
-<table class="table table-hover layers " id="table_layers_list"
-       aria-label="product list"
-       ng-show="$ctrl.m_bIsVisibleListOfLayers && $ctrl.isEmptyProductsList() == false" >
+<table class="table table-hover layers " id="table_layers_list" aria-label="product list"
+    ng-show="$ctrl.m_bIsVisibleListOfLayers && $ctrl.isEmptyProductsList() == false">
 
     <tbody ng-repeat="layer in $ctrl.m_aoProductsList | filter:{ provider: provider.name } "
            ng-mouseover="$ctrl.changeStyleRectangleMouseOver(layer.rectangle)"
@@ -56,8 +55,15 @@
         <!-- INFO CELL -->
         <td class="info-cell">
 
-            <div ng-if="layer.summary && layer.summary.Date">{{layer.summary.Date|date:'medium'}}</div><!--Date-->
-            </br>
+        <div ng-if="layer.summary && layer.summary.Date">
+            {{layer.properties.endDate? "Start Date:" : ""}}
+            {{layer.properties.endDate? layer.properties.startDate: "" |date:'medium': 'GMT'}}
+            <br ng-if="layer.properties.endDate">
+            {{layer.properties.endDate? "End Date:": ""}}
+            {{ layer.properties.endDate? layer.properties.endDate:
+            layer.summary.Date|date:'medium': 'GMT'}}
+        </div><!--Date-->
+        </br>
 
             <div ng-if="layer.title">
                 <span>{{'IMPORT_PRODUCT_LIST_NAME'|translate}}</span>
