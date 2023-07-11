@@ -1,8 +1,11 @@
 package wasdi.shared.queryexecutors.creodias2;
 
 import java.util.List;
+import java.util.Map;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
+import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
@@ -15,8 +18,16 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 
 	@Override
 	public int getCountResult(String sQueryResult) {
-		// TODO Auto-generated method stub
-		return 0;
+		int iCount = -1; 
+		
+		if (Utils.isNullOrEmpty(sQueryResult)) 
+			return iCount;
+		
+		Map<String, Object> aoProperties = JsonUtils.jsonToMapOfObjects(sQueryResult);
+		
+		iCount = (Integer) aoProperties.get("@odata.count");
+		
+		return iCount;
 	}
 
 }

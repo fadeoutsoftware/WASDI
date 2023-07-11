@@ -32,9 +32,6 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	@Override
 	protected String translate(String sQueryFromClient) {
 		Preconditions.checkNotNull(sQueryFromClient, "QueryTranslatorCreoDias2.translate: query is null");
-		// probably the two checks below will be removed
-		Preconditions.checkNotNull(m_sAppConfigPath, "QueryTranslatorCreoDias2.translate: app config path is null");
-		Preconditions.checkNotNull(m_sParserConfigPath, "QueryTranslatorCreoDias2.translate: parser config is null");
 		
 		
 		String sQuery = this.prepareQuery(sQueryFromClient);
@@ -117,9 +114,10 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (!Utils.isNullOrEmpty(oQueryViewModel.instrument))
 			asQueryElements.add(createStringAttribute("instrumentShortName", oQueryViewModel.instrument));
 		
-		// satellite platform
-		if (!Utils.isNullOrEmpty(oQueryViewModel.platformSerialIdentifier))
-			asQueryElements.add(createStringAttribute("platformSerialIdentifier", oQueryViewModel.platformSerialIdentifier));
+		// satellite platform identifier
+		String sPlatformId = getPlatformSerialIdentifierCode(oQueryViewModel.platformSerialIdentifier);
+		if (!Utils.isNullOrEmpty(sPlatformId))
+			asQueryElements.add(createStringAttribute("platformSerialIdentifier", sPlatformId));
 		
 		
 
@@ -133,7 +131,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 
 			
 		String sFilterValue = String.join(" " + sODataAND + " ", asQueryElements);	
-
+		
 		return sODataFilterOption + sFilterValue;
 	}
 	
@@ -161,7 +159,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		asCoordinates.add(sE + " " + sN);
 		asCoordinates.add(sW + " " + sN);
 		asCoordinates.add(sW + " " + sS); // polygon must start and end with the same point
-		return "OData.CSC.Intersects(area=geography'SRID=4326;POLYGON((" + String.join(", ", asCoordinates) + "))')";
+		return "OData.CSC.Intersects(Footprint=geography'SRID=4326;POLYGON ((" + String.join(", ", asCoordinates) + "))')";
 	}
 	
 	private String createStringAttribute(String sName, String sValue) {
@@ -219,6 +217,16 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			return "L1b";
 		if (sProductLevel.equalsIgnoreCase("LEVEL2"))
 			return "L2";
+		return "";
+	}
+	
+	private String getPlatformSerialIdentifierCode(String sId) {
+		if (Utils.isNullOrEmpty(sId))
+			return "";
+		if (sId.equalsIgnoreCase("S1A_*") || sId.equalsIgnoreCase("S2A_*"))
+			return "A";
+		if (sId.equalsIgnoreCase("S1B_*") || sId.equalsIgnoreCase("S2B_*"))
+			return "B";
 		return "";
 	}
 	
@@ -289,19 +297,18 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 
 	@Override
 	public String getCountUrl(String sQuery) {
-		// TODO Auto-generated method stub
 		if(Utils.isNullOrEmpty(sQuery)) {
 			WasdiLog.debugLog("QueryTranslatorCreoDias2.getCountUrl: sQuery is null");
 		}
 		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+=translateAndEncodeParams(sQuery) + "&$count=True";
 		
+		WasdiLog.debugLog("QueryTranslatorCreoDias2.getCountUrl. Generated OData query URL: " + sUrl);
 		return sUrl;
 	}
 
 	@Override
 	public String getSearchUrl(PaginatedQuery oQuery) {
-		// TODO Auto-generated method stub
 		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+= translateAndEncodeParams(oQuery.getQuery());
 		
@@ -322,7 +329,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			WasdiLog.debugLog("QueryTranslatorCreoDias2.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
-		sUrl += "&" + sODataOrderBy + "ContentDate/Start asc"; // TODO: do we get these values from the client or we have a default order?
+		sUrl += "&" + sODataOrderBy + "ContentDate/Start asc&$expand=Attributes"; // TODO: do we get these values from the client or we have a default order?
 		
 		
 		return sUrl;
@@ -340,30 +347,30 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		System.out.println(sRes + ""); //OK
 		
 		// try the search by name
-//		sQuery = "S1A_IW_SLC__1SDV_20230630T001327_20230630T001357_049208_05EACA_F030 AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
-//		sRes = tr.getCountUrl(sQuery);
-//		System.out.println(sRes); // OK
-//		
-//		
-//		String sQuery2 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5)";
-//		String sRes2 = tr.getCountUrl(sQuery2);
-//		System.out.println("\nQuery for Sentinel-1. Parameters: [time frame, product type, Polarisation, Sensor mode, Relative orbit number]. Must return 5 results");
-//		System.out.println(sRes2);
-//		
-//		String sQuery3 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND producttype:S2MSI1C AND cloudcoverpercentage:[3 TO 30])";
-//		String sRes3 = tr.getCountUrl(sQuery3);
-//		System.out.println("\nQuery for Sentinel-2. Parameters: [time frame, product type, cloud coverage]. Must return 20057 results");
-//		System.out.println(sRes3);
+		sQuery = "S1A_IW_SLC__1SDV_20230630T001327_20230630T001357_049208_05EACA_F030 AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
+		sRes = tr.getCountUrl(sQuery);
+		System.out.println(sRes); // OK
+		
+		
+		String sQuery2 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5)";
+		String sRes2 = tr.getCountUrl(sQuery2);
+		System.out.println("\nQuery for Sentinel-1. Parameters: [time frame, product type, Polarisation, Sensor mode, Relative orbit number]. Must return 5 results");
+		System.out.println(sRes2);
+		
+		String sQuery3 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND producttype:S2MSI1C AND cloudcoverpercentage:[3 TO 30])";
+		String sRes3 = tr.getCountUrl(sQuery3);
+		System.out.println("\nQuery for Sentinel-2. Parameters: [time frame, product type, cloud coverage]. Must return 20057 results");
+		System.out.println(sRes3);
 		
 		String sQuery4 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Near Real Time AND relativeorbitstart:38)"; 
 		String sRes4 = tr.getCountUrl(sQuery4);
 		System.out.println("\nQuery for Sentinel-3. Parameters: [time frame, product type, product level, timeliness ]. Must return  2711 results");
 		System.out.println(sRes4);
 		
-//		String sQuery7 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-5P AND productlevel:LEVEL1B AND producttype:L1B_IR_SIR AND timeliness:Offline AND absoluteorbit:29698)";  
-//		String sRes7 = tr.getCountUrl(sQuery7);
-//		System.out.println("\nQuery for Sentinel-5P. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
-//		System.out.println(sRes7);
+		String sQuery7 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-5P AND productlevel:LEVEL1B AND producttype:L1B_IR_SIR AND timeliness:Offline AND absoluteorbit:29698)";  
+		String sRes7 = tr.getCountUrl(sQuery7);
+		System.out.println("\nQuery for Sentinel-5P. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
+		System.out.println(sRes7);
 		
 		// TODO - IMPORTANT! envisat filters in wasdi do not have a match with creodias
 //		String sQuery5 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Envisat AND name:ASA_IM__0P AND orbitDirection:ASCENDING)";  
@@ -371,35 +378,38 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 //		System.out.println("\nQuery for ENVISAT. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
 //		System.out.println(sRes5);
 		
-//		String sQuery6 = "( footprint:\"intersects(POLYGON((4.983398169279099 43.4413942785878,4.983398169279099 45.789344262312,10.124999731779099 45.789344262312,10.124999731779099 43.4413942785878,4.983398169279099 43.4413942785878)))\" ) AND ( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Landsat-* AND name:L1TP AND cloudcoverpercentage:[0 TO 30])";   
-//		String sRes6 = tr.getCountUrl(sQuery6);
-//		System.out.println("\nQuery for LANDSTAT-8. Parameters: [time frame, bounding box, name]. Must return  3 results");
-//		System.out.println(sRes6);
-//		
-//		
-//		QueryViewModel oQVM = new QueryViewModel();
-//		oQVM.platformName = Platforms.SENTINEL1;
-//		System.out.println("\nTryRegex for polarisation");
-//		String sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:S2MSI1C AND polarisationmode:HH+VV)";;
-//		tr.findPolarisation(sQ, oQVM);
-//		System.out.println(oQVM.polarisation);
-//		
-//		System.out.println("\nTryRegex for platform identifier");
-//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5 AND swathidentifier:1)";
-//		tr.findPlatformSerialIdentifier(sQ, oQVM);
-//		System.out.println(oQVM.platformSerialIdentifier);
-//		
-//		System.out.println("\nTry regex for instrument");
-//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:[1-385])";
-//		oQVM.platformName = Platforms.SENTINEL3;
-//		tr.findInstrument(sQ, oQVM);
-//		System.out.println(oQVM.instrument);
-//		
-//		System.out.println("\nTry regex for relative orbit start");
-//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:385)";
-//		tr.findRelativeOrbit(sQ, oQVM);
-//		System.out.println(oQVM.relativeOrbit);
-
+		String sQuery6 = "( footprint:\"intersects(POLYGON((4.983398169279099 43.4413942785878,4.983398169279099 45.789344262312,10.124999731779099 45.789344262312,10.124999731779099 43.4413942785878,4.983398169279099 43.4413942785878)))\" ) AND ( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Landsat-* AND name:L1TP AND cloudcoverpercentage:[0 TO 30])";   
+		String sRes6 = tr.getCountUrl(sQuery6);
+		System.out.println("\nQuery for LANDSTAT-8. Parameters: [time frame, bounding box, name]. Must return  3 results");
+		System.out.println(sRes6);
+		
+		
+		QueryViewModel oQVM = new QueryViewModel();
+		oQVM.platformName = Platforms.SENTINEL1;
+		System.out.println("\nTryRegex for polarisation");
+		String sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:S2MSI1C AND polarisationmode:HH+VV)";;
+		tr.findPolarisation(sQ, oQVM);
+		System.out.println(oQVM.polarisation);
+		
+		System.out.println("\nTryRegex for platform identifier");
+		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5 AND swathidentifier:1)";
+		tr.findPlatformSerialIdentifier(sQ, oQVM);
+		System.out.println(oQVM.platformSerialIdentifier);
+		
+		System.out.println("\nTry regex for instrument");
+		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:[1-385])";
+		oQVM.platformName = Platforms.SENTINEL3;
+		tr.findInstrument(sQ, oQVM);
+		System.out.println(oQVM.instrument);
+		
+		System.out.println("\nTry regex for relative orbit start");
+		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:385)";
+		tr.findRelativeOrbit(sQ, oQVM);
+		System.out.println(oQVM.relativeOrbit);
+		
+		PaginatedQuery oPQ = new PaginatedQuery(sQuery6, "0", "10", null, null);
+		String sSearchUrl1 = tr.getSearchUrl(oPQ);
+		System.out.println(sSearchUrl1);
 		
 	}
 }
