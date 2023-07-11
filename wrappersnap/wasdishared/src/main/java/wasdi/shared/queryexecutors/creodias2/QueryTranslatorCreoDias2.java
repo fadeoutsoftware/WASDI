@@ -2,30 +2,31 @@ package wasdi.shared.queryexecutors.creodias2;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.LinkedList;
-
-import org.esa.snap.rcp.actions.raster.CreateGeoCodingDisplacementBandsAction;
-import org.json.JSONObject;
 
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.queryexecutors.QueryTranslationParser;
 import wasdi.shared.queryexecutors.QueryTranslator;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	
 	protected String m_sCreoDiasApiBaseUrl = "https://datahub.creodias.eu/odata/v1/Products?";
-	private static final String sODataEQ = "eq";  // TODO: check naming convention
-	private static final String sODataAND = "and"; // TODO: check naming convention
+	
+	private static final String sODataEQ = "eq";  
+	private static final String sODataAND = "and";
 	private static final String sODataGE = "ge"; // greater or equal
 	private static final String sODataLE = "lt"; // less or equal
-	private static final String sOdataFilterOption = "$filter=";
+	private static final String sODataFilterOption = "$filter=";
+	private static final String sODataSkipOption = "$skip=";
+	private static final String sODataTopOption = "$top=";
+	private static final String sODataOrderBy = "$orderby=";
 
  
 	@Override
@@ -38,6 +39,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		String sQuery = this.prepareQuery(sQueryFromClient);
 		QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQuery);
+		refineQueryViewModel(sQuery, oQueryViewModel);
+		
 		
 		List<String> asQueryElements = new LinkedList<>();
 		
@@ -76,8 +79,9 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createStringAttribute("operationalMode", oQueryViewModel.sensorMode));
 		
 		// relative orbit number
+		// TODO: in creodias, the interval for the relative orbit is higher
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit; 
-		if (iRelativeOrbit > 0 && iRelativeOrbit < 176)
+		if ( iRelativeOrbit > 0 && ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) || (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 385)))
 			asQueryElements.add(createIntegerAttribute("relativeOrbitNumber", sODataEQ, iRelativeOrbit));
 		
 		// cloud coverage - from
@@ -105,23 +109,32 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		if (iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000) 
 			asQueryElements.add(createIntegerAttribute("orbitNumber", sODataEQ, iAbsoluteOrbit));
 		
-			
-		// TODO: polarisation -- TO BE CONFIRMED (I added the processing of the value in the query translator. It was not supported for Sentinel-1)
+		// polarisation	
 		if (!Utils.isNullOrEmpty(oQueryViewModel.polarisation))
 			asQueryElements.add(createStringAttribute("polarisationChannels", oQueryViewModel.polarisation));
-
 		
-		// TODO: satellite platform (e.g. Sentinel-2 A or B), not supported by the queryViewModel? To be confirmed.
+		// instrument
+		if (!Utils.isNullOrEmpty(oQueryViewModel.instrument))
+			asQueryElements.add(createStringAttribute("instrumentShortName", oQueryViewModel.instrument));
+		
+		// satellite platform
+		if (!Utils.isNullOrEmpty(oQueryViewModel.platformSerialIdentifier))
+			asQueryElements.add(createStringAttribute("platformSerialIdentifier", oQueryViewModel.platformSerialIdentifier));
+		
+		
+
 		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed.
-		// TODO: instrument (for Sentinel-3)
-		// TODO: relativeorbitstart (for Sentinel-3)
 		// TODO - IMPORTANT!!! Envisat filters and the corresponding values have no match with what we currently have in WASDI
+		
+		// TODO - DONE: polarisation (sentinel 1)
+		// TODO - DONE: satellite platform (e.g. Sentinel-2 A or B), not supported by the queryViewModel? To be confirmed.
+		// TODO - DONE: instrument (for Sentinel-3)
+		// TODO - DONE: relativeorbitstart (for Sentinel-3)
 
 			
 		String sFilterValue = String.join(" " + sODataAND + " ", asQueryElements);	
-	
 
-		return sOdataFilterOption + sFilterValue;
+		return sODataFilterOption + sFilterValue;
 	}
 	
 	private String createCollectionNameEqFilter(String sCollectionName) {
@@ -130,8 +143,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	}
 	
 	private String createProductNameEqFilter(String sProductName) {
-		List<String> asFilterElements = Arrays.asList("Name", sODataEQ, "'" + sProductName.toUpperCase() + "'");
-		return "contains(Name, '" + sProductName + "')"; 
+		return "contains(Name, '" + sProductName.toUpperCase() + "')"; 
 	}
 	
 
@@ -209,6 +221,71 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			return "L2";
 		return "";
 	}
+	
+	
+	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
+		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
+		findPolarisation(sQuery, oViewModel);
+		findPlatformSerialIdentifier(sQuery, oViewModel);
+		findInstrument(sQuery, oViewModel);
+		findRelativeOrbit(sQuery, oViewModel);
+	}
+	
+	
+	private void findPolarisation(String sQuery, QueryViewModel oViewModel) {
+		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) || !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL1))
+			return;
+
+		String sRegex = "polarisationmode:([HV\\+]{2,5})[\\s\\)]";
+		Pattern oPattern = Pattern.compile(sRegex);
+		Matcher oMatcher = oPattern.matcher(sQuery);
+		
+		if (oMatcher.find() && oMatcher.groupCount() >= 1) 
+			oViewModel.polarisation = oMatcher.group(1);
+	}
+	
+	private void findPlatformSerialIdentifier(String sQuery, QueryViewModel oViewModel) {
+		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) 
+				|| (!oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL1) && !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL2)))
+			return;
+		
+		String sPlatformName = oViewModel.platformName;
+
+		String sPlatformCode = sPlatformName.equalsIgnoreCase(Platforms.SENTINEL1) ? "S1" : "S2";
+		String sRegex = "filename:(" + sPlatformCode + "[AB]" + "\\_\\*)";
+		Pattern oPattern = Pattern.compile(sRegex);
+		Matcher oMatcher = oPattern.matcher(sQuery);
+		
+		if (oMatcher.find() && oMatcher.groupCount() >= 1)
+			oViewModel.platformSerialIdentifier = oMatcher.group(1);
+	}
+	
+	private void findInstrument(String sQuery, QueryViewModel oViewModel) {
+		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) || !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL3))
+			return;
+		
+		String sRegex = "[iI]nstrument:([A-Z]+)[\\s\\)]";
+		Pattern oPattern = Pattern.compile(sRegex);
+		Matcher oMatcher = oPattern.matcher(sQuery);
+		
+		if (oMatcher.find() && oMatcher.groupCount() >= 1)
+			oViewModel.instrument = oMatcher.group(1);
+	}
+	
+	private void findRelativeOrbit(String sQuery, QueryViewModel oViewModel) {
+		if (oViewModel == null || Utils.isNullOrEmpty(oViewModel.platformName) 
+				|| !oViewModel.platformName.equalsIgnoreCase(Platforms.SENTINEL3) || oViewModel.relativeOrbit >= 0)
+			return;
+		
+		String sRegex = "relativeorbitstart:(\\d\\d?\\d?)[\\s\\)]";
+		Pattern oPattern = Pattern.compile(sRegex);
+		Matcher oMatcher = oPattern.matcher(sQuery);
+		
+		if (oMatcher.find() && oMatcher.groupCount() >= 1) 
+			oViewModel.relativeOrbit = Integer.parseInt(oMatcher.group(1));
+	}
+	
+	
 
 	@Override
 	public String getCountUrl(String sQuery) {
@@ -227,7 +304,6 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		// TODO Auto-generated method stub
 		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+= translateAndEncodeParams(oQuery.getQuery());
-		sUrl += "&maxRecords=" + oQuery.getOriginalLimit();
 		
 		try {
 			
@@ -237,16 +313,16 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 
 			// handle the offset
 			if (iSkipCount > 0)
-				sUrl = "&skip=" + iSkipCount; 
+				sUrl = "&" + sODataSkipOption + iSkipCount; 
 			
 			// handle the number of results per pages
-			sUrl += "&top=" + iItemsPerPage;
+			sUrl += "&" + sODataTopOption + iItemsPerPage;
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslatorCreoDias2.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
-		sUrl += "&$orderby=ContentDate/Start asc"; // TODO: do we get these values from the client or we have a default order?
+		sUrl += "&" + sODataOrderBy + "ContentDate/Start asc"; // TODO: do we get these values from the client or we have a default order?
 		
 		
 		return sUrl;
@@ -257,38 +333,37 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		QueryTranslatorCreoDias2 tr = new QueryTranslatorCreoDias2();
 		tr.setAppconfigPath("C:/WASDI/GIT/WASDI/client/app/config/appconfig.json");
 		tr.setParserConfigPath("C:/WASDI/GIT/WASDI/configuration/creodias2ParserConfig.json");
-
-		
+	
 		// try the bounding box
 		String sQuery = "( footprint:\"intersects(POLYGON((5.843719647673683 43.22105226995176,5.843719647673683 46.61479620873007,10.763258396058559 46.61479620873007,10.763258396058559 43.22105226995176,5.843719647673683 43.22105226995176)))\" ) AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_*)";
 		String sRes = tr.getCountUrl(sQuery);
 		System.out.println(sRes + ""); //OK
 		
 		// try the search by name
-		sQuery = "S1A_IW_SLC__1SDV_20230630T001327_20230630T001357_049208_05EACA_F030 AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
-		sRes = tr.getCountUrl(sQuery);
-		System.out.println(sRes); // OK
+//		sQuery = "S1A_IW_SLC__1SDV_20230630T001327_20230630T001357_049208_05EACA_F030 AND ( beginPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] AND endPosition:[2023-06-30T00:00:00.000Z TO 2023-06-30T23:59:59.999Z] ) AND   (platformname:Sentinel-1)";
+//		sRes = tr.getCountUrl(sQuery);
+//		System.out.println(sRes); // OK
+//		
+//		
+//		String sQuery2 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5)";
+//		String sRes2 = tr.getCountUrl(sQuery2);
+//		System.out.println("\nQuery for Sentinel-1. Parameters: [time frame, product type, Polarisation, Sensor mode, Relative orbit number]. Must return 5 results");
+//		System.out.println(sRes2);
+//		
+//		String sQuery3 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND producttype:S2MSI1C AND cloudcoverpercentage:[3 TO 30])";
+//		String sRes3 = tr.getCountUrl(sQuery3);
+//		System.out.println("\nQuery for Sentinel-2. Parameters: [time frame, product type, cloud coverage]. Must return 20057 results");
+//		System.out.println(sRes3);
 		
-		
-		String sQuery2 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5)";
-		String sRes2 = tr.getCountUrl(sQuery2);
-		System.out.println("\nQuery for Sentinel-1. Parameters: [time frame, product type, Polarisation, Sensor mode, Relative orbit number]. Must return 5 results");
-		System.out.println(sRes2);
-		
-		String sQuery3 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-2 AND producttype:S2MSI1C AND cloudcoverpercentage:[3 TO 30])";
-		String sRes3 = tr.getCountUrl(sQuery3);
-		System.out.println("\nQuery for Sentinel-2. Parameters: [time frame, product type, cloud coverage]. Must return 20057 results");
-		System.out.println(sRes3);
-		
-		String sQuery4 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND producttype:SR_1_SRA___ AND timeliness:Short Time Critical)";
+		String sQuery4 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Near Real Time AND relativeorbitstart:38)"; 
 		String sRes4 = tr.getCountUrl(sQuery4);
 		System.out.println("\nQuery for Sentinel-3. Parameters: [time frame, product type, product level, timeliness ]. Must return  2711 results");
 		System.out.println(sRes4);
 		
-		String sQuery7 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-5P AND productlevel:LEVEL1B AND producttype:L1B_IR_SIR AND timeliness:Offline AND absoluteorbit:29698)";  
-		String sRes7 = tr.getCountUrl(sQuery7);
-		System.out.println("\nQuery for Sentinel-5P. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
-		System.out.println(sRes7);
+//		String sQuery7 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-5P AND productlevel:LEVEL1B AND producttype:L1B_IR_SIR AND timeliness:Offline AND absoluteorbit:29698)";  
+//		String sRes7 = tr.getCountUrl(sQuery7);
+//		System.out.println("\nQuery for Sentinel-5P. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
+//		System.out.println(sRes7);
 		
 		// TODO - IMPORTANT! envisat filters in wasdi do not have a match with creodias
 //		String sQuery5 = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Envisat AND name:ASA_IM__0P AND orbitDirection:ASCENDING)";  
@@ -296,10 +371,35 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 //		System.out.println("\nQuery for ENVISAT. Parameters: [time frame, product type, product level, timeliness, absoluteorbit ]. Must return  0 results");
 //		System.out.println(sRes5);
 		
-		String sQuery6 = "( footprint:\"intersects(POLYGON((4.983398169279099 43.4413942785878,4.983398169279099 45.789344262312,10.124999731779099 45.789344262312,10.124999731779099 43.4413942785878,4.983398169279099 43.4413942785878)))\" ) AND ( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Landsat-* AND name:L1TP AND cloudcoverpercentage:[0 TO 30])";   
-		String sRes6 = tr.getCountUrl(sQuery6);
-		System.out.println("\nQuery for LANDSTAT-8. Parameters: [time frame, bounding box, name]. Must return  3 results");
-		System.out.println(sRes6);
+//		String sQuery6 = "( footprint:\"intersects(POLYGON((4.983398169279099 43.4413942785878,4.983398169279099 45.789344262312,10.124999731779099 45.789344262312,10.124999731779099 43.4413942785878,4.983398169279099 43.4413942785878)))\" ) AND ( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Landsat-* AND name:L1TP AND cloudcoverpercentage:[0 TO 30])";   
+//		String sRes6 = tr.getCountUrl(sQuery6);
+//		System.out.println("\nQuery for LANDSTAT-8. Parameters: [time frame, bounding box, name]. Must return  3 results");
+//		System.out.println(sRes6);
+//		
+//		
+//		QueryViewModel oQVM = new QueryViewModel();
+//		oQVM.platformName = Platforms.SENTINEL1;
+//		System.out.println("\nTryRegex for polarisation");
+//		String sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND producttype:S2MSI1C AND polarisationmode:HH+VV)";;
+//		tr.findPolarisation(sQ, oQVM);
+//		System.out.println(oQVM.polarisation);
+//		
+//		System.out.println("\nTryRegex for platform identifier");
+//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:HH AND sensoroperationalmode:IW AND relativeorbitnumber:5 AND swathidentifier:1)";
+//		tr.findPlatformSerialIdentifier(sQ, oQVM);
+//		System.out.println(oQVM.platformSerialIdentifier);
+//		
+//		System.out.println("\nTry regex for instrument");
+//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:[1-385])";
+//		oQVM.platformName = Platforms.SENTINEL3;
+//		tr.findInstrument(sQ, oQVM);
+//		System.out.println(oQVM.instrument);
+//		
+//		System.out.println("\nTry regex for relative orbit start");
+//		sQ = "( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Non Time Critical AND relativeorbitstart:385)";
+//		tr.findRelativeOrbit(sQ, oQVM);
+//		System.out.println(oQVM.relativeOrbit);
+
 		
 	}
 }

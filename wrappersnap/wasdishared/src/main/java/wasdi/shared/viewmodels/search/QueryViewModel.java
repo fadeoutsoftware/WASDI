@@ -95,5 +95,15 @@ public class QueryViewModel {
 	 * Polarisation
 	 */
 	public String polarisation;
+	
+	/**
+	 * Platform identifier (eg. Sentinel-1 A or B)
+	 */
+	public String platformSerialIdentifier;
+	
+	/**
+	 * Instrument
+	 */
+	public String instrument;
 
 }
