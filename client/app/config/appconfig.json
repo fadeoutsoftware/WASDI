@@ -916,7 +916,7 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "EEHCM|EEHSEBS|EEHSTIC|EEHSW|EEHTES|EEHTSEB",
+                    "indexvalues": "EEHCM|EEHSEBS|EEHSTIC|EEHSW|EEHTES|EEHTSEB|L1B_RAD",
                     "regex": ".*",
                     "indexvalue":"EEHCM"
                 },
