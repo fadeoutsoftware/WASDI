@@ -85,19 +85,17 @@ f. In the event of a temporary suspension of the Service, you remain responsible
 
 7. Service Guarantees
 --------------------------
-7.1. The Service will be available with a minimum availability (level 1 and level 2, see §5.8) of 95%. However, a single service interruption will have a duration of fewer than 72 hours (weekdays only). Scheduled maintenance downtime is announced with a notification period of more than 1 week.
+7.1. The Service will be available with a minimum availability of 95%. However, a single service interruption will have a duration of fewer than 72 hours (weekdays only). Scheduled maintenance downtime is announced with a notification period of 3 business days. For further information as to what constitutes a Service interruption, see section 6.3.
 
-7.2. If the minimum availability (§5.1) is not provided by the Service Provider, the Service Provider will grant an annual service credit of 10% of the price of the Service, to the Service User which will be deducted on the next outstanding invoice. 
+7.2. If the minimum availability (§7.1) is not provided by the Service Provider, the Service Provider will grant a service credit in the form of time lost added to the end of any short-term (1 Day or 1 Week Subscription). 
 
-7.3. To receive a credit, the Service User must contact the Service Provider within 30 days following the end of the unavailability via email at the address provided in §5.7 and include the dates and times of unavailability. 
+7.3. To receive a credit, the Service User must contact the Service Provider within 30 days following the end of the unavailability via email at the address provided in §7.6 and include the dates and times of unavailability.
 
-7.4. If the Service Provider confirms that the uptime percentage covered by the Service User request is below the minimum availability (§5.1), the Service Provider will issue the Service User a service credit. The service credit is added to the end of the Service User’s term for the Service, and cannot be exchanged for, or converted to, monetary compensation. 
+7.4. If the Service Provider confirms that the uptime percentage covered by the Service User request is below the minimum availability (§7.1), the Service Provider will issue the Service User a service credit. The service credit is added to the end of the Service User’s term for the Service, and cannot be exchanged for, or converted to, monetary compensation.
 
-7.5. The maximum service credit that the Service Provider will issue for downtime in a month is 25% of the fees the Service User owes the Service Provider for the month in which the Service did not achieve minimum availability. 
+7.5. The WASDI Service Level Agreement (SLA) includes the provision of a chat support in a public Discord Channel from Monday to Friday, from 9:00AM to 7:00PM CET.
 
-7.6. The WASDI Service Level Agreement (SLA) includes the provision of a chat support in a public Discord Channel from Monday to Friday, from 9:00AM to 7:00PM CET.
-
-7.7. Direct support requests should be sent via e-mail to: info@wasdi.cloud 
+7.6. Direct support requests should be sent via e-mail to: info@wasdi.cloud
 
 8. Technical and Performance
 -------------------------------------
