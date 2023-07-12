@@ -1,8 +1,19 @@
 package wasdi.dataproviders;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.apache.commons.net.io.Util;
+import org.json.JSONObject;
+
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CreoDias2ProviderAdapter extends ProviderAdapter {
+	
+	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
 	
 	public CreoDias2ProviderAdapter() {
 		super();
@@ -28,6 +39,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		// TODO Auto-generated method stub
 		// main method. sFileUrl is the url received by the lined data provider. sSaveDirOnSerer is the local folder. 
 		// must return the valid file full path or "" if the download was not possible. 
+		
+		
+		
 		return null;
 	}
 
@@ -43,6 +57,42 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		// TODO Auto-generated method stub
 		// returns the score auto-evaluated by the Provider Adapter to download sFileName of sPlatformType.
 		return 0;
+	}
+	
+	public static void main(String[]args) throws Exception {
+		URL oURL = new URL("https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token");
+
+		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+		oConnection.setRequestMethod("POST");
+		oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		oConnection.setDoOutput(true);
+		String sDownloadPassword = "**********";
+		String sDownloadUser = "**********";
+		String totp = "140043";
+		oConnection.getOutputStream().write(("client_id=CLOUDFERRO_PUBLIC&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password").getBytes());
+		int iStatus = oConnection.getResponseCode();
+		WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken: Response status: " + iStatus);
+		if( iStatus == 200) {
+			InputStream oInputStream = oConnection.getInputStream();
+			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+			if(null!=oInputStream) {
+				Util.copyStream(oInputStream, oBytearrayOutputStream);
+				String sResult = oBytearrayOutputStream.toString();
+				//WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken: json: " + sResult);
+				JSONObject oJson = new JSONObject(sResult);
+				String sToken = oJson.optString("access_token", null);
+				System.out.println(sToken);
+			}
+		} else {
+			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+			InputStream oErrorStream = oConnection.getErrorStream();
+			Util.copyStream(oErrorStream, oBytearrayOutputStream);
+			String sMessage = oBytearrayOutputStream.toString();
+			WasdiLog.debugLog("CREODIASProviderAdapter.obtainKeycloakToken:" + sMessage);
+
+		}
+
+
 	}
 	
 }
