@@ -2,21 +2,33 @@ package wasdi.shared.queryexecutors.creodias2;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
 
-public class QueryExecutorCreoDias2 extends QueryExecutor {
+public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 	
 	
 	public QueryExecutorCreoDias2() {
-		m_sProvider = "CREODIAS2";
+		this.m_sProvider = "CREODIAS2";
 		this.m_oQueryTranslator = new QueryTranslatorCreoDias2();
 		this.m_oResponseTranslator = new ResponseTranslatorCreoDias2();
+		this.m_asSupportedPlatforms.addAll(
+				Arrays.asList(Platforms.SENTINEL1, Platforms.SENTINEL2, Platforms.SENTINEL3, Platforms.SENTINEL5P, Platforms.ENVISAT, Platforms.LANDSAT8));
 	}
 
 	@Override
@@ -24,6 +36,14 @@ public class QueryExecutorCreoDias2 extends QueryExecutor {
 		int iCount = -1;
 
 		try {
+			
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+			
+			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Platform not supported by the data provider for query: " + sQuery);
+				return -1;
+			}
+			
 			String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
 			
 			String sResults = standardHttpGETQuery(sOutputQuery);
@@ -40,35 +60,38 @@ public class QueryExecutorCreoDias2 extends QueryExecutor {
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		// MUST
-		// TODO Auto-generated method stub
-		//  receive in input the WASDI query, must return the list of provider's results  as a list of QueryResultViewModel
-		// (there, the important fields are title and link).
 		
-		
-		// TODO: in the query string, most probably I will need to add the filter "&$expand=Attributes" to get the information about the product that 
-		// must be shown in the list
-		
-		// 1- check if the platform is supported
-		
-		
-		List<QueryResultViewModel> aoRes = new LinkedList<>();
-		
-		String sOutputQuery = m_oQueryTranslator.getSearchUrl(oQuery);
-		
-		// Call standard http get API
-		String sResults = standardHttpGETQuery(sOutputQuery);
-		
-		if (sResults==null) return aoRes;
-		
-		return aoRes;
-		
-		
-	}
+		try {
 	
-	public static void main(String[] args) throws Exception {
-		QueryExecutorCreoDias2 oQE = new QueryExecutorCreoDias2();
-		int iCount = oQE.executeCount("( beginPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] AND endPosition:[2023-07-03T00:00:00.000Z TO 2023-07-10T23:59:59.999Z] ) AND   (platformname:Sentinel-3 AND productlevel:L1 AND Instrument:SRAL AND producttype:SR_1_SRA___ AND timeliness:Near Real Time AND relativeorbitstart:38)");
-		System.out.println(iCount);
+			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+	
+			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Platform not supported by the data provider for query: " + oQuery.getQuery());
+				return Collections.emptyList();
+			}
+			
+			String sCreodiasQuery = m_oQueryTranslator.getSearchUrl(oQuery);
+			
+			// Call standard http get API
+			String sCreodiasResult = standardHttpGETQuery(sCreodiasQuery);
+			
+			
+			
+			if (Utils.isNullOrEmpty(sCreodiasResult)) {
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. The data provider returned an empty string for query: " + sCreodiasQuery);
+				return Collections.emptyList();
+			}
+			
+			// TODO: what's the bFullViewModel
+			List<QueryResultViewModel> aoRes = m_oResponseTranslator.translateBatch(sCreodiasResult, bFullViewModel);
+			
+			return aoRes;
+		
+		} catch (Exception oEx) {
+			WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the Creodias results for query. " + oEx.getMessage());
+		}
+		
+		return Collections.emptyList();
 	}
+
 }

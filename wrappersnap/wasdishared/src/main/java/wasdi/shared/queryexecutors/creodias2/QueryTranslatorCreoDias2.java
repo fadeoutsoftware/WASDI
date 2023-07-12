@@ -1,6 +1,9 @@
 package wasdi.shared.queryexecutors.creodias2;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +14,7 @@ import com.google.common.base.Preconditions;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryTranslator;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -121,7 +125,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		
 
-		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed.
+		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed. What values can it take?
 		// TODO - IMPORTANT!!! Envisat filters and the corresponding values have no match with what we currently have in WASDI
 		
 		// TODO - DONE: polarisation (sentinel 1)
@@ -312,6 +316,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		String sUrl = m_sCreoDiasApiBaseUrl;
 		sUrl+= translateAndEncodeParams(oQuery.getQuery());
 		
+		
 		try {
 			
 			int iItemsPerPage = Integer.parseInt(oQuery.getOriginalLimit());
@@ -324,18 +329,18 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			
 			// handle the number of results per pages
 			sUrl += "&" + sODataTopOption + iItemsPerPage;
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslatorCreoDias2.getSearchUrl: exception generating the page parameter  " + oEx.toString());
 		}
 		
-		sUrl += "&" + sODataOrderBy + "ContentDate/Start asc&$expand=Attributes"; // TODO: do we get these values from the client or we have a default order?
-		
+		sUrl += "&" + sODataOrderBy + "ContentDate/Start%20asc&$expand=Attributes"; // TODO: do we get these values from the client or we have a default order?
 		
 		return sUrl;
 	}
 
-	public static void main(String[]args) {
+	public static void main(String[]args) throws Exception {
 		String clientString = "( beginPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] AND endPosition:[2023-06-29T00:00:00.000Z TO 2023-07-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC AND polarisationmode:VV AND sensoroperationalmode:EW AND relativeorbitnumber:123)";
 		QueryTranslatorCreoDias2 tr = new QueryTranslatorCreoDias2();
 		tr.setAppconfigPath("C:/WASDI/GIT/WASDI/client/app/config/appconfig.json");
