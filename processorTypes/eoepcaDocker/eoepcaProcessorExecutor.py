@@ -200,11 +200,23 @@ def executeProcessor(aoS3Configuration):
 
     # Run the processor
     try:
+        '''
+        Get files published in the current workspace
+        before we run the application: we try to
+        push only new files in the S3 bucket
+        '''
+        asProductsBefore = wasdi.getProductsByActiveWorkspace()
+
+
+        '''
+        Run the application
+        '''
         import myProcessor
 
         wasdi.wasdiLog('wasdi.executeProcessor RUN ' + sProcessId)
         myProcessor.run()
         wasdi.wasdiLog('wasdi.executeProcessor Done')
+
 
         '''
         DISABLE FOR THE MOMENT
@@ -219,6 +231,7 @@ def executeProcessor(aoS3Configuration):
                 sFullPath = wasdi.getPath(sFile)
                 oWasdiS3.uploadFile(sFullPath)
         '''
+
 
         '''
         CREATE THE DIRECTORY TO WRITE IN S3
@@ -239,19 +252,20 @@ def executeProcessor(aoS3Configuration):
         '''
         PUBLISH FILES PRODUCED IN THE S3 BUCKET
         '''
-        asProducts = wasdi.getProductsByActiveWorkspace()
+        asProductsAfter = wasdi.getProductsByActiveWorkspace()
 
-        for sFile in asProducts:
-            wasdi.wasdiLog('Copy the file %s in the S3 bucket' %(sFile))
-            shutil.copy(
-                wasdi.getPath(sFile),
-                os.path.join(
-                    sObjectStorageDirectory,
-                    sFile
+        for sFile in asProductsAfter:
+            if sFile not in asProductsBefore:
+                wasdi.wasdiLog('Copy the file %s in the S3 bucket' %(sFile))
+                shutil.copy(
+                    wasdi.getPath(sFile),
+                    os.path.join(
+                        sObjectStorageDirectory,
+                        sFile
+                    )
                 )
-            )
 
-            wasdi.wasdiLog('The file %s is written' %(sFile))
+                wasdi.wasdiLog('The file %s is written' %(sFile))
 
         sForceStatus = 'DONE'
     except Exception as oEx:
