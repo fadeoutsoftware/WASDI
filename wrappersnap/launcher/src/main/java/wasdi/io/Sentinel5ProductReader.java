@@ -276,6 +276,12 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				//WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
 				
 				sFileName = sDownloadPath + File.separator + sFileNameFromProvider.replace(".zip", "");
+				
+				if (!sFileName.toUpperCase().endsWith(".NC")) {
+					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: missing .nc extension at the end of the file, add it");
+					sFileName = sFileName + ".nc";
+				}
+				
 				WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: File Name: " + sFileName);
 				
 				String sCdlFileName = sFileName.replace(".nc", ".cdl");

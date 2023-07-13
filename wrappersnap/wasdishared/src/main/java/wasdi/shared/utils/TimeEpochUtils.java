@@ -14,6 +14,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * @author c.nattero
@@ -46,6 +47,17 @@ public class TimeEpochUtils {
 			WasdiLog.debugLog("TimeEpochUtils.fromEpochToDateString: " + oE);
 			return "";
 		}
+	}
+	
+	/**
+	 * Return a Date object from the Epoch milliseconds
+	 * @param lTimeInMillis the EpochMilliseconds
+	 * @return the Date object corresponding to the Epoch milliseconds
+	 */
+	public static Date fromEpochToDateObject(long lTimeInMillis) {
+		Calendar oCal = Calendar.getInstance();
+		oCal.setTimeInMillis(lTimeInMillis);
+		return oCal.getTime();
 	}
 	
 	/**

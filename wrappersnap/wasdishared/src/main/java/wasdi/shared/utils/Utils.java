@@ -13,9 +13,11 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
@@ -29,6 +31,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -308,6 +311,80 @@ public class Utils {
 		}
 
 		return sDate +  " " + getLocalDateOffsetFromUTCForJS();
+	}
+	
+	/**
+	 * Split the time range represented by the two input Date objects in monthly intervals.
+	 * Each Date array represents an interval and is made of two elements. Element at index 0 represent the start Date of the interval,
+	 * while the element at index 1 represents the end Date of the interval. 
+	 * E.g. if the input parameters represent an interval from 22/05/2023 to 10/07/203, then the monthly intervals will be: 
+	 * [22/05/2023-31/05/2023], [01/06/2023-30/06/2023], [01/07/2023-10/07/2023]
+	 * @param oStartDate the start date of the time range
+	 * @param oEndDate the end date of the time range
+	 * @param iOffset offset for the pagination
+	 * @param iLimit maximum number of results per page
+	 * @return a list of monthly intervals included in the time range, represented by 2-dimensional Date arrays.
+	 */
+	public static List<Date[]> splitTimeRangeInMonthlyIntervals(Date oStartDate, Date oEndDate, int iOffset, int iLimit) {
+		List<Date[]> aaoIntervals = new LinkedList<>();
+		Calendar oStartCalendar = Calendar.getInstance();
+		oStartCalendar.setTime(oStartDate);
+		Calendar oEndCalendar = Calendar.getInstance();
+		oEndCalendar.setTime(oEndDate);
+		
+		int iCurrentInterval = 0;
+		while (oStartCalendar.before(oEndCalendar)) {
+			Date[] aoCurrentInterval = getMonthIntervalFromDate(oStartCalendar, oEndCalendar);
+			if (aoCurrentInterval.length == 0) {
+				break;
+			}
+			
+			if (iCurrentInterval >= iOffset && iCurrentInterval < iOffset + iLimit) {
+				aaoIntervals.add(aoCurrentInterval);
+			}
+			
+			oStartCalendar.setTime(aoCurrentInterval[1]);
+			oStartCalendar.add(Calendar.MILLISECOND, 1);
+			
+			iCurrentInterval++;
+		}
+		return aaoIntervals;
+	}
+	
+	
+	private static Date[] getMonthIntervalFromDate(Calendar oStartCalendar, Calendar oEndCalendar) {
+		Calendar oStartCalendarClone = Calendar.getInstance();
+		oStartCalendarClone.setTime(oStartCalendar.getTime());
+		int iStartMonth = oStartCalendarClone.get(Calendar.MONTH);
+		int iEndMonth = oEndCalendar.get(Calendar.MONTH);
+		int iStartYear = oStartCalendarClone.get(Calendar.YEAR);
+		int iEndYear = oEndCalendar.get(Calendar.YEAR);
+		
+		if (iStartMonth == iEndMonth && iStartYear == iEndYear) {
+			Date oStartIntervalDate = oStartCalendarClone.getTime();
+			Date oEndIntervalDate = oEndCalendar.getTime();
+			Date[] aoInterval = new Date[] {oStartIntervalDate, oEndIntervalDate};
+			return aoInterval;
+		} else {
+			Date oStartIntervalDate = oStartCalendarClone.getTime();
+			// jump to the last day of the month		
+			oStartCalendarClone.set(Calendar.DAY_OF_MONTH, 1);
+			oStartCalendarClone.set(Calendar.MONTH, (iStartMonth + 1) % 12);
+			adjustCalendar(oStartCalendarClone);
+			oStartCalendarClone.add(Calendar.MILLISECOND, -1);
+
+		
+			Date oEndIntervalDate = oStartCalendarClone.getTime();
+			Date[] aoIntervals = new Date[] {oStartIntervalDate, oEndIntervalDate};
+			return aoIntervals;
+		}
+	}
+	
+	private static void adjustCalendar(Calendar oCalendar) {
+		if (oCalendar.get(Calendar.MONTH) == 0) {
+			oCalendar.add(Calendar.YEAR, 1);
+		}
+
 	}
 	
 

@@ -61,7 +61,7 @@ var WorkspaceDetailsController = (function () {
         this.m_asNodeCode = this.m_aoNodesList.map(function (item) {
             return item['nodeCode']
         });
-        this.m_asNodeCode.push("wasdi");
+        //this.m_asNodeCode.push("wasdi");
 
         /**
          * Extract an array of strings from the node list
@@ -69,7 +69,7 @@ var WorkspaceDetailsController = (function () {
          */
         this.m_asCloudProvider = this.m_aoNodesList.map(function (item) {
             return item['cloudProvider']
-        }).push("wasdi");
+        });//.push("wasdi");
 
 
     } // end constructor

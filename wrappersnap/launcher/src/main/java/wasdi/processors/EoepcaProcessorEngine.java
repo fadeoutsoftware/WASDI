@@ -477,9 +477,9 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			File oProcFolder = new File(sProcessorFolder);
 			
-			if (!oProcFolder.exists()) {
-				this.deploy(oParameter);
-			}
+//			if (!oProcFolder.exists()) {
+//				this.deploy(oParameter);
+//			}
 			
 			String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
 			
