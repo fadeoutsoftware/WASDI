@@ -71,7 +71,6 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createGeographicalFillter(oQueryViewModel.north, oQueryViewModel.south, oQueryViewModel.east, oQueryViewModel.west));
 		
 		// product type
-		// TODO: in LANDSTAD, not all product type listed in WASDI are supported by Creodias. What should we do with the unsupported values?
 		if (!Utils.isNullOrEmpty(oQueryViewModel.productType))
 			asQueryElements.add(createStringAttribute("productType", oQueryViewModel.productType));
 		
@@ -237,10 +236,26 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	
 	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
 		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
+		oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
+		oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
+		oViewModel.instrument = extractValue(sQuery, "Instrument");
+		if (oViewModel.relativeOrbit < 0) {
+			String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
+			if (!Utils.isNullOrEmpty(sRelativeOrbit)) {
+				try {
+					oViewModel.relativeOrbit = Integer.parseInt(sRelativeOrbit); 
+				} catch (NumberFormatException oEx) {
+					WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Impossible to parse relative orbit. " + oEx.getMessage());
+				}
+			}
+		}
+		
+		/*
 		findPolarisation(sQuery, oViewModel);
 		findPlatformSerialIdentifier(sQuery, oViewModel);
 		findInstrument(sQuery, oViewModel);
 		findRelativeOrbit(sQuery, oViewModel);
+		*/
 	}
 	
 	
