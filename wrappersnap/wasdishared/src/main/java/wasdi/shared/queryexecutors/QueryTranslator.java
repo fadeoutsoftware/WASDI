@@ -1004,7 +1004,7 @@ public abstract class QueryTranslator {
 	 * @param sKey the key
 	 * @return the corresponding value
 	 */
-	private static String extractValue(String sQuery, String sKey) {
+	protected static String extractValue(String sQuery, String sKey) {
 		int iStart = -1;
 		int iEnd = -1;
 

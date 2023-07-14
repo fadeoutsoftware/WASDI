@@ -43,13 +43,21 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_END_DOWNLOAD_URL = ")/$value";
 	
 	// WASDI  keywords
+	private static final String sDATE = "date";
+	private static final String SINSTRUMENT = "instrumentshortname";
 	private static final String SMULTI_POLYGON = "MULTYPOLYGON";
+	private static final String SRELATIVE_ORBIT = "relativeorbitnumber";
+	private static final String SPLATFORM_NAME = "platformname";
 	private static final String SPOLYGON = "POLYGON";
+	private static final String SSENSOR_MODE = "sensoroperationalmode";
+	private static final String SSIZE = "size";
+	
+	
 		
 	
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
-		List<QueryResultViewModel> aoResults = new LinkedList();
+		List<QueryResultViewModel> aoResults = new LinkedList<>();
 		
 		if (Utils.isNullOrEmpty(sResponse)) {
 			WasdiLog.debugLog("ResponseTranslatorCreoDias2.translateBatch: response string is null or empty.");
@@ -75,7 +83,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		// BASIC INFO: title, summary, product id, link, footprint, provider id
-		String sProductTitle =  oJsonItem.optString(SODATA_NAME);
+		String sProductTitle =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
 		String sProductId = oJsonItem.optString(SODATA_PRODUCT_ID);
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
@@ -84,32 +92,29 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 		// some properties to add to the summary. TODO: decide which are the one we need
 		JSONArray aoAttributes = oJsonItem.optJSONArray(SODATA_ATTRIBUTES);
-		String sIntrument = getAttribute(aoAttributes, SODATA_INSTRUMENT);
+		String sInstrument = getAttribute(aoAttributes, SODATA_INSTRUMENT);
 		String sMode = getAttribute(aoAttributes, SODATA_MODE);
 		String sPlatform = getAttribute(aoAttributes, SODATA_PLATFORM_SHORT_NAME);
 		String sPlatformSerialId = getAttribute(aoAttributes, SODATA_PLATFORM_SERIAL_ID);
 		String sRelativeOrbit = getAttribute(aoAttributes, SODATA_RELATIVE_ORBIT);
-		
-		String sPolarisation = getAttribute(aoAttributes, SODATA_POLARISATION);
-		String sProductType = getAttribute(aoAttributes, SODATA_PRODUCT_TYPE);
-		
-		String sSummary = getSummary(sDate, sSize, sIntrument, sMode, sPlatform, sPlatformSerialId);
+				
+		String sSummary = getSummary(sDate, sSize, sInstrument, sMode, sPlatform, sPlatformSerialId);
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		setBasicInfo(oResult, sProductId, sProductTitle, sLink, sSummary, sFootprint);
-		setProperties(oResult, aoAttributes);
+		setBasicProperties(oResult, sDate, sPlatform, sPlatformSerialId, sInstrument, sMode, sSize, sRelativeOrbit);
+		setAllProviderProperties(oResult, aoAttributes);
 		
 		return oResult;
 	}
 	
 	
-	private void setProperties(QueryResultViewModel oViewModel, JSONArray aoAttributes) {
-		Map<String, String> oMapProperties = oViewModel.getProperties();
-		for (Object oAtt : aoAttributes) {
-			JSONObject oJsonAtt = (JSONObject) oAtt;
-			oMapProperties.put(oJsonAtt.optString(SODATA_NAME), oJsonAtt.optString(SODATA_VALUE));
-		}
+	private String removeExtensionFromProductTitle(String sProductTitle) {
+		return sProductTitle.replace(".SAFE", "")	// extension for Sentinel-1 and Sentinel-2
+				.replace(".SEN3", "") 	// extension for Sentinel-3
+				.replace(".nc", ""); // extension for Sentine-5
 	}
+	
 	
 	private void setBasicInfo(QueryResultViewModel oViewModel, String sProductId, String sProductTitle, String sLink, String sSummary, String sFootprint) {
 		oViewModel.setProvider("CREODIAS2");
@@ -130,10 +135,39 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oViewModel.setFootprint(sFootprint);
 	}
 	
+	private void setBasicProperties(QueryResultViewModel oViewModel, String sDate, String sPlatform, String sPlatformSerialId, String sInstrument, String sMode, String sSize, String sRelativeOrbit) {
+		Map<String, String> oMapProperties = oViewModel.getProperties();
+		
+		if (!Utils.isNullOrEmpty(sDate))
+			oMapProperties.put(sDATE, sDate);
+		
+		if (!Utils.isNullOrEmpty(sPlatform))
+			oMapProperties.put(SPLATFORM_NAME, sPlatform + (!Utils.isNullOrEmpty(sPlatformSerialId) ? sPlatformSerialId : "") );
+		
+		if (!Utils.isNullOrEmpty(sInstrument))
+			oMapProperties.put(SINSTRUMENT, sInstrument);
+		
+		if (!Utils.isNullOrEmpty(sMode))
+			oMapProperties.put(SSENSOR_MODE, sMode);
+		
+		if (!Utils.isNullOrEmpty(sSize))
+			oMapProperties.put(SSIZE, sSize);
+		
+		if (!Utils.isNullOrEmpty(sRelativeOrbit))
+			oMapProperties.put(SRELATIVE_ORBIT, sRelativeOrbit);		
+	}
+	
+	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONArray aoAttributes) {
+		Map<String, String> oMapProperties = oViewModel.getProperties();
+		for (Object oAtt : aoAttributes) {
+			JSONObject oJsonAtt = (JSONObject) oAtt;
+			oMapProperties.putIfAbsent(oJsonAtt.optString(SODATA_NAME), oJsonAtt.optString(SODATA_VALUE));
+		}
+	}
 	
 	
 	private String parseSize(JSONObject oJsonObject) {
-		double dByteSize = (double) oJsonObject.optInt(SODATA_SIZE, -1);
+		double dByteSize = (double) oJsonObject.optLong(SODATA_SIZE, -1L);
 		return dByteSize > 0 
 				? Utils.getNormalizedSize(dByteSize)
 				: "";
