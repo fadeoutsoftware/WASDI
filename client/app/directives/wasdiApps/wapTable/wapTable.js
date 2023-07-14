@@ -15,12 +15,12 @@ angular.module('wasdi.wapTable', []).directive('waptable', function () {
         templateUrl: "directives/wasdiApps/wapTable/wapTable.html",
         link: function (scope, elem, attrs) {
             //create array of objects for table inputs
-            console.log(scope.colHeaders)
+            //console.log(scope.colHeaders)
             scope.aoInputs = []
-            for (let index = 0; index < scope.tableVariables.length; index++) {
+            for (let iIndex = 0; iIndex < scope.tableVariables.length; iIndex++) {
                 scope.aoInputs.push([])
                 for (let j = 0; j < scope.tableVariables[1].length; j++) {
-                    scope.aoInputs[index].push(undefined)
+                    scope.aoInputs[iIndex].push(undefined)
                 }
             }
             scope.addValue = function (text, colIndex, rowIndex) {
