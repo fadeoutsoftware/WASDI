@@ -73,23 +73,31 @@ public class QueryExecutorCDS extends QueryExecutor {
 			if (!m_asSupportedPlatforms.contains(oCDSQuery.platformName)) {
 				return -1;
 			}
-
-			int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
-
-			iCount = iDays;
-
-			return iCount;			
-		}
-		catch (Exception oEx) {
+			
+			// we use the absolute orbit parameter to decide if the data should be aggregated monthly
+			boolean bIsMonthlyAggregation = oCDSQuery.startToDate.equals("monthly");
+			
+			if (bIsMonthlyAggregation) {
+				long lStart = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.startFromDate);
+				long lEnd = TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate);
+				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
+				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(lEnd);
+				iCount = Utils.splitTimeRangeInMonthlyIntervals(oStartDate, oEndDate, 0, Integer.MAX_VALUE).size();
+			} else {
+				int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
+				iCount = iDays;
+			}
+			return iCount;
+		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorCDS.executeCount: error " + oEx.toString());
 		}
-		
+
 		return -1;
 	}
 
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
-		
+
 		try {
 			List<QueryResultViewModel> aoResults = new ArrayList<>();
 
@@ -122,80 +130,86 @@ public class QueryExecutorCDS extends QueryExecutor {
 				WasdiLog.debugLog("QueryExecutorCDS.executeAndRetrieve: " + oE.toString());
 			}
 
-			int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
-			for (int i = 0; i < iDays; i++) {
-				Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
+			String sDataset = oCDSQuery.productName;
+			String sProductType = oCDSQuery.productType;
+			String sPresureLevels = oCDSQuery.productLevel;
+			String sVariables = oCDSQuery.sensorMode;
+			String sFormat = oCDSQuery.timeliness;
+			String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
+			String sFootPrint = extractFootprint(oQuery.getQuery());
 
-				if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
-					QueryResultViewModel oResult = new QueryResultViewModel();
+			// we use the "startToDate" parameter to decide if the data should be aggregated monthly
+			boolean bIsMonthlyAggregation = oCDSQuery.startToDate.equals("monthly");
 
-					String sDataset = oCDSQuery.productName;
-					String sProductType = oCDSQuery.productType;
-					String sPresureLevels = oCDSQuery.productLevel;
-					String sVariables = oCDSQuery.sensorMode;
-					String sFormat = oCDSQuery.timeliness;
-
-					String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
-
-					String sDate = Utils.formatToYyyyMMdd(oActualDay);
-					String sExtension = "." + sFormat;
-
-					String sFileName = String.join("_", Platforms.ERA5, sDataset, sVariables, sDate).replaceAll("[\\W]", "_") + sExtension;
-
-					oResult.setId(sFileName);
-					oResult.setTitle(sFileName);
-
-					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, sBoundingBox, sFormat);
-
-					String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
-					String sUrlEncoded = StringUtils.encodeUrl(sUrl);
-
-					oResult.setLink(sUrlEncoded);
-					String sDateTime = TimeEpochUtils.fromEpochToDateString(oActualDay.getTime());
-					oResult.setSummary("Date: "  + sDateTime +  ", Mode: " + oCDSQuery.sensorMode +  ", Instrument: " + oCDSQuery.timeliness);
-					oResult.setProvider(m_sProvider);
-					oResult.setFootprint(extractFootprint(oQuery.getQuery()));
-					oResult.getProperties().put("platformname", Platforms.ERA5);
-					oResult.getProperties().put("dataset", oCDSQuery.productName);
-					oResult.getProperties().put("productType", oCDSQuery.productType);
-					oResult.getProperties().put("presureLevels", oCDSQuery.productLevel);
-					oResult.getProperties().put("variables", oCDSQuery.sensorMode);
-					oResult.getProperties().put("format", oCDSQuery.timeliness);
-					oResult.getProperties().put("startDate", sDateTime);
-					oResult.getProperties().put("beginposition", sDateTime);
-
+			if (bIsMonthlyAggregation) {
+				Date oStartDate = TimeEpochUtils.fromEpochToDateObject(lStart);
+				Date oEndDate = TimeEpochUtils.fromEpochToDateObject(TimeEpochUtils.fromDateStringToEpoch(oCDSQuery.endToDate));
+				
+				List<Date[]> aaoIntervals = Utils.splitTimeRangeInMonthlyIntervals(oStartDate, oEndDate, iOffset, iLimit);
+				
+				for (Date[] aoInterval : aaoIntervals) {
+					Date oStartIntervalDate = aoInterval[0];
+					Date oEndIntervalDate = aoInterval[1];
+					String sStartDate = Utils.formatToYyyyMMdd(oStartIntervalDate);
+					String sEndDate = Utils.formatToYyyyMMdd(oEndIntervalDate);
+					
+					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat);
+					QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oStartIntervalDate, oEndIntervalDate);
 					aoResults.add(oResult);
 				}
+				
+			} else {
+				int iDays = TimeEpochUtils.countDaysIncluding(oCDSQuery.startFromDate, oCDSQuery.endToDate);
+				for (int i = 0; i < iDays; i++) {
+					Date oActualDay = TimeEpochUtils.getLaterDate(lStart, i);
 
-				iActualElement ++;
+					if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
+						String sDate = Utils.formatToYyyyMMdd(oActualDay);
+						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, null, sBoundingBox, sFormat);
 
-				if (iActualElement > iOffset + iLimit) break;
+						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oActualDay, null);
+						aoResults.add(oResult);
+					}
+
+					iActualElement++;
+
+					if (iActualElement > iOffset + iLimit)
+						break;
+				}
 			}
 
-			return aoResults;			
-		}
-		catch (Exception oEx) {
+			return aoResults;
+		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorCDS.executeAndRetrieve: error " + oEx.toString());
 		}
-		
+
 		return null;
 	}
 
-	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables, String sPresureLevels, String sDate, String sBoundingBox, String sFormat) {
+	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables,
+			String sPresureLevels, String sStartDate, String sEndDate, String sBoundingBox, String sFormat) {
+		String sMonthlyAggregation = String.valueOf(!Utils.isNullOrEmpty(sEndDate)); // if sEndDate is not null, then we do the monthly aggregation
 		Map<String, String> aoPayload = new HashMap<>();
 		aoPayload.put("dataset", sDataset); // reanalysis-era5-pressure-levels
 		aoPayload.put("productType", sProductType); // Reanalysis
 		aoPayload.put("variables", sVariables); // U+V
 		aoPayload.put("presureLevels", sPresureLevels); // 1 hPa
-		aoPayload.put("date", sDate); // 20211201
 		aoPayload.put("boundingBox", sBoundingBox); // North 10�, West 5�, South 5�, East 7
 		aoPayload.put("format", sFormat); // grib | netcdf
+		aoPayload.put("monthlyAggregation", sMonthlyAggregation); // true | false
+		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
+			aoPayload.put("startDate", sStartDate);
+			aoPayload.put("endDate", sEndDate);
+		} else {
+			aoPayload.put("date", sStartDate);
+		}
 
 		String sPayload = null;
 		try {
 			sPayload = s_oMapper.writeValueAsString(aoPayload);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("QueryExecutorCDS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
+			WasdiLog.debugLog(
+					"QueryExecutorCDS.prepareLinkJsonPayload: could not serialize payload due to " + oE + ".");
 		}
 
 		return sPayload;
@@ -219,6 +233,59 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 
 		return sFootprint;
+	}
+
+	private QueryResultViewModel getQueryResultViewModel(QueryViewModel oQuery, String sPayload, String sFootPrint,
+			Date oStartDate, Date oEndDate) {
+		String sStartDate = Utils.formatToYyyyMMdd(oStartDate);
+		String sEndDate = oEndDate != null 
+				? Utils.formatToYyyyMMdd(oEndDate) 
+				: "";
+		String sStartDateTime = TimeEpochUtils.fromEpochToDateString(oStartDate.getTime());
+		String sEndDateTime = null;
+		if (oEndDate != null) {
+			sEndDateTime = TimeEpochUtils.fromEpochToDateString(oEndDate.getTime());
+		}
+
+		String sExtension = "." + oQuery.timeliness;
+		String sFileName = getFileName(oQuery.productName, oQuery.sensorMode, sStartDate, sEndDate, sExtension);
+		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
+		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
+
+		QueryResultViewModel oResult = new QueryResultViewModel();
+		oResult.setId(sFileName);
+		oResult.setTitle(sFileName);
+		oResult.setLink(sEncodedUrl);
+		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, oQuery.sensorMode, oQuery.timeliness)); 
+		oResult.setProvider(m_sProvider);
+		oResult.setFootprint(sFootPrint);
+		oResult.getProperties().put("platformname", Platforms.ERA5);
+		oResult.getProperties().put("dataset", oQuery.productName);
+		oResult.getProperties().put("productType", oQuery.productType);
+		oResult.getProperties().put("presureLevels", oQuery.productLevel);
+		oResult.getProperties().put("variables", oQuery.sensorMode);
+		oResult.getProperties().put("format", oQuery.timeliness);
+		oResult.getProperties().put("startDate", sStartDateTime);
+		oResult.getProperties().put("beginposition", sStartDateTime);
+
+		if (oEndDate != null) {
+			oResult.getProperties().put("endDate", sEndDateTime);
+			oResult.getProperties().put("endposition", sEndDateTime);
+		}
+		return oResult;
+	}
+
+	private String getSummary(String sStartDateTime, String sEndDateTime, String sMode, String timeliness) {
+		return Utils.isNullOrEmpty(sEndDateTime)
+				? "Date: " + sStartDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness
+				: "Start date: " + sStartDateTime + ",End date: " + sEndDateTime + ", Mode: " + sMode + ", Instrument: "
+						+ timeliness;
+	}
+	
+	private String getFileName(String sProductName, String sSensoreMode, String sStartDate, String sEndDate, String sExtension) {
+		return Utils.isNullOrEmpty(sEndDate) 
+				? String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate).replaceAll("[\\W]", "_") + sExtension
+				: String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
 	}
 
 }

@@ -812,6 +812,7 @@ public abstract class QueryTranslator {
 			oResult.productLevel = extractValue(sQuery, "pressureLevels");
 			oResult.sensorMode = extractValue(sQuery, "variables");
 			oResult.timeliness = extractValue(sQuery, "format");
+			oResult.startToDate = extractValue(sQuery, "aggregation");
 		}
 	}
 

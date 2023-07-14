@@ -7,7 +7,7 @@ networks:
 
 services:
   traefik-notebook:
-    image: "traefik:v2.9.1"
+    image: "traefik:v2.10.3"
     container_name: "traefik-notebook"
     restart: "unless-stopped"
     user: "root:root"
@@ -20,6 +20,7 @@ services:
       - "--log.level=INFO"
       - "--log.format=common"
       - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
       - "--providers.file=true"
@@ -36,5 +37,5 @@ services:
       - "8083:80"
 {% endif %}
     volumes:
-      - "/data/wasdi/container/volume/traefik-notebook/etc_traefik:/etc/traefik"
+      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/traefik-notebook/etc_traefik:/etc/traefik"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
