@@ -348,7 +348,7 @@
                 {
                     "indexname": "name",
                     "indexlabel": "Type",
-                    "indexvalues":"L1T|L1G|L1GT|L1GS|L1TP",
+                    "indexvalues":"L1T|L1GT|L1TP",
                     "regex": ".*"
                 },
                 {
