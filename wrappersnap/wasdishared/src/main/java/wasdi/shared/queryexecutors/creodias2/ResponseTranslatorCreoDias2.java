@@ -109,7 +109,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-	private String removeExtensionFromProductTitle(String sProductTitle) {
+	public static String removeExtensionFromProductTitle(String sProductTitle) {
 		return sProductTitle.replace(".SAFE", "")	// extension for Sentinel-1 and Sentinel-2
 				.replace(".SEN3", "") 	// extension for Sentinel-3
 				.replace(".nc", ""); // extension for Sentine-5

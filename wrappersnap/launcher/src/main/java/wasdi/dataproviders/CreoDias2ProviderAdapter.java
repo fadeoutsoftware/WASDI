@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
+import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -22,10 +24,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	private static final String SODATA_SIZE = "ContentLength";
 	
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
-	private static final String SDOWNLOAD_URL = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(702b4faf-16d5-4450-9f61-4d0a13f96794)/$value?token=";
+	private static final String SDOWNLOAD_URL_START = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(";
+	private static final String SDOWNLOAD_URL_END = ")/$value?token=";
 	
-	private static final String SFILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
-	private static final String SFILE_URL_END = ")/$value";
+	private static final String SODATA_FILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
+	private static final String SODATA_FILE_URL_END = ")/$value";
 	
 	private static final String SCREODIAS_BASE_URL = "https://datahub.creodias.eu/odata/v1/Products?";
 	
@@ -34,12 +37,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		m_sDataProviderCode = "CREODIAS2";
 	}
 	
-
-	@Override
-	protected void internalReadConfig() {
-		// TODO Auto-generated method srub. 
-		// read from WasdiConfig specific configurations
-	}
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
@@ -64,6 +61,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return -1L;
 		}
 		
+		WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Anwer well received from the provider");
+		
 		JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
 		JSONArray aoJsonAttributes = oJsonBody.optJSONArray(SODATA_ATTRIBUTES);
 		
@@ -77,7 +76,19 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return -1L;
 		}
 		
+		WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. File size: " + sFileSize);
+
+		
 		return Long.parseLong(sFileSize);
+	}
+	
+	@Override
+	protected void internalReadConfig() {
+		try {
+			m_sDefaultProtocol = m_oDataProviderConfig.defaultProtocol; 
+		} catch (Exception e) {
+			WasdiLog.errorLog("CreoDias2ProvierAdapter: Config reader is null");
+		}
 	}
 	
 	
@@ -93,7 +104,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	private String getProductIdFromURL(String sFileUrl) {
 		// url in input is something like: https://datahub.creodias.eu/odata/v1/Products(a6212de3-f2e4-58c2-840b-7f42c3c8c612)/$value
-		return sFileUrl.replace(SFILE_URL_START, "").replace(SFILE_URL_END, "");
+		return sFileUrl.replace(SODATA_FILE_URL_START, "").replace(SODATA_FILE_URL_END, "");
 	}
 	
 
@@ -102,6 +113,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		// main method. sFileUrl is the url received by the lined data provider. sSaveDirOnServer is the local folder. 
 		// must return the valid file full path or "" if the download was not possible. 
+		
+		WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Execute download for file: " + sFileURL);
+
 		
 		int iAttemptCount = 0;
 		int iWaitDelta = 100;
@@ -117,10 +131,16 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				return "";
 			}
 			
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Access token correctly received.");
+
+			String sProductId = getProductIdFromURL(sFileURL);
 			// with the auth token, we can send the download request
-			String sDownloadUrl = SDOWNLOAD_URL + sAccessToken;
+			String sDownloadUrl = SDOWNLOAD_URL_START + sProductId + SDOWNLOAD_URL_END + sAccessToken;
 			
-			// TODO: understand if I should also pass the name of the file 
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Access token correctly received. Download url (withouth accesso token: " + SDOWNLOAD_URL_START + sProductId + SDOWNLOAD_URL_END);
+
+			
+			// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
 			String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, null, sSaveDirOnServer);
 			
 			if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
@@ -138,7 +158,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				return sDownloadedFilePath;
 			}
 		}
-		// TODO: better to return an empty string or null?
+		// TODO: better to return an empty string or null? 
 		return "";
 	}
 	
@@ -147,7 +167,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		HttpCallResponse oResponse = null;
 		try {
 			oResponse = HttpUtils.httpPost(SAUTHENTICATION_URL, sPayload);
-			int iResponseCode = oResponse.getResponseCode();
 			if (oResponse == null ||  oResponse.getResponseCode() < 200 || oResponse.getResponseCode() > 299) {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.getAuthenticationToken. Error code while trying to retrieve the auth token.");
 				return "";
@@ -170,9 +189,66 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
 		// extracts the file name from the URL
-		return null;
+		WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieving the product's file name from URL: " + sFileURL);
+		
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			WasdiLog.errorLog("CreoDias2ProviderAdaper.getFileName: sFileURL is null or Empty");
+			return "";
+		}
+
+		String sResult = "";
+		if (isHttpsProtocol(sFileURL)) {
+			try {
+				String sProductId = getProductIdFromURL(sFileURL);
+				String sUrl = SCREODIAS_BASE_URL + "$filter=Id eq '" + sProductId;
+				HttpCallResponse sResponse = null;
+				
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieve file at http URL: " + sUrl);
+
+				try {
+					sResponse = HttpUtils.httpGet(sUrl);
+					if (sResponse == null || sResponse.getResponseCode() < 200 || sResponse.getResponseCode() > 299 || Utils.isNullOrEmpty(sResponse.getResponseBody())) {
+						WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Error retrieving the information about the product from the provider. " + sUrl);
+						return "";
+					}
+				} catch (Exception oEx) {
+					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. An exception occurred while retrieving the product information from the provider. " + oEx.getMessage());
+					return "";
+				}
+				
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Response correctly received from the data provider.");
+
+				
+				JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
+				
+				String sFileName = oJsonBody.optString(SODATA_NAME);
+				
+				if (Utils.isNullOrEmpty(sFileName)) 
+					WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. File name was not found under the key " + SODATA_NAME);
+				
+				sResult = ResponseTranslatorCreoDias2.removeExtensionFromProductTitle(sFileName);
+				
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. File name without extension: " + sResult);
+			
+			} catch (Exception oEx) {
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Exception during the retrieval of the file name from http url " + oEx.getMessage());
+				return "";
+			}
+		} else if (isFileProtocol(sFileURL)) {
+			
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieve file at local path: " + sFileURL);
+
+			String[] asParts = sFileURL.split("/");
+
+			if (asParts != null && asParts.length > 1) {
+				sResult = asParts[asParts.length-1];
+			}
+			
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. File name without extension: " + sResult);
+		}
+
+		return sResult;
 	}
 
 	@Override
