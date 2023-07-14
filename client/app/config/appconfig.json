@@ -327,14 +327,32 @@
             "provider":"Envisat",
             "filters": [
                 {
-                    "indexname": "name",
-                    "indexlabel": "Type",
-                    "indexvalues":"ASA_IM__0P|ASA_WS__0P",
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"FRS|ASA_APP_1P|ASA_APS_1P|ASA_IMP_1P|ASA_IMS_1P|ASA_WSS_1P",
                     "regex": ".*"
                 },{
-                    "indexname": "orbitDirection",
-                    "indexlabel": "Orbit Direction",
-                    "indexvalues":"ASCENDING|DESCENDING",
+                    "indexname": "Instrument",
+                    "indexlabel": "Instrument",
+                    "indexvalues":"MERIS|ARAS",
+                    "regex": ".*"
+                }, {
+					"indexname": "productlevel",
+					"indexlabel":"Processing level",
+					"indexvalues":"LEVEL1B|LEVEL1P",
+					"regex":".*"
+				},{
+                    "indexname": "polarisationmode",
+                    "indexlabel": "Phase",
+                    "indexvalues":"2|3",
+                    "regex": ".*"
+                },{
+                    "indexname": "absoluteorbit",
+                    "indexlabel": "Cycle",
+                    "indexhint" : "6-113",
+                    "indexvalues":"",
+                    "indexmin":"6",
+                    "indexmax":"113",
                     "regex": ".*"
                 }
             ]

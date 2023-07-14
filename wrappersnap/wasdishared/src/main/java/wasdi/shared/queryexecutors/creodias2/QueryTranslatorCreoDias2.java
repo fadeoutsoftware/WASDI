@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.LinkedList;
@@ -31,6 +32,14 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private static final String sODataSkipOption = "$skip=";
 	private static final String sODataTopOption = "$top=";
 	private static final String sODataOrderBy = "$orderby=";
+	
+	private static final Map<String, String> asODATA_POLARISATION_MODE_MAP = Map.of(
+			Platforms.ENVISAT, "phaseNumber",
+			Platforms.SENTINEL1, "polarisationChannels");
+	
+	private static final Map<String, String> asODATA_ABSOLUTE_ORBIT_MAP = Map.of(
+			Platforms.SENTINEL5P, "orbitNumber",
+			Platforms.ENVISAT, "cycleNumber");
 
  
 	@Override
@@ -95,7 +104,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createDoubleAttribute("cloudCover", sODataLE, dCloudCovTo));
 		
 		// product level
-		String sProductLevelCode = getProductLevelCode(oQueryViewModel.productLevel);
+		String sProductLevelCode = getProductLevelCode(oQueryViewModel.productLevel, sPlatform);
 		if (!Utils.isNullOrEmpty(sProductLevelCode))
 			asQueryElements.add(createStringAttribute("processingLevel", sProductLevelCode));
 		
@@ -106,12 +115,17 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 					
 		// absolute orbit
 		int iAbsoluteOrbit = oQueryViewModel.absoluteOrbit;
-		if (iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000) 
-			asQueryElements.add(createIntegerAttribute("orbitNumber", sODataEQ, iAbsoluteOrbit));
+		boolean bIsValueForS5 = sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000;
+		boolean bIsValueForENVISAT = sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113;
+		String sAbsoluteOrbitAtt = asODATA_ABSOLUTE_ORBIT_MAP.get(sPlatform);
+		if ( (bIsValueForS5 || bIsValueForENVISAT) && !Utils.isNullOrEmpty(sAbsoluteOrbitAtt) ) {
+			asQueryElements.add(createIntegerAttribute(sAbsoluteOrbitAtt, sODataEQ, iAbsoluteOrbit));
+		}
 		
 		// polarisation	
-		if (!Utils.isNullOrEmpty(oQueryViewModel.polarisation))
-			asQueryElements.add(createStringAttribute("polarisationChannels", oQueryViewModel.polarisation));
+		String sODataPolarisationAtt = asODATA_POLARISATION_MODE_MAP.get(sPlatform);
+		if (!Utils.isNullOrEmpty(oQueryViewModel.polarisation) && !Utils.isNullOrEmpty(sODataPolarisationAtt))
+			asQueryElements.add(createStringAttribute(sODataPolarisationAtt, oQueryViewModel.polarisation));
 		
 		// instrument
 		if (!Utils.isNullOrEmpty(oQueryViewModel.instrument))
@@ -124,8 +138,9 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		
 
-		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed. What values can it take?
+		// TODO: swath (for Sentinel-1), not supported by the queryViewModel? To be confirmed. What values can it take? (Laura)
 		// TODO - IMPORTANT!!! Envisat filters and the corresponding values have no match with what we currently have in WASDI
+		// TODO: cosa facciamo con tutti i valori che sono nuovi in creodias e non sono i Wasdi? - non metterli x il momento
 		
 		// TODO - DONE: polarisation (sentinel 1)
 		// TODO - DONE: satellite platform (e.g. Sentinel-2 A or B), not supported by the queryViewModel? To be confirmed.
@@ -209,17 +224,22 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return null;
 	}
 	
-	private String getProductLevelCode(String sProductLevel) {
-		if (Utils.isNullOrEmpty(sProductLevel))
+	private String getProductLevelCode(String sProductLevel, String sPlatform) {
+		if (Utils.isNullOrEmpty(sProductLevel) || Utils.isNullOrEmpty(sPlatform))
 			return "";
-		if (sProductLevel.equalsIgnoreCase("L1"))
-			return "1";
-		if (sProductLevel.equalsIgnoreCase("L2"))
-			return "2";
-		if (sProductLevel.equalsIgnoreCase("LEVEL1B"))
-			return "L1b";
-		if (sProductLevel.equalsIgnoreCase("LEVEL2"))
-			return "L2";
+		if (sPlatform.equals(Platforms.SENTINEL3)) {
+			if (sProductLevel.equalsIgnoreCase("L1"))
+				return "1";
+			if (sProductLevel.equalsIgnoreCase("L2"))
+				return "2";
+		} else if (sPlatform.equals(Platforms.SENTINEL5P)) {
+			if (sProductLevel.equalsIgnoreCase("LEVEL1B"))
+				return "L1b";
+			if (sProductLevel.equalsIgnoreCase("LEVEL2"))
+				return "L2";
+		} else if (sPlatform.equals(Platforms.ENVISAT)) {
+			return sProductLevel;
+		}
 		return "";
 	}
 	
