@@ -1,11 +1,8 @@
 package wasdi.shared.queryexecutors.creodias2;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.LinkedList;
@@ -15,7 +12,6 @@ import com.google.common.base.Preconditions;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryTranslator;
-import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -33,13 +29,15 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private static final String sODataTopOption = "$top=";
 	private static final String sODataOrderBy = "$orderby=";
 	
-	private static final Map<String, String> asODATA_POLARISATION_MODE_MAP = Map.of(
-			Platforms.ENVISAT, "phaseNumber",
-			Platforms.SENTINEL1, "polarisationChannels");
+	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<String, String>() {{
+			put(Platforms.ENVISAT, "phaseNumber");
+			put(Platforms.SENTINEL1, "polarisationChannels");
+	}};
 	
-	private static final Map<String, String> asODATA_ABSOLUTE_ORBIT_MAP = Map.of(
-			Platforms.SENTINEL5P, "orbitNumber",
-			Platforms.ENVISAT, "cycleNumber");
+	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<String, String>() {{
+			put(Platforms.SENTINEL5P, "orbitNumber");
+			put(Platforms.ENVISAT, "cycleNumber");
+	}};
 
  
 	@Override

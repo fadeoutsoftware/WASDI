@@ -15,7 +15,6 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.ResponseTranslatorCreoDias2;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
@@ -49,7 +48,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	public CreoDias2ProviderAdapter() {
 		super();
 		m_sDataProviderCode = "CREODIAS2";
-
 	}
 	
 
