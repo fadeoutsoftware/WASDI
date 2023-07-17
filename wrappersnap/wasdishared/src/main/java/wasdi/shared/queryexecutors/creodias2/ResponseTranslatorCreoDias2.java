@@ -8,9 +8,12 @@ import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.common.base.Preconditions;
+
 import java.util.LinkedList;
 
 import wasdi.shared.queryexecutors.ResponseTranslator;
+import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -35,6 +38,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_PRODUCT_ID = "Id";
 	private static final String SODATA_PRODUCT_TYPE = "productType";
 	private static final String SODATA_RELATIVE_ORBIT = "relativeOrbitNumber";
+	private static final String SODATA_S3_PATH = "S3Path";
 	private static final String SODATA_SIZE = "ContentLength";
 	private static final String SODATA_TYPE = "type";
 	private static final String SODATA_VALUE = "Value";
@@ -52,6 +56,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SSENSOR_MODE = "sensoroperationalmode";
 	private static final String SSIZE = "size";
 	
+	public static final String SLINK_SEPARATOR_CREODIAS2 = ",";
+	public static final String SLINK_PROPERTY_CREODIAS = "link";
+	public static final int IPOSITIONOF_LINK = 0;
+	public static final int IPOSITIONOF_FILENAME = 1;
+	public static final int IPOSITIONOF_SIZEINBYTES = 2;
+	public static final int IPOSITIONOF_PRODUCTIDENTIFIER = 3;
 	
 		
 	
@@ -88,7 +98,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
 		String sDate = oJsonItem.optString(SODATA_DATE);
-		String sSize = parseSize(oJsonItem);
+		double dByteSize = (double) oJsonItem.optLong(SODATA_SIZE, -1L);
+		String sSize = dByteSize > 0 ? Utils.getNormalizedSize(dByteSize) : "";
 		
 		// some properties to add to the summary. TODO: decide which are the one we need
 		JSONArray aoAttributes = oJsonItem.optJSONArray(SODATA_ATTRIBUTES);
@@ -104,6 +115,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		setBasicInfo(oResult, sProductId, sProductTitle, sLink, sSummary, sFootprint);
 		setBasicProperties(oResult, sDate, sPlatform, sPlatformSerialId, sInstrument, sMode, sSize, sRelativeOrbit);
 		setAllProviderProperties(oResult, aoAttributes);
+		setLink(oResult, dByteSize);
 		
 		return oResult;
 	}
@@ -154,8 +166,56 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oMapProperties.put(SSIZE, sSize);
 		
 		if (!Utils.isNullOrEmpty(sRelativeOrbit))
-			oMapProperties.put(SRELATIVE_ORBIT, sRelativeOrbit);		
+			oMapProperties.put(SRELATIVE_ORBIT, sRelativeOrbit);	
+		
+		
 	}
+	
+	
+	private void setLink(QueryResultViewModel oResult, double dSizeInBytes) {
+		Preconditions.checkNotNull(oResult, "result view model is null");
+		try {
+			StringBuilder oLink = new StringBuilder("");
+			
+			String sItem = "";
+			
+			String sLink = oResult.getLink(); 
+			if(Utils.isNullOrEmpty(sItem)) {
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
+				sLink = "http://";
+			} 
+			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); //0: on-line download link
+		
+			String sTitle = oResult.getTitle();  
+			if(Utils.isNullOrEmpty(sTitle)) {
+				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the product title is empty.");
+				sTitle = "";
+			}
+			sTitle = sTitle + ".zip";
+			oLink.append(sTitle).append(SLINK_SEPARATOR_CREODIAS2); //1: file title (zip format)
+			
+			
+			String sSizeInBytes = ""; 
+			if(dSizeInBytes > -1) {
+				sSizeInBytes = Double.toString(dSizeInBytes);
+			} 
+			oLink.append(sSizeInBytes).append(SLINK_SEPARATOR_CREODIAS2); //2: size in bytes
+
+			
+			String sPathIdentifier = oResult.getProperties().getOrDefault(SODATA_S3_PATH, "");
+			if(Utils.isNullOrEmpty(sPathIdentifier)) {
+				sPathIdentifier = "";
+			} 
+			oLink.append(sPathIdentifier).append(SLINK_SEPARATOR_CREODIAS2); //3: path identifier
+
+			oResult.getProperties().put(ResponseTranslatorCREODIAS.SLINK, oLink.toString());
+			oResult.setLink(oLink.toString());
+		} catch (Exception oE) {
+			WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
+		}
+	}
+	
+	
 	
 	private void setAllProviderProperties(QueryResultViewModel oViewModel, JSONArray aoAttributes) {
 		Map<String, String> oMapProperties = oViewModel.getProperties();
@@ -166,14 +226,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-	private String parseSize(JSONObject oJsonObject) {
-		double dByteSize = (double) oJsonObject.optLong(SODATA_SIZE, -1L);
-		return dByteSize > 0 
-				? Utils.getNormalizedSize(dByteSize)
-				: "";
-	}
-	
-	
+
 	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
 		for (Object oAtt : aoAttributes) {
 			JSONObject oJsonAtt = (JSONObject) oAtt;
