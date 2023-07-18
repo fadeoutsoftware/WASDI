@@ -39,7 +39,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_PRODUCT_TYPE = "productType";
 	private static final String SODATA_RELATIVE_ORBIT = "relativeOrbitNumber";
 	private static final String SODATA_S3_PATH = "S3Path";
-	private static final String SODATA_SIZE = "ContentLength";
+	public static final String  SODATA_SIZE = "ContentLength";
 	private static final String SODATA_TYPE = "type";
 	private static final String SODATA_VALUE = "Value";
 	

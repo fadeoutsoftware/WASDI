@@ -3,13 +3,20 @@ package wasdi.dataproviders;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
+import java.net.IDN;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipOutputStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.net.URI;
+
 
 import com.google.common.base.Preconditions;
 
@@ -28,7 +35,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	private static final String SODATA_ATTRIBUTES = "Attributes";
 	private static final String SODATA_NAME = "Name";
 	private static final String SODATA_VALUE = "Value";
-	private static final String SODATA_SIZE = "ContentLength";
 	
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
 	private static final String SDOWNLOAD_URL_START = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(";
@@ -89,13 +95,17 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		
 
 		if (isHttpsProtocol(sFileURL)) {
+			
 			String sDownloadUrl = getODataDownloadUrl(sFileURL);
 			String sProductId = getProductIdFromURL(sDownloadUrl);
 			String sUrl = SCREODIAS_BASE_URL + "$filter=Id eq '" + sProductId + "'&$expand=Attributes";
+			URL oURL = new URL(sUrl);
+			URI oURI = new URI(oURL.getProtocol(), oURL.getUserInfo(), IDN.toASCII(oURL.getHost()), oURL.getPort(), oURL.getPath(), oURL.getQuery(), oURL.getRef());
+			
 			HttpCallResponse sResponse = null;
 			
 			try {
-				sResponse = HttpUtils.httpGet(sUrl);
+				sResponse = HttpUtils.httpGet(oURI.toASCIIString());
 				if (sResponse == null || sResponse.getResponseCode() < 200 || sResponse.getResponseCode() > 299 || Utils.isNullOrEmpty(sResponse.getResponseBody())) {
 					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Error retrieving the information about the product from the provider. " + sUrl);
 					return -1L;
@@ -107,18 +117,32 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Anwer well received from the provider");
 			
+			
+			JSONObject jsonO = new JSONObject(sResponse.getResponseBody());
+			JSONArray arr = jsonO.getJSONArray("value");
+			System.out.println(arr.length());
+			JSONObject jsonObject = (JSONObject) arr.get(0);
+			System.out.println(jsonObject.optString("ContentLength"));	
+			
+			
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
-			JSONArray aoJsonAttributes = oJsonBody.optJSONArray(SODATA_ATTRIBUTES);
+			JSONArray aoValues = oJsonBody.optJSONArray("value");
+			if (aoValues == null || aoValues.length() != 1) {
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Array of attributes not found on CreoDias");
+				return 0;
+			}
 			
-			if (aoJsonAttributes == null) 
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Array of attributes not found for key " + SODATA_ATTRIBUTES);
-			
-			lSizeInBytes = Long.parseLong(getAttribute(aoJsonAttributes, SODATA_SIZE));
+			JSONObject oValue = (JSONObject) aoValues.get(0);
+			String sFileSize = oValue.optString(ResponseTranslatorCreoDias2.SODATA_SIZE, "0");
 			
 			
+			if (Utils.isNullOrEmpty(sFileSize)) {
+				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Array of attributes not found for key " + ResponseTranslatorCreoDias2.SODATA_SIZE);
+			}
+			
+			lSizeInBytes = Long.parseLong(sFileSize);
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. File size: " + lSizeInBytes);
-	
-			
+
 		}
 
 		return lSizeInBytes;
@@ -279,7 +303,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 				
 				// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
-				String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, null, sSaveDirOnServer);
+				String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
 				
 				if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
 					// we will try again
@@ -514,33 +538,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		}
 		
 		return 0;
-	}
-
-	
-	public static void main(String[]args) throws Exception {
-		String sUrl = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
-		URL oURL = new URL(sUrl);
-
-		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-		oConnection.setRequestMethod("POST");
-		oConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		oConnection.setDoOutput(true);
-		String sDownloadPassword = "******";
-		String sDownloadUser = "******";
-		String sPayload = "client_id=CLOUDFERRO_PUBLIC&password=" + sDownloadPassword + "&username=" + sDownloadUser + "&grant_type=password";
-
-		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sPayload);
-		System.out.println(oResponse.getResponseBody());
-		JSONObject oResponseBody = new JSONObject(oResponse.getResponseBody());
-		String sAccessToken = oResponseBody.optString("access_token");
-		
-		String otherUrl = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(702b4faf-16d5-4450-9f61-4d0a13f96794)/$value?token=" + sAccessToken;
-		
-		HttpCallResponse oResponse2 = HttpUtils.httpGet(otherUrl);
-		
-		System.out.println(oResponse2);
-
-
 	}
 	
 }
