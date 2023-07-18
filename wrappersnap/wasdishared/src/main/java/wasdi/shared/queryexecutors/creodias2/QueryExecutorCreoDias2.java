@@ -1,24 +1,19 @@
 package wasdi.shared.queryexecutors.creodias2;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 
-import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
-import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
+import wasdi.shared.utils.HttpUtils;
+
 
 public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 	
@@ -46,9 +41,18 @@ public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 			
 			String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
 			
-			String sResults = standardHttpGETQuery(sOutputQuery);
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sOutputQuery, null, null);  // standardHttpGETQuery(sOutputQuery);
 			
-			iCount = m_oResponseTranslator.getCountResult(sResults);
+			String sResult = oHttpResponse.getResponseBody();
+						
+			if (oHttpResponse.getResponseCode()>=200 && oHttpResponse.getResponseCode()<=299) {
+				iCount = m_oResponseTranslator.getCountResult(sResult);
+			}
+			else {
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Error when trying to retrieve the number of results. Response code: " + oHttpResponse.getResponseCode());
+				return -1;
+			}
+			
 			
 		} catch (Exception oException) {
 			WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Error when trying to retrieve the number of results " + oException.getMessage());
@@ -73,10 +77,14 @@ public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 			String sCreodiasQuery = m_oQueryTranslator.getSearchUrl(oQuery);
 			
 			// Call standard http get API
-			String sCreodiasResult = standardHttpGETQuery(sCreodiasQuery);
-			
-			
-			
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);  // standardHttpGETQuery(sOutputQuery);
+						
+			if (oHttpResponse.getResponseCode()< 200 && oHttpResponse.getResponseCode() > 299) {
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode());
+			}
+		
+			String sCreodiasResult = oHttpResponse.getResponseBody();
+
 			if (Utils.isNullOrEmpty(sCreodiasResult)) {
 				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. The data provider returned an empty string for query: " + sCreodiasQuery);
 				return Collections.emptyList();
