@@ -354,11 +354,10 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			
 			int iItemsPerPage = Integer.parseInt(oQuery.getOriginalLimit());
 			int iActualOffset = Integer.parseInt(oQuery.getOffset());
-			int iSkipCount = iItemsPerPage * iActualOffset;
-
+					
 			// handle the offset
-			if (iSkipCount > 0)
-				sUrl = "&" + sODataSkipOption + iSkipCount; 
+			if (iActualOffset > 0)
+				sUrl += "&" + sODataSkipOption + iActualOffset; 
 			
 			// handle the number of results per pages
 			sUrl += "&" + sODataTopOption + iItemsPerPage;
