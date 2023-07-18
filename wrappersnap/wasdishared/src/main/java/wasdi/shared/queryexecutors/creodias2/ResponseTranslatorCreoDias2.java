@@ -100,6 +100,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sDate = oJsonItem.optString(SODATA_DATE);
 		double dByteSize = (double) oJsonItem.optLong(SODATA_SIZE, -1L);
 		String sSize = dByteSize > 0 ? Utils.getNormalizedSize(dByteSize) : "";
+		String sS3Path = oJsonItem.optString(SODATA_S3_PATH);
 		
 		// some properties to add to the summary. TODO: decide which are the one we need
 		JSONArray aoAttributes = oJsonItem.optJSONArray(SODATA_ATTRIBUTES);
@@ -115,7 +116,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		setBasicInfo(oResult, sProductId, sProductTitle, sLink, sSummary, sFootprint);
 		setBasicProperties(oResult, sDate, sPlatform, sPlatformSerialId, sInstrument, sMode, sSize, sRelativeOrbit);
 		setAllProviderProperties(oResult, aoAttributes);
-		setLink(oResult, dByteSize);
+		setLink(oResult, dByteSize, sS3Path);
 		
 		return oResult;
 	}
@@ -172,15 +173,14 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	}
 	
 	
-	private void setLink(QueryResultViewModel oResult, double dSizeInBytes) {
+	private void setLink(QueryResultViewModel oResult, double dSizeInBytes, String sS3Path) {
 		Preconditions.checkNotNull(oResult, "result view model is null");
 		try {
 			StringBuilder oLink = new StringBuilder("");
 			
-			String sItem = "";
 			
 			String sLink = oResult.getLink(); 
-			if(Utils.isNullOrEmpty(sItem)) {
+			if(Utils.isNullOrEmpty(sLink)) {
 				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty. Product title: " + oResult.getTitle() );
 				sLink = "http://";
 			} 
@@ -202,7 +202,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oLink.append(sSizeInBytes).append(SLINK_SEPARATOR_CREODIAS2); //2: size in bytes
 
 			
-			String sPathIdentifier = oResult.getProperties().getOrDefault(SODATA_S3_PATH, "");
+			String sPathIdentifier = sS3Path;
 			if(Utils.isNullOrEmpty(sPathIdentifier)) {
 				sPathIdentifier = "";
 			} 
