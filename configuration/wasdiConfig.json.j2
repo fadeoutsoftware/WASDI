@@ -389,7 +389,7 @@
         "metricsMaxAgeSeconds": {{ aoWasdiConfiguration['loadBalancer']['metricsMaxAgeSeconds'] }}
     },
     "catalogues": [
-{% for sCurrentCatalogue in aoWasdiConfiguration['catalogues'] | default({}) %}
+{% for sCurrentCatalogue in aoWasdiConfiguration['catalogues'] | default({}) | sort %}
         {
             "platform": "{{ sCurrentCatalogue }}",
             "catalogues": [
