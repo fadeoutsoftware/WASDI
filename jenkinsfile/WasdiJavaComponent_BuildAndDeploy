@@ -80,13 +80,7 @@ pipeline {
 
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
-        script {
-          if ( env.sCurrentEnvironmentLower == 'prod' ) {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy scm:tag", label: "Upload in Nexus"
-          } else {
-            sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
-          }
-        }
+        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
       }
     }
 
