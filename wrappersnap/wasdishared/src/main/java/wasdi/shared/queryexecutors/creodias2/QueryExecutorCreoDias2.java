@@ -6,6 +6,7 @@ import java.util.Collections;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -15,7 +16,7 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 import wasdi.shared.utils.HttpUtils;
 
 
-public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
+public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 	
 	
 	public QueryExecutorCreoDias2() {
@@ -41,7 +42,7 @@ public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 			
 			String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
 			
-			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sOutputQuery, null, null);  // standardHttpGETQuery(sOutputQuery);
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sOutputQuery, null, null);  
 			
 			String sResult = oHttpResponse.getResponseBody();
 						
@@ -77,7 +78,7 @@ public class QueryExecutorCreoDias2 extends QueryExecutorHttpGet {
 			String sCreodiasQuery = m_oQueryTranslator.getSearchUrl(oQuery);
 			
 			// Call standard http get API
-			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);  // standardHttpGETQuery(sOutputQuery);
+			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);  
 						
 			if (oHttpResponse.getResponseCode()< 200 && oHttpResponse.getResponseCode() > 299) {
 				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode());
