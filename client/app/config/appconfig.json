@@ -252,7 +252,7 @@
                     "indexname": "timeliness",
                     "indexlabel": "Timeliness",
                     "indexvalues":"Offline|Near real time|Reprocessing",
-                    "regex": ".*"
+                    "regex": ".*" 
                 },
                 {
                     "indexname": "absoluteorbit",
@@ -400,7 +400,7 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "reanalysis-era5-pressure-levels|reanalysis-era5-single-levels|reanalysis-era5-land",
+                    "indexvalues": "reanalysis-era5-pressure-levels|reanalysis-era5-single-levels|reanalysis-era5-land|satellite-sea-surface-temperature",
                     "regex": ".*",
                     "indexvalue":"reanalysis-era5-pressure-levels"
                 },
@@ -449,6 +449,7 @@
                     "indexlabel": "Format",
                     "indexvalues":"grib|netcdf",
                     "regex": ".*",
+                    "visibilityConditions": "dataset:reanalysis-era5-pressure-levels|dataset:reanalysis-era5-single-levels|dataset:reanalysis-era5-land",
                     "indexvalue":"netcdf"
                 },
 				{
@@ -548,7 +549,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt|GHS_BUILT_S_P2030LIN_GLOBE_R2022A_54009_100_V1_0|GHS_BUILT_H_AGBH_E2018_GLOBE_R2022A_54009_100_V1_0|WORLD_POP_2020_1km|GHS_POP_P2030_GLOBE_R2022A_WGS84_100_V1_0",
+                    "indexvalues": "ESA_CCI_LAND_COVER_2015|ESACCI-Ocean-Land-Map-150m-P13Y-2000|CopDEM30m_wbm_global_mosaic|GLO-MFC_001_024_coordinates_e1t|GLO-MFC_001_024_coordinates_e2t|GLO-MFC_001_024_coordinates_e3t|GLO-MFC_001_024_mask_bathy_deptho|GLO-MFC_001_024_mask_bathy_deptho_lev|GLO-MFC_001_024_mask_bathy_mask|GLO-MFC_001_024_mdt_mdt|GHS_BUILT_S_P2030LIN_GLOBE_R2022A_54009_100_V1_0|GHS_BUILT_H_AGBH_E2018_GLOBE_R2022A_54009_100_V1_0|WORLD_POP_2020_1km|GHS_POP_P2030_GLOBE_R2022A_WGS84_100_V1_0|Jakarta_BuildingTypeClassification",
                     "regex": ".*",
                     "indexvalue":"ESA_CCI_LAND_COVER_2015"
                 }
@@ -608,7 +609,7 @@
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues": "OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
+                    "indexvalues": "OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|OCEANCOLOUR_GLO_BGC_L4_MY_009_104-TDS|GLOBAL_MULTIYEAR_PHY_001_030-TDS|GLOBAL_ANALYSISFORECAST_PHY_001_024-TDS",
                     "regex": ".*",
                     "indexvalue": "OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS"
                 },
@@ -617,7 +618,7 @@
                     "indexlabel": "Protocol",
                     "indexvalues": "SUBS",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS|GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS|OCEANCOLOUR_MED_BGC_HR_L3_NRT_009_205-TDS|MEDSEA_ANALYSISFORECAST_PHY_006_013-TDS|SST_MED_SST_L4_NRT_OBSERVATIONS_010_004-TDS|MEDSEA_ANALYSISFORECAST_BGC_006_014-TDS|GLOBAL_ANALYSIS_FORECAST_WAV_001_027-TDS|SST_MED_SST_L3S_NRT_OBSERVATIONS_010_012-TDS",
                     "indexvalue": "SUBS"
                 },
                 {
@@ -628,6 +629,14 @@
                     "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_108-TDS",
                     "indexvalue": "c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
                 },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D|cmems_obs-oc_glo_bgc-transp_my_l4-gapfree-multi-4km_P1D",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_104-TDS",
+                    "indexvalue": "cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D"
+                },                
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
@@ -679,11 +688,19 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|global-analysis-forecast-phy-001-024|global-analysis-forecast-phy-001-024-3dinst-so|global-analysis-forecast-phy-001-024-3dinst-thetao|global-analysis-forecast-phy-001-024-3dinst-uovo|global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh|global-analysis-forecast-phy-001-024-monthly",
+                    "indexvalues": "cmems_mod_glo_phy-so_anfc_0.083deg_P1M-m|cmems_mod_glo_phy_anfc_merged-uv_PT1H-i",
                     "regex": ".*",
-                    "visibilityConditions": "producttype:GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS",
-                    "indexvalue": "cmems_mod_glo_phy_anfc_merged-uv_PT1H-i"
+                    "visibilityConditions": "producttype:GLOBAL_ANALYSISFORECAST_PHY_001_024-TDS",
+                    "indexvalue": "cmems_mod_glo_phy-so_anfc_0.083deg_P1M-m"
                 },
+                {
+                    "indexname": "dataset",
+                    "indexlabel": "Dataset",
+                    "indexvalues": "cmems_mod_glo_phy_my_0.083_P1M-m",
+                    "regex": ".*",
+                    "visibilityConditions": "producttype:GLOBAL_MULTIYEAR_PHY_001_030-TDS",
+                    "indexvalue": "cmems_mod_glo_phy_my_0.083_P1M-m"
+                },                
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
@@ -699,14 +716,6 @@
                     "regex": ".*",
                     "visibilityConditions": "(dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2|dataset:SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_c_V2)&protocol:SUBS",
                     "indexvalue": "analysed_sst+analysis_error"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
-                    "indexvalues": "thetao",
-                    "regex": ".*",
-                    "visibilityConditions": "dataset:global-analysis-forecast-phy-001-024-3dinst-thetao&protocol:SUBS",
-                    "indexvalue": "thetao"
                 },
                 {
                     "indexname": "variables",
@@ -745,7 +754,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "uo+utide+utotal+vo+vsdx+vsdy+vtide+vtotal|uo|utide|utotal|vo|vsdx|vsdy|vtide|vtotal",
                     "regex": ".*",
-                    "visibilityConditions": "dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i",
                     "indexvalue": "uo+utide+utotal+vo+vsdx+vsdy+vtide+vtotal"
                 },
                 {
@@ -783,22 +792,6 @@
                 {
                     "indexname": "variables",
                     "indexlabel": "Variables",
-                    "indexvalues": "thetao+uo+vo+zos|thetao|uo|vo|zos",
-                    "regex": ".*",
-                    "visibilityConditions": "dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh&protocol:SUBS",
-                    "indexvalue": "thetao+uo+vo+zos"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
-                    "indexvalues": "bottomT+mlotst+siconc+sithick+so+thetao+uo+usi+vo+vsi+zos|bottomT|mlotst|siconc|sithick|so|thetao|uo|usi|vo|vsi|zos",
-                    "regex": ".*",
-                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
-                    "indexvalue": "bottomT+mlotst+siconc+sithick+so+thetao+uo+usi+vo+vsi+zos"
-                },
-                {
-                    "indexname": "variables",
-                    "indexlabel": "Variables",
                     "indexvalues": "nppv+o2|nppv|o2",
                     "regex": ".*",
                     "visibilityConditions": "(dataset:med-ogs-bio-an-fc-d|dataset:med-ogs-bio-an-fc-m)&protocol:SUBS",
@@ -825,7 +818,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "so",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1M-m|dataset:global-analysis-forecast-phy-001-024-3dinst-so)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-sal_anfc_4.2km_P1M-m)&protocol:SUBS",
                     "indexvalue": "so"
                 },
                 {
@@ -833,7 +826,7 @@
                     "indexlabel": "Variables",
                     "indexvalues": "uo+vo|uo|vo",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT15M-i|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo)&protocol:SUBS",
+                    "visibilityConditions": "(dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1D-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1H-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT1HTS-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_P1M-m|dataset:cmems_mod_med_phy-cur_anfc_4.2km_PT15M-i)&protocol:SUBS",
                     "indexvalue": "uo+vo"
                 },
                 {
@@ -851,6 +844,39 @@
                     "regex": ".*",
                     "visibilityConditions": "dataset:cmems_mod_med_phy-ssh_anfc_4.2km_P1M-m&protocol:SUBS",
                     "indexvalue": "zos"
+                },
+
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL|CHL_uncertainty|flags|CHL+CHL_uncertainty+flags",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D",
+                    "indexvalue": "CHL"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "KD490|KD490_uncertainty|ZSD|ZSD_uncertainty|flags|KD490+KD490_uncertainty+ZSD+ZSD_uncertainty+flags",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_obs-oc_glo_bgc-transp_my_l4-gapfree-multi-4km_P1D",
+                    "indexvalue": "KD490"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "so",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy-so_anfc_0.083deg_P1M-m",
+                    "indexvalue": "so"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "bottomT|mlotst|siconc|sithick|so|thetao|uo|usi|vo|vsi|zos|bottomT+mlotst+siconc+sithick+so+thetao+uo+usi+vo+vsi+zos",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy_my_0.083_P1M-m",
+                    "indexvalue": "so"
                 },
                 {
                     "indexname": "startDepth",
@@ -873,7 +899,7 @@
                     "indexlabel": "Depth From",
                     "indexvalues": "0.49402499198913574",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh)&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i",
                     "indexvalue": "0.49402499198913574"
                 },
                 {
@@ -881,7 +907,7 @@
                     "indexlabel": "Depth To",
                     "indexvalues": "0.49402499198913574",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i|dataset:global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh)&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy_anfc_merged-uv_PT1H-i",
                     "indexvalue": "0.49402499198913574"
                 },
                 {
@@ -921,7 +947,7 @@
                     "indexlabel": "Depth From",
                     "indexvalues": "0.49402499198913574|1.5413750410079956|2.6456689834594727|3.8194949626922607|5.078224182128906|6.440614223480225|7.92956018447876|9.572997093200684|11.404999732971191|13.467140197753906|15.810070037841797|18.495559692382812|21.598819732666016|25.211410522460938|29.444730758666992|34.43415069580078|40.344051361083984|47.37369155883789|55.76428985595703|65.80726623535156|77.85385131835938|92.3260726928711|109.72930145263672|130.66600036621094|155.85069274902344|186.12559509277344|222.47520446777344|266.0403137207031|318.1274108886719|380.2130126953125|453.9377136230469|541.0889282226562|643.5667724609375|763.3331298828125|902.3392944335938|1062.43994140625|1245.291015625|1452.2509765625|1684.2840576171875|1941.8929443359375|2225.077880859375|2533.3359375|2865.702880859375|3220.820068359375|3597.031982421875|3992.48388671875|4405.22412109375|4833.291015625|5274.7841796875|5727.9169921875",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-3dinst-so|dataset:global-analysis-forecast-phy-001-024-3dinst-thetao|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy-so_anfc_0.083deg_P1M-m|cmems_mod_glo_phy_my_0.083_P1M-m",
                     "indexvalue": "0.49402499198913574"
                 },
                 {
@@ -929,8 +955,8 @@
                     "indexlabel": "Depth To",
                     "indexvalues": "0.49402499198913574|1.5413750410079956|2.6456689834594727|3.8194949626922607|5.078224182128906|6.440614223480225|7.92956018447876|9.572997093200684|11.404999732971191|13.467140197753906|15.810070037841797|18.495559692382812|21.598819732666016|25.211410522460938|29.444730758666992|34.43415069580078|40.344051361083984|47.37369155883789|55.76428985595703|65.80726623535156|77.85385131835938|92.3260726928711|109.72930145263672|130.66600036621094|155.85069274902344|186.12559509277344|222.47520446777344|266.0403137207031|318.1274108886719|380.2130126953125|453.9377136230469|541.0889282226562|643.5667724609375|763.3331298828125|902.3392944335938|1062.43994140625|1245.291015625|1452.2509765625|1684.2840576171875|1941.8929443359375|2225.077880859375|2533.3359375|2865.702880859375|3220.820068359375|3597.031982421875|3992.48388671875|4405.22412109375|4833.291015625|5274.7841796875|5727.9169921875",
                     "regex": ".*",
-                    "visibilityConditions": "(dataset:global-analysis-forecast-phy-001-024|dataset:global-analysis-forecast-phy-001-024-3dinst-so|dataset:global-analysis-forecast-phy-001-024-3dinst-thetao|dataset:global-analysis-forecast-phy-001-024-3dinst-uovo|dataset:global-analysis-forecast-phy-001-024-monthly)&protocol:SUBS",
-                    "indexvalue": "5727.9169921875"
+                    "visibilityConditions": "dataset:cmems_mod_glo_phy-so_anfc_0.083deg_P1M-m|cmems_mod_glo_phy_my_0.083_P1M-m",
+                    "indexvalue": "0.49402499198913574"
                 }
             ]
         },

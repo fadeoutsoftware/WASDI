@@ -164,7 +164,7 @@ public final class JsonUtils {
 		Map<String, Object> aoMap = aoJSONMap;
 		Object oTarget = null;
 		for (int i = 0; i < aoTokens.length; i++) {
-			aoMap.get(aoTokens[i]);
+			oTarget = aoMap.get(aoTokens[i]);
 		}
 
 		return oTarget;

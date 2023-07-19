@@ -70,34 +70,58 @@ public class CMHttpUtils {
 		if (asCookies != null) {
 			String sRequestId = null;
 
-			String sResponse_productdownload = callGetAndObtainResponse(sUrlProductDownload, asCookies);
+			String sResponseProductDownload = callGetAndObtainResponse(sUrlProductDownload, asCookies);
 
-			if (sResponse_productdownload == null) return null;
+			if (sResponseProductDownload == null) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: callGetAndObtainResponse returned null URL " + sUrlProductDownload);
+				return null;
+			}
 
-			if (!sResponse_productdownload.contains("statusModeResponse")) return null;
+			if (!sResponseProductDownload.contains("statusModeResponse")) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to find statusModeResponse " + sUrlProductDownload);
+				return null;
+			}
 
-			if (!sResponse_productdownload.contains("requestId")) return null;
+			if (!sResponseProductDownload.contains("requestId")) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to find requestId URL " + sUrlProductDownload);
+				return null;
+			}
 
-			sRequestId = parseValue(sResponse_productdownload, "requestId");
+			sRequestId = parseValue(sResponseProductDownload, "requestId");
 
-			if (sRequestId == null) return null;
+			if (sRequestId == null) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: Impossible to parse Request Id URL " + sUrlProductDownload);
+				return null;
+			}
 
 
 			String sRemoteUri = null;
 
 			while (true) {
-				String sResponse_getreqstatus = callGetAndObtainResponse(sUrlGetReqStatus + sRequestId, asCookies);
+				String sResponseGetReqStatus = callGetAndObtainResponse(sUrlGetReqStatus + sRequestId, asCookies);
 
-				if (sResponse_getreqstatus == null) return null;
-				if (!sResponse_getreqstatus.contains("statusModeResponse")) return null;
+				if (sResponseGetReqStatus == null) {
+					WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to get Request status URL " + sUrlGetReqStatus);
+					return null;
+				}
+				if (!sResponseGetReqStatus.contains("statusModeResponse")) {
+					WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to get statusModeResponse Request status URL " + sUrlGetReqStatus);
+					return null;
+				}
 
-				if (!sResponse_getreqstatus.contains("msg")) return null;
+				if (!sResponseGetReqStatus.contains("msg")) {
+					WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to get msg URL " + sUrlGetReqStatus);
+					return null;
+				}
 
-				String sMsg = parseValue(sResponse_getreqstatus, "msg");
+				String sMsg = parseValue(sResponseGetReqStatus, "msg");
 
-				if (!sResponse_getreqstatus.contains("status" + "=")) return null;
+				if (!sResponseGetReqStatus.contains("status" + "=")) {
+					WasdiLog.errorLog("CMHttpUtils.downloadProduct: error finding status URL " + sUrlGetReqStatus);
+					return null;
+				}
 
-				String sStatus = parseValue(sResponse_getreqstatus, "status");
+				String sStatus = parseValue(sResponseGetReqStatus, "status");
 
 				if (sMsg.equalsIgnoreCase("request in progress") || sStatus.equals("0")) {
 
@@ -110,14 +134,22 @@ public class CMHttpUtils {
 					continue;
 				}
 
-				if (!sResponse_getreqstatus.contains("remoteUri")) return null;
+				if (!sResponseGetReqStatus.contains("remoteUri")) {
+					WasdiLog.errorLog("CMHttpUtils.downloadProduct: remote Uri not found URL " + sUrlGetReqStatus);
+					return null;
+				}
 
-				sRemoteUri = parseValue(sResponse_getreqstatus, "remoteUri");
+				sRemoteUri = parseValue(sResponseGetReqStatus, "remoteUri");
 
 				break;
 			}
 
-			if (sRemoteUri == null) return null;
+			if (sRemoteUri == null) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to parse remote Uri " + sUrlGetReqStatus);
+				return null;
+			}
+			
+			WasdiLog.debugLog("CMHttpUtils.downloadProduct: got sRemoteUri: " + sRemoteUri);
 
 			String sFileName = sRemoteUri.substring(sRemoteUri.lastIndexOf("/") + 1);
 
@@ -126,7 +158,6 @@ public class CMHttpUtils {
 
 			String sOutputFilePath = sDownloadPath + sFileName;
 
-
 			String sJsessionid = asCookies.get("JSESSIONID");
 
 			Map<String, String> asHeaders = new HashMap<>();
@@ -134,9 +165,15 @@ public class CMHttpUtils {
 
 			String sActualOutputFilePath = HttpUtils.downloadFile(sRemoteUri, asHeaders, sOutputFilePath);
 
-			if (!sOutputFilePath.equalsIgnoreCase(sActualOutputFilePath)) return null;
+			if (!sOutputFilePath.equalsIgnoreCase(sActualOutputFilePath)) {
+				WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to download remote Uri " + sRemoteUri);
+				return null;
+			}
 
 			return sActualOutputFilePath;
+		}
+		else {
+			WasdiLog.errorLog("CMHttpUtils.downloadProduct: Impossible to get Cookies for authentication, return null" );
 		}
 
 		return null;

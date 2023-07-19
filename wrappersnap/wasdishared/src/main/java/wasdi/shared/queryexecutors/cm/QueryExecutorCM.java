@@ -14,7 +14,6 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
-import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -29,6 +28,9 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  */
 public class QueryExecutorCM extends QueryExecutor {
 
+	/**
+	 * Static reference to the provider config
+	 */
 	private static DataProviderConfig s_oDataProviderConfig;
 
 	public QueryExecutorCM() {
@@ -48,6 +50,10 @@ public class QueryExecutorCM extends QueryExecutor {
 		return sOriginalUrl;
 	}
 
+	/**
+	 * "Fake" execute Count: the service is able to return a single net-cdf file for each request.
+	 * So the result is always 0 in case of problems or 1 otherwise.
+	 */
 	@Override
 	public int executeCount(String sQuery) {
 		WasdiLog.debugLog("QueryExecutorCM.executeCount | sQuery: " + sQuery);
@@ -65,19 +71,12 @@ public class QueryExecutorCM extends QueryExecutor {
 			return iCount;
 		}
 
-		String sProtocol = oQueryViewModel.productLevel;
-
-		if (sProtocol.equalsIgnoreCase("SUBS")) {
-			iCount = 1;
-		} else if (sProtocol.equalsIgnoreCase("FTP")) {
-			int iDays = TimeEpochUtils.countDaysIncluding(oQueryViewModel.startFromDate, oQueryViewModel.endToDate);
-
-			iCount = iDays;
-		}
-
-		return iCount;
+		return 1;
 	}
-
+	
+	/**
+	 * The method must create the Result View Model
+	 */
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		WasdiLog.debugLog("QueryExecutorCM.executeAndRetrieve | sQuery: " + oQuery.getQuery());
@@ -95,200 +94,194 @@ public class QueryExecutorCM extends QueryExecutor {
 			return aoResults;
 		}
 
-		String sProtocol = oQueryViewModel.productLevel;
+		QueryResultViewModel oResult = new QueryResultViewModel();
 
-		if (sProtocol.equalsIgnoreCase("SUBS")) {
-			QueryResultViewModel oResult = new QueryResultViewModel();
+		String sService = oQueryViewModel.productType;
+		String sProduct = oQueryViewModel.productName;
 
-			String sService = oQueryViewModel.productType;
-			String sProduct = oQueryViewModel.productName;
+		oResult.setId(sService);
+		oResult.setTitle(sProduct + "_" + Utils.nowInMillis().longValue() + ".nc");
 
-			oResult.setId(sService);
-			oResult.setTitle(sProduct + "_" + Utils.nowInMillis().longValue() + ".nc");
+		StringBuilder oSBQuery = new StringBuilder("");
 
-			StringBuilder oSBQuery = new StringBuilder("");
+		oSBQuery.append("&x_lo=").append(oQueryViewModel.west);
+		oSBQuery.append("&x_hi=").append(oQueryViewModel.east);
+		oSBQuery.append("&y_lo=").append(oQueryViewModel.south);
+		oSBQuery.append("&y_hi=").append(oQueryViewModel.north);
 
-			oSBQuery.append("&x_lo=").append(oQueryViewModel.west);
-			oSBQuery.append("&x_hi=").append(oQueryViewModel.east);
-			oSBQuery.append("&y_lo=").append(oQueryViewModel.south);
-			oSBQuery.append("&y_hi=").append(oQueryViewModel.north);
+		final String sQueryStartFromDate = oQueryViewModel.startFromDate;
+		final String sQueryEndToDate = oQueryViewModel.endToDate;
 
-			final String sQueryStartFromDate = oQueryViewModel.startFromDate;
-			final String sQueryEndToDate = oQueryViewModel.endToDate;
+		final Date oStartFromDate;
+		final Date oEndToDate;
 
-			final Date oStartFromDate;
-			final Date oEndToDate;
+		Date oStartFromDateProvided = null;
+		Date oEndToDateProvided = null;
+		if (!Utils.isNullOrEmpty(sQueryStartFromDate) && !Utils.isNullOrEmpty(sQueryEndToDate)) {
+			oStartFromDateProvided = Utils.getYyyyMMddTZDate(sQueryStartFromDate);
+			oEndToDateProvided = Utils.getYyyyMMddTZDate(sQueryEndToDate);
+		}
 
-			Date oStartFromDateProvided = null;
-			Date oEndToDateProvided = null;
-			if (!Utils.isNullOrEmpty(sQueryStartFromDate) && !Utils.isNullOrEmpty(sQueryEndToDate)) {
-				oStartFromDateProvided = Utils.getYyyyMMddTZDate(sQueryStartFromDate);
-				oEndToDateProvided = Utils.getYyyyMMddTZDate(sQueryEndToDate);
-			}
+		if (oStartFromDateProvided == null || oEndToDateProvided == null) {
+			oStartFromDate = getDefaultStartDate();
+			oEndToDate = getDefaultEndDate();
+		} else {
+			if (oEndToDateProvided.before(oStartFromDateProvided)) {
+				WasdiLog.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
 
-			if (oStartFromDateProvided == null || oEndToDateProvided == null) {
-				oStartFromDate = getDefaultStartDate();
-				oEndToDate = getDefaultEndDate();
+				oStartFromDate = oEndToDateProvided;
+				oEndToDate = oStartFromDateProvided;
 			} else {
-				if (oEndToDateProvided.before(oStartFromDateProvided)) {
-					WasdiLog.debugLog("QueryExecutorGPM.executeCount | the end date preceedes the start date. oStartFromDate = " + oStartFromDateProvided + "; " + "oEndToDate = " + oEndToDateProvided + "; Inverting the dates.");
-
-					oStartFromDate = oEndToDateProvided;
-					oEndToDate = oStartFromDateProvided;
-				} else {
-					oStartFromDate = oStartFromDateProvided;
-					oEndToDate = oEndToDateProvided;
-				}
+				oStartFromDate = oStartFromDateProvided;
+				oEndToDate = oEndToDateProvided;
 			}
+		}
 
-			String sStartFromDate = Utils.formatToYyyyDashMMDashdd(oStartFromDate);
-			String sEndToDate = Utils.formatToYyyyDashMMDashdd(oEndToDate);
-			oSBQuery.append("&t_lo=").append(sStartFromDate);
-			oSBQuery.append("&t_hi=").append(sEndToDate);
+		String sStartFromDate = Utils.formatToYyyyDashMMDashdd(oStartFromDate);
+		String sEndToDate = Utils.formatToYyyyDashMMDashdd(oEndToDate);
+		oSBQuery.append("&t_lo=").append(sStartFromDate);
+		oSBQuery.append("&t_hi=").append(sEndToDate);
 
 
-			String sVariables = oQueryViewModel.sensorMode;
+		String sVariables = oQueryViewModel.sensorMode;
 
-			if (!Utils.isNullOrEmpty(sVariables)) {
-				String[] asVariables = sVariables.split(" ");
+		if (!Utils.isNullOrEmpty(sVariables)) {
+			
+			String[] asVariables = sVariables.split(" ");
 
-				for (String sVariable : asVariables) {
-					oSBQuery.append("&variable=").append(sVariable);
-				}
+			for (String sVariable : asVariables) {
+				oSBQuery.append("&variable=").append(sVariable);
 			}
+		}
 
-			Double dStartDepth = oQueryViewModel.cloudCoverageFrom;
-			if (dStartDepth != null) {
-				oSBQuery.append("&z_lo=").append(dStartDepth);
-			}
+		Double dStartDepth = oQueryViewModel.cloudCoverageFrom;
+		if (dStartDepth != null) {
+			oSBQuery.append("&z_lo=").append(dStartDepth);
+		}
 
-			Double dEndDepth = oQueryViewModel.cloudCoverageTo;
-			if (dEndDepth != null) {
-				oSBQuery.append("&z_hi=").append(dEndDepth);
-			}
+		Double dEndDepth = oQueryViewModel.cloudCoverageTo;
+		if (dEndDepth != null) {
+			oSBQuery.append("&z_hi=").append(dEndDepth);
+		}
 
-			String sQuery = oSBQuery.toString();
+		String sQuery = oSBQuery.toString();
 
-			String sLinks = s_oDataProviderConfig.link;
-			String[] asLinks = sLinks.split(" ");
+		String sLinks = s_oDataProviderConfig.link;
+		String[] asLinks = sLinks.split(" ");
 
-			for (String sDomainUrl : asLinks) {
-				// discard the result of an eventual previous request (made to an alternative URL)
-				aoResults.clear();
-				oResult.setSummary(null);
-				oResult.getProperties().remove("error");
+		for (String sDomainUrl : asLinks) {
+			// discard the result of an eventual previous request (made to an alternative URL)
+			aoResults.clear();
+			oResult.setSummary(null);
+			oResult.getProperties().remove("error");
 
-				String sProductSize = CMHttpUtils.getProductSize(sService, sProduct, sQuery, sDomainUrl, s_oDataProviderConfig.user, s_oDataProviderConfig.password);
+			String sProductSize = CMHttpUtils.getProductSize(sService, sProduct, sQuery, sDomainUrl, s_oDataProviderConfig.user, s_oDataProviderConfig.password);
 
-				if (sProductSize.startsWith("Error: ")) {
-					String sErrorMessage = sProductSize.replace("Error: ", "");
+			if (sProductSize.startsWith("Error: ")) {
+				String sErrorMessage = sProductSize.replace("Error: ", "");
 
-					if (sErrorMessage.contains("Exception: ")) {
-						sErrorMessage = sErrorMessage.substring(sErrorMessage.indexOf("Exception: ") + "Exception: ".length());
-					}
-
-					oResult.getProperties().put("error", sErrorMessage);
-
-					String sSummary = sProductSize;
-
-					oResult.setSummary(sSummary);
-
-					aoResults.add(oResult);
-
-					// if the error is of type dataset-unknown, a new attempt should/could be done on an alternative URL.
-					// else, use/show the current error message
-					if (sProductSize.contains("005-29") || sProductSize.contains("product/dataset is unknown")) {
-						continue;
-					} else {
-						break;
-					}
+				if (sErrorMessage.contains("Exception: ")) {
+					sErrorMessage = sErrorMessage.substring(sErrorMessage.indexOf("Exception: ") + "Exception: ".length());
 				}
 
-				String sNormalizedSize;
-				if (NumberUtils.isCreatable(sProductSize)) {
-					double dSizeinKB = Double.parseDouble(sProductSize);
-					double dSizeinB = dSizeinKB * 1024;
-					String sUnit = "B";
-					sNormalizedSize = Utils.getNormalizedSize(dSizeinB, sUnit);
+				oResult.getProperties().put("error", sErrorMessage);
 
-					oResult.getProperties().put("sizeInBytes", "" + (long) dSizeinB);
-					oResult.getProperties().put("size", sNormalizedSize);
-				} else {
-					sNormalizedSize = sProductSize;
-				}
-
-				oResult.getProperties().put("platformname", Platforms.CM);
-				oResult.getProperties().put("productType", oQueryViewModel.productType);
-				oResult.getProperties().put("dataset", oQueryViewModel.productName);
-				oResult.getProperties().put("variables", oQueryViewModel.sensorMode);
-				oResult.getProperties().put("protocol", "SUBS");
-				oResult.getProperties().put("format", "nc");
-				oResult.getProperties().put("startDate", oQueryViewModel.startFromDate);
-				oResult.getProperties().put("endDate", oQueryViewModel.endToDate);
-
-				oResult.setFootprint(extractFootprint(oQuery.getQuery()));
-
-
-				Pattern oPattern = Pattern.compile("(\\d\\d+_)+(\\d+)");
-				Matcher oMatcher = oPattern.matcher(oQueryViewModel.productType);
-				String sMode = "";
-
-				while(oMatcher.find()) {
-					sMode = oMatcher.group();
-				}
-
-				String sInstrument;
-
-				if (oQueryViewModel.productName == null) {
-					sInstrument = "";
-				} else if (oQueryViewModel.productName.length() > 20) {
-					sInstrument = oQueryViewModel.productName.substring(oQueryViewModel.productName.length() - 20);
-				} else if (oQueryViewModel.productName.length() > 10) {
-					sInstrument = oQueryViewModel.productName.substring(oQueryViewModel.productName.length() - 10);
-				} else {
-					sInstrument = oQueryViewModel.productName;
-				}
-
-				String sDate;
-				if (sStartFromDate.equals(sEndToDate)) {
-					sDate = sStartFromDate;
-				} else {
-					sDate = sStartFromDate + " - " + sEndToDate;
-				}
-
-				oResult.getProperties().put("beginposition", sDate);
-
-				String sSummary = "Date: " + sDate + ", ";
-				sSummary = sSummary + "Mode: " + sMode + ", ";
-				sSummary = sSummary + "Instrument: " + sInstrument + ", ";
-				sSummary = sSummary + "Size: " + sNormalizedSize;
+				String sSummary = sProductSize;
 
 				oResult.setSummary(sSummary);
 
-
-				oResult.setProvider(m_sProvider);
-
-				String sSizeInBytes = oResult.getProperties().get("sizeInBytes");
-
-				String sLink = "http://" + "&service=" + sService + "&product=" + sProduct + "&query=" + sQuery;
-
-				if (!Utils.isNullOrEmpty(sSizeInBytes)) {
-					sLink = sLink + "&size=" + sSizeInBytes;
-				}
-
-				oResult.setLink(sLink);
-
-				oResult.getProperties().put("link", sLink);
-
 				aoResults.add(oResult);
 
-				return aoResults;
+				// if the error is of type dataset-unknown, a new attempt should/could be done on an alternative URL.
+				// else, use/show the current error message
+				if (sProductSize.contains("005-29") || sProductSize.contains("product/dataset is unknown")) {
+					continue;
+				} else {
+					break;
+				}
 			}
 
-		} else if (sProtocol.equalsIgnoreCase("FTP")) {
-			//TODO
-		}
+			String sNormalizedSize;
+			if (NumberUtils.isCreatable(sProductSize)) {
+				double dSizeinKB = Double.parseDouble(sProductSize);
+				double dSizeinB = dSizeinKB * 1024;
+				String sUnit = "B";
+				sNormalizedSize = Utils.getNormalizedSize(dSizeinB, sUnit);
 
+				oResult.getProperties().put("sizeInBytes", "" + (long) dSizeinB);
+				oResult.getProperties().put("size", sNormalizedSize);
+			} else {
+				sNormalizedSize = sProductSize;
+			}
+
+			oResult.getProperties().put("platformname", Platforms.CM);
+			oResult.getProperties().put("productType", oQueryViewModel.productType);
+			oResult.getProperties().put("dataset", oQueryViewModel.productName);
+			oResult.getProperties().put("variables", oQueryViewModel.sensorMode);
+			oResult.getProperties().put("protocol", "SUBS");
+			oResult.getProperties().put("format", "nc");
+			oResult.getProperties().put("startDate", oQueryViewModel.startFromDate);
+			oResult.getProperties().put("endDate", oQueryViewModel.endToDate);
+
+			oResult.setFootprint(extractFootprint(oQuery.getQuery()));
+
+
+			Pattern oPattern = Pattern.compile("(\\d\\d+_)+(\\d+)");
+			Matcher oMatcher = oPattern.matcher(oQueryViewModel.productType);
+			String sMode = "";
+
+			while(oMatcher.find()) {
+				sMode = oMatcher.group();
+			}
+
+			String sInstrument;
+
+			if (oQueryViewModel.productName == null) {
+				sInstrument = "";
+			} else if (oQueryViewModel.productName.length() > 20) {
+				sInstrument = oQueryViewModel.productName.substring(oQueryViewModel.productName.length() - 20);
+			} else if (oQueryViewModel.productName.length() > 10) {
+				sInstrument = oQueryViewModel.productName.substring(oQueryViewModel.productName.length() - 10);
+			} else {
+				sInstrument = oQueryViewModel.productName;
+			}
+
+			String sDate;
+			if (sStartFromDate.equals(sEndToDate)) {
+				sDate = sStartFromDate;
+			} else {
+				sDate = sStartFromDate + " - " + sEndToDate;
+			}
+
+			oResult.getProperties().put("beginposition", sDate);
+
+			String sSummary = "Date: " + sDate + ", ";
+			sSummary = sSummary + "Mode: " + sMode + ", ";
+			sSummary = sSummary + "Instrument: " + sInstrument + ", ";
+			sSummary = sSummary + "Size: " + sNormalizedSize;
+
+			oResult.setSummary(sSummary);
+
+
+			oResult.setProvider(m_sProvider);
+
+			String sSizeInBytes = oResult.getProperties().get("sizeInBytes");
+
+			String sLink = "http://" + "&service=" + sService + "&product=" + sProduct + "&query=" + sQuery;
+
+			if (!Utils.isNullOrEmpty(sSizeInBytes)) {
+				sLink = sLink + "&size=" + sSizeInBytes;
+			}
+
+			oResult.setLink(sLink);
+
+			oResult.getProperties().put("link", sLink);
+
+			aoResults.add(oResult);
+
+			return aoResults;
+		}
+		
 		return aoResults;
 	}
 
