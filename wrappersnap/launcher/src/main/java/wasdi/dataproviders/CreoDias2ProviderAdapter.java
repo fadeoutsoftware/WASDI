@@ -158,12 +158,12 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	 */
 	private String extractFilePathFromHttpsUrl(String sHttpsURL) {
 		String sProductIdentifier = extractProductIdentifierFromURL(sHttpsURL);
-		String filesystemPath = m_sProviderBasePath + sProductIdentifier;
+		String sFileSystemPath = m_sProviderBasePath + sProductIdentifier;
 
 		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sProductIdentifier);
-		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + filesystemPath);
+		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + sFileSystemPath);
 
-		return filesystemPath;
+		return sFileSystemPath;
 	}
 	
 	private String extractProductIdentifierFromURL(String sFileURL) {
@@ -420,70 +420,38 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		
 		return sAccessToken;
 	}
-
+	
+	/**
+	 * Obtain the name of the file from the url. 
+	 * In this case is one of the info passed in the url, comma separated, from the web server
+	 * and it is in position 1.
+	 */
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
-		// extracts the file name from the URL
+		
+		String sResult = "";
+		
 		WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieving the product's file name from URL: " + sFileURL);
 		
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			WasdiLog.errorLog("CreoDias2ProviderAdaper.getFileName: sFileURL is null or Empty");
-			return "";
+			return sResult;
 		}
-
-		String sResult = "";
+		
+		
 		if (isHttpsProtocol(sFileURL)) {
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieve file at local path: " + sFileURL);
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName: http protocol - Retrieve file at local path: " + sFileURL);
 			try {			
 				String[] asTokens = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
-				String sS3Path = asTokens[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];
-				String[] asPathTokens = sS3Path.split("/");
-				return asPathTokens[asPathTokens.length-1];
+				sResult = asTokens[ResponseTranslatorCreoDias2.IPOSITIONOF_FILENAME];
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("CreoDias2ProviderAdaper.getFileName: exception while trying to retrieve the file name." + oEx.getMessage());
-
+				sResult = "";
 			}
-			/*
-			try {
-				String sProductId = getProductIdFromURL(sFileURL);
-				String sUrl = SCREODIAS_BASE_URL + "$filter=Id eq '" + sProductId;
-				HttpCallResponse sResponse = null;
-				
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieve file at http URL: " + sUrl);
-
-				try {
-					sResponse = HttpUtils.httpGet(sUrl);
-					if (sResponse == null || sResponse.getResponseCode() < 200 || sResponse.getResponseCode() > 299 || Utils.isNullOrEmpty(sResponse.getResponseBody())) {
-						WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Error retrieving the information about the product from the provider. " + sUrl);
-						return "";
-					}
-				} catch (Exception oEx) {
-					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. An exception occurred while retrieving the product information from the provider. " + oEx.getMessage());
-					return "";
-				}
-				
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Response correctly received from the data provider.");
-
-				
-				JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
-				
-				String sFileName = oJsonBody.optString(SODATA_NAME);
-				
-				if (Utils.isNullOrEmpty(sFileName)) 
-					WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. File name was not found under the key " + SODATA_NAME);
-				
-				sResult = ResponseTranslatorCreoDias2.removeExtensionFromProductTitle(sFileName);
-				
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. File name without extension: " + sResult);
+		} 
+		else if (isFileProtocol(sFileURL)) {
 			
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Exception during the retrieval of the file name from http url " + oEx.getMessage());
-				return "";
-			}
-			*/
-		} else if (isFileProtocol(sFileURL)) {
-			
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName. Retrieve file at local path: " + sFileURL);
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getFileName: file protocol - Retrieve file at local path: " + sFileURL);
 
 			String[] asParts = sFileURL.split("/");
 
@@ -499,7 +467,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		// TODO Auto-generated method stub
+		
 		// returns the score auto-evaluated by the Provider Adapter to download sFileName of sPlatformType.
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
