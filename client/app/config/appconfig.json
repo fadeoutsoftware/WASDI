@@ -232,14 +232,14 @@
                     "indexlabel": "Product Level",
                     "indexvalues":"LEVEL1B|LEVEL2",
                     "regex": ".*",
-                    "indexvalue":"LEVEL1B"
+                    "indexvalue":""
                 },
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
-                    "indexvalues":"L1B_IR_SIR|L1B_IR_UVN|L1B_RA_BD1|L1B_RA_BD2|L1B_RA_BD3|L1B_RA_BD4|L1B_RA_BD5|L1B_RA_BD6|L1B_RA_BD7|L1B_RA_BD8|AUX_CTMFCT|AUX_CTMANA",
+                    "indexvalues":"L1B_IR_SIR|L1B_IR_UVN|L1B_RA_BD1|L1B_RA_BD2|L1B_RA_BD3|L1B_RA_BD4|L1B_RA_BD5|L1B_RA_BD6|L1B_RA_BD7|L1B_RA_BD8|AUX_CTMFCT|AUX_CTMANA|L2__AER_AI|L2__AER_LH|L2__CH4___|L2__CLOUD_|L2__CO____|L2__HCHO__|L2__NO2___|L2__NP_BD3|L2__NP_BD6|L2__NP_BD7|L2__O3_TCL|L2__O3____|L2__SO2___",
                     "regex": ".*",
-                    "visibilityConditions": "productlevel:LEVEL1B"
+                    "visibilityConditions": ""
                 },
                 {
                     "indexname": "producttype",

@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipOutputStream;
 
@@ -474,23 +475,34 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
 			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
-			if (sType.equals("GRD") || sType.equals("OCN")) {
+			if (sType.equals("SLC") || sType.equals("GRD") || sType.equals("GRD-COG") || sType.equals("RTC")) {
 				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
 				else return DataProviderScores.DOWNLOAD.getValue();
 			}
+			else if (sType.equals("RAW")) {
+				Date oImageDate = WasdiFileUtils.getDateFromSatelliteImageFileName(sFileName);
+				
+				Date oNow = new Date();
+				
+				long lDistance = oNow.getTime() - oImageDate.getTime();
+				
+				if (lDistance> 365*24*60*60*1000) {
+					return -1;
+				}				
+				else {
+					if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+					else return DataProviderScores.DOWNLOAD.getValue();					
+				}
+			}
 			
-			// TODO: SLC in europe are available. Look if we can get the bbox
 			return DataProviderScores.LTA.getValue();
 		}
 		else if (sPlatformType.equals(Platforms.SENTINEL2)) {
 			String sType = WasdiFileUtils.getProductTypeSatelliteImageFileName(sFileName);
 			
-			if (sType.equals("MSIL1C")) {
-				if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
-				else return DataProviderScores.DOWNLOAD.getValue();				
-			}
 			
-			return DataProviderScores.LTA.getValue();
+			if (bOnCloud) return DataProviderScores.FILE_ACCESS.getValue();
+			else return DataProviderScores.DOWNLOAD.getValue();				
 		}
 		else if (sPlatformType.equals(Platforms.ENVISAT)) {
 			if (sFileName.startsWith("ASA_")) {
