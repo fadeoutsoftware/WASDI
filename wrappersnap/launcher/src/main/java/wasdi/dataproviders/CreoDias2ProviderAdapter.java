@@ -2,11 +2,8 @@ package wasdi.dataproviders;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Date;
@@ -33,12 +30,7 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
-	private static final String SODATA_ATTRIBUTES = "Attributes";
-	private static final String SODATA_NAME = "Name";
-	private static final String SODATA_VALUE = "Value";
-	
 	private static final String SAUTHENTICATION_URL = "https://identity.cloudferro.com/auth/realms/wekeo-elasticity/protocol/openid-connect/token";
-	private static final String SDOWNLOAD_URL_START = "https://zipper.dataspace.copernicus.eu/odata/v1/Products(";
 	private static final String SDOWNLOAD_URL_END = "?token=";
 	
 	private static final String SODATA_FILE_URL_START = "https://datahub.creodias.eu/odata/v1/Products(";
@@ -61,15 +53,10 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
 		// receives the file URI and must return the size of the file. Useful to give progress to the user
-		// TODO: are we are talking about the overall file size? or just the size has been downloaded until a certain point?
 		
 		WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Retrieving information for product: " + sFileURL);
 		
-		// create a creodias query like: https://datahub.creodias.eu/odata/v1/Products?$filter=Id eq '79d7807b-66e5-41d2-a586-1628eb82c3e0'&$expand=Attributes
-		
-		
 		long lSizeInBytes = 0L;
-
 		
 		if (isFileProtocol(m_sDefaultProtocol)) {
 			String sPath = null;
@@ -85,7 +72,6 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 
 			if (sPath != null) {
 				File oSourceFile = new File(sPath);
-
 				if (oSourceFile != null && oSourceFile.exists()) {
 					lSizeInBytes = getSourceFileLength(oSourceFile);
 					WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: detected file size: " + lSizeInBytes);
@@ -109,41 +95,35 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				sResponse = HttpUtils.httpGet(oURI.toASCIIString());
 				if (sResponse == null || sResponse.getResponseCode() < 200 || sResponse.getResponseCode() > 299 || Utils.isNullOrEmpty(sResponse.getResponseBody())) {
 					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Error retrieving the information about the product from the provider. " + sUrl);
-					return -1L;
+					return lSizeInBytes;
 				}
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. An exception occurred while retrieving the product information from the provider. " + oEx.getMessage());
-				return -1L;
+				return lSizeInBytes;
 			}
 			
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Anwer well received from the provider");
-			
-			
-			JSONObject jsonO = new JSONObject(sResponse.getResponseBody());
-			JSONArray arr = jsonO.getJSONArray("value");
-			System.out.println(arr.length());
-			JSONObject jsonObject = (JSONObject) arr.get(0);
-			System.out.println(jsonObject.optString("ContentLength"));	
-			
+			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Answer well received from the provider");			
 			
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());
 			JSONArray aoValues = oJsonBody.optJSONArray("value");
 			if (aoValues == null || aoValues.length() != 1) {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Array of attributes not found on CreoDias");
-				return 0;
+				return lSizeInBytes;
 			}
 			
 			JSONObject oValue = (JSONObject) aoValues.get(0);
 			String sFileSize = oValue.optString(ResponseTranslatorCreoDias2.SODATA_SIZE, "0");
 			
 			
-			if (Utils.isNullOrEmpty(sFileSize)) {
+			if (!Utils.isNullOrEmpty(sFileSize)) {
+				try {
+					lSizeInBytes = Long.parseLong(sFileSize);
+				} catch(Exception oEx) {
+					WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Exception while converting the file size from string to double. " + oEx.getMessage());
+				}
+			} else {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. Array of attributes not found for key " + ResponseTranslatorCreoDias2.SODATA_SIZE);
 			}
-			
-			lSizeInBytes = Long.parseLong(sFileSize);
-			WasdiLog.debugLog("CreoDias2ProviderAdaper.getDownloadFileSize. File size: " + lSizeInBytes);
-
 		}
 
 		return lSizeInBytes;
@@ -151,9 +131,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	
 	/**
-	 * Extract the file-system path of the file out of an HTTPS URL.
+	 * Extracts the file-system path of the file out of an HTTPS URL.
 	 * @param sHttpsURL the HTTPS URL containing the product identifier (i.e. /eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
 	 * @return the file-system path (i.e. C:/temp/wasdi//eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
 	 */
@@ -223,18 +202,13 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	private String getAttribute(JSONArray aoAttributes, String sAttributeName) {
-		for (Object oAtt : aoAttributes) {
-			JSONObject oJsonAtt = (JSONObject) oAtt;
-			if (oJsonAtt.get(SODATA_NAME).equals(sAttributeName))
-				return oJsonAtt.optString(SODATA_VALUE);
-		}
-		return "";
-	}
-	
-	
+	/**
+	 * From the Creodias URL for the download of a product, extracts the id of the product
+	 * @param sFileUrl the Creodias URL for downloading a product, following the format https://datahub.creodias.eu/odata/v1/Products(some_product_id)/$value
+	 * @return the id of the product
+	 */
 	private String getProductIdFromURL(String sFileUrl) {
-		// url in input is something like: https://datahub.creodias.eu/odata/v1/Products(a6212de3-f2e4-58c2-840b-7f42c3c8c612)/$value
+		// url in input is something like: 
 		return sFileUrl.replace(SODATA_FILE_URL_START, "").replace(SODATA_FILE_URL_END, "");
 	}
 	
@@ -326,6 +300,12 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		return "";
 	}
 	
+	
+	/**
+	 * From the link that was created in the Creodias' response translator, extracts the part related to the URL for downloading the product
+	 * @param sFileURL the link following the pattern "download_url,file_name,file:size,S3_path"
+	 * @return the URL for downloading the product if present. An empty string otherwise. 
+	 */
 	private String getODataDownloadUrl(String sFileURL) {
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			WasdiLog.errorLog("CREODIASProviderAdapter.getODataDownloadUrl: Empty file URL");
