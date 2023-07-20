@@ -306,57 +306,57 @@
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-biophysical</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-cache</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-forest-cover-change</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-gdal-writer</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-mosaic</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-s2msi-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-spot6-reader</artifactId>
-            <version>${sVersionS2tbx}</version>
+            <version>8.0.7</version>
         </dependency>
         <!-- S3 -->
         <dependency>
