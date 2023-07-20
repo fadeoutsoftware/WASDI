@@ -7,7 +7,6 @@ import java.util.Collections;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
-import wasdi.shared.queryexecutors.http.QueryExecutorHttpGet;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -36,8 +35,8 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
 			
 			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
-				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Platform not supported by the data provider for query: " + sQuery);
-				return -1;
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Platform not supported by Creodias for query: " + sQuery);
+				return iCount;
 			}
 			
 			String sOutputQuery = m_oQueryTranslator.getCountUrl(sQuery);
@@ -50,14 +49,11 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 				iCount = m_oResponseTranslator.getCountResult(sResult);
 			}
 			else {
-				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Error when trying to retrieve the number of results. Response code: " + oHttpResponse.getResponseCode());
-				return -1;
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Error when trying to retrieve the number of results from Creodias. Response code: " + oHttpResponse.getResponseCode());
 			}
 			
-			
 		} catch (Exception oException) {
-			WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Error when trying to retrieve the number of results " + oException.getMessage());
-			return -1;
+			WasdiLog.debugLog("QueryExecutorCreoDias2.executeCount. Exception when trying to retrieve the number of results: " + oException.getMessage());
 		}
 		
 		return iCount;
@@ -66,41 +62,41 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		
+		List<QueryResultViewModel> aoResults = Collections.emptyList(); 
+		
 		try {
 	
 			QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
 	
 			if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
-				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Platform not supported by the data provider for query: " + oQuery.getQuery());
-				return Collections.emptyList();
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Platform not supported by Creodias for query: " + oQuery.getQuery());
+				return aoResults;
 			}
 			
 			String sCreodiasQuery = m_oQueryTranslator.getSearchUrl(oQuery);
 			
-			// Call standard http get API
 			HttpCallResponse oHttpResponse = HttpUtils.httpGet(sCreodiasQuery, null, null);  
 						
 			if (oHttpResponse.getResponseCode()< 200 && oHttpResponse.getResponseCode() > 299) {
-				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the results on CreoDias. Response code: " + oHttpResponse.getResponseCode());
+				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the results from CreoDias. Response code: " + oHttpResponse.getResponseCode());
+				return aoResults;
 			}
 		
 			String sCreodiasResult = oHttpResponse.getResponseBody();
 
 			if (Utils.isNullOrEmpty(sCreodiasResult)) {
 				WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. The data provider returned an empty string for query: " + sCreodiasQuery);
-				return Collections.emptyList();
+				return aoResults;
 			}
 			
 			// TODO: what's the bFullViewModel
-			List<QueryResultViewModel> aoRes = m_oResponseTranslator.translateBatch(sCreodiasResult, bFullViewModel);
+			aoResults = m_oResponseTranslator.translateBatch(sCreodiasResult, bFullViewModel);
 			
-			return aoRes;
-		
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryExecutorCreoDias2.executeAndRetrieve. Error when trying to retrieve the Creodias results for query. " + oEx.getMessage());
 		}
 		
-		return Collections.emptyList();
+		return aoResults;
 	}
 
 }
