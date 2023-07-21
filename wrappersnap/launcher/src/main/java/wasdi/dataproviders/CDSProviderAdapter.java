@@ -242,7 +242,9 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sDate = JsonUtils.getProperty(aoWasdiPayload, "date");
 		String sBoundingBox = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
-
+		
+		if (sVariables == null) sVariables = "";
+		
 		List<String> asVariables = Arrays.stream(sVariables.split(" "))
 				.map(CDSProviderAdapter::inflateVariable)
 				.collect(Collectors.toList());
@@ -300,6 +302,16 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 			aoHashMap.put("pressure_level", oaPressureLevels);
 		}
+		
+		if (sDataset.equalsIgnoreCase("satellite-sea-surface-temperature")) {
+			aoHashMap.put("sensor_on_satellite", "combined_product");
+			aoHashMap.put("version", "2_1");
+			aoHashMap.put("processinglevel", "level_4");
+			aoHashMap.remove("time");
+			aoHashMap.remove("variable");
+			aoHashMap.remove("grid");
+			aoHashMap.remove("area");
+		}		
 
 		return aoHashMap;
 	}

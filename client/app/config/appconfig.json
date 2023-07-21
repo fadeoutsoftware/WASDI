@@ -632,7 +632,7 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D|cmems_obs-oc_glo_bgc-transp_my_l4-gapfree-multi-4km_P1D",
+                    "indexvalues": "cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D|cmems_obs-oc_glo_bgc-transp_my_l4-gapfree-multi-4km_P1D|cmems_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M|cmems_obs-oc_glo_bgc-transp_my_l4-multi-4km_P1M",
                     "regex": ".*",
                     "visibilityConditions": "producttype:OCEANCOLOUR_GLO_BGC_L4_MY_009_104-TDS",
                     "indexvalue": "cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D"
@@ -878,6 +878,22 @@
                     "visibilityConditions": "dataset:cmems_mod_glo_phy_my_0.083_P1M-m",
                     "indexvalue": "so"
                 },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "CHL|CHL_uncertainty|DIATO|DIATO_uncertainty|DINO|DINO_uncertainty|GREEN|HAPTO|HAPTO_uncertainty|MICRO|MICRO_uncertainty|NANO|NANO_uncertainty|PICO|PICO_uncertainty|PROCHLO|PROCHLO_uncertainty|PROKAR|PROKAR_uncertainty|flags|CHL+CHL_uncertainty+DIATO+DIATO_uncertainty+DINO+DINO_uncertainty+GREEN+HAPTO+HAPTO_uncertainty+MICRO+MICRO_uncertainty+NANO+NANO_uncertainty+PICO+PICO_uncertainty+PROCHLO+PROCHLO_uncertainty+PROKAR+PROKAR_uncertainty+flags",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M",
+                    "indexvalue":"CHL"
+                },
+                {
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "KD490|KD490_uncertainty|SPM|SPM_uncertainty|ZSD|ZSD_uncertainty|flags|KD490+KD490_uncertainty+SPM+SPM_uncertainty+ZSD+ZSD_uncertainty+flags",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:cmems_obs-oc_glo_bgc-transp_my_l4-multi-4km_P1M",
+                    "indexvalue": "so"
+                },                
                 {
                     "indexname": "startDepth",
                     "indexlabel": "Depth From",
