@@ -64,7 +64,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				sPath = removePrefixFile(sFileURL);
 				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: file protocol detected. File path " + sFileURL);
 			} else if(isHttpsProtocol(sFileURL)) {
-				sPath = extractFilePathFromHttpsUrl(sFileURL);
+				sPath = extractS3FilePath(sFileURL);
 				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: http protocol detected. File path " + sFileURL);
 			} else {
 				WasdiLog.debugLog("CREODIASProviderAdapter.getDownloadFileSize: unknown protocol " + sFileURL);
@@ -132,31 +132,27 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	
 	/**
-	 * Extracts the file-system path of the file out of an HTTPS URL.
-	 * @param sHttpsURL the HTTPS URL containing the product identifier (i.e. /eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
-	 * @return the file-system path (i.e. C:/temp/wasdi//eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
+	 * Extracts the file-system path of the file out of the URL sent by the query executor (in the format "download_url,file_name,file:size,S3_path")
+	 * @param sUrl the url string containing the S3 path to the file
+	 * @return the file-system path (i.e. C:/temp/wasdi/eodata/Sentinel-1/SAR/GRD/2021/01/01/S1B_S1_GRDH_1SDH_20210101T152652_20210101T152706_024962_02F890_39B4.SAFE)
 	 */
-	private String extractFilePathFromHttpsUrl(String sHttpsURL) {
-		String sProductIdentifier = extractProductIdentifierFromURL(sHttpsURL);
-		String sFileSystemPath = m_sProviderBasePath + sProductIdentifier;
-
-		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: HTTPS URL: " + sProductIdentifier);
-		WasdiLog.debugLog("CREODIASProviderAdapter.extractFilePathFromHttpsUrl: file path: " + sFileSystemPath);
+	private String extractS3FilePath(String sUrl) {
+		Preconditions.checkNotNull(sUrl, "URL is null");
+		String sFileSystemPath = null;
+		
+		try {
+			String[] asParts = sUrl.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
+			String sProductIdentifier = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];		
+			sFileSystemPath = m_sProviderBasePath + sProductIdentifier;
+			WasdiLog.debugLog("CREODIASProviderAdapter.extractS3FilePath. S3 path: " + sProductIdentifier);
+			WasdiLog.debugLog("CREODIASProviderAdapter.extractS3FilePath. file path: " + sFileSystemPath);
+		} catch (Exception oE) {
+			WasdiLog.errorLog("CREODIASProviderAdapter.extractS3FilePath. S3Path idenfier not found. " + oE);
+		}
 
 		return sFileSystemPath;
 	}
 	
-	private String extractProductIdentifierFromURL(String sFileURL) {
-		Preconditions.checkNotNull(sFileURL, "URL is null");
-		try {
-			String[] asParts = sFileURL.split(ResponseTranslatorCreoDias2.SLINK_SEPARATOR_CREODIAS2);
-			String sProductIdentifier = asParts[ResponseTranslatorCreoDias2.IPOSITIONOF_PRODUCTIDENTIFIER];
-			return sProductIdentifier;
-		} catch (Exception oE) {
-			WasdiLog.errorLog("CREODIASProviderAdapter.extractProductIdentifierFromURL: " + oE);
-		}
-		return null;
-	}
 	
 	/**
 	 * Get The length, in bytes, of the source-file.
@@ -169,7 +165,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			return 0L;
 		}
 		
-		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: Get file lengh for file " + oSourceFile.getAbsolutePath());
+		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength. Get file lengh for file " + oSourceFile.getAbsolutePath());
 
 		long lLenght;
 		if (oSourceFile.isDirectory()) {
@@ -183,9 +179,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		}
 		
 		if (!oSourceFile.exists()) {
-			WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: FILE DOES NOT EXISTS");
+			WasdiLog.debugLog("ProviderAdapter.getSourceFileLength. FILE DOES NOT EXISTS");
 		}
-		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength: Found length " + lLenght);
+		WasdiLog.debugLog("ProviderAdapter.getSourceFileLength. Found length " + lLenght);
 
 		return lLenght;
 	}
@@ -232,7 +228,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				sFilesystemPath = removePrefixFile(sFileURL);
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from file protocol " + sFilesystemPath);
 			} else if (isHttpsProtocol(sFileURL)) {
-				sFilesystemPath = extractFilePathFromHttpsUrl(sFileURL);
+				sFilesystemPath = extractS3FilePath(sFileURL);
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile:  file system path from http protocol " + sFilesystemPath);
 			} else {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: unknown protocol " + sFileURL);
@@ -249,9 +245,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				}
 			}
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile: no operation was effective for file protocol");
-
 		}
-		
 
 		if(isHttpsProtocol(sFileURL)) { 
 			int iAttemptCount = 0;
@@ -264,20 +258,15 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				
 				if (Utils.isNullOrEmpty(sAccessToken)) {
 					WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Error retrieving the access token. Impossible to continue.");
-					// TODO: better to return an empty string or null?
-					return "";
+					return sResult;
 				}
 				
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Access token correctly received.");
 				String sODataDownloadUrl = getODataDownloadUrl(sFileURL);
-//				String sProductId = getProductIdFromURL(sODataDownloadUrl);
-				// with the auth token, we can send the download request
 				String sDownloadUrl = sODataDownloadUrl + SDOWNLOAD_URL_END + sAccessToken;
 				
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. Access token correctly received. Download url (withouth accesso token): " + sODataDownloadUrl + SDOWNLOAD_URL_END);
-	
 				
-				// TODO: understand if I should also pass the name of the file - I think no. The method already parses the "File-disposition" attribute in the header. Should also work for Creodias2
 				String sDownloadedFilePath = downloadViaHttp(sDownloadUrl, Collections.emptyMap(), sSaveDirOnServer);
 				
 				if(Utils.isNullOrEmpty(sDownloadedFilePath)) {
@@ -292,12 +281,12 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 				} else {
 					// download completed
 					WasdiLog.debugLog("CreoDias2ProviderAdapter.executeDownloadFile. Download completed: " + sDownloadedFilePath);
-					return sDownloadedFilePath;
+					sResult = sDownloadedFilePath;
+					break;
 				}
 			}
 		}
-		// TODO: better to return an empty string or null? 
-		return "";
+		return sResult;
 	}
 	
 	
@@ -320,9 +309,17 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
-	
-	
-	
+	/**
+	 * Copies the file specified at sFileURL to the destination specified by sSaveDirOnServer
+	 * @param sFileURL file system path to the file to copy
+	 * @param sDownloadUser username 
+	 * @param sDownloadPassword password
+	 * @param sSaveDirOnServer destination folder
+	 * @param oProcessWorkspace process workspace
+	 * @param iMaxRetry maximum number of times the operation should be tried
+	 * @return the path to the file in the destination folder. If the path of the file or the destination folder are not found in the file system then it returns an empty string.
+	 * @throws Exception
+	 */
 	private String copyFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 
@@ -330,11 +327,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: sFileURL is null");
-			return "";
+			return sResult;
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
 			WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
-			return "";
+			return sResult;
 		}
 		
 		WasdiLog.debugLog("CREODIASProviderAdapter.ExecuteDownloadFile: start");
@@ -364,6 +361,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	}
 	
 	
+
 	private void downloadZipFile(String sourceFile, String destinationFile) throws Exception {
         FileOutputStream fos = new FileOutputStream(destinationFile);
         ZipOutputStream zipOut = new ZipOutputStream(fos);
@@ -376,23 +374,29 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	
 	
-	
+	/**
+	 * Retrieves the authentication token to be added to the request for downloading a product from Creodias. 
+	 * @param sUsername username
+	 * @param sPassword password
+	 * @return the token to be added to the download request, if the authentication was successful. An empty string, otherwise.
+	 */
 	private String getAuthenticationToken(String sUsername, String sPassword) {
 		String sPayload = "client_id=CLOUDFERRO_PUBLIC&password=" + sPassword + "&username=" + sUsername + "&grant_type=password";
 		HttpCallResponse oResponse = null;
+		String sAccessToken = "";
 		try {
 			oResponse = HttpUtils.httpPost(SAUTHENTICATION_URL, sPayload);
 			if (oResponse == null ||  oResponse.getResponseCode() < 200 || oResponse.getResponseCode() > 299) {
 				WasdiLog.debugLog("CreoDias2ProviderAdaper.getAuthenticationToken. Error code while trying to retrieve the auth token.");
-				return "";
+				return sAccessToken;
 			} 
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.getAuthenticationToken. Error while trying to retrieve the authentication token." + oEx.getMessage());
-			return "";
+			return sAccessToken;
 		}
 		
 		JSONObject oResponseBody = new JSONObject(oResponse.getResponseBody());
-		String sAccessToken = oResponseBody.optString("access_token", "");
+		sAccessToken = oResponseBody.optString("access_token", "");
 		
 		if (Utils.isNullOrEmpty(sAccessToken)) {
 			WasdiLog.debugLog("CreoDias2ProviderAdaper.executeDownloadFile. No access token found.");
@@ -406,6 +410,8 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	 * Obtain the name of the file from the url. 
 	 * In this case is one of the info passed in the url, comma separated, from the web server
 	 * and it is in position 1.
+	 * @param sFileURL the url as passed from the web server, in the format "download_url,file_name,file:size,S3_path"
+	 * @return 
 	 */
 	@Override
 	public String getFileName(String sFileURL) throws Exception {
@@ -446,10 +452,11 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 		return sResult;
 	}
 
+	
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
-		
 		// returns the score auto-evaluated by the Provider Adapter to download sFileName of sPlatformType.
+		
 		boolean bOnCloud = isWorkspaceOnSameCloud();
 		
 		if (sPlatformType.equals(Platforms.SENTINEL1)) {
