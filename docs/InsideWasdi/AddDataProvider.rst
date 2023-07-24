@@ -108,6 +108,9 @@ Create 3 objects:
 * The new QueryTranslator deriving from QueryTranslator
 * The new ResponseTranslator deriving from ResponseTranslator
 
+Query Executor
+~~~~~~~~~~~~~~~~~~~~~~
+
 QueryExecutor, in the contructor, MUST define in m_sProvider its own unique code. Usually, it also must instantiate its own QueryTranslator and ResponseTranslator in the constructor.
 
 .. code-block:: java
@@ -165,6 +168,9 @@ executeAndRetrive steps are:
 
 Base class for Proviers supporting Open Search.
 
+QueryTranslator
+~~~~~~~~~~~~~~~~~~~~~~
+
 QueryTranslator has the goal to convert the WASDI query in a valid provider query. The user must implement 2 methods:
 
 .. code-block:: java
@@ -181,6 +187,9 @@ In the base class, there is the parseWasdiClientQuery method
 This parse the WASDI query in the corrisponding view model. If the Platform or Data Provider has special filters, these must be supported (parsed) there. 
 
 CHECK that the parseWasdiClientQuery is able to detect the platformName attribute that is Mandatory.
+
+ResponseTranslator
+~~~~~~~~~~~~~~~~~~~~~~
 
 The ResponseTranslator must translate the api call results in the WASDI format.
 
@@ -250,7 +259,7 @@ To add the query executor to WASDI, remember to add it to the factory:
 		}
 	}
 
-PROVIDER ADAPTER
+Provider Adapter
 ---------------------------
 
 The ProviderAdapter has the goal to ingest the file: can be a download or a file copy, it depends. Each ProviderAdapter is linked to the relative QueryExecutor using the same DataProviderCode.
@@ -326,9 +335,9 @@ The base class has many utility functions ready for many common cases:
 	
 The provider adapter MUST be added to the ProviderAdapterFactory
 
-CONFIGURATION
-
-Each Data provider is listed in the dataProviders section of wasdiConfig.json. 
+Configuration
+~~~~~~~~~~~~~~~~~~~~~~
+Each Data provider is listed in the `dataProviders` section of wasdiConfig.json. 
 An example is:
 
 .. code-block:: json
@@ -351,17 +360,13 @@ An example is:
 			"supportedPlatforms":["Sentinel-1","Sentinel-2"]
 		}
 
-*name* is the unique code. 
+* **name** is the unique code of the data provider
+* **parserConfig** and **adapterConfig** are 2 possible specific config file that can be used by the Data Provider, one for the QueryExecutor and the other for the Provider Adapter. 
+* **user** and **password**, if present, are the credentials of the Data Provider.
+* **cloudProvider** is the unique code of the cloud where the DataProvider is hosted. Can be used to set the score of the performance for a specific file download. 
+* **supportedPlatforms** is an array if strings. Each String is a valid entry of the Plaforms supported by WASDI: here is written the list of plaforms that this DataProvider supports.
 
-*parserConfig* and *adapterConfig* are 2 possible specific config file that can be used by the Data Provider, one for the QueryExecutor and the other for the Provider Adapter. 
-
-*user* and *password*, if present, are the credentials of the Data Provider.
-
-*cloudProvider* is the unique code of the cloud where the DataProvider is hosted. Can be used to set the score of the performance for a specific file download. 
-
-*supportedPlatforms* is an array if strings. Each String is a valid entry of the Plaforms supported by WASDI: here is written the list of plaforms that this DataProvider supports.
-
-Since each Platform can be supported by many data providers, as we can select the best data provider, WASDI also define the best catalogue to use to query that specific Platform. This is done in the catalogues section of wasdiConfig.
+Since each Platform can be supported by many data providers, as we can select the best data provider, WASDI also defines the best catalogue to use to query that specific Platform. This is done in the `catalogues` section of wasdiConfig.
 
 .. code-block:: json
 
@@ -373,6 +378,26 @@ Since each Platform can be supported by many data providers, as we can select th
 		
 In the example, we see that the Platform  Sentinel-1 is supported by 6 catalogues (DataProviders) and the priority one is LSA Data Center.
 
+To enable the new data provider to download products, we also need to add and configure a new queue to the arrays `schedulers`, under the Json field `scheduler`.
+
+.. code-block:: json
+
+	"schedulers": [
+		{
+			"name": "DOWNLOAD.PROVIDERNAME",
+			"maxQueue": "10",
+			"timeoutMs": "1111111",
+			"opTypes": "DOWNLOAD",
+			"opSubType": "PROVIDERNAME",
+			"enabled": "1"
+		}
+
+* **name** is the unique code of the queue, following the pattern DOWNLOAD.NAME_OF_THE_DATAPROVIDER.
+* **maxQueue** is the number of elements that can be put in the queue.
+* **timeOutMS** is the default queue timeout, in milliseconds.
+* **opTypes** it is a comma separated list of OperationTypes supported by the queue. In this specific case, the operation supported by the queue should be "DOWNLOAD".
+* **opSubType** must be a valid subtype of opType. In this case, the field is used to store the name of the data provider the queue refers to.
+* **enabled** is a flag to enable ("1") or disable ("0") the queue.
 
 Welcome to Space, Have fun!
 
