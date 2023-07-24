@@ -31,23 +31,41 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	
 	
 	// map the polarisation field in the QueryViewModel to the corresponding OData attribute, depending on the platform
-	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<String, String>() {{
+	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+		{
 			put(Platforms.ENVISAT, "phaseNumber");
 			put(Platforms.SENTINEL1, "polarisationChannels");
-	}};
+		}};
 	
 	// map the absoluteOrbit field in the QueryViewModel to the corresponding OData attribute, depending on the platform
-	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<String, String>() {{
+	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<String, String>() {
+		private static final long serialVersionUID = 2L;
+		{
 			put(Platforms.SENTINEL5P, "orbitNumber");
 			put(Platforms.ENVISAT, "cycleNumber");
-	}};
+			put(Platforms.LANDSAT5, "rowNumber");
+		}};
 
 	// map the timeliness field in the QueryViewModel to the corresponding OData attribute, depending on the platform
-	private static final HashMap<String, String> asODATA_TIMELINESS_MAP = new HashMap<String, String>() {{
+	private static final HashMap<String, String> asODATA_TIMELINESS_MAP = new HashMap<String, String>() {
+		private static final long serialVersionUID = 3L;
+		{
 			put(Platforms.SENTINEL1, "swathIdentifier");
 			put(Platforms.SENTINEL3, "timeliness");
 			put(Platforms.SENTINEL5P, "processingMode");
-	}};
+		}};
+	
+	
+	// map the relativeOrbit filed in the QueryViewModel to the corresponding OData attribute, depending of the platform
+	private static final HashMap<String, String> asODATA_RELATIVE_ORBIT_MAP = new HashMap<String, String>() {
+		private static final long serialVersionUID = 4L;
+		{
+			put(Platforms.SENTINEL1, "relativeOrbitNumber");
+			put(Platforms.SENTINEL3, "relativeOrbitNumber");
+			put(Platforms.SENTINEL6, "relativeOrbitNumber");
+			put(Platforms.LANDSAT5, "pathNumber");
+		}};
  
 	@Override
 	protected String translate(String sQueryFromClient) {
@@ -94,8 +112,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		
 		// relative orbit number
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit; 
-		if ( iRelativeOrbit > 0 && ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) || (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 442)))
-			asQueryElements.add(createIntegerAttribute("relativeOrbitNumber", sODataEQ, iRelativeOrbit));
+		if (isRelativeOrbitValid(sPlatform, iRelativeOrbit) && asODATA_RELATIVE_ORBIT_MAP.containsKey(sPlatform))
+			asQueryElements.add(createIntegerAttribute(asODATA_RELATIVE_ORBIT_MAP.get(sPlatform), sODataEQ, iRelativeOrbit));
 		
 		// cloud coverage - from
 		Double dCloudCovFrom = oQueryViewModel.cloudCoverageFrom; 
@@ -120,11 +138,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 					
 		// absolute orbit
 		int iAbsoluteOrbit = oQueryViewModel.absoluteOrbit;
-		boolean bIsValueForS5 = sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000;
-		boolean bIsValueForENVISAT = sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113;
-		String sAbsoluteOrbitAtt = asODATA_ABSOLUTE_ORBIT_MAP.get(sPlatform);
-		if ( (bIsValueForS5 || bIsValueForENVISAT) && !Utils.isNullOrEmpty(sAbsoluteOrbitAtt) ) {
-			asQueryElements.add(createIntegerAttribute(sAbsoluteOrbitAtt, sODataEQ, iAbsoluteOrbit));
+		if (isAbsoluteOrbitValid(sPlatform, iAbsoluteOrbit) && asODATA_ABSOLUTE_ORBIT_MAP.containsKey(sPlatform)) {
+			asQueryElements.add(createIntegerAttribute(asODATA_ABSOLUTE_ORBIT_MAP.get(sPlatform), sODataEQ, iAbsoluteOrbit));
 		}
 		
 		// polarisation	
@@ -262,7 +277,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private String getTimelinessAttributeAndCode(String sPlatform, String sTimeliness) {
 		if (Utils.isNullOrEmpty(sTimeliness))
 			return null;
-		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3)) {
+		if (sPlatform.equalsIgnoreCase(Platforms.SENTINEL3) || sPlatform.equals(Platforms.SENTINEL6)) {
 			if (sTimeliness.equalsIgnoreCase("Near Real Time")) 
 				return  "NR";
 			if (sTimeliness.equalsIgnoreCase("Short Time Critical"))
@@ -370,6 +385,36 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			WasdiLog.debugLog("QueryTranslatorCreoDias2.findSwathIdentifier: error while retrieving the swath idenfier from regex." + oEx.getMessage());
 		}
 	}
+	
+	/**
+	 * Returns true is the relative orbit is an allowed value for the platform. False otherwise 
+	 * @param sPlatform the name or the platform for which the relative orbit is looked for
+	 * @param iRelativeOrbit the value of the relative orbit
+	 * @return returns true is the relative orbit is an allowed value for the platform. False otherwise 
+	 */
+	private boolean isRelativeOrbitValid(String sPlatform, int iRelativeOrbit) {
+		return iRelativeOrbit >= 1
+					&& ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) 
+						|| (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 143)
+						|| (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127))
+						|| (sPlatform.equals(Platforms.LANDSAT5) && iRelativeOrbit <= 233);
+	}
+	
+	
+
+	/**
+	 * Returns true is the absolute orbit is an allowed value for the platform. False otherwise 
+	 * @param sPlatform the name or the platform for which the absolute orbit is looked for
+	 * @param iAbsoluteOrbit the value of the absolute orbit
+	 * @return returns true is the absolute orbit is an allowed value for the platform. False otherwise 
+	 */
+	private boolean isAbsoluteOrbitValid(String sPlatform, int iAbsoluteOrbit) {
+		boolean bIsValueForS5 = sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000;
+		boolean bIsValueForENVISAT = sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113;
+		boolean bIsValueForLandsat5 = sPlatform.equals(Platforms.LANDSAT5) && iAbsoluteOrbit >=1 && iAbsoluteOrbit <= 248;
+		return bIsValueForS5 || bIsValueForENVISAT || bIsValueForLandsat5;
+	}
+	
 	
 	
 	@Override

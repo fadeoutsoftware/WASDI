@@ -261,7 +261,46 @@
                     "regex": ".*"
                 }
             ]
-        },
+        },        {
+            "name": "S6",
+            "indexname": "platformname",
+            "indexvalue": "Sentinel-6",
+            "filters": [
+                {
+                    "indexname": "Instrument",
+                    "indexlabel": "Instrument",
+                    "indexvalues":"AMR-C|P4",
+                    "regex": ".*"
+                },
+                {
+                    "indexname": "level",
+                    "indexlabel": "Level",
+                    "indexvalues":"L1|L2",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"MW_2__AMR____|P4_1B_LR_____|P4_2__LR_____",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "timeliness",
+                    "indexlabel": "Timeliness",
+                    "indexvalues":"Near real time|Short Time Critical|Non Time Critical",
+                    "regex": ".*" 
+                },
+				{
+                    "indexname": "relativeorbitnumber",
+                    "indexlabel": "Relative Orbit Number",
+                    "indexhint" : "(from 1 to 127)",
+                    "indexvalues": "",
+                    "regex": ".*",
+					"indexmin":"1",
+                    "indexmax":"127"
+                }
+            ]
+        } ,
         {
             "name": "PROBAV",
             "indexname": "platformname",
@@ -327,21 +366,28 @@
             "provider":"Envisat",
             "filters": [
                 {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues":"FRS|ASA_APP_1P|ASA_APS_1P|ASA_IMP_1P|ASA_IMS_1P|ASA_WSS_1P",
-                    "regex": ".*"
-                },{
-                    "indexname": "Instrument",
-                    "indexlabel": "Instrument",
-                    "indexvalues":"MERIS|ARAS",
-                    "regex": ".*"
-                }, {
 					"indexname": "productlevel",
 					"indexlabel":"Processing level",
 					"indexvalues":"LEVEL1B|LEVEL1P",
 					"regex":".*"
 				},{
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"FRS|ASA_APP_1P|ASA_APS_1P|ASA_IMP_1P|ASA_IMS_1P|ASA_WSS_1P",
+                    "regex": ".*",
+					"visibilityConditions":"productlevel:LEVEL1B"
+                },{
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"ASA_APP_1P|ASA_APS_1P|ASA_IMP_1P|ASA_IMS_1P|ASA_WSS_1P",
+                    "regex": ".*",
+					"visibilityConditions":"productlevel:LEVEL1P"
+                },{
+                    "indexname": "Instrument",
+                    "indexlabel": "Instrument",
+                    "indexvalues":"MERIS|ARAS",
+                    "regex": ".*"
+                },{
                     "indexname": "polarisationmode",
                     "indexlabel": "Phase",
                     "indexvalues":"2|3",
@@ -353,6 +399,41 @@
                     "indexvalues":"",
                     "indexmin":"6",
                     "indexmax":"113",
+                    "regex": ".*"
+                }
+            ]
+        },
+		{
+            "name": "L5",
+            "indexname": "platformname",
+            "indexvalue": "Landsat-5",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"L1G|L1T",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "sensoroperationalmode",
+                    "indexlabel": "Operational Mode",
+                    "indexvalues":"SAM|BUMPER",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "relativeorbitnumber",
+                    "indexlabel": "Path Number",
+                    "indexhint":"1-233",
+					"indexmin":"1",
+					"indexmax":"233",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "absoluteorbit",
+                    "indexlabel": "row Number",
+                    "indexhint":"1-248",
+					"indexmin":"1",
+					"indexmax":"248",
                     "regex": ".*"
                 }
             ]
