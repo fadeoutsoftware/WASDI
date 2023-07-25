@@ -36,6 +36,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		{
 			put(Platforms.ENVISAT, "phaseNumber");
 			put(Platforms.SENTINEL1, "polarisationChannels");
+			put(Platforms.SMOS, "orbitDirection");
 		}};
 	
 	// map the absoluteOrbit field in the QueryViewModel to the corresponding OData attribute, depending on the platform
@@ -45,6 +46,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			put(Platforms.SENTINEL5P, "orbitNumber");
 			put(Platforms.ENVISAT, "cycleNumber");
 			put(Platforms.LANDSAT5, "rowNumber");
+			put(Platforms.LANDSAT7, "rowNumber");
 		}};
 
 	// map the timeliness field in the QueryViewModel to the corresponding OData attribute, depending on the platform
@@ -65,6 +67,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			put(Platforms.SENTINEL3, "relativeOrbitNumber");
 			put(Platforms.SENTINEL6, "relativeOrbitNumber");
 			put(Platforms.LANDSAT5, "pathNumber");
+			put(Platforms.LANDSAT7, "pathNumber");
 		}};
  
 	@Override
@@ -315,7 +318,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				return "L1b";
 			if (sProductLevel.equalsIgnoreCase("LEVEL2"))
 				return "L2";
-		} else if (sPlatform.equals(Platforms.ENVISAT)) {
+		} else if (sPlatform.equals(Platforms.ENVISAT) || sPlatform.equals(Platforms.SMOS)) {
 			return sProductLevel;
 		}
 		return "";
@@ -396,8 +399,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 		return iRelativeOrbit >= 1
 					&& ((sPlatform.equals(Platforms.SENTINEL1) && iRelativeOrbit <= 175) 
 						|| (sPlatform.equals(Platforms.SENTINEL3) && iRelativeOrbit <= 143)
-						|| (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127))
-						|| (sPlatform.equals(Platforms.LANDSAT5) && iRelativeOrbit <= 233);
+						|| (sPlatform.equals(Platforms.SENTINEL6) && iRelativeOrbit <= 127)
+						|| ((sPlatform.equals(Platforms.LANDSAT5) || sPlatform.equals(Platforms.LANDSAT7)) && iRelativeOrbit <= 233));
 	}
 	
 	
@@ -411,8 +414,8 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private boolean isAbsoluteOrbitValid(String sPlatform, int iAbsoluteOrbit) {
 		boolean bIsValueForS5 = sPlatform.equals(Platforms.SENTINEL5P) && iAbsoluteOrbit >= 1 && iAbsoluteOrbit <= 30000;
 		boolean bIsValueForENVISAT = sPlatform.equals(Platforms.ENVISAT) && iAbsoluteOrbit >= 6 && iAbsoluteOrbit <= 113;
-		boolean bIsValueForLandsat5 = sPlatform.equals(Platforms.LANDSAT5) && iAbsoluteOrbit >=1 && iAbsoluteOrbit <= 248;
-		return bIsValueForS5 || bIsValueForENVISAT || bIsValueForLandsat5;
+		boolean bIsValueForLandsat = (sPlatform.equals(Platforms.LANDSAT5) || sPlatform.equals(Platforms.LANDSAT7)) && iAbsoluteOrbit >=1 && iAbsoluteOrbit <= 248;
+		return bIsValueForS5 || bIsValueForENVISAT || bIsValueForLandsat;
 	}
 	
 	

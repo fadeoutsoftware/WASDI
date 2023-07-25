@@ -438,6 +438,41 @@
                 }
             ]
         },
+		{
+            "name": "L7",
+            "indexname": "platformname",
+            "indexvalue": "Landsat-7",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"GTC_1P|L1GT|L1G|L1T",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "sensoroperationalmode",
+                    "indexlabel": "Operational Mode",
+                    "indexvalues":"SAM|BUMPER",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "relativeorbitnumber",
+                    "indexlabel": "Path Number",
+                    "indexhint":"1-233",
+					"indexmin":"1",
+					"indexmax":"233",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "absoluteorbit",
+                    "indexlabel": "row Number",
+                    "indexhint":"1-248",
+					"indexmin":"1",
+					"indexmax":"248",
+                    "regex": ".*"
+                }
+            ]
+        },
         {
             "name": "L8",
             "indexname": "platformname",
@@ -461,6 +496,32 @@
                 }
             ]
         },
+        {
+            "name": "SMOS",
+            "indexname": "platformname",
+            "indexvalue": "SMOS",
+            "provider":"SMOS",
+            "filters": [
+                {
+                    "indexname": "productlevel",
+                    "indexlabel": "Processing Level",
+                    "indexvalues":"1B|1C|2",
+                    "regex": ".*"
+                },
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues":"MIR_SC_D1B|MIR_SC_F1B|MIR_BWLD1C|MIR_BWLF1C|MIR_BWSD1C|MIR_BWSF1C|MIR_SCLD1C|MIR_SCLF1C|MIR_SCSD1C|MIR_SCSF1C|MIR_OSUDP2|MIR_SMUDP2",
+                    "regex": ".*"
+                },
+				{
+                    "indexname": "polarisationmode",
+                    "indexlabel": "Orbit Direction",
+                    "indexvalues":"ASCENDING|DESCENDING",
+                    "regex": ".*"
+                }
+            ]
+        },		
         {
             "name": "Viirs",
             "indexname": "platformname",

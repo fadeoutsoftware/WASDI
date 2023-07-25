@@ -769,8 +769,17 @@ public class WasdiFileUtils {
 			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
 				return Platforms.SENTINEL6;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC08_")) {
+			else if (sFileName.toUpperCase().startsWith("LC05_")) {
+				return Platforms.LANDSAT5;
+			}
+			else if (sFileName.toUpperCase().startsWith("LS07_") || sFileName.toUpperCase().startsWith("LE7")) {
+				return Platforms.LANDSAT7;
+			}
+			else if (sFileName.toUpperCase().startsWith("LC08_") || sFileName.toUpperCase().startsWith("LC8")) {
 				return Platforms.LANDSAT8;
+			}
+			else if (sFileName.toUpperCase().startsWith("SM")) {
+				return Platforms.SMOS;
 			}
 			else if (sFileName.toUpperCase().startsWith("MER_") || sFileName.toUpperCase().startsWith("ASA_")) {
 				return Platforms.ENVISAT;
@@ -816,6 +825,13 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
+			}
+			else if (sFileName.toUpperCase().startsWith("MCD43A1")
+					|| sFileName.toUpperCase().startsWith("MCD43A2")
+					|| sFileName.toUpperCase().startsWith("MCD43A4")
+					|| sFileName.toUpperCase().startsWith("VNP43IA1")
+					|| sFileName.toUpperCase().startsWith("VNP43IA2")) {
+				return Platforms.TERRAAQUA;
 			}
 			
 			return null;

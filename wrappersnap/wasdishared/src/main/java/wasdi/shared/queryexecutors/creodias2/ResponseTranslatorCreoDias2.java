@@ -127,12 +127,18 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	/**
 	 * Remove the file extension from the title of the product
 	 * @param sProductTitle the title of the product
-	 * @return the sama title, without the file extension at the end
+	 * @return the same title, without the file extension at the end
 	 */
 	private static String removeExtensionFromProductTitle(String sProductTitle) {
-		return sProductTitle.replace(".SAFE", "")	// extension for Sentinel-1 and Sentinel-2
-				.replace(".SEN3", "")		// extension for Sentinel-3
-				.replace(".nc", ""); 	// extension for Sentinel-5
+		if (sProductTitle.endsWith(".SAFE")) 			// extension for Sentinel-1 and Sentinel-2
+			return sProductTitle.replace(".SAFE", "");
+		if (sProductTitle.endsWith(".SEN3")) 			// extension for Sentinel-3
+			return sProductTitle.replace(".SEN3", "");  
+		if (sProductTitle.endsWith(".nc")) 				// extension for Sentinel-5
+			return sProductTitle.replace(".nc", "");
+		if (sProductTitle.endsWith(".SEN6"))			// extension for Sentinel-6
+			return sProductTitle.replace(".SEN6", "");
+		return sProductTitle;
 	}
 	
 	
