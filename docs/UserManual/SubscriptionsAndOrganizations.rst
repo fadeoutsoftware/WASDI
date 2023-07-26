@@ -2,7 +2,7 @@
 
 
 
-Managing Subscriptiosn and Organizations
+Managing Subscriptions and Organizations
 ===========================
 
 WASDI has recently implemented a subscription based usage model. To execute various actions in WASDI, the user must have an a valid subscription and an active project.
