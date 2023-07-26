@@ -51,13 +51,16 @@ A good starting point to search for and executing applications is the tutorial o
    :caption: Wasdi User Manual
 
    UserManual/SigningUpAndSigningIn.rst
-   UserManual/AppStoreTutorial.rst
-   UserManual/AddAppUIControl.rst
-   UserManual/Worksapces.rst
-   UserManual/UsingYourWorkspace.rst
-   UserManual/SearchingForProducts.rst
    UserManual/SubscriptionsAndOrganizations.rst
    UserManual/Other.rst
+
+   .. UserManual/AppStoreTutorial.rst 
+   .. UserManual/AddAppUIControl.rst
+   .. UserManual/Worksapces.rst
+   .. UserManual/UsingYourWorkspace.rst
+   .. UserManual/SearchingForProducts.rst
+  
+  
 
 WASDI Marketplace
 ---------------------------
