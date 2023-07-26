@@ -20,9 +20,7 @@ WASDI Login
 To create a WASDI account, just click on the **New User? Register here!** link
 
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage7.png
 
-.. image:: ../_static/wasdi_tutorial_images/Devmanimage5.png
 
 To register the user has to input:
 
