@@ -1,7 +1,7 @@
 Signing Up and Signing In
 ===========================
 
-To create an account on `http://WASDI.net <http://wasdi.net>` , navigate to the homepage and click “Sign Up”.
+To create an account on https://www.wasdi.net/ , navigate to the homepage and click “Sign Up”.
 
 WASDI Login
 ------------------------------------------
