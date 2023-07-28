@@ -56,6 +56,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			put(Platforms.SENTINEL1, "swathIdentifier");
 			put(Platforms.SENTINEL3, "timeliness");
 			put(Platforms.SENTINEL5P, "processingMode");
+			put(Platforms.SENTINEL6, "timeliness");
 		}};
 	
 	
@@ -318,7 +319,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 				return "L1b";
 			if (sProductLevel.equalsIgnoreCase("LEVEL2"))
 				return "L2";
-		} else if (sPlatform.equals(Platforms.ENVISAT) || sPlatform.equals(Platforms.SMOS)) {
+		} else if (sPlatform.equals(Platforms.SENTINEL6) || sPlatform.equals(Platforms.ENVISAT) || sPlatform.equals(Platforms.SMOS)) {
 			return sProductLevel;
 		}
 		return "";
@@ -348,9 +349,12 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	 */
 	private void refineQueryViewModel(String sQuery, QueryViewModel oViewModel) {
 		WasdiLog.debugLog("QueryTranslatorCreoDias2.refineQueryViewModel. Try to fill view model with missing information");
-		oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
-		oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
-		oViewModel.instrument = extractValue(sQuery, "Instrument");
+		if (Utils.isNullOrEmpty(oViewModel.polarisation))
+			oViewModel.polarisation = extractValue(sQuery, "polarisationmode");
+		if (Utils.isNullOrEmpty(oViewModel.platformSerialIdentifier))
+			oViewModel.platformSerialIdentifier = extractValue(sQuery, "filename");
+		if (Utils.isNullOrEmpty(oViewModel.instrument))
+			oViewModel.instrument = extractValue(sQuery, "Instrument");
 		if (oViewModel.relativeOrbit < 0) {
 			String sRelativeOrbit = extractValue(sQuery, "relativeorbitstart");
 			if (!Utils.isNullOrEmpty(sRelativeOrbit)) {

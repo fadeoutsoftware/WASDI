@@ -22,8 +22,18 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 		this.m_sProvider = "CREODIAS2";
 		this.m_oQueryTranslator = new QueryTranslatorCreoDias2();
 		this.m_oResponseTranslator = new ResponseTranslatorCreoDias2();
-		this.m_asSupportedPlatforms.addAll(
-				Arrays.asList(Platforms.SENTINEL1, Platforms.SENTINEL2, Platforms.SENTINEL3, Platforms.SENTINEL5P, Platforms.ENVISAT, Platforms.LANDSAT8));
+		this.m_asSupportedPlatforms.addAll(Arrays.asList(
+				Platforms.SENTINEL1, 
+				Platforms.SENTINEL2, 
+				Platforms.SENTINEL3, 
+				Platforms.SENTINEL5P, 
+				Platforms.SENTINEL6,
+				Platforms.ENVISAT, 
+				Platforms.LANDSAT5,
+				Platforms.LANDSAT7,
+				Platforms.LANDSAT8,
+				Platforms.SMOS,
+				Platforms.S2GLC));
 	}
 
 	@Override

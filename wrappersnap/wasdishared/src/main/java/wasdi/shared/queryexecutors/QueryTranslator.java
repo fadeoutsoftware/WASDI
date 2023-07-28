@@ -68,6 +68,18 @@ public abstract class QueryTranslator {
 	 */
 	private static final String s_sPLATFORMNAME_SENTINEL_5P = "platformname:Sentinel-5P";	
 	/**
+	 * Token of S6 platform
+	 */
+	private static final String s_sPLATFORMNAME_SENTINEL_6 = "platformname:Sentinel-6";
+	/**
+	 * Token of L5 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_5 = "platformname:Landsat-5";
+	/**
+	 * Token of L7 platform
+	 */
+	private static final String s_sPLATFORMNAME_LANDSAT_7 = "platformname:Landsat-7";
+	/**
 	 * Token of Landsat platform
 	 */
 	private static final String s_sPLATFORMNAME_LANDSAT = "platformname:Landsat-*";
@@ -136,6 +148,10 @@ public abstract class QueryTranslator {
 	 * Token of ERA5 platform
 	 */
 	private static final String S_SPLATFORMNAME_EARTHCACHE = "platformname:Earthcache";
+	/**
+	 * Token of SMOS platform
+	 */
+	private static final String S_SPLATFORMNAME_SMOS = "platformname:SMOS";
 
 	/**
 	 * Token of product type
@@ -545,6 +561,9 @@ public abstract class QueryTranslator {
 			
 			// Try get Info about Earthcache
 			parseEarthcache(sQuery, oResult);
+			
+			// Try get Info about SENTINEL-6
+			parseSentinel6(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -1348,6 +1367,32 @@ public abstract class QueryTranslator {
 		}
 	}	
 
+	/**
+	 * Fill the query view model with information about Sentinel-6
+	 * @param sQuery
+	 * @param oResult
+	 */
+	private void parseSentinel6(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_6)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_SENTINEL_6);
+
+			oResult.platformName = Platforms.SENTINEL6;
+			
+			oResult.instrument = extractValue(sQuery, "Instrument");
+			oResult.productLevel = extractValue(sQuery, "level");
+			oResult.productType = extractValue(sQuery, "producttype");
+			oResult.timeliness = extractValue(sQuery, "timeliness");
+			String sRelativeOrbitNumber = extractValue(sQuery, "relativeorbitnumber");
+			if (!Utils.isNullOrEmpty(sRelativeOrbitNumber)) {
+				try {
+					oResult.relativeOrbit = Integer.valueOf(sRelativeOrbitNumber);
+				} catch (Exception oE) {
+					WasdiLog.debugLog("QueryTranslator.parseSentinel6( " + sQuery  + " ): error while parsing relativeOrbitNumber: " + sRelativeOrbitNumber);
+				}
+			}
+
+		}
+	}
 	
 	/**
 	 * Parse Copernicus Marine

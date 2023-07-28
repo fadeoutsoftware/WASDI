@@ -195,6 +195,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 		if (!Utils.isNullOrEmpty(sSize))
 			oMapProperties.put(SSIZE, sSize);
+		else
+			oMapProperties.put(SSIZE, "0.0 GB");
 		
 		if (!Utils.isNullOrEmpty(sRelativeOrbit))
 			oMapProperties.put(SRELATIVE_ORBIT, sRelativeOrbit);	
@@ -312,6 +314,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 		if (!Utils.isNullOrEmpty(sSize))
 			asRes.add("Size: " + sSize);
+		else
+			asRes.add("Size: 0.0 GB");
 		
 		return String.join(", ", asRes);
 	}
