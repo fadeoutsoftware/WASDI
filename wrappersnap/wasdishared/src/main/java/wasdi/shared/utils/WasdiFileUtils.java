@@ -833,6 +833,9 @@ public class WasdiFileUtils {
 					|| sFileName.toUpperCase().startsWith("VNP43IA2")) {
 				return Platforms.TERRAAQUA;
 			}
+			else if (sFileName.toUpperCase().startsWith("S2GLC_")) {
+				return Platforms.S2GLC;
+			}
 			
 			return null;
 		}
