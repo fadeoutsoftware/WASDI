@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import com.amazonaws.util.Platform;
 import com.google.common.base.Preconditions;
 
 import wasdi.shared.utils.Utils;
@@ -565,8 +566,9 @@ public abstract class QueryTranslator {
 			// Try get Info about SENTINEL-6
 			parseSentinel6(sQuery, oResult);
 			
-			// Try get Info about Landsat-5
-			parseLandsat5(sQuery, oResult);
+			// Try get Info about Landsat-5 or Landsat-7
+			parseLandsat5And7(sQuery, oResult);
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -1402,33 +1404,43 @@ public abstract class QueryTranslator {
 	 * @param sQuery the query sent by the client
 	 * @param oResult the view model to be filled with the information parsed from the query
 	 */
-	private void parseLandsat5(String sQuery, QueryViewModel oResult) {
+	private void parseLandsat5And7(String sQuery, QueryViewModel oResult) {
+		String sPlatformToken = "";
+		String sPlatformName = "";
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_5)) {
-			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_5);
-
-			oResult.platformName = Platforms.LANDSAT5;
-			
-			oResult.productType = extractValue(sQuery, "producttype");
-			oResult.sensorMode = extractValue(sQuery, "sensoroperationalmode");
-			String sPathNumber = extractValue(sQuery, "relativeorbitnumber");
-			String sRowNumber = extractValue(sQuery, "absoluteorbit");
-			if (!Utils.isNullOrEmpty(sPathNumber)) {
-				try {
-					oResult.relativeOrbit = Integer.valueOf(sPathNumber);
-				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseLandsat5( " + sQuery  + " ): error while parsing relativeorbitnumber: " + sPathNumber);
-				}
-			}
-			if (!Utils.isNullOrEmpty(sRowNumber)) {
-				try {
-					oResult.absoluteOrbit = Integer.valueOf(sRowNumber);
-				} catch (Exception oE) {
-					WasdiLog.debugLog("QueryTranslator.parseLandsat5( " + sQuery  + " ): error while parsing sRowNumber: " + sRowNumber);
-				}
-			}
-			// check for cloud coverage
-			parseCloudCoverage(sQuery, oResult);
+			sPlatformToken = QueryTranslator.s_sPLATFORMNAME_LANDSAT_5;
+			sPlatformName = Platforms.LANDSAT5;
+		} else if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_7)) {
+			sPlatformToken = QueryTranslator.s_sPLATFORMNAME_LANDSAT_7;
+			sPlatformName = Platforms.LANDSAT7;
+		} else {
+			return;
 		}
+		
+		sQuery = removePlatformToken(sQuery, sPlatformToken);
+
+		oResult.platformName = sPlatformName;
+		
+		oResult.productType = extractValue(sQuery, "producttype");
+		oResult.sensorMode = extractValue(sQuery, "sensoroperationalmode");
+		String sPathNumber = extractValue(sQuery, "relativeorbitnumber");
+		String sRowNumber = extractValue(sQuery, "absoluteorbit");
+		if (!Utils.isNullOrEmpty(sPathNumber)) {
+			try {
+				oResult.relativeOrbit = Integer.valueOf(sPathNumber);
+			} catch (Exception oE) {
+				WasdiLog.debugLog("QueryTranslator.parseLandsat5And7( " + sQuery  + " ): error while parsing relativeorbitnumber: " + sPathNumber);
+			}
+		}
+		if (!Utils.isNullOrEmpty(sRowNumber)) {
+			try {
+				oResult.absoluteOrbit = Integer.valueOf(sRowNumber);
+			} catch (Exception oE) {
+				WasdiLog.debugLog("QueryTranslator.parseLandsat5And7( " + sQuery  + " ): error while parsing absoluteorbit: " + sRowNumber);
+			}
+		}
+		// check for cloud coverage
+		parseCloudCoverage(sQuery, oResult);
 	}	
 	
 	

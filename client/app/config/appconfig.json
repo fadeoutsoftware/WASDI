@@ -479,6 +479,15 @@
 					"indexmin":"1",
 					"indexmax":"248",
                     "regex": ".*"
+                },
+				{
+                    "indexname": "cloudcoverpercentage",
+                    "indexlabel": "Cloud Coverage (%)",
+                    "indexhint" : "e.g. [0 TO 94]",
+                    "indexvalues":"",
+                    "indexmin":"0",
+                    "indexmax":"100",
+                    "regex": ".*"
                 }
             ]
         },
