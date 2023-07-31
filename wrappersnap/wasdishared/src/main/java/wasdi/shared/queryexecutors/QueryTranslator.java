@@ -564,6 +564,9 @@ public abstract class QueryTranslator {
 			
 			// Try get Info about SENTINEL-6
 			parseSentinel6(sQuery, oResult);
+			
+			// Try get Info about Landsat-5
+			parseLandsat5(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -1369,8 +1372,8 @@ public abstract class QueryTranslator {
 
 	/**
 	 * Fill the query view model with information about Sentinel-6
-	 * @param sQuery
-	 * @param oResult
+	 * @param sQuery the query sent by the client
+	 * @param oResult the view model to be filled with the information parsed from the query
 	 */
 	private void parseSentinel6(String sQuery, QueryViewModel oResult) {
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_SENTINEL_6)) {
@@ -1393,6 +1396,41 @@ public abstract class QueryTranslator {
 
 		}
 	}
+	
+	/**
+	 * Fill the query view model with information about Landsat-5
+	 * @param sQuery the query sent by the client
+	 * @param oResult the view model to be filled with the information parsed from the query
+	 */
+	private void parseLandsat5(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_LANDSAT_5)) {
+			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_LANDSAT_5);
+
+			oResult.platformName = Platforms.LANDSAT5;
+			
+			oResult.productType = extractValue(sQuery, "producttype");
+			oResult.sensorMode = extractValue(sQuery, "sensoroperationalmode");
+			String sPathNumber = extractValue(sQuery, "relativeorbitnumber");
+			String sRowNumber = extractValue(sQuery, "absoluteorbit");
+			if (!Utils.isNullOrEmpty(sPathNumber)) {
+				try {
+					oResult.relativeOrbit = Integer.valueOf(sPathNumber);
+				} catch (Exception oE) {
+					WasdiLog.debugLog("QueryTranslator.parseLandsat5( " + sQuery  + " ): error while parsing relativeorbitnumber: " + sPathNumber);
+				}
+			}
+			if (!Utils.isNullOrEmpty(sRowNumber)) {
+				try {
+					oResult.absoluteOrbit = Integer.valueOf(sRowNumber);
+				} catch (Exception oE) {
+					WasdiLog.debugLog("QueryTranslator.parseLandsat5( " + sQuery  + " ): error while parsing sRowNumber: " + sRowNumber);
+				}
+			}
+			// check for cloud coverage
+			parseCloudCoverage(sQuery, oResult);
+		}
+	}	
+	
 	
 	/**
 	 * Parse Copernicus Marine
