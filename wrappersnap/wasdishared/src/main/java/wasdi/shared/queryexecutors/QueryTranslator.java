@@ -569,6 +569,9 @@ public abstract class QueryTranslator {
 			// Try get Info about Landsat-5 or Landsat-7
 			parseLandsat5And7(sQuery, oResult);
 			
+			// Try get Info about SMOS
+			parseSMOS(sQuery, oResult);
+			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -1400,7 +1403,7 @@ public abstract class QueryTranslator {
 	}
 	
 	/**
-	 * Fill the query view model with information about Landsat-5
+	 * Fill the query view model with information about Landsat-5 and Landsat-7
 	 * @param sQuery the query sent by the client
 	 * @param oResult the view model to be filled with the information parsed from the query
 	 */
@@ -1442,6 +1445,23 @@ public abstract class QueryTranslator {
 		// check for cloud coverage
 		parseCloudCoverage(sQuery, oResult);
 	}	
+	
+	/**
+	 * Fill the query view model with information about SMOS
+	 * @param sQuery the query sent by the client
+	 * @param oResult the view model to be filled with the information parsed from the query
+	 */
+	private void parseSMOS(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_SMOS)) {
+			sQuery = removePlatformToken(sQuery, S_SPLATFORMNAME_SMOS);
+
+			oResult.platformName = Platforms.SMOS;
+			
+			oResult.productLevel = extractValue(sQuery, "level");
+			oResult.productType = extractValue(sQuery, "producttype");
+			oResult.polarisation = extractValue(sQuery, "polarisationmode");
+		}
+	}		
 	
 	
 	/**
