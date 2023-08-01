@@ -998,14 +998,14 @@
                 {
                     "indexname": "parameterName",
                     "indexlabel": "Parameter",
-                    "indexvalues": "Day|Night",
+                    "indexvalues": "L1B_RAD|L1B_GEO",
                     "regex": ".*",
                     "indexvalue":""
                 },
                 {
                     "indexname": "dayNightFlag",
                     "indexlabel": "DayNightFlag",
-                    "indexvalues": "L1B_RAD|Night",
+                    "indexvalues": "Day|Night",
                     "regex": ".*",
                     "indexvalue":""
                 }
