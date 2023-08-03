@@ -412,6 +412,14 @@
                     "visibilityConditions": "dataset:reanalysis-era5-pressure-levels|dataset:reanalysis-era5-single-levels",
                     "indexvalue":"reanalysis"
                 },
+				{
+                    "indexname": "productType",
+                    "indexlabel": "Sensor",
+                    "indexvalues": "Combined product",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:satellite-sea-surface-temperature",
+                    "indexvalue":"Combined product"
+                },
                 {
                     "indexname": "pressureLevels",
                     "indexlabel": "Pressure levels in hPa",
@@ -419,6 +427,14 @@
                     "regex": ".*",
                     "visibilityConditions": "dataset:reanalysis-era5-pressure-levels",
                     "indexvalue":"1000"
+                },
+				{
+                    "indexname": "pressureLevels",
+                    "indexlabel": "Processing level",
+                    "indexvalues": "Level 4",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:satellite-sea-surface-temperature",
+                    "indexvalue": "Level 4"
                 },
                 {
                     "indexname": "variables",
@@ -444,6 +460,14 @@
                     "visibilityConditions": "dataset:reanalysis-era5-land",
                     "indexvalue":"2m_temperature"
                 },
+				{
+                    "indexname": "variables",
+                    "indexlabel": "Variables",
+                    "indexvalues": "all",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:satellite-sea-surface-temperature",
+                    "indexvalue":"all"
+                },
                 {
                     "indexname": "format",
                     "indexlabel": "Format",
@@ -452,6 +476,22 @@
                     "visibilityConditions": "dataset:reanalysis-era5-pressure-levels|dataset:reanalysis-era5-single-levels|dataset:reanalysis-era5-land",
                     "indexvalue":"netcdf"
                 },
+								{
+                    "indexname": "format",
+                    "indexlabel": "Format",
+                    "indexvalues": "zip|tar",
+                    "regex": ".*",
+                    "visibilityConditions": "dataset:satellite-sea-surface-temperature",
+                    "indexvalue":"zip"
+                },
+				{
+					"indexname": "version",
+                    "indexlabel": "Version",
+                    "indexvalues": "2.1",
+                    "regex": ".*",
+					"visibilityConditions": "dataset:satellite-sea-surface-temperature",
+					"indexvalue": "2.1"
+				},
 				{
 					"indexname": "aggregation",
                     "indexlabel": "Aggregation",
