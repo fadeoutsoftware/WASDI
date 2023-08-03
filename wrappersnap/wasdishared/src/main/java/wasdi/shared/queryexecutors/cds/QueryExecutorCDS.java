@@ -218,7 +218,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 			sKey = "presureLevels";
 			if (sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET)) { 
 				sKey = "processingLevel";
-				sPressureLevels.toLowerCase().replace(" ", "_");
+				sPressureLevels = sPressureLevels.toLowerCase().replace(" ", "_");
 			}
 			aoPayload.put(sKey, sPressureLevels);
 		}
