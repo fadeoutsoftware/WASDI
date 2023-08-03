@@ -224,11 +224,11 @@ public class QueryExecutorCDS extends QueryExecutor {
 		}
 		
 		// insert bounding box  (for reanalysis)
-		if (Utils.isNullOrEmpty(sBoundingBox))
+		if (!Utils.isNullOrEmpty(sBoundingBox))
 			aoPayload.put("boundingBox", sBoundingBox); // North 10�, West 5�, South 5�, East 7
 		
 		// insert format 
-		if (Utils.isNullOrEmpty(sFormat))
+		if (!Utils.isNullOrEmpty(sFormat))
 			aoPayload.put("format", sFormat); // grib | netcdf
 		
 		// insert version (for sea-surface-temperature)
