@@ -39,6 +39,30 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
    GettingStarted/LibsConcepts.rst
 
 
+
+WASDI User Manual
+---------------------------
+WASDI has created a comprehensive user manual to explain and simplify all operations in WASDI. If you require explaination for any concepts in WASDI, please see the corresponding section in the manual. 
+A good starting point to search for and executing applications is the tutorial on the Space Marketplace 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Wasdi User Manual
+
+   UserManual/SigningUpAndSigningIn.rst
+   UserManual/UsingYourWorkspace.rst
+   UserManual/SearchingForProducts.rst
+   UserManual/SubscriptionsAndOrganizations.rst
+   UserManual/Other.rst
+
+   .. UserManual/AppStoreTutorial.rst 
+   .. UserManual/AddAppUIControl.rst
+   .. UserManual/Worksapces.rst
+
+  
+  
+
 WASDI Marketplace
 ---------------------------
 All the WASDI Applications are available for end users' with a simple and intuitive Interface. Choose your App, set your input data with a few clicks and enjoy the result.
