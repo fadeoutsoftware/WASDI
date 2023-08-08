@@ -191,7 +191,8 @@
                 oThat.generateDefaultNavBarMenu();
             }, (function (data, status) {
                 var sMessage = oThat.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
-                utilsVexDialogAlertBottomRightCorner(sMessage);
+                let oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
+                utilsVexCloseDialogAfter(4000, oDialog); 
             }));        
         }
         //set default navbar menu

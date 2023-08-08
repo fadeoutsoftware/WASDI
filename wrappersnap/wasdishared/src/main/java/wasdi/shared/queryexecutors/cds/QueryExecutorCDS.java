@@ -1,6 +1,7 @@
 package wasdi.shared.queryexecutors.cds;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import software.amazon.ion.util.IonTextUtils.SymbolVariant;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -38,6 +40,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 	private static ObjectMapper s_oMapper = new ObjectMapper();
 	private static DataProviderConfig s_oDataProviderConfig;
+	public static final String s_sSEA_SURFACE_TEMPERATURE_DATASET = "satellite-sea-surface-temperature";
 
 	public QueryExecutorCDS() {
 		
@@ -135,6 +138,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 			String sPresureLevels = oCDSQuery.productLevel;
 			String sVariables = oCDSQuery.sensorMode;
 			String sFormat = oCDSQuery.timeliness;
+			String sVersion = oCDSQuery.instrument;
 			String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
 			String sFootPrint = extractFootprint(oQuery.getQuery());
 
@@ -153,7 +157,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 					String sStartDate = Utils.formatToYyyyMMdd(oStartIntervalDate);
 					String sEndDate = Utils.formatToYyyyMMdd(oEndIntervalDate);
 					
-					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat);
+					String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sStartDate, sEndDate, sBoundingBox, sFormat, sVersion);
 					QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oStartIntervalDate, oEndIntervalDate);
 					aoResults.add(oResult);
 				}
@@ -165,7 +169,7 @@ public class QueryExecutorCDS extends QueryExecutor {
 
 					if (iActualElement >= iOffset && iActualElement < iOffset + iLimit) {
 						String sDate = Utils.formatToYyyyMMdd(oActualDay);
-						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, null, sBoundingBox, sFormat);
+						String sPayload = prepareLinkJsonPayload(sDataset, sProductType, sVariables, sPresureLevels, sDate, null, sBoundingBox, sFormat, sVersion);
 
 						QueryResultViewModel oResult = getQueryResultViewModel(oCDSQuery, sPayload, sFootPrint, oActualDay, null);
 						aoResults.add(oResult);
@@ -187,15 +191,51 @@ public class QueryExecutorCDS extends QueryExecutor {
 	}
 
 	private static String prepareLinkJsonPayload(String sDataset, String sProductType, String sVariables,
-			String sPresureLevels, String sStartDate, String sEndDate, String sBoundingBox, String sFormat) {
+			String sPressureLevels, String sStartDate, String sEndDate, String sBoundingBox, String sFormat, String sVersion) {
 		String sMonthlyAggregation = String.valueOf(!Utils.isNullOrEmpty(sEndDate)); // if sEndDate is not null, then we do the monthly aggregation
+		
 		Map<String, String> aoPayload = new HashMap<>();
+		
 		aoPayload.put("dataset", sDataset); // reanalysis-era5-pressure-levels
-		aoPayload.put("productType", sProductType); // Reanalysis
-		aoPayload.put("variables", sVariables); // U+V
-		aoPayload.put("presureLevels", sPresureLevels); // 1 hPa
-		aoPayload.put("boundingBox", sBoundingBox); // North 10�, West 5�, South 5�, East 7
-		aoPayload.put("format", sFormat); // grib | netcdf
+		
+		// insert product type (for reanalysis) or sensor (for sea-surface-temperature)
+		String sKey = "";
+		if (!Utils.isNullOrEmpty(sProductType)) {
+			sKey = "productType";;
+			if (sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET)) { 
+				sKey = "sensor";
+				sProductType = sProductType.toLowerCase().replace(" ", "_");
+			}
+			aoPayload.put(sKey, sProductType); 
+		}
+		
+		// insert variables  
+		if (!Utils.isNullOrEmpty(sVariables))
+			aoPayload.put("variables", sVariables);
+		
+		// insert pressure level (for reanalysis) or processing level (for sea-surface-temperature)
+		if (!Utils.isNullOrEmpty(sPressureLevels)) {
+			sKey = "presureLevels";
+			if (sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET)) { 
+				sKey = "processingLevel";
+				sPressureLevels = sPressureLevels.toLowerCase().replace(" ", "_");
+			}
+			aoPayload.put(sKey, sPressureLevels);
+		}
+		
+		// insert bounding box  (for reanalysis)
+		if (!Utils.isNullOrEmpty(sBoundingBox))
+			aoPayload.put("boundingBox", sBoundingBox); // North 10�, West 5�, South 5�, East 7
+		
+		// insert format 
+		if (!Utils.isNullOrEmpty(sFormat))
+			aoPayload.put("format", sFormat); // grib | netcdf
+		
+		// insert version (for sea-surface-temperature)
+		if (!Utils.isNullOrEmpty(sVersion))
+			aoPayload.put("version", sVersion.replace(".", "_"));
+		
+		// insert monthly aggregation
 		aoPayload.put("monthlyAggregation", sMonthlyAggregation); // true | false
 		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
 			aoPayload.put("startDate", sStartDate);
@@ -261,10 +301,8 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.setFootprint(sFootPrint);
 		oResult.getProperties().put("platformname", Platforms.ERA5);
 		oResult.getProperties().put("dataset", oQuery.productName);
-		oResult.getProperties().put("productType", oQuery.productType);
-		oResult.getProperties().put("presureLevels", oQuery.productLevel);
-		oResult.getProperties().put("variables", oQuery.sensorMode);
 		oResult.getProperties().put("format", oQuery.timeliness);
+		oResult.getProperties().put("variables", oQuery.sensorMode);
 		oResult.getProperties().put("startDate", sStartDateTime);
 		oResult.getProperties().put("beginposition", sStartDateTime);
 
@@ -272,20 +310,37 @@ public class QueryExecutorCDS extends QueryExecutor {
 			oResult.getProperties().put("endDate", sEndDateTime);
 			oResult.getProperties().put("endposition", sEndDateTime);
 		}
+		
+		if (!oQuery.productName.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET)) { 
+			oResult.getProperties().put("productType", oQuery.productType);
+			oResult.getProperties().put("presureLevels", oQuery.productLevel);
+		}
 		return oResult;
 	}
 
-	private String getSummary(String sStartDateTime, String sEndDateTime, String sMode, String timeliness) {
-		return Utils.isNullOrEmpty(sEndDateTime)
-				? "Date: " + sStartDateTime + ", Mode: " + sMode + ", Instrument: " + timeliness
-				: "Start date: " + sStartDateTime + ",End date: " + sEndDateTime + ", Mode: " + sMode + ", Instrument: "
-						+ timeliness;
+	private String getSummary(String sStartDateTime, String sEndDateTime, String sMode, String sTimeliness) {
+		List<String> sSummaryElements = new ArrayList<>();
+		
+		if (Utils.isNullOrEmpty(sEndDateTime)) {
+			sSummaryElements.add("Date: " + sStartDateTime);
+		} else {
+			sSummaryElements.add("Start date: " + sStartDateTime);
+			sSummaryElements.add("End date: " + sEndDateTime);
+		}
+			
+		if (!Utils.isNullOrEmpty(sMode)) 
+			sSummaryElements.add("Mode: " + sMode);
+		
+		if (!Utils.isNullOrEmpty(sTimeliness))
+			sSummaryElements.add("Instrument: " + sTimeliness);
+		
+		return String.join(", ", sSummaryElements);
 	}
 	
-	private String getFileName(String sProductName, String sSensoreMode, String sStartDate, String sEndDate, String sExtension) {
+	private String getFileName(String sProductName, String sVariables, String sStartDate, String sEndDate, String sExtension) {
 		return Utils.isNullOrEmpty(sEndDate) 
-				? String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate).replaceAll("[\\W]", "_") + sExtension
-				: String.join("_", Platforms.ERA5, sProductName, sSensoreMode, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
+				? String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate).replaceAll("[\\W]", "_") + sExtension
+				: String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
 	}
 
 }
