@@ -813,6 +813,7 @@ public abstract class QueryTranslator {
 			oResult.sensorMode = extractValue(sQuery, "variables");
 			oResult.timeliness = extractValue(sQuery, "format");
 			oResult.startToDate = extractValue(sQuery, "aggregation");
+			oResult.instrument = extractValue(sQuery, "version");
 		}
 	}
 
