@@ -769,22 +769,10 @@ public class WasdiFileUtils {
 			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
 				return Platforms.SENTINEL6;
 			}
-			else if (sFileName.toUpperCase().startsWith("LS05") 
-					|| sFileName.toUpperCase().startsWith("LC05")
-					|| sFileName.toUpperCase().startsWith("LO05")
-					|| sFileName.toUpperCase().startsWith("LT05")
-					|| sFileName.toUpperCase().startsWith("LE05")
-					|| sFileName.toUpperCase().startsWith("LT05")
-					|| sFileName.toUpperCase().startsWith("LM05")) {
+			else if (sFileName.toUpperCase().startsWith("LS05_")) {
 				return Platforms.LANDSAT5;
 			}
-			else if (sFileName.toUpperCase().startsWith("LS07") 
-					|| sFileName.toUpperCase().startsWith("LC07")
-					|| sFileName.toUpperCase().startsWith("LO07")
-					|| sFileName.toUpperCase().startsWith("LT07")
-					|| sFileName.toUpperCase().startsWith("LE07")
-					|| sFileName.toUpperCase().startsWith("LT07")
-					|| sFileName.toUpperCase().startsWith("LM07")) {
+			else if (sFileName.toUpperCase().startsWith("LS07_")) {
 				return Platforms.LANDSAT7;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_") || sFileName.toUpperCase().startsWith("LC8")) {
@@ -896,6 +884,18 @@ public class WasdiFileUtils {
 			else if (sPlatform.equals(Platforms.ENVISAT)) {
 				String sDate = sFileName.substring(14, 14+8);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.LANDSAT5)) {
+				String [] asLandsatParts = sFileName.split("_");
+				String sDate = asLandsatParts[6];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
+			else if (sPlatform.equals(Platforms.LANDSAT7)) {
+				String [] asLandsatParts = sFileName.split("_");
+				String sDate = asLandsatParts[5];
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
 			}
 			else if (sPlatform.equals(Platforms.LANDSAT8)) {
