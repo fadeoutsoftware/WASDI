@@ -769,10 +769,22 @@ public class WasdiFileUtils {
 			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
 				return Platforms.SENTINEL6;
 			}
-			else if (sFileName.toUpperCase().startsWith("LC05_")) {
+			else if (sFileName.toUpperCase().startsWith("LS05") 
+					|| sFileName.toUpperCase().startsWith("LC05")
+					|| sFileName.toUpperCase().startsWith("LO05")
+					|| sFileName.toUpperCase().startsWith("LT05")
+					|| sFileName.toUpperCase().startsWith("LE05")
+					|| sFileName.toUpperCase().startsWith("LT05")
+					|| sFileName.toUpperCase().startsWith("LM05")) {
 				return Platforms.LANDSAT5;
 			}
-			else if (sFileName.toUpperCase().startsWith("LS07_") || sFileName.toUpperCase().startsWith("LE7")) {
+			else if (sFileName.toUpperCase().startsWith("LS07") 
+					|| sFileName.toUpperCase().startsWith("LC07")
+					|| sFileName.toUpperCase().startsWith("LO07")
+					|| sFileName.toUpperCase().startsWith("LT07")
+					|| sFileName.toUpperCase().startsWith("LE07")
+					|| sFileName.toUpperCase().startsWith("LT07")
+					|| sFileName.toUpperCase().startsWith("LM07")) {
 				return Platforms.LANDSAT7;
 			}
 			else if (sFileName.toUpperCase().startsWith("LC08_") || sFileName.toUpperCase().startsWith("LC8")) {
