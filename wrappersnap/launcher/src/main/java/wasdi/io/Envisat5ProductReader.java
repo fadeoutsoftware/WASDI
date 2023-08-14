@@ -154,6 +154,7 @@ public class Envisat5ProductReader extends SnapProductReader {
 		}
 		catch (Exception oE) {
 			WasdiLog.errorLog("Envisat5ProductReader.readProductBandFromFile: tried to read " + sFileName + " but failed: " + oE);
+			m_bSnapReadAlreadyDone = false;
 		}
 	}
 	
