@@ -746,6 +746,35 @@ public class WasdiFileUtils {
 		return false;
 	}
 	
+	public static boolean isEnvisat5Name(File oFile) {
+		try {
+			if(null==oFile) {
+				return false;
+			}
+			return isEnvisat5Name(oFile.getName());
+		} catch (Exception oE) {
+			WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(File): " + oE);
+		}
+		return false;
+	}
+	
+	public static boolean isEnvisat5Name(String sName) {
+		try {
+			if(Utils.isNullOrEmpty(sName)) {
+				WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File name is null or empty"  );
+				return false;
+			}
+			if(sName.toUpperCase().startsWith("LS05_") && (sName.toLowerCase().endsWith(".zip") ) ){
+				WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File " + sName + "is a Envisat-5 file."  );
+				return true;
+			}
+		} catch (Exception oE) {
+			WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String): " + oE);
+		}
+		WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File " + sName + "is not a Envisat-5 file."  );
+		return false;
+	}
+	
 	/**
 	 * Get the Platform code of the mission starting from the file Name
 	 * @param sFileName File Name to investigate

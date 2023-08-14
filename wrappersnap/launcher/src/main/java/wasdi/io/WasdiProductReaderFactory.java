@@ -3,6 +3,7 @@ package wasdi.io;
 import java.io.File;
 
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class WasdiProductReaderFactory {
 	
@@ -45,6 +46,11 @@ public class WasdiProductReaderFactory {
 		
 		if(WasdiFileUtils.isSentinel3Name(oFile)) {
 			return new Sentinel3ProductReader(oFile);
+		}
+		
+		if (WasdiFileUtils.isEnvisat5Name(oFile)) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Envisat-5 file.");
+			return new Envisat5ProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {

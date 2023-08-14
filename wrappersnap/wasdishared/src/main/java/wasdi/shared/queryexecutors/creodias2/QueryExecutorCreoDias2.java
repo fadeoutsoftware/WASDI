@@ -60,7 +60,7 @@ public class QueryExecutorCreoDias2 extends QueryExecutorCREODIAS {
 	@Override
 	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		
-		List<QueryResultViewModel> aoResults = Collections.emptyList(); 
+		List<QueryResultViewModel> aoResults = null; 
 		
 		try {
 	
