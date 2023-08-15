@@ -312,7 +312,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	/**
 	 * Copies the file specified at sFileURL to the destination specified by sSaveDirOnServer
 	 * @param sFileURL file system path to the file to copy
-	 * @param sDownloadUser username 
+	 * @param sDownloadUser user name 
 	 * @param sDownloadPassword password
 	 * @param sSaveDirOnServer destination folder
 	 * @param oProcessWorkspace process workspace
@@ -376,7 +376,7 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 	
 	/**
 	 * Retrieves the authentication token to be added to the request for downloading a product from Creodias. 
-	 * @param sUsername username
+	 * @param sUsername user name
 	 * @param sPassword password
 	 * @return the token to be added to the download request, if the authentication was successful. An empty string, otherwise.
 	 */
