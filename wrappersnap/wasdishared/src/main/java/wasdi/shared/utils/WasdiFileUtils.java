@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -37,6 +39,8 @@ import wasdi.shared.utils.log.WasdiLog;
  *
  */
 public class WasdiFileUtils {
+	
+	private static final String sDateTimePattern = "\\d{8}T\\d{6}"; // pattern for date-time strings like: yyyymmddThhmmss
 	
 	static List<String> asShapeFileExtensions;
 	static{
@@ -909,6 +913,10 @@ public class WasdiFileUtils {
 				String sDate = sFileName.substring(20, 20+15);
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
 				return new Date(lTime);
+			} else if (sPlatform.equals(Platforms.SENTINEL6)) {
+				String sDate = extractDateTimeSubstring(sFileName, sDateTimePattern);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
 			}
 			else if (sPlatform.equals(Platforms.ENVISAT)) {
 				String sDate = sFileName.substring(14, 14+8);
@@ -938,7 +946,11 @@ public class WasdiFileUtils {
 				String sDate = asViirsParts[1];
 				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd");
 				return new Date(lTime);				
-			}			
+			} else if (sPlatform.equals(Platforms.SMOS)) {
+				String sDate = extractDateTimeSubstring(sFileName, sDateTimePattern);
+				Long lTime = TimeEpochUtils.fromDateStringToEpoch(sDate, "yyyyMMdd'T'HHmmss");
+				return new Date(lTime);
+			}
 			
 			// For CMEMS, ERA5 are Not relevant 
 		}
@@ -947,6 +959,23 @@ public class WasdiFileUtils {
 		}
 		
 		return new Date();
+	}
+	
+	/**
+	 * Given the name of a file and given a pattern for the date-time timestamp, returns the first substring having a match with the given pattern
+	 * @param sFileName the name of the file
+	 * @param sPattern the pattern for the date-time timestamp expected in the file name string.
+	 * @return the first substring that matches the pattern in the file name
+	 */
+	private static String extractDateTimeSubstring(String sFileName, String sPattern) {
+		Pattern datePattern = Pattern.compile(sPattern);
+        Matcher matcher = datePattern.matcher(sFileName);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        return null;
 	}
 	
 	
@@ -1048,4 +1077,5 @@ public class WasdiFileUtils {
             oContext.setConfigLocation(oLogConfigFile.toURI());
 	    }
 	}
+	
 }
