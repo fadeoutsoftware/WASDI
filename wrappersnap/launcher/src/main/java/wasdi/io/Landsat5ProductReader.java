@@ -27,25 +27,25 @@ public class Landsat5ProductReader extends SnapProductReader {
 	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
 		try {
 			if(Utils.isNullOrEmpty(sDownloadedFileFullPath)) {
-				WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: sDownloadedFileFullPath null or empty, aborting");
+				WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: sDownloadedFileFullPath null or empty, aborting");
 				return null;
 			}
 			if(Utils.isNullOrEmpty(sFileNameFromProvider)){
-				WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: sFileNameFromProvider null or empty, aborting");
+				WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: sFileNameFromProvider null or empty, aborting");
 				return null;
 			}
 			if(!sFileNameFromProvider.toUpperCase().startsWith("LS05_") || !sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
-				WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a LANDSAT-5 file name");
+				WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a LANDSAT-5 file name");
 				return null;
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: arguments checking failed due to: " + oE.getMessage() + ", aborting");
+			WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: arguments checking failed due to: " + oE.getMessage() + ", aborting");
 			return null;
 		}
 
 		try {
 			String sDownloadPath = new File(sDownloadedFileFullPath).getParentFile().getPath();
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: File is a ENVISAT-5 image, start unzip");
+			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: File is a ENVISAT-5 image, start unzip");
 			ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
@@ -55,10 +55,10 @@ public class Landsat5ProductReader extends SnapProductReader {
 			String sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
 			String sTIFFSubfolder = sFolderName + File.separator + sNewFileName + ".TIFF";
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: Product folder path: " + sFolderName);
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: TIFF subfolder path: " + sTIFFSubfolder);
+			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: Product folder path: " + sFolderName);
+			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: TIFF subfolder path: " + sTIFFSubfolder);
 
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: starting deletion of all files in the main product folder");
+			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: starting deletion of all files in the main product folder");
 			File oMainFolder = new File(sFolderName);
 			// delete all the files in the main directory
 			for (File oFile : oMainFolder.listFiles()) {
@@ -67,8 +67,8 @@ public class Landsat5ProductReader extends SnapProductReader {
 				}
 			}
 			if (oMainFolder.listFiles().length == 1 && oMainFolder.listFiles()[0].isDirectory() && oMainFolder.listFiles()[0].getName().endsWith(".TIFF")) {
-				WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: all files have been deleted, execpt the folder with the TIFF.");
-				WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: starting moving the TIFF files to the main folder");
+				WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: all files have been deleted, execpt the folder with the TIFF.");
+				WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: starting moving the TIFF files to the main folder");
 			
 				// copy all the files in the TIFF folder in the main directory
 				String sTargetDir = sFolderName;
@@ -78,9 +78,9 @@ public class Landsat5ProductReader extends SnapProductReader {
 					Files.move(oFile, oTargetFile);
 				}
 				if (oTIFFSubfolder.listFiles().length == 0) {
-					WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: all files have been moved. Subsfolder can be deleted");
+					WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: all files have been moved. Subsfolder can be deleted");
 					if (oTIFFSubfolder.delete()) {
-						WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: .TIFF subsfolder has been deleted");
+						WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: .TIFF subsfolder has been deleted");
 					}
 				}
 			}
@@ -89,7 +89,7 @@ public class Landsat5ProductReader extends SnapProductReader {
 			sDownloadedFileFullPath = sFolderName; // here I should put the name of the first folder
 
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 
 		return sDownloadedFileFullPath;
@@ -103,12 +103,12 @@ public class Landsat5ProductReader extends SnapProductReader {
 		try {
 			File oZipFile = new File(sDownloadedFileFullPath);
 			if(!oZipFile.delete()) {
-				WasdiLog.errorLog("Envisat5ProductReader.deleteZipFile: cannot delete zip file");
+				WasdiLog.errorLog("Landsat5ProductReader.deleteZipFile: cannot delete zip file");
 			} else {
-				WasdiLog.debugLog("Envisat5ProductReader.deleteZipFile: file zip successfully deleted");
+				WasdiLog.debugLog("Landsat5ProductReader.deleteZipFile: file zip successfully deleted");
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("Envisat5ProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
+			WasdiLog.errorLog("Landsat5ProductReader.deleteZipFile: exception while trying to delete zip file: " + oE ); 
 		}
 	}
 	
@@ -131,7 +131,7 @@ public class Landsat5ProductReader extends SnapProductReader {
 			sBase = m_oProductFile.getAbsolutePath();
 			
 		} catch (Exception oE) {
-			WasdiLog.errorLog("Envisat5ProductReader.getSnapProduct: setting paths failed due to: " + oE);
+			WasdiLog.errorLog("Landsat5ProductReader.getSnapProduct: setting paths failed due to: " + oE);
 			return null;
 		}
 		
@@ -141,12 +141,12 @@ public class Landsat5ProductReader extends SnapProductReader {
 				File oCurrentFile = aoFiles[i];
 				if (oCurrentFile.isFile() && oCurrentFile.getName().endsWith("_MTL.txt")) {
 					String sFileName = oCurrentFile.getName();
-					WasdiLog.errorLog("Envisat5ProductReader.getSnapProduct: found a txt file: " + sFileName);
+					WasdiLog.errorLog("Landsat5ProductReader.getSnapProduct: found a txt file: " + sFileName);
 					readProductBandFromFile(sBase, sFileName);
 				}
 			}
 		} else {
-			WasdiLog.debugLog("Envisat5ProductReader.getSnapProduct: " + sBase + "is not a folder");
+			WasdiLog.debugLog("Landsat5ProductReader.getSnapProduct: " + sBase + "is not a folder");
 			return null;
 		}
 		
@@ -161,27 +161,27 @@ public class Landsat5ProductReader extends SnapProductReader {
 	 * @param sFileName
 	 */
 	private void readProductBandFromFile(String sBase, String sFileName) {
-		WasdiLog.debugLog("Envisat5ProductReader.readProductBandFromFile: base path " + sBase + ", file name: " + sFileName);
+		WasdiLog.debugLog("Landsat5ProductReader.readProductBandFromFile: base path " + sBase + ", file name: " + sFileName);
 		try {
 			m_oProductFile = new File(sBase + File.separator + sFileName);
 			if(!m_oProductFile.exists()) {
-				WasdiLog.warnLog("Envisat5ProductReader.readProductBandFromFile: file " + sBase + File.separator + sFileName + " does not exist");
+				WasdiLog.warnLog("Landsat5ProductReader.readProductBandFromFile: file " + sBase + File.separator + sFileName + " does not exist");
 				return;
 			}
 			if (m_bSnapReadAlreadyDone == false) {
 				m_oProduct = readSnapProduct();
-				WasdiLog.debugLog("Envisat5ProductReader.readProductBandFromFile. snap product has been read: " + m_oProduct.getName());
+				WasdiLog.debugLog("Landsat5ProductReader.readProductBandFromFile. snap product has been read: " + m_oProduct.getName());
 			}
 			if(m_oProduct != null) {
 				m_bSnapReadAlreadyDone = true;
-				WasdiLog.debugLog("Envisat5ProductReader.readProductBandFromFile: snap product has been already read");
+				WasdiLog.debugLog("Landsat5ProductReader.readProductBandFromFile: snap product has been already read");
 			} else {
-				WasdiLog.debugLog("Envisat5ProductReader.readProductBandFromFile: snap product not yet read");
+				WasdiLog.debugLog("Landsat5ProductReader.readProductBandFromFile: snap product not yet read");
 				m_bSnapReadAlreadyDone = false;
 			}
 		}
 		catch (Exception oE) {
-			WasdiLog.errorLog("Envisat5ProductReader.readProductBandFromFile: tried to read " + sFileName + " but failed: " + oE);
+			WasdiLog.errorLog("Landsat5ProductReader.readProductBandFromFile: tried to read " + sFileName + " but failed: " + oE);
 			m_bSnapReadAlreadyDone = false;
 		}
 	}

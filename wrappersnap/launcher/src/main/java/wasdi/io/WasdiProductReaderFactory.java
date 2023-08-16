@@ -2,6 +2,7 @@ package wasdi.io;
 
 import java.io.File;
 
+import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -48,9 +49,15 @@ public class WasdiProductReaderFactory {
 			return new Sentinel3ProductReader(oFile);
 		}
 		
-		if (WasdiFileUtils.isEnvisat5Name(oFile)) {
-			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Envisat-5 file.");
+		if (WasdiFileUtils.isLandsat5Name(oFile)) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Landsat-5 file.");
 			return new Landsat5ProductReader(oFile);
+		}
+		
+		if (WasdiFileUtils.getPlatformFromSatelliteImageFileName(oFile.getName()).equals(Platforms.SENTINEL6)) {
+			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Sentinel-6 file.");
+			return new Sentinel6ProductReader(oFile);
+
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
