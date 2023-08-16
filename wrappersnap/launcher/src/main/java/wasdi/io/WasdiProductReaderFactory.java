@@ -50,7 +50,7 @@ public class WasdiProductReaderFactory {
 		
 		if (WasdiFileUtils.isEnvisat5Name(oFile)) {
 			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Envisat-5 file.");
-			return new Envisat5ProductReader(oFile);
+			return new Landsat5ProductReader(oFile);
 		}
 
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {

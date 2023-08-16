@@ -798,7 +798,7 @@ public class WasdiFileUtils {
 			} else if (sFileName.toUpperCase().startsWith("S6A_")) {
 				return Platforms.SENTINEL6;
 			}
-			else if (sFileName.toUpperCase().startsWith("LS05_")) {
+			else if (sFileName.toUpperCase().startsWith("LS05_") || sFileName.toUpperCase().startsWith("LT5")) {
 				return Platforms.LANDSAT5;
 			}
 			else if (sFileName.toUpperCase().startsWith("LS07_")) {

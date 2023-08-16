@@ -6,17 +6,19 @@ import java.util.List;
 
 import org.esa.snap.core.datamodel.Product;
 
+import com.google.common.io.Files;
+
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
-public class Envisat5ProductReader extends SnapProductReader {
+public class Landsat5ProductReader extends SnapProductReader {
 	
 	/**
 	 * @param oProductFile the envisat (zip) file to be read
 	 */
-	public Envisat5ProductReader(File oProductFile) {
-		super(oProductFile);
+	public Landsat5ProductReader(File oProductFile) {
+		super(oProductFile); 
 	}
 	
 
@@ -47,22 +49,47 @@ public class Envisat5ProductReader extends SnapProductReader {
 			ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 			oZipExtractor.unzip(sDownloadPath + File.separator + sFileNameFromProvider, sDownloadPath);
+			//remove .zip
 			deleteDownloadedZipFile(sDownloadedFileFullPath);
 
-			//remove .zip
 			String sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
 			String sTIFFSubfolder = sFolderName + File.separator + sNewFileName + ".TIFF";
-			
-			
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: Unzip done, folder name: " + sFolderName);
-			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: TIFF subfolder name: " + sTIFFSubfolder);
+			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: Product folder path: " + sFolderName);
+			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: TIFF subfolder path: " + sTIFFSubfolder);
 
-			m_oProductFile = new File(sTIFFSubfolder);
-			return sTIFFSubfolder;
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("Sentinel3ProductReader.adjustFileAfterDownload: error ", oEx);
+			WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: starting deletion of all files in the main product folder");
+			File oMainFolder = new File(sFolderName);
+			// delete all the files in the main directory
+			for (File oFile : oMainFolder.listFiles()) {
+				if (!(oFile.isDirectory() && oFile.getName().endsWith(".TIFF"))) {
+					oFile.delete();
+				}
+			}
+			if (oMainFolder.listFiles().length == 1 && oMainFolder.listFiles()[0].isDirectory() && oMainFolder.listFiles()[0].getName().endsWith(".TIFF")) {
+				WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: all files have been deleted, execpt the folder with the TIFF.");
+				WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: starting moving the TIFF files to the main folder");
+			
+				// copy all the files in the TIFF folder in the main directory
+				String sTargetDir = sFolderName;
+				File oTIFFSubfolder = new File(sTIFFSubfolder);
+				for (File oFile : oTIFFSubfolder.listFiles()) {
+					File oTargetFile = new File(sTargetDir + File.separator + oFile.getName());
+					Files.move(oFile, oTargetFile);
+				}
+				if (oTIFFSubfolder.listFiles().length == 0) {
+					WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: all files have been moved. Subsfolder can be deleted");
+					if (oTIFFSubfolder.delete()) {
+						WasdiLog.debugLog("Envisat5ProductReader.adjustFileAfterDownload: .TIFF subsfolder has been deleted");
+					}
+				}
+			}
+
+			m_oProductFile = new File(sFolderName); // here we change the pointer to the file, from the zip file to the _MTL.txt file, which provides the information for reading the bands
+			sDownloadedFileFullPath = sFolderName; // here I should put the name of the first folder
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("Envisat5ProductReader.adjustFileAfterDownload: error ", oEx);
 		}
 
 		return sDownloadedFileFullPath;
@@ -99,6 +126,7 @@ public class Envisat5ProductReader extends SnapProductReader {
 		
 		//prepare path
 		String sBase = null;
+		File oOriginalProductFile = m_oProductFile;
 		try {
 			sBase = m_oProductFile.getAbsolutePath();
 			
@@ -111,7 +139,7 @@ public class Envisat5ProductReader extends SnapProductReader {
 			File[] aoFiles = m_oProductFile.listFiles();
 			for (int i = 0; i < aoFiles.length; i++) {
 				File oCurrentFile = aoFiles[i];
-				if (oCurrentFile.isFile() && oCurrentFile.getName().endsWith(".txt")) {
+				if (oCurrentFile.isFile() && oCurrentFile.getName().endsWith("_MTL.txt")) {
 					String sFileName = oCurrentFile.getName();
 					WasdiLog.errorLog("Envisat5ProductReader.getSnapProduct: found a txt file: " + sFileName);
 					readProductBandFromFile(sBase, sFileName);
@@ -123,7 +151,7 @@ public class Envisat5ProductReader extends SnapProductReader {
 		}
 		
 		//reset the File pointer
-		m_oProductFile = m_oProductFile.getParentFile();
+		m_oProductFile = oOriginalProductFile;
 
 		return m_oProduct;
 	}
