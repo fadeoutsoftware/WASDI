@@ -757,7 +757,7 @@ public class WasdiFileUtils {
 			}
 			return isLandsat5Name(oFile.getName());
 		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(File): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isLandsat5Name(File): " + oE);
 		}
 		return false;
 	}
@@ -765,17 +765,16 @@ public class WasdiFileUtils {
 	public static boolean isLandsat5Name(String sName) {
 		try {
 			if(Utils.isNullOrEmpty(sName)) {
-				WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File name is null or empty"  );
+				WasdiLog.debugLog("WasdiFileUtils.isLandsat5Name(String). File name is null or empty"  );
 				return false;
 			}
 			if(sName.toUpperCase().startsWith("LS05_") && (sName.toLowerCase().endsWith(".zip") ) ){
-				WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File " + sName + "is a Envisat-5 file."  );
+				WasdiLog.debugLog("WasdiFileUtils.isLandsat5Name(String). File " + sName + "is a Landsat-5 file."  );
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String): " + oE);
+			WasdiLog.debugLog("WasdiFileUtils.isLandsat5Name(String): " + oE);
 		}
-		WasdiLog.debugLog("WasdiFileUtils.isEnvisat5Name(String). File " + sName + "is not a Envisat-5 file."  );
 		return false;
 	}
 	
