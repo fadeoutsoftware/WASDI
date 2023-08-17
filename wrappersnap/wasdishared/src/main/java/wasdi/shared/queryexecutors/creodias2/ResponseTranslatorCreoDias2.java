@@ -94,7 +94,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	 */
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		// BASIC INFO: title, summary, product id, link, footprint, date, size
-		String sProductTitleNoExtension =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
+		String sProductTitle = oJsonItem.optString(SODATA_NAME);
+		String sProductTitleNoExtension =  removeExtensionFromProductTitle(sProductTitle);
 		String sProductId = oJsonItem.optString(SODATA_PRODUCT_ID);
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
@@ -115,7 +116,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
 		setBasicInfo(oResult, sProductId, sProductTitleNoExtension, sSummary, sFootprint);
-		setLink(oResult, sLink, sProductTitleNoExtension, dByteSize, sS3Path);
+		setLink(oResult, sLink, sProductTitle, sProductTitleNoExtension, dByteSize, sS3Path);
 		setBasicProperties(oResult, sDate, sPlatform, sPlatformSerialId, sInstrument, sMode, sSize, sRelativeOrbit);
 		if (bFullViewModel)
 			setAllProviderProperties(oResult, aoAttributes);
