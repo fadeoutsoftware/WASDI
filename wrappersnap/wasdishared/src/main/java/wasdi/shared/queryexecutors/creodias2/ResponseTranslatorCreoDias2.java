@@ -94,7 +94,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	 */
 	private QueryResultViewModel processProduct(JSONObject oJsonItem, boolean bFullViewModel) {
 		// BASIC INFO: title, summary, product id, link, footprint, date, size
-		String sProductTitle =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
+		String sProductTitleNoExtension =  removeExtensionFromProductTitle(oJsonItem.optString(SODATA_NAME));
 		String sProductId = oJsonItem.optString(SODATA_PRODUCT_ID);
 		String sLink = SODATA_BASE_DOWNLOAD_URL + sProductId + SODATA_END_DOWNLOAD_URL;
 		String sFootprint = parseFootPrint(oJsonItem);
@@ -114,8 +114,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 		String sSummary = getSummary(sDate, sSize, sInstrument, sMode, sPlatform, sPlatformSerialId);
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
-		setBasicInfo(oResult, sProductId, sProductTitle, sSummary, sFootprint);
-		setLink(oResult, sLink, sProductTitle, dByteSize, sS3Path);
+		setBasicInfo(oResult, sProductId, sProductTitleNoExtension, sSummary, sFootprint);
+		setLink(oResult, sLink, sProductTitleNoExtension, dByteSize, sS3Path);
 		setBasicProperties(oResult, sDate, sPlatform, sPlatformSerialId, sInstrument, sMode, sSize, sRelativeOrbit);
 		if (bFullViewModel)
 			setAllProviderProperties(oResult, aoAttributes);
@@ -211,11 +211,12 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	 * the name that will be used to save the downloaded copy of the file (with the zip extension), the size of the file and its S3Path on creodias. 
 	 * @param oResult the view model where the link string will be stored
 	 * @param sDownloadLink the URL to be used for downloading a product from Creodias
+	 * @param sProductTitle the name of the product to download (with the extension, if it has any)
 	 * @param sProductTitle the name of the product to download (without any extension)
 	 * @param dSizeInBytes the size of the product 
 	 * @param sS3Path the S3 path on Creodias
 	 */
-	private void setLink(QueryResultViewModel oResult, String sDownloadLink, String sProductTitle, double dSizeInBytes, String sS3Path) {
+	private void setLink(QueryResultViewModel oResult, String sDownloadLink, String sProductTitle, String sProductTitleNoExtension, double dSizeInBytes, String sS3Path) {
 		Preconditions.checkNotNull(oResult, "result view model is null");
 		try {
 			StringBuilder oLink = new StringBuilder("");
@@ -229,7 +230,8 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); 
 		
 			// 1: file name in zip format
-			String sTitle = sProductTitle;  
+			String sTitle = sProductTitle.toUpperCase().endsWith(".SEN6") 
+					? sProductTitle : sProductTitleNoExtension;  // zip file for Sentinel-6 needs the extension, when downloaded by Creodias
 			if(Utils.isNullOrEmpty(sTitle)) {
 				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the product title is empty.");
 				sTitle = "";
