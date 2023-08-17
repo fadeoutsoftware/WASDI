@@ -54,12 +54,10 @@ public class WasdiProductReaderFactory {
 			return new Landsat5ProductReader(oFile);
 		}
 		
-		if (WasdiFileUtils.getPlatformFromSatelliteImageFileName(oFile.getName()).equals(Platforms.SENTINEL6)) {
-			WasdiLog.debugLog("WasdiProductReaderFactory.getProductReader. Found Sentinel-6 file.");
+		if (oFile.getName().startsWith("S6A")) {
 			return new Sentinel6ProductReader(oFile);
-
 		}
-
+		
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			return new CmNcProductReader(oFile);
 		}
