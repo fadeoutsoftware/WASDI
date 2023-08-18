@@ -1024,7 +1024,7 @@
                 {
                     "indexname": "dataset",
                     "indexlabel": "Dataset",
-                    "indexvalues": "EEHCM|EEHSEBS|EEHSTIC|EEHSW|EEHTES|EEHTSEB|L1B_RAD",
+                    "indexvalues": "EEHCM|EEHSEBS|EEHSTIC|EEHSW|EEHTES|EEHTSEB|L1B_RAD|L1B_GEO",
                     "regex": ".*",
                     "indexvalue":"EEHCM"
                 },
@@ -1038,14 +1038,14 @@
                 {
                     "indexname": "parameterName",
                     "indexlabel": "Parameter",
-                    "indexvalues": "Day|Night",
+                    "indexvalues": "L1B_RAD|L1B_GEO",
                     "regex": ".*",
                     "indexvalue":""
                 },
                 {
                     "indexname": "dayNightFlag",
                     "indexlabel": "DayNightFlag",
-                    "indexvalues": "L1B_RAD|Night",
+                    "indexvalues": "Day|Night",
                     "regex": ".*",
                     "indexvalue":""
                 }
