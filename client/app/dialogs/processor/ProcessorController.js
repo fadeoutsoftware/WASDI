@@ -103,7 +103,8 @@ var ProcessorController = (function () {
          * @type {({name: string, id: string}|{name: string, id: string}|{name: string, id: string})[]}
          */
         this.m_aoProcessorTypes = [
-            { name: "Python 3.7 Pip", id: "ubuntu_python37_snap" },
+            {name: "Ubuntu 20.04 + Python 3.8", id:"ubuntu_python37_snap"},
+            // { name: "Python 3.7 Pip", id: "ubuntu_python37_snap" },
             // { name: "Python 3.x Pip 2", id:"python_pip_2"},
             // { name: "Python 3.x Pip One Shot", id:"pip_oneshot"},
             { name: "IDL 3.7.2", id: "ubuntu_idl372" },
