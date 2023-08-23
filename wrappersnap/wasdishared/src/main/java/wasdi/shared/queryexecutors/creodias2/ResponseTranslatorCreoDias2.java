@@ -28,6 +28,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SODATA_COORDINATES = "coordinates";
 	private static final String SODATA_INSTRUMENT = "instrumentShortName";
 	private static final String SODATA_MODE = "operationalMode";
+	private static final String SODATA_MULTIPOLYGON = "MultiPolygon";
 	private static final String SODATA_NAME = "Name";
 	private static final String SODATA_PLATFORM_SERIAL_ID = "platformSerialIdentifier";
 	private static final String SODATA_PLATFORM_SHORT_NAME = "platformShortName";
@@ -48,6 +49,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 	private static final String SRELATIVE_ORBIT = "relativeorbitnumber";
 	private static final String SPLATFORM_NAME = "platformname";
 	private static final String SPOLYGON = "POLYGON";
+	private static final String SMULTI_POLYGON = "MULTIPOLYGON";
 	private static final String SSENSOR_MODE = "sensoroperationalmode";
 	private static final String SSIZE = "size";
 	
@@ -78,7 +80,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorCREODIAS.translateBatch. Exception when translating the Creodias results in the Wasdi view model " + oE);
+			WasdiLog.debugLog("ResponseTranslatorCreoDias2.translateBatch. Exception when translating the Creodias results in the Wasdi view model " + oE);
 			aoResults = Collections.emptyList();
 		}
 		
@@ -225,7 +227,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			// 0: on-line download link
 			String sLink = sDownloadLink; 
 			if(Utils.isNullOrEmpty(sLink)) {
-				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the download URL is null or empty.");
+				WasdiLog.debugLog("ResponseTranslatorCreoDias2.buildLink: the download URL is null or empty.");
 				sLink = "http://";
 			} 
 			oLink.append(sLink).append(SLINK_SEPARATOR_CREODIAS2); 
@@ -234,7 +236,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			String sTitle = sProductTitle.toUpperCase().endsWith(".SEN6") 
 					? sProductTitle : sProductTitleNoExtension;  // zip file for Sentinel-6 needs the extension, when downloaded by Creodias
 			if(Utils.isNullOrEmpty(sTitle)) {
-				WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: the product title is empty.");
+				WasdiLog.debugLog("ResponseTranslatorCreoDias2.buildLink: the product title is empty.");
 				sTitle = "";
 			}
 			sTitle = sTitle + ".zip";
@@ -257,7 +259,7 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			oResult.getProperties().put(ResponseTranslatorCREODIAS.SLINK, oLink.toString());
 			oResult.setLink(oLink.toString());
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ResponseTranslatorCREODIAS.buildLink: could not extract download link: " + oE);
+			WasdiLog.debugLog("ResponseTranslatorCreoDias2.buildLink: could not extract download link: " + oE);
 		}
 	}
 	
@@ -337,6 +339,41 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 			JSONArray aoCoordinates = (JSONArray) oJsonFootprint.optJSONArray(SODATA_COORDINATES);
 			String sCoordinates = parseCoordinates(aoCoordinates);
 			return SPOLYGON + " ((" + sCoordinates + "))";
+		} else if (sType.equals(SODATA_MULTIPOLYGON)) {
+			/*
+			// level 0 - can be made of more subarrays
+			"coordinates": [	
+				// level 1 - has just one subarray
+				[	
+					// level 2 - can be made of multiple subarrays
+					[			
+						[ x1, y1 ], [ x2, y2 ],[ x3, y3]
+					]
+				]
+			] 
+			*/
+			List<String> asMultiPolygonPoints = new ArrayList<>();
+			JSONArray aoCoordinates = (JSONArray) oJsonFootprint.optJSONArray(SODATA_COORDINATES); // level 0
+			for (int i = 0; i < aoCoordinates.length(); i++) {
+				JSONArray aoArrL1 = aoCoordinates.getJSONArray(i); // level 1
+				if (aoArrL1.length() == 1) {
+					JSONArray aoArrL2 = aoArrL1.getJSONArray(0);	// level 2
+					for (Object oItem: aoArrL2) {
+						if(oItem instanceof JSONArray) {
+							for (int z = 0; z < ((JSONArray) oItem).length(); z++) {
+								Double dX = ((JSONArray)oItem).getDouble(0);
+								Double dY = ((JSONArray)oItem).getDouble(1);
+								if(!Double.isNaN(dX) && !Double.isNaN(dY) )
+									asMultiPolygonPoints.add(dX + " " + dY);
+							}
+						}
+					}
+				} else {
+					WasdiLog.debugLog("ResponseTranslatorCreoDias2.parseFootPrint. Coordinates array has more than one subarray. All sub-arrays should be processed.");
+				}
+			}
+			return SMULTI_POLYGON + " (((" + String.join(", ", asMultiPolygonPoints) + ")))";
+					
 		}
 		return "";	
 	}
