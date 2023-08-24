@@ -961,7 +961,7 @@
             ]
         },
         {
-            "name": "ECOSTRESS",
+            "name": "European ECOSTRESS hub",
             "indexname": "platformname",
             "indexvalue": "ECOSTRESS",
             "filters": [
