@@ -31,32 +31,32 @@ public class DockerUtils {
     /**
      * Wasdi Processor
      */
-    Processor m_oProcessor;
+    protected Processor m_oProcessor;
 
     /**
      * Folder of the processor
      */
-    String m_sProcessorFolder;
+    protected String m_sProcessorFolder;
 
     /**
      * Wasdi Working Path
      */
-    String m_sWorkingRootPath;
+    protected String m_sWorkingRootPath;
 
     /**
      * Log file for docker operations
      */
-    String m_sDockerLogFile = WasdiConfig.Current.dockers.dockersDeployLogFilePath;
+    protected String m_sDockerLogFile = WasdiConfig.Current.dockers.dockersDeployLogFilePath;
 
     /**
      * User that run the docker
      */
-    String m_sUser = "tomcat";    
+    protected String m_sUser = "tomcat";    
 
     /**
      * Docker registry in use
      */
-    String m_sDockerRegistry = "";
+    protected String m_sDockerRegistry = "";
     
     /**
      * Create a new instance
