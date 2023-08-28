@@ -358,21 +358,6 @@ public class ResponseTranslatorCreoDias2 extends ResponseTranslator {
 				JSONArray aoArrL1 = aoCoordinates.getJSONArray(i); // level 1
 				String sCoordinates = parseCoordinates(aoArrL1);
 				asMultiPolygonPoints.add(sCoordinates);
-//				if (aoArrL1.length() == 1) {
-//					JSONArray aoArrL2 = aoArrL1.getJSONArray(0);	// level 2
-//					for (Object oItem: aoArrL2) {
-//						if(oItem instanceof JSONArray) {
-//							for (int z = 0; z < ((JSONArray) oItem).length(); z++) {
-//								Double dX = ((JSONArray)oItem).getDouble(0);
-//								Double dY = ((JSONArray)oItem).getDouble(1);
-//								if(!Double.isNaN(dX) && !Double.isNaN(dY) )
-//									asMultiPolygonPoints.add(dX + " " + dY);
-//							}
-//						}
-//					}
-//				} else {
-//					WasdiLog.debugLog("ResponseTranslatorCreoDias2.parseFootPrint. Coordinates array has more than one subarray. All sub-arrays should be processed.");
-//				}
 			}
 			return SMULTI_POLYGON + " (((" + String.join(", ", asMultiPolygonPoints) + ")))";
 					
