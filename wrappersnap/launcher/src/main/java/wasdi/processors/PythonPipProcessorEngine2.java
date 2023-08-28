@@ -255,13 +255,13 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	        }
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: exception " + oEx.toString());
 		}		
 	}
 	
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		WasdiLog.debugLog("DockerProcessorEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
+		WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
 		return redeploy(oParameter);
 	}
 	

@@ -1877,6 +1877,7 @@ public class ProcessorsResource  {
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
 					oProcessorParameter.setProcessObjId(Utils.getRandomName());
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
+					oProcessorParameter.setProcessorType(oProcessorToUpdate.getType());
 					
 					String sPath = WasdiConfig.Current.paths.serializationPath;
 					
