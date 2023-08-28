@@ -261,8 +261,16 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
-		return redeploy(oParameter);
+		
+		if (WasdiConfig.Current.nodeCode == "wasdi") {
+			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
+			return redeploy(oParameter);			
+		}
+		else {
+			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  we are not the main node, nothing to do");
+			return true;			
+		}
+		
 	}
 	
 	@Override
