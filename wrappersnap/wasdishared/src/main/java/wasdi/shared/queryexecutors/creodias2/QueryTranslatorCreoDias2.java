@@ -167,7 +167,7 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 			asQueryElements.add(createStringAttribute(sODataSwathId, sSwathId));
 		}
 			
-		String sFilterValue = String.join(" " + sODataAND + " ", asQueryElements);	
+		String sFilterValue = "(Online eq true) and " + String.join(" " + sODataAND + " ", asQueryElements);	
 		
 		return sODataFilterOption + sFilterValue;
 	}

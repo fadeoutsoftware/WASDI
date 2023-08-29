@@ -1,11 +1,11 @@
 package wasdi.io;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.esa.snap.core.datamodel.Product;
 
@@ -17,6 +17,7 @@ import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
@@ -173,6 +174,129 @@ public class Sentinel6ProductReader extends CmNcProductReader {
     	return null;   
 	
 	}
+	
+	
+	@Override
+	public File getFileForPublishBand(String sBand, String sLayerId) {
+		try {
+			
+			String sInputFile = m_oProductFile.getAbsolutePath();
+			String sOutputFile = sLayerId + ".tif";		
+			WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. Product NetCDFFile path: " + sInputFile);
+			WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. Expected output TIF file path: " + sOutputFile);
+			
+			File oFile = new File(sInputFile);
+			String sInputPath = oFile.getParentFile().getPath();
+			if (!sInputPath.endsWith("/")) 
+				sInputPath += "/";
+			
+			List<String> asGdalTranslateArgs = buildArgumentsGdalTranslate(sInputPath, sInputFile, sBand);
+
+			// Execute the process
+			ProcessBuilder oProcessBuidler = new ProcessBuilder(asGdalTranslateArgs.toArray(new String[0]));
+			Process oProcess;
+			
+			oProcessBuidler.redirectErrorStream(true);
+			oProcess = oProcessBuidler.start();
+			
+			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+			String sLine;
+			while ((sLine = oReader.readLine()) != null)
+				WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. [gdal]: " + sLine);
+			
+			oProcess.waitFor();		
+			WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. gdal_translate command execution ended");
+
+			
+			List<String> asGdalWaepArgs = buildArgumentsGdalWarp(sInputPath, sOutputFile, sBand); 
+			
+			oProcessBuidler = new ProcessBuilder(asGdalWaepArgs.toArray(new String[0]));
+			oProcessBuidler.redirectErrorStream(true);
+			oProcess = oProcessBuidler.start();
+			
+			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+			while ((sLine = oReader.readLine()) != null)
+				WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. [gdal]: " + sLine);
+			
+			oProcess.waitFor();
+			WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand. gdalwarp command execution ended");
+
+			return new File(sInputPath + sOutputFile);
+		}
+		catch (Exception oEx) {
+			
+			WasdiLog.debugLog("Sentinel6ProductReader.getFileForPublishBand.: Exception = " + oEx.toString());
+			
+			return null;
+		}
+	}
+	
+	/**
+	 * Populate the list of arguments to create a VRT file starting from a NetCDF file with GDAL
+	 * @param sParentFolderPath the path of the folder where the VRT file will be created
+	 * @param sInputFilePath the path of the NetCDF file
+	 * @param sBandName the name of the band
+	 * @return the list of arguments to execute the gdal_translate command
+	 */
+	private static List<String> buildArgumentsGdalTranslate(String sParentFolderPath, String sInputFilePath, String sBandName) {
+		String sGdalCommand = "gdal_translate";
+		sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+		
+		List<String> asArgs = new ArrayList<>();
+		
+		asArgs.add(sGdalCommand);
+		
+		asArgs.add("-co");
+		asArgs.add("WRITE_BOTTOMUP=NO");
+		
+		asArgs.add("-of");
+		asArgs.add("VRT");
+
+		String sGdalInput = "\"NETCDF:" + sInputFilePath + ":data_01/" + sBandName + "\"";  // e.g. "NETCDF:path_to_file/file_name.nc:/data_01/band_name"
+		asArgs.add(sGdalInput);
+		
+		String sGdalOutput = sParentFolderPath + sBandName + ".vrt";
+		asArgs.add(sGdalOutput);
+		
+		WasdiLog.debugLog("Sentinel6ProductReader.buildArgumentsGdalTranslate. gdal_translate input: " + sGdalInput);
+		WasdiLog.debugLog("Sentinel6ProductReader.buildArgumentsGdalTranslate. gdal_translate output: " + sGdalOutput);
+		
+		return asArgs;
+	}
+	
+	/**
+	 * Populate the list of arguments to create a TIF file starting from a VRT file with GDAL
+	 * @param sParentFolderPath the path of the folder containing the VRT file
+	 * @param sOutputFileName the name of the output TIF file
+	 * @param sBandName the name of the band
+	 * @return the list of arguments to execute the gdalwarp command
+	 */
+	private static List<String> buildArgumentsGdalWarp(String sParentFolderPath, String sOutputFileName, String sBandName) {
+		String sGdalCommand = "gdalwarp";
+		sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+		
+		List<String> asArgs = new ArrayList<String>();
+		
+		asArgs.add(sGdalCommand);
+		
+		asArgs.add("-geoloc");
+		
+		asArgs.add("-t_srs");
+		asArgs.add("EPSG:4326");
+		
+		asArgs.add("-overwrite");
+		
+		String sGdalInput = sParentFolderPath + sBandName + ".vrt";
+		String sGdalOutput = sParentFolderPath + sOutputFileName;
+		asArgs.add(sGdalInput);
+		asArgs.add(sGdalOutput);
+		
+		WasdiLog.debugLog("Sentinel6ProductReader.buildArgumentsGdalWarp. gdalwarp input: " + sGdalInput);
+		WasdiLog.debugLog("Sentinel6ProductReader.buildArgumentsGdalWarp. gdalwarp output: " + sGdalOutput);
+		
+		return asArgs;
+	}
+	
 	
 
 
