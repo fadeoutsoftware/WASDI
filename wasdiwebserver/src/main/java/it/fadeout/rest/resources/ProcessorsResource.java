@@ -213,7 +213,7 @@ public class ProcessorsResource  {
 			File oProcessorFile = new File(sDownloadRootPath+"/processors/" + sName + "/" + sProcessorId + ".zip");
 			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
 			
-			//save uploaded file
+			// Save uploaded file
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
 			
@@ -1648,12 +1648,14 @@ public class ProcessorsResource  {
 		
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-
+			
+			// Check the user
 			if (oUser==null) {
 				WasdiLog.debugLog("ProcessorResources.updateProcessor: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-				
+			
+			// Check if the processor exists
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
@@ -1662,11 +1664,13 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 			
+			// Check if the user can access the processor
 			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToUpdate)) {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessor: user cannot access the processor");
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 						
+			// Check the JSON of parameters sample
 			if (Utils.isNullOrEmpty(oUpdatedProcessorVM.getParamsSample())==false) {				
 				try {
 					String sDecodedJSON = URLDecoder.decode(oUpdatedProcessorVM.getParamsSample(), StandardCharsets.UTF_8.name());
@@ -1679,6 +1683,7 @@ public class ProcessorsResource  {
 				}
 			}
 			
+			// Update the processor data
 			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
@@ -1729,11 +1734,13 @@ public class ProcessorsResource  {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
+			// Check the processor Id
 			if(Utils.isNullOrEmpty(sProcessorId) || sProcessorId.contains("\\") || sProcessorId.contains("/")) {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: invalid processor name, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
+			// Check if the processor exists
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			if (oProcessorToUpdate == null) {
@@ -1741,6 +1748,8 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 			
+			
+			// Check if the user can access the processor
 			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToUpdate)) {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: user cannot access the processor");
 				return Response.status(Status.FORBIDDEN).build();				
@@ -1748,7 +1757,6 @@ public class ProcessorsResource  {
 						
 			// Set the processor path
 			String sDownloadRootPath = Wasdi.getDownloadPath();
-
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
 			File oProcessorPath = oDirPath.toFile();
 			if (!oProcessorPath.isDirectory()) {
@@ -1756,6 +1764,7 @@ public class ProcessorsResource  {
 				return Response.serverError().build();
 			}
 			
+			// Get the name and path of the new zip
 			String sFileName = sProcessorId + ".zip";
 			
 			if (!Utils.isNullOrEmpty(sInputFileName)) {

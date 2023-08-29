@@ -1,26 +1,12 @@
 package wasdi.processors;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import wasdi.LauncherMain;
 import wasdi.processors.dockerUtils.DockerUtils;
-import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.StringUtils;
@@ -49,10 +35,9 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	
 	
 	/**
-	 * Deploy the processor in ADES.
-	 * The method creates the docker in "single run mode".
+	 * Deploy the processor in WASDI.
+	 * The method creates the docker
 	 * Then it pushes the image in Nexus
-	 * Then creates the CWL and the body to post to the ades api to deploy a processor.
 	 */
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
