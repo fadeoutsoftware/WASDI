@@ -16,6 +16,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -520,6 +521,8 @@ public class DockerUtils {
 
             // Wait for docker to finish
             Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
+            
+            WasdiLog.debugLog("DockerUtils.delete: remove image");
 
             // Delete this image
             ArrayList<String> asArgs = new ArrayList<>();
@@ -527,13 +530,38 @@ public class DockerUtils {
             asArgs.add("rmi");
             asArgs.add("-f");
             asArgs.add(sDockerName);
-
+            
             String sCommand = "docker";
 
             RunTimeUtils.shellExec(sCommand, asArgs, false);
-
+            
             // Wait for docker to finish
             Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
+            
+            
+            String sVersionCopy = sVersion;
+            int iVersion = StringUtils.getAsInteger(sVersionCopy);
+            
+        	while (iVersion>1)  {
+        		sVersionCopy = StringUtils.decrementIntegerString(sVersionCopy);
+        		
+        		WasdiLog.debugLog("DockerUtils.delete: remove also image version " + sVersionCopy);
+        		
+                // Delete this image
+                asArgs = new ArrayList<>();
+                // Remove the container image
+                asArgs.add("rmi");
+                asArgs.add("-f");
+                asArgs.add(sDockerName.replace(":"+sVersion, ":"+sVersionCopy));
+        		
+        		RunTimeUtils.shellExec(sCommand, asArgs, false);
+        		
+                // Wait for docker to finish
+                Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);    		
+                
+                iVersion = StringUtils.getAsInteger(sVersionCopy);
+        	}
+       
             
             if (WasdiConfig.Current.nodeCode.equals("wasdi")) {            	
                 if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
@@ -936,7 +964,14 @@ public class DockerUtils {
         		
         		WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Delete Layer with Digest " + sUrl);
         		
-        		HttpUtils.httpDelete(sUrl, asHeaders);    			
+        		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl, asHeaders);
+        		
+        		if (oResponse.getResponseCode() == 202) {
+        			WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Image Deleted ");
+        		}
+        		else {
+        			WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Problem deleting image: output code " + oResponse.getResponseCode().toString() + " Message: " + oResponse.getResponseBody());
+        		}
     		}
     		else {
     			WasdiLog.debugLog("DockerUtils.removeImageFromRegistry: Delete Layer digest is null, nothing to do ");

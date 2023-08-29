@@ -617,7 +617,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 }
             }
 
-
             String sProcessorFolder = getProcessorFolder(sProcessorName);
 
             File oProcessorFolder = new File(sProcessorFolder);

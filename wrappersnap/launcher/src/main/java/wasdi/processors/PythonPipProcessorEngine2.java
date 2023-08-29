@@ -322,5 +322,30 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		return super.refreshPackagesInfo(oParameter);
 	}
 	
+	@Override
+	public boolean delete(ProcessorParameter oParameter) {
+		
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is empty, return false.");
+			return false;			
+		}
+		
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.delete: Registry set, call base class delete.");
+		
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;	
+		
+		return super.delete(oParameter);
+	}
+	
 
 }

@@ -74,33 +74,43 @@ public abstract class WasdiProcessorEngine {
 		}
 		
 		if (sType.equals(ProcessorTypes.IDL)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type IDL2ProcessorEngine");
 			return new IDL2ProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.OCTAVE)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type OctaveProcessorEngine");
 			return new OctaveProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.CONDA)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type CondaProcessorEngine");
 			return new CondaProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.JUPYTER_NOTEBOOK)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type JupyterNotebookProcessorEngine");
 			return new JupyterNotebookProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type CSharpProcessorEngine");
 			return new CSharpProcessorEngine();
 		}		
 		else if (sType.equals(ProcessorTypes.EOEPCA)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type EoepcaProcessorEngine");
 			return new EoepcaProcessorEngine();
 		}
 		else if (sType.equals(ProcessorTypes.PYTHON_PIP_2)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PythonPipProcessorEngine2");
 			return new PythonPipProcessorEngine2();
 		}
 		else if (sType.equals(ProcessorTypes.PIP_ONESHOT)) {
+			WasdiLog.debugLog("WasdiProcessorEngine.getProcessorEngine: return processor of type PipOneShotProcessorEngine");
 			return new PipOneShotProcessorEngine();
 		}		
 		else {
+			WasdiLog.warnLog("WasdiProcessorEngine.getProcessorEngine: DEFAULT CASE (type "  + sType+ " not recognized) return processor of type UbuntuPython37ProcessorEngine");
 			return new UbuntuPython37ProcessorEngine();
 		}
 	}
