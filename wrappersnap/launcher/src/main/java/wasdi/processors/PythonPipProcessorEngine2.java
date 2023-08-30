@@ -148,6 +148,8 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
         
 		// Increment the version of the processor
 		String sNewVersion = oProcessor.getVersion();
+		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: Actual Version " + sNewVersion);
+		
 		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
 		oProcessor.setVersion(sNewVersion);
 		// Save it
