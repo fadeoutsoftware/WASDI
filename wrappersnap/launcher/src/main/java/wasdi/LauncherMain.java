@@ -78,11 +78,6 @@ public class LauncherMain  {
     public static Send s_oSendToRabbit = new Send(null);
 
     /**
-     * Actual node where the Launcher is running, main by default
-     */
-    public static String s_sNodeCode = "wasdi";
-
-    /**
      * Process Workspace Logger: this object allow to write the logs
      * linked to the process workspace that can be seen by the users in the web client
      * or using the libraries.
@@ -322,11 +317,10 @@ public class LauncherMain  {
         try {
 
             // Read this node code
-            LauncherMain.s_sNodeCode = WasdiConfig.Current.nodeCode;
-            WasdiLog.debugLog("NODE CODE: " + LauncherMain.s_sNodeCode);
+            WasdiLog.debugLog("NODE CODE: " + WasdiConfig.Current.nodeCode);
 
             // If this is not the main node
-            if (!LauncherMain.s_sNodeCode.equals("wasdi")) {
+            if (!WasdiConfig.Current.isMainNode()) {
             	// Configure also the local connection
                 WasdiLog.debugLog("Adding local mongo config");
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);

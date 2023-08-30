@@ -348,7 +348,7 @@ public class ProcessWorkspaceResource {
 			}
 			
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode.equals("wasdi") ) {
+			if (WasdiConfig.Current.isMainNode()) {
 				
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
@@ -482,7 +482,7 @@ public class ProcessWorkspaceResource {
 			
 			
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode.equals("wasdi") ) {
+			if (WasdiConfig.Current.isMainNode()) {
 				
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
@@ -1220,7 +1220,7 @@ public class ProcessWorkspaceResource {
 			lRunningTime = oProcessWorkspaceRepository.getRunningTime(sTargetUserId, lDateFrom, lDateTo);
 
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
 
@@ -1302,7 +1302,7 @@ public class ProcessWorkspaceResource {
 			}
 
 			// The main node needs to query also the others
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				NodeRepository oNodeRepo = new NodeRepository();
 				List<Node> aoNodes = oNodeRepo.getNodesList();
 
@@ -1383,7 +1383,7 @@ public class ProcessWorkspaceResource {
 
 		try {
 			
-			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				if (Utils.isNullOrEmpty(sNodeCode)) {
 					sNodeCode = "wasdi";
 				}				

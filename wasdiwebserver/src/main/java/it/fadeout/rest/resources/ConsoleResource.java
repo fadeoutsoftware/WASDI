@@ -97,7 +97,7 @@ public class ConsoleResource {
 			}
 
 
-			if (!Wasdi.s_sMyNodeCode.equals(oWorkspace.getNodeCode())) {
+			if (!WasdiConfig.Current.nodeCode.equals(oWorkspace.getNodeCode())) {
 				oResult.setStringValue("WORKSPACE NOT IN THIS NODE");
 				oResult.setBoolValue(false);
 				return oResult;

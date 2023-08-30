@@ -1255,7 +1255,7 @@ public class ProcessorsResource  {
 			}
 			
 			// This API is allowed ONLY on computing nodes
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				WasdiLog.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
@@ -1271,7 +1271,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			if (oWorkspace != null) {
 				
@@ -1330,7 +1330,7 @@ public class ProcessorsResource  {
 			}
 						
 			// This API is allowed ONLY on the main node
-			if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (!WasdiConfig.Current.isMainNode()) {
 				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: this is not the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
@@ -1397,7 +1397,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			if (oWorkspace != null) {
 				
@@ -1469,7 +1469,7 @@ public class ProcessorsResource  {
 			}
 						
 			
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				// Start a thread to update all the computing nodes
 				try {
 					WasdiLog.debugLog("ProcessorsResource.redeployProcessor: this is the main node, starting Worker to redeploy Processor also on computing nodes");
@@ -1495,7 +1495,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);			
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);			
 
 			// Schedule the process to run the processor
 			
@@ -1570,7 +1570,7 @@ public class ProcessorsResource  {
 			}
 
 
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				
 				// In the main node: start a thread to update all the computing nodes
 				
@@ -1600,7 +1600,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			WasdiLog.debugLog("ProcessorsResource.libraryUpdate: create local operation");
 			
@@ -1819,7 +1819,7 @@ public class ProcessorsResource  {
 				
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 				
-				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 					
 					// In the main node: start a thread to update all the computing nodes
 					
@@ -1864,7 +1864,7 @@ public class ProcessorsResource  {
 				
 				// Get the dedicated special workpsace
 				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 				
 				// If we have our special workspace
 				if (oWorkspace != null) {

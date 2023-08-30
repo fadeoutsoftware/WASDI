@@ -87,7 +87,7 @@ public class Environmentupdate extends Operation {
 			if (bRet) {
 				WasdiLog.infoLog("Environmentupdate.executeOperation: update done with success");
 				
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 				
 					// We need to update the history of actions done in this environment
 					String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
@@ -128,7 +128,7 @@ public class Environmentupdate extends Operation {
 			try {
 				
 				// We need to refresh the package list if we are in the main node
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 					Thread.sleep(2000);
 					oEngine.refreshPackagesInfo(oParameter);
 					

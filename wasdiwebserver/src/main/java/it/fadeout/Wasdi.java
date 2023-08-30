@@ -79,12 +79,7 @@ public class Wasdi extends ResourceConfig {
 	 * Static name of the system property that hosts to the nfs (satellite path finder) download folder 
 	 */
 	private static final String s_SNFS_DATA_DOWNLOAD = "nfs.data.download";
-	
-	/**
-	 * Name of the main WASDI node
-	 */
-	private static final String s_sWASDINAME = "wasdi";
-	
+		
 	/**
 	 * Servlet Config to access web.xml file
 	 */
@@ -100,12 +95,7 @@ public class Wasdi extends ResourceConfig {
 	 * Password for debug mode auto login
 	 */
 	public static String s_sDebugPassword = "password";
-	
-	/**
-	 * Code of the actual node
-	 */
-	public static String s_sMyNodeCode = Wasdi.s_sWASDINAME;
-	
+		
 	/**
 	 * Name of the Node-Specific Workpsace
 	 */
@@ -172,9 +162,7 @@ public class Wasdi extends ResourceConfig {
 		
 		// Read the code of this Node
 		try {
-
-			s_sMyNodeCode = WasdiConfig.Current.nodeCode;
-			WasdiLog.debugLog("-------Node Code " + s_sMyNodeCode);
+			WasdiLog.debugLog("-------Node Code " + WasdiConfig.Current.nodeCode);
 
 		} catch (Throwable oEx) {
 			WasdiLog.errorLog("Read the code of this Node exception " + oEx.toString());
@@ -188,11 +176,11 @@ public class Wasdi extends ResourceConfig {
 		// Computational nodes need to configure also the local dababase
 		try {
 			// If this is not the main node
-			if (!s_sMyNodeCode.equals(Wasdi.s_sWASDINAME)) {
+			if (!WasdiConfig.Current.isMainNode()) {
 				
 				// Configure also the local connection: by default is the "wasdi" port + 1
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
-				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + s_sMyNodeCode);
+				WasdiLog.debugLog("-------Addded Mongo Configuration local for " + WasdiConfig.Current.nodeCode);
 			}			
 		}
 		catch (Throwable oEx) {
@@ -247,7 +235,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 			// Check if it exists
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			if (oWorkspace == null) {
 				
@@ -261,7 +249,7 @@ public class Wasdi extends ResourceConfig {
 				oWorkspace.setName(Wasdi.s_sLocalWorkspaceName);
 				// Leave this at "no user"
 				oWorkspace.setWorkspaceId(Utils.getRandomName());
-				oWorkspace.setNodeCode(Wasdi.s_sMyNodeCode);
+				oWorkspace.setNodeCode(WasdiConfig.Current.nodeCode);
 				
 				// Insert in the db
 				oWorkspaceRepository.insertWorkspace(oWorkspace);
@@ -552,9 +540,7 @@ public class Wasdi extends ResourceConfig {
 			}
 			
 			// Check my node name
-			String sMyNodeCode = Wasdi.s_sMyNodeCode;
-			
-			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = Wasdi.s_sWASDINAME;
+			String sMyNodeCode = WasdiConfig.Current.nodeCode;
 					
 			// Is the workspace here?
 			String sWsNodeCode = oWorkspace.getNodeCode();
@@ -809,7 +795,7 @@ public class Wasdi extends ResourceConfig {
 		try {
 			if (s_oMyNode == null) {
 				NodeRepository oNodeRepository = new NodeRepository();
-				s_oMyNode = oNodeRepository.getNodeByCode(s_sMyNodeCode);
+				s_oMyNode = oNodeRepository.getNodeByCode(WasdiConfig.Current.nodeCode);
 			}
 			
 			return s_oMyNode;

@@ -432,7 +432,7 @@ public class FileBufferResource {
 			// if the provider is not specified, we fallback on the node default provider
 			DataProvider oProvider = null;
 			if (Utils.isNullOrEmpty(sProvider)) {
-				oProvider = m_oDataProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
+				oProvider = m_oDataProviderCatalog.getDefaultProvider(WasdiConfig.Current.nodeCode);
 			} else {
 				oProvider = m_oDataProviderCatalog.getProvider(sProvider);
 			}

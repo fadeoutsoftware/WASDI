@@ -852,7 +852,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             waitForApplicationToStart(oParameter);
 
-			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				refreshPackagesInfo(oParameter);
 			}
 

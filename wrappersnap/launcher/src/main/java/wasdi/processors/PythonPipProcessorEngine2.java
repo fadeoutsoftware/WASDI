@@ -99,7 +99,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
 		
-		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+		if (!WasdiConfig.Current.isMainNode()) {
 			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
 			return true;			
 		}
@@ -262,7 +262,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		
-		if (WasdiConfig.Current.nodeCode == "wasdi") {
+		if (WasdiConfig.Current.isMainNode()) {
 			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
 			return redeploy(oParameter);			
 		}

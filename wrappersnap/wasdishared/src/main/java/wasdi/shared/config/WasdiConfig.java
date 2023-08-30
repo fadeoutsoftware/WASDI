@@ -221,10 +221,26 @@ public class WasdiConfig {
 			
 			return true;
 		} catch (Exception e) {
-			WasdiLog.debugLog("WasdiConfig.readConfig: exception " + e.toString());
+			WasdiLog.errorLog("WasdiConfig.readConfig: exception " + e.toString());
 		}
         
         return false;
+	}
+	
+	/**
+	 * Return true if this is the main WASDI node
+	 * false otherwise
+	 * @return True if this is the main WASDI Node
+	 */
+	public boolean isMainNode() {
+		try {
+			return WasdiConfig.Current.nodeCode.equals("wasdi");
+		}
+		catch (Exception e) {
+			WasdiLog.errorLog("WasdiConfig.isMainNode: exception " + e.toString());
+		}
+		
+		return false;
 	}
 	
 	/**
