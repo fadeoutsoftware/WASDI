@@ -1688,7 +1688,8 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
 			oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
-			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
+			// NOTE: The version is handled only on server side in automatic way
+			//oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
