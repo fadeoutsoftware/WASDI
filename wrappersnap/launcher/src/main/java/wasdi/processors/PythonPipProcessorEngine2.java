@@ -129,6 +129,8 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: Actual Version  Pre Docker Utils" + oProcessor.getVersion());
+		
 		WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: delete run script. It will be recreated at the right moment");
 		String sProcFolder = getProcessorFolder(oProcessor);
 		WasdiFileUtils.deleteFile(sProcFolder+"runwasdidocker.sh");
