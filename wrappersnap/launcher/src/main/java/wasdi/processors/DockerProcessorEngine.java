@@ -994,8 +994,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 		// Is the processor installed in this node?
 		if (!oProcessorFolder.exists()) {
-			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName
-					+ "] environment not updated in this node, return");
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName + "] environment not updated in this node, return");
 			return false;
 		}
 		
@@ -1010,8 +1009,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
         
         if (!bIsContainerStarted) {
+        	WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: Container not started: starting it");
         	oDockerUtils.start();
         	waitForApplicationToStart(oParameter);
+        	this.reconstructEnvironment(oParameter, oProcessor.getPort());
         }
         
 		try {
@@ -1020,19 +1021,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
 
 			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
-			WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo | sFileFullPath: " + sFileFullPath);
 
 			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
-			if (bResult) {
-				WasdiLog.debugLog("the file was created.");
-			} else {
-				WasdiLog.debugLog("the file was not created.");
+			if (!bResult) {
+				WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
 			}
 
 			return bResult;
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: " + oEx);
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: ", oEx);
 		}
 
 		return false;
