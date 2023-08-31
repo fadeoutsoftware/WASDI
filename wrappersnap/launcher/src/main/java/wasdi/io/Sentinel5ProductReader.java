@@ -53,36 +53,36 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	    	NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
         	oNodeGroupViewModel.setNodeName("Bands");
 
-    		Set<String> excludedVariableSet = new HashSet<>(Arrays.asList("scanline", "ground_pixel", "time", "corner",
+    		Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList("scanline", "ground_pixel", "time", "corner",
     				"latitude", "longitude", "delta_time", "time_utc", "qa_value", "layer"));
 
-    		Group rootGroup = oFile.getRootGroup();
-    		List<Group> rootGroupGroups = rootGroup.getGroups();
+    		Group oRootGroup = oFile.getRootGroup();
+    		List<Group> aoRootGroupGroups = oRootGroup.getGroups();
 
         	List<BandViewModel> oBands = new ArrayList<>();
 
-    		for (Group g : rootGroupGroups) {
-    			if (g.getShortName().equalsIgnoreCase("PRODUCT")) {
+    		for (Group oGroup : aoRootGroupGroups) {
+    			if (oGroup.getShortName().equalsIgnoreCase("PRODUCT")) {
 
-    				List<Variable> variableList = g.getVariables();
-    				for (Variable v : variableList) {
-    					String variableShortName = v.getShortName();
-    					if (!excludedVariableSet.contains(variableShortName)) {
+    				List<Variable> aoVariableList = oGroup.getVariables();
+    				for (Variable oVariable : aoVariableList) {
+    					String sVariableShortName = oVariable.getShortName();
+    					if (!asExcludedVariableSet.contains(sVariableShortName)) {
     						int iWidth = 0;
     						int iHeight = 0;
     						// [time = 1;, scanline = 358;, ground_pixel = 450;]
-    						int[] shapeArray = v.getShape();
+    						int[] aiShapeArray = oVariable.getShape();
 
-    						if (shapeArray == null) {
+    						if (aiShapeArray == null) {
     							continue;
     						}
 
-							if (shapeArray.length < 3) {
+							if (aiShapeArray.length < 3) {
 								continue;
 							}
 
-							iWidth = shapeArray[1];
-							iHeight = shapeArray[2];
+							iWidth = aiShapeArray[1];
+							iHeight = aiShapeArray[2];
     			        	
     			        	// Create the single band representing the shape
     			        	BandViewModel oBandViewModel = new BandViewModel();
@@ -91,7 +91,7 @@ public class Sentinel5ProductReader extends WasdiProductReader {
     			        	oBandViewModel.setHeight(iHeight);
     			        	oBandViewModel.setWidth(iWidth);
     			        	oBandViewModel.setPublished(false);
-    			        	oBandViewModel.setName(variableShortName);
+    			        	oBandViewModel.setName(sVariableShortName);
 
     			        	oBands.add(oBandViewModel);
     					}
@@ -101,8 +101,8 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 
         	oNodeGroupViewModel.setBands(oBands);
 	    	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
-		} catch (Exception e) {
-    		WasdiLog.debugLog("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+		} catch (Exception oEx) {
+    		WasdiLog.debugLog("Sentinel5ProductReader.getProductViewModel: exception reading the shape file: " + oEx.toString());
 		}
 		
     	return oRetViewModel;
@@ -115,8 +115,8 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 
 		try {
 			return extractBboxFromFile(m_oProductFile.getAbsolutePath());
-		} catch (Exception e) {
-    		WasdiLog.debugLog("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + e.toString());
+		} catch (Exception oEx) {
+    		WasdiLog.debugLog("Sentinel5ProductReader.getProductBoundingBox: exception reading the shape file: " + oEx.toString());
 
     		return null;
 		}
@@ -134,24 +134,24 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @return the bounding box
 	 * @throws IOException in case of issues reading the file
 	 */
-	private static String extractBboxFromFile(String fileName) throws IOException {
-		NetcdfFile oFile = NetcdfFiles.open(fileName);
+	private static String extractBboxFromFile(String sFileName) throws IOException {
+		NetcdfFile oFile = NetcdfFiles.open(sFileName);
 
-		Variable latitudeVariable = getVariableByName(oFile, "latitude");
-		Variable longitudeVariable = getVariableByName(oFile, "longitude");
+		Variable oLlatitudeVariable = getVariableByName(oFile, "latitude");
+		Variable oLongitudeVariable = getVariableByName(oFile, "longitude");
 
-		Array latArray = getArrayFromVariable(latitudeVariable);
-		Object latStorage = getStorageFromArray(latArray);
-		float[] latitudeCoordinates = extractExtremeCoordinatesFromStorage(latStorage);
+		Array aoLatArray = getArrayFromVariable(oLlatitudeVariable);
+		Object oLatStorage = getStorageFromArray(aoLatArray);
+		float[] fLatitudeCoordinates = extractExtremeCoordinatesFromStorage(oLatStorage);
 
-		Array lonArray = getArrayFromVariable(longitudeVariable);
-		Object lonStorage = getStorageFromArray(lonArray);
-		float[] longitudeCoordinates = extractExtremeCoordinatesFromStorage(lonStorage);
+		Array aoLonArray = getArrayFromVariable(oLongitudeVariable);
+		Object oLonStorage = getStorageFromArray(aoLonArray);
+		float[] afLongitudeCoordinates = extractExtremeCoordinatesFromStorage(oLonStorage);
 
-		float fLatN = latitudeCoordinates[1];
-		float fLonW = longitudeCoordinates[0];
-		float fLatS = latitudeCoordinates[0];
-		float fLonE = longitudeCoordinates[1];
+		float fLatN = fLatitudeCoordinates[1];
+		float fLonW = afLongitudeCoordinates[0];
+		float fLatS = fLatitudeCoordinates[0];
+		float fLonE = afLongitudeCoordinates[1];
 
 		String sBBox = fLatN + "," + fLonW + "," + fLatS + "," + fLonE;
 
@@ -164,18 +164,18 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @param variableName the name of the variable to be found
 	 * @return the variable with the specified name
 	 */
-	private static Variable getVariableByName(NetcdfFile oFile, String variableName) {
-		Group rootGroup = oFile.getRootGroup();
-		List<Group> rootGroupGroups = rootGroup.getGroups();
+	private static Variable getVariableByName(NetcdfFile oFile, String sVariableName) {
+		Group oRootGroup = oFile.getRootGroup();
+		List<Group> aoRootGroupGroups = oRootGroup.getGroups();
 
-		for (Group g : rootGroupGroups) {
-			if (g.getShortName().equalsIgnoreCase("PRODUCT")) {
+		for (Group oGroup : aoRootGroupGroups) {
+			if (oGroup.getShortName().equalsIgnoreCase("PRODUCT")) {
 
-				List<Variable> variableList = g.getVariables();
-				for (Variable v : variableList) {
-					String variableShortName = v.getShortName();
-					if (variableShortName.equalsIgnoreCase(variableName)) {
-						return v;
+				List<Variable> aoVariableList = oGroup.getVariables();
+				for (Variable oVariable : aoVariableList) {
+					String sVariableShortName = oVariable.getShortName();
+					if (sVariableShortName.equalsIgnoreCase(sVariableName)) {
+						return oVariable;
 					}
 				}
 			}
@@ -190,14 +190,14 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @return the array containing the data-set
 	 * @throws IOException in case of any issues reading the data-set
 	 */
-	private static Array getArrayFromVariable(Variable variable) throws IOException {
-		Array array = null;
+	private static Array getArrayFromVariable(Variable oVariable) throws IOException {
+		Array oArray = null;
 
-		if (variable != null) {
-			array = variable.read();
+		if (oVariable != null) {
+			oArray = oVariable.read();
 		}
 
-		return array;
+		return oArray;
 	}
 
 	/**
@@ -205,14 +205,14 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @param array the array
 	 * @return the storage object
 	 */
-	private static Object getStorageFromArray(Array array) {
-		Object o = null;
+	private static Object getStorageFromArray(Array oArray) {
+		Object oObj = null;
 
-		if (array != null) {
-			o = array.getStorage();
+		if (oArray != null) {
+			oObj = oArray.getStorage();
 		}
 
-		return o;
+		return oObj;
 	}
 
 	/**
@@ -220,16 +220,16 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @param storage the storage object
 	 * @return the extreme coordinates of the storage object
 	 */
-	private static float[] extractExtremeCoordinatesFromStorage(Object storage) {
-		float[] extremeCoordinates = new float[] {0F, 0F};
+	private static float[] extractExtremeCoordinatesFromStorage(Object oStorage) {
+		float[] afExtremeCoordinates = new float[] {0F, 0F};
 
-		if (storage != null && storage instanceof float[]) {
-			float[] floatArray = (float[]) storage;
+		if (oStorage != null && oStorage instanceof float[]) {
+			float[] afFloatArray = (float[]) oStorage;
 
-			extremeCoordinates = extractExtremeValuesFromArray(floatArray);
+			afExtremeCoordinates = extractExtremeValuesFromArray(afFloatArray);
 		}
 
-		return extremeCoordinates;
+		return afExtremeCoordinates ;
 	}
 
 	/**
@@ -237,23 +237,23 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 	 * @param floatArray the array
 	 * @return a float array containing the min & max values of the initial array
 	 */
-	private static float[] extractExtremeValuesFromArray(float[] floatArray) {
-		float minf = 181F;
-		float maxf = - 181F;
+	private static float[] extractExtremeValuesFromArray(float[] afFloatArray) {
+		float fMinf = 181F;
+		float fMaxf = - 181F;
 
-		if (floatArray != null) {
-			for (float f : floatArray) {
-				if (f > maxf) {
-					maxf = f;
+		if (afFloatArray != null) {
+			for (float fEl : afFloatArray) {
+				if (fEl > fMaxf) {
+					fMaxf = fEl;
 				}
 
-				if (f < minf) {
-					minf = f;
+				if (fEl < fMinf) {
+					fMinf = fEl;
 				}
 			}
 		}
 
-		return new float[] {minf, maxf};
+		return new float[] {fMinf, fMaxf};
 	}
 
 	@Override
