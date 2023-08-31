@@ -468,6 +468,7 @@
 
         ],
 {% endif %}
+        "internalDockerAPIAddress": "{{ aoWasdiConfiguration['dockers']['internalDockerAPIAddress'] }}",
         "internalDockersBaseAddress": "{{ aoWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
         "millisBetweenAttmpts": {{ aoWasdiConfiguration['dockers']['millisBetweenAttmpts'] }},
         "millisWaitAfterDelete": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDelete'] }},
