@@ -535,6 +535,16 @@ public final class HttpUtils {
 	 * Standard http delete utility function
 	 * 
 	 * @param sUrl url to call
+	 * @return server response
+	 */
+	public static HttpCallResponse httpDelete(String sUrl) {
+		return httpDelete(sUrl, null);
+	}
+	
+	/**
+	 * Standard http delete utility function
+	 * 
+	 * @param sUrl url to call
 	 * @param asHeaders headers dictionary
 	 * @return server response
 	 */

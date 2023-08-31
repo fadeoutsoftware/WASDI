@@ -479,7 +479,7 @@ public class DockerUtils {
      * @param sVersion
      * @return
      */
-    public boolean delete(String sProcessorName, String sVersion) {
+    public boolean delete_old(String sProcessorName, String sVersion) {
 
         try {
 
@@ -580,6 +580,67 @@ public class DockerUtils {
 
         return true;
     }
+    
+    /**
+     * Delete using processor name and processor version
+     *
+     * @param sProcessorName
+     * @param sVersion
+     * @return
+     */
+    public boolean delete(String sProcessorName, String sVersion) {
+
+        try {            
+            
+            int iVersion = StringUtils.getAsInteger(sVersion);
+            
+        	while (iVersion>0)  {
+        		
+        		WasdiLog.debugLog("DockerUtils.delete2: Removing " + sProcessorName + " version "  + sVersion);
+        		
+                String sBaseDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
+                String sDockerName = sBaseDockerName;
+                
+                if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                	sDockerName = m_sDockerRegistry + "/" + sDockerName;
+                }
+                
+                String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
+                boolean bContainersRemoved = removeContainer(sId, true);
+                
+                if (!bContainersRemoved) {
+                	WasdiLog.errorLog("DockerUtils.delete2: error removing the container for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                }
+                
+                WasdiLog.debugLog("DockerUtils.delete2: Removing image for " + sProcessorName + " version "  + sVersion);
+                
+                boolean bImageRemoved = removeImage(sDockerName, true);
+                
+                if (!bImageRemoved) {
+                	WasdiLog.errorLog("DockerUtils.delete2: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                }
+                
+                if (WasdiConfig.Current.isMainNode()) {            	
+                    if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+                    	WasdiLog.infoLog("DockerUtils.delete2: This is a registry stored docker: clean all our registers");
+                    	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
+                    		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
+        				}
+                    }
+                }                
+        		
+                sVersion = StringUtils.decrementIntegerString(sVersion);
+                iVersion = StringUtils.getAsInteger(sVersion);
+        	}
+            
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("DockerUtils.delete: " + oEx.toString());
+            return false;
+        }
+
+        return true;
+    }    
 
     /**
      * Log in docker on a specific Repository Server
@@ -669,6 +730,62 @@ public class DockerUtils {
     	
     	return true;
     }
+        
+    /**
+     * Gets the container id starting from processor name and version
+     * @param sProcessorName
+     * @param sVersion
+     * @return
+     */
+    protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
+    	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "containers/json";
+    		
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
+    		
+    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			return "";
+    		}
+    		
+    		List<Object> aoOutputJsonMap = null;
+
+            try {
+                ObjectMapper oMapper = new ObjectMapper();
+                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
+            } catch (Exception oEx) {
+                WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: exception converting API result " + oEx);
+                return "";
+            }
+            
+            String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
+            String sId = "";
+            
+            for (Object oContainer : aoOutputJsonMap) {
+				try {
+					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
+					String sImageName = oContainerMap.get("Image");
+					
+					if (sImageName.endsWith(sMyImage)) {
+						WasdiLog.debugLog("DockerUtils.DockerUtils.getContainerIdFromWasdiAppName: found my container " + sMyImage + " Docker Image = " +sImageName);
+						sId = oContainerMap.get("Id");
+						return sId;
+					}
+					
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.DockerUtils.getContainerIdFromWasdiAppName: error parsing a container json entity " + oEx.toString());
+		        }
+			}    		
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
+		}
+    	return "";
+    }
     
     /**
      * Stop a running container
@@ -683,6 +800,7 @@ public class DockerUtils {
     	
     	return stop(oProcessor.getName(), oProcessor.getVersion());    	
     }
+
     
     /**
      * Stop a running container
@@ -691,56 +809,33 @@ public class DockerUtils {
      * @return true if stopped
      */
     public boolean stop(String sProcessorName, String sVersion) {
+        String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
+        return stop(sId);            
+    }
+    
+    /**
+     * Stop a running container
+     * @param sProcessorName Processor Name
+     * @param sVersion Version
+     * @return true if stopped
+     */
+    public boolean stop(String sId) {
        	try {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-    		
-    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		
-    		sUrl += "containers/json";
-    		
-    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
-    		
-    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
-    			return false;
-    		}
-    		
-    		List<Object> aoOutputJsonMap = null;
-
-            try {
-                ObjectMapper oMapper = new ObjectMapper();
-                aoOutputJsonMap = oMapper.readValue(oResponse.getResponseBody(), new TypeReference<List<Object>>(){});
-            } catch (Exception oEx) {
-                WasdiLog.errorLog("DockerUtils.stop: exception converting API result " + oEx);
-                return false;
-            }
-            
-            String sMyImage = "wasdi/" + sProcessorName + ":" + sVersion;
-            String sId = "";
-            
-            for (Object oContainer : aoOutputJsonMap) {
-				try {
-					LinkedHashMap<String, String> oContainerMap = (LinkedHashMap<String, String>) oContainer;
-					String sImageName = oContainerMap.get("Image");
-					
-					if (sImageName.endsWith(sMyImage)) {
-						WasdiLog.debugLog("DockerUtils.stop: found my container " + sMyImage + " Docker Image = " +sImageName);
-						sId = oContainerMap.get("Id");
-						break;
-					}
-					
-				}
-		    	catch (Exception oEx) {
-		    		WasdiLog.errorLog("DockerUtils.stop: error parsing a container json entity " + oEx.toString());
-		        }
-			}
-            
+                        
             if (!Utils.isNullOrEmpty(sId)) {
-            	sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
         		if (!sUrl.endsWith("/")) sUrl += "/";
         		sUrl += "containers/" + sId + "/stop";
         		
-        		oResponse = HttpUtils.httpPost(sUrl, "");
+        		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
         		
+        		if (oResponse.getResponseCode()==204||oResponse.getResponseCode()==304) {
+        			return true;
+        		}
+        		
+        		// In theory here we should just return false. But still if the answer was not
+        		// 204 (stopped) or 304 (already stopped) we handle the un-expected case of 
+        		// 2xx returned codes.
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
         			return false;
         		}
@@ -755,6 +850,97 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.stop: " + oEx.toString());
             return false;
         }
+    }    
+    
+    /**
+     * Remove a container
+     * @param sId Container Id
+     * @return true if was removed
+     */
+    public boolean removeContainer(String sId) {
+    	return removeContainer(sId, false);
+    }
+    
+    /**
+     * Remove a container
+     * @param sId Container Id
+     * @param bForce True to force to kill running containers 
+     * @return true if was removed
+     */
+    public boolean removeContainer(String sId, boolean bForce) {
+       	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+                        
+            if (!Utils.isNullOrEmpty(sId)) {
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "containers/" + sId;
+        		
+        		if (bForce) {
+        			sUrl+="force=true";
+        		}
+        		
+        		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
+        		
+        		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+        			return false;
+        		}
+        		else {
+        			return true;
+        		}
+            }
+    		
+    		return false;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.removeContainer: " + oEx.toString());
+            return false;
+        }    	
+    }
+    
+    /**
+     * Removes a Docker Image
+     * @param sImageName Image Name
+     * @return True if deleted
+     */
+    boolean removeImage(String sImageName) {
+    	return removeImage(sImageName, true);
+    	
+    }
+    
+    /**
+     * Removes a Docker Image
+     * @param sImageName Image Name
+     * @param bForce True to force to delete the image even if there are stopped containers
+     * @return True if deleted
+     */
+    boolean removeImage(String sImageName, boolean bForce) {
+       	try {
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+                        
+            if (!Utils.isNullOrEmpty(sImageName)) {
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "images/" + sImageName;
+        		
+        		if (bForce) {
+        			sUrl+="force=true";
+        		}
+        		
+        		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
+        		
+        		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+        			return false;
+        		}
+        		else {
+        			return true;
+        		}
+            }
+    		
+    		return false;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.removeImage: " + oEx.toString());
+            return false;
+        }    	    	
     }
     
     /**
@@ -785,6 +971,8 @@ public class DockerUtils {
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		sUrl += "containers/json";
+    		
+    		// NOTE / TODO: should we here add the filter on status running?!?!
     		
     		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
