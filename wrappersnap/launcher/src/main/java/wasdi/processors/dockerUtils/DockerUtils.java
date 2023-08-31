@@ -877,7 +877,7 @@ public class DockerUtils {
         		sUrl += "containers/" + sId;
         		
         		if (bForce) {
-        			sUrl+="force=true";
+        			sUrl+="?force=true";
         		}
         		
         		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
@@ -923,7 +923,7 @@ public class DockerUtils {
         		sUrl += "images/" + sImageName;
         		
         		if (bForce) {
-        			sUrl+="force=true";
+        			sUrl+="?force=true";
         		}
         		
         		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
