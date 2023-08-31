@@ -583,9 +583,10 @@ public class DockerUtils {
     
     /**
      * Delete using processor name and processor version
-     *
-     * @param sProcessorName
-     * @param sVersion
+     * It deletes also all the previous versions
+     * 
+     * @param sProcessorName Name of the processor to delete
+     * @param sVersion Version
      * @return
      */
     public boolean delete(String sProcessorName, String sVersion) {
