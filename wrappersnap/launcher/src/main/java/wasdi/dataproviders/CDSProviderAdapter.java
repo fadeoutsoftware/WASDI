@@ -15,7 +15,6 @@ import java.util.stream.IntStream;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
@@ -235,27 +234,15 @@ public class CDSProviderAdapter extends ProviderAdapter {
 	
 	private static Map<String, Object> prepareCdsPayload(Map<String, String> aoWasdiPayload) {
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
+		String sProductType = JsonUtils.getProperty(aoWasdiPayload, "productType");
+		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables");
 		String sMonthlyAggregation = JsonUtils.getProperty(aoWasdiPayload, "monthlyAggregation");
-		String sVariables = JsonUtils.getProperty(aoWasdiPayload, "variables"); 	
-		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
-		
-		// parameters for reanalysis dataset
-		String sProductType = JsonUtils.getProperty(aoWasdiPayload, "productType"); 
+		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");
+		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate");
+		String sDate = JsonUtils.getProperty(aoWasdiPayload, "date");
 		String sBoundingBox = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
-		String sPresureLevels = JsonUtils.getProperty(aoWasdiPayload, "presureLevels");
+		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
 
-		// parameters for sea-surface-temperature
-		String sSensor = JsonUtils.getProperty(aoWasdiPayload, "sensor"); 			
-		String sVersion = JsonUtils.getProperty(aoWasdiPayload, "version"); 		
-		String sProcessingLevel = JsonUtils.getProperty(aoWasdiPayload, "processingLevel"); 
-		
-		// dates depending on the monthly aggregation offset
-		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");		// start date (monthly aggregation is enabled)
-		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate"); 		// end date (monthly aggregation is enabled)
-		String sDate = JsonUtils.getProperty(aoWasdiPayload, "date");				// reference date (monthly aggregation not enabled)
-		
-		if (sVariables == null) sVariables = "";
-		
 		List<String> asVariables = Arrays.stream(sVariables.split(" "))
 				.map(CDSProviderAdapter::inflateVariable)
 				.collect(Collectors.toList());
@@ -278,23 +265,39 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			sMonth = sDate.substring(4, 6);
 			sDay = sDate.substring(6, 8);
 		}
+		
 
-		
-		List<String> asPressureLevels = Collections.emptyList();
-		if (sDataset.equalsIgnoreCase("reanalysis-era5-pressure-levels") && !Utils.isNullOrEmpty(sPresureLevels)) {
-			asPressureLevels = Arrays.asList(sPresureLevels.split(" "));		
-		}
-		
-		// insert values in the result hash map.
+		List<String> oaTimeHours = Arrays.asList("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00");
+
 		Map<String, Object> aoHashMap = new HashMap<>();
-		
-		insertBasicParameters(aoHashMap, sYear, sMonth, asDays, sDay, sFormat, asVariables);
-		
-		if (sDataset.equalsIgnoreCase(QueryExecutorCDS.s_sSEA_SURFACE_TEMPERATURE_DATASET))
-			insertSeaTemperaturesParameters(aoHashMap, sSensor, sVersion, sProcessingLevel);
-		else
-			insertReanalysisParameters(aoHashMap, sProductType,  asVariables, sFormat, sBoundingBox, asPressureLevels);
-		
+		if (sProductType != null) aoHashMap.put("product_type", sProductType);
+		aoHashMap.put("variable", asVariables);
+		aoHashMap.put("year", sYear);
+		aoHashMap.put("month", sMonth);
+		aoHashMap.put("time", oaTimeHours);
+		aoHashMap.put("format", sFormat);
+		if (sMonthlyAggregation.equalsIgnoreCase("true")) {
+			aoHashMap.put("day", asDays);
+		} else {
+			aoHashMap.put("day", sDay);
+		}
+
+		if (sBoundingBox != null && !sBoundingBox.contains("null")) {
+			List<Double> originalBbox = BoundingBoxUtils.parseBoundingBox(sBoundingBox);
+			List<Double> expandedBbox = BoundingBoxUtils.expandBoundingBoxUpToAQuarterDegree(originalBbox);
+
+			if (expandedBbox != null) {
+				aoHashMap.put("area", expandedBbox);
+			}
+		}
+
+		if (sDataset.equalsIgnoreCase("reanalysis-era5-pressure-levels")) {
+			String sPresureLevels = JsonUtils.getProperty(aoWasdiPayload, "presureLevels");
+			List<String> oaPressureLevels = Arrays.asList(sPresureLevels.split(" "));
+
+			aoHashMap.put("pressure_level", oaPressureLevels);
+		}
+
 		return aoHashMap;
 	}
 
@@ -325,86 +328,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 			return sVariable;
 		}
 	}
-	
-	/**
-	 * Fill the map that collects the request parameters to be sent to the data provider with basic information concerning the time parameters 
-	 * @param aoParametersMap the map that collect the request parameters to be sent to the data provider
-	 * @param sYear year of the time range
-	 * @param sMonth month of the time range
-	 * @param asDays the list of days, if the reference time of the request refers to multiple days in the month, an empty or null list otherwise
-	 * @param sDay a single day in the month, it the reference time of the request does not refer to a time interval, an empty or null string otherwise
-	 */
-	private static void insertBasicParameters(Map<String, Object> aoParametersMap, String sYear, String sMonth, List<String> asDays, String sDay, String sFormat, List<String> asVariables) {
-		if (!Utils.isNullOrEmpty(sYear))
-			aoParametersMap.put("year", sYear);
-		
-		if (!Utils.isNullOrEmpty(sMonth))
-			aoParametersMap.put("month", sMonth);
-		
-		if (asDays != null && !asDays.isEmpty())
-			aoParametersMap.put("day", asDays);
-		else if (!Utils.isNullOrEmpty(sDay))
-			aoParametersMap.put("day", sDay);
-		
-		if (!Utils.isNullOrEmpty(sFormat))
-			aoParametersMap.put("format", sFormat); 
-		
-		if (asVariables != null && !asVariables.isEmpty())
-			aoParametersMap.put("variable", asVariables);
-	}
-	
-	/**
-	 * Fill the map that collects the request parameters to be sent to the data provider with the information related to the reanalysis dataset
-	 * @param aoParametersMap the map that collect the request parameters 
-	 * @param sProductType product type
-	 * @param asVariables list of variables
-	 * @param sFormat format 
-	 * @param sBoundingBox the bounding box
-	 * @param asPressureLevels the pressure levels
-	 */
-	private static void insertReanalysisParameters(Map<String, Object> aoParametersMap, 
-			String sProductType,  List<String> asVariables, String sFormat, String sBoundingBox, List<String> asPressureLevels) {
-		
-		List<String> oaTimeHours = Arrays.asList("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00");
-		List<Double> adGrid = Arrays.asList(0.25, 0.25);
 
-		aoParametersMap.put("time", oaTimeHours);
-		aoParametersMap.put("grid", adGrid);
-		
-		if (!Utils.isNullOrEmpty(sProductType))
-			aoParametersMap.put("product_type", sProductType);
-		
-		if (sBoundingBox != null && !sBoundingBox.contains("null")) {
-			List<Double> originalBbox = BoundingBoxUtils.parseBoundingBox(sBoundingBox);
-			List<Double> expandedBbox = BoundingBoxUtils.expandBoundingBoxUpToAQuarterDegree(originalBbox);
-
-			if (expandedBbox != null)
-				aoParametersMap.put("area", expandedBbox);
-		}
-		
-		if (asPressureLevels != null && !asPressureLevels.isEmpty())
-			aoParametersMap.put("pressure_level", asPressureLevels);
-	}
-	
-
-	/**
-	 * Fill the map that collects the request parameters to be sent to the data provider with the information related to the datasets about sea temperature
-	 * @param sSensor sensor
-	 * @param sVersion version
-	 * @param sProcessingLevel processing level
-	 */
-	private static void insertSeaTemperaturesParameters(Map<String, Object> aoParametersMap, String sSensor, String sVersion, String sProcessingLevel) {
-		if (!Utils.isNullOrEmpty(sSensor))
-			aoParametersMap.put("sensor_on_satellite", sSensor);
-		
-		if (!Utils.isNullOrEmpty(sVersion))
-			aoParametersMap.put("version", sVersion);
-		
-		if (!Utils.isNullOrEmpty(sProcessingLevel))
-			aoParametersMap.put("processinglevel", sProcessingLevel);
-	}
-
-	
 	private static String deodeUrl(String sUrlEncoded) {
 		try {
 			return URLDecoder.decode(sUrlEncoded, java.nio.charset.StandardCharsets.UTF_8.toString());

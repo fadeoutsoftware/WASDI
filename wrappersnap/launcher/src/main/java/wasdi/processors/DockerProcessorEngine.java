@@ -1057,6 +1057,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	        		return;
 	        	}
 	        }
+	        
+	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
@@ -1208,14 +1210,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
 			String sUrl = "http://" + sIp + ":" + iPort + "/hello";
-			WasdiLog.debugLog("CondaPackageManagerImpl.isDockerServerUp: sUrl: " + sUrl);
+			WasdiLog.debugLog("DockerProcessorEngine.isDockerServerUp: poll sUrl: " + sUrl);
 
 			Map<String, String> asHeaders = Collections.emptyMap();
 
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
-			WasdiLog.debugLog("CondaPackageManagerImpl.isDockerServerUp: iResult: " + iResult);
+			WasdiLog.debugLog("DockerProcessorEngine.isDockerServerUp: got iResult: " + iResult);
 
 			return (iResult != null && iResult.intValue() == 200);
 		} catch (Exception oEx) {

@@ -410,7 +410,7 @@ public class DockerUtils {
             
             // Add the pull command
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	WasdiLog.debugLog("DockerUtils.start: log in in the registers");
+            	WasdiLog.debugLog("DockerUtils.start: login in the registers");
             	
             	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
             	
@@ -610,7 +610,7 @@ public class DockerUtils {
                 boolean bContainersRemoved = removeContainer(sId, true);
                 
                 if (!bContainersRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete2: error removing the container for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                	WasdiLog.errorLog("DockerUtils.delete2: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                 }
                 
                 WasdiLog.debugLog("DockerUtils.delete2: Removing image for " + sProcessorName + " version "  + sVersion);
