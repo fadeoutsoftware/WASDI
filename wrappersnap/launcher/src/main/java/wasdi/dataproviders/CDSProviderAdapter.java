@@ -243,9 +243,12 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sBoundingBox = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
 
-		List<String> asVariables = Arrays.stream(sVariables.split(" "))
-				.map(CDSProviderAdapter::inflateVariable)
-				.collect(Collectors.toList());
+		List<String> asVariables = null;
+		if (!Utils.isNullOrEmpty(sVariables)) {
+			asVariables = Arrays.stream(sVariables.split(" "))
+					.map(CDSProviderAdapter::inflateVariable)
+					.collect(Collectors.toList());
+		}
 
 		String sYear = "";
 		String sMonth = "";
@@ -271,7 +274,9 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		Map<String, Object> aoHashMap = new HashMap<>();
 		if (sProductType != null) aoHashMap.put("product_type", sProductType);
-		aoHashMap.put("variable", asVariables);
+		if (asVariables != null) {
+			aoHashMap.put("variable", asVariables);
+		}
 		aoHashMap.put("year", sYear);
 		aoHashMap.put("month", sMonth);
 		aoHashMap.put("time", oaTimeHours);
@@ -297,6 +302,14 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 			aoHashMap.put("pressure_level", oaPressureLevels);
 		}
+		
+        if (sDataset.equalsIgnoreCase("satellite-sea-surface-temperature")) {
+            aoHashMap.put("sensor_on_satellite", "combined_product");
+            aoHashMap.put("version", "2_1");
+            aoHashMap.put("processinglevel", "level_4");
+            aoHashMap.remove("time");
+            aoHashMap.remove("area");
+        }
 
 		return aoHashMap;
 	}
