@@ -28,7 +28,7 @@ public class ModisRepository extends MongoRepository  {
 				sJSON += "\"instrument\": \"" + oNewDocument.getSInstrument() + "\",";
 				sJSON += "\"sensor\": \"" + oNewDocument.getSSensor() + "\",";
 				sJSON += "\"url\": \"" + oNewDocument.getSUrl() + "\",";
-				sJSON += "\"boundingBox\":" + oNewDocument.getSBoundingBox();
+				sJSON += "\"boundingBox\": \"" + oNewDocument.getSBoundingBox() + "\"";
 
 				sJSON += "}";
 

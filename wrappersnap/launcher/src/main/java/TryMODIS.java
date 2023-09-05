@@ -26,6 +26,7 @@ import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.data.modis11a2.ModisRepository;
 
 public class TryMODIS {
 	
@@ -48,6 +49,19 @@ public class TryMODIS {
 	private static final String s_sBoundingBox = "BoundingBox"; // the corners of the boudning box will be stored in the following order
 	private static final String s_sUrl = "url";
 	
+	
+//	System.out.println("Local Granule ID (0): " + asMetadata[0]);
+//	System.out.println("Entity id (1): " + asMetadata[1]);
+//	System.out.println("Acquisition Start date (2): " + sStartDate);
+//	System.out.println("Acquisition End date (3): " + asMetadata[3]);
+//	System.out.println("NW corner lat (28): " + asMetadata[28]);
+//	System.out.println("NW corner long (29): " + asMetadata[29]);
+//	System.out.println("NE corner lat (30): " + asMetadata[30]);
+//	System.out.println("NE corner long (31): " + asMetadata[31]);
+//	System.out.println("SE corner lat (32): " + asMetadata[32]);
+//	System.out.println("SE corner long (33): " + asMetadata[33]);
+//	System.out.println("SW corner lat (34): " + asMetadata[34]);
+//	System.out.println("SW corner long (35): " + asMetadata[35]);
 
     /*
      * Prefix used to identify redirects to URS for the purpose of
@@ -72,6 +86,8 @@ public class TryMODIS {
     	
     	BufferedReader oReader = null;
     	
+    	ModisRepository oModisRepo = new ModisRepository();
+    	
     	try {
     		oReader = new BufferedReader(new FileReader(sCSVFilePath));  
     		String sLine = "";
@@ -80,18 +96,7 @@ public class TryMODIS {
     			String[] asMetadata = sLine.split(","); 
     			String sGranuleId = asMetadata[0];
     			String sStartDate = asMetadata[2].replaceAll("/", ".");
-//    			System.out.println("Local Granule ID (0): " + asMetadata[0]);
-//    			System.out.println("Entity id (1): " + asMetadata[1]);
-//    			System.out.println("Acquisition Start date (2): " + sStartDate);
-//    			System.out.println("Acquisition End date (3): " + asMetadata[3]);
-//    			System.out.println("NW corner lat (28): " + asMetadata[28]);
-//    			System.out.println("NW corner long (29): " + asMetadata[29]);
-//    			System.out.println("NE corner lat (30): " + asMetadata[30]);
-//    			System.out.println("NE corner long (31): " + asMetadata[31]);
-//    			System.out.println("SE corner lat (32): " + asMetadata[32]);
-//    			System.out.println("SE corner long (33): " + asMetadata[33]);
-//    			System.out.println("SW corner lat (34): " + asMetadata[34]);
-//    			System.out.println("SW corner long (35): " + asMetadata[35]);
+
     			iCont ++;
     			
     			String sDirectoryUrl = sBaseUrl + sStartDate;
@@ -106,6 +111,7 @@ public class TryMODIS {
     					Map<String, String> asProperties = parseXML(sXMLMetadataString, sProductFileUrl);
     					asProperties.entrySet().stream().forEach(oEntry -> System.out.println(oEntry.getKey() + ": " + oEntry.getValue()));
     					ModisItem oItem = buildModisItem(asProperties);
+    					oModisRepo.insertModisItem(oItem);
     				}
     				//tryDownloadFile(sDirectoryUrl + "/" + sGranuleId);
     			}
@@ -122,8 +128,8 @@ public class TryMODIS {
     
     
     public static void tryDownloadFile(String sUrlFile) throws Exception {
-    	String sUsername = "vl_valentina";
-        String sPassword = "hAk4CuvYwQXOK7kX9kwJ*";
+    	String sUsername = "*";
+        String sPassword = "*";
         System.out.println("Accessing resource " + sUrlFile);
         
             /*
@@ -164,8 +170,8 @@ public class TryMODIS {
     
     
     public static String readXmlFile(String sXMLUrlFile) throws IOException {
-        String sUsername = "vl_valentina";						// TODO: put this in the config file
-        String sPassword = "hAk4CuvYwQXOK7kX9kwJ*";				// TODO: put this in the config file
+        String sUsername = "*";						// TODO: put this in the config file
+        String sPassword = "*";				// TODO: put this in the config file
         System.out.println("Accessing resource " + sXMLUrlFile);
         
         InputStream oIn = null;
@@ -209,8 +215,8 @@ public class TryMODIS {
     private static ModisItem buildModisItem(Map<String, String> asProperties) {
     	ModisItem oItem = new ModisItem();
     	
-    	oItem.setLFileSize(Long.parseLong(asProperties.get(s_sFileName)));
-    	oItem.setSFileName(asProperties.get(s_sFileSize));
+    	oItem.setSFileName(asProperties.get(s_sFileName));
+    	oItem.setLFileSize(Long.parseLong(asProperties.get(s_sFileSize)));
     	oItem.setSDayNightFlag(asProperties.get(s_sDayNightFlag));
     	oItem.setSInstrument(asProperties.get(s_sInstrument));
     	oItem.setSSensor(asProperties.get(s_sSensor));
@@ -342,48 +348,35 @@ public class TryMODIS {
      * authenticated remote server.
      *
      */
-    public static InputStream getResource(
-        String resource, String username, String password) throws Exception
-    {
-        int redirects = 0;
-        /* Place an upper limit on the number of redirects we will follow */
-        while( redirects < 10 )
-        {
-            ++redirects;
+    public static InputStream getResource(String sResource, String sUsername, String sPassword) throws Exception {
+        int iRedirects = 0;
+        while( iRedirects < 10 ) {
+            ++iRedirects;
             /*
-             * Configure a connection to the resource server and submit the
-             * request for our resource.
+             * Configure a connection to the resource server and submit the  request for our resource.
              */
-            URL url = new URL(resource);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setInstanceFollowRedirects(false);
-            connection.setUseCaches(false);
-            connection.setDoInput(true);
+            URL oUrl = new URL(sResource);
+            HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
+            oConnection.setRequestMethod("GET");
+            oConnection.setInstanceFollowRedirects(false);
+            oConnection.setUseCaches(false);
+            oConnection.setDoInput(true);
  
             /*
              * If this is the URS server, add in the authentication header.
              */
-            if( resource.startsWith(URS) )
+            if( sResource.startsWith(URS) )
             {
-                connection.setRequestProperty(
+            	oConnection.setRequestProperty(
                     "Authorization",
                     "Basic " + Base64.getEncoder().encodeToString(
-                        (username + ":" + password).getBytes()));
+                        (sUsername + ":" + sPassword).getBytes()));
             }
  
-            /*
-             * Execute the request and get the response status code.
-             * A return status of 200 means is good - it means that we
-             * have got our resource. We can return the input stream
-             * so it can be read (may want to return additional header
-             * information, such as the mime type or size ).
-             */
-            int status = connection.getResponseCode();
+
+            int status = oConnection.getResponseCode();
             if( status == 200 )
-            {
-                return connection.getInputStream();
-            }
+                return oConnection.getInputStream();
  
             /*
              * Any value other than 302 (a redirect) will need some custom
@@ -391,17 +384,15 @@ public class TryMODIS {
              * are invalid, while a 403 means that the user has not authorized
              * the application.
              */
-            if( status != 302 )
-            {
-                throw new Exception(
-                    "Invalid response from server - status " + status);
+            if( status != 302 ) {
+                throw new Exception( "Invalid response from server - status " + status);
             }
  
             /*
              * Get the redirection location and continue. This should really
              * have a null check, just in case.
              */
-            resource = connection.getHeaderField("Location");
+            sResource = oConnection.getHeaderField("Location");
         }
  
         /*
