@@ -814,6 +814,8 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
+			} else if (sFileName.toUpperCase().startsWith("MOD11A2")) {
+				return Platforms.TERRA;
 			}
 			
 			return null;
