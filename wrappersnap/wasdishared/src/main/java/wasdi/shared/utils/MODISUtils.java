@@ -1,3 +1,5 @@
+package wasdi.shared.utils;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStream;
@@ -22,13 +24,14 @@ import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import wasdi.shared.business.modis11a2.ModisItem;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
-public class TryMODIS {
+public class MODISUtils {
 	
 	// MODIS XML PARAMETERS
 	private static final String s_sFileName = "DistributedFileName";
@@ -46,84 +49,81 @@ public class TryMODIS {
 	private static final String s_sPlatform = "PlatformShortName";
 	
 	// KEY TO ACCESS THE PARAMETERS MAP
-	private static final String s_sBoundingBox = "BoundingBox"; // the corners of the boudning box will be stored in the following order
+	private static final String s_sBoundingBox = "BoundingBox"; // the corners of the bounding box will be stored in the following order
 	private static final String s_sUrl = "url";
 	
-	
-//	System.out.println("Local Granule ID (0): " + asMetadata[0]);
-//	System.out.println("Entity id (1): " + asMetadata[1]);
-//	System.out.println("Acquisition Start date (2): " + sStartDate);
-//	System.out.println("Acquisition End date (3): " + asMetadata[3]);
-//	System.out.println("NW corner lat (28): " + asMetadata[28]);
-//	System.out.println("NW corner long (29): " + asMetadata[29]);
-//	System.out.println("NE corner lat (30): " + asMetadata[30]);
-//	System.out.println("NE corner long (31): " + asMetadata[31]);
-//	System.out.println("SE corner lat (32): " + asMetadata[32]);
-//	System.out.println("SE corner long (33): " + asMetadata[33]);
-//	System.out.println("SW corner lat (34): " + asMetadata[34]);
-//	System.out.println("SW corner long (35): " + asMetadata[35]);
 
     /*
-     * Prefix used to identify redirects to URS for the purpose of
-     * adding authentication headers. For test, this should be:
+     * Prefix used to identify redirects to URS for the purpose of adding authentication headers. For test, this should be:
      * https://uat.urs.earthdata.nasa.gov for test
      */
-    static String URS = "https://urs.earthdata.nasa.gov";
+    private static final String s_URSUrl = "https://urs.earthdata.nasa.gov";
+    
+	private static final String s_sMODISBaseUrl = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/";
+
   
  
-    /*
-     * Simple test.
-     */
+
     public static void main( String[] args ) throws Exception {
-    	// tryDownload();
-    	tryReadMetadata();
-    	
+    	// TODO: read the file from some configuration
+    	final String sCSVFilePath = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA/modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv";
+    	insertProducts(sCSVFilePath);
     }
     
-    public static void tryReadMetadata() throws Exception {
-    	final String sCSVFilePath = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA/modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv";
-    	String sBaseUrl = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/";
-    	
+    /**
+     * Populate the collection on Mongo
+     * @param sCSVFilePath the path to the CSV file containing the list of product names
+     * @return
+     * @throws Exception
+     */
+    public static void insertProducts(String sCSVFilePath) throws Exception {
     	BufferedReader oReader = null;
-    	
     	ModisRepository oModisRepo = new ModisRepository();
+    	int iProdCounts = 0;
     	
     	try {
     		oReader = new BufferedReader(new FileReader(sCSVFilePath));  
     		String sLine = "";
     		int iCont = 0;
-    		while ((sLine = oReader.readLine()) != null && iCont < 2) {  
+    		
+    		while ((sLine = oReader.readLine()) != null && iCont < 2) {  // TODO: remove the count
+    			iCont ++;
+    			
     			String[] asMetadata = sLine.split(","); 
     			String sGranuleId = asMetadata[0];
     			String sStartDate = asMetadata[2].replaceAll("/", ".");
-
-    			iCont ++;
     			
-    			String sDirectoryUrl = sBaseUrl + sStartDate;
-    			String sProductFileUrl = sDirectoryUrl + "/" + sGranuleId;
+    			String sProductDirectoryUrl = s_sMODISBaseUrl + sStartDate;
+    			String sProductFileUrl = sProductDirectoryUrl + "/" + sGranuleId;
     			String sXMLUrlPath = sProductFileUrl + ".xml";
-    			System.out.println("XML file url: " + sXMLUrlPath + "\n");
+    			WasdiLog.debugLog("MODISUyils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
     			
-    			if (iCont - 1 > 0) {
-    				
-    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); // TODO: handle Exception
-    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
-    					Map<String, String> asProperties = parseXML(sXMLMetadataString, sProductFileUrl);
-    					asProperties.entrySet().stream().forEach(oEntry -> System.out.println(oEntry.getKey() + ": " + oEntry.getValue()));
-    					ModisItem oItem = buildModisItem(asProperties);
-    					oModisRepo.insertModisItem(oItem);
-    				}
-    				//tryDownloadFile(sDirectoryUrl + "/" + sGranuleId);
+    			
+    			try {
+	    			if (iCont - 1 > 0) {			// TODO: remove the cont
+	    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); // TODO: handle Exception
+	    				
+	    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
+	    					Map<String, String> asProperties = parseXML(sXMLMetadataString, sProductFileUrl);
+	    					ModisItem oItem = buildModisItem(asProperties);
+	    					oModisRepo.insertModisItem(oItem);
+	    					iProdCounts++;
+	    					WasdiLog.debugLog("MODISUtils.insertProducts. product added to db: " + sProductFileUrl);
+	    				} else {
+	    					WasdiLog.debugLog("MODISUtils.insertProducts. Impossible to read metadata and add product to db: " + sProductFileUrl);
+	    				}
+	    			}
+    			} catch(IOException oEx) {
+    	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading metadata file " + sXMLUrlPath + ". " + oEx.getMessage());
     			}
     		}  
     		oReader.close();
-    	} catch (IOException e) {  
-    		e.printStackTrace();
-    		if (oReader != null) {
+    	} catch (IOException oEx) {
+    		WasdiLog.errorLog("MODISUtils.insertProducts. Error while populating the database with MODIS products " + oEx.getMessage());
+    	} finally {
+    		if (oReader != null) 
     			oReader.close();
-    		}
-    	}  
-    	
+    	}	
     }
     
     
@@ -171,12 +171,12 @@ public class TryMODIS {
     
     public static String readXmlFile(String sXMLUrlFile) throws IOException {
         String sUsername = "*";						// TODO: put this in the config file
-        String sPassword = "*";				// TODO: put this in the config file
+        String sPassword = "*";						// TODO: put this in the config file
         System.out.println("Accessing resource " + sXMLUrlFile);
         
         InputStream oIn = null;
         BufferedReader oBin = null;
-        String sXMLMetadata = "";
+        String sXMLMetadata = null;
         try {
             /* Set up a cookie handler to maintain session cookies. */
             CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
@@ -224,18 +224,22 @@ public class TryMODIS {
     	oItem.setSUrl(asProperties.get(s_sUrl));
     	oItem.setSPlatform(asProperties.get(s_sPlatform));
     	
-    	//data
+    	// set start and end dateTime
     	Long lStartDateTime = parseDate(asProperties.get(s_sStartDate), asProperties.get(s_sStartTime));
     	Long lEndDateTime = parseDate(asProperties.get(s_sEndDate), asProperties.get(s_sEndTime));
     	
     	double dStarDateTime = 0.0;
     	double dEndDateTime = 0.0;
     	
-    	if (lStartDateTime != null) dStarDateTime = lStartDateTime.doubleValue();
-    	else WasdiLog.errorLog("Starting time for product is null");
+    	if (lStartDateTime != null) 
+    		dStarDateTime = lStartDateTime.doubleValue();
+    	else 
+    		WasdiLog.debugLog("MODISUtils.buildModisItem. Starting time for product is null");
     	
-    	if (lEndDateTime != null) dEndDateTime = lEndDateTime.doubleValue();
-    	else WasdiLog.errorLog("Ending time for product is null");
+    	if (lEndDateTime != null) 
+    		dEndDateTime = lEndDateTime.doubleValue();
+    	else 
+    		WasdiLog.debugLog("MODISUtils.buildModisItem. Ending time for product is null");
     	
     	oItem.setDStartDate(dStarDateTime);
     	oItem.setDEndDate(dEndDateTime);
@@ -243,6 +247,12 @@ public class TryMODIS {
     	return oItem;
     }
     
+    /**
+     * Parse the XML string containing the metadata and populate a map
+     * @param sXMLString
+     * @param sProductFileUrl
+     * @return
+     */
     private static Map<String, String> parseXML(String sXMLString, String sProductFileUrl) {
     	Map<String, String> asProperties = new HashMap<>();
     	
@@ -301,14 +311,14 @@ public class TryMODIS {
 	    	asCoordinates.add(asCoordinates.get(0));
 	    	asCoordinates.add(asCoordinates.get(1));
 		} else {
-			WasdiLog.debugLog("Coodinate list does not contain all the points. Cannot close the bounding box");
+			WasdiLog.debugLog("MODUSUtils.readBoundingBox. Coodinate list does not contain all the points. Cannot close the bounding box.");
 		}
 		
 		return String.join(",", asCoordinates);
 	}
 	
     public static void tryDownload() {
-        String resource = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/2000.05.16/MOD11A2.A2000137.h34v10.061.2020045132244.hdf.xml";
+        String resource = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/2000.05.16/MOD11A2.A2000137.h34v10.061.2020045132244.hdf";
         String username = "*";
         String password = "*";
         System.out.println("Accessing resource " + resource);
@@ -327,6 +337,7 @@ public class TryMODIS {
             /* Dump the resource out (not a good idea for binary data) */
             BufferedReader bin = new BufferedReader(
                 new InputStreamReader(in));
+            System.out.println("Ok - tryDownload");
             String line;
             while( (line = bin.readLine()) != null)
             {
@@ -343,18 +354,16 @@ public class TryMODIS {
     }
   
  
+    
+    
     /*
-     * Returns an input stream for a designated resource on a URS
-     * authenticated remote server.
-     *
+     * Returns an input stream for a designated resource on a URSauthenticated remote server.
      */
     public static InputStream getResource(String sResource, String sUsername, String sPassword) throws Exception {
         int iRedirects = 0;
         while( iRedirects < 10 ) {
             ++iRedirects;
-            /*
-             * Configure a connection to the resource server and submit the  request for our resource.
-             */
+
             URL oUrl = new URL(sResource);
             HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
             oConnection.setRequestMethod("GET");
@@ -362,44 +371,36 @@ public class TryMODIS {
             oConnection.setUseCaches(false);
             oConnection.setDoInput(true);
  
-            /*
-             * If this is the URS server, add in the authentication header.
-             */
-            if( sResource.startsWith(URS) )
-            {
+            // If this is the URS server, add in the authentication header.
+            if( sResource.startsWith(s_URSUrl) ) {
             	oConnection.setRequestProperty(
                     "Authorization",
-                    "Basic " + Base64.getEncoder().encodeToString(
-                        (sUsername + ":" + sPassword).getBytes()));
+                    "Basic " + Base64.getEncoder().encodeToString((sUsername + ":" + sPassword).getBytes()));
             }
  
 
             int status = oConnection.getResponseCode();
-            if( status == 200 )
-                return oConnection.getInputStream();
- 
-            /*
-             * Any value other than 302 (a redirect) will need some custom
-             * handling. A 401 from URS means that the credentials
-             * are invalid, while a 403 means that the user has not authorized
-             * the application.
-             */
-            if( status != 302 ) {
-                throw new Exception( "Invalid response from server - status " + status);
+            if( status == 200 ) {
+                WasdiLog.debugLog("MODISUtils.getResource. Successfully connected, opening the input stream");
+            	return oConnection.getInputStream();
             }
  
-            /*
-             * Get the redirection location and continue. This should really
-             * have a null check, just in case.
-             */
+            // status codes other than 302 (a redirect) are not accepted
+            if( status != 302 ) {
+                throw new Exception("MODISUtils.getResource. Invalid response from server - status " + status);
+            }
+ 
+            // Get the redirection location and continue. 
             sResource = oConnection.getHeaderField("Location");
+            if (sResource == null) {
+            	throw new Exception("MODISUtils.getResource. Redirection location is null. Impossible to continue");
+            } else {
+                WasdiLog.debugLog("MODISUtils.getResource. Got a redirection to: " + sResource);
+            }
         }
  
-        /*
-         * If we get here, we exceeded our redirect limit. This is most likely
-         * a configuration problem somewhere in the remote server.
-         */
-        throw new Exception("Redirection limit exceeded");
+        // If we get here, we exceeded our redirect limit
+        throw new Exception("MODISUtils.getResource. Redirection limit exceeded");
     }
 
 }
