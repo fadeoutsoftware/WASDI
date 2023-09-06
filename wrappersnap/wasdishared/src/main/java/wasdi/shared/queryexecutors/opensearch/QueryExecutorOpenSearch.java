@@ -24,6 +24,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
@@ -65,7 +66,7 @@ public abstract class QueryExecutorOpenSearch extends QueryExecutor {
 	 * @throws UnsupportedEncodingException
 	 */
 	protected String encodeAsRequired(String sUrl) throws UnsupportedEncodingException {
-		String sResult = URLEncoder.encode(sUrl, "UTF-8");
+		String sResult = StringUtils.encodeUrl(sUrl);
 		return sResult;
 	}
 	

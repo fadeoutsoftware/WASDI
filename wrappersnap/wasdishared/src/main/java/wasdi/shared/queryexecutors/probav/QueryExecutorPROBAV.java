@@ -37,6 +37,7 @@ import org.w3c.dom.NodeList;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.opensearch.QueryExecutorOpenSearch;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
@@ -94,12 +95,8 @@ public class QueryExecutorPROBAV extends QueryExecutorOpenSearch  {
 					if (asPolygon.length > 0)
 					{
 						String[] asCoordinates = asPolygon[1].split("\\)\\)");
-						
-						try {
-							asCoordinates[0] = URLEncoder.encode(asCoordinates[0], "UTF-8"); 
-						} catch (UnsupportedEncodingException e) {
-						}						
-						
+						asCoordinates[0] = StringUtils.encodeUrl(asCoordinates[0]);
+												
 						sPolygon = String.format("geometry=POLYGON((%s))", asCoordinates[0]);
 					}
 				}

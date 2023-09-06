@@ -45,7 +45,12 @@ public class WasdiConfig {
 	/**
 	 * System name of the tomcat user
 	 */
-	public String tomcatUser = "tomcat8";
+	public String tomcatUser = "appwasdi";
+	
+	/**
+	 * Fixed Id of the system user
+	 */
+	public Integer systemUserId = 2042;
 	
 	/**
 	 * Base url of WASDI API

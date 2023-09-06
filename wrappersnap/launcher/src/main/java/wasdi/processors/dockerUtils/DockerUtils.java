@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,6 +30,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.StringUtils;
+import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
@@ -58,7 +61,7 @@ public class DockerUtils {
     /**
      * User that run the docker
      */
-    protected String m_sUser = "tomcat";    
+    protected String m_sWasdiSystemUser = "appwasdi";    
 
     /**
      * Docker registry in use
@@ -71,10 +74,10 @@ public class DockerUtils {
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
      * @param sWorkingRootPath WASDI Working path
-     * @param sTomcatUser      User
+     * @param sWasdiSystemUser      User
      */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser) {
-    	this(oProcessor, sProcessorFolder, sTomcatUser, "");
+    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWasdiSystemUser) {
+    	this(oProcessor, sProcessorFolder, sWasdiSystemUser, "");
     }
     
     /**
@@ -89,7 +92,7 @@ public class DockerUtils {
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder;
-        m_sUser = sTomcatUser;
+        m_sWasdiSystemUser = sTomcatUser;
         m_sDockerRegistry = sDockerRegistry;
     }    
     
@@ -146,7 +149,7 @@ public class DockerUtils {
 	 * @return
 	 */
 	public String getUser() {
-		return m_sUser;
+		return m_sWasdiSystemUser;
 	}
 	
 	/**
@@ -154,7 +157,7 @@ public class DockerUtils {
 	 * @param sUser
 	 */
 	public void setUser(String sUser) {
-		this.m_sUser = sUser;
+		this.m_sWasdiSystemUser = sUser;
 	}    
 
 	/**
@@ -179,108 +182,105 @@ public class DockerUtils {
      */
     public String build() {
     	
-    	String sDockerName = "";
+    	String sImageName = "";
 
         try {
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
             
-            // Prepare the name of the docker
-            String sDockerBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
+            // Prepare the name of the image
+            String sImageBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
             
-            sDockerName = sDockerBaseName;
+            sImageName = sImageBaseName;
             
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
             	WasdiLog.debugLog("DockerUtils.build: using registry " + m_sDockerRegistry);
-            	sDockerName = m_sDockerRegistry + "/" + sDockerBaseName;
+            	sImageName = m_sDockerRegistry + "/" + sImageBaseName;
             }
             
-            // Initialize Args
-            ArrayList<String> asArgs = new ArrayList<>();
-
-            // Generate shell script file
-            String sBuildScriptFile = m_sProcessorFolder + "deploywasdidocker.sh";
-            File oBuildScriptFile = new File(sBuildScriptFile);
-            
-            try (BufferedWriter oBuildScriptWriter = new BufferedWriter(new FileWriter(oBuildScriptFile))) {
-                // Fill the script file
-                if (oBuildScriptWriter != null) {
-                    WasdiLog.debugLog("DockerUtils.build: Creating " + sBuildScriptFile + " file");
-
-                    oBuildScriptWriter.write("#!/bin/bash");
-                    oBuildScriptWriter.newLine();
-                    oBuildScriptWriter.write("echo Deploy Docker Started >> " + m_sDockerLogFile);
-                    oBuildScriptWriter.newLine();
-                    
-                    // Are we building locally or for a register?
-                    if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-                    	// Local build
-                    	oBuildScriptWriter.write("docker build -t" + sDockerName + " " + m_sProcessorFolder);
-                    }
-                    else {
-                    	WasdiLog.debugLog("DockerUtils.build: multi tag build ");
-                    	
-                    	// Register: the first tag is already in the Docker Name
-                    	String sMultiTagBuild = "docker build -t" + sDockerName;
-                    	
-                    	// Take all our registers
-                    	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-                    	
-                    	// For each register
-                    	for (DockerRegistryConfig oDockerRegistryConfig : aoRegisters) {
-                    		// Is this the main one? So jump, already added
-							if (oDockerRegistryConfig.address.equals(m_sDockerRegistry)) continue;
-							
-							// No, ok, we can add a new tag
-							sMultiTagBuild += " -t" +  oDockerRegistryConfig.address + "/"  + sDockerBaseName;
-							
-							WasdiLog.debugLog("DockerUtils.build: added tag  for " + oDockerRegistryConfig.id);
-						}
-                    	
-                    	// Last the space and the folder to build
-                    	sMultiTagBuild += " " + m_sProcessorFolder;
-                    	
-                    	// We can write our script
-                    	oBuildScriptWriter.write(sMultiTagBuild);
-                    }
-                    
-                    if (!Utils.isNullOrEmpty(m_sUser)) {
-                        oBuildScriptWriter.write(" --build-arg USR_NAME=" + m_sUser + " --build-arg USR_ID=$(id -u " + m_sUser + ")" +
-                                " --build-arg GRP_NAME=" + m_sUser + " --build-arg GRP_ID=$(id -g " + m_sUser + ")");                    	
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		
+    		sUrl += "build?t=" + sImageName + ":" + m_oProcessor.getVersion();
+    		
+    		if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
+    			
+            	// Take all our registers
+            	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+            	
+            	// For each register
+            	for (DockerRegistryConfig oDockerRegistryConfig : aoRegisters) {
+            		// Is this the main one? So jump, already added
+					if (oDockerRegistryConfig.address.equals(m_sDockerRegistry)) continue;
+					
+					// No, ok, we can add a new tag
+					sUrl += "&t=" +  oDockerRegistryConfig.address + "/"  + sImageBaseName + ":" + m_oProcessor.getVersion();
+					
+					WasdiLog.debugLog("DockerUtils.build: added tag  for " + oDockerRegistryConfig.id);
+				}
+            	
+            	// If we have user and or pip params, add the buildargs parameter
+            	if (!Utils.isNullOrEmpty(m_sWasdiSystemUser) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+            		
+            		String sBuildArgs = "{";
+            		
+            		boolean bAdded = false;
+            		
+                    if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
+                    	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\", \"USR_ID\": " + WasdiConfig.Current.systemUserId + ", \"GRP_NAME\":\""+m_sWasdiSystemUser+"\", \"GRP_ID\":" + WasdiConfig.Current.systemUserId;                    	
+                    	bAdded = true;
                     }
                     
                     if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
-                    	oBuildScriptWriter.write(" --build-arg PIP_INSTALL_WASDI_ARGUMENTS=\"" + WasdiConfig.Current.dockers.pipInstallWasdiAddress+"\""); 
-                    }
-                      
-                    oBuildScriptWriter.write(" $1 >> " + m_sDockerLogFile + " 2>&1");
+                    	if (bAdded) sBuildArgs+=",";
+                    	sBuildArgs+="\"PIP_INSTALL_WASDI_ARGUMENTS\":\""+ WasdiConfig.Current.dockers.pipInstallWasdiAddress + "\"";
+                    }            	
+            		
+                    sBuildArgs += "}";
                     
-                    oBuildScriptWriter.newLine();
-                    oBuildScriptWriter.write("echo Deploy Docker Done >> " + m_sDockerLogFile);
-                    oBuildScriptWriter.flush();
-                    oBuildScriptWriter.close();
-                }
-            }
+                    String sEncodedBuildArgs = StringUtils.encodeUrl(sBuildArgs);
+                    
+                    sUrl+="&buildargs=" + sEncodedBuildArgs;
+            	}
+            	
+            	// We need to make a Tar File
+            	// TODO: Here I have my error I think!! We need to put all the files in the processor folder!!
+            	ArrayList<String> asTarFiles = new ArrayList<>();
+            	String sDockerFileInput = m_sProcessorFolder + "/Dockerfile";
+            	asTarFiles.add(sDockerFileInput);
+            	
+            	String sTarFileOuput = m_sProcessorFolder + "/Dockerfile.tar";
+            	
+            	// Tar the file
+            	if (!TarUtils.tarFiles(asTarFiles, sTarFileOuput)) {
+            		WasdiLog.errorLog("Impossible to create the tar file to upload to docker, this is a problem!");
+            		return "";
+            	}
+            	
+            	// Set the Content Type Header
+            	HashMap<String, String> asHeaders = new HashMap<>();
+            	asHeaders.put("Content-type","application/x-tar");
+            	
+            	// Finally make the call
+            	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders, null, null);
+            	
+            	if (oResponse.getResponseCode() != 200) {
+            		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());
+            		return "";
+            	}
+    		}
 
-            // Wait a little bit to let the file be written
-            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDeployScriptCreated);
-
-            // Make it executable
-            RunTimeUtils.addRunPermission(sBuildScriptFile);
-
-            // Run the script
-            RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
-
-            WasdiLog.debugLog("DockerUtils.build: created image " + sDockerName);
+            WasdiLog.debugLog("DockerUtils.build: created image " + sImageName);
+            
         } catch (Exception oEx) {
         	WasdiLog.errorLog("DockerUtils.build: " + oEx.toString());
             return "";
         }
 
-        return sDockerName;
+        return sImageName;
     }
     
     
@@ -299,164 +299,8 @@ public class DockerUtils {
      * 
      */
     public boolean start(String sMountWorkspaceFolder) {
-        return start2(sMountWorkspaceFolder, m_oProcessor.getPort());
+        return start(sMountWorkspaceFolder, m_oProcessor.getPort());
     }    
-
-    /**
-     * Run the docker at the specified port
-     *
-     * @param sMountWorkspaceFolder workspace folder to mount
-     * @param iProcessorPort Port to use
-     */
-    public boolean start(String sMountWorkspaceFolder, int iProcessorPort) {
-
-        try {
-        	
-        	if (Utils.isNullOrEmpty(sMountWorkspaceFolder)) {
-        		sMountWorkspaceFolder = WasdiConfig.Current.paths.downloadRootPath;
-        		if (!sMountWorkspaceFolder.endsWith(File.separator)) sMountWorkspaceFolder += File.separator;
-        	}
-        	
-            // Get the docker name
-            String sDockerName = "wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
-            
-            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
-            }
-            
-            String sCommand = "docker";
-
-            // Initialize Args
-            ArrayList<String> asArgs = new ArrayList<>();
-
-            // Processor Script File
-            String sRunFile = m_sProcessorFolder + "runwasdidocker.sh";
-            File oRunFile = new File(sRunFile);
-
-            // Check if it is already done:
-
-            //if (!oRunFile.exists() || oRunFile.length() == 0L) {
-            if (true) {
-
-                // Command
-                asArgs.add(sCommand);
-
-                // Action
-                asArgs.add("run");
-
-                // User
-                asArgs.add("-u$(id -u " + m_sUser + "):$(id -g " + m_sUser + ")");
-
-                // Working Path
-                asArgs.add("-v" + sMountWorkspaceFolder + ":/data/wasdi");
-
-                // Processor folder
-                asArgs.add("--mount");
-                asArgs.add("type=bind,src=" + m_sProcessorFolder + ",dst=/wasdi");
-
-                // Port
-                asArgs.add("-p127.0.0.1:" + iProcessorPort + ":5000");
-
-                // Extra hosts mapping, useful for some instances when the server host can't be resolved
-                // The symptoms of such problem is that the POST call from the Docker container timeouts
-                if (WasdiConfig.Current.dockers.extraHosts != null) {
-                	
-                	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
-                		WasdiLog.debugLog("DockerUtils.start adding configured extra host mapping to the run arguments");
-                    	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
-                    		
-                    		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
-                    		
-                    		asArgs.add("--add-host=" + sExtraHost);
-                    	}
-                	}
-                }
-				
-                // Add the pull command
-                if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {	                	
-                	asArgs.add("--pull always");
-                }				
-                
-                if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.additionalDockerRunParameter)) {
-                	asArgs.add(WasdiConfig.Current.dockers.additionalDockerRunParameter);
-                }
-
-                // Docker name
-                asArgs.add(sDockerName);
-
-                // Generate the command line
-                String sCommandLine = "";
-
-
-                for (String sArg : asArgs) {
-                    sCommandLine += sArg + " ";
-                }
-
-                WasdiLog.debugLog("DockerUtils.start CommandLine: " + sCommandLine);
-
-                try (BufferedWriter oRunWriter = new BufferedWriter(new FileWriter(oRunFile))) {
-                    if (null != oRunWriter) {
-                        WasdiLog.debugLog("DockerUtils.start: Creating " + sRunFile + " file");
-
-                        oRunWriter.write("#!/bin/bash");
-                        oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Started ");
-                        oRunWriter.newLine();
-                        oRunWriter.write(sCommandLine);
-                        oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Done");
-                        oRunWriter.flush();
-                        oRunWriter.close();
-                    }
-                }
-
-                RunTimeUtils.addRunPermission(sRunFile);
-
-                asArgs.clear();
-            }
-            
-            // Check if we need to login in the registry
-            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	WasdiLog.debugLog("DockerUtils.start: login in the registers");
-            	
-            	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-            	
-				// For each register: ordered by priority
-				for (int iRegisters=0; iRegisters<aoRegisters.size(); iRegisters++) {
-					
-					DockerRegistryConfig oDockerRegistryConfig = aoRegisters.get(iRegisters);
-					
-					WasdiLog.debugLog("DockerUtils.start: logging in to " + oDockerRegistryConfig.id);
-					
-					// Try to login
-					String sToken = loginInRegistry(oDockerRegistryConfig);
-					
-					if (Utils.isNullOrEmpty(sToken)) {
-						WasdiLog.debugLog("DockerUtils.start: error in the login");
-					}
-				}
-            }
-            
-
-            try {
-                if (!oRunFile.canExecute()) {
-                	RunTimeUtils.addRunPermission(sRunFile);
-                }
-            } catch (Exception oInnerEx) {
-            	RunTimeUtils.addRunPermission(sRunFile);
-            }
-
-            // Execute the command to start the docker
-            RunTimeUtils.shellExec(sRunFile, asArgs, false);
-
-            WasdiLog.debugLog("DockerUtils.start " + sDockerName + " started");
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("DockerUtils.start error: " + oEx.toString());
-            return false;
-        }
-
-        return true;
-    }
     
     /**
      * Run the docker at the specified port
@@ -464,7 +308,7 @@ public class DockerUtils {
      * @param sMountWorkspaceFolder workspace folder to mount
      * @param iProcessorPort Port to use
      */
-    public boolean start2(String sMountWorkspaceFolder, int iProcessorPort) {
+    public boolean start(String sMountWorkspaceFolder, int iProcessorPort) {
 
         try {
         	
@@ -552,7 +396,7 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
             		// Set the user
-            		oContainerCreateParams.User = "appwasdi";
+            		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;
@@ -602,6 +446,7 @@ public class DockerUtils {
 //                    	asArgs.add(WasdiConfig.Current.dockers.additionalDockerRunParameter);
 //                    }
             		
+                    // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		
             		if (Utils.isNullOrEmpty(sContainerCreateParams)) {
@@ -609,12 +454,15 @@ public class DockerUtils {
             			return false;
             		}
             		
+            		// We need to set the json Content-Type
             		HashMap<String, String> asHeaders = new HashMap<>();
             		asHeaders.put("Content-Type", "application/json");
             		
+            		// Is a post!
             		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
             		
             		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+            			// Here is not good
             			WasdiLog.errorLog("DockerUtils.start: impossible to create the container. We cannot proceed :(. ERROR = " + oResponse.getResponseBody());
             			return false;
             		}
@@ -623,33 +471,38 @@ public class DockerUtils {
             		
             	}
             	catch (Exception oEx) {
-            		
-            		WasdiLog.errorLog("DockerUtils.start: " + oEx.toString());
+            		WasdiLog.errorLog("DockerUtils.start exception creating the container: " + oEx.toString());
                     return false;
                 }        		
         	}
         	else {        		
+        		// If the container exists, we can take the ID
         		WasdiLog.debugLog("DockerUtils.start: Container already found, we will use the id");
         		sContainerName = oContainerInfo.Id;
         	}
             
             WasdiLog.debugLog("DockerUtils.start: Starting Container Named" + sContainerName + " created");
             
+            // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		sUrl+="containers/" + sContainerName + "/start";
     		
+    		// Make the call
     		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
     		
     		if (oResponse.getResponseCode() == 204) {
+    			// Started Well
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " started");
     			return true;
     		}
-    		else if (oResponse.getResponseCode() == 204) {
+    		else if (oResponse.getResponseCode() == 304) {
+    			// ALready Started (but so why we did not detected this before?!?)
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " wasd already started");
     			return true;
     		}
     		else {
+    			// Error!
     			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName);
     			return false;
     		}
@@ -680,115 +533,6 @@ public class DockerUtils {
     public boolean delete(String sProcessorName) {
         return delete(sProcessorName, "1");
     }
-
-    /**
-     * Delete using processor name and processor version
-     *
-     * @param sProcessorName
-     * @param sVersion
-     * @return
-     */
-    public boolean delete_old(String sProcessorName, String sVersion) {
-
-        try {
-
-            // docker ps -a | awk '{ print $1,$2 }' | grep <imagename> | awk '{print $1 }' | xargs -I {} docker rm -f {}
-            // docker rmi -f <imagename>
-
-            String sBaseDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
-            String sDockerName = sBaseDockerName;
-            
-            if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-            	sDockerName = m_sDockerRegistry + "/" + sDockerName;
-            }
-
-            String sDeleteScriptFile = m_sProcessorFolder + "cleanwasdidocker.sh";
-            File oDeleteScriptFile = new File(sDeleteScriptFile);
-
-            if (!oDeleteScriptFile.exists() || oDeleteScriptFile.length() == 0L) {
-                try (BufferedWriter oDeleteScriptWriter = new BufferedWriter(new FileWriter(oDeleteScriptFile))) {
-                    if (oDeleteScriptWriter != null) {
-                        WasdiLog.debugLog("DockerUtils.delete: Creating " + sDeleteScriptFile + " file");
-
-                        oDeleteScriptWriter.write("#!/bin/bash");
-                        oDeleteScriptWriter.newLine();
-                        oDeleteScriptWriter.write("docker ps -a | awk '{ print $1,$2 }' | grep " + sDockerName + " | awk '{print $1 }' | xargs -I {} docker rm -f {}");
-                        oDeleteScriptWriter.newLine();
-                        oDeleteScriptWriter.flush();
-                        oDeleteScriptWriter.close();
-                    }
-                }
-
-                RunTimeUtils.addRunPermission(sDeleteScriptFile);
-                
-                
-            } else {
-                RunTimeUtils.addRunPermission(sDeleteScriptFile);
-            }
-
-            Runtime.getRuntime().exec(sDeleteScriptFile);
-
-            // Wait for docker to finish
-            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
-            
-            WasdiLog.debugLog("DockerUtils.delete: remove image");
-
-            // Delete this image
-            ArrayList<String> asArgs = new ArrayList<>();
-            // Remove the container image
-            asArgs.add("rmi");
-            asArgs.add("-f");
-            asArgs.add(sDockerName);
-            
-            String sCommand = "docker";
-
-            RunTimeUtils.shellExec(sCommand, asArgs, false);
-            
-            // Wait for docker to finish
-            Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);
-            
-            
-            String sVersionCopy = sVersion;
-            int iVersion = StringUtils.getAsInteger(sVersionCopy);
-            
-        	while (iVersion>1)  {
-        		sVersionCopy = StringUtils.decrementIntegerString(sVersionCopy);
-        		
-        		WasdiLog.debugLog("DockerUtils.delete: remove also image version " + sVersionCopy);
-        		
-                // Delete this image
-                asArgs = new ArrayList<>();
-                // Remove the container image
-                asArgs.add("rmi");
-                asArgs.add("-f");
-                asArgs.add(sDockerName.replace(":"+sVersion, ":"+sVersionCopy));
-        		
-        		RunTimeUtils.shellExec(sCommand, asArgs, false);
-        		
-                // Wait for docker to finish
-                Thread.sleep(WasdiConfig.Current.dockers.millisWaitAfterDelete);    		
-                
-                iVersion = StringUtils.getAsInteger(sVersionCopy);
-        	}
-       
-            
-            if (WasdiConfig.Current.isMainNode()) {            	
-                if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-                	WasdiLog.infoLog("This is a registry stored docker: clean all our registers");
-                	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
-                		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
-    				}
-                }
-            }
-            
-            
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("DockerUtils.delete: " + oEx.toString());
-            return false;
-        }
-
-        return true;
-    }
     
     /**
      * Delete using processor name and processor version
@@ -806,7 +550,7 @@ public class DockerUtils {
             
         	while (iVersion>0)  {
         		
-        		WasdiLog.debugLog("DockerUtils.delete2: Removing " + sProcessorName + " version "  + sVersion);
+        		WasdiLog.debugLog("DockerUtils.delete: Removing " + sProcessorName + " version "  + sVersion);
         		
                 String sBaseDockerName = "wasdi/" + sProcessorName + ":" + sVersion;
                 String sDockerName = sBaseDockerName;
@@ -819,20 +563,20 @@ public class DockerUtils {
                 boolean bContainersRemoved = removeContainer(sId, true);
                 
                 if (!bContainersRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete2: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                 }
                 
-                WasdiLog.debugLog("DockerUtils.delete2: Removing image for " + sProcessorName + " version "  + sVersion);
+                WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion);
                 
                 boolean bImageRemoved = removeImage(sDockerName, true);
                 
                 if (!bImageRemoved) {
-                	WasdiLog.errorLog("DockerUtils.delete2: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
+                	WasdiLog.errorLog("DockerUtils.delete: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                 }
                 
                 if (WasdiConfig.Current.isMainNode()) {            	
                     if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-                    	WasdiLog.infoLog("DockerUtils.delete2: This is a registry stored docker: clean all our registers");
+                    	WasdiLog.infoLog("DockerUtils.delete: This is a registry stored docker: clean all our registers");
                     	for (DockerRegistryConfig oRegistryConfig : WasdiConfig.Current.dockers.registers) {
                     		this.removeImageFromRegistry(sBaseDockerName, sVersion, oRegistryConfig);					
         				}
@@ -920,13 +664,51 @@ public class DockerUtils {
      * @param sImage Image name
      * @return True if pushed false if error 
      */
-    public boolean push(String sImage, String sToken) {	
+    public boolean push(String sImage, String sToken) {
+    	
     	try {
+    		
+    		// Get the docker address
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		if (sImage.contains(":")) {
     			WasdiLog.debugLog("DockerUtils.push image contains a tag: remove it");
     			sImage = sImage.split(":")[0];
+    		}    		
+    		
+    		// Url Encode
+    		String sEncodedServerImage = StringUtils.encodeUrl(sImage);
+    		
+    		// Add the query parameter
+    		sUrl+="images/"+sEncodedServerImage + "/push";
+    		
+    		// We need a couple of headers
+    		HashMap<String, String> asHeaders = new HashMap<>();
+    		
+    		// The content is taken from the sample on line
+    		//asHeaders.put("Content-Type", "application/tar");
+    		asHeaders.put("X-Registry-Auth", sToken);    		
+    		
+    		// Is a post!
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
+    		
+    		if (oResponse.getResponseCode() == 200) {
+    			return true;
     		}
+    		else {
+    			WasdiLog.errorLog("Error pulling image " + sImage + " got answer http " + oResponse.getResponseCode());
+    			return false;
+    		}
+    	} 
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.pull: " + oEx.toString());
+            return false;
+        }
+    	/*
+    	try {
+    		
+
     		
             // Create the docker command
             ArrayList<String> asArgs = new ArrayList<>();
@@ -949,6 +731,7 @@ public class DockerUtils {
         }
     	
     	return true;
+    	*/
     }
     
     /**
@@ -964,7 +747,7 @@ public class DockerUtils {
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		// Url Encode
-    		String sEncodedServerImage = URLEncoder.encode(sImage);
+    		String sEncodedServerImage = StringUtils.encodeUrl(sImage);
     		
     		// Add the query parameter
     		sUrl+="images/create?fromImage="+sEncodedServerImage;

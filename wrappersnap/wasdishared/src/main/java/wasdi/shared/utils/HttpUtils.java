@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.abdera.util.AbderaDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
@@ -215,6 +216,18 @@ public final class HttpUtils {
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
 	public static HttpCallResponse httpPost(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth, Map<String, List<String>> aoOutputHeaders) {
+		return httpPost(sUrl, sPayload.getBytes(), asHeaders, sAuth, aoOutputHeaders);
+	}
+	
+	/**
+	 * Standard http post utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post
+	 * @param asHeaders headers dictionary
+	 * @param sAuth in the form user:password (i.e., separated by a column: ':')
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpPost(String sUrl, byte []ayBytes, Map<String, String> asHeaders, String sAuth, Map<String, List<String>> aoOutputHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 
@@ -244,16 +257,13 @@ public final class HttpUtils {
 					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
 				}
 			}
-
 			
-			byte[] ayBytes = sPayload.getBytes();
 			oConnection.setFixedLengthStreamingMode(ayBytes.length);
 			oConnection.connect();
 			
 			try (OutputStream oOutputStream = oConnection.getOutputStream()) {
 				oOutputStream.write(ayBytes);
-			}
-			
+			}			
 
 			// Avoid log spam when we check the token
 			boolean bLog = true;
@@ -337,7 +347,7 @@ public final class HttpUtils {
 		//local file -> automatically checks for null
 		File oFile = new File(sFileName);
 		if (!oFile.exists()) {
-			WasdiLog.debugLog("Wasdi.httpPostFile: file not found");
+			WasdiLog.errorLog("Wasdi.httpPostFile: file not found");
 			return false;
 		}
 

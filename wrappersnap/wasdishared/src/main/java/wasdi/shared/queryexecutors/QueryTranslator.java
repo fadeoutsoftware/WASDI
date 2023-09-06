@@ -253,7 +253,6 @@ public abstract class QueryTranslator {
 		String sResult = sDecoded;
 		sResult = sResult.replace(" ", "%20");
 		sResult = sResult.replaceAll("\"", "%22");
-		// sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
 	}
 

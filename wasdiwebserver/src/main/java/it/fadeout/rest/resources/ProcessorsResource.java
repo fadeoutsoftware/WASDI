@@ -79,6 +79,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -2401,7 +2402,7 @@ public class ProcessorsResource  {
 			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
 			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(oProcessor.getProcessorId());
 			
-			String sEncodedUI = URLEncoder.encode(sUIJson, StandardCharsets.UTF_8.toString());
+			String sEncodedUI = StringUtils.encodeUrl(sUIJson);
 			
 			if (oUI == null) {
 				oUI = new ProcessorUI();

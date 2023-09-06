@@ -53,6 +53,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -567,12 +568,12 @@ public class Wasdi extends ResourceConfig {
 				String sUrl = oDestinationNode.getNodeBaseAddress();
 				WasdiLog.debugLog("Wasdi.runProcess: base url is: " + sUrl );
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?operation=" + sOperationType + "&name=" + URLEncoder.encode(sProductName, java.nio.charset.StandardCharsets.UTF_8.toString());
+				sUrl += "processing/run?operation=" + sOperationType + "&name=" + StringUtils.encodeUrl(sProductName);
 				
 				// Is there a parent?
 				if (!Utils.isNullOrEmpty(sParentId)) {
 					WasdiLog.debugLog("Wasdi.runProcess: adding parent " + sParentId);
-					sUrl += "&parent=" + URLEncoder.encode(sParentId, java.nio.charset.StandardCharsets.UTF_8.toString());
+					sUrl += "&parent=" + StringUtils.encodeUrl(sParentId);
 				}
 				
 				// Is there a subType?

@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -22,10 +20,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import wasdi.processors.PythonPipProcessorEngine2;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -72,6 +66,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -487,7 +482,7 @@ public class dbUtils {
 
                     if (oUiFile.exists()) {
                         String sJsonUI = new String(Files.readAllBytes(Paths.get(oUiFile.getAbsolutePath())), StandardCharsets.UTF_8);
-                        String sEncodedJSON = URLEncoder.encode(sJsonUI, StandardCharsets.UTF_8.toString());
+                        String sEncodedJSON = StringUtils.encodeUrl(sJsonUI);
                         ProcessorUI oProcessorUI = new ProcessorUI();
                         oProcessorUI.setProcessorId(oProcessor.getProcessorId());
                         oProcessorUI.setUi(sEncodedJSON);
