@@ -1,4 +1,4 @@
-package wasdi.shared.queryexecutors.modis;
+package wasdi.shared.queryexecutors.lpdaac;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +15,13 @@ import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
 
-public class QueryExecutorModis extends QueryExecutor {
+public class QueryExecutorLpDaac extends QueryExecutor {
 	
-	public QueryExecutorModis() {
-		m_sProvider = "MODIS"; // TODO: not sure this is the provider to put
+	public QueryExecutorLpDaac() {
+		m_sProvider = "LPDAAC"; // TODO: not sure this is the provider to put
 		
-		this.m_oQueryTranslator = new QueryTranslatorModis();
-		this.m_oResponseTranslator = new ResponseTranslatorModis();
+		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
+		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
 		
 		m_asSupportedPlatforms.add(Platforms.TERRA);
 	}
@@ -111,7 +111,7 @@ public class QueryExecutorModis extends QueryExecutor {
 		List<ModisItemForReading> aoItemList = oModisRepositroy.getModisItemList(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, iOffset, iLimit);
 
 		aoResults = aoItemList.stream()
-				.map((ModisItemForReading t) -> ((ResponseTranslatorModis) this.m_oResponseTranslator).translate(t))
+				.map((ModisItemForReading t) -> ((ResponseTranslatorLpDaac) this.m_oResponseTranslator).translate(t))
 				.collect(Collectors.toList());
 
 		return aoResults;

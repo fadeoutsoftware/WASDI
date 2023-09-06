@@ -1,9 +1,9 @@
-package wasdi.shared.queryexecutors.modis;
+package wasdi.shared.queryexecutors.lpdaac;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryTranslator;
 
-public class QueryTranslatorModis extends QueryTranslator {
+public class QueryTranslatorLpDaac extends QueryTranslator {
 
 	@Override
 	public String getCountUrl(String sQuery) {

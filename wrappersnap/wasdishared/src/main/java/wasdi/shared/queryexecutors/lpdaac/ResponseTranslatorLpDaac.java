@@ -1,4 +1,4 @@
-package wasdi.shared.queryexecutors.modis;
+package wasdi.shared.queryexecutors.lpdaac;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
-public class ResponseTranslatorModis extends ResponseTranslator {
+public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	
 	private static final String SLINK_SEPARATOR = ",";
 	private static final String SLINK = "link";
