@@ -16,7 +16,7 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	
-	private static final String SLINK_SEPARATOR = ",";
+	public static final String SLINK_SEPARATOR = ",";
 	private static final String SLINK = "link";
 
 	private static final String SSIZE_IN_BYTES = "sizeInBytes";
@@ -28,6 +28,10 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	private static final String SINSTRUMENT = "instrument";
 	private static final String SDATE = "date";
 	private static final String STITLE = "title";
+	
+	public static final int S_IURL_INDEX = 0;
+	public static final int S_IFILE_NAME_INDEX = 1;
+	public static final int S_IFILE_SIZE_INDEX = 2;
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
@@ -147,7 +151,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 		String sItem = "";
 
-		sItem = oResult.getProperties().get(SURL); //0 - url
+		sItem = oResult.getProperties().get(SHREF); //0 - url
 		if (sItem == null || sItem.isEmpty()) {
 			WasdiLog.debugLog("ResponseTranslatorModis.addLink: the download URL is null or empty. Product title: " + oResult.getTitle());
 			sItem = "http://";
