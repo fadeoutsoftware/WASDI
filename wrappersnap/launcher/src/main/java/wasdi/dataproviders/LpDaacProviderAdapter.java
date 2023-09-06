@@ -82,6 +82,9 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
         }
         catch( Exception oEx) {
 			WasdiLog.errorLog("LpDaacProviderAdapter.executeDownloadFile: exception when trying to download the file " + oEx.getMessage());
+        } finally {
+        	if (oInputStream != null)
+        		oInputStream.close();
         }
 
 		return sDownloadUrl;

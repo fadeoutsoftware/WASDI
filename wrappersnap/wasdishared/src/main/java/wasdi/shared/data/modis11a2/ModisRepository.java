@@ -46,7 +46,7 @@ public class ModisRepository extends MongoRepository  {
 				sJSON += "\"instrument\": \"" + oNewDocument.getSInstrument() + "\",";
 				sJSON += "\"sensor\": \"" + oNewDocument.getSSensor() + "\",";
 				sJSON += "\"url\": \"" + oNewDocument.getSUrl() + "\",";
-				sJSON += "\"boundingBox\": \"" + oNewDocument.getSBoundingBox() + "\"";
+				sJSON += "\"boundingBox\":" + oNewDocument.getSBoundingBox();
 
 				sJSON += "}";
 
@@ -64,9 +64,9 @@ public class ModisRepository extends MongoRepository  {
 		            // Insert the document into the collection
 		            collection.insertOne(oDocument);
 
-		            System.out.println("Document inserted successfully!");
-		        } catch (Exception e) {
-		            e.printStackTrace();
+		            WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
+		        } catch (Exception oEx) {
+					WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
 		        }
 		        
 				
@@ -75,7 +75,7 @@ public class ModisRepository extends MongoRepository  {
 
 //				WasdiLog.debugLog("EcoStressRepository | sResult: " + sResult);
 			} catch (Exception oEx) {
-				WasdiLog.debugLog("ModisRepository.insertModisItem: Exception when trying to insert the document in the db" + oEx);
+				WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when trying to insert the document in the db" + oEx);
 			}
 			
 		}
@@ -103,7 +103,6 @@ public class ModisRepository extends MongoRepository  {
 			
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("ModisRepository.countItems: Exception when counting documents from db" + oEx);
-
 		}
 
 		return -1;

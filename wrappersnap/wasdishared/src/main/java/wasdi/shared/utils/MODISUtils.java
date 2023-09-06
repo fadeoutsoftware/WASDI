@@ -2,6 +2,7 @@ package wasdi.shared.utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
@@ -16,18 +17,24 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+
 
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
+import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
 public class MODISUtils {
+	
+	private static final String s_sUsername;
+	private static final String s_sPassword;
+	
+	static {
+		 DataProviderConfig oDataProvider = WasdiConfig.Current.getDataProviderConfig("LPDAAC");
+		s_sUsername = oDataProvider.user;
+		s_sPassword = oDataProvider.password;
+	}
 	
 	// MODIS XML PARAMETERS
 	private static final String s_sFileName = "DistributedFileName";
@@ -92,7 +99,7 @@ public class MODISUtils {
     			String sProductDirectoryUrl = s_sMODISBaseUrl + sStartDate;
     			String sProductFileUrl = sProductDirectoryUrl + "/" + sGranuleId;
     			String sXMLUrlPath = sProductFileUrl + ".xml";
-    			WasdiLog.debugLog("MODISUyils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
+    			WasdiLog.debugLog("MODISUtils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
     			
     			
     			try {
@@ -112,63 +119,62 @@ public class MODISUtils {
     			} catch(IOException oEx) {
     	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading metadata file " + sXMLUrlPath + ". " + oEx.getMessage());
     			}
-    		}  
+    		}  // end while
     		oReader.close();
     	} catch (IOException oEx) {
     		WasdiLog.errorLog("MODISUtils.insertProducts. Error while populating the database with MODIS products " + oEx.getMessage());
     	} finally {
     		if (oReader != null) 
     			oReader.close();
+    		WasdiLog.debugLog("MODISUtils.insertProducts. Number of products added to the db: " + iProdCounts);
     	}	
     }
     
     
-    public static void tryDownloadFile(String sUrlFile) throws Exception {
-    	String sUsername = "*";
-        String sPassword = "*";
-        System.out.println("Accessing resource " + sUrlFile);
-        
-            /*
-             * Set up a cookie handler to maintain session cookies. A custom
-             * CookiePolicy could be used to limit cookies to just the resource
-             * server and URS.
-             */
-            CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-        
-            
-           System.out.println("Try to download file: " + sUrlFile);
-           
-           InputStream inputStream = null;
-         
-        try {
-        	inputStream = getResource(sUrlFile, sUsername, sPassword);
-	
-	        // Check if the save directory exists; if not, create it
-	        String savingDir = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA";
-	        File oSaveDir = new File(savingDir);
-
-
-            String saveName = oSaveDir + File.separator + sUrlFile.substring(sUrlFile.lastIndexOf('/') + 1).trim();
-            Path outputPath = Paths.get(saveName);
-
-            // Download the file using NIO
-            Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-
-            System.out.println("Downloaded file: " + saveName);
-            
-            inputStream.close();
-       } catch (IOException e) {
-        e.printStackTrace();
-        if (inputStream != null)
-        	inputStream.close();
-       }
-    }
+//    public static void tryDownloadFile(String sUrlFile) throws Exception {
+//    	String sUsername = "*";
+//        String sPassword = "*";
+//        System.out.println("Accessing resource " + sUrlFile);
+//        
+//            /*
+//             * Set up a cookie handler to maintain session cookies. A custom
+//             * CookiePolicy could be used to limit cookies to just the resource
+//             * server and URS.
+//             */
+//            CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+//        
+//            
+//           System.out.println("Try to download file: " + sUrlFile);
+//           
+//           InputStream inputStream = null;
+//         
+//        try {
+//        	inputStream = getResource(sUrlFile, sUsername, sPassword);
+//	
+//	        // Check if the save directory exists; if not, create it
+//	        String savingDir = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA";
+//	        File oSaveDir = new File(savingDir);
+//
+//
+//            String saveName = oSaveDir + File.separator + sUrlFile.substring(sUrlFile.lastIndexOf('/') + 1).trim();
+//            Path outputPath = Paths.get(saveName);
+//
+//            // Download the file using NIO
+//            Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
+//
+//            System.out.println("Downloaded file: " + saveName);
+//            
+//            inputStream.close();
+//       } catch (IOException e) {
+//        e.printStackTrace();
+//        if (inputStream != null)
+//        	inputStream.close();
+//       }
+//    }
     
     
     public static String readXmlFile(String sXMLUrlFile) throws IOException {
-        String sUsername = "*";						// TODO: put this in the config file
-        String sPassword = "*";						// TODO: put this in the config file
-        System.out.println("Accessing resource " + sXMLUrlFile);
+    	WasdiLog.debugLog("MODISUtils.readXmlFile. Accessing resource: " + sXMLUrlFile);
         
         InputStream oIn = null;
         BufferedReader oBin = null;
@@ -178,7 +184,7 @@ public class MODISUtils {
             CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
  
             /* Retrieve a stream for the resource */
-            oIn = getResource(sXMLUrlFile, sUsername, sPassword);
+            oIn = getResource(sXMLUrlFile, s_sUsername, s_sPassword);
             oBin = new BufferedReader(new InputStreamReader(oIn));
             StringBuilder oStringBuilder = new StringBuilder();
             String sLine;
@@ -320,45 +326,7 @@ public class MODISUtils {
 		
 		return sLocationJson;
 	}
-	
-    public static void tryDownload() {
-        String resource = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/2000.05.16/MOD11A2.A2000137.h34v10.061.2020045132244.hdf";
-        String username = "*";
-        String password = "*";
-        System.out.println("Accessing resource " + resource);
-        try
-        {
-            /*
-             * Set up a cookie handler to maintain session cookies. A custom
-             * CookiePolicy could be used to limit cookies to just the resource
-             * server and URS.
-             */
-            CookieHandler.setDefault(
-                new CookieManager(null, CookiePolicy.ACCEPT_ALL));
- 
-            /* Retreve a stream for the resource */
-            InputStream in = getResource(resource, username, password);
-            /* Dump the resource out (not a good idea for binary data) */
-            BufferedReader bin = new BufferedReader(
-                new InputStreamReader(in));
-            System.out.println("Ok - tryDownload");
-            String line;
-            while( (line = bin.readLine()) != null)
-            {
-                System.out.println(line);
-            }
-            bin.close();
-        }
-        catch( Exception t)
-        {
-            System.out.println("ERROR: Failed to retrieve resource");
-            System.out.println(t.getMessage());
-            t.printStackTrace();
-        }
-    }
-  
- 
-    
+
     
     /*
      * Returns an input stream for a designated resource on a URSauthenticated remote server.
