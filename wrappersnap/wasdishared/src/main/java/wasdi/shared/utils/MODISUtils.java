@@ -47,8 +47,8 @@ public class MODISUtils {
 	private static final String s_sBoundary = "Boundary";
 	private static final String s_sInstrument = "InstrumentShortName"; 
 	private static final String s_sSensor = "SensorShortName";
-	private static final String s_sLatitude = "PointLongitude";
-	private static final String s_sLongitude = "PointLatitude";
+	private static final String s_sLongitude = "PointLongitude";
+	private static final String s_sLatitude = "PointLatitude";
 	private static final String s_sPlatform = "PlatformShortName";
 	
 	// KEY TO ACCESS THE PARAMETERS MAP

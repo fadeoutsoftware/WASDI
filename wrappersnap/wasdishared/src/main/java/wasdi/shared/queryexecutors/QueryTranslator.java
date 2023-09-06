@@ -136,6 +136,11 @@ public abstract class QueryTranslator {
 	 * Token of ERA5 platform
 	 */
 	private static final String S_SPLATFORMNAME_EARTHCACHE = "platformname:Earthcache";
+	
+	/**
+	 * Token of TERRA platform
+	 */
+	private static final String S_SPLATFORMNAME_TERRA = "platformname:TERRA";
 
 	/**
 	 * Token of product type
@@ -545,6 +550,8 @@ public abstract class QueryTranslator {
 			
 			// Try get Info about Earthcache
 			parseEarthcache(sQuery, oResult);
+			
+			parseTerra(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -904,6 +911,20 @@ public abstract class QueryTranslator {
 			}
 
 			oResult.timeliness = extractValue(sQuery, "dayNightFlag");
+		}
+	}
+	
+	/**
+	 * Fills the Query View Model with TERRA info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseTerra(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_TERRA)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_TERRA);
+
+			oResult.platformName = Platforms.TERRA;
 		}
 	}
 
