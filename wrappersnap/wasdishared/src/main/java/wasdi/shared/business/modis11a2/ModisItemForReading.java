@@ -9,16 +9,21 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class ModisItem {
+public class ModisItemForReading {
+	
 	private String sFileName;
 	private long lFileSize;
 	private String sDayNightFlag;
+	
 	private Double dStartDate;
 	private Double dEndDate;
-	private String sBoundingBox;
+
+	private ModisLocation oBoundingBox;
+
 	private String sInstrument; 
 	private String sSensor;
 	private String sLatitude;
 	private String sPlatform;
 	private String sUrl;
+
 }

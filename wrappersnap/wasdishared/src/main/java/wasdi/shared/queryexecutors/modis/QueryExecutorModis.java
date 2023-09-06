@@ -1,0 +1,122 @@
+package wasdi.shared.queryexecutors.modis;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import wasdi.shared.queryexecutors.PaginatedQuery;
+import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.search.QueryResultViewModel;
+import wasdi.shared.viewmodels.search.QueryViewModel;
+import wasdi.shared.business.modis11a2.ModisItemForReading;
+import wasdi.shared.data.modis11a2.ModisRepository;
+
+
+public class QueryExecutorModis extends QueryExecutor {
+	
+	public QueryExecutorModis() {
+		m_sProvider = "MODIS"; // TODO: not sure this is the provider to put
+		
+		this.m_oQueryTranslator = new QueryTranslatorModis();
+		this.m_oResponseTranslator = new ResponseTranslatorModis();
+		
+		m_asSupportedPlatforms.add(Platforms.TERRA);
+	}
+	
+	@Override
+	public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+		if (sProduct.toUpperCase().startsWith("MOD11A2")) {
+			return sOriginalUrl;
+		}
+		return null;
+	}
+
+	@Override
+	public int executeCount(String sQuery) {
+		WasdiLog.debugLog("QueryExecutorModis.executeCount. Query: " + sQuery);
+		
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(sQuery);
+
+		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			return -1;
+		}
+		
+		Double dWest = oQueryViewModel.west;
+		Double dNorth = oQueryViewModel.north;
+		Double dEast = oQueryViewModel.east;
+		Double dSouth = oQueryViewModel.south;
+
+		String sDateFrom = oQueryViewModel.startFromDate;
+		String sDateTo = oQueryViewModel.endToDate;
+
+		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
+		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+
+		ModisRepository oModisRepositroy = new ModisRepository();
+		
+		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
+		
+		WasdiLog.debugLog("QueryExecutorModis.executeCount. Retrieved number of results: " + sQuery);
+
+		return (int) lCount;
+	}
+
+	@Override
+	public List<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
+		WasdiLog.debugLog("QueryExecutorModis.executeAndRetrieve. Query: " + oQuery.getQuery());
+
+		String sOffset = oQuery.getOffset();
+		String sLimit = oQuery.getLimit();
+
+		int iOffset = 0;
+		int iLimit = 10;
+
+		try {
+			iOffset = Integer.parseInt(sOffset);
+		} catch (Exception oE) {
+			WasdiLog.debugLog("QueryExecutorModis.executeAndRetrieve. Impossible to parse offset " + sOffset + ". "+ oE.toString());
+		}
+
+		try {
+			iLimit = Integer.parseInt(sLimit);
+		} catch (Exception oE) {
+			WasdiLog.debugLog("QueryExecutorModis.executeAndRetrieve. Impossible to parse limit " + sLimit + ". "+ oE.toString());
+		}
+
+		List<QueryResultViewModel> aoResults = new ArrayList<>();
+
+		// Parse the query
+		QueryViewModel oQueryViewModel = m_oQueryTranslator.parseWasdiClientQuery(oQuery.getQuery());
+
+		if (!m_asSupportedPlatforms.contains(oQueryViewModel.platformName)) {
+			return aoResults;
+		}
+
+		Double dWest = oQueryViewModel.west;
+		Double dNorth = oQueryViewModel.north;
+		Double dEast = oQueryViewModel.east;
+		Double dSouth = oQueryViewModel.south;
+
+		String sDateFrom = oQueryViewModel.startFromDate;
+		String sDateTo = oQueryViewModel.endToDate;
+
+		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
+		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+		
+		ModisRepository oModisRepositroy = new ModisRepository();
+
+		List<ModisItemForReading> aoItemList = oModisRepositroy.getModisItemList(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, iOffset, iLimit);
+
+		aoResults = aoItemList.stream()
+				.map((ModisItemForReading t) -> ((ResponseTranslatorModis) this.m_oResponseTranslator).translate(t))
+				.collect(Collectors.toList());
+
+		return aoResults;
+	}
+	
+	
+
+}

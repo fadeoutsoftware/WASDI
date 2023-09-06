@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-import wasdi.shared.business.modis11a2.ModisItem;
+import wasdi.shared.business.modis11a2.ModisItemForWriting;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
@@ -81,7 +82,7 @@ public class MODISUtils {
     		String sLine = "";
     		int iCont = 0;
     		
-    		while ((sLine = oReader.readLine()) != null && iCont < 2) {  // TODO: remove the count
+    		while ((sLine = oReader.readLine()) != null && iCont < 100) {  // TODO: remove the count
     			iCont ++;
     			
     			String[] asMetadata = sLine.split(","); 
@@ -100,7 +101,7 @@ public class MODISUtils {
 	    				
 	    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
 	    					Map<String, String> asProperties = parseXML(sXMLMetadataString, sProductFileUrl);
-	    					ModisItem oItem = buildModisItem(asProperties);
+	    					ModisItemForWriting oItem = buildModisItem(asProperties);
 	    					oModisRepo.insertModisItem(oItem);
 	    					iProdCounts++;
 	    					WasdiLog.debugLog("MODISUtils.insertProducts. product added to db: " + sProductFileUrl);
@@ -207,8 +208,8 @@ public class MODISUtils {
 	}
 	
     
-    private static ModisItem buildModisItem(Map<String, String> asProperties) {
-    	ModisItem oItem = new ModisItem();
+    private static ModisItemForWriting buildModisItem(Map<String, String> asProperties) {
+    	ModisItemForWriting oItem = new ModisItemForWriting();
     	
     	oItem.setSFileName(asProperties.get(s_sFileName));
     	oItem.setLFileSize(Long.parseLong(asProperties.get(s_sFileSize)));
@@ -291,25 +292,33 @@ public class MODISUtils {
 		String sLatitudeOpenTag = "<" + s_sLatitude + ">";
 		String sLatitudeCloseTag = sLatitudeOpenTag.replace("<", "</");
 		
-		List<String> asCoordinates = new ArrayList<>();
+		List<Double> adLongitude = new ArrayList<>();
+		List<Double> adLatitude = new ArrayList<>();
 		// read longitude and latitude for each point in the xml string
 		for (String sLine : asLines) {
 			sLine = sLine.trim();
-			if ( sLine.startsWith(sLongitudeOpenTag) && sLine.endsWith(sLongitueCloseTag)) 
-				asCoordinates.add(sLine.replace(sLongitudeOpenTag, "").replace(sLongitueCloseTag, ""));
+			if ( sLine.startsWith(sLongitudeOpenTag) && sLine.endsWith(sLongitueCloseTag))
+				adLongitude.add(Double.parseDouble(sLine.replace(sLongitudeOpenTag, "").replace(sLongitueCloseTag, "")));
 			else if (sLine.startsWith(sLatitudeOpenTag) && sLine.endsWith(sLatitudeCloseTag)) 
-				asCoordinates.add(sLine.replace(sLatitudeOpenTag, "").replace(sLatitudeCloseTag, ""));
+				adLatitude.add(Double.parseDouble(sLine.replace(sLatitudeOpenTag, "").replace(sLatitudeCloseTag, "")));
 		}
 		
-		// repeat the latitude and the longitude of the last point, to close the bounding box
-		if (asCoordinates.size() > 1) {
-	    	asCoordinates.add(asCoordinates.get(0));
-	    	asCoordinates.add(asCoordinates.get(1));
-		} else {
-			WasdiLog.debugLog("MODUSUtils.readBoundingBox. Coodinate list does not contain all the points. Cannot close the bounding box.");
-		}
+		double dMaxLat = Collections.max(adLatitude); // north
+		double dMinLat = Collections.min(adLatitude); // south
+		double dMaxLong = Collections.max(adLongitude); // east
+		double dMinLong = Collections.min(adLongitude); // west
 		
-		return String.join(",", asCoordinates);
+		// coordinates: WN, EN, ES, WS, WN
+		String sCoordinates = "[[ [" 
+				+ dMinLong + ", " + dMaxLat + "], [" 
+				+ dMaxLong +", " + dMaxLat + "], [" 
+				+ dMaxLong + ", " + dMinLat + "] , [" 
+				+ dMinLong + ", " + dMinLat + "], [" 
+				+ dMinLong + ", " + dMaxLat + "] ]]"; 
+		
+		String sLocationJson = "{\"type\": \"Polygon\", \"coordinates\": " + sCoordinates +"}";
+		
+		return sLocationJson;
 	}
 	
     public static void tryDownload() {
