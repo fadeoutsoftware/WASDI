@@ -59,7 +59,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
 		
-		WasdiLog.debugLog("QueryExecutorModis.executeCount. Retrieved number of results: " + sQuery);
+		WasdiLog.debugLog("QueryExecutorModis.executeCount. Retrieved number of results: " + lCount);
 
 		return (int) lCount;
 	}
