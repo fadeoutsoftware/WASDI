@@ -56,7 +56,7 @@ public class PushDockerImagesThread extends Thread {
 					
 					
 					// Try to login and push
-					String sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sDockerImageName, sProcessorFolder);
+					String sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, sDockerImageName);
 					
 					if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 						WasdiLog.debugLog("PushDockerImagesThread.run: error in the push");
@@ -80,16 +80,16 @@ public class PushDockerImagesThread extends Thread {
 	 * @param sImageName
 	 * @return
 	 */
-	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
+	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName) {
 		try {
-			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			String sToken = oDockerUtils.loginInRegistry(oDockerRegistryConfig);
 			
-			if (!bLogged) {
+			if (Utils.isNullOrEmpty(sToken)) {
 				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error logging in, return false.");
 				return "";
 			}
 			
-			boolean bPushed = oDockerUtils.push(sImageName);
+			boolean bPushed = oDockerUtils.push(sImageName, sToken);
 			
 			if (!bPushed) {
 				WasdiLog.debugLog("PushDockerImagesThread.loginAndPush: error in push, return false.");

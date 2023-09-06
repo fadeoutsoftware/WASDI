@@ -395,7 +395,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
             	
                 // Try to start Again the docker
-                oDockerUtils.start();
+                if (oDockerUtils.start() == false) {
+                	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
+                	return false;
+                }
                 
                 // Wait for it
                 waitForApplicationToStart(oParameter);                
@@ -1320,7 +1323,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
 				
 				// Try to login and push
-				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
+				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName);
 				
 				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
 					WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: image pushed");
@@ -1360,18 +1363,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * @param sImageName
 	 * @return
 	 */
-	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
+	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName) {
 		try {
 			// Login in the docker
-			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			String sToken = oDockerUtils.loginInRegistry(oDockerRegistryConfig);
 			
-			if (!bLogged) {
+			if (Utils.isNullOrEmpty(sToken)) {
 				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error logging in, return false.");
 				return "";
 			}
 			
 			// Push the image
-			boolean bPushed = oDockerUtils.push(sImageName);
+			boolean bPushed = oDockerUtils.push(sImageName, sToken);
 			
 			if (!bPushed) {
 				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error in push, return false.");
