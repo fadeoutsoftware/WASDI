@@ -21,13 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
 
 import wasdi.shared.business.modis11a2.ModisItem;
-import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.S3BucketUtils;
-import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
