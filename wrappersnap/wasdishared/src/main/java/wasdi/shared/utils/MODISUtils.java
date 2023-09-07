@@ -90,7 +90,7 @@ public class MODISUtils {
     		String sLine = "";
     		int iCont = 0;
     		
-    		while ((sLine = oReader.readLine()) != null && iCont < 100) {  // TODO: remove the count
+    		while ((sLine = oReader.readLine()) != null) {
     			iCont ++;
     			
     			String[] asMetadata = sLine.split(","); 
@@ -104,8 +104,8 @@ public class MODISUtils {
     			
     			
     			try {
-	    			if (iCont - 1 > 0) {			// TODO: remove the cont
-	    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); // TODO: handle Exception
+	    			if (iCont - 1 > 0) {
+	    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); 
 	    				
 	    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
 	    					Map<String, String> asProperties = parseXML(sXMLMetadataString, sProductFileUrl);
