@@ -48,7 +48,7 @@ WASDI retains the right to add subscription-only actions to this list at any tim
 
 5. Purchasing WASDI Subscriptions
 -----------------------------------
-5.1. After the 3 months of free access, WASDI offers two levels of subscription, STANDARD (STND) and PROFESSIONAL (PRO). For information on the differentiation, please visit our pricing page at either (`our information page <www.wasdi.cloud/pricing>`_) or log into an existing WASDI account and navigate to (`the Subscriptions Page<https://test.wasdi.net/#!/subscriptions>`_).
+5.1. After the 3 months of free access, WASDI offers two levels of subscription, STANDARD (STND) and PROFESSIONAL (PRO). For information on the differentiation, please visit our pricing page at either `our information page <www.wasdi.cloud/pricing>`_ or log into an existing WASDI account and navigate to `the Subscriptions Page <www.wasdi.net/#!/subscriptions>`_.
 
 5.2. Short Term and STANDARD (STND) Subscriptions are purchased through our payment partner, STRIPE. When the user completes a payment through Stripe, they are not only agreeing to act in compliance with WASDI’s terms of service, but also that of Stripe.
 
