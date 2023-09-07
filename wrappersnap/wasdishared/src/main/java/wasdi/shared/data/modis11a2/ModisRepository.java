@@ -6,10 +6,6 @@ import java.util.List;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
@@ -23,11 +19,11 @@ public class ModisRepository extends MongoRepository  {
 	String collectionName;
 	
 	public ModisRepository() {
-//		m_sThisCollection = "catalog";
-//		m_sRepoDb = "ecostress";
-		connectionString = "mongodb://localhost:27017";
-		databaseName = "testDb";
-		collectionName = "testModis";
+		m_sThisCollection = "catalog";  // TODO: add the name of the MODIS collection
+		m_sRepoDb = "mod11a2"; // TODO: add the name of the modis DB
+//		connectionString = "mongodb://localhost:27017";
+//		databaseName = "testDb";
+//		collectionName = "testModis";
 	}
 	
 	public void insertModisItem(ModisItemForWriting oNewDocument) {
@@ -51,29 +47,27 @@ public class ModisRepository extends MongoRepository  {
 				sJSON += "}";
 
 				Document oDocument = Document.parse(sJSON);
+				getCollection(m_sThisCollection).insertOne(oDocument);
+				String sResult = oDocument.getObjectId("_id").toHexString();
+				WasdiLog.debugLog("ModisRepository.insertModisItem. Result id: " + sResult);
 				
 				
-		        try (MongoClient mongoClient = MongoClients.create(connectionString)) {
-		            // Get a reference to the database
-		            MongoDatabase database = mongoClient.getDatabase(databaseName);
+//		        try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
+//		            // Get a reference to the database
+//		            MongoDatabase database = mongoClient.getDatabase(databaseName);
+//
+//		            // Get a reference to the collection
+//		            MongoCollection<Document> collection = database.getCollection(collectionName);
+//
+//
+//		            // Insert the document into the collection
+//		            collection.insertOne(oDocument);
+//
+//		            WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
+//		        } catch (Exception oEx) {
+//					WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
+//		        }			
 
-		            // Get a reference to the collection
-		            MongoCollection<Document> collection = database.getCollection(collectionName);
-
-
-		            // Insert the document into the collection
-		            collection.insertOne(oDocument);
-
-		            WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
-		        } catch (Exception oEx) {
-					WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
-		        }
-		        
-				
-//				getCollection(m_sThisCollection).insertOne(oDocument);0 
-//				String sResult = oDocument.getObjectId("_id").toHexString();
-
-//				WasdiLog.debugLog("EcoStressRepository | sResult: " + sResult);
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when trying to insert the document in the db" + oEx);
 			}
@@ -90,14 +84,9 @@ public class ModisRepository extends MongoRepository  {
 
 		System.out.println(sQuery);
 
-		try (MongoClient mongoClient = MongoClients.create(connectionString)) {
-            // Get a reference to the database
-            MongoDatabase database = mongoClient.getDatabase(databaseName);
-
-            // Get a reference to the collection
-            MongoCollection<Document> collection = database.getCollection(collectionName);
+		try {
             
-			long lCount = collection.countDocuments(Document.parse(sQuery));
+			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
 
 			return lCount;
 			
@@ -163,17 +152,13 @@ public class ModisRepository extends MongoRepository  {
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
 
 		System.out.println(sQuery);
-
-		try (MongoClient mongoClient = MongoClients.create(connectionString)) {
-            // Get a reference to the database
-            MongoDatabase database = mongoClient.getDatabase(databaseName);
-
-            // Get a reference to the collection
-            MongoCollection<Document> collection = database.getCollection(collectionName);
-            
-			FindIterable<Document> oWSDocuments = collection.find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
+		
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
 
 			fillList(aoReturnList, oWSDocuments, ModisItemForReading.class);
+
+
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
 		}
