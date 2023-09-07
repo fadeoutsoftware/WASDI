@@ -29,11 +29,13 @@ public class MODISUtils {
 	
 	private static final String s_sUsername;
 	private static final String s_sPassword;
+	private static final String s_sCSVFilePath;
 	
 	static {
 		 DataProviderConfig oDataProvider = WasdiConfig.Current.getDataProviderConfig("LPDAAC");
 		s_sUsername = oDataProvider.user;
 		s_sPassword = oDataProvider.password;
+		s_sCSVFilePath = WasdiConfig.Current.paths.wasdiTempFolder + "modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv"; 
 	}
 	
 	// MODIS XML PARAMETERS
@@ -68,9 +70,8 @@ public class MODISUtils {
  
 
     public static void main( String[] args ) throws Exception {
-    	// TODO: read the file from some configuration
     	final String sCSVFilePath = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA/modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv";
-    	insertProducts(sCSVFilePath);
+    	insertProducts();
     }
     
     /**
@@ -79,13 +80,13 @@ public class MODISUtils {
      * @return
      * @throws Exception
      */
-    public static void insertProducts(String sCSVFilePath) throws Exception {
+    public static void insertProducts() throws Exception {
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
     	
     	try {
-    		oReader = new BufferedReader(new FileReader(sCSVFilePath));  
+    		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
     		String sLine = "";
     		int iCont = 0;
     		

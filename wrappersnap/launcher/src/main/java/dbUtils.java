@@ -69,6 +69,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.MODISUtils;
 import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
@@ -2291,6 +2292,31 @@ public class dbUtils {
 		}
 	}    
 
+	
+	private static void modis() {
+		try {
+			
+            System.out.println("This tool will parse the config file and ingest in WASDI the MOD11A2 data from the LP DAAC catalogue. ");
+
+            System.out.println("\t1 - Proceed with import");
+            System.out.println("\tx - back");
+            System.out.println("");
+
+            String sInputString = s_oScanner.nextLine();
+
+            if (sInputString.equals("x")) {
+                return;
+            }
+
+            if (sInputString.equals("1")) {
+            	MODISUtils.insertProducts();
+            }
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+	}
+	
     public static void main(String[] args) {
 
         try {
@@ -2374,6 +2400,7 @@ public class dbUtils {
                 System.out.println("\t12 - Logs");
                 System.out.println("\t13 - EcoStress");
                 System.out.println("\t14 - Subscriptions");
+                System.out.println("\t15 - MOD11A2 data import");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2408,7 +2435,9 @@ public class dbUtils {
                     ecoStress();
                 } else if (sInputString.equals("14")) {
                     subscriptions();
-                }  
+                } else if (sInputString.equals("15")) {
+                	modis();
+                }
                 else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {
