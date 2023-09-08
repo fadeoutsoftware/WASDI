@@ -55,8 +55,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: call base class deploy");
-		
 		// We do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register

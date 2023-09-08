@@ -195,14 +195,12 @@ public class DockerUtils {
         	// Docker API Url
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
-        	
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
             
             // Prepare the name of the image
             String sImageBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
-            
             sImageName = sImageBaseName;
             
             sUrl += "build?t=" + StringUtils.encodeUrl(sImageName);
@@ -213,10 +211,7 @@ public class DockerUtils {
             	WasdiLog.debugLog("DockerUtils.build: using registry " + m_sDockerRegistry);
             	sImageName = m_sDockerRegistry + "/" + sImageBaseName;
             	sUrl += "&t=" + StringUtils.encodeUrl(sImageName);
-            }
-    		
-    		if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
-    			
+
             	// Take all our registers
             	List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
             	
@@ -231,65 +226,67 @@ public class DockerUtils {
 					sUrl += "&t=" +  StringUtils.encodeUrl(sAddedName);
 					
 					WasdiLog.debugLog("DockerUtils.build: added tag  for " + oDockerRegistryConfig.id);
-				}
-            	
-            	// If we have user and or pip params, add the buildargs parameter
-            	if (!Utils.isNullOrEmpty(m_sWasdiSystemUser) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
-            		
-            		String sBuildArgs = "{";
-            		
-            		boolean bAdded = false;
-            		
-                    if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
-                    	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\",\"USR_ID\":\"" + WasdiConfig.Current.systemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemUser+"\",\"GRP_ID\":\"" + WasdiConfig.Current.systemUserId+"\"";                    	
-                    	bAdded = true;
-                    }
-                    
-                    if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
-                    	if (bAdded) sBuildArgs+=",";
-                    	sBuildArgs+="\"PIP_INSTALL_WASDI_ARGUMENTS\":\""+ WasdiConfig.Current.dockers.pipInstallWasdiAddress + "\"";
-                    }            	
-            		
-                    sBuildArgs += "}";
-                    
-                    String sEncodedBuildArgs = StringUtils.encodeUrl(sBuildArgs);
-                    
-                    sUrl+="&buildargs=" + sEncodedBuildArgs;
-            	}
-            	
-            	// We need to make a Tar File
-            	final ArrayList<String> asTarFiles = new ArrayList<>();
+				}            	
+            }
+    		            	
+        	// If we have user and or pip params, add the buildargs parameter
+        	if (!Utils.isNullOrEmpty(m_sWasdiSystemUser) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
         		
-            	// Get the list of all files in the processor folder
-    			Path oPath = Paths.get(m_sProcessorFolder);
-    			Files.walk(oPath).filter(oFilteredPath -> !Files.isDirectory(oFilteredPath)).forEach(oFilePath -> {
-    				asTarFiles.add(oFilePath.toString());
-    			});
-            	
-    			// Name of the ouput tar
-            	String sTarFileOuput = m_sProcessorFolder + m_oProcessor.getProcessorId() + ".tar";
-            	
-            	// Tar the file
-            	if (!TarUtils.tarFiles(asTarFiles, m_sProcessorFolder, sTarFileOuput)) {
-            		WasdiLog.errorLog("Impossible to create the tar file to upload to docker, this is a problem!");
-            		return "";
-            	}
-            	
-            	// Set the Content Type Header
-            	HashMap<String, String> asHeaders = new HashMap<>();
-            	asHeaders.put("Content-type","application/x-tar");
-            	
-            	// Finally make the call
-            	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders, null, null);
-            	
-            	// Delete the tar
-            	WasdiFileUtils.deleteFile(sTarFileOuput);
-            	
-            	if (oResponse.getResponseCode() != 200) {
-            		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());
-            		return "";
-            	}
-    		}
+        		WasdiLog.debugLog("DockerUtils.build: adding build args to url");
+        		
+        		String sBuildArgs = "{";
+        		
+        		boolean bAdded = false;
+        		
+                if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
+                	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\",\"USR_ID\":\"" + WasdiConfig.Current.systemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemUser+"\",\"GRP_ID\":\"" + WasdiConfig.Current.systemUserId+"\"";                    	
+                	bAdded = true;
+                }
+                
+                if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+                	if (bAdded) sBuildArgs+=",";
+                	sBuildArgs+="\"PIP_INSTALL_WASDI_ARGUMENTS\":\""+ WasdiConfig.Current.dockers.pipInstallWasdiAddress + "\"";
+                }            	
+        		
+                sBuildArgs += "}";
+                
+                String sEncodedBuildArgs = StringUtils.encodeUrl(sBuildArgs);
+                
+                sUrl+="&buildargs=" + sEncodedBuildArgs;
+        	}
+        	
+        	// We need to make a Tar File
+        	final ArrayList<String> asTarFiles = new ArrayList<>();
+    		
+        	// Get the list of all files in the processor folder
+			Path oPath = Paths.get(m_sProcessorFolder);
+			Files.walk(oPath).filter(oFilteredPath -> !Files.isDirectory(oFilteredPath)).forEach(oFilePath -> {
+				asTarFiles.add(oFilePath.toString());
+			});
+        	
+			// Name of the ouput tar
+        	String sTarFileOuput = m_sProcessorFolder + m_oProcessor.getProcessorId() + ".tar";
+        	
+        	// Tar the file
+        	if (!TarUtils.tarFiles(asTarFiles, m_sProcessorFolder, sTarFileOuput)) {
+        		WasdiLog.errorLog("Impossible to create the tar file to upload to docker, this is a problem!");
+        		return "";
+        	}
+        	
+        	// Set the Content Type Header
+        	HashMap<String, String> asHeaders = new HashMap<>();
+        	asHeaders.put("Content-type","application/x-tar");
+        	
+        	// Finally make the call
+        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders, null, null);
+        	
+        	// Delete the tar
+        	WasdiFileUtils.deleteFile(sTarFileOuput);
+        	
+        	if (oResponse.getResponseCode() != 200) {
+        		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());
+        		return "";
+        	}
 
             WasdiLog.debugLog("DockerUtils.build: created image " + sImageName);
             

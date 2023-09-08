@@ -154,7 +154,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Check it
             if (oProcessorZipFile.exists() == false) {
-            	return logDeployErrorAndClean("Cannot find the processor file... something went wrong", bFirstDeploy);
+            	return logDeployErrorAndClean("DeployProcessor Cannot find the processor Zip file, something went wrong", bFirstDeploy);
             }
 
             if (bFirstDeploy) {
