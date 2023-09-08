@@ -644,7 +644,7 @@ public class WasdiFileUtils {
 			String sFileName = oFile.getName();
 			String sExt = FilenameUtils.getExtension(sFileName);
 
-			if(ImageResourceUtils.isValidExtension(sExt) == false ){
+			if(ImageResourceUtils.isValidExtension(sExt)){
 				return true;
 			}					
 		}
