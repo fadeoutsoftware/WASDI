@@ -3,14 +3,20 @@ package wasdi.processors.dockerUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -32,6 +38,7 @@ import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -185,6 +192,10 @@ public class DockerUtils {
     	String sImageName = "";
 
         try {
+        	// Docker API Url
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+        	
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
@@ -194,17 +205,15 @@ public class DockerUtils {
             
             sImageName = sImageBaseName;
             
+            sUrl += "build?t=" + StringUtils.encodeUrl(sImageName);
+            
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
             	// Yes, add it to the docker name
             	WasdiLog.debugLog("DockerUtils.build: using registry " + m_sDockerRegistry);
             	sImageName = m_sDockerRegistry + "/" + sImageBaseName;
+            	sUrl += "&t=" + StringUtils.encodeUrl(sImageName);
             }
-            
-    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		
-    		sUrl += "build?t=" + sImageName + ":" + m_oProcessor.getVersion();
     		
     		if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
     			
@@ -216,8 +225,10 @@ public class DockerUtils {
             		// Is this the main one? So jump, already added
 					if (oDockerRegistryConfig.address.equals(m_sDockerRegistry)) continue;
 					
+					String sAddedName = oDockerRegistryConfig.address + "/"  + sImageBaseName; 
+					
 					// No, ok, we can add a new tag
-					sUrl += "&t=" +  oDockerRegistryConfig.address + "/"  + sImageBaseName + ":" + m_oProcessor.getVersion();
+					sUrl += "&t=" +  StringUtils.encodeUrl(sAddedName);
 					
 					WasdiLog.debugLog("DockerUtils.build: added tag  for " + oDockerRegistryConfig.id);
 				}
@@ -230,7 +241,7 @@ public class DockerUtils {
             		boolean bAdded = false;
             		
                     if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
-                    	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\", \"USR_ID\": " + WasdiConfig.Current.systemUserId + ", \"GRP_NAME\":\""+m_sWasdiSystemUser+"\", \"GRP_ID\":" + WasdiConfig.Current.systemUserId;                    	
+                    	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\",\"USR_ID\":\"" + WasdiConfig.Current.systemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemUser+"\",\"GRP_ID\":\"" + WasdiConfig.Current.systemUserId+"\"";                    	
                     	bAdded = true;
                     }
                     
@@ -247,15 +258,19 @@ public class DockerUtils {
             	}
             	
             	// We need to make a Tar File
-            	// TODO: Here I have my error I think!! We need to put all the files in the processor folder!!
-            	ArrayList<String> asTarFiles = new ArrayList<>();
-            	String sDockerFileInput = m_sProcessorFolder + "/Dockerfile";
-            	asTarFiles.add(sDockerFileInput);
+            	final ArrayList<String> asTarFiles = new ArrayList<>();
+        		
+            	// Get the list of all files in the processor folder
+    			Path oPath = Paths.get(m_sProcessorFolder);
+    			Files.walk(oPath).filter(oFilteredPath -> !Files.isDirectory(oFilteredPath)).forEach(oFilePath -> {
+    				asTarFiles.add(oFilePath.toString());
+    			});
             	
-            	String sTarFileOuput = m_sProcessorFolder + "/Dockerfile.tar";
+    			// Name of the ouput tar
+            	String sTarFileOuput = m_sProcessorFolder + m_oProcessor.getProcessorId() + ".tar";
             	
             	// Tar the file
-            	if (!TarUtils.tarFiles(asTarFiles, sTarFileOuput)) {
+            	if (!TarUtils.tarFiles(asTarFiles, m_sProcessorFolder, sTarFileOuput)) {
             		WasdiLog.errorLog("Impossible to create the tar file to upload to docker, this is a problem!");
             		return "";
             	}
@@ -266,6 +281,9 @@ public class DockerUtils {
             	
             	// Finally make the call
             	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders, null, null);
+            	
+            	// Delete the tar
+            	WasdiFileUtils.deleteFile(sTarFileOuput);
             	
             	if (oResponse.getResponseCode() != 200) {
             		WasdiLog.errorLog("There was an error in the post: message " + oResponse.getResponseBody());
@@ -697,12 +715,12 @@ public class DockerUtils {
     			return true;
     		}
     		else {
-    			WasdiLog.errorLog("Error pulling image " + sImage + " got answer http " + oResponse.getResponseCode());
+    			WasdiLog.errorLog("DockerUtils.push: Error pushing image " + sImage + " got answer http " + oResponse.getResponseCode());
     			return false;
     		}
     	} 
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("DockerUtils.pull: " + oEx.toString());
+    		WasdiLog.errorLog("DockerUtils.push: " + oEx.toString());
             return false;
         }
     	/*
