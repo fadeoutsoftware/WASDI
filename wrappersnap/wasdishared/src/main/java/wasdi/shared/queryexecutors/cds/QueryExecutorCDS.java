@@ -136,8 +136,12 @@ public class QueryExecutorCDS extends QueryExecutor {
 			String sDataset = oCDSQuery.productName;
 			String sProductType = oCDSQuery.productType;
 			String sPresureLevels = oCDSQuery.productLevel;
-			String sVariables = oCDSQuery.sensorMode;
-			String sFormat = oCDSQuery.timeliness;
+			String sVariables = sDataset.contentEquals(s_sSEA_SURFACE_TEMPERATURE_DATASET) 
+					? "all" 
+					: oCDSQuery.sensorMode;
+			String sFormat = sDataset.contentEquals(s_sSEA_SURFACE_TEMPERATURE_DATASET) 
+					? "zip" 
+					: oCDSQuery.timeliness;
 			String sVersion = oCDSQuery.instrument;
 			String sBoundingBox = oCDSQuery.north + ", " + oCDSQuery.west + ", " + oCDSQuery.south + ", " + oCDSQuery.east;
 			String sFootPrint = extractFootprint(oQuery.getQuery());
@@ -287,8 +291,11 @@ public class QueryExecutorCDS extends QueryExecutor {
 			sEndDateTime = TimeEpochUtils.fromEpochToDateString(oEndDate.getTime());
 		}
 
-		String sExtension = "." + oQuery.timeliness;
-		String sFileName = getFileName(oQuery.productName, oQuery.sensorMode, sStartDate, sEndDate, sExtension);
+		String sDataset = oQuery.productName;
+		String sVariables = sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET) ? "all" : oQuery.sensorMode;
+		String sExtension = sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET) ? "zip" : oQuery.timeliness;
+		String sExtensionWithComma = "." +  sExtension;
+		String sFileName = getFileName(oQuery.productName, sVariables, sStartDate, sEndDate, sExtensionWithComma);
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
@@ -296,13 +303,13 @@ public class QueryExecutorCDS extends QueryExecutor {
 		oResult.setId(sFileName);
 		oResult.setTitle(sFileName);
 		oResult.setLink(sEncodedUrl);
-		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, oQuery.sensorMode, oQuery.timeliness)); 
+		oResult.setSummary(getSummary(sStartDateTime, sEndDateTime, sVariables, sExtension)); 
 		oResult.setProvider(m_sProvider);
 		oResult.setFootprint(sFootPrint);
 		oResult.getProperties().put("platformname", Platforms.ERA5);
 		oResult.getProperties().put("dataset", oQuery.productName);
-		oResult.getProperties().put("format", oQuery.timeliness);
-		oResult.getProperties().put("variables", oQuery.sensorMode);
+		oResult.getProperties().put("variables", sVariables);
+		oResult.getProperties().put("format", sExtension);
 		oResult.getProperties().put("startDate", sStartDateTime);
 		oResult.getProperties().put("beginposition", sStartDateTime);
 
