@@ -1,17 +1,26 @@
 package wasdi.shared.queryexecutors.lpdaac;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 import wasdi.shared.business.modis11a2.ModisItemForReading;
+import wasdi.shared.config.MongoConfig;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
 
@@ -22,8 +31,7 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
-		
-		m_asSupportedPlatforms.add(Platforms.TERRA);
+		this.m_asSupportedPlatforms.add(Platforms.TERRA);
 	}
 	
 	@Override
@@ -117,6 +125,22 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		return aoResults;
 	}
 	
+	@Override
+	public void init() {
+		super.init();
+		if (Utils.isNullOrEmpty(this.m_sParserConfigPath)) {
+			WasdiLog.errorLog("QueryExecutorLpDaac.init. Path to parser config is empty. It won't be possible to establish a connection to the db");
+			return;
+		}
+    	try {
+    		String sModisConfigJson = Files.lines(Paths.get(this.m_sParserConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+    		ObjectMapper oMapper = new ObjectMapper(); 
+            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("QueryExecutorLpDaac.init. Error while trying to connect to MODIS db. " + oEx.getMessage());
+        }
+	}
 	
 
 }

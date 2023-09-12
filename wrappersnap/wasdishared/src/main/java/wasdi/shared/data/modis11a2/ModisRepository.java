@@ -19,8 +19,8 @@ public class ModisRepository extends MongoRepository  {
 	String collectionName;
 	
 	public ModisRepository() {
-		m_sThisCollection = "catalog";  // TODO: add the name of the MODIS collection
-		m_sRepoDb = "modis"; // TODO: add the name of the modis DB
+		m_sThisCollection = "catalog"; 
+		m_sRepoDb = "modis"; 
 //		connectionString = "mongodb://localhost:27017";
 //		databaseName = "testDb";
 //		collectionName = "testModis";
