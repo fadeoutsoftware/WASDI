@@ -2373,13 +2373,25 @@ public class dbUtils {
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
             
+            // add connection to ecostress db
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
-            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
-            String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
-            ObjectMapper oMapper = new ObjectMapper(); 
-            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
-            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
             
+            // add connection to modis db
+            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
+            if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
+            	try {
+            		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+            		ObjectMapper oMapper = new ObjectMapper(); 
+		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+	            } catch (Exception oEx) {
+	            	System.err.println("Db Utils - Error while reading the MODIS db configuration. Exit. " + oEx.getMessage());
+	            	System.exit(-1);
+	            }
+            } else {
+                System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
+                System.exit(-1); 
+            }
             
             //testEOEPCALogin();
 
