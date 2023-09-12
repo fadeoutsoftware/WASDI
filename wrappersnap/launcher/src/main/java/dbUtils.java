@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,10 +22,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.processors.PythonPipProcessorEngine2;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -47,6 +45,7 @@ import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
+import wasdi.shared.config.MongoConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -69,13 +68,13 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.MODISUtils;
 import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -2375,6 +2374,12 @@ public class dbUtils {
             }
             
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
+            String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+            ObjectMapper oMapper = new ObjectMapper(); 
+            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+            
             
             //testEOEPCALogin();
 

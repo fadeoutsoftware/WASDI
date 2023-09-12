@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.shared.utils.modis;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -22,6 +22,8 @@ import java.util.Map;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.TimeEpochUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.data.modis11a2.ModisRepository;
 
@@ -32,10 +34,10 @@ public class MODISUtils {
 	private static final String s_sCSVFilePath;
 	
 	static {
-		 DataProviderConfig oDataProvider = WasdiConfig.Current.getDataProviderConfig("LPDAAC");
+		DataProviderConfig oDataProvider = WasdiConfig.Current.getDataProviderConfig("LPDAAC");
 		s_sUsername = oDataProvider.user;
 		s_sPassword = oDataProvider.password;
-		s_sCSVFilePath = WasdiConfig.Current.paths.wasdiTempFolder + "modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv"; 
+		s_sCSVFilePath = WasdiConfig.Current.paths.userHomePath + "modis_mod11a2_v61_64f584ce5c8845f6.csv"; 
 	}
 	
 	// MODIS XML PARAMETERS
@@ -210,8 +212,6 @@ public class MODISUtils {
 	private static Long parseDate(String sDate, String sTime) {
 		String sComposedDate = sDate + "T" + sTime.substring(0, 12) + "Z";
 		return TimeEpochUtils.fromDateStringToEpoch(sComposedDate);
-
-		
 	}
 	
     

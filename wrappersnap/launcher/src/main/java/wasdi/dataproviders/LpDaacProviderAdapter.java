@@ -13,9 +13,9 @@ import java.nio.file.StandardCopyOption;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.lpdaac.ResponseTranslatorLpDaac;
-import wasdi.shared.utils.MODISUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.modis.MODISUtils;
 
 public class LpDaacProviderAdapter extends ProviderAdapter {
 	
