@@ -6,17 +6,22 @@ import java.util.List;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class ModisRepository extends MongoRepository  {
 	
-	String connectionString;
-	String databaseName;
-	String collectionName;
+//	String connectionString;
+//	String databaseName;
+//	String collectionName;
 	
 	public ModisRepository() {
 		m_sThisCollection = "catalog"; 
@@ -81,11 +86,29 @@ public class ModisRepository extends MongoRepository  {
 	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo) {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
+		
+		
+//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
+//	        // Get a reference to the database
+//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
+//
+//	        // Get a reference to the collection
+//	        MongoCollection<Document> collection = database.getCollection(collectionName);
+//
+//
+//	        // Insert the document into the collection
+//	        long lCount = collection.countDocuments(Document.parse(sQuery));
+//	        
+//	        
+//	        return lCount;
+//
+//	    } catch (Exception oEx) {
+//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
+//	    }	
+		
 
-		System.out.println(sQuery);
-
-		try {
-            
+		try {	
+			
 			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
 
 			return lCount;
@@ -98,9 +121,11 @@ public class ModisRepository extends MongoRepository  {
 	}
 	
 	
-	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo) {
-		// coordinates: WN, EN, ES, WS, WN
+	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo) {		
+		
+		List<String> asQueryFilters = new ArrayList<>();
 
+		// coordinates: WN, EN, ES, WS, WN
 		String sCoordinates = "[ "
 				+ "[" + dWest + ", " + dNorth + "], "
 				+ "[" + dEast + ", " + dNorth + "], "
@@ -109,34 +134,35 @@ public class ModisRepository extends MongoRepository  {
 				+ "[" + dWest + ", " + dNorth + "] "
 				+ "]";
 
-		System.out.println(sCoordinates);
-
-		String sQuery = 
-				"   {\r\n" + 
+		boolean bValidCoordinates = !Utils.isNullOrEmpty(dWest) && !Utils.isNullOrEmpty(dNorth) && !Utils.isNullOrEmpty(dEast) && !Utils.isNullOrEmpty(dSouth); 
+		
+		if (bValidCoordinates) {
+		asQueryFilters.add(  
 				"     boundingBox: {\r\n" + 
 				"       $geoIntersects: {\r\n" + 
 				"          $geometry: {\r\n" + 
 				"             type: \"Polygon\" ,\r\n" + 
 				"             coordinates: [\r\n" + 
-				sCoordinates + 
+								sCoordinates + 
 				"             ]\r\n" + 
 				"          }\r\n" + 
 				"       }\r\n" + 
-				"     }\r\n";
+				"     }\r\n"
+				);
+		}
 
 
 
 		if (lDateFrom != null) {
-			sQuery += ", startDate: {$gte: " + lDateFrom + "}";
+			asQueryFilters.add("startDate: {$gte: " + lDateFrom + "}");
 		}
 
 		if (lDateTo != null) {
-			sQuery += ", endDate: {$lte: " + lDateTo + "}";
+			asQueryFilters.add("endDate: {$lte: " + lDateTo + "}");
 		}
 
-
-		sQuery += "   }";
-
+		String sQuery = "   {\r\n" + String.join(", ", asQueryFilters) + "   }";
+		
 		return sQuery;
 	}
 	
@@ -151,7 +177,23 @@ public class ModisRepository extends MongoRepository  {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
 
-		System.out.println(sQuery);
+//		System.out.println(sQuery);
+		
+//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
+//	        // Get a reference to the database
+//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
+//
+//	        // Get a reference to the collection
+//	        MongoCollection<Document> collection = database.getCollection(collectionName);
+//
+//
+//	        // Insert the document into the collection
+//	        collection.find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
+//
+//	        WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
+//	    } catch (Exception oEx) {
+//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
+//	    }	
 		
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
