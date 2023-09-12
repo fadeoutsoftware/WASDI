@@ -55,8 +55,6 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: call base class deploy");
-		
 		// We do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -99,7 +97,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	@Override
 	public boolean redeploy(ProcessorParameter oParameter) {
 		
-		if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+		if (!WasdiConfig.Current.isMainNode()) {
 			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
 			return true;			
 		}
@@ -150,6 +148,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		String sNewVersion = oProcessor.getVersion();
 		sNewVersion = StringUtils.incrementIntegerString(sNewVersion);
 		oProcessor.setVersion(sNewVersion);
+		
 		// Save it
 		oProcessorRepository.updateProcessor(oProcessor);
         
@@ -255,14 +254,22 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	        }
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: exception " + oEx.toString());
 		}		
 	}
 	
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		WasdiLog.debugLog("DockerProcessorEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
-		return redeploy(oParameter);
+		
+		if (WasdiConfig.Current.isMainNode()) {
+			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
+			return redeploy(oParameter);			
+		}
+		else {
+			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  we are not the main node, nothing to do");
+			return true;			
+		}
+		
 	}
 	
 	@Override
@@ -312,6 +319,31 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: call base class refreshPackagesInfo");
 		
 		return super.refreshPackagesInfo(oParameter);
+	}
+	
+	@Override
+	public boolean delete(ProcessorParameter oParameter) {
+		
+		// We read  the registers from the config
+		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		
+		if (aoRegisters == null) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is null, return false.");
+			return false;
+		}
+		
+		if (aoRegisters.size() == 0) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is empty, return false.");
+			return false;			
+		}
+		
+		
+		WasdiLog.debugLog("PythonPipProcessorEngine2.delete: Registry set, call base class delete.");
+		
+		// And we work with our main register
+		m_sDockerRegistry = aoRegisters.get(0).address;	
+		
+		return super.delete(oParameter);
 	}
 	
 

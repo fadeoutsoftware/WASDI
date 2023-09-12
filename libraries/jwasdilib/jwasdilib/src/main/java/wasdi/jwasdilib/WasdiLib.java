@@ -2460,8 +2460,8 @@ public class WasdiLib {
 				sProvider = getDefaultProvider();
 			}
 			// Encode link and bb
-			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
-			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
+			String sEncodedFileLink = URLEncoder.encode(sFileUrl, java.nio.charset.StandardCharsets.UTF_8.toString());
+			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox, java.nio.charset.StandardCharsets.UTF_8.toString());
 
 			String sUrl = m_sBaseUrl + "/filebuffer/download";
 
@@ -2683,7 +2683,7 @@ public class WasdiLib {
 			}
 
 			// Encode the params
-			sParamsJson = URLEncoder.encode(sParamsJson);
+			sParamsJson = URLEncoder.encode(sParamsJson, java.nio.charset.StandardCharsets.UTF_8.toString());
 
 			// Use the string version
 			return asynchExecuteProcessor(sProcessorName, sParamsJson);

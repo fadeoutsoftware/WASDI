@@ -79,6 +79,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.ImageResourceUtils;
 import wasdi.shared.utils.PermissionsUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -1255,7 +1256,7 @@ public class ProcessorsResource  {
 			}
 			
 			// This API is allowed ONLY on computing nodes
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				WasdiLog.debugLog("ProcessorsResource.nodeDeleteProcessor: this is the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
@@ -1271,7 +1272,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			if (oWorkspace != null) {
 				
@@ -1330,7 +1331,7 @@ public class ProcessorsResource  {
 			}
 						
 			// This API is allowed ONLY on the main node
-			if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (!WasdiConfig.Current.isMainNode()) {
 				WasdiLog.debugLog("ProcessorsResource.deleteProcessor: this is not the main node, cannot call this API here");
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
@@ -1397,7 +1398,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			if (oWorkspace != null) {
 				
@@ -1469,7 +1470,7 @@ public class ProcessorsResource  {
 			}
 						
 			
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				// Start a thread to update all the computing nodes
 				try {
 					WasdiLog.debugLog("ProcessorsResource.redeployProcessor: this is the main node, starting Worker to redeploy Processor also on computing nodes");
@@ -1495,7 +1496,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);			
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);			
 
 			// Schedule the process to run the processor
 			
@@ -1570,7 +1571,7 @@ public class ProcessorsResource  {
 			}
 
 
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				
 				// In the main node: start a thread to update all the computing nodes
 				
@@ -1600,7 +1601,7 @@ public class ProcessorsResource  {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			WasdiLog.debugLog("ProcessorsResource.libraryUpdate: create local operation");
 			
@@ -1688,7 +1689,8 @@ public class ProcessorsResource  {
 			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
 			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
 			oProcessorToUpdate.setTimeoutMs(((long)oUpdatedProcessorVM.getMinuteTimeout())*1000l*60l);
-			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
+			// NOTE: The version is handled only on server side in automatic way
+			//oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
 			
 			Date oDate = new Date();
 			oProcessorToUpdate.setUpdateDate((double)oDate.getTime());
@@ -1819,7 +1821,7 @@ public class ProcessorsResource  {
 				
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: update done");
 				
-				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 					
 					// In the main node: start a thread to update all the computing nodes
 					
@@ -1864,7 +1866,7 @@ public class ProcessorsResource  {
 				
 				// Get the dedicated special workpsace
 				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+				Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 				
 				// If we have our special workspace
 				if (oWorkspace != null) {
@@ -1877,6 +1879,7 @@ public class ProcessorsResource  {
 					oProcessorParameter.setName(oProcessorToUpdate.getName());
 					oProcessorParameter.setProcessObjId(Utils.getRandomName());
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
+					oProcessorParameter.setProcessorType(oProcessorToUpdate.getType());
 					
 					String sPath = WasdiConfig.Current.paths.serializationPath;
 					
@@ -2399,7 +2402,7 @@ public class ProcessorsResource  {
 			ProcessorUIRepository oProcessorUIRepository = new ProcessorUIRepository();			
 			ProcessorUI oUI = oProcessorUIRepository.getProcessorUI(oProcessor.getProcessorId());
 			
-			String sEncodedUI = URLEncoder.encode(sUIJson, StandardCharsets.UTF_8.toString());
+			String sEncodedUI = StringUtils.encodeUrl(sUIJson);
 			
 			if (oUI == null) {
 				oUI = new ProcessorUI();

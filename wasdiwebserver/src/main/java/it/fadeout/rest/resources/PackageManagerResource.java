@@ -125,7 +125,7 @@ public class PackageManagerResource {
 			return Response.status(Status.UNAUTHORIZED).build();			
 		}		
 		
-		if (WasdiConfig.Current.nodeCode.equals("wasdi") == false) {
+		if (WasdiConfig.Current.isMainNode() == false) {
 			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
@@ -251,7 +251,7 @@ public class PackageManagerResource {
 			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, Wasdi.s_sMyNodeCode);
+			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
 			
 			WasdiLog.debugLog("PackageManagerResource.environmentupdate: create local operation");
 			String sUserId = oUser.getUserId();
@@ -274,7 +274,7 @@ public class PackageManagerResource {
 			
 			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), sPath, oProcessorParameter);
 			
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				
 				// In the main node: start a thread to update all the computing nodes
 				try {

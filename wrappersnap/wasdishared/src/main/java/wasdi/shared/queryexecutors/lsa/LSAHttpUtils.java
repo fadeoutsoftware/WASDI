@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.net.io.Util;
 
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -55,7 +56,7 @@ public class LSAHttpUtils {
     		sActionLink = sActionLink.replace("&amp;", "&");
     		
     		// Body with the login data
-    		String sLoginData = "username=" + URLEncoder.encode(sUser, java.nio.charset.StandardCharsets.UTF_8.toString()) + "&password=" + URLEncoder.encode(sPassword, java.nio.charset.StandardCharsets.UTF_8.toString());
+    		String sLoginData = "username=" + StringUtils.encodeUrl(sUser) + "&password=" + StringUtils.encodeUrl(sPassword);
     		
     		// Log in
     		String sLoginResult = LSAHttpUtils.httpPostResults(sActionLink, sLoginData, oCookieManager);

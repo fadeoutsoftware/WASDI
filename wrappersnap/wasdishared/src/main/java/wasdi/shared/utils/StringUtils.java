@@ -141,5 +141,62 @@ public final class StringUtils {
 		
 		return sReturnString;
 	}
+	
+	/**
+	 * Assume that the sNumber parameter contains the representation of an integer.
+	 * It returns the number decreased by 1.
+	 * @param sNumber Input string with the number
+	 * @return String with the number decreased, empty string otherwise
+	 */
+	public static String decrementIntegerString(String sNumber) {
+		String sReturnString = "";
+		
+		try {
+			int iNumber = Integer.parseInt(sNumber);
+			
+			iNumber = iNumber-1;
+			sReturnString = "" + iNumber;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StringUtils.decrementIntegerString: not valid input string - ", oEx);
+		}
+		
+		return sReturnString;
+	}
+	
+	/**
+	 * Check if a String is a valid integer
+	 * In case of errors, will log and return 0
+	 * @param sNumber Input string with the number
+	 * @return Integer representation. NOTE that in case of errors returns 0 in any case
+	 */
+	public static boolean isValidInteger(String sNumber) {
+		try {
+			Integer.parseInt(sNumber);
+			return true;
+		}
+		catch (Exception oEx) {
+		}
+		
+		return false;
+	}	
+	
+	/**
+	 * Get an integer from a String.
+	 * In case of errors, will log and return 0
+	 * @param sNumber Input string with the number
+	 * @return Integer representation. NOTE that in case of errors returns 0 in any case
+	 */
+	public static int getAsInteger(String sNumber) {
+		try {
+			int iReturn = Integer.parseInt(sNumber);
+			return iReturn;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StringUtils.getAsInteger: not valid input string - ", oEx);
+		}
+		
+		return 0;
+	}
 
 }

@@ -82,7 +82,7 @@ public class PipOneShotProcessorEngine extends DockerProcessorEngine {
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
 		WasdiLog.debugLog("PipOneShotProcessorEngine.run");
-		return super.run(oParameter);
+		return super.run(oParameter, false);
 	}
 	
 

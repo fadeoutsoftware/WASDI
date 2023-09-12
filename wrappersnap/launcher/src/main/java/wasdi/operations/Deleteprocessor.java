@@ -51,7 +51,7 @@ public class Deleteprocessor extends Operation {
 	        bRet = oEngine.delete(oParameter);
 	                	
         	// Check if it is valid
-        	if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+        	if (WasdiConfig.Current.isMainNode()) {
 				// Notify the user
 	        	String sName = oParameter.getName();
 	        	

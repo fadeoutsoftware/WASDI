@@ -18,7 +18,7 @@ import wasdi.shared.utils.log.WasdiLog;
  */
 public final class JsonUtils {
 	
-	private static ObjectMapper s_oMapper = new ObjectMapper();
+	public static ObjectMapper s_oMapper = new ObjectMapper();
 
 	private JsonUtils() {
 		throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");

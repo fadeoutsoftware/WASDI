@@ -112,6 +112,8 @@ public class RunTimeUtils {
 
 				String sOutputFileContent = readLogFile(oLogFile);
 				
+				WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
+				
 				if (bDelete) {
 					deleteLogFile(oLogFile);
 				}

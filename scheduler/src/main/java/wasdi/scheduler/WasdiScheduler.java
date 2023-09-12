@@ -34,12 +34,7 @@ public class WasdiScheduler
 	 * Process Workpsace Repository
 	 */
 	private static ProcessWorkspaceRepository s_oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-	
-	/**
-	 * Local WASDI node code
-	 */
-	public static String s_sWasdiNode;
-	
+		
 	/**
 	 * sleeping time between iterations
 	 */
@@ -127,7 +122,7 @@ public class WasdiScheduler
 		// Computational nodes need to configure also the local dababase
 		try {
 			// If this is not the main node
-			if (!WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			if (!WasdiConfig.Current.isMainNode()) {
 				
 				// Configure also the local connection
 				MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
@@ -148,10 +143,7 @@ public class WasdiScheduler
 				asSchedulers.add(oQueueConfig.name);
 				
 			}
-			
-			// Read Node Code
-			s_sWasdiNode = WasdiConfig.Current.nodeCode;
-			
+						
 			// Read the sleep time beween steps
 			try {
 				long iThreadSleep = Long.parseLong(WasdiConfig.Current.scheduler.processingThreadSleepingTimeMS);
@@ -286,7 +278,7 @@ public class WasdiScheduler
 			iSometimes ++;
 			
 			
-			List<ProcessWorkspace> aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(s_sWasdiNode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(WasdiConfig.Current.nodeCode, "lastStateChangeDate");
 			
 			List<ProcessWorkspace> aoRunningList = getStateList(aoProcessesList, "RUNNING");
 			List<ProcessWorkspace> aoReadyList = getStateList(aoProcessesList, "READY");
@@ -300,7 +292,7 @@ public class WasdiScheduler
 			if (iSometimes == s_iSometimesCounter) {
 				iSometimes = 0;
 				
-				aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(s_sWasdiNode, "lastStateChangeDate");
+				aoProcessesList = s_oProcessWorkspaceRepository.getProcessesForSchedulerNode(WasdiConfig.Current.nodeCode, "lastStateChangeDate");
 				
 				aoRunningList = getStateList(aoProcessesList, "RUNNING");
 				aoReadyList = getStateList(aoProcessesList, "READY");

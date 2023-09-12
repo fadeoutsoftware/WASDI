@@ -154,7 +154,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Check it
             if (oProcessorZipFile.exists() == false) {
-            	return logDeployErrorAndClean("Cannot find the processor file... something went wrong", bFirstDeploy);
+            	return logDeployErrorAndClean("DeployProcessor Cannot find the processor Zip file, something went wrong", bFirstDeploy);
             }
 
             if (bFirstDeploy) {
@@ -348,8 +348,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
                 return false;                    
             }
-            
-            boolean bMustReconstructEnvironment = false;
 
             // Check if the processor is available on the node
             if (!isProcessorOnNode(oParameter)) {
@@ -372,7 +370,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	
             	if (bBuildLocally) {
             		bResult = deploy(oParameter, false);
-            		bMustReconstructEnvironment = true;
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
@@ -398,15 +395,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
             	
                 // Try to start Again the docker
-                oDockerUtils.start();
+                if (oDockerUtils.start() == false) {
+                	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
+                	return false;
+                }
                 
                 // Wait for it
-                waitForApplicationToStart(oParameter);
+                waitForApplicationToStart(oParameter);                
                 
-                if (bMustReconstructEnvironment) {
-                	WasdiLog.errorLog("DockerProcessorEngine.run: Processor just built and started, reconstruct the environment");
-                	reconstructEnvironment(oParameter, oProcessor.getPort());
-                }
+            	WasdiLog.debugLog("DockerProcessorEngine.run: Processor just built and started, reconstruct the environment");
+            	reconstructEnvironment(oParameter, oProcessor.getPort());
             }
 
             // Decode JSON
@@ -616,7 +614,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                     return false;
                 }
             }
-
 
             String sProcessorFolder = getProcessorFolder(sProcessorName);
 
@@ -853,7 +850,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             waitForApplicationToStart(oParameter);
 
-			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				refreshPackagesInfo(oParameter);
 			}
 
@@ -1000,8 +997,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 		// Is the processor installed in this node?
 		if (!oProcessorFolder.exists()) {
-			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName
-					+ "] environment not updated in this node, return");
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName + "] environment not updated in this node, return");
 			return false;
 		}
 		
@@ -1016,8 +1012,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
         
         if (!bIsContainerStarted) {
+        	WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: Container not started: starting it");
         	oDockerUtils.start();
         	waitForApplicationToStart(oParameter);
+        	this.reconstructEnvironment(oParameter, oProcessor.getPort());
         }
         
 		try {
@@ -1026,19 +1024,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
 
 			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
-			WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo | sFileFullPath: " + sFileFullPath);
 
 			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
 
-			if (bResult) {
-				WasdiLog.debugLog("the file was created.");
-			} else {
-				WasdiLog.debugLog("the file was not created.");
+			if (!bResult) {
+				WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
 			}
 
 			return bResult;
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: " + oEx);
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: ", oEx);
 		}
 
 		return false;
@@ -1065,6 +1060,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	        		return;
 	        	}
 	        }
+	        
+	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
@@ -1216,14 +1213,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
 			String sUrl = "http://" + sIp + ":" + iPort + "/hello";
-			WasdiLog.debugLog("CondaPackageManagerImpl.isDockerServerUp: sUrl: " + sUrl);
+			WasdiLog.debugLog("DockerProcessorEngine.isDockerServerUp: poll sUrl: " + sUrl);
 
 			Map<String, String> asHeaders = Collections.emptyMap();
 
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders);
 			Integer iResult = oHttpCallResponse.getResponseCode();
 
-			WasdiLog.debugLog("CondaPackageManagerImpl.isDockerServerUp: iResult: " + iResult);
+			WasdiLog.debugLog("DockerProcessorEngine.isDockerServerUp: got iResult: " + iResult);
 
 			return (iResult != null && iResult.intValue() == 200);
 		} catch (Exception oEx) {
@@ -1326,7 +1323,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: try to push to " + oDockerRegistryConfig.id);
 				
 				// Try to login and push
-				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName, sProcessorFolder);
+				sPushedImageAddress = loginAndPush(oDockerUtils, oDockerRegistryConfig, m_sDockerImageName);
 				
 				if (!Utils.isNullOrEmpty(sPushedImageAddress)) {
 					WasdiLog.debugLog("DockerProcessorEngine.pushImageInRegisters: image pushed");
@@ -1366,18 +1363,18 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	 * @param sImageName
 	 * @return
 	 */
-	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName, String sFolder) {
+	protected String loginAndPush(DockerUtils oDockerUtils, DockerRegistryConfig oDockerRegistryConfig, String sImageName) {
 		try {
 			// Login in the docker
-			boolean bLogged = oDockerUtils.loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password, sFolder);
+			String sToken = oDockerUtils.loginInRegistry(oDockerRegistryConfig);
 			
-			if (!bLogged) {
+			if (Utils.isNullOrEmpty(sToken)) {
 				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error logging in, return false.");
 				return "";
 			}
 			
 			// Push the image
-			boolean bPushed = oDockerUtils.push(sImageName);
+			boolean bPushed = oDockerUtils.push(sImageName, sToken);
 			
 			if (!bPushed) {
 				WasdiLog.debugLog("DockerProcessorEngine.loginAndPush: error in push, return false.");

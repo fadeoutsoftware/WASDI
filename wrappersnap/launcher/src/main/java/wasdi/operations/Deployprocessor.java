@@ -52,7 +52,7 @@ public class Deployprocessor extends Operation {
 	        try {
 	        	
 //	        	if (oEngine.isRunAfterDeploy()) {
-//					if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+//					if (WasdiConfig.Current.isMainNode()) {
 //						oEngine.waitForApplicationToStart(oParameter);
 //						oEngine.refreshPackagesInfo(oParameter);
 //					}	        		

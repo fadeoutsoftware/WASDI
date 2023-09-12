@@ -43,7 +43,7 @@ public class Environmentupdate extends Operation {
 		}
 
 		try {
-			// redeploy User Processor
+			// Read the Parameter
 			ProcessorParameter oParameter = (ProcessorParameter) oParam;
 
 			// First Check if processor exists
@@ -87,7 +87,7 @@ public class Environmentupdate extends Operation {
 			if (bRet) {
 				WasdiLog.infoLog("Environmentupdate.executeOperation: update done with success");
 				
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 				
 					// We need to update the history of actions done in this environment
 					String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
@@ -106,9 +106,11 @@ public class Environmentupdate extends Operation {
 					Object oUpdateCommand = oJsonItem.get("updateCommand");
 
 					if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
-						WasdiLog.debugLog("Environmentupdate.executeOperation: refresh of the list of libraries.");
+						WasdiLog.debugLog("Environmentupdate.executeOperation: no actions to add to the envActionsList");
 					} else {
 						String sUpdateCommand = (String) oUpdateCommand;
+						
+						WasdiLog.debugLog("Environmentupdate.executeOperation: adding " + sUpdateCommand + " to the envActionsList");
 					
 						// Add carriage return
 						sUpdateCommand += "\n";
@@ -128,7 +130,7 @@ public class Environmentupdate extends Operation {
 			try {
 				
 				// We need to refresh the package list if we are in the main node
-				if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 					Thread.sleep(2000);
 					oEngine.refreshPackagesInfo(oParameter);
 					
@@ -139,8 +141,7 @@ public class Environmentupdate extends Operation {
 						sInfo = "GURU MEDITATION<br>Error updating " + sProcessorName + " Environment";
 					}
 
-					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(),
-							oParam.getExchange(), sInfo, oParam.getExchange());
+					m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.ENVIRONMENTUPDATE.name(), oParam.getExchange(), sInfo, oParam.getExchange());
 					
 				}							
 

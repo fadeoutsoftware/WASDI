@@ -262,7 +262,7 @@ public class StyleResource {
 			}
 
 			//computational-node-side work
-			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+			if (WasdiConfig.Current.isMainNode()) {
 				computationalNodesUpdateStyle(sSessionId, sStyleId, oStyleSldFile.getPath());
 			}
 
@@ -454,7 +454,7 @@ public class StyleResource {
 		WasdiLog.debugLog("StyleResource.deleteStyle( Style: " + sStyleId + " )");
 
 		// This API is allowed ONLY on main nodes
-		if (!Wasdi.s_sMyNodeCode.equals("wasdi")) {
+		if (!WasdiConfig.Current.isMainNode()) {
 			WasdiLog.debugLog("StyleResource.DeleteStyle: this is a computational node, cannot call this API here");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -500,7 +500,7 @@ public class StyleResource {
 				oStyleRepository.deleteStyle(sStyleId);
 
 
-				if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				if (WasdiConfig.Current.isMainNode()) {
 					// computational-node-side work
 					computationalNodesDeleteStyle(sSessionId, oStyle.getStyleId(), oStyle.getName());
 				}
@@ -530,7 +530,7 @@ public class StyleResource {
 		WasdiLog.debugLog("StyleResource.nodeDeleteStyle( Session: " + sSessionId + ", Style: " + sStyleName + " )");
 
 		// This API is allowed ONLY on computed nodes
-		if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+		if (WasdiConfig.Current.isMainNode()) {
 			WasdiLog.debugLog("StyleResource.nodeDeleteStyle: this is the main node, cannot call this API here");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
