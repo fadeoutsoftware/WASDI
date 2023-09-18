@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.queryexecutors.Platforms;
+import wasdi.shared.queryexecutors.cds.QueryExecutorCDS;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
@@ -367,19 +368,38 @@ public class CDSProviderAdapter extends ProviderAdapter {
 		String sStartDate = JsonUtils.getProperty(aoWasdiPayload, "startDate");
 		String sEndDate = JsonUtils.getProperty(aoWasdiPayload, "endDate");
 		String sFormat = JsonUtils.getProperty(aoWasdiPayload, "format");
-
+		String sFootprint = JsonUtils.getProperty(aoWasdiPayload, "boundingBox");
+		String sFootprintForFileName = getFootprintForFileName(sFootprint, sDataset);
 		String sExtension = "." + sFormat;
 
 		// filename: reanalysis-era5-pressure-levels_UV_20211201
-		String sFileName = getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension);
+		String sFileName = getFileName(sDataset, sVariables, sDate, sStartDate, sEndDate, sExtension, sFootprintForFileName);
 			
 		return sFileName;
 	}
 	
-	private String getFileName(String sDataset, String sVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension) {
+	private String getFootprintForFileName(String sFootprint, String sDatasetName) {
+		String sFootprintForFileName = "";
+		
+		if (sFootprint == null || sFootprint.contains("null")) {
+			sFootprintForFileName = QueryExecutorCDS.getFootprintForFileName(null, null, null, null, sDatasetName);
+		} else {
+			String[] asFootprint = sFootprint.split(", ");
+			if (asFootprint.length == 4) {
+				double dNorth = Double.parseDouble(asFootprint[0]);
+				double dWest = Double.parseDouble(asFootprint[1]);
+				double dSouth = Double.parseDouble(asFootprint[2]);
+				double dEast = Double.parseDouble(asFootprint[3]);
+				sFootprintForFileName = QueryExecutorCDS.getFootprintForFileName(dNorth, dWest, dSouth, dEast, sDatasetName);
+			}
+		}
+		return sFootprintForFileName;
+	}
+	
+	private String getFileName(String sDataset, String sVariables, String sDailyDate, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
 	return Utils.isNullOrEmpty(sStartDate) || Utils.isNullOrEmpty(sEndDate) 
-			? String.join("_", Platforms.ERA5, sDataset, sVariables, sDailyDate).replaceAll("[\\W]", "_") + sExtension
-			: String.join("_", Platforms.ERA5, sDataset, sVariables, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
+			? String.join("_", Platforms.ERA5, sDataset, sVariables, sDailyDate, sFootprint).replaceAll("[\\W]", "_") + sExtension
+			: String.join("_", Platforms.ERA5, sDataset, sVariables, sStartDate, sEndDate, sFootprint).replaceAll("[\\W]", "_") + sExtension;
 	}
 
 
