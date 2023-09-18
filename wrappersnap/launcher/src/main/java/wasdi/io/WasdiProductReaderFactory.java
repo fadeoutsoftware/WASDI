@@ -50,6 +50,14 @@ public class WasdiProductReaderFactory {
 		if (oFile.getName().toLowerCase().endsWith(".nc")) {
 			return new CmNcProductReader(oFile);
 		}
+		
+		if (oFile.getName().toLowerCase().endsWith(".pdf")) { 
+			return new PdfProductReader(oFile);
+		}
+		
+		if (WasdiFileUtils.isImageFile(oFile)) {
+			return new ImagesProductReader(oFile);
+		}
 
 		return new SnapProductReader(oFile);
 	}
