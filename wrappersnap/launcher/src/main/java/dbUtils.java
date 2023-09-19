@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -41,6 +42,7 @@ import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
+import wasdi.shared.config.MongoConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -70,6 +72,7 @@ import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -2286,6 +2289,31 @@ public class dbUtils {
 		}
 	}    
 
+	
+	private static void modis() {
+		try {
+			
+            System.out.println("This tool will parse the config file and ingest in WASDI the MOD11A2 data from the LP DAAC catalogue. ");
+
+            System.out.println("\t1 - Proceed with import");
+            System.out.println("\tx - back");
+            System.out.println("");
+
+            String sInputString = s_oScanner.nextLine();
+
+            if (sInputString.equals("x")) {
+                return;
+            }
+
+            if (sInputString.equals("1")) {
+            	MODISUtils.insertProducts();
+            }
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+	}
+	
     public static void main(String[] args) {
 
         try {
@@ -2343,7 +2371,25 @@ public class dbUtils {
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
             
+            // add connection to ecostress db
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+            
+            // add connection to modis db
+            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
+            if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
+            	try {
+            		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+            		ObjectMapper oMapper = new ObjectMapper(); 
+		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+	            } catch (Exception oEx) {
+	            	System.err.println("Db Utils - Error while reading the MODIS db configuration. Exit. " + oEx.getMessage());
+	            	System.exit(-1);
+	            }
+            } else {
+                System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
+                System.exit(-1); 
+            }
             
             //testEOEPCALogin();
 
@@ -2369,6 +2415,7 @@ public class dbUtils {
                 System.out.println("\t12 - Logs");
                 System.out.println("\t13 - EcoStress");
                 System.out.println("\t14 - Subscriptions");
+                System.out.println("\t15 - MOD11A2 data import");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2403,7 +2450,9 @@ public class dbUtils {
                     ecoStress();
                 } else if (sInputString.equals("14")) {
                     subscriptions();
-                }  
+                } else if (sInputString.equals("15")) {
+                	modis();
+                }
                 else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {

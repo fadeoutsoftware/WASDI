@@ -1,7 +1,6 @@
 package wasdi.shared.queryexecutors.cds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import software.amazon.ion.util.IonTextUtils.SymbolVariant;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.PaginatedQuery;
@@ -294,8 +292,9 @@ public class QueryExecutorCDS extends QueryExecutor {
 		String sDataset = oQuery.productName;
 		String sVariables = sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET) ? "all" : oQuery.sensorMode;
 		String sExtension = sDataset.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET) ? "zip" : oQuery.timeliness;
+		String sFileNameFootprint = getFootprintForFileName(oQuery.north, oQuery.west, oQuery.south, oQuery.east, sDataset);
 		String sExtensionWithComma = "." +  sExtension;
-		String sFileName = getFileName(oQuery.productName, sVariables, sStartDate, sEndDate, sExtensionWithComma);
+		String sFileName = getFileName(oQuery.productName, sVariables, sStartDate, sEndDate, sExtensionWithComma, sFileNameFootprint);
 		String sUrl = s_oDataProviderConfig.link + "?payload=" + sPayload;
 		String sEncodedUrl = StringUtils.encodeUrl(sUrl);
 
@@ -344,10 +343,98 @@ public class QueryExecutorCDS extends QueryExecutor {
 		return String.join(", ", sSummaryElements);
 	}
 	
-	private String getFileName(String sProductName, String sVariables, String sStartDate, String sEndDate, String sExtension) {
-		return Utils.isNullOrEmpty(sEndDate) 
-				? String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate).replaceAll("[\\W]", "_") + sExtension
-				: String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sEndDate).replaceAll("[\\W]", "_") + sExtension;
+	/**
+	 * Create the string representing the footprint of the data, to be included in the ERA5 file name
+	 * @param oW: west
+	 * @param oE: east
+	 * @param oN: north
+	 * @param oS: south
+	 * @param sDatasetName: name of the dataset 
+	 * @return the representation of the footprint, in a standard format
+	 */
+	public static String getFootprintForFileName(Double oN, Double oW, Double oS, Double oE, String sDatasetName) {
+		String sFootprint = "";
+		if ((oW == null && oE == null && oS == null && oN == null) || sDatasetName.equalsIgnoreCase(s_sSEA_SURFACE_TEMPERATURE_DATASET)) {
+			oW = -180d;
+			oN = 90d;
+			oE = 180d;
+			oS = -90d;
+		} 
+		
+		String sW = getStringRepresentationOfPoint(oW, "W");
+		String sE = getStringRepresentationOfPoint(oE, "E");
+		String sS = getStringRepresentationOfPoint(oS, "S");
+		String sN = getStringRepresentationOfPoint(oN, "N");
+		sFootprint = sN + sW + sS + sE;
+		
+		return sFootprint;
 	}
+	
+	/**
+	 * Format a single point of the bounding box according to the following pattern:
+	 * - "n" or "p" to represent a negative or a positive value
+	 * - the value of the point. The integer part of the value always contains two digits (for north or south points) or three digits (for west and east points).
+	 * The decimal part of the value always contain three digits and it is contiguous to the integer part (i.e. no special characters are used to separate the integer and the decimal part)
+	 * - a letter representing the cardinal point (can be: W, E, N, S)
+	 * @param oValue the  value representing the position of the point
+	 * @param sCoordinate a letter representing the cardinal point (W, E, N, S)
+	 * @return a string following one of the following patterns: [n|p]\d\d\d.\d\d\d[W|E] for east and west cardinal points, [n|p]\d\d.\d\d\d[S|W] for north and south cardinal points
+	 */
+	public static String getStringRepresentationOfPoint(Double oValue, String sCoordinate) {
+		
+		String sFormattedCoordinate = "";
+		
+		if (oValue != null && !oValue.isNaN()) {
+		
+			// 1 - prefix to determine if the number is positive or negative
+			sFormattedCoordinate += oValue < 0.0 ? "n" : "p";
+			
+			try {
+			
+				// 2 - put in a standard format the integer and decimal part of the coordinate 
+				
+				// "%.3" is used to keep three decimal values (if there are not decimal values, then it adds zeros)
+				String[] asValues = String.format("%.3f", oValue).split("\\.");	
+				
+				if (asValues.length == 2) { 
+					String sIntPart = asValues[0].replace("-", "");
+					
+					// pad the representation of the number with zeros if necessary
+					if (sCoordinate.equalsIgnoreCase("N") || sCoordinate.equalsIgnoreCase("S"))
+						sIntPart = String.format("%02d", Integer.parseInt(sIntPart));
+					else
+						sIntPart = String.format("%03d", Integer.parseInt(sIntPart));
+					
+					sFormattedCoordinate += sIntPart + asValues[1]; 
+							
+					// 3 - add the reference to the cardinal point
+					sFormattedCoordinate += sCoordinate;
+				}
+				else {
+					WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint. Cannot find integer and decimal part in the number: " + oValue);
+					sFormattedCoordinate = "null";
+				}
+			} catch (Exception oE) {
+				WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint.Exception while formatting the value " + oValue);
+				sFormattedCoordinate = "null";
+			}
+		} else {
+			// this is a fallback that should never happen
+			WasdiLog.debugLog("QueryExecutorCDS.getStringRepresentationOfPoint. The coordinate poit is null or not a number " + oValue);
+			sFormattedCoordinate = "null";
+		}
+		
+		
+		return sFormattedCoordinate;
+	}
+	
+	
+	private String getFileName(String sProductName, String sVariables, String sStartDate, String sEndDate, String sExtension, String sFootprint) {
+		return Utils.isNullOrEmpty(sEndDate) 
+				? String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sFootprint).replaceAll("[\\W]", "_") + sExtension
+				: String.join("_", Platforms.ERA5, sProductName, sVariables, sStartDate, sEndDate, sFootprint).replaceAll("[\\W]", "_") + sExtension;
+	}
+	
+	
 
 }

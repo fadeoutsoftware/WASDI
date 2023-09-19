@@ -1,0 +1,7 @@
+{
+    "address": "{{ sWasdiDataProviderModisMongoAddress }}",
+    "dbName": "{{ sWasdiDataProviderModisMongoDatabaseName }}",
+    "user": "{{ sWasdiDataProviderModisMongoUsername }}",
+    "password": "{{ sWasdiDataProviderModisMongoPassword }}",
+    "replicaName": "{{ sWasdiDataProviderModisMongoReplicaName }}"
+}
