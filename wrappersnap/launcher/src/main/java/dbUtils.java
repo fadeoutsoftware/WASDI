@@ -21,6 +21,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
