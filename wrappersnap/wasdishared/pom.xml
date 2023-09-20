@@ -26,11 +26,25 @@
         <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
         <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
         <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
+        <sVersionAssertjCore>3.18.1</sVersionAssertjCore>
+        <sVersionAwsJavaSdkS3>1.12.392</sVersionAwsJavaSdkS3>
+        <sVersionCommonsCompress>1.21</sVersionCommonsCompress>
         <sVersionCommonsLang>2.6</sVersionCommonsLang>
+        <sVersionCommonsLang3>3.12.0</sVersionCommonsLang3>
+        <sVersionCommonsNet>3.9.0</sVersionCommonsNet>
+        <sVersionCommonsValidator>1.4.1</sVersionCommonsValidator>
         <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
+        <sVersionGeoserverManager>1.7.0</sVersionGeoserverManager>
+        <sVersionGson>2.10.1</sVersionGson>
+        <sVersionGuava>29.0-jre</sVersionGuava>
         <sVersionJackson>2.14.1</sVersionJackson>
+        <sVersionJaxbApi>2.3.1</sVersionJaxbApi>
         <sVersionJson>20230227</sVersionJson>
+        <sVersionJunit>4.13.1</sVersionJunit>
+        <sVersionJunitJupiter>5.7.0</sVersionJunitJupiter>
         <sVersionLog4j>2.20.0</sVersionLog4j>
+        <sVersionLombok>1.18.22</sVersionLombok>
+        <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
         <sVersionProbav>2.2.0</sVersionProbav>
         <sVersionS1tbx>9.0.2</sVersionS1tbx>
@@ -134,20 +148,23 @@
             <artifactId>amqp-client</artifactId>
             <version>${sVersionAmqpClient}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang -->
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>${sVersionCommonsLang}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>${sVersionGuava}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/it.geosolutions/geoserver-manager -->
         <dependency>
             <groupId>it.geosolutions</groupId>
             <artifactId>geoserver-manager</artifactId>
-            <version>1.7.0</version>
+            <version>${sVersionGeoserverManager}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
@@ -159,9 +176,9 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>${sVersionGson}</version>
         </dependency>
-        <!-- ESA SNAP -->
+        <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-sar-processing</artifactId>
@@ -172,16 +189,19 @@
             <artifactId>s1tbx-op-calibration</artifactId>
             <version>${sVersionS1tbx}</version>
         </dependency>
+        <!-- S2 -->
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
             <version>${sVersionS2tbx}</version>
         </dependency>
+        <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
             <version>${sVersionSnap}</version>
         </dependency>
+        <!-- PROBAV -->
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-kit</artifactId>
@@ -192,74 +212,83 @@
             <artifactId>probavbox-reader</artifactId>
             <version>${sVersionProbav}</version>
         </dependency>
-        <!-- END OF ESA SNAP -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>${sVersionCommonsCompress}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.4.1</version>
+            <version>${sVersionCommonsValidator}</version>
         </dependency>
-        <!-- FTP mock server + tests -->
+        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.9.0</version>
+            <version>${sVersionCommonsNet}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>${sVersionJunit}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
+            <version>${sVersionJunitJupiter}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.7.0</version>
+            <version>${sVersionJunitJupiter}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
         <dependency>
             <groupId>org.mockftpserver</groupId>
             <artifactId>MockFtpServer</artifactId>
-            <version>2.7.1</version>
+            <version>${sVersionMockFtpServer}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.18.1</version>
+            <version>${sVersionAssertjCore}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <version>${sVersionJaxbApi}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${sVersionCommonsLang3}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>${sVersionLombok}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.392</version>
+            <version>${sVersionAwsJavaSdkS3}</version>
         </dependency>
     </dependencies>
 
