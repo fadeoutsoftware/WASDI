@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+          https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -17,13 +18,25 @@
     <packaging>jar</packaging>
 
     <properties>
-        <revision>${revision}</revision>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>1.0</revision>
+        <sVersionAbderaClient>1.1.3</sVersionAbderaClient>
+        <sVersionAbderaCore>1.1.3</sVersionAbderaCore>
+        <sVersionAbderaExtensionsJson>1.1.3</sVersionAbderaExtensionsJson>
         <sVersionAmqpClient>5.18.0</sVersionAmqpClient>
-        <jackson.version>2.14.1</jackson.version>
-        <probav.version>2.2.0</probav.version>
-        <s1tbx.version>9.0.2</s1tbx.version>
+        <sVersionCommonsLang>2.6</sVersionCommonsLang>
+        <sVersionFlattenMavenPlugin>1.5.0</sVersionFlattenMavenPlugin>
+        <sVersionJackson>2.14.1</sVersionJackson>
+        <sVersionJson>20230227</sVersionJson>
+        <sVersionLog4j>2.20.0</sVersionLog4j>
+        <sVersionMongoDb>4.3.4</sVersionMongoDb>
+        <sVersionProbav>2.2.0</sVersionProbav>
+        <sVersionS1tbx>9.0.2</sVersionS1tbx>
+        <sVersionS2tbx>8.0.7</sVersionS2tbx>
+        <sVersionS3tbx>9.0.3</sVersionS3tbx>
+        <sVersionSnap>9.0.4</sVersionSnap>
     </properties>
 
     <build>
@@ -31,7 +44,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.3.0</version>
+                <version>${sVersionFlattenMavenPlugin}</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>
@@ -73,46 +86,47 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
-        <!-- dependency> <groupId>org.mongodb</groupId> <artifactId>mongo-java-driver</artifactId>
-            <version>3.12.8</version> </dependency -->
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.3.4</version>
+            <version>${sVersionMongoDb}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${sVersionJackson}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-core</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaCore}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-client -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-client</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaClient}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-extensions-json -->
         <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-extensions-json</artifactId>
-            <version>1.1.3</version>
+            <version>${sVersionAbderaExtensionsJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.20.0</version>
+            <version>${sVersionLog4j}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.20.0</version>
+            <version>${sVersionLog4j}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
         <dependency>
@@ -123,7 +137,7 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${sVersionCommonsLang}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -135,10 +149,11 @@
             <artifactId>geoserver-manager</artifactId>
             <version>1.7.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>${sVersionJson}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -150,32 +165,32 @@
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>${s1tbx.version}</version>
+            <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-op-calibration</artifactId>
-            <version>${s1tbx.version}</version>
+            <version>${sVersionS1tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s2tbx</groupId>
             <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>8.0.7</version>
+            <version>${sVersionS2tbx}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
-            <version>9.0.4</version>
+            <version>${sVersionSnap}</version>
         </dependency>
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-kit</artifactId>
-            <version>${probav.version}</version>
+            <version>${sVersionProbav}</version>
         </dependency>
         <dependency>
             <groupId>org.vito.probavbox</groupId>
             <artifactId>probavbox-reader</artifactId>
-            <version>${probav.version}</version>
+            <version>${sVersionProbav}</version>
         </dependency>
         <!-- END OF ESA SNAP -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
