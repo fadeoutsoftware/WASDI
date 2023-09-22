@@ -82,8 +82,8 @@ m_bVerbose = True
 m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
-#m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bIsOnExternalServer = False
 m_iRequestsTimeout = 2 * 60
