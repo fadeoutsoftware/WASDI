@@ -158,10 +158,12 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				sDownloadUrl += "&workspace=" + sOriginWorkspace;
 				sDownloadUrl += "&token="+oParameter.getSessionID();
 				
+				WasdiLog.errorLog("Share.executeOperation: download url " + sDownloadUrl);
+				
 				String sOutputPath = HttpUtils.downloadFile(sDownloadUrl, HttpUtils.getStandardHeaders(oParam.getSessionID()), oDestinationFile.getPath());
 				
 				if (Utils.isNullOrEmpty(sOutputPath)) {
-					WasdiLog.errorLog("Share.executeOperation: impossible to downlaod the file");
+					WasdiLog.errorLog("Share.executeOperation: impossible to download the file");
 					m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), "Impossible to download the file", oParameter.getExchange());
 					return false;
 				}

@@ -1634,8 +1634,8 @@
         var oOptions = {
             titleModal: sMessage,
             buttonName: sMessage,
-            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId,
-            currentNodeCode: this.m_oActiveWorkspace.nodeCode
+            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId//,
+            //currentNodeCode: this.m_oActiveWorkspace.nodeCode
         };
 
         var oThat = this;

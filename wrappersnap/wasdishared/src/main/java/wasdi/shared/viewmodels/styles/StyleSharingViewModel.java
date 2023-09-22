@@ -10,6 +10,10 @@ import wasdi.shared.business.UserResourcePermission;
 public class StyleSharingViewModel {
 
 	private String userId;
+	
+	public StyleSharingViewModel() {
+		
+	}
 
 	public StyleSharingViewModel(UserResourcePermission oSharing) {
 		super();

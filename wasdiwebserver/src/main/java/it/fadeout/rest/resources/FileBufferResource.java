@@ -254,6 +254,7 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sDestinationWorkspaceId);
 			oParameter.setWorkspaceOwnerId(sDestinationWorkspaceUserId);
+			oParameter.setSessionID(sSessionId);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
