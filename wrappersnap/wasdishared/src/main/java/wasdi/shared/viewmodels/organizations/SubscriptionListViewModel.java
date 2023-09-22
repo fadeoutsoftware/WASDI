@@ -1,14 +1,5 @@
 package wasdi.shared.viewmodels.organizations;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class SubscriptionListViewModel {
 
 	private String subscriptionId;
@@ -28,5 +19,77 @@ public class SubscriptionListViewModel {
 	private boolean buySuccess;
 	private boolean adminRole;
 	private Long runningTime;
+	public String getSubscriptionId() {
+		return subscriptionId;
+	}
+	public void setSubscriptionId(String subscriptionId) {
+		this.subscriptionId = subscriptionId;
+	}
+	public String getOwnerUserId() {
+		return ownerUserId;
+	}
+	public void setOwnerUserId(String ownerUserId) {
+		this.ownerUserId = ownerUserId;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getTypeId() {
+		return typeId;
+	}
+	public void setTypeId(String typeId) {
+		this.typeId = typeId;
+	}
+	public String getTypeName() {
+		return typeName;
+	}
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+	public String getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+	public String getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+	public String getOrganizationName() {
+		return organizationName;
+	}
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+	public String getReason() {
+		return reason;
+	}
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+	public boolean isBuySuccess() {
+		return buySuccess;
+	}
+	public void setBuySuccess(boolean buySuccess) {
+		this.buySuccess = buySuccess;
+	}
+	public boolean isAdminRole() {
+		return adminRole;
+	}
+	public void setAdminRole(boolean adminRole) {
+		this.adminRole = adminRole;
+	}
+	public Long getRunningTime() {
+		return runningTime;
+	}
+	public void setRunningTime(Long runningTime) {
+		this.runningTime = runningTime;
+	}
 
 }

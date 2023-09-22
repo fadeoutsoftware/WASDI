@@ -524,49 +524,6 @@ public class LauncherMain  {
         return oNode;
     }
 
-    /**
-     * Get the full workspace path for this parameter
-     *
-     * @param oParameter Base Parameter
-     * @return full workspace path
-     */
-    public static String getWorkspacePath(BaseParameter oParameter) {
-        try {
-            return getWorkspacePath(oParameter, WasdiConfig.Current.paths.downloadRootPath);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return getWorkspacePath(oParameter, "/data/wasdi");
-        }
-    }
-
-    /**
-     * Get the full workspace path for this parameter (with last / included)
-     *
-     * @param oParameter Base Parameter of the launcher operation
-     * @param sRootPath Root path of WASDI node
-     * @return full workspace path
-     */
-    public static String getWorkspacePath(BaseParameter oParameter, String sRootPath) {
-        // Get Base Path
-        String sWorkspacePath = sRootPath;
-
-        if (!(sWorkspacePath.endsWith("/") || sWorkspacePath.endsWith("//")))
-            sWorkspacePath += "/";
-
-        String sUser = oParameter.getUserId();
-
-        if (Utils.isNullOrEmpty(oParameter.getWorkspaceOwnerId()) == false) {
-            sUser = oParameter.getWorkspaceOwnerId();
-        }
-
-        // Get Workspace path
-        sWorkspacePath += sUser;
-        sWorkspacePath += "/";
-        sWorkspacePath += oParameter.getWorkspace();
-        sWorkspacePath += "/";
-
-        return sWorkspacePath;
-    }
 
     /**
      * Static helper function to update status and progress of a Process Workspace.

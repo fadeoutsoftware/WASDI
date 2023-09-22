@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.StringUtils;
@@ -38,11 +39,6 @@ public class DockerUtils {
      * Folder of the processor
      */
     protected String m_sProcessorFolder;
-
-    /**
-     * Wasdi Working Path
-     */
-    protected String m_sWorkingRootPath;
 
     /**
      * Log file for docker operations
@@ -82,9 +78,7 @@ public class DockerUtils {
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
         m_oProcessor = oProcessor;
-        m_sProcessorFolder = sProcessorFolder;
-        m_sWorkingRootPath = WasdiConfig.Current.paths.downloadRootPath;
-        if (!m_sWorkingRootPath.endsWith(File.separator)) m_sWorkingRootPath += File.separator; 
+        m_sProcessorFolder = sProcessorFolder; 
         m_sUser = sTomcatUser;
         m_sDockerRegistry = sDockerRegistry;
     }    
@@ -119,22 +113,6 @@ public class DockerUtils {
 	 */
 	public void setProcessorFolder(String sProcessorFolder) {
 		this.m_sProcessorFolder = sProcessorFolder;
-	}
-	
-	/**
-	 * Get the actual WASDI Working Path
-	 * @return actual WASDI Working Path
-	 */
-	public String getWorkingRootPath() {
-		return m_sWorkingRootPath;
-	}
-	
-	/**
-	 * Set the actual WASDI Working Path
-	 * @param sWorkingRootPath actual WASDI Working Path
-	 */
-	public void setWorkingRootPath(String sWorkingRootPath) {
-		this.m_sWorkingRootPath = sWorkingRootPath;
 	}
 	
 	/**
@@ -341,7 +319,7 @@ public class DockerUtils {
                 asArgs.add("-u$(id -u " + m_sUser + "):$(id -g " + m_sUser + ")");
 
                 // Working Path
-                asArgs.add("-v" + m_sWorkingRootPath + ":/data/wasdi");
+                asArgs.add("-v" + PathsConfig.getWasdiBasePath() + ":/data/wasdi");
 
                 // Processor folder
                 asArgs.add("--mount");

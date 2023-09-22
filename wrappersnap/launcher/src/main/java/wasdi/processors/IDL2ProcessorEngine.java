@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import com.google.common.io.Files;
 
 import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
@@ -207,7 +208,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			}
 			
 			// Get the processor Path
-			String sDestinationFilePath = getProcessorFolder(m_oParameter.getName());;
+			String sDestinationFilePath = PathsConfig.getProcessorFolder(m_oParameter.getName());;
 			
 			File oLibFile = new File(sLibFilePath+"idlwasdilib.pro");
 			File oDestinationFile = new File(sDestinationFilePath+"idlwasdilib.pro");

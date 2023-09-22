@@ -46,6 +46,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
 import wasdi.shared.config.MongoConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -327,9 +328,8 @@ public class dbUtils {
     }
     
     public static void redeployProcessor(Processor oProcessor) {
-        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
         
-        String sProcessorFolder = sBasePath + "/processors/" + oProcessor.getName() + "/";
+        String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor);
         
         if (new File(sProcessorFolder).exists() == false) {
         	System.out.println("Processor " + oProcessor.getName() + " Does not exists in path " + sProcessorFolder);
@@ -481,8 +481,7 @@ public class dbUtils {
                 for (Processor oProcessor : aoProcessors) {
 
                     String sProcessorName = oProcessor.getName();
-                    String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                    String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+                    String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
                     File oUiFile = new File(sProcessorPath + "/ui.json");
 
                     if (oUiFile.exists()) {
@@ -516,8 +515,7 @@ public class dbUtils {
                 	
                 	if (oProcessor.getType().equals(sProcessorType)) {
                         String sProcessorName = oProcessor.getName();
-                        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                        String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+                        String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
                         File oProcessorFolder = new File(sProcessorPath);
 
                         if (oProcessorFolder.exists()) {
@@ -794,11 +792,7 @@ public class dbUtils {
                 SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
                 List<SnapWorkflow> aoWorkflows = oSnapWorkflowRepository.getList();
 
-                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                if (!sBasePath.endsWith("/")) {
-                    sBasePath += "/";
-                }
-                sBasePath += "workflows/";
+                String sBasePath = PathsConfig.getWorkflowsPath();
 
                 File oDestinationPath = new File(sBasePath);
 
@@ -906,10 +900,7 @@ public class dbUtils {
                 // Clean the user folder
                 System.out.println("Deleting User Folder ");
 
-                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                if (!sBasePath.endsWith("/")) {
-                    sBasePath += "/";
-                }
+                String sBasePath = PathsConfig.getWasdiBasePath();
                 sBasePath += sUserId;
                 sBasePath += "/";
 
@@ -929,19 +920,6 @@ public class dbUtils {
         }
     }
 
-    private static String getWorkspacePath(String sWorkspaceOwner, String sWorkspaceId) throws IOException {
-        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-        if (!sBasePath.endsWith("/")) {
-            sBasePath += "/";
-        }
-        sBasePath += sWorkspaceOwner;
-        sBasePath += "/";
-        sBasePath += sWorkspaceId;
-        sBasePath += "/";
-
-        return sBasePath;
-    }
-
     private static void deleteWorkspace(String sWorkspaceId, String sWorkspaceOwner) {
 
         try {
@@ -959,7 +937,7 @@ public class dbUtils {
             }
 
             // get workspace path
-            String sWorkspacePath = getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
+            String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
             System.out.println("deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -1250,7 +1228,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
                 System.out.println("Deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -1397,7 +1375,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
                 // Check and create the folder
                 File oWorkspaceFolder = new File(sWorkspacePath);
@@ -1582,7 +1560,7 @@ public class dbUtils {
 	                String sWorkspaceOwner = oWS.getUserId();
 
 	                // get workspace path
-	                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+	                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 	                
 	                File oWorkspacePath = new File(sWorkspacePath);
 	                

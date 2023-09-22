@@ -15,6 +15,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.PublishedBandsRepository;
@@ -74,7 +75,7 @@ public class Publishband extends Operation {
             }            
 
             // Generate full path name of the input file
-            sInputFile = LauncherMain.getWorkspacePath(oParameter) + sInputFile;
+            sInputFile = PathsConfig.getWorkspacePath(oParameter) + sInputFile;
             
             // Debug Utils: to debug publish band in local, we can force the path of the file to be published
             String sBackup = sInputFile;
@@ -427,9 +428,7 @@ public class Publishband extends Operation {
         if (!oGeoServerManager.styleExists(sStyle)) {
 
             // Not yet: obtain styles root path
-            String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
-            if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
-            sStylePath += "styles" + File.separator;
+            String sStylePath =PathsConfig.getStylesPath();
 
             // Set the style file
             sStylePath += sStyle + ".sld";

@@ -39,6 +39,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.MongoRepository;
@@ -377,50 +378,7 @@ public class Wasdi extends ResourceConfig {
 				WasdiLog.debugLog("AuthService.Login: Error deleting session.");
 			}
 		}
-	}
-
-	/**
-	 * Obtain the local workspace path from configuration (base path), user and worksapce id
-	 * @param sUserId User Id
-	 * @param sWorkspace Workspace
-	 * @return full workspace local path with the ending / included
-	 */
-	public static String getWorkspacePath(String sUserId, String sWorkspace) {
-		// Take path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-
-		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
-			sDownloadRootPath = "/data/wasdi/";
-		}
-
-		if (!sDownloadRootPath.endsWith("/")) {
-			sDownloadRootPath = sDownloadRootPath + "/";
-		}
-		String sPath = sDownloadRootPath + sUserId + "/" + sWorkspace + "/";
-
-		return sPath;
-	}
-	
-	/**
-	 * Get the root path of download folder of WASDI 
-	 * 
-	 * @return base download local path with the ending / included
-	 */
-	public static String getDownloadPath() {
-		// Take path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-
-		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
-			sDownloadRootPath = "/data/wasdi/";
-		}
-
-		if (!sDownloadRootPath.endsWith("/")) {
-			sDownloadRootPath = sDownloadRootPath + "/";
-		}
-
-		return sDownloadRootPath;
-	}
-	
+	}	
 
 	/**
 	 * Get The owner of a workspace starting from the workspace id
@@ -752,7 +710,7 @@ public class Wasdi extends ResourceConfig {
 					}
 					
 
-					String sSavePath = getDownloadPath() + "workflows/";
+					String sSavePath = PathsConfig.getWorkflowsPath();
 					sOutputFilePath = sSavePath + sWorkflowId+".xml";
 					
 					File oTargetFile = new File(sOutputFilePath);

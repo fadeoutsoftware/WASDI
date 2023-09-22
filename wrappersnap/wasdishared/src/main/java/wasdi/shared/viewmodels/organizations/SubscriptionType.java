@@ -5,11 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public enum SubscriptionType {
 
 	Free("Free", "Free", "Free"),
@@ -25,6 +20,12 @@ public enum SubscriptionType {
 	private String typeDescription;
 
 	private static final Map<String, SubscriptionType> ENUM_MAP;
+	
+	private SubscriptionType(String sId, String sName, String sDescription) {
+		this.typeId = sId;
+		this.typeName = sName;
+		this.typeDescription = sDescription;
+	}
 
 	static {
 		ENUM_MAP = Arrays.stream(SubscriptionType.values())
@@ -33,6 +34,34 @@ public enum SubscriptionType {
 
 	public static SubscriptionType get(String name) {
 		return ENUM_MAP.get(name);
+	}
+
+	public String getTypeId() {
+		return typeId;
+	}
+
+	public void setTypeId(String typeId) {
+		this.typeId = typeId;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+
+	public String getTypeDescription() {
+		return typeDescription;
+	}
+
+	public void setTypeDescription(String typeDescription) {
+		this.typeDescription = typeDescription;
+	}
+
+	public static Map<String, SubscriptionType> getEnumMap() {
+		return ENUM_MAP;
 	}
 
 }

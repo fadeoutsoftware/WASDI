@@ -1,10 +1,5 @@
 package wasdi.shared.viewmodels.organizations;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import wasdi.shared.business.UserResourcePermission;
 
 /**
@@ -12,16 +7,16 @@ import wasdi.shared.business.UserResourcePermission;
  * @author PetruPetrescu on 16/01/2023
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrganizationSharingViewModel {
 
 	private String organizationId;
 	private String userId;
 	private String ownerId;
 	private String role;
+	
+	public OrganizationSharingViewModel() {
+		
+	}
 
 	public OrganizationSharingViewModel(UserResourcePermission oSharing) {
 		super();
@@ -34,6 +29,38 @@ public class OrganizationSharingViewModel {
 		} else {
 			role = "USER";
 		}
+	}
+
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 }

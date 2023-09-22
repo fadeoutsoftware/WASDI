@@ -1,17 +1,14 @@
 package wasdi.shared.business;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class Subscription {
+	
+	public Subscription() {
+		
+	}
 
 	private String subscriptionId;
 	private String name;
@@ -65,6 +62,94 @@ public class Subscription {
 		if (sSubscriptionType.equals(SubscriptionType.OneYearProfessional.name())) return UserType.PROFESSIONAL.name();
 		
 		return UserType.NONE.name();
+	}
+
+	public String getSubscriptionId() {
+		return subscriptionId;
+	}
+
+	public void setSubscriptionId(String subscriptionId) {
+		this.subscriptionId = subscriptionId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Double getBuyDate() {
+		return buyDate;
+	}
+
+	public void setBuyDate(Double buyDate) {
+		this.buyDate = buyDate;
+	}
+
+	public Double getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Double startDate) {
+		this.startDate = startDate;
+	}
+
+	public Double getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Double endDate) {
+		this.endDate = endDate;
+	}
+
+	public int getDurationDays() {
+		return durationDays;
+	}
+
+	public void setDurationDays(int durationDays) {
+		this.durationDays = durationDays;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public boolean isBuySuccess() {
+		return buySuccess;
+	}
+
+	public void setBuySuccess(boolean buySuccess) {
+		this.buySuccess = buySuccess;
 	}
 
 }

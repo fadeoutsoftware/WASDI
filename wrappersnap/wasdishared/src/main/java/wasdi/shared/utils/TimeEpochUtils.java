@@ -14,7 +14,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * @author c.nattero

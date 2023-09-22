@@ -1,8 +1,5 @@
 package wasdi.shared.viewmodels.styles;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import wasdi.shared.business.Style;
 
 /**
@@ -11,9 +8,7 @@ import wasdi.shared.business.Style;
  * @author PetruPetrescu on 23/02/2022
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
+
 public class StyleViewModel {
 
 	private String styleId;
@@ -26,6 +21,10 @@ public class StyleViewModel {
 	// through the repositories 
 	// default value to false;
 	private boolean sharedWithMe = false;
+	
+	public StyleViewModel() {
+		
+	}
 
 	// Parameterized constructor with all fields except sharing  
 	public StyleViewModel(String styleId, String name, String description, boolean isPublic, String userId) {
@@ -46,6 +45,54 @@ public class StyleViewModel {
 		oVM.setUserId(oStyle.getUserId());
 
 		return oVM;
+	}
+
+	public String getStyleId() {
+		return styleId;
+	}
+
+	public void setStyleId(String styleId) {
+		this.styleId = styleId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public boolean isPublic() {
+		return isPublic;
+	}
+
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public boolean isSharedWithMe() {
+		return sharedWithMe;
+	}
+
+	public void setSharedWithMe(boolean sharedWithMe) {
+		this.sharedWithMe = sharedWithMe;
 	}
 
 }

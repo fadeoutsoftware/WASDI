@@ -48,6 +48,7 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
@@ -118,10 +119,8 @@ public class WorkflowsResource {
 
             String sUserId = oUser.getUserId();
 
-            // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath();
-
-            String sDirectoryPathname = sDownloadRootPath + "workflows/";
+            // Get Workflows Path
+            String sDirectoryPathname = PathsConfig.getWorkflowsPath();
 
             createDirectoryIfDoesNotExist(sDirectoryPathname);
 
@@ -247,18 +246,14 @@ public class WorkflowsResource {
             }            
 
             // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath();
-
-            WasdiLog.debugLog("WorkflowsResource.updateFile: download path " + sDownloadRootPath);
-
-            String sDirectoryPathname = sDownloadRootPath + "workflows/";
+            String sDirectoryPathname = PathsConfig.getWorkflowsPath();
 
             createDirectoryIfDoesNotExist(sDirectoryPathname);
             
             // original xml file
-            File oWorkflowXmlFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
+            File oWorkflowXmlFile = new File(PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml");
             // new xml file
-            File oWorkflowXmlFileTemp = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml.temp");
+            File oWorkflowXmlFileTemp = new File(PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml.temp");
             //if the new one is ok delete the old and rename the ".temp" file
             // save uploaded file in ".temp" format
             
@@ -373,10 +368,8 @@ public class WorkflowsResource {
                 return Response.notModified("WorkflowId not found").build();
             }
 
-            // Get Download Path
-            String sDownloadRootPath = Wasdi.getDownloadPath();
-
-            File oWorkflowsFile = new File(sDownloadRootPath + "workflows/" + sWorkflowId + ".xml");
+            // Get Path
+            File oWorkflowsFile = new File(PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml");
 
             if (!oWorkflowsFile.exists()) {
                 WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ") Error, workflow file not found;");
@@ -588,9 +581,7 @@ public class WorkflowsResource {
             }
             
             // Get Download Path on the current WASDI instance
-            String sBasePath = Wasdi.getDownloadPath();
-            sBasePath += "workflows/";
-            String sWorkflowFilePath = sBasePath + oWorkflow.getWorkflowId() + ".xml";
+            String sWorkflowFilePath = PathsConfig.getWorkflowsPath() + oWorkflow.getWorkflowId() + ".xml";
 
             if (!Utils.isNullOrEmpty(sWorkflowFilePath)) {
                 File oWorkflowFile = new File(sWorkflowFilePath);
@@ -940,8 +931,7 @@ public class WorkflowsResource {
                 return oResult;            	
             }
 
-            String sBasePath = Wasdi.getDownloadPath();
-            String sWorkflowPath = sBasePath + "workflows/" + oWF.getWorkflowId() + ".xml";
+            String sWorkflowPath = PathsConfig.getWorkflowsPath() + oWF.getWorkflowId() + ".xml";
             File oWorkflowFile = new File(sWorkflowPath);
 
             if (!oWorkflowFile.exists()) {
@@ -1064,8 +1054,7 @@ public class WorkflowsResource {
             SnapWorkflow oSnapWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
             // Take path
-            String sDownloadRootPath = Wasdi.getDownloadPath();
-            String sWorkflowXmlPath = sDownloadRootPath + "workflows/" + sWorkflowId + ".xml";
+            String sWorkflowXmlPath = PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml";
 
             File oFile = new File(sWorkflowXmlPath);
 

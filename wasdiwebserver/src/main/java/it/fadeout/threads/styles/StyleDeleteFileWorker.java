@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import wasdi.shared.business.Node;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -16,13 +13,21 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author PetruPetrescu on 11/03/2022
  *
  */
-@Getter
-@Setter
-@AllArgsConstructor
 public class StyleDeleteFileWorker extends Thread {
+	
+	public StyleDeleteFileWorker() {
+		
+	}
 
+	public StyleDeleteFileWorker(List<Node> aoNodes, String sSessionId, String sStyleId, String sStyleName ) {
+		this.m_aoNodes = aoNodes;
+		this.m_sSessionId = sSessionId;
+		this.m_sStyleId = sStyleId;
+		this.m_sStyleName = sStyleName;
+	}
+	
 	List<Node> m_aoNodes;
-	String m_sSessionId;
+	String m_sSessionId;	
 	String m_sStyleId;
 	String m_sStyleName;
 

@@ -11,6 +11,7 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -60,7 +61,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			processWorkspaceLog("Creating JupyterLab on this workspace");
 			
 			// Take reference to the folder of the notebooks "processor" where all the dockers are deployed
-			String sProcessorFolder = getProcessorFolder(sProcessorName);
+			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 			String sProcessorTemplateFolder = getProcessorTemplateFolder(sProcessorName);
 
 			// check if the processors/jupyter-notebook template and processor exists
@@ -208,7 +209,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 60);
 
 			// mkdir **notebook** in the Workspace folder: it will be mounted on the docker that hosts the users' notebook
-			String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
 
 			String sNotebookPath = sWorkspacePath + "notebook";
 			
@@ -245,7 +246,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: sJsonContent: " + sJsonContent);
 
 			// create the file on the workspace folder that will be mounted by docker
-			String sWaspyNotebookConfigFileFullPath = LauncherMain.getWorkspacePath(oParameter) + "notebook/notebook_config.cfg";
+			String sWaspyNotebookConfigFileFullPath = PathsConfig.getWorkspacePath(oParameter) + "notebook/notebook_config.cfg";
 			WasdiLog.infoLog("JupyterNotebookProcessorEngine.launchJupyterNotebook: sWaspyNotebookConfigFileFullPath: " + sWaspyNotebookConfigFileFullPath);
 			WasdiFileUtils.writeFile(sJsonContent, sWaspyNotebookConfigFileFullPath);
 			
@@ -311,7 +312,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
-			String sProcessorFolder = getProcessorFolder(sProcessorName);
+			String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
 			String sJupyterNotebookCode = Utils.generateJupyterNotebookCode(oParameter.getWorkspaceOwnerId(), oParameter.getWorkspace());
 
@@ -362,7 +363,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 			// Delete the Jupyter Notebook docker-compose file
 			// rm -f /data/wasdi/processors/jupyter-notebook/docker-compose_<notebook ID>.yml
 
-			String sDockerComposeFilePath = getProcessorFolder(sProcessorName) + "docker-compose_" + sJupyterNotebookCode + ".yml";
+			String sDockerComposeFilePath = PathsConfig.getProcessorFolder(sProcessorName) + "docker-compose_" + sJupyterNotebookCode + ".yml";
 			File oDockerComposeFile = new File(sDockerComposeFilePath);
 
 			if (WasdiFileUtils.fileExists(oDockerComposeFile)) {

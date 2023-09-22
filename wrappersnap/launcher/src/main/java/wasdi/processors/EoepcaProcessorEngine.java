@@ -13,6 +13,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -125,7 +126,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		// Now we need to post: start from reading the appDeployBody.json file
-		String sDeployBodyFilePath = getProcessorFolder(oProcessor) + "appDeployBody.json";
+		String sDeployBodyFilePath = PathsConfig.getProcessorFolder(oProcessor) + "appDeployBody.json";
 
 		
 		String sDeployBody = WasdiFileUtils.fileToText(sDeployBodyFilePath);
@@ -224,8 +225,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		aoCWLParameters.put("wasdiOutputFolder", WasdiConfig.Current.dockers.eoepca.dockerWriteFolder);
 		aoCWLParameters.put("wasdiProcessorImage", m_sDockerImageName);
 		
-		String sCWLTemplateInput = getProcessorFolder(sProcessorName) + "wasdi-processor.cwl.j2";
-		String sCWLTemplateOutput = getProcessorFolder(sProcessorName) + sProcessorName + ".cwl";
+		String sCWLTemplateInput = PathsConfig.getProcessorFolder(sProcessorName) + "wasdi-processor.cwl.j2";
+		String sCWLTemplateOutput = PathsConfig.getProcessorFolder(sProcessorName) + sProcessorName + ".cwl";
 		
 		// Translate
 		boolean bTranslateCSW = oJinjaTemplateRenderer.translate(sCWLTemplateInput, sCWLTemplateOutput, aoCWLParameters);
@@ -238,8 +239,8 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// Generate the body of the descriptor to deploy
 		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate app body deploy json file");
 		
-		String sBodyTemplateInput = getProcessorFolder(sProcessorName) + "appDeployBody.json.j2";
-		String sBodyTemplateOutput = getProcessorFolder(sProcessorName) + "appDeployBody.json";
+		String sBodyTemplateInput = PathsConfig.getProcessorFolder(sProcessorName) + "appDeployBody.json.j2";
+		String sBodyTemplateOutput = PathsConfig.getProcessorFolder(sProcessorName) + "appDeployBody.json";
 		
 		HashMap<String, Object> aoBodyParameters = new HashMap<>();
 		String sCWLLink = WasdiConfig.Current.baseUrl + "processors/getcwl?processorName=" + sProcessorName;
@@ -473,7 +474,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
         }
         
 		try {
-			String sProcessorFolder = getProcessorFolder(oParameter.getName());
+			String sProcessorFolder = PathsConfig.getProcessorFolder(oParameter.getName());
 			
 			File oProcFolder = new File(sProcessorFolder);
 			

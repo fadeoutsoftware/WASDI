@@ -25,6 +25,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
@@ -347,7 +348,7 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 
@@ -383,7 +384,7 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 

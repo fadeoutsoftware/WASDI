@@ -1,10 +1,5 @@
 package wasdi.shared.viewmodels.processors;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * ProcessorParametersTemplate List View Model
  * 
@@ -13,10 +8,7 @@ import lombok.Setter;
  * @author PetruPetrescu
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class ProcessorParametersTemplateListViewModel {
 
 	private String templateId;
@@ -24,5 +16,35 @@ public class ProcessorParametersTemplateListViewModel {
 	private String processorId;
 	private String name;
 	private String updateDate;
+	public String getTemplateId() {
+		return templateId;
+	}
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getProcessorId() {
+		return processorId;
+	}
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUpdateDate() {
+		return updateDate;
+	}
+	public void setUpdateDate(String updateDate) {
+		this.updateDate = updateDate;
+	}
 
 }

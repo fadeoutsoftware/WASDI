@@ -6,9 +6,7 @@ import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -47,6 +45,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationPermission;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.StyleRepository;
@@ -107,9 +106,7 @@ public class StyleResource {
 			// filesystem-side work
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			String sDirectoryPathname = sDownloadRootPath + "styles/";
+			String sDirectoryPathname = PathsConfig.getStylesPath();
 
 			createDirectoryIfDoesNotExist(sDirectoryPathname);
 
@@ -192,14 +189,12 @@ public class StyleResource {
 			// filesystem-side work
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			String sDirectoryPathname = sDownloadRootPath + "styles/";
+			String sDirectoryPathname = PathsConfig.getStylesPath() + "styles/";
 
 			createDirectoryIfDoesNotExist(sDirectoryPathname);
 			
 			// original sld file
-			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
+			File oStyleSldFile = new File(PathsConfig.getStylesPath()+ oStyle.getName() + ".sld");
 			
 			if (!oStyleSldFile.exists()) {
 				GeoServerManager oManager = new GeoServerManager();
@@ -214,7 +209,7 @@ public class StyleResource {
 				bZipped = false;
 			}
 			
-			String sTempFileName = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp";
+			String sTempFileName = PathsConfig.getStylesPath() + oStyle.getName() + ".sld.temp";
 			
 			if (bZipped) {
 				WasdiLog.debugLog("StyleResource.updateFile: file is zipped");
@@ -238,7 +233,7 @@ public class StyleResource {
 				
 				WasdiLog.debugLog("StyleResource.updateFile: unzip the style");
 				ZipFileUtils oExtractor = new ZipFileUtils();
-				oExtractor.unzip(sTempFileName, sDownloadRootPath+"styles/");
+				oExtractor.unzip(sTempFileName, PathsConfig.getStylesPath());
 				// Delete the zip file
 				FileUtils.deleteQuietly(oStyleSldFileTemp);
 			}
@@ -312,9 +307,7 @@ public class StyleResource {
 			}
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			File oStyleFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
+			File oStyleFile = new File(PathsConfig.getStylesPath() + oStyle.getName() + ".sld");
 
 			if (!oStyleFile.exists()) {
 				WasdiLog.debugLog("StyleResource.getXML: style file not found;");
@@ -817,8 +810,7 @@ public class StyleResource {
 			}
 
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sStyleSldPath = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld";
+			String sStyleSldPath = PathsConfig.getStylesPath() + oStyle.getName() + ".sld";
 
 			File oFile = new File(sStyleSldPath);
 
@@ -877,9 +869,7 @@ public class StyleResource {
 		}
 
 		// Get Download Path on the current WASDI instance
-		String sBasePath = Wasdi.getDownloadPath();
-		sBasePath += "styles/";
-		String sStyleFilePath = sBasePath + sName + ".sld";
+		String sStyleFilePath = PathsConfig.getStylesPath() + sName + ".sld";
 
 		File oStyleFile = new File(sStyleFilePath);
 		if (oStyleFile.exists()) {
@@ -938,7 +928,7 @@ public class StyleResource {
 			}			
 			
 			
-			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName + ".sld";
+			String sStyleFilePath = PathsConfig.getStylesPath() + sName + ".sld";
 			
 			WasdiLog.debugLog("StyleResource.geoServerRemoveStyleIfExists: remove the style " + sStyleFilePath);
 			

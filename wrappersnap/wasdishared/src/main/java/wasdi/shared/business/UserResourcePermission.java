@@ -1,14 +1,12 @@
 package wasdi.shared.business;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import wasdi.shared.utils.Utils;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserResourcePermission {
+	
+	public UserResourcePermission() {
+		
+	}
 
 	private String resourceId;
 	private String resourceType;
@@ -31,6 +29,76 @@ public class UserResourcePermission {
 		this.createdBy = sRequesterUserId;
 		this.createdDate = Utils.nowInMillis();
 		this.permissions = sPermissions;
+	}
+
+
+	public String getResourceId() {
+		return resourceId;
+	}
+
+
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
+	}
+
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+
+	public String getUserId() {
+		return userId;
+	}
+
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+	public String getPermissions() {
+		return permissions;
+	}
+
+
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
+	}
+
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+
+	public Double getCreatedDate() {
+		return createdDate;
+	}
+
+
+	public void setCreatedDate(Double createdDate) {
+		this.createdDate = createdDate;
 	}
 
 }

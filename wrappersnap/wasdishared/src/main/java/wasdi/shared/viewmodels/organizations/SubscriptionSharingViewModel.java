@@ -1,10 +1,5 @@
 package wasdi.shared.viewmodels.organizations;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import wasdi.shared.business.UserResourcePermission;
 
 /**
@@ -12,16 +7,17 @@ import wasdi.shared.business.UserResourcePermission;
  * @author PetruPetrescu on 16/01/2023
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class SubscriptionSharingViewModel {
 
 	private String subscriptionId;
 	private String userId;
 	private String ownerId;
 	private String role;
+	
+	public SubscriptionSharingViewModel() {
+		
+	}
 
 	public SubscriptionSharingViewModel(UserResourcePermission oSharing) {
 		super();
@@ -34,6 +30,38 @@ public class SubscriptionSharingViewModel {
 		} else {
 			role = "USER";
 		}
+	}
+
+	public String getSubscriptionId() {
+		return subscriptionId;
+	}
+
+	public void setSubscriptionId(String subscriptionId) {
+		this.subscriptionId = subscriptionId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 }

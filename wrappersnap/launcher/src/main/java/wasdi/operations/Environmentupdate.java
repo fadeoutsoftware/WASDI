@@ -10,6 +10,7 @@ import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -90,7 +91,7 @@ public class Environmentupdate extends Operation {
 				if (WasdiConfig.Current.isMainNode()) {
 				
 					// We need to update the history of actions done in this environment
-					String sProcessorFolder = oEngine.getProcessorFolder(sProcessorName);
+					String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 					sProcessorFolder = sProcessorFolder + "envActionsList.txt";
 					
 					// Get the actions file

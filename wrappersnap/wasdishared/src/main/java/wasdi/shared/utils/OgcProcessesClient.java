@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.abdera.util.AbderaDataSource;
-import org.apache.xerces.dom3.as.ASObject;
-
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;

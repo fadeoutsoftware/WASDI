@@ -12,12 +12,12 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 
-import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.settings.SubsetSetting;
@@ -50,7 +50,7 @@ public class Subset extends Operation {
             SubsetSetting oSettings = (SubsetSetting) oParameter.getSettings();
 
 			
-            File oProductFile = new File(LauncherMain.getWorkspacePath(oParameter) + sSourceProduct);
+            File oProductFile = new File(PathsConfig.getWorkspacePath(oParameter) + sSourceProduct);
 			WasdiProductReader oReadProduct = WasdiProductReaderFactory.getProductReader(oProductFile);
 			Product oInputProduct = oReadProduct.getSnapProduct();
 
@@ -105,7 +105,7 @@ public class Subset extends Operation {
             
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
-            String sOutputPath = LauncherMain.getWorkspacePath(oParameter) + sOutputProduct;
+            String sOutputPath = PathsConfig.getWorkspacePath(oParameter) + sOutputProduct;
 
             ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
 

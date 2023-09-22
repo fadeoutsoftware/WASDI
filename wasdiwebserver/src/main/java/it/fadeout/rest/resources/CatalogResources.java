@@ -25,6 +25,7 @@ import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.User;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
@@ -146,7 +147,7 @@ public class CatalogResources {
 		}
 		
 		try {
-			String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
+			String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
 
 			File oFile = new File(sTargetFilePath);
 			
@@ -302,7 +303,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: computed file path: " + sFilePath);
 		
@@ -319,7 +320,7 @@ public class CatalogResources {
 				WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -395,7 +396,7 @@ public class CatalogResources {
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
 		
@@ -412,7 +413,7 @@ public class CatalogResources {
 				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -537,7 +538,7 @@ public class CatalogResources {
 	{
 		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
 				
-		String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+		String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);

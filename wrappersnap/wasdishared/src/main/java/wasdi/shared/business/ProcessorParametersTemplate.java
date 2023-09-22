@@ -1,10 +1,5 @@
 package wasdi.shared.business;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * Parameters template for processor by user Cross-table for users and
  * processors (applications). It enables a specific user to run a specific
@@ -14,11 +9,11 @@ import lombok.Setter;
  * @author PetruPetrescu
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ProcessorParametersTemplate {
+	
+	public ProcessorParametersTemplate() {
+		
+	}
 
 	/** Identifier of the template */
 	private String templateId;
@@ -43,5 +38,69 @@ public class ProcessorParametersTemplate {
 
 	/** Last update timestamp */
 	private Double updateDate;
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getProcessorId() {
+		return processorId;
+	}
+
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getJsonParameters() {
+		return jsonParameters;
+	}
+
+	public void setJsonParameters(String jsonParameters) {
+		this.jsonParameters = jsonParameters;
+	}
+
+	public Double getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Double creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public Double getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Double updateDate) {
+		this.updateDate = updateDate;
+	}
 
 }

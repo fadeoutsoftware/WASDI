@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
@@ -32,22 +33,18 @@ public class Runmatlab extends Operation {
         try {
         	
         	MATLABProcParameters oParameter = (MATLABProcParameters) oParam; 
-        	
-            String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
 
-            if (!sBasePath.endsWith("/")) sBasePath += "/";
-
-            String sRunPath = sBasePath + "processors/" + oParameter.getProcessorName() + "/run_" + oParameter.getProcessorName() + ".sh";
+            String sRunPath = PathsConfig.getProcessorFolder(oParameter.getProcessorName()) + "run_" + oParameter.getProcessorName() + ".sh";
 
             String sMatlabRunTimePath = WasdiConfig.Current.paths.matlabRuntimePath;
-            String sConfigFilePath = sBasePath + "processors/" + oParameter.getProcessorName() + "/config.properties";
+            String sConfigFilePath = PathsConfig.getProcessorFolder(oParameter.getProcessorName()) + "config.properties";
 
             String asCmd[] = new String[]{sRunPath, sMatlabRunTimePath, sConfigFilePath};
 
             WasdiLog.debugLog("Runmatlab.executeOperation: shell exec " + Arrays.toString(asCmd));
             ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
 
-            oProcBuilder.directory(new File(sBasePath + "processors/" + oParameter.getProcessorName()));
+            oProcBuilder.directory(new File(PathsConfig.getProcessorFolder(oParameter.getProcessorName())));
             Process oProc = oProcBuilder.start();
 
             BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));

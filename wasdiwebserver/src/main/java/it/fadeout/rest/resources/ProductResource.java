@@ -29,6 +29,7 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -90,7 +91,7 @@ public class ProductResource {
                 return null;            	
             }
 
-            String sPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Create the entity
             ProductWorkspace oProductWorkspace = new ProductWorkspace();
@@ -168,7 +169,7 @@ public class ProductResource {
                 return null;            	
             }
 
-            String sFullPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sFullPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Read the product from db
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -221,7 +222,7 @@ public class ProductResource {
             return null;            	
         }        
 
-        String sProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+        String sProductPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
         // Read the product from db
         DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -565,7 +566,7 @@ public class ProductResource {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
 
-            String sFullPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sFullPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             // Create repo
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -639,9 +640,7 @@ public class ProductResource {
                     		if (!oGeoServerManager.styleExists(sNewStyle)) {
                     			WasdiLog.debugLog("ProductResource.updateProductViewModel: style does not exists: add it");
                     			
-                                String sStylePath = WasdiConfig.Current.paths.downloadRootPath;
-                                if (!sStylePath.endsWith(File.separator)) sStylePath += File.separator;
-                                sStylePath += "styles" + File.separator;
+                                String sStylePath = PathsConfig.getStylesPath();
 
                                 // Set the style file
                                 sStylePath += sNewStyle + ".sld";
@@ -736,7 +735,7 @@ public class ProductResource {
         
         // Take path
         String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
-        String sPath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
+        String sPath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
         File oOutputFilePath = new File(sPath + sName);
 
@@ -833,7 +832,7 @@ public class ProductResource {
 
         try {
             // Take path
-            String sPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
             File oOutputFilePath = new File(sPath + sName);
 
@@ -920,7 +919,7 @@ public class ProductResource {
 
 
             // Get the file path
-            String sDownloadPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+            String sDownloadPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
             String sFilePath = sDownloadPath + sProductName;
 
             WasdiLog.debugLog("ProductResource.deleteProduct: File Path: " + sFilePath);

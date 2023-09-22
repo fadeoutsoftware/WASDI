@@ -1,10 +1,5 @@
 package wasdi.shared.viewmodels.styles;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import wasdi.shared.business.UserResourcePermission;
 
 /**
@@ -12,10 +7,6 @@ import wasdi.shared.business.UserResourcePermission;
  * @author PetruPetrescu on 23/02/2022
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class StyleSharingViewModel {
 
 	private String userId;
@@ -23,6 +14,14 @@ public class StyleSharingViewModel {
 	public StyleSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.userId = oSharing.getUserId();
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 }

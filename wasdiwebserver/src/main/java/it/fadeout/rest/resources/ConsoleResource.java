@@ -24,6 +24,7 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
@@ -524,12 +525,7 @@ public class ConsoleResource {
 
 	private String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
 		// Set the processor path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-
-		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
-
-		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
-
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 		return sProcessorFolder + "var" + FILE_SEPARATOR + "general_common.env";
 	}
 

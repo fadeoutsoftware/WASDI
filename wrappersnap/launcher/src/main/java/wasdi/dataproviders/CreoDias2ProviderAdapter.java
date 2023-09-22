@@ -2,11 +2,9 @@ package wasdi.dataproviders;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.HttpURLConnection;
 import java.net.IDN;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Date;
@@ -15,9 +13,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.net.URI;
-
 
 import com.google.common.base.Preconditions;
 

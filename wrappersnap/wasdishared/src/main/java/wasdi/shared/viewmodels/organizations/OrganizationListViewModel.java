@@ -1,17 +1,5 @@
 package wasdi.shared.viewmodels.organizations;
 
-//import java.util.ArrayList;
-//import java.util.List;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrganizationListViewModel {
 
 	private String organizationId;
@@ -23,6 +11,30 @@ public class OrganizationListViewModel {
 //	private String url;
 //	private String logo;
 	private boolean adminRole;
+	public String getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
+	}
+	public String getOwnerUserId() {
+		return ownerUserId;
+	}
+	public void setOwnerUserId(String ownerUserId) {
+		this.ownerUserId = ownerUserId;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public boolean isAdminRole() {
+		return adminRole;
+	}
+	public void setAdminRole(boolean adminRole) {
+		this.adminRole = adminRole;
+	}
 
 //	private List<String> sharedUsers = new ArrayList<>();
 

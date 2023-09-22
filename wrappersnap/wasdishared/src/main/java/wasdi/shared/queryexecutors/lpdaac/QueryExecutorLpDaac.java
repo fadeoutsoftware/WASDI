@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import wasdi.shared.business.modis11a2.ModisItemForReading;
+import wasdi.shared.config.MongoConfig;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.modis11a2.ModisRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
@@ -17,11 +21,6 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
-import wasdi.shared.business.modis11a2.ModisItemForReading;
-import wasdi.shared.config.MongoConfig;
-import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.data.MongoRepository;
-import wasdi.shared.data.modis11a2.ModisRepository;
 
 
 public class QueryExecutorLpDaac extends QueryExecutor {

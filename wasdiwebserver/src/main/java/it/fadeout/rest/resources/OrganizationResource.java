@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.UserApplicationPermission.ORGANIZATION_READ;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,8 +39,8 @@ import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationEditorViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
-import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationSharingViewModel;
+import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 
 @Path("/organizations")
 public class OrganizationResource {

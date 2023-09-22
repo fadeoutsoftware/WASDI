@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -39,7 +40,7 @@ public class PushDockerImagesThread extends Thread {
 			try {
 				
 				// And get the processor folder
-				String sProcessorFolder = WasdiConfig.Current.paths.downloadRootPath + "/processors/" + m_oProcessor.getName() + "/";
+				String sProcessorFolder = PathsConfig.getProcessorFolder(m_oProcessor);
 				
 				// Create the docker utils
 				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder, "");

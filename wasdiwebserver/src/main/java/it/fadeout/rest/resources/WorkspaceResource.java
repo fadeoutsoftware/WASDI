@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.UserApplicationPermission.WORKSPACE_READ;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.CloudProviderRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -49,7 +49,6 @@ import wasdi.shared.data.JupyterNotebookRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
-import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
@@ -613,7 +612,7 @@ public class WorkspaceResource {
 			}
 			
 			// get workspace path
-			String sWorkspacePath = Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
 			WasdiLog.debugLog("WorkspaceResource.deleteWorkspace: deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -660,7 +659,7 @@ public class WorkspaceResource {
 							PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 							
 							
-							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(Wasdi.getWorkspacePath(sWorkspaceOwner, sWorkspaceId) + sProductName);
+							List<PublishedBand> aoPublishedBands = oPublishRepository.getPublishedBandsByProductName(PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId) + sProductName);
 
 							// For each published band
 							for (PublishedBand oPublishedBand : aoPublishedBands) {

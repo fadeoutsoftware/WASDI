@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,6 +61,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CounterRepository;
@@ -194,8 +193,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
+			File oProcessorPath = new File(PathsConfig.getProcessorFolder(sName));
 			
 			// Create folders
 			if (!oProcessorPath.exists()) {
@@ -210,7 +208,7 @@ public class ProcessorsResource  {
 			
 			// Create file
 			String sProcessorId =  UUID.randomUUID().toString();
-			File oProcessorFile = new File(sDownloadRootPath+"/processors/" + sName + "/" + sProcessorId + ".zip");
+			File oProcessorFile = new File(PathsConfig.getProcessorFolder(sName) + sProcessorId + ".zip");
 			WasdiLog.debugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
 			
 			// Save uploaded file
@@ -943,7 +941,7 @@ public class ProcessorsResource  {
 			WasdiLog.debugLog("ProcessorsResource.help: read Processor " +sName);
 			
 			// Take path
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sName;
+			String sProcessorPath = PathsConfig.getProcessorFolder(sName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 
@@ -1757,8 +1755,7 @@ public class ProcessorsResource  {
 			}
 						
 			// Set the processor path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath + "/processors/" + oProcessorToUpdate.getName()).toAbsolutePath().normalize();
+			java.nio.file.Path oDirPath = java.nio.file.Paths.get(PathsConfig.getProcessorFolder(oProcessorToUpdate.getName())).toAbsolutePath().normalize();
 			File oProcessorPath = oDirPath.toFile();
 			if (!oProcessorPath.isDirectory()) {
 				WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: Processor path " + oProcessorPath.getPath() + " does not exist or is not a directory. No update, aborting");
@@ -2008,17 +2005,8 @@ public class ProcessorsResource  {
 			}
 			
 			String sProcessorName = oProcessor.getName();
-			
-			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sDownloadRootPath).toAbsolutePath().normalize();
-			File oDirFile = oDirPath.toFile();
-			if(!oDirFile.isDirectory()) {
-				WasdiLog.debugLog("ProcessorsResource.downloadProcessor: directory " + oDirPath.toString() + " not found");
-				return Response.serverError().build();
-			}
 
-			String sProcessorZipPath = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorName + ".zip";
+			String sProcessorZipPath = PathsConfig.getProcessorFolder(sProcessorName) + sProcessorName + ".zip";
 			java.nio.file.Path oFilePath = java.nio.file.Paths.get(sProcessorZipPath).toAbsolutePath().normalize();
 			
 			File oFile = oFilePath.toFile();
@@ -2027,7 +2015,7 @@ public class ProcessorsResource  {
 			return zipProcessor(oFile, oProcessor);			
 		} 
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorsResource.downloadProcessor error: " + oEx);
+			WasdiLog.errorLog("ProcessorsResource.downloadProcessor error: ", oEx);
 		}
 		
 		return Response.serverError().build();
@@ -2444,8 +2432,7 @@ public class ProcessorsResource  {
 			}
 			
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sCWLFile = sDownloadRootPath + "processors/" + sProcessorName + "/" + sProcessorName + ".cwl";
+			String sCWLFile = PathsConfig.getProcessorFolder(sProcessorName) + sProcessorName + ".cwl";
 			File oFile = new File(sCWLFile);
 			WasdiLog.debugLog("CatalogResources.getCWLDescriptor: file " + sCWLFile);
 			
