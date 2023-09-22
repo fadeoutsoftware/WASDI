@@ -154,7 +154,7 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 				
 				if (!sDownloadUrl.endsWith("/")) sDownloadUrl += "/";
 				
-				sDownloadUrl += "/catalog/downloadbyname?filename=" +  oParameter.getProductName();
+				sDownloadUrl += "catalog/downloadbyname?filename=" +  oParameter.getProductName();
 				sDownloadUrl += "&workspace=" + sOriginWorkspace;
 				sDownloadUrl += "&token="+oParameter.getSessionID();
 				

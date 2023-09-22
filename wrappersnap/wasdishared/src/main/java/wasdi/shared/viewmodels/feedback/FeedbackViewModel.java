@@ -8,9 +8,14 @@ package wasdi.shared.viewmodels.feedback;
  */
 
 public class FeedbackViewModel {
+	
+	public FeedbackViewModel() {
+		
+	}
 
 	private String title;
 	private String message;
+	
 	public String getTitle() {
 		return title;
 	}
