@@ -76,13 +76,17 @@ public class MODISUtils {
     	insertProducts();
     }
     
+    public static void insertProducts() throws Exception {
+    	insertProducts(-1, -1);
+    }
+    
     /**
      * Populate the collection on Mongo
      * @param sCSVFilePath the path to the CSV file containing the list of product names
      * @return
      * @throws Exception
      */
-    public static void insertProducts() throws Exception {
+    public static void insertProducts(int iStartLine, int iEndLine) throws Exception {
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
@@ -90,10 +94,23 @@ public class MODISUtils {
     	try {
     		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
     		String sLine = "";
-    		int iCont = 0;
+    		int iCurrentLine = 0; // the variable stores the number of the current line of the file being read
+    		boolean bImportAll = iStartLine == -1 && iEndLine == -1;
     		
     		while ((sLine = oReader.readLine()) != null) {
-    			iCont ++;
+    			iCurrentLine ++;
+    			
+    			if (!bImportAll && iCurrentLine < iStartLine) {
+    				continue;
+    			}
+    			
+    			if (!bImportAll && iCurrentLine > iEndLine) {
+    				break;
+    			}
+    			
+    			System.out.println(iCurrentLine);
+    			iProdCounts++;
+    			
     			
     			String[] asMetadata = sLine.split(","); 
     			String sGranuleId = asMetadata[0];
@@ -104,9 +121,8 @@ public class MODISUtils {
     			String sXMLUrlPath = sProductFileUrl + ".xml";
     			WasdiLog.debugLog("MODISUtils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
     			
-    			
     			try {
-	    			if (iCont - 1 > 0) {
+	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)
 	    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); 
 	    				
 	    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
@@ -121,7 +137,7 @@ public class MODISUtils {
 	    			}
     			} catch(IOException oEx) {
     	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading metadata file " + sXMLUrlPath + ". " + oEx.getMessage());
-    			}
+    			} 
     		}  // end while
     		oReader.close();
     	} catch (IOException oEx) {
