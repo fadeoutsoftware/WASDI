@@ -14,7 +14,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

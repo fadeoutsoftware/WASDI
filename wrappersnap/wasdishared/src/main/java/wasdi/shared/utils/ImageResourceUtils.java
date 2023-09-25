@@ -9,7 +9,7 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.common.io.Files;
 
 import wasdi.shared.business.ImagesCollections;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;

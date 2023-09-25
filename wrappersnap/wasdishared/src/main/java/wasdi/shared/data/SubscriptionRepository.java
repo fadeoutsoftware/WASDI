@@ -16,7 +16,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

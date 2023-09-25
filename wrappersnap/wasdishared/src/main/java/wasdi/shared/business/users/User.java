@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.business.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.business.processors;
 
 /**
  * Parameters template for processor by user Cross-table for users and

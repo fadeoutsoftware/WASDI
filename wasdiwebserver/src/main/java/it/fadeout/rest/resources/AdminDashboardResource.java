@@ -1,6 +1,6 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +23,12 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserResourcePermission;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.UserRepository;
@@ -240,7 +241,7 @@ public class AdminDashboardResource {
 	public Response addResourcePermission(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("resourceType") String sResourceType,
 			@QueryParam("resourceId") String sResourceId,
-			@QueryParam("userId") String sDestinationUserId) {
+			@QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("AdminDashboardResource.addResourcePermission(" + " ResourceType: " + sResourceType
 				+ ", ResourceId: " + sResourceId + ", User: " + sDestinationUserId + " )");
@@ -251,16 +252,20 @@ public class AdminDashboardResource {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}		
+		
+		// Use Read By default
+		if (!UserAccessRights.isValidAccessRight(sRights)) {
+			sRights = UserAccessRights.READ.getAccessRight();
+		}
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-
 		if (sResourceType.equalsIgnoreCase("node")) {
 			NodeResource oNodeResource = new NodeResource();
-			PrimitiveResult oResult = oNodeResource.shareNode(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oNodeResource.shareNode(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
@@ -269,7 +274,7 @@ public class AdminDashboardResource {
 			}
 		} else if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
-			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
@@ -278,7 +283,7 @@ public class AdminDashboardResource {
 			}
 		} else if (sResourceType.equalsIgnoreCase("processor")) {
 			ProcessorsResource oProcessorResource = new ProcessorsResource();
-			PrimitiveResult oResult = oProcessorResource.shareProcessor(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oProcessorResource.shareProcessor(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
@@ -287,7 +292,7 @@ public class AdminDashboardResource {
 			}
 		} else if (sResourceType.equalsIgnoreCase("style")) {
 			StyleResource oStyleResource = new StyleResource();
-			PrimitiveResult oResult = oStyleResource.shareStyle(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oStyleResource.shareStyle(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
@@ -296,7 +301,7 @@ public class AdminDashboardResource {
 			}
 		} else if (sResourceType.equalsIgnoreCase("workflow")) {
 			WorkflowsResource oWorkflowResource = new WorkflowsResource();
-			PrimitiveResult oResult = oWorkflowResource.shareWorkflow(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oWorkflowResource.shareWorkflow(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
@@ -305,7 +310,7 @@ public class AdminDashboardResource {
 			}
 		} else if (sResourceType.equalsIgnoreCase("workspace")) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
-			PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId);
+			PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId, sRights);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();

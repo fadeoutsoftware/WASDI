@@ -12,7 +12,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;

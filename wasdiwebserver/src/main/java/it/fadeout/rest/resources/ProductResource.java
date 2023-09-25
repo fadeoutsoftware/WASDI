@@ -28,7 +28,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -82,12 +82,12 @@ public class ProductResource {
             // Validate Session
             User oUser = Wasdi.getUserFromSession(sSessionId);
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.addProductToWorkspace: invalid session");
+                WasdiLog.warnLog("ProductResource.addProductToWorkspace: invalid session");
                 return null;
             }
             
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.addProductToWorkspace: user cannot access workspace");
+                WasdiLog.warnLog("ProductResource.addProductToWorkspace: user cannot access workspace");
                 return null;            	
             }
 
@@ -101,7 +101,7 @@ public class ProductResource {
             ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
             if (oProductWorkspaceRepository.existsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
-                WasdiLog.debugLog("ProductResource.addProductToWorkspace:  Product already in the workspace");
+                WasdiLog.warnLog("ProductResource.addProductToWorkspace:  Product already in the workspace");
 
                 // Ok done
                 PrimitiveResult oResult = new PrimitiveResult();
@@ -160,12 +160,12 @@ public class ProductResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.getByProductName: invalid session");
+                WasdiLog.warnLog("ProductResource.getByProductName: invalid session");
                 return null;
             }
             
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getByProductName: user cannot access workspace");
+                WasdiLog.warnLog("ProductResource.getByProductName: user cannot access workspace");
                 return null;            	
             }
 
@@ -213,12 +213,12 @@ public class ProductResource {
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
-        	WasdiLog.debugLog("ProductResource.getMetadataByProductName: invalid session");
+        	WasdiLog.warnLog("ProductResource.getMetadataByProductName: invalid session");
         	return null;
         }
         
         if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.debugLog("ProductResource.getMetadataByProductName: user cannot access workspace");
+            WasdiLog.warnLog("ProductResource.getMetadataByProductName: user cannot access workspace");
             return null;            	
         }        
 
@@ -324,19 +324,19 @@ public class ProductResource {
         	
             // Validate input
             if (Utils.isNullOrEmpty(sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getListByWorkspace: workspace is null or empty");
+                WasdiLog.warnLog("ProductResource.getListByWorkspace: workspace is null or empty");
                 return aoProductList;
             }        	
         	
             User oUser = Wasdi.getUserFromSession(sSessionId);
             
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.getListByWorkspace: invalid session");
+                WasdiLog.warnLog("ProductResource.getListByWorkspace: invalid session");
                 return aoProductList;
             }
             
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getListByWorkspace: user cannot access workspace");
+                WasdiLog.warnLog("ProductResource.getListByWorkspace: user cannot access workspace");
                 return aoProductList;            	
             }
             
@@ -415,18 +415,18 @@ public class ProductResource {
         try {
         	// Validate inputs
             if (Utils.isNullOrEmpty(sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getLightListByWorkspace: workspace is null or empty");
+                WasdiLog.warnLog("ProductResource.getLightListByWorkspace: workspace is null or empty");
                 return aoProductList;
             }
         	
             User oUser = Wasdi.getUserFromSession(sSessionId);
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.getLightListByWorkspace: invalid session");
+                WasdiLog.warnLog("ProductResource.getLightListByWorkspace: invalid session");
                 return aoProductList;
             }
             
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getLightListByWorkspace: user cannot access workspace");
+                WasdiLog.warnLog("ProductResource.getLightListByWorkspace: user cannot access workspace");
                 return aoProductList;            	
             }
 
@@ -480,12 +480,12 @@ public class ProductResource {
 
             // Domain Check
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.getNamesByWorkspace: invalid session");
+                WasdiLog.warnLog("ProductResource.getNamesByWorkspace: invalid session");
                 return aoProductList;
             }
             
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.getNamesByWorkspace: user cannot access the workspace");
+                WasdiLog.warnLog("ProductResource.getNamesByWorkspace: user cannot access the workspace");
                 return aoProductList;            	
             }
 
@@ -553,12 +553,12 @@ public class ProductResource {
             // Domain Check
             User oUser = Wasdi.getUserFromSession(sSessionId);
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.updateProductViewModel: invalid session");
+                WasdiLog.warnLog("ProductResource.updateProductViewModel: invalid session");
                 return Response.status(Status.UNAUTHORIZED).build();
             }
 
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.debugLog("ProductResource.updateProductViewModel: user cannot access workspace");
+                WasdiLog.warnLog("ProductResource.updateProductViewModel: user cannot access workspace");
                 return Response.status(Status.UNAUTHORIZED).build();
             }            
 
@@ -579,7 +579,7 @@ public class ProductResource {
             }
 
             if (oDownloaded == null) {
-                WasdiLog.debugLog("ProductResource.updateProductViewModel: Associated downloaded file not found.");
+                WasdiLog.warnLog("ProductResource.updateProductViewModel: Associated downloaded file not found.");
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
             
@@ -708,20 +708,20 @@ public class ProductResource {
 
         // before any operation check that this is not an injection attempt from the user
         if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
-            WasdiLog.debugLog("ProductResource.uploadfile: Injection attempt from users");
+            WasdiLog.warnLog("ProductResource.uploadfile: Injection attempt from users");
             return Response.status(Status.BAD_REQUEST).build();
         }
 
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
-            WasdiLog.debugLog("ProductResource.uploadfile: invalid session");
+            WasdiLog.warnLog("ProductResource.uploadfile: invalid session");
             return Response.status(Status.UNAUTHORIZED).build();
         }
         
         // If workspace is not found in DB returns bad request
         if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.debugLog("ProductResource.uploadfile: invalid workspace");
+            WasdiLog.warnLog("ProductResource.uploadfile: invalid workspace");
             return Response.status(Status.FORBIDDEN).build();
         }
         
@@ -742,7 +742,7 @@ public class ProductResource {
         WasdiLog.debugLog("ProductResource.uploadfile: destination " + oOutputFilePath.getAbsolutePath());
 
         if (oOutputFilePath.getParentFile().exists() == false) {
-            WasdiLog.debugLog("ProductResource.uploadfile: Creating dirs " + oOutputFilePath.getParentFile().getAbsolutePath());
+            WasdiLog.warnLog("ProductResource.uploadfile: Creating dirs " + oOutputFilePath.getParentFile().getAbsolutePath());
             oOutputFilePath.getParentFile().mkdirs();
         }
 
@@ -807,7 +807,7 @@ public class ProductResource {
 
         // before any operation check that this is not an injection attempt from the user
         if (sName.contains("/") || sName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
-            WasdiLog.debugLog("ProductResource.uploadFileByLib: Injection attempt from users");
+            WasdiLog.warnLog("ProductResource.uploadFileByLib: Injection attempt from users");
             return Response.status(Status.BAD_REQUEST).build();
         }
 
@@ -815,13 +815,13 @@ public class ProductResource {
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
-        	WasdiLog.debugLog("ProductResource.uploadFileByLib: invalid session");
+        	WasdiLog.warnLog("ProductResource.uploadFileByLib: invalid session");
             return Response.status(Status.UNAUTHORIZED).build();
         }
 
         // If workspace is not found in DB returns bad request
         if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.debugLog("ProductResource.uploadFileByLib: user cannot access the workspace");
+            WasdiLog.warnLog("ProductResource.uploadFileByLib: user cannot access the workspace");
             return Response.status(Status.FORBIDDEN).build();
         }
 
@@ -887,7 +887,7 @@ public class ProductResource {
 
         // before any operation check that this is not an injection attempt from the user
         if (sProductName.contains("/") || sProductName.contains("\\") || sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
-            WasdiLog.debugLog("ProductResource.deleteProduct: Injection attempt from users");
+            WasdiLog.warnLog("ProductResource.deleteProduct: Injection attempt from users");
             oReturn.setIntValue(400);
             return oReturn;
         }
@@ -897,13 +897,13 @@ public class ProductResource {
 
             // Domain Check
             if (oUser == null) {
-                WasdiLog.debugLog("ProductResource.deleteProduct: invalid session");
+                WasdiLog.warnLog("ProductResource.deleteProduct: invalid session");
                 oReturn.setIntValue(404);
                 return oReturn;
             }
             if (Utils.isNullOrEmpty(sWorkspaceId)) {
                 String sMessage = "workspace null or empty";
-                WasdiLog.debugLog("ProductResource.deleteProduct: " + sMessage);
+                WasdiLog.warnLog("ProductResource.deleteProduct: " + sMessage);
                 oReturn.setStringValue(sMessage);
                 oReturn.setIntValue(404);
                 return oReturn;
@@ -911,7 +911,7 @@ public class ProductResource {
             // If workspace is not found in DB returns bad request
             if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
                 String sMessage = "ProductResource.deleteProduct: user cannot access the workspace";
-                WasdiLog.debugLog(sMessage);
+                WasdiLog.warnLog(sMessage);
                 oReturn.setStringValue(sMessage);
                 oReturn.setIntValue(403);
                 return oReturn;
@@ -944,7 +944,7 @@ public class ProductResource {
             }
 
             if (oDownloadedFile == null) {
-                WasdiLog.debugLog("ProductResource.deleteProduct: invalid product");
+                WasdiLog.warnLog("ProductResource.deleteProduct: invalid product");
                 oReturn.setStringValue("Invalid Product");
                 oReturn.setIntValue(403);
                 return oReturn;
@@ -1138,14 +1138,14 @@ public class ProductResource {
     	User oUser = Wasdi.getUserFromSession(sSessionId);
     	
     	if (oUser == null) {
-            WasdiLog.debugLog("ProductResource.deleteMultipleProduct: invalid session " );
+            WasdiLog.warnLog("ProductResource.deleteMultipleProduct: invalid session " );
             oPrimitiveResult.setIntValue(500);
             oPrimitiveResult.setBoolValue(false);
             return oPrimitiveResult;    		
     	}
     	
     	if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.debugLog("ProductResource.deleteMultipleProduct: user cannot access workspace" );
+            WasdiLog.warnLog("ProductResource.deleteMultipleProduct: user cannot access workspace" );
             oPrimitiveResult.setIntValue(500);
             oPrimitiveResult.setBoolValue(false);
             return oPrimitiveResult;    		

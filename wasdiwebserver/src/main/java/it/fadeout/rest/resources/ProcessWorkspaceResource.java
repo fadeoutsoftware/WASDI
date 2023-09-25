@@ -1,6 +1,6 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
-import wasdi.shared.business.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
 import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
@@ -118,18 +118,18 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByWorkspace: workspace id is null, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByWorkspace: workspace id is null, aborting");
 				return aoProcessList;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByWorkspace: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByWorkspace: invalid session");
 				return aoProcessList;
 			}
 			
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByWorkspace: user not allowed to access workspace" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByWorkspace: user not allowed to access workspace" );
 				return aoProcessList;
 			}
 			
@@ -203,7 +203,7 @@ public class ProcessWorkspaceResource {
 			// Domain Check
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByUser: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByUser: invalid session");
 				return aoProcessList;
 			}
 			
@@ -268,13 +268,13 @@ public class ProcessWorkspaceResource {
 			
 			// Domain Check
 			if(Utils.isNullOrEmpty(sProcessorName)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name");
 				return aoProcessList;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid session");
 				return aoProcessList;
 			}
 			
@@ -282,12 +282,12 @@ public class ProcessWorkspaceResource {
 			ProcessorRepository oProcessRepository = new ProcessorRepository();
 			
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication Processor name not found in DB, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication Processor name not found in DB, aborting");
 				return aoProcessList;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sProcessorName)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication: user cannot access processor");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: user cannot access processor");
 				return aoProcessList;				
 			}
 
@@ -423,21 +423,21 @@ public class ProcessWorkspaceResource {
 			
 			// Domain Check
 			if(Utils.isNullOrEmpty(sProcessorName)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: invalid processor name, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid processor name, aborting");
 				return oReturnStats;
 			}
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid session");
 				return oReturnStats;
 			}
 			
 			// checks that processor is in db -> needed to avoid url injection from users 
 			ProcessorRepository oProcessRepository = new ProcessorRepository();
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics: Processor name not found in DB, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: Processor name not found in DB, aborting");
 				return oReturnStats;
 			}
 
@@ -574,17 +574,17 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: invalid session");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByWorkspace: ws id is null");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getLastProcessByWorkspace: ws id is null");
 				return aoProcessList;
 			}
 			
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-				WasdiLog.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: user cannot access the workspace");
+				WasdiLog.warnLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: user cannot access the workspace");
 				return aoProcessList;				
 			}
 
@@ -630,7 +630,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getLastProcessByUser: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getLastProcessByUser: invalid session");
 				return aoProcessList;
 			}
 						
@@ -677,7 +677,7 @@ public class ProcessWorkspaceResource {
 
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.GetSummary: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.GetSummary: invalid session");
 				return oSummaryViewModel;
 			}
 						
@@ -739,12 +739,12 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.deleteProcess: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			if(Utils.isNullOrEmpty(sToKillProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.deleteProcess: processObjId is null or empty, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: processObjId is null or empty, aborting");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -753,13 +753,13 @@ public class ProcessWorkspaceResource {
 
 			//check that the process exists
 			if(null==oProcessToKill) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.deleteProcess: process not found in DB, aborting");
+				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: process not found in DB, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
 			// check that the user can access the processWorkspace
 			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.deleteProcess: user cannot access requested process workspace");
+				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: user cannot access requested process workspace");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 	
@@ -804,12 +804,12 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessById: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessById: invalid session");
 				return oProcess;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessWorkspaceId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessById: user cannot access the process workspace");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessById: user cannot access the process workspace");
 				return oProcess;				
 			}
 			
@@ -850,7 +850,7 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getStatusProcessesById: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: invalid session");
 				return asReturnStatusList;
 			}
 			
@@ -883,7 +883,7 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(null == oUser) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getProcessStatusById: invalid session" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessStatusById: invalid session" );
 				return null;
 			}
 			
@@ -923,12 +923,12 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.updateProcessById: invalid session");
+				WasdiLog.warnLog("ProcessWorkspaceResource.updateProcessById: invalid session");
 				return oProcess;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.updateProcessById: user cannot access Process Workspace");
+				WasdiLog.warnLog("ProcessWorkspaceResource.updateProcessById: user cannot access Process Workspace");
 				return oProcess;				
 			}
 
@@ -1031,12 +1031,12 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.internalSetPaylod: invalid session" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: invalid session" );
 				return oProcess;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.internalSetPaylod: user cannot access process workspace id" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: user cannot access process workspace id" );
 				return oProcess;				
 			}
 
@@ -1086,12 +1086,12 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid: invalid session" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.setSubProcessPid: invalid session" );
 				return oProcess;
 			}
 			
 			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.setSubProcessPid: user cannot access process workspace" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.setSubProcessPid: user cannot access process workspace" );
 				return oProcess;				
 			}
 			
@@ -1136,12 +1136,12 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(null == oUser) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: invalid session" );
+				WasdiLog.warnLog("ProcessWorkspaceResource.getPayload: invalid session" );
 				return null;
 			}
 			
 			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.debugLog("ProcessWorkspaceResource.getPayload: user cannot access process workspace");
+				WasdiLog.warnLog("ProcessWorkspaceResource.getPayload: user cannot access process workspace");
 				return null;
 			} 
 			
@@ -1169,7 +1169,7 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: invalid session");
+			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeByUserAndInterval: invalid session");
 			return lRunningTime;
 		}
 
@@ -1271,7 +1271,7 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
+			WasdiLog.warnLog("ProcessWorkspaceResource.getRunningTimeBySubscriptionAndProject: invalid session");
 			return aoRunningTimeBySubscriptionByProject;
 		}
 
@@ -1377,7 +1377,7 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getNodeQueuesStatus: invalid session");
+			WasdiLog.warnLog("ProcessWorkspaceResource.getNodeQueuesStatus: invalid session");
 			return aoViewModel;
 		}
 
@@ -1611,7 +1611,7 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
+			WasdiLog.warnLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
 			return aoViewModels;
 		}
 

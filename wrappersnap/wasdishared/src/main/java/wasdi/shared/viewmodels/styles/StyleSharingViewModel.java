@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.styles;
 
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.UserResourcePermission;
 
 /**
  * Represents the sharing of a style with a user

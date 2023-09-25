@@ -6,7 +6,7 @@ import java.io.FileWriter;
 
 import com.google.common.io.Files;
 
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;

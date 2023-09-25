@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.workflows;
 
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.UserResourcePermission;
 
 /**
  * Represents the sharing of a workflow with a user

@@ -12,7 +12,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
-import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

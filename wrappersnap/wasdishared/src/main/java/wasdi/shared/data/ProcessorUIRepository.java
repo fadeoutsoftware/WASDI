@@ -5,7 +5,7 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.ProcessorUI;
+import wasdi.shared.business.processors.ProcessorUI;
 
 public class ProcessorUIRepository extends MongoRepository {
 	

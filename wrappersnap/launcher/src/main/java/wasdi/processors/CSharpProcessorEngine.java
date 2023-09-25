@@ -1,6 +1,6 @@
 package wasdi.processors;
 
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.packagemanagers.IPackageManager;
 
 /**

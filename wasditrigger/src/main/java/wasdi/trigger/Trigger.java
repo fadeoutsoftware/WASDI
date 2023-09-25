@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import wasdi.jwasdilib.WasdiLib;
 import wasdi.shared.business.Schedule;
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.UserSession;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;

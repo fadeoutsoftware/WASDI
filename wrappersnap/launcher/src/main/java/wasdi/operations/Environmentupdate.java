@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;

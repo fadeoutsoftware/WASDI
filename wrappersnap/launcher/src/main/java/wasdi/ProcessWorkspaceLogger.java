@@ -2,7 +2,7 @@ package wasdi;
 
 import java.util.Date;
 
-import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.utils.Utils;
 

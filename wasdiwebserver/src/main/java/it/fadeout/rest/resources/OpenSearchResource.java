@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.CatalogueConfig;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -71,13 +71,13 @@ public class OpenSearchResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if (oUser == null) {
-				WasdiLog.debugLog(m_sClassName + ".count: invalid session");
+				WasdiLog.warnLog(m_sClassName + ".count: invalid session");
 				return -1;
 			}
 	
 			int iCounter = 0;
 			
-			WasdiLog.debugLog(m_sClassName + ".count, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+			WasdiLog.warnLog(m_sClassName + ".count, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 			
 			if (Utils.isNullOrEmpty(sProviders)) sProviders = "AUTO";
 			String sOriginalProvider = sProviders;
@@ -147,7 +147,7 @@ public class OpenSearchResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			WasdiLog.debugLog(m_sClassName + ".search: invalid session");
+			WasdiLog.warnLog(m_sClassName + ".search: invalid session");
 			return null;
 		}
 		
@@ -158,7 +158,7 @@ public class OpenSearchResource {
 		sProvider = getProvider(sProvider, sPlatformType);
 		
 		if (Utils.isNullOrEmpty(sProvider)) {
-			WasdiLog.debugLog(m_sClassName + ".search: Impossible to find the Provider ");
+			WasdiLog.warnLog(m_sClassName + ".search: Impossible to find the Provider ");
 			return null;
 		}
 		
@@ -231,12 +231,9 @@ public class OpenSearchResource {
 	public ArrayList<DataProviderViewModel> getDataProviders(@HeaderParam("x-session-token") String sSessionId) {
 		WasdiLog.debugLog(m_sClassName + ".getDataProviders");
 		try {
-			if (Utils.isNullOrEmpty(sSessionId)) {
-				return null;
-			}
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				WasdiLog.debugLog(m_sClassName + ".getDataProviders: invalid session");
+				WasdiLog.warnLog(m_sClassName + ".getDataProviders: invalid session");
 				return null;
 			}			
 			
@@ -284,13 +281,13 @@ public class OpenSearchResource {
 			// Validate the input			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				WasdiLog.debugLog(m_sClassName + ".countList, session: invalid");
+				WasdiLog.warnLog(m_sClassName + ".countList, session: invalid");
 				return -1;
 			}
 			
 			// We need query!
 			if(null==asQueries || asQueries.size() <= 0) {
-				WasdiLog.debugLog(m_sClassName + ".countList, asQueries is null");
+				WasdiLog.warnLog(m_sClassName + ".countList, asQueries is null");
 				return -1;
 			}
 			
@@ -375,13 +372,13 @@ public class OpenSearchResource {
 			// Validate the User
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				WasdiLog.debugLog(m_sClassName + ".searchList, session is invalid");
+				WasdiLog.warnLog(m_sClassName + ".searchList, session is invalid");
 				return null;
 			}
 						
 			// Check if we have at least one query
 			if(null==asQueries || asQueries.size()<= 0) {
-				WasdiLog.debugLog(m_sClassName + ".searchList, no queries available");
+				WasdiLog.warnLog(m_sClassName + ".searchList, no queries available");
 				return null;
 			}
 	

@@ -1,6 +1,6 @@
 package wasdi.shared.viewmodels.organizations;
 
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.UserResourcePermission;
 
 /**
  * Represents the sharing of an organization with a user

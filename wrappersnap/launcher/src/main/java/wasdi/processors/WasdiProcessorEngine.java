@@ -5,8 +5,8 @@ import java.util.Map;
 
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;

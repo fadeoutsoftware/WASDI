@@ -21,10 +21,10 @@ import it.fadeout.Wasdi;
 import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
@@ -58,26 +58,26 @@ public class PackageManagerResource {
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: user cannot access the processor");
+			WasdiLog.warnLog("PackageManagerResource.getListPackages: user cannot access the processor");
 			return Response.status(Status.UNAUTHORIZED).build();			
 		}
 		
 		String sContentAsJson = readPackagesInfoFile(sName);
 
 		if (Utils.isNullOrEmpty(sContentAsJson)) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
+			WasdiLog.warnLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
 
 		if (oPackageManagerFullInfoViewModel == null) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
+			WasdiLog.warnLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -117,24 +117,24 @@ public class PackageManagerResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
+			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
 			return Response.status(Status.UNAUTHORIZED).build();			
 		}		
 		
 		if (WasdiConfig.Current.isMainNode() == false) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
+			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
 		String sContent = readEnvironmentActionsFile(sName);
 
 		if (Utils.isNullOrEmpty(sContent)) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
+			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -152,17 +152,17 @@ public class PackageManagerResource {
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (Utils.isNullOrEmpty(sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: invalid app name");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
 			return Response.status(Status.UNAUTHORIZED).build();			
 		}		
 
@@ -188,7 +188,7 @@ public class PackageManagerResource {
 		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 		
 		if (oProcessorToRun==null) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
@@ -227,7 +227,7 @@ public class PackageManagerResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.warnLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -236,12 +236,12 @@ public class PackageManagerResource {
 			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToForceUpdate == null) {
-				WasdiLog.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
-				WasdiLog.debugLog("PackageManagerResource.environmentupdate: user cannot access the processor");
+			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: user cannot write the processor");
 				return Response.status(Status.UNAUTHORIZED).build();			
 			}			
 			

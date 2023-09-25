@@ -2,7 +2,7 @@ package wasdi.shared.config;
 
 import java.io.File;
 
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.Utils;
 

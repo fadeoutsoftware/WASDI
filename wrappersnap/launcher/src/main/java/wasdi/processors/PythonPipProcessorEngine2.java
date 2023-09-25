@@ -3,8 +3,8 @@ package wasdi.processors;
 import java.util.List;
 
 import wasdi.processors.dockerUtils.DockerUtils;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;

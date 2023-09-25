@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -55,7 +55,7 @@ public class WasdiResource {
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			WasdiLog.debugLog("WasdiResource.feedback: invalid session");
+			WasdiLog.warnLog("WasdiResource.feedback: invalid session");
 			oPrimitiveResult.setIntValue(401);
 			return oPrimitiveResult;
 		}
@@ -63,7 +63,7 @@ public class WasdiResource {
 		if (oFeedback == null
 				|| Utils.isNullOrEmpty(oFeedback.getTitle())
 				|| Utils.isNullOrEmpty(oFeedback.getMessage())) {
-			WasdiLog.debugLog("WasdiResource.feedback: empty or invalid payload");
+			WasdiLog.warnLog("WasdiResource.feedback: empty or invalid payload");
 			oPrimitiveResult.setIntValue(404);
 			return oPrimitiveResult;
 		}

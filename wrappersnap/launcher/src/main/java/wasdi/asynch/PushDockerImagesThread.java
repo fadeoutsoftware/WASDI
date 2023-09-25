@@ -3,7 +3,7 @@ package wasdi.asynch;
 import java.util.ArrayList;
 
 import wasdi.processors.dockerUtils.DockerUtils;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;

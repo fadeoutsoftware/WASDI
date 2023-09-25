@@ -1,5 +1,6 @@
 package wasdi.shared.business;
 
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 

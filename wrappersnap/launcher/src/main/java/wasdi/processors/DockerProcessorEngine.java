@@ -27,7 +27,7 @@ import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;

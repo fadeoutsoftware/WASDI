@@ -1,6 +1,6 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
 import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
@@ -45,9 +45,10 @@ import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SnapWorkflowRepository;
@@ -104,7 +105,7 @@ public class WorkflowsResource {
         	
             // Checks whether null file is passed
             if (oFileInputStream == null) {
-            	WasdiLog.debugLog("WorkflowsResource.uploadFile: no file stream");
+            	WasdiLog.warnLog("WorkflowsResource.uploadFile: no file stream");
             	return Response.status(Status.BAD_REQUEST).build();
             }
             
@@ -112,7 +113,7 @@ public class WorkflowsResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
-            	WasdiLog.debugLog("WorkflowsResource.uploadFile: invalid session");
+            	WasdiLog.warnLog("WorkflowsResource.uploadFile: invalid session");
             	return Response.status(Status.UNAUTHORIZED).build();
             }
             
@@ -153,7 +154,7 @@ public class WorkflowsResource {
             boolean bResult = fillWorkflowIONodes(oWorkflowXmlFile, oWorkflow);
             
             if (!bResult)  {
-            	WasdiLog.debugLog("WorkflowsResource.uploadFile: error finding IO Nodes");
+            	WasdiLog.warnLog("WorkflowsResource.uploadFile: error finding IO Nodes");
             	return Response.serverError().build();
             }
             
@@ -227,12 +228,12 @@ public class WorkflowsResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
-            	WasdiLog.debugLog("WorkflowsResource.updateFile: invalid session");
+            	WasdiLog.warnLog("WorkflowsResource.updateFile: invalid session");
             	return Response.status(Status.UNAUTHORIZED).build();
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-            	WasdiLog.debugLog("WorkflowsResource.updateFile: user cannot access to the workflow");
+            	WasdiLog.warnLog("WorkflowsResource.updateFile: user cannot access to the workflow");
             	return Response.status(Status.FORBIDDEN).build();            	
             }
             
@@ -350,12 +351,12 @@ public class WorkflowsResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
-            	WasdiLog.debugLog("WorkflowsResource.getXML: invalid session");
+            	WasdiLog.warnLog("WorkflowsResource.getXML: invalid session");
             	return Response.status(Status.UNAUTHORIZED).build();
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-            	WasdiLog.debugLog("WorkflowsResource.getXML: user cannot access to the workflow");
+            	WasdiLog.warnLog("WorkflowsResource.getXML: user cannot access to the workflow");
             	return Response.status(Status.FORBIDDEN).build();            	
             }            
 
@@ -364,7 +365,7 @@ public class WorkflowsResource {
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
             
             if (oWorkflow == null) {
-                WasdiLog.debugLog("WorkflowsResource.getXML: error in workflowId " + sWorkflowId + " not found on DB");
+                WasdiLog.warnLog("WorkflowsResource.getXML: error in workflowId " + sWorkflowId + " not found on DB");
                 return Response.notModified("WorkflowId not found").build();
             }
 
@@ -372,7 +373,7 @@ public class WorkflowsResource {
             File oWorkflowsFile = new File(PathsConfig.getWorkflowsPath() + sWorkflowId + ".xml");
 
             if (!oWorkflowsFile.exists()) {
-                WasdiLog.debugLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ") Error, workflow file not found;");
+                WasdiLog.warnLog("WorkflowsResource.getXML( Workflow Id : " + sWorkflowId + ") Error, workflow file not found;");
                 return Response.status(Status.BAD_REQUEST).build();
             }
             // Check is the owner or a the sharing
@@ -436,12 +437,12 @@ public class WorkflowsResource {
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
-        	WasdiLog.debugLog("WorkflowsResource.updateParams: invalid session");
+        	WasdiLog.warnLog("WorkflowsResource.updateParams: invalid session");
         	return Response.status(Status.UNAUTHORIZED).build();
         }
         
         if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-        	WasdiLog.debugLog("WorkflowsResource.updateParams: user cannot access to the workflow");
+        	WasdiLog.warnLog("WorkflowsResource.updateParams: user cannot access to the workflow");
         	return Response.status(Status.FORBIDDEN).build();            	
         }        
 
@@ -476,7 +477,7 @@ public class WorkflowsResource {
         User oUser = Wasdi.getUserFromSession(sSessionId);
 
         if (oUser == null) {
-            WasdiLog.debugLog("WorkflowsResource.getWorkflowsByUser: invalid session");
+            WasdiLog.warnLog("WorkflowsResource.getWorkflowsByUser: invalid session");
             return null;
         }
         
@@ -545,12 +546,12 @@ public class WorkflowsResource {
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
-                WasdiLog.debugLog("WorkflowsResource.delete: invalid session");
+                WasdiLog.warnLog("WorkflowsResource.delete: invalid session");
                 return Response.status(Status.UNAUTHORIZED).build();
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-            	WasdiLog.debugLog("WorkflowsResource.delete: user cannot access to the workflow");
+            	WasdiLog.warnLog("WorkflowsResource.delete: user cannot access to the workflow");
             	return Response.status(Status.FORBIDDEN).build();            	
             }            
 
@@ -561,7 +562,7 @@ public class WorkflowsResource {
             SnapWorkflow oWorkflow = oSnapWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
             if (oWorkflow == null) {
-            	WasdiLog.debugLog("WorkflowsResource.delete: workflow not found");
+            	WasdiLog.warnLog("WorkflowsResource.delete: workflow not found");
             	return Response.status(Status.BAD_REQUEST).build();
             }
 
@@ -619,7 +620,7 @@ public class WorkflowsResource {
     @Path("share/add")
     @Produces({"application/xml", "application/json", "text/xml"})
     public PrimitiveResult shareWorkflow(@HeaderParam("x-session-token") String sSessionId,
-                                         @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId) {
+                                         @QueryParam("workflowId") String sWorkflowId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 
         WasdiLog.debugLog("WorkflowsResource.shareWorkflow(Workflow : " + sWorkflowId + ", User: " + sUserId + " )");
 
@@ -633,14 +634,19 @@ public class WorkflowsResource {
         oResult.setBoolValue(false);
 
         if (oRequesterUser == null) {
-            WasdiLog.debugLog("WorkflowsResource.shareWorkflow: invalid session");
+            WasdiLog.warnLog("WorkflowsResource.shareWorkflow: invalid session");
             oResult.setStringValue("Invalid session.");
             return oResult;
         }
         
+		// Use Read By default
+		if (!UserAccessRights.isValidAccessRight(sRights)) {
+			sRights = UserAccessRights.READ.getAccessRight();
+		}        
+        
         if (Utils.isNullOrEmpty(oRequesterUser.getUserId()) && 
         		!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-            WasdiLog.debugLog("WorkflowsResource.shareWorkflow: user cannot access workflow");
+            WasdiLog.warnLog("WorkflowsResource.shareWorkflow: user cannot access workflow");
             oResult.setStringValue("Invalid user.");
             return oResult;
         }
@@ -651,13 +657,13 @@ public class WorkflowsResource {
             SnapWorkflow oWorkflow = oWorkflowRepository.getSnapWorkflow(sWorkflowId);
 
             if (oWorkflow == null) {
-            	WasdiLog.debugLog("WorkflowsResource.shareWorkflow: invalid workflow");
+            	WasdiLog.warnLog("WorkflowsResource.shareWorkflow: invalid workflow");
                 oResult.setStringValue("Invalid Workflow");
                 return oResult;
             }
             
             if (oRequesterUser.getUserId().equals(sUserId)) {
-                WasdiLog.debugLog("WorkflowsResource.ShareWorkflow: auto sharing not so smart");
+                WasdiLog.warnLog("WorkflowsResource.ShareWorkflow: auto sharing not so smart");
                 oResult.setStringValue("Impossible to autoshare.");
                 return oResult;
             }
@@ -668,14 +674,14 @@ public class WorkflowsResource {
             
             // Can't find destination user for the sharing
             if (oDestinationUser == null) {
-            	WasdiLog.debugLog("WorkflowsResource.ShareWorkflow: invalid target user");
+            	WasdiLog.warnLog("WorkflowsResource.ShareWorkflow: invalid target user");
                 oResult.setStringValue("Can't find target user of the sharing");
                 return oResult;
             }
 
             // Check if has been already shared
             if (oUserResourcePermissionRepository.isWorkflowSharedWithUser(sUserId, sWorkflowId)) {
-            	WasdiLog.debugLog("WorkflowsResource.ShareWorkflow: already shared");
+            	WasdiLog.warnLog("WorkflowsResource.ShareWorkflow: already shared");
                 oResult.setStringValue("Already shared");
                 return oResult;
             }
@@ -765,20 +771,20 @@ public class WorkflowsResource {
             User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oOwnerUser == null) {
-                WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow: invalid session");
+                WasdiLog.warnLog("WorkflowsResource.deleteUserSharedWorkflow: invalid session");
                 oResult.setStringValue("Invalid session");
                 return oResult;
             }
 
             if (Utils.isNullOrEmpty(sUserId)) {
-            	WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow: invalid target user");
+            	WasdiLog.warnLog("WorkflowsResource.deleteUserSharedWorkflow: invalid target user");
                 oResult.setStringValue("Invalid shared user.");
                 return oResult;
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oOwnerUser.getUserId(), sWorkflowId) &&
             		!UserApplicationRole.userHasRightsToAccessApplicationResource(oOwnerUser.getRole(), ADMIN_DASHBOARD)) {
-                WasdiLog.debugLog("WorkflowsResource.deleteUserSharedWorkflow: user cannot access the workflow");
+                WasdiLog.warnLog("WorkflowsResource.deleteUserSharedWorkflow: user cannot access the workflow");
                 oResult.setStringValue("Forbidden");
                 return oResult;            	
             }
@@ -837,12 +843,12 @@ public class WorkflowsResource {
         User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
         if (oRequestingUser == null) {
-            WasdiLog.debugLog("WorkflowsResource.getEnableUsersSharedWorkflow: invalid session");
+            WasdiLog.warnLog("WorkflowsResource.getEnableUsersSharedWorkflow: invalid session");
             return oResult;
         }
         
         if (!PermissionsUtils.canUserAccessWorkflow(oRequestingUser.getUserId(), sWorkflowId)) {
-            WasdiLog.debugLog("WorkflowsResource.getEnableUsersSharedWorkflow: user cannot access workflow");
+            WasdiLog.warnLog("WorkflowsResource.getEnableUsersSharedWorkflow: user cannot access workflow");
             return oResult;        	
         }
 
@@ -896,14 +902,14 @@ public class WorkflowsResource {
         User oUser = Wasdi.getUserFromSession(sSessionId);
         
         if (oUser == null) {
-            WasdiLog.debugLog("WorkflowsResource.run: invalid session");
+            WasdiLog.warnLog("WorkflowsResource.run: invalid session");
             oResult.setBoolValue(false);
             oResult.setIntValue(401);
             return oResult;
         }
         
         if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-            WasdiLog.debugLog("WorkflowsResource.run: user does not have a valid subscription");
+            WasdiLog.warnLog("WorkflowsResource.run: user does not have a valid subscription");
             oResult.setBoolValue(false);
             oResult.setIntValue(401);
             return oResult;
@@ -918,14 +924,14 @@ public class WorkflowsResource {
             SnapWorkflow oWF = oSnapWorkflowRepository.getSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
 
             if (oWF == null) {
-            	WasdiLog.debugLog("WorkflowsResource.run: invalid workflow");
+            	WasdiLog.warnLog("WorkflowsResource.run: invalid workflow");
                 oResult.setBoolValue(false);
                 oResult.setIntValue(500);
                 return oResult;
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), oWF.getWorkflowId())) {
-                WasdiLog.debugLog("WorkflowsResource.run: user cannot access workflow");
+                WasdiLog.warnLog("WorkflowsResource.run: user cannot access workflow");
                 oResult.setBoolValue(false);
                 oResult.setIntValue(401);
                 return oResult;            	
@@ -1041,12 +1047,12 @@ public class WorkflowsResource {
             User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
             if (oUser == null) {
-                WasdiLog.debugLog("WorkflowsResource.download: invalid session");
+                WasdiLog.warnLog("WorkflowsResource.download: invalid session");
                 return Response.status(Status.UNAUTHORIZED).build();
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-                WasdiLog.debugLog("WorkflowsResource.download: user cannot access the workflow");
+                WasdiLog.warnLog("WorkflowsResource.download: user cannot access the workflow");
                 return Response.status(Status.UNAUTHORIZED).build();            	
             }
 
@@ -1061,13 +1067,13 @@ public class WorkflowsResource {
             ResponseBuilder oResponseBuilder = null;
 
             if (oSnapWorkflow == null) {
-                WasdiLog.debugLog("WorkflowsResource.download:  workflowId " + sWorkflowId + " not found on DB");
+                WasdiLog.warnLog("WorkflowsResource.download:  workflowId " + sWorkflowId + " not found on DB");
                 oResponseBuilder = Response.noContent();
                 return oResponseBuilder.build();
             }
 
             if (oFile.exists() == false) {
-                WasdiLog.debugLog("WorkflowsResource.download: file does not exists " + oFile.getPath());
+                WasdiLog.warnLog("WorkflowsResource.download: file does not exists " + oFile.getPath());
                 oResponseBuilder = Response.serverError();
             } else {
 

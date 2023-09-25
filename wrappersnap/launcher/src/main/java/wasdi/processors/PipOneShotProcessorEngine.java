@@ -2,8 +2,8 @@ package wasdi.processors;
 
 import java.util.List;
 
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
