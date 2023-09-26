@@ -421,6 +421,7 @@
 	"DIALOG_WS_INFO_FILES": "Total File:",
 	"DIALOG_WS_INFO_PROCS": "Proses Dieksekusi:",
 	"DIALOG_WS_INFO_SHARINGS": "Berbagi Area Kerja:",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	
 	"DIALOG_PARAMS_TITLE": "Pustaka Parameter Aplikasi",
 	"DIALOG_PARAMS_FILTER_HELP": "Nama Template Filter...",

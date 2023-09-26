@@ -385,6 +385,7 @@
     "DIALOG_WS_INFO_FILES": "Tổng số tệp :",
     "DIALOG_WS_INFO_PROCS": "Quy trình đã thực thi :",
     "DIALOG_WS_INFO_SHARINGS": "Chia sẻ không gian làm việc :",
+    "DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
     "DIALOG_PARAMS_TITLE": "Thư viện Thông số Ứng dụng",
     "DIALOG_PARAMS_FILTER_HELP": "Lọc Tên mẫu biểu...",
     "DIALOG_PARAMS_ADD": "Thêm",

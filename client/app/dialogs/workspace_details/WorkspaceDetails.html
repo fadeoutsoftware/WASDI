@@ -39,16 +39,16 @@
                             <i
                                 class="fa fa-square"
                                 aria-hidden="true"
-                                ng-hide="m_oController.m_oWorkspaceViewModel.isPublic === true"
-                                ng-click="m_oController.m_oWorkspaceViewModel.isPublic = !m_oController.m_oWorkspaceViewModel.isPublic">
+                                ng-hide="m_oController.m_oWorkspaceViewModel.public === true"
+                                ng-click="m_oController.m_oWorkspaceViewModel.public = !m_oController.m_oWorkspaceViewModel.public">
                             </i>
                             <i
                                 class="fa fa-check-square"
                                 aria-hidden="true"
-                                ng-hide="m_oController.m_oWorkspaceViewModel.isPublic === false"
-                                ng-click="m_oController.m_oWorkspaceViewModel.isPublic = !m_oController.m_oWorkspaceViewModel.isPublic">
+                                ng-hide="m_oController.m_oWorkspaceViewModel.public === false"
+                                ng-click="m_oController.m_oWorkspaceViewModel.public = !m_oController.m_oWorkspaceViewModel.public">
                             </i>
-                            <span>{{"DIALOG_PROCESSOR_BASE_PUBLIC"|translate}}</span>                            
+                            <span>{{"DIALOG_WS_INFO_PUBLIC"|translate}}</span>                            
                         </div>
                         <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
                             <span class="workspace-details-heading">{{"DIALOG_WS_INFO_SHARINGS"|translate}}</span>

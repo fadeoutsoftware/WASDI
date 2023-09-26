@@ -411,6 +411,7 @@
 	"DIALOG_WS_INFO_FILES": "Archivos totales :",
 	"DIALOG_WS_INFO_PROCS": "Procesos Ejecutados :",
 	"DIALOG_WS_INFO_SHARINGS": "Espacios de trabajo compartidos :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	
 	"DIALOG_PARAMS_TITLE": "Librería de parámetros de App",
 	"DIALOG_PARAMS_FILTER_HELP": "Filtra por nombre de Template...",

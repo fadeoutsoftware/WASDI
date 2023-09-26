@@ -387,6 +387,7 @@
 	"DIALOG_WS_INFO_FILES": "Fichiers totaux :",
 	"DIALOG_WS_INFO_PROCS": "Processus exécutés :",
 	"DIALOG_WS_INFO_SHARINGS": "Partage d'espace de travail :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	"DIALOG_PARAMS_TITLE": "App Params Library",
 	"DIALOG_PARAMS_FILTER_HELP": "Nom du modèle pour filtrer...",
 	"DIALOG_PARAMS_ADD": "Ajouter",

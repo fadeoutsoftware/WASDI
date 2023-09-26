@@ -76,7 +76,7 @@ public class WorkspaceRepository extends  MongoRepository {
     public boolean updateWorkspacePublicFlag(Workspace oWorkspace) {
 
         try {
-            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("isPublic",oWorkspace.isPublic())));
+            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("public",oWorkspace.isPublic())));
 
             return true;
 

@@ -251,8 +251,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("getws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspaceId) {
+	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspaceId) {
 
 		WasdiLog.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ")");
 

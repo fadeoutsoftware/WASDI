@@ -421,6 +421,7 @@
 	"DIALOG_WS_INFO_FILES": "Total fișiere :",
 	"DIALOG_WS_INFO_PROCS": "Procese executate :",
 	"DIALOG_WS_INFO_SHARINGS": "Partajare spațiului de lucru :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	
 	"DIALOG_PARAMS_TITLE": "Parametrii librăriei",
 	"DIALOG_PARAMS_FILTER_HELP": "Filtrare nume șablon...",
