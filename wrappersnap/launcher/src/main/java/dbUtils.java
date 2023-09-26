@@ -2350,7 +2350,7 @@ public class dbUtils {
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
-            String sConfigFilePath = "C:/temp/wasdi/wasdiLocalTESTConfig.json"; // "/etc/wasdi/wasdiConfig.json";
+            String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
 
             // parse the command line arguments
             CommandLine oLine = oParser.parse(oOptions, args);
@@ -2385,7 +2385,7 @@ public class dbUtils {
                 System.err.println("DbUtils - Error loading log configuration.  Reason: "
                         + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
             }
-/*
+
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
                 System.out.println("Adding local mongo config");
@@ -2412,7 +2412,7 @@ public class dbUtils {
                 System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
                 System.exit(-1); 
             }
-*/            
+            
             //testEOEPCALogin();
 
             boolean bExit = false;
