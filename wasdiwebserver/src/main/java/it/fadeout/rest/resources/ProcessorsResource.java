@@ -51,7 +51,6 @@ import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Counter;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Review;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
