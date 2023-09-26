@@ -23,7 +23,8 @@ let ProcessParamsShareController = (function () {
         this.m_aoParametersPermissionsList = [];
         this.sResourceType = "PROCESSORPARAMETERSTEMPLATE";
 
-        this.m_sUserEmail = null;
+        this.m_sUserEmail = "";
+        this.m_sRights = "read";
         this.m_sTemplateId = this.m_oExtras.template.templateId;
         this.m_sOwnerEmail = this.m_oExtras.template.userId;
         
@@ -49,7 +50,8 @@ let ProcessParamsShareController = (function () {
     //Add a user (by email) to list of users with whom the parameters are shared
     ProcessParamsShareController.prototype.addParametersPermission = function (
         sResourceId,
-        sUserEmail
+        sUserEmail,
+        sRights
     ) {
 
         let oController = this;
@@ -72,7 +74,8 @@ let ProcessParamsShareController = (function () {
             .addResourcePermission(
                 oController.sResourceType,
                 sResourceId,
-                sUserEmail
+                sUserEmail,
+                sRights
             )
             .then(function (data) {
                 oController.m_oTimeout(function () {
@@ -80,6 +83,9 @@ let ProcessParamsShareController = (function () {
                         oController.m_sTemplateId
                     );
                 }, 500);
+
+                oController.m_sUserEmail = "";
+                oController.m_sRights = "read";
             });
     };
     ProcessParamsShareController.prototype.removeParametersPermission =

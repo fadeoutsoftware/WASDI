@@ -48,8 +48,9 @@ let OrganizationUsersController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({ userId: sUserId });
+                        oController.m_aoUsersList.push({ userId: sUserId , permissions: sRights});
                         oController.m_sUserEmail = "";
+                        oController.m_sRights = "read";
                     } else if (response.data.message === "Already Shared.") {
                         let oDialog = utilsVexDialogAlertBottomRightCorner(
                             `ORGANIZATION ALREADY SHARED WITH ${sUserId}`

@@ -42,6 +42,10 @@ var WorkflowController = (function () {
          */
         this.m_sUserEmail = "";
         /**
+         * User rights for sharing
+         */
+        this.m_sRights = "read";
+        /**
          * Field with list of active sharing
          */
         this.m_aoEnabledUsers = [];
@@ -176,9 +180,9 @@ var WorkflowController = (function () {
     /**
      * Share the workflow with a user
      */
-    WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId) {
+    WorkflowController.prototype.shareWorkflowByUserEmail = function (oUserId, sRights) {
         var oController = this;
-        this.m_oWorkflowService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId)
+        this.m_oWorkflowService.addWorkflowSharing(this.m_oWorkflow.workflowId, oUserId, sRights)
             .then(function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     // all done
@@ -188,7 +192,7 @@ var WorkflowController = (function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING WORKFLOW");
                 }
                 // reload the sharing list
-
+                oController.m_sRights = "read";
             }, function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING WORKFLOW");
             });
