@@ -686,8 +686,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType
-					+ ", " + sUserId + ", " + sResourceId + "): error: " + oE);
+			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType + ", " + sUserId + ", " + sResourceId + "): error: " + oE);
 		}
 
 		return false;

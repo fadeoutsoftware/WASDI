@@ -147,6 +147,7 @@ public class WorkspaceResource {
 				oWSViewModel.setWorkspaceName(oWorkspace.getName());
 				oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 				oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
+				oWSViewModel.setPublic(oWorkspace.isPublic());
 
 				if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 					if (oWorkspace.getNodeCode().equals("wasdi")) {
@@ -161,8 +162,7 @@ public class WorkspaceResource {
 				}
 
 				// Get Sharings
-                List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository
-                		.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
+                List<UserResourcePermission> aoPermissions = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
 
 				// Add Sharings to View Model
 				if (aoPermissions != null) {
@@ -176,7 +176,6 @@ public class WorkspaceResource {
 				}
 
 				aoWSList.add(oWSViewModel);
-
 			}
 
 			// Get the list of workspace shared with this user
@@ -200,6 +199,7 @@ public class WorkspaceResource {
 					oWSViewModel.setWorkspaceName(oWorkspace.getName());
 					oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 					oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
+					oWSViewModel.setPublic(oWorkspace.isPublic());
 
 					if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 						if (oWorkspace.getNodeCode().equals("wasdi")) {
@@ -290,6 +290,7 @@ public class WorkspaceResource {
 			oVM.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 			oVM.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
 			oVM.setNodeCode(oWorkspace.getNodeCode());
+			oVM.setPublic(oWorkspace.isPublic());
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oVM.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
@@ -332,8 +333,8 @@ public class WorkspaceResource {
 			}
 
 			// Get Sharings
-			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-					.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getWorkspaceSharingsByWorkspaceId(oWorkspace.getWorkspaceId());
+			
 			// Add Sharings to View Model
 			if (aoSharings != null) {
 				if (oVM.getSharedUsers() == null) {
@@ -397,6 +398,7 @@ public class WorkspaceResource {
 		oWorkspace.setName(sName);
 		oWorkspace.setUserId(oUser.getUserId());
 		oWorkspace.setWorkspaceId(Utils.getRandomName());
+		oWorkspace.setPublic(false);
 		
 		
 		if (Utils.isNullOrEmpty(sNodeCode)) {
@@ -451,8 +453,7 @@ public class WorkspaceResource {
 	@POST
 	@Path("update")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId,
-			WorkspaceEditorViewModel oWorkspaceEditorViewModel) {
+	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oWorkspaceEditorViewModel) {
 
 		WasdiLog.debugLog("WorkspaceResource.updateWorkspace");
 
@@ -499,11 +500,15 @@ public class WorkspaceResource {
 			oWorkspace.setName(sName);
 			oWorkspace.setUserId(oWorkspaceEditorViewModel.getUserId());
 			oWorkspace.setWorkspaceId(oWorkspaceEditorViewModel.getWorkspaceId());
+			
+			if (oWorkspace.isPublic() != oWorkspaceEditorViewModel.isPublic()) {
+				oWorkspace.setPublic(oWorkspaceEditorViewModel.isPublic());
+				oWorkspaceRepository.updateWorkspacePublicFlag(oWorkspace);				
+			}
 
 			
 			// if present and different from "wasdi", the node code must be updated
-			if (oWorkspaceEditorViewModel.getNodeCode() != null &&
-					!(oWorkspaceEditorViewModel.getNodeCode().equals("wasdi"))) {
+			if (oWorkspaceEditorViewModel.getNodeCode() != null && !(oWorkspaceEditorViewModel.getNodeCode().equals("wasdi"))) {
 				NodeRepository oNodeRepository = new NodeRepository();
 				String sNodeCode = oWorkspaceEditorViewModel.getNodeCode();
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);

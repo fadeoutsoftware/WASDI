@@ -23,6 +23,7 @@ public class WorkspaceEditorViewModel {
     private long processesCount;
     private String cloudProvider;
     private String slaLink;
+    private boolean isPublic=false;
    
     
 	public String getCloudProvider() {
@@ -120,7 +121,14 @@ public class WorkspaceEditorViewModel {
 	public void setSlaLink(String slaLink) {
 		this.slaLink = slaLink;
 	}
+	
+	public boolean isPublic() {
+		return isPublic;
+	}
 
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
 
 	@Override
 	public String toString() {
@@ -129,7 +137,4 @@ public class WorkspaceEditorViewModel {
 				+ ", sharedUsers=" + sharedUsers + ", nodeCode=" + nodeCode + ", processesCount=" + processesCount
 				+ ", cloudProvider=" + cloudProvider + "]";
 	}
-
-
-
 }

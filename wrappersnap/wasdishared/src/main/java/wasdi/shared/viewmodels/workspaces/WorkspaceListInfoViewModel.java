@@ -17,6 +17,7 @@ public class WorkspaceListInfoViewModel {
     private boolean activeNode;
     private String nodeCode;
     private Date creationDate;
+    private boolean isPublic=false;
 
     public Date getCreationDate() {
 		return creationDate;
@@ -72,6 +73,14 @@ public class WorkspaceListInfoViewModel {
 
 	public void setNodeCode(String nodeCode) {
 		this.nodeCode = nodeCode;
+	}
+
+	public boolean isPublic() {
+		return isPublic;
+	}
+
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
 	}
 
 }

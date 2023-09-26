@@ -12,6 +12,7 @@ import wasdi.shared.business.ImagesCollections;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
@@ -145,13 +146,21 @@ public class PermissionsUtils {
 			}
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			
-			if (oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
+			if (oWorkspace == null) {
+				return false;
+			}
+			
+			if (oWorkspace.getUserId().equals(sUserId)) {
+				return true;
+			}
+			
+			if (oWorkspace.isPublic()) {
 				return true;
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			WasdiLog.errorLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);

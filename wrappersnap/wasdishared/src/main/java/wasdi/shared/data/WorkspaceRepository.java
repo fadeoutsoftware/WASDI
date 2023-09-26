@@ -67,6 +67,27 @@ public class WorkspaceRepository extends  MongoRepository {
         return false;
     }
     
+    
+    /**
+     * Update the name of a workpsace
+     * @param oWorkspace
+     * @return
+     */
+    public boolean updateWorkspacePublicFlag(Workspace oWorkspace) {
+
+        try {
+            getCollection(m_sThisCollection).updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("isPublic",oWorkspace.isPublic())));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+        
+    
     /**
      * Update the node of a workspace
      * @param oWorkspace workspaceViewModel passed as input
