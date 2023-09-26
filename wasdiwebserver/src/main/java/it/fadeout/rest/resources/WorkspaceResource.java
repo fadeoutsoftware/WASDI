@@ -918,6 +918,7 @@ public class WorkspaceResource {
 					oWorkspaceSharingViewModel.setOwnerId(oWorkspaceSharing.getUserId());
 					oWorkspaceSharingViewModel.setUserId(oWorkspaceSharing.getUserId());
 					oWorkspaceSharingViewModel.setWorkspaceId(oWorkspaceSharing.getResourceId());
+					oWorkspaceSharingViewModel.setPermissions(oWorkspaceSharing.getPermissions());
 
 					aoWorkspaceSharingViewModels.add(oWorkspaceSharingViewModel);
 				}

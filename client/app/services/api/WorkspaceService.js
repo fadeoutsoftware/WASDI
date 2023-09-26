@@ -47,8 +47,8 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return null;
     };
 
-    this.putShareWorkspace = function(sWorkspaceId,sUserId){
-        return this.m_oHttp.put(this.APIURL + '/ws/share/add?workspace=' + sWorkspaceId + "&userId=" + sUserId);
+    this.putShareWorkspace = function(sWorkspaceId,sUserId, sRights){
+        return this.m_oHttp.put(this.APIURL + '/ws/share/add?workspace=' + sWorkspaceId + "&userId=" + sUserId+"&rights="+sRights);
     };
 
     this.getUsersBySharedWorkspace = function(sWorkspaceId){
