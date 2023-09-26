@@ -2275,8 +2275,9 @@ public class dbUtils {
 			
             System.out.println("This tool will parse the config file and ingest in WASDI the MOD11A2 data from the LP DAAC catalogue. ");
 
-            System.out.println("\t1 - Proceed with the import of all documents");
-            System.out.println("\t2 - Specify the set of documents to import from the CSV file");
+            System.out.println("\t1 - Proceed with the import of all documents from the data provider");
+            System.out.println("\t2 - Specify the lines of the CSV file to read and import the documents FROM THE DATA PROVIDER");
+            System.out.println("\t3 - Specify the lines of the CSV file to read and import the documents reading the metadata FROM THE CSV FILE");
             System.out.println("\tx - back to main menu");
             System.out.println("");
 
@@ -2289,10 +2290,11 @@ public class dbUtils {
             if (sInputString.equals("1")) {
             	System.out.println("you chose to import all the documents");
             	 MODISUtils.insertProducts();
+            	 return;
             }
             
-            if (sInputString.equals("2")) {
-            	System.out.println("\tSpecify the number of the starting line and the ending line in the CSV file, separated by a space");
+            if (sInputString.equals("2") || sInputString.equals("3")) {
+            	System.out.println("Specify the number of the starting line and the ending line in the CSV file, separated by a space");
             	System.out.println("");
             	
                 String sLineIndeces = s_oScanner.nextLine();
@@ -2318,9 +2320,16 @@ public class dbUtils {
                 	return;
                 }
                 
-                System.out.println("You chose to import the documents in the line included between " + iStartLine + " and " + iEndLine);
-                MODISUtils.insertProducts(iStartLine, iEndLine);
+                System.out.println("You chose to import the documents in the lines included between " + iStartLine + " and " + iEndLine);
+                
+                if (sInputString.equals("2"))
+                	MODISUtils.insertProducts(iStartLine, iEndLine);
+                else
+                	MODISUtils.insertProductsFromCsv(iStartLine, iEndLine);
+                
+                return;
             }
+            
 
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
@@ -2341,7 +2350,7 @@ public class dbUtils {
 
             oOptions.addOption("c", "config", true, "WASDI Configuration File Path");
 
-            String sConfigFilePath = "/etc/wasdi/wasdiConfig.json";
+            String sConfigFilePath = "C:/temp/wasdi/wasdiLocalTESTConfig.json"; // "/etc/wasdi/wasdiConfig.json";
 
             // parse the command line arguments
             CommandLine oLine = oParser.parse(oOptions, args);
@@ -2376,7 +2385,7 @@ public class dbUtils {
                 System.err.println("DbUtils - Error loading log configuration.  Reason: "
                         + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
             }
-
+/*
             // If this is not the main node
             if (!s_sMyNodeCode.equals("wasdi")) {
                 System.out.println("Adding local mongo config");
@@ -2403,7 +2412,7 @@ public class dbUtils {
                 System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
                 System.exit(-1); 
             }
-            
+*/            
             //testEOEPCALogin();
 
             boolean bExit = false;
