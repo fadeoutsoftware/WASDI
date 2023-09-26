@@ -64,7 +64,7 @@ public class PackageManagerResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
 			WasdiLog.warnLog("PackageManagerResource.getListPackages: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			return Response.status(Status.FORBIDDEN).build();			
 		}
 		
 		String sContentAsJson = readPackagesInfoFile(sName);
@@ -123,7 +123,7 @@ public class PackageManagerResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
 			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			return Response.status(Status.FORBIDDEN).build();			
 		}		
 		
 		if (WasdiConfig.Current.isMainNode() == false) {
@@ -163,7 +163,7 @@ public class PackageManagerResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
 			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			return Response.status(Status.FORBIDDEN).build();			
 		}		
 
 
@@ -242,7 +242,7 @@ public class PackageManagerResource {
 			
 			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
 				WasdiLog.warnLog("PackageManagerResource.environmentupdate: user cannot write the processor");
-				return Response.status(Status.UNAUTHORIZED).build();			
+				return Response.status(Status.FORBIDDEN).build();			
 			}			
 			
 			// Schedule the process to run the operation in the environment

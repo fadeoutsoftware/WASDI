@@ -28,6 +28,7 @@ import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
@@ -114,7 +115,6 @@ public class ProcessorsMediaResource {
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-
 
 		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
 			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: invalid processor");
@@ -337,6 +337,11 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
+		if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}		
+		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
 		Review oReview = getReviewFromViewModel(oReviewViewModel,sUserId, Utils.getRandomName());
@@ -393,6 +398,20 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
+		String sProcessorId = oReview.getProcessorId();
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: processor null " + sProcessorId);
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
+		
 		CommentRepository oCommentRepository =  new CommentRepository();
 		
 		Comment oComment = getCommentFromViewModel(oCommentViewModel, sUserId, Utils.getRandomName());
@@ -431,9 +450,13 @@ public class ProcessorsMediaResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
+		
 		if (iPage==null) iPage = 0;
 		if (iItemsPerPage==null) iItemsPerPage = 4;
-		
 		
 		// Get all the reviews
 		ReviewRepository oReviewRepository =  new ReviewRepository();
@@ -492,6 +515,20 @@ public class ProcessorsMediaResource {
 			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		String sProcessorId = oReview.getProcessorId();
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: processor null " + sProcessorId);
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
 		
 		// Get all the comments
 		CommentRepository oCommentRepository = new CommentRepository();
@@ -742,25 +779,5 @@ public class ProcessorsMediaResource {
 
 		return oListViewModel;
 	}
-	
-	/**
-	 * Transform the Comment object into a Comment DetailViewModel.
-	 * @param oComment the comment object
-	 * @return a detail view model
-	 */
-	private static CommentDetailViewModel getDetailViewModel(Comment oComment) {
-		if (oComment == null) {
-			return null; 
-		}
-
-		CommentDetailViewModel oDetailViewModel = new CommentDetailViewModel();
-		oDetailViewModel.setCommentId(oComment.getCommentId());
-		oDetailViewModel.setReviewId(oComment.getReviewId());
-		oDetailViewModel.setUserId(oComment.getUserId());
-		oDetailViewModel.setDate(new Date(oComment.getDate().longValue()));
-		oDetailViewModel.setText(oComment.getText());
-
-		return oDetailViewModel;
-	}	
 }
 

@@ -75,7 +75,7 @@ public class ImagesResource {
 			
 			if (!PermissionsUtils.canUserWriteImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
 				WasdiLog.warnLog("ImagesResource.uploadImage: user cannot access image");
-				return Response.status(Status.UNAUTHORIZED).build();				
+				return Response.status(Status.FORBIDDEN).build();				
 			}
 						
 			if (Utils.isNullOrEmpty(sFolder)) {
@@ -223,7 +223,7 @@ public class ImagesResource {
 			
 			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
 				WasdiLog.warnLog("ImagesResource.getImage: invalid user or session");
-				return Response.status(Status.UNAUTHORIZED).build();				
+				return Response.status(Status.FORBIDDEN).build();				
 			}			
 			
 			if (sFolder==null) sFolder="";
@@ -290,7 +290,7 @@ public class ImagesResource {
 		
 		if (!PermissionsUtils.canUserWriteImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
 			WasdiLog.warnLog("ImagesResource.deleteImage: invalid user or session");
-			return Response.status(Status.UNAUTHORIZED).build();				
+			return Response.status(Status.FORBIDDEN).build();				
 		}		
 		
 		if (sFolder==null) sFolder="";		
@@ -364,7 +364,7 @@ public class ImagesResource {
 			
 			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), sProcessorId)) {
 				WasdiLog.warnLog("ImagesResource.uploadProcessorLogo: processor not accesable by user " + oUser.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();								
+				return Response.status(Status.FORBIDDEN).build();								
 			}
 			
 			String sFileName = ImageResourceUtils.s_sDEFAULT_LOGO_PROCESSOR_NAME;
@@ -428,7 +428,7 @@ public class ImagesResource {
 		
 		if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), sProcessorId)) {
 			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: user cannot access " + oUser.getUserId());
-			return Response.status(Status.UNAUTHORIZED).build();								
+			return Response.status(Status.FORBIDDEN).build();								
 		}
 				
 		// Take path

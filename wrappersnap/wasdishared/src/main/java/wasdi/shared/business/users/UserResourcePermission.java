@@ -4,10 +4,6 @@ import wasdi.shared.utils.Utils;
 
 public class UserResourcePermission {
 	
-	public UserResourcePermission() {
-		
-	}
-
 	private String resourceId;
 	private String resourceType;
 	private String userId;
@@ -17,11 +13,12 @@ public class UserResourcePermission {
 
 	private String createdBy;
 	private Double createdDate;
+	
+	public UserResourcePermission() {		
+	}	
 
 
 	public UserResourcePermission(String sResourceType, String sResourceId, String sDestinationUserId, String sOwnerUserId, String sRequesterUserId, String sPermissions) {
-		this();
-
 		this.resourceType = sResourceType;
 		this.ownerId = sOwnerUserId;
 		this.userId = sDestinationUserId;
@@ -101,4 +98,12 @@ public class UserResourcePermission {
 		this.createdDate = createdDate;
 	}
 
+	public boolean canWrite() {
+		try {
+			return this.getPermissions().equals(UserAccessRights.WRITE.getAccessRight());
+		}
+		catch (Exception oEx) {
+			return false;
+		}
+	}
 }

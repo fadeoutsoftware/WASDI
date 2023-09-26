@@ -1,8 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.users.UserApplicationPermission.NODE_READ;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +16,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.Node;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -175,18 +173,18 @@ public class NodeResource {
 			return oResult;
 		}
 
-		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), NODE_READ)) {
-			WasdiLog.warnLog("NodeResource.shareNode: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE);
-
-			return oResult;
-		}
+//		// Can the user access this section?
+//		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), NODE_READ)) {
+//			WasdiLog.warnLog("NodeResource.shareNode: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
+//
+//			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+//			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE);
+//
+//			return oResult;
+//		}
 
 		// Can the user access this resource?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("NodeResource.shareNode: " + sNodeCode + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
@@ -213,7 +211,7 @@ public class NodeResource {
 
 			if (!oUserResourcePermissionRepository.isNodeSharedWithUser(sDestinationUserId, sNodeCode)) {
 				UserResourcePermission oNodeSharing =
-						new UserResourcePermission("node", sNodeCode, sDestinationUserId, null, oRequesterUser.getUserId(), sRights);
+						new UserResourcePermission(ResourceTypes.NODE.getResourceType(), sNodeCode, sDestinationUserId, null, oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oNodeSharing);				
 			} else {

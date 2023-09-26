@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -195,19 +193,14 @@ public class ProcessWorkspaceResource {
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId, @QueryParam("ogc") Boolean bOgcOnly) {
 		
 		WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByUser");
-
+		
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
-			
 
 		try {
 			// Domain Check
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByUser: invalid session");
-				return aoProcessList;
-			}
-			
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProcessList;
 			}
 
@@ -266,15 +259,15 @@ public class ProcessWorkspaceResource {
 		try {
 			WasdiLog.debugLog("ProcessWorkspaceResource.getProcessByApplication  sProcessorName=" + sProcessorName);
 			
-			// Domain Check
-			if(Utils.isNullOrEmpty(sProcessorName)) {
-				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name");
-				return aoProcessList;
-			}
-			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null == oUser) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid session");
+				return aoProcessList;
+			}			
+			
+			// Domain Check
+			if(Utils.isNullOrEmpty(sProcessorName)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessByApplication: invalid processor name");
 				return aoProcessList;
 			}
 			
@@ -421,16 +414,16 @@ public class ProcessWorkspaceResource {
 			
 			WasdiLog.debugLog("ProcessWorkspaceResource.getApplicationStatistics( Session: " + sSessionId + ", processorName: " + sProcessorName + " )");
 			
-			// Domain Check
-			if(Utils.isNullOrEmpty(sProcessorName)) {
-				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid processor name, aborting");
-				return oReturnStats;
-			}
-			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			
 			if(oUser == null) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid session");
+				return oReturnStats;
+			}			
+			
+			// Domain Check
+			if(Utils.isNullOrEmpty(sProcessorName)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: invalid processor name, aborting");
 				return oReturnStats;
 			}
 			
@@ -439,6 +432,11 @@ public class ProcessWorkspaceResource {
 			if (null == oProcessRepository.getProcessorByName(sProcessorName) ) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: Processor name not found in DB, aborting");
 				return oReturnStats;
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sProcessorName)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getApplicationStatistics: user cannot access the processor");
+				return oReturnStats;				
 			}
 
 			// Create repo
@@ -758,7 +756,7 @@ public class ProcessWorkspaceResource {
 			}
 
 			// check that the user can access the processWorkspace
-			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
+			if(!PermissionsUtils.canUserWriteProcessWorkspace(oUser.getUserId(), sToKillProcessObjId)) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.deleteProcess: user cannot access requested process workspace");
 				return Response.status(Status.FORBIDDEN).build();
 			}
@@ -856,10 +854,20 @@ public class ProcessWorkspaceResource {
 			
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			 ArrayList<String> asFiltered = new ArrayList<>();
+			 
+			 for (String sProcId : asProcessesWorkspaceId) {
+				if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcId)) {
+					WasdiLog.warnLog("ProcessWorkspaceResource.getStatusProcessesById: requesting proc id that cannot be accessed");
+				}
+				else {
+					asFiltered.add(sProcId);
+				}
+			}
 
 			// Get Process List
-			asReturnStatusList = oRepository.getProcessesStatusByProcessObjId(asProcessesWorkspaceId);
-			
+			asReturnStatusList = oRepository.getProcessesStatusByProcessObjId(asFiltered);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getStatusProcessesById error: " + oEx);
@@ -887,10 +895,14 @@ public class ProcessWorkspaceResource {
 				return null;
 			}
 			
-			if(PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-				return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
+			if(!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.getProcessStatusById: user cannot access process workspace" );
+				return null;
 			}
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			return oProcessWorkspaceRepository.getProcessStatusFromId(sProcessObjId);
+
 		} catch (Exception oE) {
 			WasdiLog.errorLog("ProcessWorkspaceResource.getProcessStatusById error: " + oE );
 		}
@@ -927,8 +939,8 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.warnLog("ProcessWorkspaceResource.updateProcessById: user cannot access Process Workspace");
+			if (!PermissionsUtils.canUserWriteProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.updateProcessById: user cannot write Process Workspace");
 				return oProcess;				
 			}
 
@@ -1034,17 +1046,21 @@ public class ProcessWorkspaceResource {
 				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: invalid session" );
 				return oProcess;
 			}
-			
-			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
-				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: user cannot access process workspace id" );
-				return oProcess;				
-			}
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-
 			// Get Process
 			ProcessWorkspace oProcessWorkspace = oRepository.getProcessByProcessObjId(sProcessObjId);
+			
+			if (oProcessWorkspace == null) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: invalidprocess workspace id" );
+				return oProcess;				
+			}
+
+			if (!PermissionsUtils.canUserWriteProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
+				WasdiLog.warnLog("ProcessWorkspaceResource.internalSetPaylod: user cannot write process workspace id" );
+				return oProcess;				
+			}
 			
 			// Update payload
 			oProcessWorkspace.setPayload(sPayload);
@@ -1090,7 +1106,7 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
+			if (!PermissionsUtils.canUserWriteProcessWorkspace(oUser.getUserId(), sProcessObjId)) {
 				WasdiLog.warnLog("ProcessWorkspaceResource.setSubProcessPid: user cannot access process workspace" );
 				return oProcess;				
 			}
@@ -1186,7 +1202,7 @@ public class ProcessWorkspaceResource {
 			}
 
 			// if the requesting-user is not super-user and if the requesting-user is not the target-user, then return null
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)
+			if (!UserApplicationRole.isAdmin(oUser)
 					&& !sTargetUserId.equalsIgnoreCase(oUser.getUserId())) {
 				return lRunningTime;
 			}
@@ -1394,7 +1410,6 @@ public class ProcessWorkspaceResource {
 					return aoViewModel;					
 				}
 			}
-
 
 			NodeRepository oNodeRepo = new NodeRepository();
 			Node oNode = oNodeRepo.getNodeByCode(sNodeCode);
@@ -1616,7 +1631,7 @@ public class ProcessWorkspaceResource {
 		}
 
 		try {
-			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
+			if (!UserApplicationRole.isAdmin(oUser)) {
 				WasdiLog.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: user not admin");
 				return aoViewModels;
 			}

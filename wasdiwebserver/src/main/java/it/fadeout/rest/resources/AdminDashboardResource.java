@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -81,7 +80,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 		
@@ -124,7 +123,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 
@@ -165,7 +164,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 
@@ -209,7 +208,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 
@@ -263,7 +262,7 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("node")) {
+		if (sResourceType.equalsIgnoreCase(ResourceTypes.NODE.getResourceType())) {
 			NodeResource oNodeResource = new NodeResource();
 			PrimitiveResult oResult = oNodeResource.shareNode(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -272,7 +271,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.PARAMETER.getResourceType())) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
 			PrimitiveResult oResult = oProcessorParametersTemplateResource.shareProcessorParametersTemplate(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -281,7 +281,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("processor")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.PROCESSOR.getResourceType())) {
 			ProcessorsResource oProcessorResource = new ProcessorsResource();
 			PrimitiveResult oResult = oProcessorResource.shareProcessor(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -290,7 +291,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("style")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.STYLE.getResourceType())) {
 			StyleResource oStyleResource = new StyleResource();
 			PrimitiveResult oResult = oStyleResource.shareStyle(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -299,7 +301,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("workflow")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.WORKFLOW.getResourceType())) {
 			WorkflowsResource oWorkflowResource = new WorkflowsResource();
 			PrimitiveResult oResult = oWorkflowResource.shareWorkflow(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -308,7 +311,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("workspace")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.WORKSPACE.getResourceType())) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
 			PrimitiveResult oResult = oWorkspaceResource.shareWorkspace(sSessionId, sResourceId, sDestinationUserId, sRights);
 
@@ -317,7 +321,8 @@ public class AdminDashboardResource {
 			} else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else {
+		} 
+		else {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
@@ -347,61 +352,73 @@ public class AdminDashboardResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
 
-		if (sResourceType.equalsIgnoreCase("node")) {
+		if (sResourceType.equalsIgnoreCase(ResourceTypes.NODE.getResourceType())) {
 			NodeResource oNodeResource = new NodeResource();
 			PrimitiveResult oResult = oNodeResource.deleteUserSharedNode(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} if (sResourceType.equalsIgnoreCase("processorparameterstemplate")) {
+		} 
+		if (sResourceType.equalsIgnoreCase(ResourceTypes.PARAMETER.getResourceType())) {
 			ProcessorParametersTemplateResource oProcessorParametersTemplateResource = new ProcessorParametersTemplateResource();
 			PrimitiveResult oResult = oProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("processor")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.PROCESSOR.getResourceType())) {
 			ProcessorsResource oProcessorResource = new ProcessorsResource();
 			PrimitiveResult oResult = oProcessorResource.deleteUserSharingProcessor(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("style")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.STYLE.getResourceType())) {
 			StyleResource oStyleResource = new StyleResource();
 			PrimitiveResult oResult = oStyleResource.deleteUserSharingStyle(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("workflow")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.WORKFLOW.getResourceType())) {
 			WorkflowsResource oWorkflowResource = new WorkflowsResource();
 			PrimitiveResult oResult = oWorkflowResource.deleteUserSharingWorkflow(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else if (sResourceType.equalsIgnoreCase("workspace")) {
+		} 
+		else if (sResourceType.equalsIgnoreCase(ResourceTypes.WORKSPACE.getResourceType())) {
 			WorkspaceResource oWorkspaceResource = new WorkspaceResource();
 			PrimitiveResult oResult = oWorkspaceResource.deleteUserSharedWorkspace(sSessionId, sResourceId, sUserId);
 
 			if (oResult.getBoolValue()) {
 				return Response.ok().build();
-			} else {
+			} 
+			else {
 				return Response.status(oResult.getIntValue()).entity(new ErrorResponse(oResult.getStringValue())).build();
 			}
-		} else {
+		} 
+		else {
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
 		}
@@ -420,7 +437,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 
@@ -457,7 +474,7 @@ public class AdminDashboardResource {
 		}
 
 		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
 		}
 

@@ -164,13 +164,13 @@ public class ProcessingResources {
         // Check the subscription
         if (!PermissionsUtils.userHasValidSubscription(oUser)) {
         	WasdiLog.warnLog("ProcessingResources.sen2CorConversion: invalid subscription");
-            return Response.status(Status.UNAUTHORIZED).build();     	
+            return Response.status(Status.FORBIDDEN).build();     	
         }
         
         // Check if we can write the workspace        
         if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
             WasdiLog.warnLog("ProcessingResources.sen2CorConversion: user canno write workspace");
-            return Response.status(Status.UNAUTHORIZED).build();        	
+            return Response.status(Status.FORBIDDEN).build();        	
         }
 
         WasdiLog.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");

@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +22,7 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.Organization;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -147,7 +146,7 @@ public class OrganizationResource {
 
 			if (!PermissionsUtils.canUserAccessOrganization(oUser.getUserId(), sOrganizationId)) {
 				WasdiLog.warnLog("OrganizationResource.getOrganizationViewModel: user cannot access organization, aborting");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The user cannot access the organization info.")).build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the organization info.")).build();
 			}
 
 			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: read organizations " + sOrganizationId);
@@ -254,7 +253,7 @@ public class OrganizationResource {
 		
 		if (!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), oOrganizationEditorViewModel.getOrganizationId())) {
 			WasdiLog.warnLog("OrganizationResource.updateOrganization: user cannot access the organization");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION)).build();			
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION)).build();			
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
@@ -389,7 +388,7 @@ public class OrganizationResource {
 
 		// Can the user access this resource?
 		if (!PermissionsUtils.canUserWriteOrganization(oRequesterUser.getUserId(), sOrganizationId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				&& !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("OrganizationResource.shareOrganization: " + sOrganizationId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION)).build();
@@ -397,7 +396,7 @@ public class OrganizationResource {
 
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			if (UserApplicationRole.isAdmin(oRequesterUser)) {
 				// A user that has Admin rights should be able to auto-share the resource.
 			} else {
 				WasdiLog.warnLog("OrganizationResource.shareOrganization: auto sharing not so smart");
@@ -428,7 +427,7 @@ public class OrganizationResource {
 
 			if (!oUserResourcePermissionRepository.isOrganizationSharedWithUser(sDestinationUserId, sOrganizationId)) {
 				UserResourcePermission oOrganizationSharing =
-						new UserResourcePermission("organization", sOrganizationId, sDestinationUserId, oOrganization.getUserId(), oRequesterUser.getUserId(), sRights);
+						new UserResourcePermission(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId, sDestinationUserId, oOrganization.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oOrganizationSharing);
 
@@ -519,7 +518,7 @@ public class OrganizationResource {
 		
 		if (!PermissionsUtils.canUserAccessOrganization(oOwnerUser.getUserId(), sOrganizationId)) {
 			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: user cannot access organization");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();			
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();			
 		}
 
 		try {
@@ -568,7 +567,7 @@ public class OrganizationResource {
 		
 		if (!PermissionsUtils.canUserWriteOrganization(oRequestingUser.getUserId(), sOrganizationId)) {
 			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: user cannot write organization");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();			
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();			
 		}		
 
 		try {

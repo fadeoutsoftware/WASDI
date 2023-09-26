@@ -38,6 +38,7 @@ import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 public class ProjectResource {
 
 	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
+	private static final String MSG_ERROR_CANNOT_ACCESS= "MSG_ERROR_CANNOT_ACCESS";
 
 	/**
 	 * Get the list of projects associated to a user.
@@ -141,12 +142,21 @@ public class ProjectResource {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
+		
+		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+		Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
+		
+		if (oSubscription == null) {
+			WasdiLog.warnLog("ProjectResource.getListBySubscription: invalid subscription");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();						
+		}		
+		
+		if (PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+			WasdiLog.warnLog("ProjectResource.getListBySubscription: user cannot access the subscription");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();			
+		}
 
 		try {
-
-			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
 
 			String sSubscriptionName = null;
 
@@ -216,7 +226,7 @@ public class ProjectResource {
 
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), oProject.getSubscriptionId())) {
 				WasdiLog.debugLog("ProjectResource.getProjectViewModel: user cannot access project info, aborting");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The user cannot access the project info.")).build();
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the project info.")).build();
 			}
 
 			oVM = convert(oProject, oUser.getActiveProjectId());
@@ -238,6 +248,7 @@ public class ProjectResource {
 	@Path("/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response createProject(@HeaderParam("x-session-token") String sSessionId, ProjectEditorViewModel oProjectEditorViewModel) {
+		
 		WasdiLog.debugLog("ProjectResource.createProject( Project: " + oProjectEditorViewModel.toString() + ")");
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
@@ -246,26 +257,41 @@ public class ProjectResource {
 			WasdiLog.warnLog("ProjectResource.createProject: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
+	
+		try {
+			
+			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oProjectEditorViewModel.getSubscriptionId())) {
+				WasdiLog.warnLog("ProjectResource.createProject: invalid session");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+			}
+			
+			ProjectRepository oProjectRepository = new ProjectRepository();
 
-		ProjectRepository oProjectRepository = new ProjectRepository();
-
-		String sName = oProjectEditorViewModel.getName();
-		
-		while (oProjectRepository.getByName(sName) != null) {
-			sName = Utils.cloneName(sName);
-			WasdiLog.debugLog("ProjectResource.createProject: a Project with the same name already exists. Changing the name to " + sName);
-		}
-
-		Project oProject = convert(oProjectEditorViewModel);
-		oProject.setProjectId(Utils.getRandomName());
-
-		if (oProjectRepository.insertProject(oProject)) {
-			if (oProjectEditorViewModel.isActiveProject()) {
-				this.changeActiveProject(sSessionId, oProject.getProjectId());
+			String sName = oProjectEditorViewModel.getName();
+			
+			while (oProjectRepository.getByName(sName) != null) {
+				sName = Utils.cloneName(sName);
+				WasdiLog.debugLog("ProjectResource.createProject: a Project with the same name already exists. Changing the name to " + sName);
 			}
 
-			return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
-		} else {WasdiLog.debugLog("ProjectResource.createProject( " + oProjectEditorViewModel.getName() + " ): insertion failed");
+			Project oProject = convert(oProjectEditorViewModel);
+			oProject.setProjectId(Utils.getRandomName());
+
+			if (oProjectRepository.insertProject(oProject)) {
+				if (oProjectEditorViewModel.isActiveProject()) {
+					this.changeActiveProject(sSessionId, oProject.getProjectId());
+				}
+
+				return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
+			} 
+			else 
+			{
+				WasdiLog.debugLog("ProjectResource.createProject( " + oProjectEditorViewModel.getName() + " ): insertion failed");
+				return Response.serverError().build();
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProjectResource.createProject: error ", oEx);
 			return Response.serverError().build();
 		}
 	}
@@ -288,48 +314,58 @@ public class ProjectResource {
 			WasdiLog.warnLog("ProjectResource.updateProject: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
+		
+		try {
+			ProjectRepository oProjectRepository = new ProjectRepository();
 
-		ProjectRepository oProjectRepository = new ProjectRepository();
+			Project oExistingProject = oProjectRepository.getProjectById(oProjectEditorViewModel.getProjectId());
 
-		Project oExistingProject = oProjectRepository.getProjectById(oProjectEditorViewModel.getProjectId());
-
-		if (oExistingProject == null) {
-			WasdiLog.warnLog("ProjectResource.updateProject: project does not exist");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id exists.")).build();
-		}
-
-		Project oExistingProjectWithTheSameName = oProjectRepository.getByName(oProjectEditorViewModel.getName());
-
-		if (oExistingProjectWithTheSameName != null
-				&& !oExistingProjectWithTheSameName.getProjectId().equalsIgnoreCase(oExistingProject.getProjectId())) {
-			WasdiLog.warnLog("ProjectResource.updateProject: a different project with the same name already exists");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An project with the same name already exists.")).build();
-		}
-
-
-		Project oProject = convert(oProjectEditorViewModel);
-
-		if (oProjectRepository.updateProject(oProject)) {
-
-			if (oProjectEditorViewModel.isActiveProject()) {
-				this.changeActiveProject(sSessionId, oProject.getProjectId());
-			} else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
-				UserRepository oUserRepository = new UserRepository();
-
-				oUser.setActiveProjectId(null);
-				oUser.setActiveSubscriptionId(null);
-
-				if (!oUserRepository.updateUser(oUser)) {
-					WasdiLog.warnLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
-					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The removing of the active project failed.")).build();
-				}
+			if (oExistingProject == null) {
+				WasdiLog.warnLog("ProjectResource.updateProject: project does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id exists.")).build();
+			}
+			
+			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oExistingProject.getSubscriptionId())) {
+				WasdiLog.warnLog("ProjectResource.updateProject: user cannot write subscription ");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();			
 			}
 
-			return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
-		} else {
-			WasdiLog.debugLog("ProjectResource.updateProject( " + oProjectEditorViewModel.getName() + " ): update failed");
-			return Response.serverError().build();
+			Project oExistingProjectWithTheSameName = oProjectRepository.getByName(oProjectEditorViewModel.getName());
+
+			if (oExistingProjectWithTheSameName != null
+					&& !oExistingProjectWithTheSameName.getProjectId().equalsIgnoreCase(oExistingProject.getProjectId())) {
+				WasdiLog.warnLog("ProjectResource.updateProject: a different project with the same name already exists");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An project with the same name already exists.")).build();
+			}
+
+			Project oProject = convert(oProjectEditorViewModel);
+
+			if (oProjectRepository.updateProject(oProject)) {
+
+				if (oProjectEditorViewModel.isActiveProject()) {
+					this.changeActiveProject(sSessionId, oProject.getProjectId());
+				} else if (oProject.getProjectId().equals(oUser.getActiveProjectId())) {
+					UserRepository oUserRepository = new UserRepository();
+
+					oUser.setActiveProjectId(null);
+					oUser.setActiveSubscriptionId(null);
+
+					if (!oUserRepository.updateUser(oUser)) {
+						WasdiLog.warnLog("ProjectResource.updateProject( " + "changing the active project of the user to null failed");
+						return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The removing of the active project failed.")).build();
+					}
+				}
+
+				return Response.ok(new SuccessResponse(oProject.getProjectId())).build();
+			} else {
+				WasdiLog.debugLog("ProjectResource.updateProject( " + oProjectEditorViewModel.getName() + " ): update failed");
+				return Response.serverError().build();
+			}			
 		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProjectResource.updateProject: error ", oEx);
+			return Response.serverError().build();
+		}		
 	}
 
 	/**
@@ -350,34 +386,47 @@ public class ProjectResource {
 			WasdiLog.warnLog("ProjectResource.changeActiveProject: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
 		}
+		
+		try {
+			String sSubscriptionId = null;
 
-		String sSubscriptionId = null;
+			if (sProjectId != null) {
+				ProjectRepository oProjectRepository = new ProjectRepository();
 
-		if (sProjectId != null) {
-			ProjectRepository oProjectRepository = new ProjectRepository();
+				Project oProject = oProjectRepository.getProjectById(sProjectId);
 
-			Project oProject = oProjectRepository.getProjectById(sProjectId);
+				if (oProject == null) {
+					WasdiLog.warnLog("ProjectResource.changeActiveProject: project does not exist");
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id " + sProjectId + " exists.")).build();
+				}
 
-			if (oProject == null) {
-				WasdiLog.warnLog("ProjectResource.changeActiveProject: project does not exist");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the Id " + sProjectId + " exists.")).build();
+				sSubscriptionId = oProject.getSubscriptionId();
+
+				if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+					WasdiLog.warnLog("ProjectResource.changeActiveProject: user cannot access the subscription");
+					return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+				}
+				
 			}
 
-			sSubscriptionId = oProject.getSubscriptionId();
+			UserRepository oUserRepository = new UserRepository();
+
+			oUser.setActiveSubscriptionId(sSubscriptionId);
+			oUser.setActiveProjectId(sProjectId);
+
+			if (oUserRepository.updateUser(oUser)) {
+				WasdiLog.warnLog("ProjectResource.changeActiveProject: active project changed to " + sProjectId + " for user " + oUser.getUserId());
+				return Response.ok(new SuccessResponse(sProjectId)).build();
+			} 
+			else {
+				WasdiLog.debugLog("ProjectResource.changeActiveProject( " + "changing the active project of the user to " + sProjectId + " failed");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The changing of the active project failed.")).build();
+			}			
 		}
-
-		UserRepository oUserRepository = new UserRepository();
-
-		oUser.setActiveSubscriptionId(sSubscriptionId);
-		oUser.setActiveProjectId(sProjectId);
-
-		if (oUserRepository.updateUser(oUser)) {
-			return Response.ok(new SuccessResponse(sProjectId)).build();
-		} 
-		else {
-			WasdiLog.debugLog("ProjectResource.changeActiveProject( " + "changing the active project of the user to " + sProjectId + " failed");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The changing of the active project failed.")).build();
-		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProjectResource.changeActiveProject: error ", oEx);
+			return Response.serverError().build();
+		}		
 	}
 
 	@DELETE
@@ -397,23 +446,34 @@ public class ProjectResource {
 			WasdiLog.warnLog("ProjectResource.deleteProject: invalid project id");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid projectId.")).build();
 		}
+		
+		try {
+			ProjectRepository oProjectRepository = new ProjectRepository();
 
-		ProjectRepository oProjectRepository = new ProjectRepository();
+			Project oProject = oProjectRepository.getProjectById(sProjectId);
 
-		Project oProject = oProjectRepository.getProjectById(sProjectId);
+			if (oProject == null) {
+				WasdiLog.warnLog("ProjectResource.deleteProject: project does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the name exists.")).build();
+			}
+			
+			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), sProjectId)) {
+				WasdiLog.warnLog("ProjectResource.deleteProject: user cannot write subscription");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+			}
 
-		if (oProject == null) {
-			WasdiLog.warnLog("ProjectResource.deleteProject: project does not exist");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No project with the name exists.")).build();
+			if (oProjectRepository.deleteProject(sProjectId)) {
+				return Response.ok(new SuccessResponse(sProjectId)).build();
+			} 
+			else {
+				WasdiLog.debugLog("ProjectResource.deleteProject: deletion failed");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the project failed.")).build();
+			}			
 		}
-
-		if (oProjectRepository.deleteProject(sProjectId)) {
-			return Response.ok(new SuccessResponse(sProjectId)).build();
-		} 
-		else {
-			WasdiLog.debugLog("ProjectResource.deleteProject: deletion failed");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the project failed.")).build();
-		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProjectResource.deleteProject: error ", oEx);
+			return Response.serverError().build();
+		}	
 	}
 
 	private static Project convert(ProjectEditorViewModel oProjectEVM) {

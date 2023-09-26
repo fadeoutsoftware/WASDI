@@ -1,8 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.users.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_READ;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,6 +25,7 @@ import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorParametersTemplate;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -101,7 +99,7 @@ public class ProcessorParametersTemplateResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oUser.getUserId(), sTemplateId)) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: user cannot access parameter template");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.FORBIDDEN).build();
 		}
 
 		String sUserId = oUser.getUserId();
@@ -169,7 +167,7 @@ public class ProcessorParametersTemplateResource {
 		
 		if (!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, oDetailViewModel.getTemplateId())) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: user cannot write this parameter");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.FORBIDDEN).build();
 		}
 
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
@@ -229,7 +227,7 @@ public class ProcessorParametersTemplateResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: user canno access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.FORBIDDEN).build();
 		}		
 		
 		String sUserId = oUser.getUserId();
@@ -271,7 +269,7 @@ public class ProcessorParametersTemplateResource {
 
 		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(sUserId, sTemplateId)) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParameterTemplateById: user cannot access the parameter");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.FORBIDDEN).build();
 		}
 
 		// Get all the ProcessorParametersTemplates
@@ -313,7 +311,7 @@ public class ProcessorParametersTemplateResource {
 		
 		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: user canno access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();
+			return Response.status(Status.FORBIDDEN).build();
 		}			
 
 		String sUserId = oUser.getUserId();
@@ -392,20 +390,10 @@ public class ProcessorParametersTemplateResource {
 
 			return oResult;
 		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), PROCESSOR_PARAMETERS_TEMPLATE_READ)) {
-			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE);
-
-			return oResult;
-		}
 		
 		// Can the user access this resource?
 		if (!PermissionsUtils.canUserWriteProcessorParametersTemplate(oRequesterUser.getUserId(), sProcessorParametersTemplateId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+				&& !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + sProcessorParametersTemplateId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
@@ -416,7 +404,7 @@ public class ProcessorParametersTemplateResource {
 		
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			if (UserApplicationRole.isAdmin(oRequesterUser)) {
 				// A user that has Admin rights should be able to auto-share the resource.
 			} else {
 				WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: auto sharing not so smart");
@@ -466,7 +454,7 @@ public class ProcessorParametersTemplateResource {
 
 			if (!oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sDestinationUserId, sProcessorParametersTemplateId)) {
 				UserResourcePermission oProcessorParametersTemplateSharing =
-						new UserResourcePermission("processorparameterstemplate", sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId(), sRights);
+						new UserResourcePermission(ResourceTypes.PARAMETER.getResourceType(), sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oProcessorParametersTemplateSharing);				
 			} else {

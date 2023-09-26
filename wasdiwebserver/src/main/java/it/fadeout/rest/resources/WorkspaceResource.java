@@ -1,7 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +36,7 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -472,7 +471,7 @@ public class WorkspaceResource {
 		}
 		
 		// Check if the user can access
-		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), oWorkspaceEditorViewModel.getWorkspaceId())) {
+		if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspaceEditorViewModel.getWorkspaceId())) {
 			WasdiLog.warnLog("WorkspaceResource.updateWorkspace: user cannot access the workspace");
 			return null;			
 		}
@@ -807,8 +806,8 @@ public class WorkspaceResource {
 		}
 
 		// Can the user access this resource?
-		if (!PermissionsUtils.canUserAccessWorkspace(oRequesterUser.getUserId(), sWorkspaceId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+		if (!PermissionsUtils.canUserWriteWorkspace(oRequesterUser.getUserId(), sWorkspaceId)
+				&& !UserApplicationRole.isAdmin(oRequesterUser)) {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
@@ -853,7 +852,7 @@ public class WorkspaceResource {
 
 			if (!oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sDestinationUserId, sWorkspaceId)) {
 				UserResourcePermission oWorkspaceSharing =
-						new UserResourcePermission("workspace", sWorkspaceId, sDestinationUserId, oWorkspace.getUserId(), oRequesterUser.getUserId(), sRights);
+						new UserResourcePermission(ResourceTypes.WORKSPACE.getResourceType(), sWorkspaceId, sDestinationUserId, oWorkspace.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oWorkspaceSharing);				
 			} else {
@@ -956,7 +955,7 @@ public class WorkspaceResource {
 		
 		
 		if (!PermissionsUtils.canUserAccessWorkspace(oRequestingUser.getUserId(), sWorkspaceId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequestingUser.getRole(), ADMIN_DASHBOARD)) {
+				&& !UserApplicationRole.isAdmin(oRequestingUser)) {
 			WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: user cannot access workspace");
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
@@ -977,15 +976,49 @@ public class WorkspaceResource {
 
 				return oResult;
 			}
-
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
 			
-			oResult.setStringValue("Done");
-			oResult.setBoolValue(true);
-			oResult.setIntValue(Status.OK.getStatusCode());
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
+			
+			if (oWorkspace == null) {
+				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: invalid workspace");
 
-			return oResult;			
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_INVALID_WORKSPACE);
+
+				return oResult;				
+			}
+			
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			
+			UserResourcePermission oSharing = oUserResourcePermissionRepository.getWorkspaceSharingByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
+			
+			if (oSharing == null) {
+				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: sharing not existing");
+				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				return oResult;								
+			}
+			
+			if (oSharing.getUserId().equals(sUserId) 
+					|| PermissionsUtils.canUserWriteWorkspace(oRequestingUser.getUserId(), sWorkspaceId)
+					|| UserApplicationRole.isAdmin(oRequestingUser)) {
+				oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(sUserId, sWorkspaceId);
+				
+				oResult.setStringValue("Done");
+				oResult.setBoolValue(true);
+				oResult.setIntValue(Status.OK.getStatusCode());
+
+				return oResult;							
+			}
+			else {
+				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: user cannot access workspace");
+				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
+				oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
+				return oResult;				
+			}
+			
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("WorkspaceResource.deleteUserSharedWorkspace: error " + oEx);

@@ -174,8 +174,9 @@ public class AuthResource {
 
 				if (oUser.getRole() != null) {
 					oUserVM.setRole(oUser.getRole());
-					UserApplicationRole oUserApplicationRole = UserApplicationRole.get(oUser.getRole());
-					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
+				}
+				else {
+					oUserVM.setRole(UserApplicationRole.USER.getRole());
 				}
 
 				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());

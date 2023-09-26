@@ -86,8 +86,8 @@ public class ProductResource {
                 return null;
             }
             
-            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.warnLog("ProductResource.addProductToWorkspace: user cannot access workspace");
+            if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.addProductToWorkspace: user cannot write in the workspace");
                 return null;            	
             }
 
@@ -557,9 +557,9 @@ public class ProductResource {
                 return Response.status(Status.UNAUTHORIZED).build();
             }
 
-            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                WasdiLog.warnLog("ProductResource.updateProductViewModel: user cannot access workspace");
-                return Response.status(Status.UNAUTHORIZED).build();
+            if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("ProductResource.updateProductViewModel: user cannot write in the workspace");
+                return Response.status(Status.FORBIDDEN).build();
             }            
 
             if (oProductViewModel == null) {
@@ -720,8 +720,8 @@ public class ProductResource {
         }
         
         // If workspace is not found in DB returns bad request
-        if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.warnLog("ProductResource.uploadfile: invalid workspace");
+        if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.warnLog("ProductResource.uploadfile: user cannot write in the workspace");
             return Response.status(Status.FORBIDDEN).build();
         }
         
@@ -820,8 +820,8 @@ public class ProductResource {
         }
 
         // If workspace is not found in DB returns bad request
-        if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.warnLog("ProductResource.uploadFileByLib: user cannot access the workspace");
+        if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.warnLog("ProductResource.uploadFileByLib: user cannot write in the workspace");
             return Response.status(Status.FORBIDDEN).build();
         }
 
@@ -909,8 +909,8 @@ public class ProductResource {
                 return oReturn;
             }
             // If workspace is not found in DB returns bad request
-            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-                String sMessage = "ProductResource.deleteProduct: user cannot access the workspace";
+            if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                String sMessage = "ProductResource.deleteProduct: user cannot write in the workspace";
                 WasdiLog.warnLog(sMessage);
                 oReturn.setStringValue(sMessage);
                 oReturn.setIntValue(403);
@@ -1144,8 +1144,8 @@ public class ProductResource {
             return oPrimitiveResult;    		
     	}
     	
-    	if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
-            WasdiLog.warnLog("ProductResource.deleteMultipleProduct: user cannot access workspace" );
+    	if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.warnLog("ProductResource.deleteMultipleProduct: user cannot write in the workspace" );
             oPrimitiveResult.setIntValue(500);
             oPrimitiveResult.setBoolValue(false);
             return oPrimitiveResult;    		

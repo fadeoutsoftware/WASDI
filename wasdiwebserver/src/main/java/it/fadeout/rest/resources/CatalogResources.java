@@ -87,7 +87,7 @@ public class CatalogResources {
 			
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
-				return Response.status(Status.UNAUTHORIZED).build();				
+				return Response.status(Status.FORBIDDEN).build();				
 			}
 			
 			// Get the File object
@@ -154,7 +154,7 @@ public class CatalogResources {
 		
 		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 			WasdiLog.warnLog("CatalogResources.checkFileByNode: user cannot access workspace");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			return Response.status(Status.FORBIDDEN).build();			
 		}
 		
 		try {
@@ -203,7 +203,7 @@ public class CatalogResources {
 			
 			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
-				return Response.status(Status.UNAUTHORIZED).build();			
+				return Response.status(Status.FORBIDDEN).build();			
 			}
 
 			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
@@ -251,7 +251,7 @@ public class CatalogResources {
 		
 		if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
 			WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot write in the workspace");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			return Response.status(Status.FORBIDDEN).build();			
 		}		
 		
 		if (!Utils.isNullOrEmpty(sStyle)) {

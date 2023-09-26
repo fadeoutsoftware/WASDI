@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.users.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
 import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
@@ -45,6 +44,7 @@ import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
+import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
 import wasdi.shared.business.users.UserApplicationRole;
@@ -103,20 +103,19 @@ public class WorkflowsResource {
 
         try {
         	
-            // Checks whether null file is passed
-            if (oFileInputStream == null) {
-            	WasdiLog.warnLog("WorkflowsResource.uploadFile: no file stream");
-            	return Response.status(Status.BAD_REQUEST).build();
-            }
-            
             // Check authorization
             User oUser = Wasdi.getUserFromSession(sSessionId);
 
             if (oUser == null) {
             	WasdiLog.warnLog("WorkflowsResource.uploadFile: invalid session");
             	return Response.status(Status.UNAUTHORIZED).build();
+            }        	
+        	
+            // Checks whether null file is passed
+            if (oFileInputStream == null) {
+            	WasdiLog.warnLog("WorkflowsResource.uploadFile: no file stream");
+            	return Response.status(Status.BAD_REQUEST).build();
             }
-            
 
             String sUserId = oUser.getUserId();
 
@@ -162,46 +161,8 @@ public class WorkflowsResource {
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
             oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);            
 
-            /*
-            try (FileReader oFileReader = new FileReader(oWorkflowXmlFile)) {
-                // Read the graph
-                Graph oGraph;
-                try {
-                    oGraph = GraphIO.read(oFileReader);
-
-                    // Take the nodes
-                    Node[] aoNodes = oGraph.getNodes();
-
-                    for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
-                        Node oNode = aoNodes[iNodes];
-                        // Search Read and Write nodes
-                        if (oNode.getOperatorName().equals("Read")) {
-                            oWorkflow.getInputNodeNames().add(oNode.getId());
-                        } else if (oNode.getOperatorName().equals("Write")) {
-                            oWorkflow.getOutputNodeNames().add(oNode.getId());
-                        }
-                    }
-                } catch (GraphException oE) {
-                    WasdiLog.debugLog("WorkflowsResource.uploadFile: malformed workflow file");
-                    // Close the file reader
-                    oFileReader.close();
-                    // Delete the file fom the server
-                    Files.delete(oWorkflowXmlFile.toPath());
-                    return Response.serverError().build();
-                }
-                // Save the Workflow
-                SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-                oSnapWorkflowRepository.insertSnapWorkflow(oWorkflow);
-
-            } catch (Exception oEx) {
-                WasdiLog.debugLog("WorkflowsResource.uploadFile: " + oEx);
-                return Response.serverError().build();
-            }
-            */
-
-
-        } catch (Exception oEx2) {
-        	WasdiLog.errorLog("WorkflowsResource.uploadFile error: " + oEx2);
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("WorkflowsResource.uploadFile error: " + oEx);
         }
 
         return Response.ok().build();
@@ -232,8 +193,8 @@ public class WorkflowsResource {
             	return Response.status(Status.UNAUTHORIZED).build();
             }
             
-            if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-            	WasdiLog.warnLog("WorkflowsResource.updateFile: user cannot access to the workflow");
+            if (!PermissionsUtils.canUserWriteWorkflow(oUser.getUserId(), sWorkflowId)) {
+            	WasdiLog.warnLog("WorkflowsResource.updateFile: user cannot write the workflow");
             	return Response.status(Status.FORBIDDEN).build();            	
             }
             
@@ -273,36 +234,6 @@ public class WorkflowsResource {
             // checks that the graph field is valid by checking the nodes
             try (FileReader oFileReader = new FileReader(oWorkflowXmlFileTemp)) {
             	
-            	/*
-                // Read the graph
-                Graph oGraph;
-                try {
-                    oGraph = GraphIO.read(oFileReader);
-
-                    // Take the nodes
-                    Node[] aoNodes = oGraph.getNodes();
-
-                    for (int iNodes = 0; iNodes < aoNodes.length; iNodes++) {
-                        Node oNode = aoNodes[iNodes];
-                        // Search Read and Write nodes
-                        if (oNode.getOperatorName().equals("Read")) {
-                            oWorkflow.getInputNodeNames().add(oNode.getId());
-                        } else if (oNode.getOperatorName().equals("Write")) {
-                            oWorkflow.getOutputNodeNames().add(oNode.getId());
-                        }
-                    }
-                    // Close the file reader
-                    oFileReader.close();
-                } catch (GraphException oE) {
-                    // Close the file reader
-                    oFileReader.close();
-                    WasdiLog.debugLog("WorkflowsResource.updateFile: malformed workflow file");
-                    // Leave the original file unchanged and delete the temp
-                    Files.delete(oWorkflowXmlFileTemp.toPath());
-                    return Response.status(Status.NOT_MODIFIED).build();
-                }
-                */
-            	
                 // Overwrite the old file
                 Files.write(oWorkflowXmlFile.toPath(), Files.readAllBytes(oWorkflowXmlFileTemp.toPath()));
                 // Delete the temp file
@@ -319,7 +250,8 @@ public class WorkflowsResource {
                 oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
                 oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
 
-            } catch (Exception oEx) {
+            } 
+            catch (Exception oEx) {
                 if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
                 WasdiLog.errorLog("WorkflowsResource.updateFile error: " + oEx);
                 return Response.status(Status.NOT_MODIFIED).build();
@@ -441,8 +373,8 @@ public class WorkflowsResource {
         	return Response.status(Status.UNAUTHORIZED).build();
         }
         
-        if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
-        	WasdiLog.warnLog("WorkflowsResource.updateParams: user cannot access to the workflow");
+        if (!PermissionsUtils.canUserWriteWorkflow(oUser.getUserId(), sWorkflowId)) {
+        	WasdiLog.warnLog("WorkflowsResource.updateParams: user cannot write to the workflow");
         	return Response.status(Status.FORBIDDEN).build();            	
         }        
 
@@ -644,9 +576,8 @@ public class WorkflowsResource {
 			sRights = UserAccessRights.READ.getAccessRight();
 		}        
         
-        if (Utils.isNullOrEmpty(oRequesterUser.getUserId()) && 
-        		!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-            WasdiLog.warnLog("WorkflowsResource.shareWorkflow: user cannot access workflow");
+        if (!PermissionsUtils.canUserWriteWorkflow(oRequesterUser.getUserId(), sWorkflowId) && !UserApplicationRole.isAdmin(oRequesterUser)) {
+            WasdiLog.warnLog("WorkflowsResource.shareWorkflow: user cannot write the  workflow");
             oResult.setStringValue("Invalid user.");
             return oResult;
         }
@@ -688,17 +619,17 @@ public class WorkflowsResource {
 
             // Create and insert the sharing
             UserResourcePermission oWorkflowSharing = new UserResourcePermission();
-            oWorkflowSharing.setResourceType("workflow");
+            oWorkflowSharing.setResourceType(ResourceTypes.WORKFLOW.getResourceType());
             Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
             oWorkflowSharing.setOwnerId(oWorkflow.getUserId());
             oWorkflowSharing.setUserId(sUserId);
             oWorkflowSharing.setResourceId(sWorkflowId);
             oWorkflowSharing.setCreatedBy(oRequesterUser.getUserId());
             oWorkflowSharing.setCreatedDate((double) oTimestamp.getTime());
-            oWorkflowSharing.setPermissions("write");
+            oWorkflowSharing.setPermissions(sRights);
             oUserResourcePermissionRepository.insertPermission(oWorkflowSharing);
 
-            WasdiLog.debugLog("WorkflowsResource.shareWorkflow: Workflow" + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
+            WasdiLog.debugLog("WorkflowsResource.shareWorkflow: Workflow " + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
             try {
                 String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
@@ -783,7 +714,7 @@ public class WorkflowsResource {
             }
             
             if (!PermissionsUtils.canUserAccessWorkflow(oOwnerUser.getUserId(), sWorkflowId) &&
-            		!UserApplicationRole.userHasRightsToAccessApplicationResource(oOwnerUser.getRole(), ADMIN_DASHBOARD)) {
+            		!UserApplicationRole.isAdmin(oOwnerUser)) {
                 WasdiLog.warnLog("WorkflowsResource.deleteUserSharedWorkflow: user cannot access the workflow");
                 oResult.setStringValue("Forbidden");
                 return oResult;            	
@@ -936,6 +867,13 @@ public class WorkflowsResource {
                 oResult.setIntValue(401);
                 return oResult;            	
             }
+            
+            if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+                WasdiLog.warnLog("WorkflowsResource.run: user cannot write in the workspace");
+                oResult.setBoolValue(false);
+                oResult.setIntValue(401);
+                return oResult;            	
+            }            
 
             String sWorkflowPath = PathsConfig.getWorkflowsPath() + oWF.getWorkflowId() + ".xml";
             File oWorkflowFile = new File(sWorkflowPath);
@@ -1053,7 +991,7 @@ public class WorkflowsResource {
             
             if (!PermissionsUtils.canUserAccessWorkflow(oUser.getUserId(), sWorkflowId)) {
                 WasdiLog.warnLog("WorkflowsResource.download: user cannot access the workflow");
-                return Response.status(Status.UNAUTHORIZED).build();            	
+                return Response.status(Status.FORBIDDEN).build();            	
             }
 
             SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
@@ -1096,6 +1034,13 @@ public class WorkflowsResource {
         return null;
     }    
 
+    /**
+     * Fills the SnapWorkflow entity with input and output nodes
+     * parsing the original SNAP XML searching for the corrisponding nodes
+     * @param oFile XML File of the workflow
+     * @param oSnapWorflow WASDI Entity
+     * @return true if ok, false in case of problems
+     */
     protected boolean fillWorkflowIONodes(File oFile, SnapWorkflow oSnapWorflow) {
 		DocumentBuilderFactory oDocBuildFactory = DocumentBuilderFactory.newInstance();
 		
@@ -1143,8 +1088,8 @@ public class WorkflowsResource {
 			
 			return true;
 
-		} catch (Exception oE1) {
-			WasdiLog.errorLog("WorkflowsResource.fillWorkflowIONodes: " + oE1);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WorkflowsResource.fillWorkflowIONodes: " + oEx);
 			return false;
 		}	
     }
