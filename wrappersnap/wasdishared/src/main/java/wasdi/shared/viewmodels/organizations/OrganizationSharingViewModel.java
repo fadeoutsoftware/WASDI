@@ -12,23 +12,16 @@ public class OrganizationSharingViewModel {
 	private String organizationId;
 	private String userId;
 	private String ownerId;
-	private String role;
+	private String permissions;
 	
 	public OrganizationSharingViewModel() {
 		
 	}
 
 	public OrganizationSharingViewModel(UserResourcePermission oSharing) {
-		super();
 		this.organizationId = oSharing.getResourceId();
 		this.userId = oSharing.getUserId();
 		this.ownerId = oSharing.getOwnerId();
-
-		if (oSharing.getPermissions() != null && oSharing.getPermissions().contains("organization:write")) {
-			role = "MANAGER";
-		} else {
-			role = "USER";
-		}
 	}
 
 	public String getOrganizationId() {
@@ -55,12 +48,12 @@ public class OrganizationSharingViewModel {
 		this.ownerId = ownerId;
 	}
 
-	public String getRole() {
-		return role;
+	public String getPermissions() {
+		return permissions;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
 	}
 
 }

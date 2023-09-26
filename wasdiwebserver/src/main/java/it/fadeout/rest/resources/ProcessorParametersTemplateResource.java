@@ -563,6 +563,7 @@ public class ProcessorParametersTemplateResource {
 					oProcessorParametersTemplateSharingViewModel.setOwnerId(oProcessorParametersTemplateSharing.getUserId());
 					oProcessorParametersTemplateSharingViewModel.setUserId(oProcessorParametersTemplateSharing.getUserId());
 					oProcessorParametersTemplateSharingViewModel.setProcessorParametersTemplateId(oProcessorParametersTemplateSharing.getResourceId());
+					oProcessorParametersTemplateSharingViewModel.setPermissions(oProcessorParametersTemplateSharing.getPermissions());
 
 					aoProcessorParametersTemplateSharingViewModels.add(oProcessorParametersTemplateSharingViewModel);
 				}

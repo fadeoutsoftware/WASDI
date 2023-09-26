@@ -9,7 +9,16 @@ import wasdi.shared.business.users.UserResourcePermission;
  */
 public class WorkflowSharingViewModel {
 	private String userId;
+	private String permissions;
 
+	public WorkflowSharingViewModel() {
+	}
+
+	public WorkflowSharingViewModel(UserResourcePermission oSharing) {
+		this.userId = oSharing.getUserId();
+		this.permissions = oSharing.getPermissions();
+	}
+	
 	public String getUserId() {
 		return userId;
 	}
@@ -18,13 +27,12 @@ public class WorkflowSharingViewModel {
 		this.userId = userId;
 	}
 
-	public WorkflowSharingViewModel() {
-		super();
+	public String getPermissions() {
+		return permissions;
 	}
 
-	public WorkflowSharingViewModel(UserResourcePermission oSharing) {
-		super();
-		this.userId = oSharing.getUserId();
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
 	}
 
 }

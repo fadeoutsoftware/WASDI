@@ -31,9 +31,31 @@
                                             placeholder='{{"DIALOG_SHARE_WS_MAIL"|translate}}'
                                         />
                                     </div>
+                                    <div class="dropdown my-dropdown">
+                                        <button class="btn btn-default dropdown-toggle w-100" type="button"
+                                                id="dropdownPermissionSelection" data-toggle="dropdown" style="font-weight: 600;">
+                                            {{m_oController.m_sRights}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu"
+                                            aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
+            
+                                            <li role="presentation">
+                                                <a role="menuitem" tabindex="-1" href="" style="font-weight: 600;"
+                                                   ng-click="m_oController.m_sRights = 'read'">
+                                                   read
+                                                </a>
+                                                <a role="menuitem" tabindex="-1" href="" style="font-weight: 600;"
+                                                   ng-click="m_oController.m_sRights = 'write'">
+                                                   write
+                                                </a>
+                                            </li>
+            
+                                        </ul>
+                                    </div>                                    
                                     <button
                                         class="btn btn-primary btn-wasdi mb-4 align-self-end"
-                                        ng-click="m_oController.shareOrganization(m_oController.m_sUserEmail)"
+                                        ng-click="m_oController.shareOrganization(m_oController.m_sUserEmail, m_oController.m_sRights)"
                                     >
                                         <em
                                             class="custom-icon fa fa-share-alt fa-lg"
@@ -58,6 +80,7 @@
                                 <thead>
                                     <tr>
                                         <th>UserId</th>
+                                        <th>Access</th>
                                         <th>
                                         </th>
                                     </tr>
@@ -65,6 +88,7 @@
                                 <tbody>
                                     <tr ng-repeat="oUser in m_oController.m_aoUsersList">
                                         <td>{{oUser.userId}}</td>
+                                        <td>{{oUser.permissions}}</td>
 
                                         <td class="over-icon">
                                             <button class="btn btn-danger btn-wasdi"

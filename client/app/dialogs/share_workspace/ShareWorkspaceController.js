@@ -70,7 +70,7 @@ var ShareWorkspaceController = (function() {
         }
 
         if (utilsIsStrNullOrEmpty(sRights)) {
-            sRights = "READ"
+            sRights = "read"
         }
 
         utilsRemoveSpaces(sEmail);

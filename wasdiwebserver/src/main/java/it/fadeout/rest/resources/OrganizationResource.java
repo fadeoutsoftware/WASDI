@@ -531,6 +531,8 @@ public class OrganizationResource {
 					oOrganizationSharingViewModel.setOwnerId(oOrganizationSharing.getUserId());
 					oOrganizationSharingViewModel.setUserId(oOrganizationSharing.getUserId());
 					oOrganizationSharingViewModel.setOrganizationId(oOrganizationSharing.getResourceId());
+					oOrganizationSharingViewModel.setPermissions(oOrganizationSharing.getPermissions());
+					
 
 					aoOrganizationSharingViewModels.add(oOrganizationSharingViewModel);
 				}

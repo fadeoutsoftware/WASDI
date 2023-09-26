@@ -2151,6 +2151,7 @@ public class ProcessorsResource  {
 			for (UserResourcePermission oSharing : aoProcessorSharing) {
 				ProcessorSharingViewModel oVM = new ProcessorSharingViewModel();
 				oVM.setUserId(oSharing.getUserId());
+				oVM.setPermissions(oSharing.getPermissions());
 				aoReturnList.add(oVM);
 			}
 			

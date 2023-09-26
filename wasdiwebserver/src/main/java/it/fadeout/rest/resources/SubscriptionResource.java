@@ -639,11 +639,7 @@ public class SubscriptionResource {
 
 			if (aoSubscriptionSharing != null) {
 				for (UserResourcePermission oSubscriptionSharing : aoSubscriptionSharing) {
-					SubscriptionSharingViewModel oSubscriptionSharingViewModel = new SubscriptionSharingViewModel();
-					oSubscriptionSharingViewModel.setOwnerId(oSubscriptionSharing.getUserId());
-					oSubscriptionSharingViewModel.setUserId(oSubscriptionSharing.getUserId());
-					oSubscriptionSharingViewModel.setSubscriptionId(oSubscriptionSharing.getResourceId());
-
+					SubscriptionSharingViewModel oSubscriptionSharingViewModel = new SubscriptionSharingViewModel(oSubscriptionSharing);
 					aoSubscriptionSharingViewModels.add(oSubscriptionSharingViewModel);
 				}
 			}

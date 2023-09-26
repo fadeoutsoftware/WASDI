@@ -798,8 +798,8 @@ public class WorkflowsResource {
 
             //Retrieve and returns the sharings
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-            oUserResourcePermissionRepository.getWorkflowSharingsByWorkflowId(sWorkflowId).forEach(element -> {
-                oResult.add(new WorkflowSharingViewModel(element));
+            oUserResourcePermissionRepository.getWorkflowSharingsByWorkflowId(sWorkflowId).forEach(oElement -> {
+                oResult.add(new WorkflowSharingViewModel(oElement));
             });
             return oResult;
 

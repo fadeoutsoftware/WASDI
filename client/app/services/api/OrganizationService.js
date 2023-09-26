@@ -42,8 +42,8 @@ service('OrganizationService', ['$http',  'ConstantsService', function ($http, o
     }
 
     // Add sharing
-    this.addOrganizationSharing = function (sOrganizationId, sUserId) {
-        return this.m_oHttp.post(this.APIURL + '/organizations/share/add?organization=' + sOrganizationId + '&userId=' + sUserId);
+    this.addOrganizationSharing = function (sOrganizationId, sUserId, sRights) {
+        return this.m_oHttp.post(this.APIURL + '/organizations/share/add?organization=' + sOrganizationId + '&userId=' + sUserId + '&rights='+sRights);
     }
 
     // Remove sharing

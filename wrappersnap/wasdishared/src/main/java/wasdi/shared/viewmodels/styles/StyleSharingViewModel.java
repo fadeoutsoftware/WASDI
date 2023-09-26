@@ -10,6 +10,7 @@ import wasdi.shared.business.users.UserResourcePermission;
 public class StyleSharingViewModel {
 
 	private String userId;
+	private String permissions;
 	
 	public StyleSharingViewModel() {
 		
@@ -18,6 +19,7 @@ public class StyleSharingViewModel {
 	public StyleSharingViewModel(UserResourcePermission oSharing) {
 		super();
 		this.userId = oSharing.getUserId();
+		this.permissions = oSharing.getPermissions();
 	}
 
 	public String getUserId() {
@@ -26,6 +28,14 @@ public class StyleSharingViewModel {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
 	}
 
 }

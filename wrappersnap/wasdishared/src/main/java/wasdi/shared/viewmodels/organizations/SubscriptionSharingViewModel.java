@@ -13,7 +13,7 @@ public class SubscriptionSharingViewModel {
 	private String subscriptionId;
 	private String userId;
 	private String ownerId;
-	private String role;
+	private String permissions;
 	
 	public SubscriptionSharingViewModel() {
 		
@@ -24,12 +24,7 @@ public class SubscriptionSharingViewModel {
 		this.subscriptionId = oSharing.getResourceId();
 		this.userId = oSharing.getUserId();
 		this.ownerId = oSharing.getOwnerId();
-
-		if (oSharing.getPermissions() != null && oSharing.getPermissions().contains("subscription:write")) {
-			role = "MANAGER";
-		} else {
-			role = "USER";
-		}
+		this.permissions = oSharing.getPermissions();
 	}
 
 	public String getSubscriptionId() {
@@ -56,12 +51,11 @@ public class SubscriptionSharingViewModel {
 		this.ownerId = ownerId;
 	}
 
-	public String getRole() {
-		return role;
+	public String getPermissions() {
+		return permissions;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
 	}
-
 }
