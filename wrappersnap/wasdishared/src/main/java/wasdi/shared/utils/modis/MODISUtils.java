@@ -76,13 +76,17 @@ public class MODISUtils {
     	insertProducts();
     }
     
+    public static void insertProducts() throws Exception {
+    	insertProducts(-1, -1);
+    }
+    
     /**
      * Populate the collection on Mongo
      * @param sCSVFilePath the path to the CSV file containing the list of product names
      * @return
      * @throws Exception
      */
-    public static void insertProducts() throws Exception {
+    public static void insertProducts(int iStartLine, int iEndLine) throws Exception {
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
@@ -90,10 +94,20 @@ public class MODISUtils {
     	try {
     		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
     		String sLine = "";
-    		int iCont = 0;
+    		int iCurrentLine = 0; // the variable stores the number of the current line of the file being read
+    		boolean bImportAll = iStartLine == -1 && iEndLine == -1;
     		
     		while ((sLine = oReader.readLine()) != null) {
-    			iCont ++;
+    			iCurrentLine ++;
+    			
+    			if (!bImportAll && iCurrentLine < iStartLine) {
+    				continue;
+    			}
+    			
+    			if (!bImportAll && iCurrentLine > iEndLine) {
+    				break;
+    			}
+    			
     			
     			String[] asMetadata = sLine.split(","); 
     			String sGranuleId = asMetadata[0];
@@ -104,9 +118,8 @@ public class MODISUtils {
     			String sXMLUrlPath = sProductFileUrl + ".xml";
     			WasdiLog.debugLog("MODISUtils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
     			
-    			
     			try {
-	    			if (iCont - 1 > 0) {
+	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)
 	    				String sXMLMetadataString = readXmlFile(sXMLUrlPath); 
 	    				
 	    				if (!Utils.isNullOrEmpty(sXMLMetadataString)) {
@@ -121,7 +134,7 @@ public class MODISUtils {
 	    			}
     			} catch(IOException oEx) {
     	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading metadata file " + sXMLUrlPath + ". " + oEx.getMessage());
-    			}
+    			} 
     		}  // end while
     		oReader.close();
     	} catch (IOException oEx) {
@@ -131,6 +144,110 @@ public class MODISUtils {
     			oReader.close();
     		WasdiLog.debugLog("MODISUtils.insertProducts. Number of products added to the db: " + iProdCounts);
     	}	
+    }
+    
+    public static void insertProductsFromCsv(int iStartLine, int iEndLine) throws Exception{
+    	BufferedReader oReader = null;
+    	ModisRepository oModisRepo = new ModisRepository();
+    	int iProdCounts = 0;
+    	
+    	
+    	
+    	try {
+    		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
+    		String sLine = "";
+    		int iCurrentLine = 0; // the variable stores the number of the current line of the file being read
+    		boolean bImportAll = iStartLine == -1 && iEndLine == -1;
+    		
+    		while ((sLine = oReader.readLine()) != null) {
+    			iCurrentLine ++;
+    			
+    			if (!bImportAll && iCurrentLine < iStartLine) {
+    				continue;
+    			}
+    			
+    			if (!bImportAll && iCurrentLine > iEndLine) {
+    				WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Lines have been read.");
+    				break;
+    			}
+    			
+    			WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Reading line: " + iCurrentLine);
+    			
+    			try {
+	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)    				
+	    				Map<String, String> asProperties = buildProperties(sLine);
+
+	    				if (asProperties != null && !asProperties.isEmpty()) {
+	    					ModisItemForWriting oItem = buildModisItem(asProperties);
+	    					oModisRepo.insertModisItem(oItem);
+	    					iProdCounts++;
+	    					WasdiLog.debugLog("MODISUtils.insertProducts. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
+	    				} else {
+	    					WasdiLog.debugLog("MODISUtils.insertProducts. Impossible to read metadata and add product to db for line: " + sLine);
+	    				}
+	    				
+	    			}
+    			} catch(Exception oEx) {
+    	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading line " + sLine + ". " + oEx.getMessage());
+    			} 
+    		}  // end while
+    		oReader.close();
+    	} catch (IOException oEx) {
+    		WasdiLog.errorLog("MODISUtils.insertProducts. Error while populating the database with MODIS products " + oEx.getMessage());
+    	} finally {
+    		if (oReader != null) 
+    			oReader.close();
+    		WasdiLog.debugLog("MODISUtils.insertProducts. Number of products added to the db: " + iProdCounts);
+    	}	
+    }
+    
+    private static Map<String, String> buildProperties(String sLine) {
+    	
+    	if (Utils.isNullOrEmpty(sLine)) {
+    		return null;
+    	}
+    	
+    	String[] asMetadata = sLine.split(",");
+    	
+    	if (asMetadata.length != 38) {
+    		return null;
+    	}
+    	
+    	String sGranuleId = asMetadata[0];
+    	String sStartDate = asMetadata[2];
+    	
+    	String sProductDirectoryUrl = s_sMODISBaseUrl + sStartDate.replaceAll("/", ".");
+		String sProductFileUrl = sProductDirectoryUrl + "/" + sGranuleId;
+		
+		List<Double> adLatitude = new ArrayList<>();
+		adLatitude.add(Double.parseDouble(asMetadata[28]));
+		adLatitude.add(Double.parseDouble(asMetadata[30]));
+		adLatitude.add(Double.parseDouble(asMetadata[32]));
+		adLatitude.add(Double.parseDouble(asMetadata[34]));
+		
+		List<Double> adLongitude = new ArrayList<>();
+		adLongitude.add(Double.parseDouble(asMetadata[29]));
+		adLongitude.add(Double.parseDouble(asMetadata[31]));
+		adLongitude.add(Double.parseDouble(asMetadata[33]));
+		adLongitude.add(Double.parseDouble(asMetadata[35]));
+		
+		String sBoundingBox = getJsonFormatBoundingBox(adLatitude, adLongitude);	
+    	
+    	Map<String, String> asProperties = new HashMap<>();
+    	asProperties.put(s_sFileName, sGranuleId);
+		asProperties.put(s_sStartDate, sStartDate.replaceAll("/", "-"));
+		asProperties.put(s_sStartTime, "00:00:00.000000");
+		asProperties.put(s_sEndDate, asMetadata[3].replaceAll("/", "-"));
+		asProperties.put(s_sEndTime, "23:59:59.000000");
+		asProperties.put(s_sPlatform, "Terra");
+		asProperties.put(s_sDayNightFlag, asMetadata[6]);
+		asProperties.put(s_sSensor, "MODIS");
+		asProperties.put(s_sInstrument, "MODIS");
+		asProperties.put(s_sFileSize, "0");
+		asProperties.put(s_sBoundingBox, sBoundingBox);
+		asProperties.put(s_sUrl, sProductFileUrl);
+		
+		return asProperties;	
     }
     
     
@@ -310,6 +427,17 @@ public class MODISUtils {
 				adLatitude.add(Double.parseDouble(sLine.replace(sLatitudeOpenTag, "").replace(sLatitudeCloseTag, "")));
 		}
 		
+		return getJsonFormatBoundingBox(adLatitude, adLongitude);
+	}
+	
+	/**
+	 * Given the arrays of latitude and longitude points, determine the bounding box of the points and returns the 
+	 * JSON string to store in the db for the corresponding polygon
+	 * @param adLatitude array of latitude points
+	 * @param adLongitude array of longitude points
+	 * @return the JSON string representing the bounding box of the points, to be stored in the db
+	 */
+	private static String getJsonFormatBoundingBox(List<Double> adLatitude, List<Double> adLongitude) {
 		double dMaxLat = Collections.max(adLatitude); // north
 		double dMinLat = Collections.min(adLatitude); // south
 		double dMaxLong = Collections.max(adLongitude); // east

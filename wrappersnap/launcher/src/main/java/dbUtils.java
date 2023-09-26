@@ -2275,8 +2275,10 @@ public class dbUtils {
 			
             System.out.println("This tool will parse the config file and ingest in WASDI the MOD11A2 data from the LP DAAC catalogue. ");
 
-            System.out.println("\t1 - Proceed with import");
-            System.out.println("\tx - back");
+            System.out.println("\t1 - Proceed with the import of all documents from the data provider");
+            System.out.println("\t2 - Specify the lines of the CSV file to read and import the documents FROM THE DATA PROVIDER");
+            System.out.println("\t3 - Specify the lines of the CSV file to read and import the documents reading the metadata FROM THE CSV FILE");
+            System.out.println("\tx - back to main menu");
             System.out.println("");
 
             String sInputString = s_oScanner.nextLine();
@@ -2286,8 +2288,48 @@ public class dbUtils {
             }
 
             if (sInputString.equals("1")) {
-            	MODISUtils.insertProducts();
+            	System.out.println("you chose to import all the documents");
+            	 MODISUtils.insertProducts();
+            	 return;
             }
+            
+            if (sInputString.equals("2") || sInputString.equals("3")) {
+            	System.out.println("Specify the number of the starting line and the ending line in the CSV file, separated by a space");
+            	System.out.println("");
+            	
+                String sLineIndeces = s_oScanner.nextLine();
+                String[] asIndeces = sLineIndeces.split(" ");
+                
+                if (asIndeces.length < 2 || asIndeces.length > 2) {
+                	System.out.println("Number of starting and ending line not specified in the correct format. Returning to the main menu.");
+                	return;
+                }
+                
+                int iStartLine = Integer.MIN_VALUE;
+                int iEndLine = Integer.MIN_VALUE;
+                try {
+                	iStartLine = Integer.parseInt(asIndeces[0]);
+                	iEndLine = Integer.parseInt(asIndeces[1]);
+                } catch (NumberFormatException oE) {
+                	System.out.println("One of the parameters is not a number. Returning to the main menu.");
+                	return;
+                }
+                
+                if (iStartLine > iEndLine) {
+                	System.out.println("The number of the start line should be less or equal than the number of the ending line. Returning to the main menu.");
+                	return;
+                }
+                
+                System.out.println("You chose to import the documents in the lines included between " + iStartLine + " and " + iEndLine);
+                
+                if (sInputString.equals("2"))
+                	MODISUtils.insertProducts(iStartLine, iEndLine);
+                else
+                	MODISUtils.insertProductsFromCsv(iStartLine, iEndLine);
+                
+                return;
+            }
+            
 
 		} catch (Exception oEx) {
 			oEx.printStackTrace();
