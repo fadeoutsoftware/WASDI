@@ -6,6 +6,10 @@ import java.util.List;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
@@ -202,6 +206,47 @@ public class ModisRepository extends MongoRepository  {
 		}
 
 		return aoReturnList;
+	}
+	
+	public long countDocumentsMatchingFileName(String sFileName) {
+			
+		try {
+			Document oQuery = new Document("fileName", sFileName);
+			
+			return getCollection(m_sThisCollection).countDocuments(oQuery);
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ModisRepository.countDocumentsMatchingFileName: Exception when counting documents from db" + oEx);
+		}
+		
+		return -1;
+		
+//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
+//	        // Get a reference to the database
+//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
+//
+//	        // Get a reference to the collection
+//	        MongoCollection<Document> collection = database.getCollection(collectionName);
+//
+//
+//	        // Insert the document into the collection
+//	        long lCount = collection.countDocuments(oQuery);
+//	        
+//	        return lCount;
+//
+//	    } catch (Exception oEx) {
+//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
+//	    }	
+//		
+
+		
+		
+	}
+	
+	
+	public static void main(String[]args) throws Exception {
+		ModisRepository oNewRepo = new ModisRepository();
+		System.out.println(oNewRepo.countDocumentsMatchingFileName("MOD11A2.A2000049.h02v11.061.2020048120245.hdf"));
 	}
 	
 
