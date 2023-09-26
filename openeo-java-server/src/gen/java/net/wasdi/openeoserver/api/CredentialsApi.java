@@ -12,8 +12,7 @@ import javax.ws.rs.core.SecurityContext;
 import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.HTTPBasicAccessToken;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.*;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/credentials")

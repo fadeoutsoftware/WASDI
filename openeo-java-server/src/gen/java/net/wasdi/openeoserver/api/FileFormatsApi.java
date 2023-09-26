@@ -17,7 +17,7 @@ import net.wasdi.openeoserver.viewmodels.FileFormat;
 import net.wasdi.openeoserver.viewmodels.FileFormat.GisDataTypesEnum;
 import net.wasdi.openeoserver.viewmodels.FileFormats;
 import net.wasdi.openeoserver.viewmodels.ResourceParameter;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.*;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/file_formats")
