@@ -184,7 +184,7 @@ public class WorkspaceResource {
 					oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 					oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 					oWSViewModel.setPublic(oWorkspace.isPublic());
-					oWSViewModel.setReadonly(!aoSharedWorkspaces.get(iWorkspaces).canWrite());
+					oWSViewModel.setReadOnly(!aoSharedWorkspaces.get(iWorkspaces).canWrite());
 
 					if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 						if (oWorkspace.getNodeCode().equals("wasdi")) {
@@ -274,7 +274,7 @@ public class WorkspaceResource {
 			oWorkspaceEditorViewModel.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
 			oWorkspaceEditorViewModel.setNodeCode(oWorkspace.getNodeCode());
 			oWorkspaceEditorViewModel.setPublic(oWorkspace.isPublic());
-			oWorkspaceEditorViewModel.setReadonly(!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspace.getWorkspaceId()));
+			oWorkspaceEditorViewModel.setReadOnly(!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspace.getWorkspaceId()));
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			oWorkspaceEditorViewModel.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 

@@ -24,7 +24,7 @@ public class WorkspaceEditorViewModel {
     private String cloudProvider;
     private String slaLink;
     private boolean isPublic=false;
-    private boolean readonly=false;
+    private boolean readOnly=false;
    
     
 	public String getCloudProvider() {
@@ -131,12 +131,12 @@ public class WorkspaceEditorViewModel {
 		this.isPublic = isPublic;
 	}
 
-	public boolean isReadonly() {
-		return readonly;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
-	public void setReadonly(boolean readonly) {
-		this.readonly = readonly;
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 	@Override

@@ -12,7 +12,7 @@ public class OrganizationViewModel {
 	private String address;
 	private String email;
 	private String url;
-//	private String logo;
+	private boolean readOnly;
 
 	private List<String> sharedUsers = new ArrayList<>();
 
@@ -78,6 +78,14 @@ public class OrganizationViewModel {
 
 	public void setSharedUsers(List<String> sharedUsers) {
 		this.sharedUsers = sharedUsers;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

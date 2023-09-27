@@ -55,8 +55,6 @@ public class OrganizationResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		WasdiLog.debugLog("OrganizationResource.getListByUser");
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		// Domain Check
@@ -64,21 +62,23 @@ public class OrganizationResource {
 			WasdiLog.warnLog("OrganizationResource.getListByUser: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
 
 		try {
 			
 			List<OrganizationListViewModel> aoOrganizationLVM = new ArrayList<>();
-
-			WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
-
-
+			
 			// Get the list of Organizations owned by the user
-
 			List<Organization> aoOwnedOrganizations = getOrganizationsOwnedByUser(oUser.getUserId());
 
 			List<OrganizationListViewModel> aoOwnedOrganizationLVM = aoOwnedOrganizations.stream()
-					.map(t -> convert(t, oUser.getUserId()))
+					.map(oOrganization -> convert(oOrganization, oUser.getUserId()))
 					.collect(Collectors.toList());
+			
+			for (OrganizationListViewModel oOwnedOrganization : aoOwnedOrganizationLVM) {
+				oOwnedOrganization.setReadOnly(false);
+			}
 
 			aoOrganizationLVM.addAll(aoOwnedOrganizationLVM);
 
@@ -90,6 +90,10 @@ public class OrganizationResource {
 			List<OrganizationListViewModel> aoSharedOrganizationLVM = aoSharedOrganizations.stream()
 					.map(t -> convert(t, oUser.getUserId()))
 					.collect(Collectors.toList());
+			
+			for (OrganizationListViewModel oSharedOrganization : aoSharedOrganizationLVM) {
+				oSharedOrganization.setReadOnly(!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), oSharedOrganization.getOrganizationId()));
+			}			
 
 			aoOrganizationLVM.addAll(aoSharedOrganizationLVM);
 
@@ -113,7 +117,7 @@ public class OrganizationResource {
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel( Organization: " + sOrganizationId + ")");
 
-		OrganizationViewModel oVM = new OrganizationViewModel();
+		OrganizationViewModel oOrganizationViewModel = new OrganizationViewModel();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -143,24 +147,25 @@ public class OrganizationResource {
 			// Get requested organization
 			Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
-			oVM = convert(oOrganization);
+			oOrganizationViewModel = convert(oOrganization);
+			
+			oOrganizationViewModel.setReadOnly(!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), sOrganizationId));
 
 			// Get Sharings
-			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-					.getOrganizationSharingsByOrganizationId(oOrganization.getOrganizationId());
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getOrganizationSharingsByOrganizationId(oOrganization.getOrganizationId());
 
 			// Add Sharings to View Model
 			if (aoSharings != null) {
-				if (oVM.getSharedUsers() == null) {
-					oVM.setSharedUsers(new ArrayList<String>());
+				if (oOrganizationViewModel.getSharedUsers() == null) {
+					oOrganizationViewModel.setSharedUsers(new ArrayList<String>());
 				}
 
 				for (UserResourcePermission oSharing : aoSharings) {
-					oVM.getSharedUsers().add(oSharing.getUserId());
+					oOrganizationViewModel.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
 
-			return Response.ok(oVM).build();
+			return Response.ok(oOrganizationViewModel).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog( "OrganizationResource.getOrganizationViewModel: " + oEx);
 			return Response.serverError().build();
@@ -340,8 +345,7 @@ public class OrganizationResource {
 	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
+	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("OrganizationResource.ShareOrganization( Organization: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
 
@@ -415,8 +419,15 @@ public class OrganizationResource {
 						new UserResourcePermission(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId, sDestinationUserId, oOrganization.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oOrganizationSharing);
-
-				sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
+				
+				try {
+					String sTitle = "Organization " +  oOrganization.getName() + " Shared";
+					String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the organization: " + oOrganization.getName();
+					WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
+				}				
 
 				return Response.ok(new SuccessResponse("Done")).build();
 			} else {
@@ -427,20 +438,6 @@ public class OrganizationResource {
 			WasdiLog.errorLog("OrganizationResource.shareOrganization: " + oEx);
 
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name())).build();
-		}
-	}
-
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sOrganizationName) {
-		try {
-
-			String sTitle = "Organization " + sOrganizationName + " Shared";
-
-			String sMessage = "The user " + sRequesterUserId + " shared with you the organization: " + sOrganizationName;
-			
-			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("OrganizationResource.sendNotificationEmail: notification exception " + oEx.toString());
 		}
 	}
 
@@ -559,7 +556,6 @@ public class OrganizationResource {
 		oOrganizationViewModel.setAddress(oOrganization.getAddress());
 		oOrganizationViewModel.setEmail(oOrganization.getEmail());
 		oOrganizationViewModel.setUrl(oOrganization.getUrl());
-//		oOrganizationViewModel.setlogo(oOrganization.getLogo());
 
 		return oOrganizationViewModel;
 	}
@@ -569,21 +565,19 @@ public class OrganizationResource {
 		oOrganizationListViewModel.setOrganizationId(oOrganization.getOrganizationId());
 		oOrganizationListViewModel.setName(oOrganization.getName());
 		oOrganizationListViewModel.setOwnerUserId(oOrganization.getUserId());
-		oOrganizationListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oOrganization.getUserId()));
 
 		return oOrganizationListViewModel;
 	}
 
 	private static Organization convert(OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		Organization oOrganization = new Organization();
+		
 		oOrganization.setOrganizationId(oOrganizationEditorViewModel.getOrganizationId());
-//		oOrganization.setUserId(oOrganizationEditorViewModel.getUserId());
 		oOrganization.setName(oOrganizationEditorViewModel.getName());
 		oOrganization.setDescription(oOrganizationEditorViewModel.getDescription());
 		oOrganization.setAddress(oOrganizationEditorViewModel.getAddress());
 		oOrganization.setEmail(oOrganizationEditorViewModel.getEmail());
 		oOrganization.setUrl(oOrganizationEditorViewModel.getUrl());
-//		oOrganization.setlogo(oOrganizationEditorViewModel.getLogo());
 
 		return oOrganization;
 	}

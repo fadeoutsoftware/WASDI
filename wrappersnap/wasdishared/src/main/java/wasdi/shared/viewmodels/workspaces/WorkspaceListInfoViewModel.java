@@ -18,7 +18,7 @@ public class WorkspaceListInfoViewModel {
     private String nodeCode;
     private Date creationDate;
     private boolean isPublic=false;
-    private boolean readonly=false;
+    private boolean readOnly=false;
 
     public Date getCreationDate() {
 		return creationDate;
@@ -84,12 +84,12 @@ public class WorkspaceListInfoViewModel {
 		this.isPublic = isPublic;
 	}
 
-	public boolean isReadonly() {
-		return readonly;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
-	public void setReadonly(boolean readonly) {
-		this.readonly = readonly;
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

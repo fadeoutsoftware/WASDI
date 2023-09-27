@@ -5,12 +5,8 @@ public class OrganizationListViewModel {
 	private String organizationId;
 	private String ownerUserId;
 	private String name;
-//	private String description;
-//	private String address;
-//	private String email;
-//	private String url;
-//	private String logo;
-	private boolean adminRole;
+	private boolean readOnly=false;
+	
 	public String getOrganizationId() {
 		return organizationId;
 	}
@@ -29,13 +25,11 @@ public class OrganizationListViewModel {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public boolean isAdminRole() {
-		return adminRole;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
-	public void setAdminRole(boolean adminRole) {
-		this.adminRole = adminRole;
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
-
-//	private List<String> sharedUsers = new ArrayList<>();
 
 }
