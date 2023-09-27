@@ -26,7 +26,7 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 public class QueryExecutorLpDaac extends QueryExecutor {
 	
 	public QueryExecutorLpDaac() {
-		m_sProvider = "LPDAAC"; // TODO: not sure this is the provider to put
+		m_sProvider = "LPDAAC";
 		
 		this.m_oQueryTranslator = new QueryTranslatorLpDaac();
 		this.m_oResponseTranslator = new ResponseTranslatorLpDaac();
@@ -61,10 +61,12 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
+		
+		String sFileName = oQueryViewModel.productName;
 
 		ModisRepository oModisRepositroy = new ModisRepository();
 		
-		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
+		long lCount = oModisRepositroy.countItems(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
 		
 		WasdiLog.debugLog("QueryExecutorModis.executeCount. Retrieved number of results: " + lCount);
 
@@ -113,9 +115,11 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 		
+		String sFileName = oQueryViewModel.productName;
+		
 		ModisRepository oModisRepositroy = new ModisRepository();
 
-		List<ModisItemForReading> aoItemList = oModisRepositroy.getModisItemList(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, iOffset, iLimit);
+		List<ModisItemForReading> aoItemList = oModisRepositroy.getModisItemList(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, iOffset, iLimit, sFileName);
 
 		aoResults = aoItemList.stream()
 				.map((ModisItemForReading t) -> ((ResponseTranslatorLpDaac) this.m_oResponseTranslator).translate(t))
@@ -142,4 +146,13 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 	}
 	
 
+	public static void main(String[]args) throws Exception {
+		String sQuey = "( footprint:\"intersects(POLYGON((-172.25988969251213 -78.55484055601048,-172.25988969251213 82.92645164934402,175.6510783044044 82.92645164934402,175.6510783044044 -78.55484055601048,-172.25988969251213 -78.55484055601048)))\" ) AND ( beginPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] AND endPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] ) AND   (platformname:TERRA AND producttype:MOD11A2)";
+		
+		String sQuey1 = "( beginPosition:[2000-02-19T00:00:00.000Z TO 2000-02-20T23:59:59.999Z] AND endPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] ) AND   (platformname:TERRA AND producttype:MOD11A2)";
+
+		QueryExecutorLpDaac oExecutor = new QueryExecutorLpDaac();
+		
+		oExecutor.executeCount(sQuey1);
+	}
 }

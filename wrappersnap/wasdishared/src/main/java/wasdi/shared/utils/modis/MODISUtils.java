@@ -181,23 +181,89 @@ public class MODISUtils {
 	    					ModisItemForWriting oItem = buildModisItem(asProperties);
 	    					oModisRepo.insertModisItem(oItem);
 	    					iProdCounts++;
-	    					WasdiLog.debugLog("MODISUtils.insertProducts. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
+	    					WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
 	    				} else {
-	    					WasdiLog.debugLog("MODISUtils.insertProducts. Impossible to read metadata and add product to db for line: " + sLine);
+	    					WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Impossible to read metadata and add product to db for line: " + sLine);
 	    				}
 	    				
 	    			}
     			} catch(Exception oEx) {
-    	    		WasdiLog.errorLog("MODISUtils.insertProducts. Exception while reading line " + sLine + ". " + oEx.getMessage());
+    	    		WasdiLog.errorLog("MODISUtils.insertProductsFromCsv. Exception while reading line " + sLine + ". " + oEx.getMessage());
     			} 
     		}  // end while
     		oReader.close();
     	} catch (IOException oEx) {
-    		WasdiLog.errorLog("MODISUtils.insertProducts. Error while populating the database with MODIS products " + oEx.getMessage());
+    		WasdiLog.errorLog("MODISUtils.insertProductsFromCsv. Error while populating the database with MODIS products " + oEx.getMessage());
     	} finally {
     		if (oReader != null) 
     			oReader.close();
-    		WasdiLog.debugLog("MODISUtils.insertProducts. Number of products added to the db: " + iProdCounts);
+    		WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Number of products added to the db: " + iProdCounts);
+    	}	
+    }
+    
+    public static void insertMissingProductsFromCsv() throws Exception {
+    	insertMissingProductsFromCsv(-1, -1);
+    }
+    
+    /**
+     * Tries to repair the database reading from the CSV the metadata related to the MODIS products that were not added in the db
+     */
+    public static void insertMissingProductsFromCsv(int iStartLine, int iEndLine) throws Exception{
+    	BufferedReader oReader = null;
+    	ModisRepository oModisRepo = new ModisRepository();
+    	int iProdCounts = 0;
+    	
+    	
+    	
+    	try {
+    		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
+    		String sLine = "";
+    		int iCurrentLine = 0; // the variable stores the number of the current line of the file being read
+    		boolean bImportAll = iStartLine == -1 && iEndLine == -1;
+    		
+    		while ((sLine = oReader.readLine()) != null) {
+    			iCurrentLine ++;
+    			
+    			if (!bImportAll && iCurrentLine < iStartLine) {
+    				continue;
+    			}
+    			
+    			if (!bImportAll && iCurrentLine > iEndLine) {
+    				WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Lines have been read.");
+    				break;
+    			}
+    			   			
+    			try {
+	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)    				
+	    				Map<String, String> asProperties = buildProperties(sLine);
+
+	    				if (asProperties != null && !asProperties.isEmpty()) {
+	    					
+	    					String sFileName = asProperties.get(s_sFileName);
+	    					
+	    					if (oModisRepo.countDocumentsMatchingFileName(sFileName) < 1L) {
+		    					ModisItemForWriting oItem = buildModisItem(asProperties);
+		    					oModisRepo.insertModisItem(oItem);
+		    					iProdCounts++;
+	    					}
+	    					
+	    					WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
+	    				} else {
+	    					WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Impossible to read metadata and add product to db for line: " + sLine);
+	    				}
+	    				
+	    			}
+    			} catch(Exception oEx) {
+    	    		WasdiLog.errorLog("MODISUtils.insertMissingProductsFromCsv. Exception while reading line " + sLine + ". " + oEx.getMessage());
+    			} 
+    		}  // end while
+    		oReader.close();
+    	} catch (IOException oEx) {
+    		WasdiLog.errorLog("MODISUtils.insertMissingProductsFromCsv. Error while populating the database with MODIS products " + oEx.getMessage());
+    	} finally {
+    		if (oReader != null) 
+    			oReader.close();
+    		WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Number of products added to the db: " + iProdCounts);
     	}	
     }
     

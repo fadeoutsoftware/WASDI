@@ -54,7 +54,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		
 		// set id, title
 		addMainInfo(oItem, oResult);
-		addFootPrint(oItem.getOBoundingBox(), oResult);
+		addFootPrint(oItem.getBoundingBox(), oResult);
 		addProperties(oItem, oResult);
 		addLink(oResult);
 		addSummary(oResult);
@@ -62,8 +62,8 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 	}
 	
 	private void addMainInfo(ModisItemForReading oItem, QueryResultViewModel oResult) {
-		oResult.setId(oItem.getSFileName());
-		oResult.setTitle(oItem.getSFileName());
+		oResult.setId(oItem.getFileName());
+		oResult.setTitle(oItem.getFileName());
 	}
 	
 	private void addFootPrint(ModisLocation sLocation, QueryResultViewModel oResult) {
@@ -109,38 +109,34 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.addProperties: input oItem is null");
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: QueryResultViewModel is null");
 
-		oResult.getProperties().put(STITLE, oItem.getSFileName());
-		oResult.getProperties().put(SHREF, oItem.getSUrl());
+		oResult.getProperties().put(STITLE, oItem.getFileName());
+		oResult.getProperties().put(SHREF, oItem.getUrl());
 		
-		long lSizeBye = oItem.getLFileSize();
+		long lSizeBye = oItem.getFileSize();
 		String sNormalizedSize = lSizeBye > 0 ? Utils.getNormalizedSize((double) lSizeBye) : "";
 		oResult.getProperties().put(SSIZE_IN_BYTES, "" + lSizeBye);
 		oResult.getProperties().put(SSIZE, sNormalizedSize);
 
 		oResult.setPreview(null);
 
-		if (oItem.getDStartDate() != null) {
-			String sStartDate = TimeEpochUtils.fromEpochToDateString(oItem.getDStartDate().longValue());
+		if (oItem.getStartDate() != null) {
+			String sStartDate = TimeEpochUtils.fromEpochToDateString(oItem.getStartDate().longValue());
 			oResult.getProperties().put(SDATE, sStartDate);
 			oResult.getProperties().put("startDate", sStartDate);
 			oResult.getProperties().put("beginposition", sStartDate);
 		}
 		
-		oResult.getProperties().put(SPLATFORM, oItem.getSPlatform());
-		oResult.getProperties().put("platformname", oItem.getSPlatform());
+		oResult.getProperties().put(SPLATFORM, oItem.getPlatform());
+		oResult.getProperties().put("platformname", oItem.getPlatform());
 
-		oResult.getProperties().put((SSENSOR_MODE), oItem.getSSensor());
-		oResult.getProperties().put("sensoroperationalmode", oItem.getSSensor());
+		oResult.getProperties().put((SSENSOR_MODE), oItem.getSensor());
+		oResult.getProperties().put("sensoroperationalmode", oItem.getSensor());
 
-
-		oResult.getProperties().put(SSENSOR_MODE, "MODIS");
-		oResult.getProperties().put("platformname", "MODIS");
-
-		oResult.getProperties().put(SINSTRUMENT, oItem.getSInstrument());
-		oResult.getProperties().put("instrumentshortname", oItem.getSInstrument());
+		oResult.getProperties().put(SINSTRUMENT, oItem.getInstrument());
+		oResult.getProperties().put("instrumentshortname", oItem.getInstrument());
 
 
-		oResult.getProperties().put("polarisationmode", oItem.getSDayNightFlag());
+		oResult.getProperties().put("polarisationmode", oItem.getDayNightFlag());
 
 	}
 	

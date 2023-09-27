@@ -6,10 +6,15 @@ import java.util.List;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -79,9 +84,9 @@ public class ModisRepository extends MongoRepository  {
 	
 
 	
-	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo) {
+	public long countItems(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo, String sFileName) {
 		
-		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
 		
 		
 //		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
@@ -117,7 +122,7 @@ public class ModisRepository extends MongoRepository  {
 	}
 	
 	
-	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo) {		
+	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo, String sFileName) {		
 		
 		List<String> asQueryFilters = new ArrayList<>();
 
@@ -156,8 +161,14 @@ public class ModisRepository extends MongoRepository  {
 		if (lDateTo != null) {
 			asQueryFilters.add("endDate: {$lte: " + lDateTo + "}");
 		}
+		
+		if (!Utils.isNullOrEmpty(sFileName)) {
+			asQueryFilters.add("fileName: \"" + sFileName + "\"");
+		}
 
-		String sQuery = "   {\r\n" + String.join(", ", asQueryFilters) + "   }";
+		String sQuery = "   { " + String.join(", ", asQueryFilters) + "   }";
+		
+	System.out.println(sQuery);
 		
 		return sQuery;
 	}
@@ -167,11 +178,12 @@ public class ModisRepository extends MongoRepository  {
 	 * Get all the Modis Items
 	 * @return the full list of items
 	 */
-	public List<ModisItemForReading> getModisItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, Long lDateFrom, Long lDateTo, int iOffset, int iLimit) {
+	public List<ModisItemForReading> getModisItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, 
+			Long lDateFrom, Long lDateTo, int iOffset, int iLimit, String sFileName) {
 
 		final List<ModisItemForReading> aoReturnList = new ArrayList<>();
 		
-		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo);
+		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
 
 //		System.out.println(sQuery);
 		
@@ -202,6 +214,58 @@ public class ModisRepository extends MongoRepository  {
 		}
 
 		return aoReturnList;
+	}
+	
+	public long countDocumentsMatchingFileName(String sFileName) {
+			
+		try {
+			Document oQuery = new Document("fileName", sFileName);
+			
+			return getCollection(m_sThisCollection).countDocuments(oQuery);
+			
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("ModisRepository.countDocumentsMatchingFileName: Exception when counting documents from db" + oEx);
+		}
+		
+		return -1;
+		
+//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
+//			
+//			Document oQuery = new Document("fileName", sFileName);
+//			
+//	        // Get a reference to the database
+//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
+//
+//	        // Get a reference to the collection
+//	        MongoCollection<Document> collection = database.getCollection(collectionName);
+//
+//
+//	        // Insert the document into the collection
+//	        long lCount = collection.countDocuments(oQuery);
+//	        
+//	        return lCount;
+//
+//	    } catch (Exception oEx) {
+//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
+//	    }	
+//		
+//
+//		return -1;
+		
+	}
+	
+	
+	public static void main(String[]args) throws Exception {
+		ModisRepository oNewRepo = new ModisRepository();
+		
+		System.out.println(oNewRepo.countItems(null, null, null, null, 950832000000L, 951523199000L, null));
+		
+		System.out.println(oNewRepo.countItems(128d, -9d, 130d, -20d, 950832000000L, 951896424000L, null));
+		
+		System.out.println("950832000000L: " + TimeEpochUtils.fromEpochToDateString(950832000000L));
+		System.out.println("951523199000L: " + TimeEpochUtils.fromEpochToDateString(951523199000L));
+		System.out.println("951896424000L: " + TimeEpochUtils.fromEpochToDateString(951896424000L));
+		
 	}
 	
 
