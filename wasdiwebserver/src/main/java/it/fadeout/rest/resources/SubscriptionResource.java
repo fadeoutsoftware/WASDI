@@ -166,15 +166,7 @@ public class SubscriptionResource {
 						
 						if (oSubscriptionViewModel != null) {
 							
-							UserResourcePermission oSharing = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId());
-							
-							if (oSharing == null) {
-								oSubscriptionViewModel.setReadyOnly(true);
-							}
-							else {
-								oSubscriptionViewModel.setReadyOnly(oSharing.readOnly());
-							}
-							
+							oSubscriptionViewModel.setReadyOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
 							aoSubscriptionLVM.add(oSubscriptionViewModel);
 						}
 						else {
@@ -209,16 +201,7 @@ public class SubscriptionResource {
 							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
 	
 					if (oSubscriptionViewModel!=null) {
-						
-						UserResourcePermission oSharing = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId());
-						
-						if (oSharing == null) {
-							oSubscriptionViewModel.setReadyOnly(true);
-						}
-						else {
-							oSubscriptionViewModel.setReadyOnly(oSharing.readOnly());
-						}
-						
+						oSubscriptionViewModel.setReadyOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
 						aoSubscriptionLVM.add(oSubscriptionViewModel);
 					}
 					else {
