@@ -498,8 +498,6 @@ public class SubscriptionRepository extends MongoRepository {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error searching not-owned subscriptions " + oEx.toString());
 		}
-		
-		
 
 		return aoReturnList;
 		

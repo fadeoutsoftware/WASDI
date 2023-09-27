@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Organization;
+import wasdi.shared.business.Subscription;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserAccessRights;
@@ -110,7 +111,8 @@ public class OrganizationResource {
 			aoOrganizationLVM.addAll(aoSharedOrganizationLVM);
 
 			return Response.ok(aoOrganizationLVM).build();
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("OrganizationResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
@@ -207,26 +209,32 @@ public class OrganizationResource {
 			WasdiLog.warnLog("OrganizationResource.createOrganization: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		try {
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
-		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
+			if (oExistingOrganization != null) {
+				WasdiLog.warnLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An organization with the same name already exists.")).build();
+			}
 
-		if (oExistingOrganization != null) {
-			WasdiLog.warnLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An organization with the same name already exists.")).build();
+			Organization oOrganization = convert(oOrganizationEditorViewModel);
+			oOrganization.setUserId(oUser.getUserId());
+			oOrganization.setOrganizationId(Utils.getRandomName());
+
+			if (oOrganizationRepository.insertOrganization(oOrganization)) {
+				return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
+			} else {
+				WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
+				return Response.serverError().build();
+			}			
 		}
-
-		Organization oOrganization = convert(oOrganizationEditorViewModel);
-		oOrganization.setUserId(oUser.getUserId());
-		oOrganization.setOrganizationId(Utils.getRandomName());
-
-		if (oOrganizationRepository.insertOrganization(oOrganization)) {
-			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
-		} else {
-			WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OrganizationResource.createOrganization: " + oEx);
 			return Response.serverError().build();
-		}
+		}		
 	}
 
 	/**
@@ -287,6 +295,12 @@ public class OrganizationResource {
 		}
 	}
 
+	/**
+	 * Deletes and organization
+	 * @param sSessionId Session Id
+	 * @param sOrganizationId Organization Id
+	 * @return 
+	 */
 	@DELETE
 	@Path("/delete")
 	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
@@ -304,46 +318,54 @@ public class OrganizationResource {
 			WasdiLog.warnLog("OrganizationResource.deleteOrganization: sOrganizationId null or empty");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
 		}
+		
+		try  {
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			if (oOrganization == null) {
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization: organization does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the name exists.")).build();
+			}
 
-		Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-		if (oOrganization == null) {
-			WasdiLog.warnLog("OrganizationResource.deleteOrganization: organization does not exist");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the name exists.")).build();
+			String sOrganizationOwner = oOrganization.getUserId();
+
+			if (!sOrganizationOwner.equals(oUser.getUserId())) {
+				// The current uses is not the owner of the organization
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
+				oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
+
+				return Response.ok(new SuccessResponse(sOrganizationId)).build();
+			}
+			
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: cleaning permissions of the organization");
+			oUserResourcePermissionRepository.deletePermissionsByOrganizationId(sOrganizationId);
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			List<Subscription> aoInvolvedSubscriptions = oSubscriptionRepository.getSubscriptionsByOrganization(sOrganizationId);
+			
+			if (aoInvolvedSubscriptions != null) {
+				if (aoInvolvedSubscriptions.size()>0) WasdiLog.debugLog("OrganizationResource.deleteOrganization: cleaning subscriptions related to the deleting organization");
+				for (Subscription oSubscription : aoInvolvedSubscriptions) {
+					oSubscription.setOrganizationId("");
+					oSubscriptionRepository.updateSubscription(oSubscription);
+				}
+			}
+
+			if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
+				return Response.ok(new SuccessResponse(sOrganizationId)).build();
+			} else {
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the organization failed.")).build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OrganizationResource.deleteOrganization error: " + oEx);
+			return Response.serverError().build();
 		}
 
-		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
-		String sOrganizationOwner = oOrganization.getUserId();
-
-		if (!sOrganizationOwner.equals(oUser.getUserId())) {
-			// The current uses is not the owner of the organization
-			WasdiLog.warnLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
-			oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
-
-			return Response.ok(new SuccessResponse(sOrganizationId)).build();
-		}
-
-		if (oUserResourcePermissionRepository.isOrganizationShared(sOrganizationId)) {
-			WasdiLog.warnLog("OrganizationResource.deleteOrganization: the organization is shared with users");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it has users. Before deleting the organization, please remove the users.")).build();
-		}
-
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-		if (oSubscriptionRepository.organizationHasSubscriptions(sOrganizationId)) {
-			WasdiLog.warnLog("OrganizationResource.deleteOrganization: the organization shares subscriptions");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it shares subscriptions. Before deleting the organization, please remove the sharings.")).build();
-		}
-
-		if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
-			return Response.ok(new SuccessResponse(sOrganizationId)).build();
-		} else {
-			WasdiLog.warnLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the organization failed.")).build();
-		}
 	}
 
 	/**

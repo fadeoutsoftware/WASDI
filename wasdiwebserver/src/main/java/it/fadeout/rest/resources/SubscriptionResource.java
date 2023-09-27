@@ -211,7 +211,8 @@ public class SubscriptionResource {
 			}
 			
 			return Response.ok(aoSubscriptionLVM).build();
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("SubscriptionResource.getListByUser error: " + oEx);
 			return Response.serverError().build();
 		}
