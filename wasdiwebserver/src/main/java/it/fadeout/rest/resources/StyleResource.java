@@ -33,8 +33,6 @@ import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
@@ -646,35 +644,10 @@ public class StyleResource {
 			WasdiLog.debugLog("StyleResource.shareStyle: Style" + sStyleId + " Shared from " + oRequestingUser.getUserId() + " to " + sUserId);
 
 			try {
-				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-				if (Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-					WasdiLog.debugLog("StyleResource.shareStyle: sMercuriusAPIAddress is null");
-				} else {
-					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);
-					Message oMessage = new Message();
-
-					String sTitle = "Style " + oStyle.getName() + " Shared";
-
-					oMessage.setTilte(sTitle);
-
-					String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-					if (sSender == null) {
-						sSender = "wasdi@wasdi.net";
-					}
-
-					oMessage.setSender(sSender);
-
-					String sMessage = "The user " + oRequestingUser.getUserId() + " shared with you the Style: " + oStyle.getName();
-
-					oMessage.setMessage(sMessage);
-
-					Integer iPositiveSucceded = 0;
-
-					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
-
-					WasdiLog.debugLog("StyleResource.shareStyle: notification sent with result " + iPositiveSucceded);
-				}
+				String sTitle = "Style " + oStyle.getName() + " Shared";
+				String sMessage = "The user " + oRequestingUser.getUserId() + " shared with you the Style: " + oStyle.getName();
+				WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
+				
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("StyleResource.shareStyle: notification exception " + oEx.toString());
 			}

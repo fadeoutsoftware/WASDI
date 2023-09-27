@@ -632,36 +632,11 @@ public class WorkflowsResource {
             WasdiLog.debugLog("WorkflowsResource.shareWorkflow: Workflow " + sWorkflowId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
             try {
-                String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
-                if (Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-                    WasdiLog.debugLog("WorkflowsResource.shareWorkflow: sMercuriusAPIAddress is null");
-                } else {
-                    MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);
-                    Message oMessage = new Message();
-
-                    String sTitle = "Workflow " + oWorkflow.getName() + " Shared";
-
-                    oMessage.setTilte(sTitle);
-
-                    String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-                    if (sSender == null) {
-                        sSender = "wasdi@wasdi.net";
-                    }
-
-                    oMessage.setSender(sSender);
-
-                    String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the Workflow: " + oWorkflow.getName();
-
-                    oMessage.setMessage(sMessage);
-
-                    Integer iPositiveSucceded = 0;
-
-                    iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
-
-                    WasdiLog.debugLog("WorkflowsResource.shareWorkflow: notification sent with result " + iPositiveSucceded);
-                }
-
+                String sTitle = "Workflow " + oWorkflow.getName() + " Shared";
+                String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the Workflow: " + oWorkflow.getName();
+                
+                WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
             } catch (Exception oEx) {
                 WasdiLog.errorLog("WorkflowsResource.shareWorkflow: notification exception " + oEx.toString());
             }

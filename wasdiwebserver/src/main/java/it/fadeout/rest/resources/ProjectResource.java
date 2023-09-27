@@ -27,6 +27,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
@@ -36,10 +37,6 @@ import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 
 @Path("/projects")
 public class ProjectResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-	private static final String MSG_ERROR_CANNOT_ACCESS= "MSG_ERROR_CANNOT_ACCESS";
-
 	/**
 	 * Get the list of projects associated to a user.
 	 * @param sSessionId User Session Id
@@ -61,7 +58,7 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.getListByUser: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		try {
@@ -140,7 +137,7 @@ public class ProjectResource {
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
 		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
@@ -148,12 +145,12 @@ public class ProjectResource {
 		
 		if (oSubscription == null) {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: invalid subscription");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();						
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();						
 		}		
 		
 		if (PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: user cannot access the subscription");
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();			
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();			
 		}
 
 		try {
@@ -203,7 +200,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.getProjectViewModel: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Domain Check
@@ -255,14 +252,14 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.createProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 	
 		try {
 			
 			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oProjectEditorViewModel.getSubscriptionId())) {
 				WasdiLog.warnLog("ProjectResource.createProject: invalid session");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();				
 			}
 			
 			ProjectRepository oProjectRepository = new ProjectRepository();
@@ -312,7 +309,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.updateProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
 		try {
@@ -327,7 +324,7 @@ public class ProjectResource {
 			
 			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oExistingProject.getSubscriptionId())) {
 				WasdiLog.warnLog("ProjectResource.updateProject: user cannot write subscription ");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();			
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();			
 			}
 
 			Project oExistingProjectWithTheSameName = oProjectRepository.getByName(oProjectEditorViewModel.getName());
@@ -384,7 +381,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.changeActiveProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
 		try {
@@ -404,7 +401,7 @@ public class ProjectResource {
 
 				if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 					WasdiLog.warnLog("ProjectResource.changeActiveProject: user cannot access the subscription");
-					return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+					return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();				
 				}
 				
 			}
@@ -439,7 +436,7 @@ public class ProjectResource {
 
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.deleteProject: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sProjectId)) {
@@ -459,7 +456,7 @@ public class ProjectResource {
 			
 			if (!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), sProjectId)) {
 				WasdiLog.warnLog("ProjectResource.deleteProject: user cannot write subscription");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_CANNOT_ACCESS)).build();				
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();				
 			}
 
 			if (oProjectRepository.deleteProject(sProjectId)) {

@@ -13,8 +13,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.users.ResourceTypes;
 import wasdi.shared.business.users.User;
@@ -25,8 +23,8 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.NodeSharingViewModel;
 import wasdi.shared.viewmodels.NodeViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -39,20 +37,7 @@ import wasdi.shared.viewmodels.PrimitiveResult;
  *
  */
 @Path("/node")
-public class NodeResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_NODE";
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_NODE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_NODE";
-
-	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
-
-	private static final String MSG_ERROR_INVALID_NODE = "MSG_ERROR_INVALID_NODE";
-	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
-	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
-	
+public class NodeResource {	
 	
 	/**
 	 * Get the list of WASDI Nodes
@@ -150,7 +135,7 @@ public class NodeResource {
 			WasdiLog.warnLog("NodeResource.shareNode: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
 		}
@@ -168,7 +153,7 @@ public class NodeResource {
 			WasdiLog.warnLog("NodeResource.ShareNode: invalid node");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_NODE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_NODE.name());
 
 			return oResult;
 		}
@@ -188,7 +173,7 @@ public class NodeResource {
 			WasdiLog.warnLog("NodeResource.shareNode: " + sNodeCode + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_NODE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_NODE.name());
 
 			return oResult;
 		}
@@ -201,7 +186,7 @@ public class NodeResource {
 			WasdiLog.warnLog("NodeResource.shareNode: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER.name());
 
 			return oResult;
 		}
@@ -226,7 +211,7 @@ public class NodeResource {
 			WasdiLog.errorLog("NodeResource.shareNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name());
 
 			return oResult;
 		}
@@ -241,39 +226,13 @@ public class NodeResource {
 
 	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sNodeName) {
 		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
+			WasdiLog.debugLog("NodeResource.sendNotificationEmail: send notification");
 
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.warnLog("NodeResource.sendNotificationEmail: sMercuriusAPIAddress is null");
-			}
-			else {
+			String sTitle = "Node " + sNodeName + " Shared";
 
-				WasdiLog.debugLog("NodeResource.sendNotificationEmail: send notification");
+			String sMessage = "The user " + sRequesterUserId +  " shared with you the node: " + sNodeName;
 
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);	
-				Message oMessage = new Message();
-
-				String sTitle = "Node " + sNodeName + " Shared";
-
-				oMessage.setTilte(sTitle);
-				
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-
-				oMessage.setSender(sSender);
-
-				String sMessage = "The user " + sRequesterUserId +  " shared with you the node: " + sNodeName;
-
-				oMessage.setMessage(sMessage);
-
-				Integer iPositiveSucceded = 0;
-
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-
-				WasdiLog.debugLog("NodeResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
-			}
+			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 
 		}
 		catch (Exception oEx) {
@@ -345,7 +304,7 @@ public class NodeResource {
 			WasdiLog.warnLog("NodeResource.deleteUserSharedNode: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
 		}
@@ -359,7 +318,7 @@ public class NodeResource {
 				WasdiLog.warnLog("NodeResource.deleteUserSharedNode: invalid destination user");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name());
 
 				return oResult;
 			}
@@ -370,7 +329,7 @@ public class NodeResource {
 			WasdiLog.errorLog("NodeResource.deleteUserSharedNode: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name());
 
 			return oResult;
 		}

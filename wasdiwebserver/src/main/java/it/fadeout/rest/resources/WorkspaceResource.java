@@ -58,6 +58,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceEditorViewModel;
@@ -77,22 +78,6 @@ import wasdi.shared.viewmodels.workspaces.WorkspaceSharingViewModel;
  */
 @Path("/ws")
 public class WorkspaceResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE";
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE";
-	private static final String MSG_ERROR_ACTIVE_PROJECT_REQUIRED = "MSG_ERROR_ACTIVE_PROJECT_REQUIRED";
-
-	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
-	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
-	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
-
-	private static final String MSG_ERROR_INVALID_WORKSPACE = "MSG_ERROR_INVALID_WORKSPACE";
-	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
-	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
-
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -788,7 +773,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: invalid session");
 			
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 			return oResult;
 		}
 		
@@ -805,7 +790,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: invalid workspace");
 			
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_WORKSPACE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_WORKSPACE.name());
 			return oResult;
 		}
 
@@ -815,7 +800,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: " + sWorkspaceId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_WORKSPACE.name());
 			return oResult;
 		}
 
@@ -824,7 +809,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: auto sharing not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_ONESELF.name());
 			return oResult;
 		}
 
@@ -833,7 +818,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_OWNER.name());
 
 			return oResult;
 		}
@@ -846,7 +831,7 @@ public class WorkspaceResource {
 			WasdiLog.warnLog("WorkspaceResource.shareWorkspace: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER.name());
 
 			return oResult;
 		}
@@ -871,13 +856,20 @@ public class WorkspaceResource {
 			WasdiLog.errorLog("WorkspaceResource.shareWorkspace error: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name());
 
 			return oResult;
 		}
 
-		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oWorkspace.getName());
-
+		try {
+			String sTitle = "Workspace " + oWorkspace.getName() + " Shared";
+			String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the workspace: " + oWorkspace.getName();
+			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("WorkspaceResource.shareWorkspace: notification exception " + oEx.toString());
+		}
+		
 		oResult.setStringValue("Done");
 		oResult.setBoolValue(true);
 
@@ -954,7 +946,7 @@ public class WorkspaceResource {
 		if (oRequestingUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: invalid session");
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 			return oResult;
 		}
 		
@@ -963,7 +955,7 @@ public class WorkspaceResource {
 				&& !UserApplicationRole.isAdmin(oRequestingUser)) {
 			WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: user cannot access workspace");
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE.name());
 			return oResult;
 		}
 		
@@ -977,7 +969,7 @@ public class WorkspaceResource {
 				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: invalid destination user");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name());
 
 				return oResult;
 			}
@@ -989,7 +981,7 @@ public class WorkspaceResource {
 				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: invalid workspace");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_WORKSPACE);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_WORKSPACE.name());
 
 				return oResult;				
 			}
@@ -1002,7 +994,7 @@ public class WorkspaceResource {
 			if (oSharing == null) {
 				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: sharing not existing");
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name());
 				return oResult;								
 			}
 			
@@ -1020,7 +1012,7 @@ public class WorkspaceResource {
 			else {
 				WasdiLog.warnLog("WorkspaceResource.deleteUserSharedWorkspace: user cannot access workspace");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_WORKSPACE.name());
 				return oResult;				
 			}
 			
@@ -1029,7 +1021,7 @@ public class WorkspaceResource {
 			WasdiLog.errorLog("WorkspaceResource.deleteUserSharedWorkspace: error " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name());
 
 			return oResult;
 		}
@@ -1139,45 +1131,4 @@ public class WorkspaceResource {
 		return false;
 	}
 	
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sWorkspaceName) {
-		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("WorkspaceResource.sendNotificationEmail: sMercuriusAPIAddress is null");
-			}
-			else {
-
-				WasdiLog.debugLog("WorkspaceResource.sendNotificationEmail: send notification");
-
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-				Message oMessage = new Message();
-
-				String sTitle = "Workspace " + sWorkspaceName + " Shared";
-
-				oMessage.setTilte(sTitle);
-
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-
-				oMessage.setSender(sSender);
-
-				String sMessage = "The user " + sRequesterUserId +  " shared with you the workspace: " + sWorkspaceName;
-
-				oMessage.setMessage(sMessage);
-
-				Integer iPositiveSucceded = 0;
-
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-				
-				WasdiLog.debugLog("WorkspaceResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
-			}
-
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("WorkspaceResource.sendNotificationEmail: notification exception " + oEx.toString());
-		}
-	}
 }

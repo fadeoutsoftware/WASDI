@@ -80,20 +80,42 @@ public class WasdiResource {
 		String sTitle = oFeedback.getTitle();
 		String sMessage = oFeedback.getMessage();
 
-		sendEmail(sUserId, sTitle, sMessage);
+		sendEmail(sUserId, sUserId, sTitle, sMessage, true);
 
 		oPrimitiveResult.setIntValue(201);
 		oPrimitiveResult.setBoolValue(true);
 
 		return oPrimitiveResult;
 	}
-
-	private void sendEmail(String sUserId, String sTitle, String sMessage) {
+	
+	/**
+	 * Send an email from sender to recipient with title and message
+	 * @param sSender Sender of the mail
+	 * @param sRecipient Recipient 
+	 * @param sTitle Title
+	 * @param sMessage Message
+	 * @return true if sent false otherwise
+	 */
+	public static boolean sendEmail(String sSender, String sRecipient, String sTitle, String sMessage) {
+		return sendEmail(sSender, sRecipient, sTitle, sMessage, false);
+	}
+	
+	/**
+	 * Send an email from sender to recipient with title and message
+	 * @param sSender Sender of the mail
+	 * @param sRecipient Recipient 
+	 * @param sTitle Title
+	 * @param sMessage Message
+	 * @param bAddAdminToRecipient Set true to add by default the WADSI admin to the recipient
+	 * @return true if sent false otherwise
+	 */
+	public static boolean sendEmail(String sSender, String sRecipient, String sTitle, String sMessage, boolean bAddAdminToRecipient) {
 		try {
 			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
 
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				WasdiLog.debugLog("WasdiResource.sendEmail: sMercuriusAPIAddress is null");
+				return false;
 			} else {
 				WasdiLog.debugLog("WasdiResource.sendEmail: send notification");
 
@@ -102,26 +124,41 @@ public class WasdiResource {
 
 				oMessage.setTilte(sTitle);
 				
-				oMessage.setSender(sUserId);
+				if (Utils.isNullOrEmpty(sSender)) {
+					sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
+					if (Utils.isNullOrEmpty(sSender)) {
+						sSender = "admin@wasdi.net";
+					}
+				}				
+				
+				oMessage.setSender(sSender);
 
 				oMessage.setMessage(sMessage);
 
 				Integer iPositiveSucceded = 0;
 				
-				String sWasdiAdminMail = WasdiConfig.Current.notifications.wasdiAdminMail;
+				String sWasdiAdminMail = sRecipient;
 
-				if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
-					sWasdiAdminMail = "info@fadeout.biz";
+				if (!Utils.isNullOrEmpty(WasdiConfig.Current.notifications.wasdiAdminMail) && bAddAdminToRecipient) {
+					sWasdiAdminMail += ";" + WasdiConfig.Current.notifications.wasdiAdminMail;
 				}
-				
-				sWasdiAdminMail += ";" + sUserId;
 
 				iPositiveSucceded = oAPI.sendMailDirect(sWasdiAdminMail, oMessage);
+				
 
-				WasdiLog.debugLog("WasdiResource.sendEmail: notification sent with result " + iPositiveSucceded);
+				if(iPositiveSucceded > 0 ) {
+					WasdiLog.debugLog("WasdiResource.sendEmail: notification sent with result " + iPositiveSucceded);
+					return true;
+				}				
+				else {
+					WasdiLog.debugLog("WasdiResource.sendEmail: notification NOT sent with result " + iPositiveSucceded);
+					return false;
+				}				
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("WasdiResource.sendEmail: notification exception " + oEx.toString());
 		}
+		
+		return false;
 	}
 }

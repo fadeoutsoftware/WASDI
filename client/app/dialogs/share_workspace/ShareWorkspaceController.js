@@ -85,6 +85,10 @@ var ShareWorkspaceController = (function() {
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
             }
+
+            oController.m_sRights = "read"
+            oController.m_sUserEmail
+
             oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
         },function (error) {

@@ -21,8 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorParametersTemplate;
 import wasdi.shared.business.users.ResourceTypes;
@@ -38,6 +36,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processorParametersTemplates.ProcessorParametersTemplateSharingViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateDetailViewModel;
@@ -53,20 +52,6 @@ import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateListViewMod
  */
 @Path("processorParamTempl")
 public class ProcessorParametersTemplateResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE";
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE";
-
-	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
-	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
-	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
-
-	private static final String MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE";
-	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
-	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
 
 	/**
 	 * Deletes a processor parameters template.
@@ -368,7 +353,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
 		}
@@ -386,7 +371,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid processorParametersTemplate");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE.name());
 
 			return oResult;
 		}
@@ -397,7 +382,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + sProcessorParametersTemplateId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE.name());
 
 			return oResult;
 		}		
@@ -410,7 +395,7 @@ public class ProcessorParametersTemplateResource {
 				WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: auto sharing not so smart");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_ONESELF.name());
 
 				return oResult;
 			}
@@ -421,7 +406,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_OWNER.name());
 
 			return oResult;
 		}
@@ -434,7 +419,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER.name());
 
 			return oResult;
 		}
@@ -469,7 +454,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name());
 
 			return oResult;
 		}
@@ -484,40 +469,11 @@ public class ProcessorParametersTemplateResource {
 
 	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sProcessorParametersTemplateName, String sProcessorName) {
 		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
+			String sTitle = "WASDI " + sProcessorName + " Parameter " + sProcessorParametersTemplateName + " shared with you";
 			
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: sMercuriusAPIAddress is null");
-			}
-			else {
-				
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: send notification");
-				
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-				Message oMessage = new Message();
-				
-				String sTitle = "WASDI " + sProcessorName + " Parameter " + sProcessorParametersTemplateName + " shared with you";
-				
-				oMessage.setTilte(sTitle);
-				
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-				
-				oMessage.setSender(sSender);
-				
-				String sMessage = "The user " + sRequesterUserId + " shared with you the parameters " + sProcessorParametersTemplateName + " of " + sProcessorName + " WASDI Application.";
-
-				oMessage.setMessage(sMessage);
-		
-				Integer iPositiveSucceded = 0;
-								
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-				
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
-			}
-				
+			String sMessage = "The user " + sRequesterUserId + " shared with you the parameters " + sProcessorParametersTemplateName + " of " + sProcessorName + " WASDI Application.";
+			
+			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.sendNotificationEmail: notification exception " + oEx.toString());
@@ -595,7 +551,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
 		}
@@ -609,7 +565,7 @@ public class ProcessorParametersTemplateResource {
 				WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid destination user");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name());
 
 				return oResult;
 			}
@@ -620,7 +576,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name());
 
 			return oResult;
 		}

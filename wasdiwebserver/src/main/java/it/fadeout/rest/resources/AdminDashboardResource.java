@@ -36,6 +36,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.SuccessResponse;
@@ -47,19 +48,6 @@ import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
 @Path("/admin")
 public class AdminDashboardResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD = "MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD";
-
-	private static final String MSG_ERROR_INVALID_RESOURCE_TYPE = "MSG_ERROR_INVALID_RESOURCE_TYPE";
-	private static final String MSG_ERROR_INVALID_PARTIAL_NAME = "MSG_ERROR_INVALID_PARTIAL_NAME";
-	private static final String MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA = "MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA";
-
-	private static final String MSG_ERROR_INVALID_METRICS_ENTRY = "MSG_ERROR_INVALID_METRICS_ENTRY";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
-	private static final String MSG_ERROR_IN_SEARCH_PROCESS = "MSG_ERROR_IN_SEARCH_PROCESS";
-	private static final String MSG_SUCCESS_METRICS_ENTRY_INSERT = "MSG_SUCCESS_METRICS_ENTRY_INSERT";
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -76,18 +64,18 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 		
 		// Do we have at least 3 chars to make our search?
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			WasdiLog.debugLog("AdminDashboardResource.findUsersByPartialName: invalid partialName");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
 		}
 		
 		// Create the repo and get the list
@@ -119,17 +107,17 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			WasdiLog.debugLog("AdminDashboardResource.findWorkspacesByPartialName: invalid partialName");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
 		}
 
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -160,17 +148,17 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("WorkspaceResource.findProcessorsByPartialName: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
 			WasdiLog.debugLog("AdminDashboardResource.findProcessorsByPartialName: invalid partialName");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_PARTIAL_NAME)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_PARTIAL_NAME.name())).build();
 		}
 
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -204,17 +192,17 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sResourceType) && Utils.isNullOrEmpty(sResourceId) && Utils.isNullOrEmpty(sUserId)) {
 			WasdiLog.debugLog("AdminDashboardResource.findResourcePermissions: insufficient search criteria");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INSUFFICIENT_SEARCH_CRITERIA.name())).build();
 		}
 
 		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -249,7 +237,7 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}		
 		
 		// Use Read By default
@@ -259,7 +247,7 @@ public class AdminDashboardResource {
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
 
 		if (sResourceType.equalsIgnoreCase(ResourceTypes.NODE.getResourceType())) {
@@ -325,7 +313,7 @@ public class AdminDashboardResource {
 		else {
 			WasdiLog.debugLog("AdminDashboardResource.addResourcePermission: invalid resource type");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
 	}
 
@@ -344,12 +332,12 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}		
 
 		if (Utils.isNullOrEmpty(sResourceType)) {
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
 
 		if (sResourceType.equalsIgnoreCase(ResourceTypes.NODE.getResourceType())) {
@@ -420,7 +408,7 @@ public class AdminDashboardResource {
 		} 
 		else {
 			WasdiLog.debugLog("AdminDashboardResource.removeResourcePermission: invalid resource type");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_RESOURCE_TYPE)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_RESOURCE_TYPE.name())).build();
 		}
 	}
 
@@ -433,17 +421,17 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 		if (oMetricsEntry == null) {
 			WasdiLog.debugLog("AdminDashboardResource.updateMetricsEntry: invalid payload");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_METRICS_ENTRY)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_METRICS_ENTRY.name())).build();
 		}
 
 
@@ -452,10 +440,10 @@ public class AdminDashboardResource {
 			oMetricsEntryRepository.updateMetricsEntry(oMetricsEntry);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("AdminDashboardResource.updateMetricsEntry: Error inserting metricsEntry: " + oEx);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name())).build();
 		}
 
-		return Response.ok(new SuccessResponse(MSG_SUCCESS_METRICS_ENTRY_INSERT)).build();
+		return Response.ok(new SuccessResponse(ClientMessageCodes.MSG_SUCCESS_METRICS_ENTRY_INSERT.name())).build();
 	}
 
 	@GET
@@ -470,12 +458,12 @@ public class AdminDashboardResource {
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
 			WasdiLog.debugLog("AdminDashboardResource.getLatestMetricsEntry: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		// Can the user access this section?
 		if (!UserApplicationRole.isAdmin(oRequesterUser)) {
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_ADMIN_DASHBOARD.name())).build();
 		}
 
 
@@ -488,7 +476,7 @@ public class AdminDashboardResource {
 			return Response.ok(oGenericEntity).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("AdminDashboardResource.getLatestMetricsEntry: Error searching metricsEntry: " + oEx);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_SEARCH_PROCESS)).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_SEARCH_PROCESS.name())).build();
 		}
 	}
 	

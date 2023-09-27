@@ -38,8 +38,6 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import it.fadeout.threads.DeleteProcessorWorker;
@@ -2054,37 +2052,10 @@ public class ProcessorsResource  {
 			WasdiLog.debugLog("ProcessorsResource.shareProcessor: Processor " + sProcessorId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 			
 			try {
-				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
+				String sTitle = "Processor " + oValidateProcessor.getName() + " Shared";
+				String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
 				
-				if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-					WasdiLog.debugLog("ProcessorsResource.shareProcessor: sMercuriusAPIAddress is null");
-				}
-				else {
-					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-					Message oMessage = new Message();
-					
-					String sTitle = "Processor " + oValidateProcessor.getName() + " Shared";
-					
-					oMessage.setTilte(sTitle);
-					
-					String sSender =  WasdiConfig.Current.notifications.sftpManagementMailSender;
-					if (sSender==null) {
-						sSender = "wasdi@wasdi.net";
-					}
-					
-					oMessage.setSender(sSender);
-					
-					String sMessage = "The user " + oRequesterUser.getUserId() +  " shared with you the processor: " + oValidateProcessor.getName();
-									
-					oMessage.setMessage(sMessage);
-			
-					Integer iPositiveSucceded = 0;
-									
-					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
-					
-					WasdiLog.debugLog("ProcessorsResource.shareProcessor: notification sent with result " + iPositiveSucceded);
-				}
-					
+				WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
 			}
 			catch (Exception oEx) {
 				WasdiLog.errorLog("ProcessorsResource.shareProcessor: notification exception " + oEx.toString());
