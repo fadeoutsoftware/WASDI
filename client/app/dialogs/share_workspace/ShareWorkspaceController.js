@@ -20,6 +20,7 @@ var ShareWorkspaceController = (function() {
         this.m_oSelectedWorkflow = null;
         this.m_oSelectedMultiInputWorkflow = null;
         this.m_sUserEmail = "";
+        this.m_sRights = "read";
         this.m_aoEnableUsers=[];
         this.m_oConstantsService = oConstantsService;
         this.m_oTranslate = oTranslate;
@@ -34,14 +35,10 @@ var ShareWorkspaceController = (function() {
 
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
-
-         // this.shareWorkspaceByUserEmail(this.m_sWorkspace);
-
     }
 
     ShareWorkspaceController.prototype.getListOfEnableUsers = function(sWorkspaceId){
-        // return ["email@fuffa.it","email@test.it","email@nonva.it"]
-        // return oWorkspace.sharedUsers;
+
         if(utilsIsStrNullOrEmpty(sWorkspaceId) === true)
         {
             return false;
@@ -64,7 +61,7 @@ var ShareWorkspaceController = (function() {
         return true;
     };
 
-    ShareWorkspaceController.prototype.shareWorkspaceByUserEmail = function(sWorkspaceId,sEmail){
+    ShareWorkspaceController.prototype.shareWorkspaceByUserEmail = function(sWorkspaceId,sEmail,sRights){
 
         if( (utilsIsObjectNullOrUndefined(sWorkspaceId) === true) || (utilsIsStrNullOrEmpty(sEmail) === true))
         {
@@ -72,17 +69,26 @@ var ShareWorkspaceController = (function() {
             return false;
         }
 
+        if (utilsIsStrNullOrEmpty(sRights)) {
+            sRights = "read"
+        }
+
         utilsRemoveSpaces(sEmail);
+
         var oController = this;
-        this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail)
-            .then(function (data) {
-                if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
+        this.m_oWorkspaceService.putShareWorkspace(sWorkspaceId,sEmail, sRights).then(function (data) {
+
+            if(utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true)
             {
                 //TODO USER SAVED
             }else
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN SHARE WORKSPACE");
             }
+
+            oController.m_sRights = "read"
+            oController.m_sUserEmail
+
             oController.getListOfEnableUsers(oController.m_sWorkspace.workspaceId);
 
         },function (error) {

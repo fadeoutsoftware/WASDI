@@ -12,14 +12,19 @@ import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ShareFileParameter;
 import wasdi.shared.payloads.DownloadPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -72,15 +77,14 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
-		WasdiLog.debugLog("Share.executeOperation");
 
 		if (oParam == null) {
-			WasdiLog.errorLog("Parameter is null");
+			WasdiLog.errorLog("Share.executeOperation:Parameter is null");
 			return false;
 		}
 
 		if (oProcessWorkspace == null) {
-			WasdiLog.errorLog("Process Workspace is null");
+			WasdiLog.errorLog("Share.executeOperation: Process Workspace is null");
 			return false;
 		}
 
@@ -88,14 +92,24 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 		try {
 			ShareFileParameter oParameter = (ShareFileParameter) oParam;
-
-//			if (Utils.isNullOrEmpty(oParameter.getProvider())) {
-//				oParameter.setProvider("AUTO");
-//			}
-
-//			m_oProcessWorkspaceLogger.log("Fetch Start - REQUESTED PROVIDER " + oParameter.getProvider());
-
+			
+			// Product view Model
+			ProductViewModel oVM = null;
+			
+			File oDestinationFile = new File(oParameter.getDestinationFilePath());
+			// Get the file name
+			String sFileNameWithoutPath = oParameter.getProductName();
+			
+			m_oProcessWorkspaceLogger.log("Source file: " + sFileNameWithoutPath);
+			
+			WasdiLog.debugLog("Share.executeOperation: move " + oParameter.getProductName() + " from Workspace " + oParameter.getOriginWorkspaceId() + " to Workspace " + oParameter.getWorkspace());
+			
+			Product oProduct = null;
+			
+			// Are we in the same Node?
 			if (oParameter.getDestinationWorkspaceNode().equals(oParameter.getOriginWorkspaceNode())) {
+				WasdiLog.debugLog("Share.executeOperation: File to share available on same node:  make a copy");
+				m_oProcessWorkspaceLogger.log("File on the same node, make a copy");
 
 				// get file size
 				File oOriginFile = new File(oParameter.getOriginFilePath());
@@ -103,16 +117,6 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 
 				// set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
-
-//				String sDownloadPath = oParameter.getOriginFilePath();
-
-				// Product view Model
-				ProductViewModel oVM = null;
-
-				// Get the file name
-				String sFileNameWithoutPath = oParameter.getProductName();
-				WasdiLog.debugLog("Share.executeOperation: File to share: " + sFileNameWithoutPath);
-				m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
 
 				if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 					oProcessWorkspace.setProductName(sFileNameWithoutPath);
@@ -126,106 +130,133 @@ public class Share extends Operation implements ProcessWorkspaceUpdateSubscriber
 					WasdiLog.errorLog("Share.executeOperation: sFileNameWithoutPath is null or empty!!");
 				}
 
-				Product oProduct = null;
-
-				File oDestinationFile = new File(oParameter.getDestinationFilePath());
-
 				try {
 					FileUtils.copyFile(oOriginFile, oDestinationFile);
 				} catch (Exception oE) {
 					WasdiLog.errorLog("Share.executeOperation: could not copy file due to: " + oE);
 				}
-
-				if (oDestinationFile.exists()) {
-					sFileName = oDestinationFile.getCanonicalPath();
-
-					// Control Check for the file Name
-					sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
-
-					// Get The product view Model
-					WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
-					sFileName = oProductReader.adjustFileAfterDownload(sFileName, sFileNameWithoutPath);
-					File oProductFile = new File(sFileName);
-
-					sFileNameWithoutPath = oProductFile.getName();
-
-					oProduct = oProductReader.getSnapProduct();
-
-					try {
-						oVM = oProductReader.getProductViewModel();
-					} catch (Exception oVMEx) {
-						WasdiLog.warnLog("Share.executeOperation: exception reading Product View Model " + oVMEx.toString());
-					}
-
-					if (oVM == null) {
-						// Reset the cycle to search a better solution
-						sFileName = "";
-					}
-
-					m_oProcessWorkspaceLogger.log("Got File, try to read");
-
-
-					// Save it in the register
-					DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-					oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
-					oAlreadyDownloaded.setFilePath(sFileName);
-					oAlreadyDownloaded.setProductViewModel(oVM);
-
-					String sBoundingBox = oParameter.getBoundingBox();
-
-					if (!Utils.isNullOrEmpty(sBoundingBox)) {
-						oAlreadyDownloaded.setBoundingBox(sBoundingBox);
-					} else {
-						WasdiLog.infoLog("Share.executeOperation: bounding box not available in the parameter");
-					}
-
-					if (oProduct != null) {
-						if (oProduct.getStartTime()!=null) {
-							oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
-						}
-					}
-
-					oAlreadyDownloaded.setCategory(DownloadedFileCategory.SHARED.name());
-
-					DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-					oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
-				} else {
-					String sError = "There was an error when copying the file";
-					m_oProcessWorkspaceLogger.log(sError);
-				}
-
-				// Final Check: do we have at the end a valid file name?
-				if (Utils.isNullOrEmpty(sFileName)) {
-					// No, we are in error
-					WasdiLog.debugLog("Share.executeOperation: file is null there must be an error");
-
-					String sError = "The name of the file to share result null";
-					m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
-
-					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-
+			} 
+			else {
+				// File Not on Node: Download it.
+				WasdiLog.debugLog("Share.executeOperation: on another node, download it");
+				m_oProcessWorkspaceLogger.log("File on the another node, download");		
+				
+				String sOriginWorkspace = oParameter.getOriginWorkspaceId();
+				
+				WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+				Workspace oOriginWorkspace = oWorkspaceRepository.getWorkspace(sOriginWorkspace);
+				
+				String sOriginNode = oOriginWorkspace.getNodeCode();
+				
+				NodeRepository oNodeRepository = new NodeRepository();
+				Node oOriginNode = oNodeRepository.getNodeByCode(sOriginNode);
+				String sDownloadUrl = oOriginNode.getNodeBaseAddress();
+				
+				if (!sDownloadUrl.endsWith("/")) sDownloadUrl += "/";
+				
+				sDownloadUrl += "catalog/downloadbyname?filename=" +  oParameter.getProductName();
+				sDownloadUrl += "&workspace=" + sOriginWorkspace;
+				sDownloadUrl += "&token="+oParameter.getSessionID();
+				
+				WasdiLog.errorLog("Share.executeOperation: download url " + sDownloadUrl);
+				
+				String sOutputPath = HttpUtils.downloadFile(sDownloadUrl, HttpUtils.getStandardHeaders(oParam.getSessionID()), oDestinationFile.getPath());
+				
+				if (Utils.isNullOrEmpty(sOutputPath)) {
+					WasdiLog.errorLog("Share.executeOperation: impossible to download the file");
+					m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), "Impossible to download the file", oParameter.getExchange());
 					return false;
 				}
-
-				// Ok, add the product to the db
-				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.SHARE.name(), oParameter.getBoundingBox());
-
-				m_oProcessWorkspaceLogger.log("Operation Completed");
-				m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
-
-				DownloadPayload oDownloadPayload = new DownloadPayload();
-				oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
-//				oDownloadPayload.setProvider(oParameter.getProvider());
-
-				setPayload(oProcessWorkspace, oDownloadPayload);
-
-				WasdiLog.debugLog("Share.executeOperation: operation done");
-				updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
-
-				return true;
-			} else {
-				throw new UnsupportedOperationException("This functionality is not yet supported.");
 			}
+			
+			if (oDestinationFile.exists()) {
+				
+				m_oProcessWorkspaceLogger.log("File moved on the target workspace, ingesting it");
+				
+				sFileName = oDestinationFile.getCanonicalPath();
+
+				// Control Check for the file Name
+				sFileName = WasdiFileUtils.fixPathSeparator(sFileName);
+
+				// Get The product view Model
+				WasdiProductReader oProductReader = WasdiProductReaderFactory.getProductReader(new File(sFileName));
+				File oProductFile = new File(sFileName);
+
+				sFileNameWithoutPath = oProductFile.getName();
+				oProduct = oProductReader.getSnapProduct();
+
+				try {
+					oVM = oProductReader.getProductViewModel();
+				} catch (Exception oVMEx) {
+					WasdiLog.warnLog("Share.executeOperation: exception reading Product View Model " + oVMEx.toString());
+				}
+
+				if (oVM == null) {
+					// Reset the cycle to search a better solution
+					sFileName = "";
+				}
+
+				m_oProcessWorkspaceLogger.log("Got File, try to read");
+
+
+				// Save it in the register
+				DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+				oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
+				oAlreadyDownloaded.setFilePath(sFileName);
+				oAlreadyDownloaded.setProductViewModel(oVM);
+
+				String sBoundingBox = oParameter.getBoundingBox();
+
+				if (!Utils.isNullOrEmpty(sBoundingBox)) {
+					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
+				} else {
+					WasdiLog.infoLog("Share.executeOperation: bounding box not available in the parameter");
+				}
+
+				if (oProduct != null) {
+					if (oProduct.getStartTime()!=null) {
+						oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+					}
+				}
+
+				oAlreadyDownloaded.setCategory(DownloadedFileCategory.SHARED.name());
+
+				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+				oDownloadedRepo.insertDownloadedFile(oAlreadyDownloaded);
+			} else {
+				String sError = "There was an error when copying the file";
+				m_oProcessWorkspaceLogger.log(sError);
+			}
+
+			// Final Check: do we have at the end a valid file name?
+			if (Utils.isNullOrEmpty(sFileName)) {
+				// No, we are in error
+				WasdiLog.debugLog("Share.executeOperation: file is null there must be an error");
+
+				String sError = "The name of the file to share result null";
+				m_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.SHARE.name(), oParameter.getWorkspace(), sError, oParameter.getExchange());
+
+				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+				return false;
+			}
+
+			// Ok, add the product to the db
+			addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.SHARE.name(), oParameter.getBoundingBox());
+
+			m_oProcessWorkspaceLogger.log("Operation Completed");
+			m_oProcessWorkspaceLogger.log(new EndMessageProvider().getGood());
+
+			DownloadPayload oDownloadPayload = new DownloadPayload();
+			oDownloadPayload.setFileName(Utils.getFileNameWithoutLastExtension(sFileName));
+//			oDownloadPayload.setProvider(oParameter.getProvider());
+
+			setPayload(oProcessWorkspace, oDownloadPayload);
+
+			WasdiLog.debugLog("Share.executeOperation: operation done");
+			updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return true;			
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Share.executeOperation: Exception "

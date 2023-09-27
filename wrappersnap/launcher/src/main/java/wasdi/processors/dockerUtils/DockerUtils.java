@@ -30,8 +30,9 @@ import wasdi.processors.dockerUtils.containersViewModels.LoginInfo;
 import wasdi.processors.dockerUtils.containersViewModels.MountVolumeParam;
 import wasdi.processors.dockerUtils.containersViewModels.constants.ContainerStates;
 import wasdi.processors.dockerUtils.containersViewModels.constants.MountTypes;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
@@ -98,7 +99,7 @@ public class DockerUtils {
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
         m_oProcessor = oProcessor;
-        m_sProcessorFolder = sProcessorFolder;
+        m_sProcessorFolder = sProcessorFolder; 
         m_sWasdiSystemUser = sTomcatUser;
         m_sDockerRegistry = sDockerRegistry;
     }    

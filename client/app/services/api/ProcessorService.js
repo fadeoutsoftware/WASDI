@@ -233,8 +233,8 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
      * @param sUserId
      * @returns {*}
      */
-    this.putShareProcessor = function(sProcessorId,sUserId){
-        return this.m_oHttp.put(this.APIURL + '/processors/share/add?processorId=' + sProcessorId + "&userId=" + sUserId);
+    this.putShareProcessor = function(sProcessorId,sUserId, sRights){
+        return this.m_oHttp.put(this.APIURL + '/processors/share/add?processorId=' + sProcessorId + "&userId=" + sUserId+"&rights="+sRights);
     };
 
     /**

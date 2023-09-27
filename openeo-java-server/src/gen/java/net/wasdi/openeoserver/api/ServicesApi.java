@@ -20,7 +20,7 @@ import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
 import net.wasdi.openeoserver.viewmodels.StoreSecondaryWebServiceRequest;
 import net.wasdi.openeoserver.viewmodels.UpdateSecondaryWebServiceRequest;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.*;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/services")

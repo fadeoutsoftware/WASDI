@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.0.2
+Version 0.8.1.0
 
-Last Update: 23/03/2023
+Last Update: 22/09/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9
 
@@ -83,7 +83,7 @@ m_aoParamsDictionary = {}
 
 m_sMyProcId = ''
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-# m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bIsOnExternalServer = False
 m_iRequestsTimeout = 2 * 60
@@ -4009,11 +4009,127 @@ def getlayerWMS(sProduct, sBand):
     oResult["layerId"] = oPayload["layerId"]
     return json.dumps(oResult)
 
+def getFileFromWorkspaceName(sSourceWorkspaceName, sFileName):
+    """
+    Takes a file from another workspace and put it in the actual one.
+    sSourceWorkspaceName: Name of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+    """
+    sWorkspaceId = getWorkspaceIdByName(sSourceWorkspaceName)
+    return getFileFromWorkspaceId(sWorkspaceId, sFileName)
 
-    """    if oResult is not None and oResult.ok:
-        oJsonResult = oResult.json()
-        return oJsonResult
-        """
+def getFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
+    """
+    Takes a file from another workspace and put it in the actual one.
+    sSourceWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+    """
+    if sFileName is None:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: file name must not be None' +
+                 '  ******************************************************************************')
+        return False
+    if len(sFileName) < 1:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: File name too short' +
+                 '  ******************************************************************************')
+        return False
+
+    if sSourceWorkspaceId is None:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name must not be None' +
+                 '  ******************************************************************************')
+        return False
+    if len(sSourceWorkspaceId) < 1:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name too short' +
+                 '  ******************************************************************************')
+        return False
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/filebuffer/share?originWorkspaceId="
+    sUrl += sSourceWorkspaceId
+    sUrl += "&destinationWorkspaceId="
+    sUrl += getActiveWorkspaceId()
+    sUrl += "&productName="
+    sUrl += sFileName
+    sUrl += "&parent="
+    sUrl += getProcId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if oResult is None:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: failed contacting the server' +
+                 '  ******************************************************************************')
+        return False
+    elif not oResult.ok and not 500 == oResult.status_code:
+        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+                 '  ******************************************************************************')
+        return False
+    else:
+        return oResult.ok
+
+def sendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
+    """
+    Takes a file from another workspace and put it in the actual one.
+    sDestinationWorkspaceName: Name of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+    """
+    sWorkspaceId = getWorkspaceIdByName(sDestinationWorkspaceName)
+    return sendFileToWorkspaceId(sWorkspaceId, sFileName)
+
+def sendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
+    """
+    Takes a file from another workspace and put it in the actual one.
+    sDestinationWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+    """
+    if sFileName is None:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: file name must not be None' +
+                 '  ******************************************************************************')
+        return False
+    if len(sFileName) < 1:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: File name too short' +
+                 '  ******************************************************************************')
+        return False
+
+    if sDestinationWorkspaceId is None:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name must not be None' +
+                 '  ******************************************************************************')
+        return False
+    if len(sDestinationWorkspaceId) < 1:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name too short' +
+                 '  ******************************************************************************')
+        return False
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/filebuffer/share?originWorkspaceId="
+    sUrl += getActiveWorkspaceId()
+    sUrl += "&destinationWorkspaceId="
+    sUrl += sDestinationWorkspaceId
+    sUrl += "&productName="
+    sUrl += sFileName
+    sUrl += "&parent="
+    sUrl += getProcId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+
+    if oResult is None:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: failed contacting the server' +
+                 '  ******************************************************************************')
+        return False
+    elif not oResult.ok and not 500 == oResult.status_code:
+        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+                 '  ******************************************************************************')
+        return False
+    else:
+        return oResult.ok
 
 if __name__ == '__main__':
     _log(

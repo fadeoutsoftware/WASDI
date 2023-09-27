@@ -1,29 +1,85 @@
 package wasdi.shared.business.modis11a2;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
 public class ModisItemForReading {
 	
-	private String sFileName;
-	private long lFileSize;
-	private String sDayNightFlag;
+	public ModisItemForReading() {
+		
+	}
 	
-	private Double dStartDate;
-	private Double dEndDate;
+	private String fileName;
+	private long fileSize;
+	private String dayNightFlag;
+	
+	private Double startDate;
+	private Double endDate;
 
-	private ModisLocation oBoundingBox;
+	private ModisLocation boundingBox;
 
-	private String sInstrument; 
-	private String sSensor;
-	private String sLatitude;
-	private String sPlatform;
-	private String sUrl;
+	private String instrument; 
+	private String sensor;
+	private String platform;
+	private String url;
+	
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String sFileName) {
+		this.fileName = sFileName;
+	}
+	public long getFileSize() {
+		return fileSize;
+	}
+	public void setFileSize(long lFileSize) {
+		this.fileSize = lFileSize;
+	}
+	public String getDayNightFlag() {
+		return dayNightFlag;
+	}
+	public void setDayNightFlag(String sDayNightFlag) {
+		this.dayNightFlag = sDayNightFlag;
+	}
+	public Double getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Double dStartDate) {
+		this.startDate = dStartDate;
+	}
+	public Double getEndDate() {
+		return endDate;
+	}
+	public void setDEndDate(Double dEndDate) {
+		this.endDate = dEndDate;
+	}
+	public ModisLocation getBoundingBox() {
+		return boundingBox;
+	}
+	public void setBoundingBox(ModisLocation oBoundingBox) {
+		this.boundingBox = oBoundingBox;
+	}
+	public String getInstrument() {
+		return instrument;
+	}
+	public void setSInstrument(String sInstrument) {
+		this.instrument = sInstrument;
+	}
+	public String getSensor() {
+		return sensor;
+	}
+	public void setSensor(String sSensor) {
+		this.sensor = sSensor;
+	}
+
+	public String getPlatform() {
+		return platform;
+	}
+	public void setSPlatform(String sPlatform) {
+		this.platform = sPlatform;
+	}
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String sUrl) {
+		this.url = sUrl;
+	}
 
 }

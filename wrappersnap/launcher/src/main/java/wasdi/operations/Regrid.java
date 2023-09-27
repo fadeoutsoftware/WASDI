@@ -3,12 +3,12 @@ package wasdi.operations;
 import java.io.File;
 import java.util.ArrayList;
 
-import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.settings.RegridSetting;
@@ -43,7 +43,7 @@ public class Regrid extends Operation {
             RegridSetting oSettings = (RegridSetting) oParameter.getSettings();
             String sReferenceProduct = oSettings.getReferenceFile();
 
-            File oReferenceFile = new File( LauncherMain.getWorkspacePath(oParameter) + sReferenceProduct);
+            File oReferenceFile = new File( PathsConfig.getWorkspacePath(oParameter) + sReferenceProduct);
 
 			WasdiProductReader oReferenceFileReader = WasdiProductReaderFactory.getProductReader(oReferenceFile);
 			
@@ -95,8 +95,8 @@ public class Regrid extends Operation {
             asArgs.add("" + dXEnd);
             asArgs.add("" + dYEnd);
 
-            asArgs.add(LauncherMain.getWorkspacePath(oParameter) + sSourceProduct);
-            asArgs.add(LauncherMain.getWorkspacePath(oParameter) + sDestinationProduct);
+            asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sSourceProduct);
+            asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sDestinationProduct);
 
             asArgs.add("-co");
             asArgs.add("COMPRESS=LZW");
@@ -118,7 +118,7 @@ public class Regrid extends Operation {
             
             String sBBox = oReferenceFileReader.getProductBoundingBox();
 
-            addProductToDbAndWorkspaceAndSendToRabbit(null, LauncherMain.getWorkspacePath(oParameter) + sDestinationProduct,
+            addProductToDbAndWorkspaceAndSendToRabbit(null, PathsConfig.getWorkspacePath(oParameter) + sDestinationProduct,
                     oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.REGRID.name(), sBBox, false,
                     true);
             

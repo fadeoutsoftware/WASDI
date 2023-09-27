@@ -3,6 +3,12 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+
+## [0.8.1.0] - 2023-09-22
+### Added
+- send file To Workspace
+- get file From Workspace
+
 ## [0.8.0.2] - 2023-03-23
 ### Added
 - publish Band feature

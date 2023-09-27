@@ -1,14 +1,11 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
 import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -36,17 +33,17 @@ import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Style;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationPermission;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.ResourceTypes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.StyleRepository;
@@ -61,13 +58,36 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.styles.StyleSharingViewModel;
 import wasdi.shared.viewmodels.styles.StyleViewModel;
 
+/**
+ * Style Resource
+ * Hosts the API to let the user upload and manage SLD styles in WASDI
+ * Styles are saved in a WASDI Path that can be obtained using PathsConfig.getStylesPath()
+ * 
+ * 	.Upload Style SLD XML
+ * 	.Edit, Delete Styles
+ * 	.Share Styles with other users
+ * 	.Download styles
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/styles")
 public class StyleResource {
 
+	/**
+	 * Uploads a SLD Style in WASDI
+	 * 
+	 * @param oFileInputStream Stream of the SLD file
+	 * @param sSessionId Session Id
+	 * @param sName Name to assign to the style
+	 * @param sDescription Description to assign to the style
+	 * @param bPublic True to set the style public
+	 * @return Primitive result with bool flag and string value
+	 */
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public PrimitiveResult uploadFile(@FormDataParam("file") InputStream oFileInputStream,
+	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
@@ -81,35 +101,33 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.uploadFile: invalid session");
+				WasdiLog.warnLog("StyleResource.uploadFile: invalid session");
 				oResult.setStringValue("Invalid session");
-				return oResult;
+				return Response.status(Status.UNAUTHORIZED).entity(oResult).build();
 			}
 
 			String sUserId = oUser.getUserId();
 			
 			// Check the uniqueness of the name
 			if (isStyleNameTaken(sName)) {
-				WasdiLog.debugLog("StyleResource.uploadFile: name already used");
+				WasdiLog.warnLog("StyleResource.uploadFile: name already used");
 				oResult.setStringValue("The style's name is already used.");
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			// File checking
 
 			// Checks whether null file is passed
 			if (oFileInputStream == null) {
-				WasdiLog.debugLog("StyleResource.uploadFile: invalid file");
+				WasdiLog.warnLog("StyleResource.uploadFile: invalid file");
 				oResult.setStringValue("Invalid file");
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			// filesystem-side work
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			String sDirectoryPathname = sDownloadRootPath + "styles/";
+			String sDirectoryPathname = PathsConfig.getStylesPath();
 
 			createDirectoryIfDoesNotExist(sDirectoryPathname);
 
@@ -126,22 +144,36 @@ public class StyleResource {
 
 			try (FileReader oFileReader = new FileReader(oStyleSldFile)) {
 				insertStyle(sUserId, sStyleId, sName, sDescription, oStyleSldFile.getPath(), bPublic);
-			} catch (Exception oEx) {
+			} 
+			catch (Exception oEx) {
 				WasdiLog.errorLog("StyleResource.uploadFile: " + oEx);
 				oResult.setStringValue("Error saving the style.");
-				return oResult;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
 			}
 
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
+			
+			oResult.setBoolValue(true);
+			return Response.ok().entity(oResult).build();
+			
 		} catch (Exception oEx2) {
 			WasdiLog.errorLog("StyleResource.uploadFile: " + oEx2);
+			oResult.setBoolValue(true);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
+			
 		}
 
-		oResult.setBoolValue(true);
-		return oResult;
     }
 
+	/**
+	 * Updates a SLD file
+	 * @param oFileInputStream stream of the updated file
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id 
+	 * @param bZipped True if the file is zipped
+	 * @return http ok or other status
+	 */
 	@POST
 	@Path("/updatefile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -149,12 +181,13 @@ public class StyleResource {
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("zipped") Boolean bZipped) {
+		
 		WasdiLog.debugLog("StyleResource.updateFile( InputStream, StyleId: " + sStyleId);
 
 		try {
 			if (Utils.isNullOrEmpty(sStyleId) || sStyleId.contains("\\") || sStyleId.contains("/")) {
 
-				WasdiLog.debugLog("StyleResource.updateFile: invalid styleId, aborting");
+				WasdiLog.warnLog("StyleResource.updateFile: invalid styleId, aborting");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -163,7 +196,7 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.updateFile: invalid session");
+				WasdiLog.warnLog("StyleResource.updateFile: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -171,7 +204,7 @@ public class StyleResource {
 			// File checking
 			// Checks whether null file is passed
 			if (oFileInputStream == null) {
-				WasdiLog.debugLog("StyleResource.updateFile: invalid file");
+				WasdiLog.warnLog("StyleResource.updateFile: invalid file");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -180,32 +213,30 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				WasdiLog.debugLog("StyleResource.updateFile: style not found on DB");
-				return Response.notModified("StyleId not found, please check parameters").build();
+				WasdiLog.warnLog("StyleResource.updateFile: style not found on DB");
+				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
-				WasdiLog.debugLog("StyleResource.updateFile: User doesn't have rights on style");
+			if (!PermissionsUtils.canUserWriteStyle(oUser.getUserId(), sStyleId)) {
+				WasdiLog.warnLog("StyleResource.updateFile: User doesn't have rights to write the style");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			// filesystem-side work
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			String sDirectoryPathname = sDownloadRootPath + "styles/";
+			String sDirectoryPathname = PathsConfig.getStylesPath() + "styles/";
 
 			createDirectoryIfDoesNotExist(sDirectoryPathname);
 			
 			// original sld file
-			File oStyleSldFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
+			File oStyleSldFile = new File(PathsConfig.getStylesPath()+ oStyle.getName() + ".sld");
 			
 			if (!oStyleSldFile.exists()) {
 				GeoServerManager oManager = new GeoServerManager();
 				
 				if (oManager.styleExists(oStyle.getName()) == false) {
-					WasdiLog.debugLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
+					WasdiLog.warnLog("StyleResource.updateFile: style file " + oStyle.getName() + ".sld does not exists in node. Exit");
 					return Response.status(404).build();					
 				}
 			}
@@ -214,7 +245,7 @@ public class StyleResource {
 				bZipped = false;
 			}
 			
-			String sTempFileName = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld.temp";
+			String sTempFileName = PathsConfig.getStylesPath() + oStyle.getName() + ".sld.temp";
 			
 			if (bZipped) {
 				WasdiLog.debugLog("StyleResource.updateFile: file is zipped");
@@ -238,7 +269,7 @@ public class StyleResource {
 				
 				WasdiLog.debugLog("StyleResource.updateFile: unzip the style");
 				ZipFileUtils oExtractor = new ZipFileUtils();
-				oExtractor.unzip(sTempFileName, sDownloadRootPath+"styles/");
+				oExtractor.unzip(sTempFileName, PathsConfig.getStylesPath());
 				// Delete the zip file
 				FileUtils.deleteQuietly(oStyleSldFileTemp);
 			}
@@ -266,7 +297,6 @@ public class StyleResource {
 				computationalNodesUpdateStyle(sSessionId, sStyleId, oStyleSldFile.getPath());
 			}
 
-
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
 		} catch (Exception oEx2) {
@@ -277,6 +307,12 @@ public class StyleResource {
 		return Response.ok().build();
 	}
 
+	/**
+	 * Get the XML content of a Style
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @return XML content of the SLD
+	 */
 	@GET
 	@Path("/getxml")
 	@Produces(MediaType.APPLICATION_XML)
@@ -293,12 +329,12 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.getXML: invalid session");
+				WasdiLog.warnLog("StyleResource.getXML: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
 			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
-				WasdiLog.debugLog("StyleResource.getXML: user cannot access style");
+				WasdiLog.warnLog("StyleResource.getXML: user cannot access style");
 				return Response.status(Status.FORBIDDEN).build();				
 			}
 
@@ -307,17 +343,15 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				WasdiLog.debugLog("StyleResource.getXML: style not found on DB");
+				WasdiLog.warnLog("StyleResource.getXML: style not found on DB");
 				return Response.notModified("StyleId not found").build();
 			}
 
 			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			File oStyleFile = new File(sDownloadRootPath + "styles/" + oStyle.getName() + ".sld");
+			File oStyleFile = new File(PathsConfig.getStylesPath() + oStyle.getName() + ".sld");
 
 			if (!oStyleFile.exists()) {
-				WasdiLog.debugLog("StyleResource.getXML: style file not found;");
+				WasdiLog.warnLog("StyleResource.getXML: style file not found;");
 				return Response.status(Status.NOT_FOUND).build();
 			}
 
@@ -332,6 +366,13 @@ public class StyleResource {
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 
+	/**
+	 * Updates the style using the text xml
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @param sStyleXml Updated XML (SLD)
+	 * @return http response
+	 */
 	@POST
 	@Path("/updatexml")
 	public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
@@ -343,6 +384,14 @@ public class StyleResource {
 		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId, false);
 	}
 
+	/**
+	 * Update the attributies of a style
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @param sDescription Description 
+	 * @param bPublic True to set it public
+	 * @return http response
+	 */
 	@POST
 	@Path("/updateparams")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -357,20 +406,23 @@ public class StyleResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("StyleResource.updateParams: invalid session");
+			WasdiLog.warnLog("StyleResource.updateParams: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
-		if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyleId)) {
-			WasdiLog.debugLog("StyleResource.updateParams: user cannot access style");
-			return Response.status(Status.UNAUTHORIZED).build();				
+		if (!PermissionsUtils.canUserWriteStyle(oUser.getUserId(), sStyleId)) {
+			WasdiLog.warnLog("StyleResource.updateParams: user cannot write the style");
+			return Response.status(Status.FORBIDDEN).build();				
 		}		
 
 		StyleRepository oStyleRepository = new StyleRepository();
 		Style oStyle = oStyleRepository.getStyle(sStyleId);
 
-		if (oStyle == null)
-			return Response.status(404).build();
+		if (oStyle == null) {
+			WasdiLog.errorLog("StyleResource.updateParams: style not found");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+			
 
 		oStyle.setDescription(sDescription);
 		oStyle.setIsPublic(bPublic);
@@ -388,7 +440,7 @@ public class StyleResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("StyleResource.getStylesByUser: invalid session");
+			WasdiLog.warnLog("StyleResource.getStylesByUser: invalid session");
 			return null;
 		}
 
@@ -398,13 +450,25 @@ public class StyleResource {
 		List<StyleViewModel> aoRetStyles = new ArrayList<>();
 
 		try {
+			// Here we take the list of all the users' styles + the public ones
 			List<Style> aoDbStyles = oStyleRepository.getStylePublicAndByUser(sUserId);
-
-			for (Style oCurWF : aoDbStyles) {
-				StyleViewModel oVM = StyleViewModel.getFromStyle(oCurWF);
-				// check if it was shared, if so, set shared with me to true
-				oVM.setSharedWithMe(false);
-				aoRetStyles.add(oVM);
+			
+			for (Style oCurrentStyle : aoDbStyles) {
+				// Convert the style in view model
+				StyleViewModel oStyleViewModel = StyleViewModel.getFromStyle(oCurrentStyle);
+				
+				// Are we the owner?
+				if (oCurrentStyle.getUserId().equals(oUser.getUserId())) {
+					// Yes: not shared, our own, not read only
+					oStyleViewModel.setSharedWithMe(false);
+					oStyleViewModel.setReadOnly(false);
+				}
+				else {
+					// For now lets assume is read only
+					oStyleViewModel.setReadOnly(true);
+				}
+				
+				aoRetStyles.add(oStyleViewModel);
 			}
 
 			// find sharings by userId
@@ -413,20 +477,26 @@ public class StyleResource {
 
 			// For all the shared styles
 			for (UserResourcePermission oSharing : aoStyleSharing) {
-				// Create the VM
+				
+				// Create the View Model of the style
 				Style oSharedWithMe = oStyleRepository.getStyle(oSharing.getResourceId());
-				StyleViewModel oVM = StyleViewModel.getFromStyle(oSharedWithMe);
+				StyleViewModel oStyleViewModel = StyleViewModel.getFromStyle(oSharedWithMe);
 
-				if (!oVM.isPublic()) {
+				if (!oStyleViewModel.isPublic()) {
 					// This is shared and not public: add to return list
-					oVM.setSharedWithMe(true);
-					aoRetStyles.add(oVM);
-				} else {
-					// This is shared but public, so this is already in our return list
+					oStyleViewModel.setSharedWithMe(true);
+					// Keep if read only or not
+					oStyleViewModel.setReadOnly(!oSharing.canWrite());
+					aoRetStyles.add(oStyleViewModel);
+				} 
+				else {
+					// This is shared but public, so this must be already in our return list
 					for (StyleViewModel oStyle : aoRetStyles) {
 						// Find it and set shared flag = true
 						if (oSharedWithMe.getStyleId().equals(oStyle.getStyleId())) {
+							// So is shared and we can correct if read only ro not
 							oStyle.setSharedWithMe(true);
+							oStyleViewModel.setReadOnly(!oSharing.canWrite());
 						}
 					}
 				}
@@ -455,7 +525,7 @@ public class StyleResource {
 
 		// This API is allowed ONLY on main nodes
 		if (!WasdiConfig.Current.isMainNode()) {
-			WasdiLog.debugLog("StyleResource.DeleteStyle: this is a computational node, cannot call this API here");
+			WasdiLog.warnLog("StyleResource.DeleteStyle: this is a computational node, cannot call this API here");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
@@ -465,7 +535,7 @@ public class StyleResource {
 
 			// Check the user
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.deleteStyle: invalid session");
+				WasdiLog.warnLog("StyleResource.deleteStyle: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
@@ -476,19 +546,19 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				WasdiLog.debugLog("StyleResource.deleteStyle: unable to find style");
+				WasdiLog.warnLog("StyleResource.deleteStyle: unable to find style");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
 			if (!PermissionsUtils.canUserAccessStyle(sUserId, sStyleId)) {
-				WasdiLog.debugLog("StyleResource.deleteStyle: user cannot access the style");
+				WasdiLog.warnLog("StyleResource.deleteStyle: user cannot access the style");
 				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			if (oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId)) {
-				WasdiLog.debugLog("StyleResource.deleteStyle: the style wasd shared with " + oUser.getUserId() + ", delete the sharing");
+				WasdiLog.debugLog("StyleResource.deleteStyle: the style was shared with " + oUser.getUserId() + ", delete the sharing");
 				oUserResourcePermissionRepository.deletePermissionsByUserIdAndStyleId(oUser.getUserId(), sStyleId);
 
 				return Response.ok().build();
@@ -531,7 +601,7 @@ public class StyleResource {
 
 		// This API is allowed ONLY on computed nodes
 		if (WasdiConfig.Current.isMainNode()) {
-			WasdiLog.debugLog("StyleResource.nodeDeleteStyle: this is the main node, cannot call this API here");
+			WasdiLog.warnLog("StyleResource.nodeDeleteStyle: this is the main node, cannot call this API here");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
@@ -540,8 +610,13 @@ public class StyleResource {
 
 			// Check user
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.nodeDeleteStyle: invalid session");
+				WasdiLog.warnLog("StyleResource.nodeDeleteStyle: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!PermissionsUtils.canUserWriteStyle(oUser.getUserId(), sStyleId)) {
+				WasdiLog.warnLog("StyleResource.nodeDeleteStyle: user cannot write style");
+				return Response.status(Status.FORBIDDEN).build();
 			}
 
 			// Trigger the style delete operation on this specific node
@@ -562,7 +637,7 @@ public class StyleResource {
 	@Path("share/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult shareStyle(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId) {
+			@QueryParam("styleId") String sStyleId, @QueryParam("userId") String sUserId, @QueryParam("rights") String sRights) {
 		WasdiLog.debugLog("StyleResource.shareStyle(  Style : " + sStyleId + ", User: " + sUserId + " )");
 
 		//init repositories
@@ -575,9 +650,14 @@ public class StyleResource {
 		oResult.setBoolValue(false);
 
 		if (oRequestingUser == null) {
-			WasdiLog.debugLog("StyleResource.shareStyle: invalid session");
+			WasdiLog.warnLog("StyleResource.shareStyle: invalid session");
 			oResult.setStringValue("Invalid session.");
 			return oResult;
+		}
+		
+		// Use Read By default
+		if (!UserAccessRights.isValidAccessRight(sRights)) {
+			sRights = UserAccessRights.READ.getAccessRight();
 		}
 
 		try {
@@ -585,13 +665,13 @@ public class StyleResource {
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
 			if (oStyle == null) {
-				WasdiLog.debugLog("StyleResource.shareStyle: invalid style");
+				WasdiLog.warnLog("StyleResource.shareStyle: invalid style");
 				oResult.setStringValue("Invalid Style");
 				return oResult;
 			}
 
 			if (oRequestingUser.getUserId().equals(sUserId)) {
-				WasdiLog.debugLog("StyleResource.shareStyle: auto sharing not so smart");
+				WasdiLog.warnLog("StyleResource.shareStyle: auto sharing not so smart");
 				oResult.setStringValue("Impossible to autoshare.");
 				return oResult;
 			}
@@ -602,9 +682,15 @@ public class StyleResource {
 			
 			// Can't find destination user for the sharing
 			if (oDestinationUser == null) {
-				WasdiLog.debugLog("StyleResource.shareStyle: invalid target user");
+				WasdiLog.warnLog("StyleResource.shareStyle: invalid target user");
 				oResult.setStringValue("Can't find target user of the sharing");
 				return oResult;
+			}
+			
+			if (!PermissionsUtils.canUserWriteStyle(oRequestingUser.getUserId(), sStyleId)) {
+				WasdiLog.warnLog("StyleResource.shareStyle: requesting user cannot write the style");
+				oResult.setStringValue("Can't write this style");
+				return oResult;				
 			}
 
 			//if the requester is not the owner
@@ -617,7 +703,7 @@ public class StyleResource {
 
 				// the requester has the share?
 				if (!oUserResourcePermissionRepository.isStyleSharedWithUser(oRequestingUser.getUserId(), sStyleId)
-						&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequestingUser.getRole(), ADMIN_DASHBOARD)) {
+						&& !UserApplicationRole.isAdmin(oRequestingUser)) {
 					oResult.setStringValue("Unauthorized");
 					return oResult;
 				}
@@ -630,43 +716,17 @@ public class StyleResource {
 			}
 
 			// Create and insert the sharing
-			UserResourcePermission oStyleSharing =
-					new UserResourcePermission("style", sStyleId, sUserId, oStyle.getUserId(), oRequestingUser.getUserId(), "write");
+			UserResourcePermission oStyleSharing = new UserResourcePermission(ResourceTypes.STYLE.getResourceType(), sStyleId, sUserId, oStyle.getUserId(), oRequestingUser.getUserId(), sRights);
 
 			oUserResourcePermissionRepository.insertPermission(oStyleSharing);
 
 			WasdiLog.debugLog("StyleResource.shareStyle: Style" + sStyleId + " Shared from " + oRequestingUser.getUserId() + " to " + sUserId);
 
 			try {
-				String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-				if (Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-					WasdiLog.debugLog("StyleResource.shareStyle: sMercuriusAPIAddress is null");
-				} else {
-					MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);
-					Message oMessage = new Message();
-
-					String sTitle = "Style " + oStyle.getName() + " Shared";
-
-					oMessage.setTilte(sTitle);
-
-					String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-					if (sSender == null) {
-						sSender = "wasdi@wasdi.net";
-					}
-
-					oMessage.setSender(sSender);
-
-					String sMessage = "The user " + oRequestingUser.getUserId() + " shared with you the Style: " + oStyle.getName();
-
-					oMessage.setMessage(sMessage);
-
-					Integer iPositiveSucceded = 0;
-
-					iPositiveSucceded = oAPI.sendMailDirect(sUserId, oMessage);
-
-					WasdiLog.debugLog("StyleResource.shareStyle: notification sent with result " + iPositiveSucceded);
-				}
+				String sTitle = "Style " + oStyle.getName() + " Shared";
+				String sMessage = "The user " + oRequestingUser.getUserId() + " shared with you the Style: " + oStyle.getName();
+				WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sUserId, sTitle, sMessage);
+				
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("StyleResource.shareStyle: notification exception " + oEx.toString());
 			}
@@ -700,7 +760,7 @@ public class StyleResource {
 			User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oOwnerUser == null) {
-				WasdiLog.debugLog("StyleResource.deleteUserSharedStyle: invalid session");
+				WasdiLog.warnLog("StyleResource.deleteUserSharedStyle: invalid session");
 				oResult.setStringValue("Invalid session");
 				return oResult;
 			}
@@ -710,18 +770,23 @@ public class StyleResource {
 				UserResourcePermission oStyleShare = oUserResourcePermissionRepository.getStyleSharingByUserIdAndStyleId(sUserId, sStyleId);
 				
 				if (oStyleShare == null) {
-					WasdiLog.debugLog("StyleResource.deleteUserSharedStyle: invalid sharing");
+					WasdiLog.warnLog("StyleResource.deleteUserSharedStyle: invalid sharing");
 					oResult.setStringValue("Sharing not found");
 					return oResult;					
 				}
 
+				if (!PermissionsUtils.canUserAccessStyle(oOwnerUser.getUserId(), sStyleId)) {
+					WasdiLog.warnLog("StyleResource.deleteUserSharedStyle: user cannot access style");
+					oResult.setStringValue("Cannot access the style");
+					return oResult;					
+				}
 				
 				// if the user making the call is the one on the sharing OR
 				if (oStyleShare.getUserId().equals(oOwnerUser.getUserId()) ||
 						// if the user making the call is the owner of the style OR
 						oStyleShare.getOwnerId().equals(oOwnerUser.getUserId())
 						// if the user has ADMIN rights
-						|| UserApplicationRole.userHasRightsToAccessApplicationResource(oOwnerUser.getRole(), UserApplicationPermission.ADMIN_DASHBOARD)) {
+						|| UserApplicationRole.isAdmin(oOwnerUser)) {
 					// Delete the sharing
 					oUserResourcePermissionRepository.deletePermissionsByUserIdAndStyleId(sUserId, sStyleId);
 				} else {
@@ -747,16 +812,16 @@ public class StyleResource {
 	@GET
 	@Path("share/bystyle")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public List<StyleSharingViewModel> getEnableUsersSharedStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
+	public List<StyleSharingViewModel> getEnabledUsersSharedStyle(@HeaderParam("x-session-token") String sSessionId, @QueryParam("styleId") String sStyleId) {
 		List<StyleSharingViewModel> oResult = new ArrayList<>();
 
-		WasdiLog.debugLog("StyleResource.getEnableUsersSharedStyle(  Style : " + sStyleId + " )");
+		WasdiLog.debugLog("StyleResource.getEnabledUsersSharedStyle(  Style : " + sStyleId + " )");
 
 		// Validate Session
 		User oAskingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oAskingUser == null) {
-			WasdiLog.debugLog("StyleResource.getEnableUsersSharedStyle: invalid session");
+			WasdiLog.warnLog("StyleResource.getEnabledUsersSharedStyle: invalid session");
 			return oResult;
 		}
 
@@ -767,20 +832,21 @@ public class StyleResource {
 
 			if (oValidateStyle == null) {
 				// return
-				WasdiLog.debugLog("StyleResource.getEnableUsersSharedStyle: Style not found");
+				WasdiLog.warnLog("StyleResource.getEnabledUsersSharedStyle: Style not found");
 				// if something went wrong returns an empty set
 				return oResult;
 			}
 
 			//Retrieve and returns the sharings
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-			oUserResourcePermissionRepository.getStyleSharingsByStyleId(sStyleId).forEach(element -> {
-				oResult.add(new StyleSharingViewModel(element));
+			oUserResourcePermissionRepository.getStyleSharingsByStyleId(sStyleId).forEach(oElement -> {
+				oResult.add(new StyleSharingViewModel(oElement));
 			});
 
 			return oResult;
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("StyleResource.getEnableUsersSharedStyle error: " + oEx);
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.getEnabledUsersSharedStyle error: " + oEx);
 			return oResult;
 		}
 	}
@@ -801,29 +867,88 @@ public class StyleResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("StyleResource.download: invalid session");
+				WasdiLog.warnLog("StyleResource.download: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 
 			StyleRepository oStyleRepository = new StyleRepository();
 			Style oStyle = oStyleRepository.getStyle(sStyleId);
 
+			return internalDownload(oUser, oStyle);
+				
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.download error: " + oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@GET
+	@Path("downloadbyname")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadByName(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("token") String sTokenSessionId,
+			@QueryParam("style") String sStyle) {
+		WasdiLog.debugLog("StyleResource.downloadByName( StyleId: " + sStyle + " )");
+
+		try {
+			if (!Utils.isNullOrEmpty(sSessionId)) {
+				sTokenSessionId = sSessionId;
+			}
+
+			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
+
+			if (oUser == null) {
+				WasdiLog.warnLog("StyleResource.downloadByName: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			StyleRepository oStyleRepository = new StyleRepository();
+			Style oStyle = oStyleRepository.getStyleByName(sStyle);
+
+			return internalDownload(oUser, oStyle);
+				
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("StyleResource.downloadByName error: " + oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}	
+	
+	/**
+	 * Internal Download operation, starting from user and style
+	 * @param oUser User requesting the download
+	 * @param oStyle Style entity
+	 * @return http response
+	 */
+	public Response internalDownload(User oUser, Style oStyle) {
+
+		try {
+
+			if (oUser == null) {
+				WasdiLog.warnLog("StyleResource.internalDownload: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
 			ResponseBuilder oResponseBuilder = null;
 
 			if (oStyle == null) {
-				WasdiLog.debugLog("StyleResource.download: Style Id not found on DB");
+				WasdiLog.warnLog("StyleResource.internalDownload: Style Id not found on DB");
 				oResponseBuilder = Response.noContent();
 				return oResponseBuilder.build();
 			}
+			
+			//check the user can access the style
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), oStyle.getStyleId())) {
+				WasdiLog.warnLog("StyleResource.internalDownload: user cannot access style");
+				return Response.status(Status.FORBIDDEN).build();
+			}			
 
 			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sStyleSldPath = sDownloadRootPath + "styles/" + oStyle.getName() + ".sld";
+			String sStyleSldPath = PathsConfig.getStylesPath() + oStyle.getName() + ".sld";
 
 			File oFile = new File(sStyleSldPath);
 
 			if (!oFile.exists()) {
-				WasdiLog.debugLog("StyleResource.download: file does not exists " + oFile.getPath());
+				WasdiLog.warnLog("StyleResource.internalDownload: file does not exists " + oFile.getPath());
 				oResponseBuilder = Response.serverError();
 			} 
 			else {
@@ -839,17 +964,28 @@ public class StyleResource {
 			return oResponseBuilder.build();
 				
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("StyleResource.download error: " + oEx);
+			WasdiLog.errorLog("StyleResource.internalDownload error: " + oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-	}
+	}	
 
-
+	/**
+	 * Check if the name of the style is already in use or not
+	 */
 	private boolean isStyleNameTaken(String sName) {
 		StyleRepository oStyleRepository = new StyleRepository();
 		return oStyleRepository.isStyleNameTaken(sName);
 	}
 
+	/**
+	 * Inserts a Style entity in the db
+	 * @param sUserId User
+	 * @param sStyleId Style Id
+	 * @param sName Style Name
+	 * @param sDescription Style description
+	 * @param sFilePath File Path of the sld
+	 * @param bPublic Flag to know if it is public or not
+	 */
 	private void insertStyle(String sUserId, String sStyleId, String sName, String sDescription, String sFilePath, Boolean bPublic) {
 		// Create Entity
 		Style oStyle = new Style();
@@ -868,6 +1004,10 @@ public class StyleResource {
 		oStyleRepository.insertStyle(oStyle);
 	}
 	
+	/**
+	 * Deletes the sld file from the server
+	 * @param sName Name of the style
+	 */
 	private void filesystemDeleteStyleIfExists(String sName) {
 		WasdiLog.debugLog("StyleResource.filesystemDeleteStyleIfExists( " + "Name: " + sName + " )");
 
@@ -877,9 +1017,7 @@ public class StyleResource {
 		}
 
 		// Get Download Path on the current WASDI instance
-		String sBasePath = Wasdi.getDownloadPath();
-		sBasePath += "styles/";
-		String sStyleFilePath = sBasePath + sName + ".sld";
+		String sStyleFilePath = PathsConfig.getStylesPath() + sName + ".sld";
 
 		File oStyleFile = new File(sStyleFilePath);
 		if (oStyleFile.exists()) {
@@ -889,6 +1027,11 @@ public class StyleResource {
 		}
 	}
 
+	/**
+	 * Adds a style in geoserver
+	 * @param sStyleFilePath Path of the sld file
+	 * @throws MalformedURLException
+	 */
 	private void geoServerAddStyle(String sStyleFilePath) throws MalformedURLException {
 		WasdiLog.debugLog("StyleResource.geoServerAddStyle( " + "StyleFile: " + sStyleFilePath + " )");
 
@@ -898,7 +1041,13 @@ public class StyleResource {
 			oGeoServerManager.publishStyle(sStyleFilePath);
 		}
 	}
-
+	
+	/**
+	 * Updates a style in geoserver (if it has been published before)
+	 * @param sName Name of the style
+	 * @param sStyleFilePath path of the sld file
+	 * @throws MalformedURLException
+	 */
 	private void geoServerUpdateStyleIfExists(String sName, String sStyleFilePath) throws MalformedURLException {
 		WasdiLog.debugLog("StyleResource.geoServerUpdateStyleIfExists( " + "Name: " + sName + ", StyleFile: " + sStyleFilePath + " )");
 
@@ -913,7 +1062,12 @@ public class StyleResource {
 			}
 		}
 	}
-
+	
+	/**
+	 * Removes a style from geoserver if it exists
+	 * @param sName Name of the style
+	 * @throws MalformedURLException
+	 */
 	private void geoServerRemoveStyleIfExists(String sName) throws MalformedURLException {
 		WasdiLog.debugLog("StyleResource.geoServerRemoveStyleIfExists( " + "Name: " + sName + " )");
 
@@ -938,7 +1092,7 @@ public class StyleResource {
 			}			
 			
 			
-			String sStyleFilePath = Wasdi.getDownloadPath() + "styles/" + sName + ".sld";
+			String sStyleFilePath = PathsConfig.getStylesPath() + sName + ".sld";
 			
 			WasdiLog.debugLog("StyleResource.geoServerRemoveStyleIfExists: remove the style " + sStyleFilePath);
 			
@@ -946,6 +1100,12 @@ public class StyleResource {
 		}
 	}
 
+	/**
+	 * Triggers the update of the style in all the computational nodes
+	 * @param sSessionId User Session Id
+	 * @param sName Name of the style 
+	 * @param sFilePath Path of the sld
+	 */
 	private void computationalNodesUpdateStyle(String sSessionId, String sName, String sFilePath) {
 		// In the main node: start a thread to update all the computing nodes
 		try {
@@ -965,6 +1125,12 @@ public class StyleResource {
 		}
 	}
  
+	/**
+	 * Triggers the delete of a style in the computational nodes
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @param sStyleName Name of the style
+	 */
 	private void computationalNodesDeleteStyle(String sSessionId, String sStyleId, String sStyleName) {
 		// Start a thread to update all the computing nodes
 		try {

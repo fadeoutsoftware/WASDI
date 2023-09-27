@@ -735,7 +735,6 @@ public final class HttpUtils {
 
 				oTargetDir.mkdirs();
 
-
 				try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
 						InputStream oInputStream = oConnection.getInputStream()) {
 					// 	opens an output stream to save into file

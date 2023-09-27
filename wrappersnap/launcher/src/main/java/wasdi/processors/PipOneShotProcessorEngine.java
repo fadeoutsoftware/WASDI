@@ -1,20 +1,15 @@
 package wasdi.processors;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
-import wasdi.shared.utils.HttpUtils;
-import wasdi.shared.utils.OgcProcessesClient;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class PipOneShotProcessorEngine extends DockerProcessorEngine {

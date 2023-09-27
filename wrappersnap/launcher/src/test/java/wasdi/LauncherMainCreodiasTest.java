@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.queryexecutors.creodias.ResponseTranslatorCREODIAS;
@@ -59,7 +60,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
 
 		String sourceFilePath = expectedDownloadFilePath;
 		String targetDirectoryPath = parseHttpsUrlToFilePath(oDownloadFileParameter.getUrl()).replace(extractFileNameFromFilePath(sourceFilePath), "");
@@ -97,7 +98,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
 
 		if (doesFileExist(expectedDownloadFilePath)) {
 			deleteFile(expectedDownloadFilePath);
@@ -140,7 +141,7 @@ public class LauncherMainCreodiasTest extends LauncherMainTest {
 
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
 
 		if (doesFileExist(expectedDownloadFilePath)) {
 			deleteFile(expectedDownloadFilePath);

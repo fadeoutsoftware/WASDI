@@ -18,16 +18,14 @@ import javax.ws.rs.core.Response.Status;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.AuthProviderService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.Subscription;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserSession;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProjectRepository;
 import wasdi.shared.data.SessionRepository;
@@ -174,8 +172,9 @@ public class AuthResource {
 
 				if (oUser.getRole() != null) {
 					oUserVM.setRole(oUser.getRole());
-					UserApplicationRole oUserApplicationRole = UserApplicationRole.get(oUser.getRole());
-					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
+				}
+				else {
+					oUserVM.setRole(UserApplicationRole.USER.getRole());
 				}
 
 				WasdiLog.debugLog("AuthResource.login: access succeeded, sSessionId: "+oSession.getSessionId());
@@ -939,27 +938,16 @@ public class AuthResource {
 	 */
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		WasdiLog.debugLog("AuthResource.sendPasswordEmail");
+		
 		if(null == sRecipientEmail || null == sPassword ) {
-			WasdiLog.debugLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
+			WasdiLog.errorLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
 			return false;
 		}
-		//send email with new password
-		String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
-
-
-		Message oMessage = new Message();
 		String sTitle = WasdiConfig.Current.notifications.pwRecoveryMailTitle;
 
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI Password Recovery";
 		}
-		oMessage.setTilte(sTitle);
-
-
-		String sSender = WasdiConfig.Current.notifications.pwRecoveryMailSender;
-		if (sSender==null) sSender = "wasdi@wasdi.net";
-		oMessage.setSender(sSender);
 
 		String sMessage = WasdiConfig.Current.notifications.pwRecoveryMailText;
 
@@ -968,16 +956,8 @@ public class AuthResource {
 		}
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
-		oMessage.setMessage(sMessage);
-		try {
-			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
-				return true;
-			}
-		} catch (Exception oE) {
-			WasdiLog.errorLog("AuthResource.sendPasswordEmail: " + oE);
-			return false;
-		}
-		return false;
+
+		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.pwRecoveryMailSender, sRecipientEmail, sTitle, sMessage);
 	}
 	
 	/**
@@ -990,26 +970,15 @@ public class AuthResource {
 	private Boolean sendSftpPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		WasdiLog.debugLog("AuthResource.sendSftpPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
-			WasdiLog.debugLog("AuthResource.sendSftpPasswordEmail: null input, not enough information to send email");
+			WasdiLog.errorLog("AuthResource.sendSftpPasswordEmail: null input, not enough information to send email");
 			return false;
 		}
-		//send email with new password
-		String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);
 
-
-		Message oMessage = new Message();
 		String sTitle = WasdiConfig.Current.notifications.sftpMailTitle;
 
 		if (Utils.isNullOrEmpty(sTitle)) {
 			sTitle = "WASDI SFTP Account";
 		}
-		oMessage.setTilte(sTitle);
-
-
-		String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-		if (sSender==null) sSender = "wasdi@wasdi.net";
-		oMessage.setSender(sSender);
 
 		String sMessage = WasdiConfig.Current.notifications.sftpMailText;
 
@@ -1018,18 +987,9 @@ public class AuthResource {
 		}
 
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
-		oMessage.setMessage(sMessage);
-		try {
-			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
-				return true;
-			}
-		} catch (Exception oE) {
-			WasdiLog.errorLog("AuthResource.sendSftpPasswordEmail: " + oE);
-			return false;
-		}
-		return false;
-	}
 
+		return WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sRecipientEmail, sTitle, sMessage);
+	}
 
 	/**
 	 * Send a notification email to the administrators
@@ -1037,15 +997,6 @@ public class AuthResource {
 	 * @return
 	 */
 	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed) {
-		return notifyNewUserInWasdi(oUser,bConfirmed,false);
-	}
-
-	/**
-	 * Send a notification email to the administrators
-	 * @param oUser
-	 * @return
-	 */
-	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed, boolean bGoogle) {
 
 		WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi");
 
@@ -1056,27 +1007,7 @@ public class AuthResource {
 
 		try {
 
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: sMercuriusAPIAddress is null");
-				return false;
-			}
-
-			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-			Message oMessage = new Message();
-
 			String sTitle = "New WASDI User";
-
-			if (bGoogle) sTitle = "New Google WASDI User";
-
-			oMessage.setTilte(sTitle);
-
-			String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-			if (sSender==null) {
-				sSender = "wasdi@wasdi.net";
-			}
-			oMessage.setSender(sSender);
 
 			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getUserId();
 
@@ -1086,25 +1017,13 @@ public class AuthResource {
 				sMessage = "Confirmation failed: " + oUser.getUserId() + " is in kc but could not be added to wasdi DB";
 			}
 
-			oMessage.setMessage(sMessage);
-
-			Integer iPositiveSucceded = 0;
-
 			String sWasdiAdminMail = WasdiConfig.Current.notifications.wasdiAdminMail;
 
 			if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
-				sWasdiAdminMail = "info@fadeout.biz";
+				sWasdiAdminMail = "team@wasdi.cloud";
 			}
-
-			iPositiveSucceded = oAPI.sendMailDirect(sWasdiAdminMail, oMessage);
-
-			WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: "+iPositiveSucceded.toString());
-
-			if(iPositiveSucceded < 0 ) {
-
-				WasdiLog.debugLog("AuthResource.notifyNewUserInWasdi: error sending notification email to admin");
-				return false;
-			}
+			
+			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sWasdiAdminMail, sTitle, sMessage);
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("AuthResource.notifyNewUserInWasdi error "+oEx.getMessage());
 			return false;

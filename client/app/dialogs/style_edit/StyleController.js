@@ -41,6 +41,10 @@ var StyleController = (function () {
           */
          this.m_sUserEmail = "";
          /**
+          * User permissions for share
+          */
+         this.m_sRights = "read";
+         /**
           * Field with list of active sharing
           */
          this.m_aoEnabledUsers = [];
@@ -175,9 +179,9 @@ var StyleController = (function () {
     /**
      * Share the style with a user
      */
-    StyleController.prototype.shareStyleByUserEmail = function (oUserId) {
+    StyleController.prototype.shareStyleByUserEmail = function (oUserId, sRights) {
         var oController = this;
-        this.m_oStyleService.addStyleSharing(this.m_oStyle.styleId, oUserId)
+        this.m_oStyleService.addStyleSharing(this.m_oStyle.styleId, oUserId, sRights)
             .then(function (data) {
                 if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
                     // all done
@@ -187,6 +191,7 @@ var StyleController = (function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING STYLE<br>" + data.data.stringValue);
                 }
                 // reload the sharing list
+                oController.m_sRights = "read"; 
 
             }, function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SHARING STYLE");
@@ -278,7 +283,7 @@ var StyleController = (function () {
 
             oController.isUploadingStyle = false;
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID STYLE FILE");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPLOADING STYLE");
             oController.cleanAllUploadStyleFields();
             oController.isUploadingStyle = false;
         });

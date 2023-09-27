@@ -1,47 +1,32 @@
 package it.fadeout.rest.resources;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import it.fadeout.Wasdi;
-import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.services.ProvidersCatalog;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DataProvider;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
-import wasdi.shared.business.Style;
-import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.users.User;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.StyleRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
@@ -62,6 +47,7 @@ import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
  * 	.import new files in WASDI from data providers
  *  .publish bands on geoserver
  *  .handle geoserver styles
+ *  .Share files between workspaces
  *  
  * @author p.campanella
  *
@@ -97,17 +83,8 @@ public class FileBufferResource {
 									@QueryParam("productName") String sProductName,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException {
+		
 		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId + "sDestinationWorkspaceId: " + sDestinationWorkspaceId + "sProductName: " + sProductName);
-
-		// find the origin workspace. make sure it is valid. 
-		// find the destination workspace. make sure it is valid
-		// make sure that the origin workspace contains the product
-		// make sure that the destination workspace does not already contain a product with the same name
-		// copy the file (local copy or http download)
-		// duplicate the record/document on the productworkspace table/collection
-		// duplicate the record/document on the downloadedfiles table/collection
-		// duplicate the record/document on the processworkspace table/collection
-		// duplicate the record/document on the publishedbands table/collection
 
 		PrimitiveResult oResult = new PrimitiveResult();
 
@@ -115,10 +92,11 @@ public class FileBufferResource {
 		oResult.setIntValue(500);
 		
 		try {
+			// Check User and Session
 			User oUser = Wasdi.getUserFromSession(sSessionId);
-
+			
 			if (oUser == null) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid session");
+				WasdiLog.warnLog("FileBufferResource.share: invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
 				return oResult;
 			}
@@ -126,196 +104,148 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-
-
+			
+			// Check if we have a valid Origin Workspace
 			if (Utils.isNullOrEmpty(sOriginWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid origin workspace");
-				oResult.setStringValue("Invalid origin workspace.");
-
-				return oResult;
-			}
-
-			if (sOriginWorkspaceId.contains("/") || sOriginWorkspaceId.contains("\\")) {
-				WasdiLog.debugLog("FileBufferResource.share: Injection attempt from users");
+				WasdiLog.warnLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
 			}
 			
-			//check the user can access the workspace
+			// Check if there is no malicius attemp
+			if (sOriginWorkspaceId.contains("/") || sOriginWorkspaceId.contains("\\")) {
+				WasdiLog.warnLog("FileBufferResource.share: Injection attempt from users");
+				oResult.setStringValue("Invalid origin workspace.");
+
+				return oResult;
+			}
+			
+			// check the user can access the origin workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sOriginWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.share: the user cannot access the origin ws");
+				WasdiLog.warnLog("FileBufferResource.share: the user cannot access the origin ws");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
 			}			
-
+			
+			// Get the origin workspace
 			Workspace oOriginWorkspace = oWorkspaceRepository.getWorkspace(sOriginWorkspaceId);
-
+			
+			// Check it is not null
 			if (oOriginWorkspace == null) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid origin workspace");
+				WasdiLog.warnLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
 				return oResult;
 			}
 
-			String sOriginWorkspaceNode = oOriginWorkspace.getNodeCode();
-			String sOriginWorkspaceUserId = oOriginWorkspace.getUserId();
-
-
+			// Check if we have a destination workspace
 			if (Utils.isNullOrEmpty(sDestinationWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid destination workspace");
-				oResult.setStringValue("Invalid destination workspace.");
-
-				return oResult;
-			}
-
-			if (sDestinationWorkspaceId.contains("/") || sDestinationWorkspaceId.contains("\\")) {
-				WasdiLog.debugLog("FileBufferResource.share: Injection attempt from users");
+				WasdiLog.warnLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
 			}
 			
-			//check the user can access the workspace
-			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sDestinationWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.share: the user cannot access the destination ws");
+			// That is not malicius
+			if (sDestinationWorkspaceId.contains("/") || sDestinationWorkspaceId.contains("\\")) {
+				WasdiLog.warnLog("FileBufferResource.share: Injection attempt from users");
+				oResult.setStringValue("Invalid destination workspace.");
+
+				return oResult;
+			}
+			
+			//check the user can write in the destination workspace
+			if (!PermissionsUtils.canUserWriteWorkspace(sUserId, sDestinationWorkspaceId)) {
+				WasdiLog.warnLog("FileBufferResource.share: the user cannot write in the destination ws");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
 			}					
-
+			
+			// Take the destination workspace
 			Workspace oDestinationWorkspace = oWorkspaceRepository.getWorkspace(sDestinationWorkspaceId);
-
+			
+			// That is not null
 			if (oDestinationWorkspace == null) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid destination workspace");
+				WasdiLog.warnLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
 				return oResult;
 			}
+			
+			// Check the product
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			
+			// Must have a valid name
+			if (Utils.isNullOrEmpty(sProductName)) {
+				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
+				oResult.setStringValue("Invalid product name.");
 
+				return oResult;
+			}
+			
+			// That is not malicious
+			if (sProductName.contains("/") || sProductName.contains("\\")) {
+				WasdiLog.warnLog("FileBufferResource.share( Product Name: " + sProductName + " ): Injection attempt from users");
+				oResult.setStringValue("Invalid product name.");
+
+				return oResult;
+			}
+			
+			// Take relevant info of the origin workspace
+			String sOriginWorkspaceNode = oOriginWorkspace.getNodeCode();
+			String sOriginWorkspaceUserId = oOriginWorkspace.getUserId();
+			
+			// And of the destination one
 			String sDestinationWorkspaceNode = oDestinationWorkspace.getNodeCode();
 			String sDestinationWorkspaceUserId = oDestinationWorkspace.getUserId();
 
-
-
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-
-			if (Utils.isNullOrEmpty(sProductName)) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
-				oResult.setStringValue("Invalid product name.");
-
-				return oResult;
-			}
-
-			if (sProductName.contains("/") || sProductName.contains("\\")) {
-				WasdiLog.debugLog("FileBufferResource.share( Product Name: " + sProductName + " ): Injection attempt from users");
-				oResult.setStringValue("Invalid product name.");
-
-				return oResult;
-			}
-
-			String sOriginFilePath = WasdiFileUtils.fixPathSeparator(WasdiConfig.Current.paths.downloadRootPath + sOriginWorkspaceUserId + "/" + sOriginWorkspaceId + "/" + sProductName);
+			String sOriginFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sOriginWorkspaceUserId, sOriginWorkspaceId) + sProductName);
 			ProductWorkspace oProductOriginWorkspace = oProductWorkspaceRepository.getProductWorkspace(sOriginFilePath, sOriginWorkspaceId);
 
 			if (oProductOriginWorkspace == null) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
+				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
 				return oResult;
 			}
 
-			String sDestinationFilePath = WasdiFileUtils.fixPathSeparator(WasdiConfig.Current.paths.downloadRootPath + sDestinationWorkspaceUserId + "/" + sDestinationWorkspaceId + "/" + sProductName);
+			String sDestinationFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sDestinationWorkspaceUserId, sDestinationWorkspaceId) + sProductName);
 			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sProductName, sDestinationWorkspaceId);
 
 			if (oProductDestinationWorkspace != null) {
-				WasdiLog.debugLog("FileBufferResource.share: product already present in the destination workspace");
+				WasdiLog.warnLog("FileBufferResource.share: product already present in the destination workspace");
 				oResult.setStringValue("The product is already present in the destination workspace.");
 
 				return oResult;
 			}
-
-			
-
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-
-			List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getDownloadedFileListByName(sProductName);
-
-			if (aoDownloadedFileList == null || aoDownloadedFileList.isEmpty()) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
-				oResult.setStringValue("Invalid product name.");
-
-				return oResult;
-			}
-
-			boolean bIsProductInOriginWorkspace = false;
-			boolean bIsProductInDestinationWorkspace = false;
-
-//			String sOriginFilePath = null;
-			String sBoundingBox = null;
-
-			for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
-				if (oDownloadedFile.getFilePath().contains(sOriginWorkspaceId)) {
-//					sOriginFilePath = oDownloadedFile.getFilePath();
-					sBoundingBox = oDownloadedFile.getBoundingBox();
-					bIsProductInOriginWorkspace = true;
-				}
-
-				if (oDownloadedFile.getFilePath().contains(sDestinationWorkspaceId)) {
-					bIsProductInDestinationWorkspace = true;
-				}
-			}
-
-			if (!bIsProductInOriginWorkspace) {
-				WasdiLog.debugLog("FileBufferResource.share: invalid product name");
-				oResult.setStringValue("Invalid product name.");
-
-				return oResult;
-			}
-
-			if (bIsProductInDestinationWorkspace) {
-				WasdiLog.debugLog("FileBufferResource.share: product already present in the destination workspace");
-				oResult.setStringValue("The product is already present in the destination workspace.");
-
-				return oResult;
-			}
-
 
 			String sProcessObjId = Utils.getRandomName();
 
-//			DataProvider oProvider = m_oDataProviderCatalog.getDefaultProvider(Wasdi.s_sMyNodeCode);
-//			String sProvider = oProvider.getName();
-
-//			String sDestinationFilePath = sOriginFilePath
-//					.replace(sOriginWorkspaceUserId, sDestinationWorkspaceUserId)
-//					.replace(sOriginWorkspaceId, sDestinationWorkspaceId);
-
 			ShareFileParameter oParameter = new ShareFileParameter();
 
-//			oParameter.setQueue(sSessionId);
-//			oParameter.setUrl(sFileUrl);
 			oParameter.setProductName(sProductName);
 			oParameter.setOriginFilePath(sOriginFilePath);
 			oParameter.setWorkspace(sDestinationWorkspaceId);
+			oParameter.setWorkspaceOwnerId(sDestinationWorkspaceUserId);
 			oParameter.setDestinationWorkspaceNode(sDestinationWorkspaceNode);
 			oParameter.setDestinationFilePath(sDestinationFilePath);
 			oParameter.setOriginWorkspaceId(sOriginWorkspaceId);
 			oParameter.setOriginWorkspaceNode(sOriginWorkspaceNode);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sDestinationWorkspaceId);
-			oParameter.setBoundingBox(sBoundingBox);
-//			oParameter.setDownloadUser(oProvider.getOSUser());
-//			oParameter.setDownloadPassword(oProvider.getOSPassword());
-//			oParameter.setProvider(oProvider.getName());
 			oParameter.setWorkspaceOwnerId(sDestinationWorkspaceUserId);
+			oParameter.setSessionID(sSessionId);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
 			String sPath = WasdiConfig.Current.paths.serializationPath;
 
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), /*sProvider.toUpperCase(),*/ sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), sProductName, sPath, oParameter, sParentProcessWorkspaceId);
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("FileBufferResource.share: " + oEx);
 		}
@@ -386,13 +316,13 @@ public class FileBufferResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("FileBufferResource.imageImport: session is not valid");
+				WasdiLog.warnLog("FileBufferResource.imageImport: session is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
 			
 			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-				WasdiLog.debugLog("FileBufferResource.imageImport: No valid Subscription");
+				WasdiLog.warnLog("FileBufferResource.imageImport: No valid Subscription");
 				oResult.setIntValue(401);
 				return oResult;				
 			}
@@ -402,7 +332,7 @@ public class FileBufferResource {
 			String sProcessObjId = Utils.getRandomName();
 
 			if (oImageImportViewModel == null) {
-				WasdiLog.debugLog("FileBufferResource.imageImport: request is not valid");
+				WasdiLog.warnLog("FileBufferResource.imageImport: request is not valid");
 				oResult.setIntValue(401);
 				return oResult;
 			}
@@ -423,8 +353,8 @@ public class FileBufferResource {
 			String sParentProcessWorkspaceId = oImageImportViewModel.getParent();
 			
 			//check the user can access the workspace
-			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.imageImport: user cannot access workspace");
+			if (!PermissionsUtils.canUserWriteWorkspace(sUserId, sWorkspaceId)) {
+				WasdiLog.warnLog("FileBufferResource.imageImport: user cannot write in the workspace");
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				return oResult;
 			}
@@ -498,7 +428,7 @@ public class FileBufferResource {
 			// Check Authentication
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser==null) {
-				WasdiLog.debugLog("FileBufferResource.publishBand: invalid session"); 
+				WasdiLog.warnLog("FileBufferResource.publishBand: invalid session"); 
 				return oReturnValue;
 			}
 			
@@ -506,12 +436,12 @@ public class FileBufferResource {
 			
 			//check the user can access the workspace
 			if (!PermissionsUtils.canUserAccessWorkspace(sUserId, sWorkspaceId)) {
-				WasdiLog.debugLog("FileBufferResource.PublishBand: user cannot access workspace");
+				WasdiLog.warnLog("FileBufferResource.PublishBand: user cannot access workspace");
 				return oReturnValue;
 			}
 			
 			// Get the full product path
-			String sFullProductPath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+			String sFullProductPath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -522,7 +452,7 @@ public class FileBufferResource {
             }
 			
 			if (oDownloadedFile == null) {
-				WasdiLog.debugLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
+				WasdiLog.warnLog("FileBufferResource.PublishBand: cannot find downloaded file, return");
 				return oReturnValue;
 			}
 			
@@ -595,203 +525,4 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
-	
-	/**
-	 * Download a SLD style
-	 * @param sSessionId Session Token
-	 * @param sTokenSessionId Alternative session token to allow client download
-	 * @param sStyle Name of the style to download
-	 * @return SLD file
-	 */
-	@GET
-	@Path("downloadstyle")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadStyleByName(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("token") String sTokenSessionId,
-			@QueryParam("style") String sStyle)
-	{			
-
-		WasdiLog.debugLog("FileBufferResource.downloadStyleByName( Style: " + sStyle + " )");
-
-		try {
-
-			if( Utils.isNullOrEmpty(sSessionId) == false) {
-				sTokenSessionId = sSessionId;
-			}
-
-			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
-
-			if (oUser == null) {
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
-			StyleRepository oStyleRepository = new StyleRepository();
-			Style oStyle = oStyleRepository.getStyleByName(sStyle);
-			
-			if (oStyle == null) {
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: invalid style");
-				return Response.status(Status.BAD_REQUEST).build();				
-			}
-			
-			//check the user can access the workspace
-			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), oStyle.getStyleId())) {
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: user cannot access style");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}			
-
-			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sStyleSldPath = sDownloadRootPath + "styles/" + sStyle + ".sld";
-
-			File oFile = new File(sStyleSldPath);
-
-			ResponseBuilder oResponseBuilder = null;
-
-			if(oFile.exists()==false) {
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: file does not exists " + oFile.getPath());
-				oResponseBuilder = Response.serverError();	
-			} 
-			else {
-
-				WasdiLog.debugLog("FileBufferResource.downloadStyleByName: returning file " + oFile.getPath());
-
-				FileStreamingOutput oStream;
-				oStream = new FileStreamingOutput(oFile);
-
-				oResponseBuilder = Response.ok(oStream);
-				oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
-				oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
-			}
-
-			return oResponseBuilder.build();
-
-		} 
-		catch (Exception oEx) {
-			WasdiLog.errorLog("FileBufferResource.downloadStyleByName: " + oEx);
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Uplad a .sld file
-	 * @param fileInputStream File Input Stream
-	 * @param sSessionId User id
-	 * @param sName style name
-	 * @return std http response
-	 */
-	@POST
-	@Path("/uploadstyle")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadStyle(@FormDataParam("file") InputStream fileInputStream,
-			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName)  {
-
-		WasdiLog.debugLog("FileBufferResource.uploadStyle( Name: " + sName);
-
-		try {
-			// Check authorization
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-
-			if (oUser == null) {
-				WasdiLog.debugLog("FileBufferResource.uploadStyle: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-			
-//			if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-//				WasdiLog.debugLog("FileBufferResource.uploadStyle: No valid Subscription");
-//				return Response.status(Status.UNAUTHORIZED).build();				
-//			}			
-
-			// Get Download Path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-
-			File oStylesPath = new File(sDownloadRootPath + "styles/");
-
-			if (!oStylesPath.exists()) {
-				oStylesPath.mkdirs();
-			}
-
-			// Generate Workflow Id and file
-			File oStyleXmlFile = new File(sDownloadRootPath + "styles/" + sName + ".sld");
-
-			WasdiLog.debugLog("FileBufferResource.uploadStyle: style file Path: " + oStyleXmlFile.getPath());
-
-			// save uploaded file
-			int iRead = 0;
-			byte[] ayBytes = new byte[1024];
-
-			try(OutputStream oOutStream = new FileOutputStream(oStyleXmlFile)) {
-				while ((iRead = fileInputStream.read(ayBytes)) != -1) {
-					oOutStream.write(ayBytes, 0, iRead);
-				}
-				oOutStream.flush();
-			}
-			
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("FileBufferResource.uploadStyle: " + oEx);
-			return Response.serverError().build();
-		}
-		
-		return Response.ok().build();
-	}
-	
-	
-	@GET
-	@Path("/styles")	
-	public Response getStyles(@HeaderParam("x-session-token") String sSessionId)
-	{			
-
-		WasdiLog.debugLog("FileBufferResource.getStyles");
-
-		try {
-
-			User oUser = Wasdi.getUserFromSession(sSessionId);
-
-			if (oUser == null) {
-				WasdiLog.debugLog("FileBufferResource.getStyles: invalid session");
-				return Response.status(Status.UNAUTHORIZED).build();
-			}
-
-			// Take path
-			String sDownloadRootPath = Wasdi.getDownloadPath();
-			String sStyleSldPath = sDownloadRootPath + "styles/";
-
-			File oFile = new File(sStyleSldPath);
-			
-			File [] aoStyleFiles = oFile.listFiles(new FilenameFilter() {
-			    @Override
-			    public boolean accept(File dir, String sName) {
-			        return sName.toLowerCase().endsWith(".sld");
-			    }
-			});
-			
-			ArrayList<String> asStyles = new ArrayList<>(); 
-
-			if (aoStyleFiles != null) {
-				for (File oSldFile : aoStyleFiles) {
-					try {
-						String sFileName = oSldFile.getName();
-						
-						String sStyle = WasdiFileUtils.getFileNameWithoutExtensionsAndTrailingDots(sFileName);
-						
-						asStyles.add(sStyle);
-					}
-					catch (Exception oEx) {
-						WasdiLog.errorLog("FileBufferResource.getStyles: error " + oEx.toString());
-					}
-				}				
-			}
-
-			return Response.ok(asStyles).build();
-		} 
-		catch (Exception oEx) {
-			WasdiLog.errorLog("FileBufferResource.getStyles: " + oEx);
-		}
-
-		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-	}	
-	
-
 }

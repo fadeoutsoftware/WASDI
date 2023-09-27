@@ -1,8 +1,6 @@
-package wasdi.shared.business;
+package wasdi.shared.business.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import wasdi.shared.utils.PermissionsUtils;
 
 /**
  * WASDI User

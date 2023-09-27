@@ -21,6 +21,7 @@ public class AppListViewModel {
 	private boolean isMine;
 	private boolean buyed;
 	private String logo;
+	private boolean readOnly;
 	
 	public Float getPrice() {
 		return price;
@@ -94,6 +95,12 @@ public class AppListViewModel {
 	}
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

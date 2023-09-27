@@ -39,8 +39,8 @@ service('AdminDashboardService', ['$http',  'ConstantsService', function ($http,
         return this.m_oHttp.get(sUrl);
     };
 
-    this.addResourcePermission = function(sResourceType, sResourceId, sUserId) {
-        return this.m_oHttp.post(this.APIURL + '/admin/resourcePermissions?resourceType=' + sResourceType + "&resourceId="+ sResourceId + "&userId=" + sUserId);
+    this.addResourcePermission = function(sResourceType, sResourceId, sUserId, sRights) {
+        return this.m_oHttp.post(this.APIURL + '/admin/resourcePermissions?resourceType=' + sResourceType + "&resourceId="+ sResourceId + "&userId=" + sUserId+ "&rights=" + sRights);
     };
 
     this.removeResourcePermission = function(sResourceType, sResourceId, sUserId) {

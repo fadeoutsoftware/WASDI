@@ -36,7 +36,7 @@ import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import satLib.astro.time.Time;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -81,7 +81,7 @@ public class OpportunitySearchResource {
 
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
-				WasdiLog.debugLog("OpportunitySearchResource.search: invalid session");
+				WasdiLog.warnLog("OpportunitySearchResource.search: invalid session");
 				return aoCoverageSwathResultViewModels;
 			}
 			
@@ -370,7 +370,7 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null == oUser) {
-			WasdiLog.debugLog("OpportunitySearchResource.getSatelliteTrack: invalid session");
+			WasdiLog.warnLog("OpportunitySearchResource.getSatelliteTrack: invalid session");
 			return oReturnViewModel;
 		}
 
@@ -438,7 +438,7 @@ public class OpportunitySearchResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("OpportunitySearchResource.getKmlSearchResults: invalid session");
+			WasdiLog.warnLog("OpportunitySearchResource.getKmlSearchResults: invalid session");
 			return null;
 		}
 		if (sFootPrint.isEmpty() || sText.isEmpty()) {
@@ -503,7 +503,7 @@ public class OpportunitySearchResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if(null==oUser) {
-			WasdiLog.debugLog("OpportunitySearchResource.getUpdatedSatelliteTrack: invalid session");
+			WasdiLog.warnLog("OpportunitySearchResource.getUpdatedSatelliteTrack: invalid session");
 			return null;
 		}
 
@@ -589,7 +589,7 @@ public class OpportunitySearchResource {
 		try {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if(null==oUser) {
-				WasdiLog.debugLog("OpportunitySearchResource.getSatellitesResources: invalid session");
+				WasdiLog.warnLog("OpportunitySearchResource.getSatellitesResources: invalid session");
 				return aaoReturnValue;
 			}
 

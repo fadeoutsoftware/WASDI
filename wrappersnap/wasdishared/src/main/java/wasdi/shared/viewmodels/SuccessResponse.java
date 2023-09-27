@@ -1,18 +1,21 @@
 package wasdi.shared.viewmodels;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class SuccessResponse {
+	
+	public SuccessResponse() {
+		
+	}
+	public SuccessResponse(String sMessage) {
+		this.message = sMessage;
+	}
 
 	private String message;
+
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
 }

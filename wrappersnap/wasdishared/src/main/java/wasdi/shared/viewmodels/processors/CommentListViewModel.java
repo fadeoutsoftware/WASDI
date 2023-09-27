@@ -2,11 +2,6 @@ package wasdi.shared.viewmodels.processors;
 
 import java.util.Date;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * Comment ListViewModel
  * 
@@ -15,10 +10,6 @@ import lombok.Setter;
  * @author PetruPetrescu
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class CommentListViewModel {
 
 	private String commentId;
@@ -26,5 +17,35 @@ public class CommentListViewModel {
 	private String userId;
 	private Date date;
 	private String text;
+	public String getCommentId() {
+		return commentId;
+	}
+	public void setCommentId(String commentId) {
+		this.commentId = commentId;
+	}
+	public String getReviewId() {
+		return reviewId;
+	}
+	public void setReviewId(String reviewId) {
+		this.reviewId = reviewId;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public Date getDate() {
+		return date;
+	}
+	public void setDate(Date date) {
+		this.date = date;
+	}
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
+	}
 
 }

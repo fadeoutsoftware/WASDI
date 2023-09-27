@@ -13,7 +13,7 @@
                             ng-click="m_oController.downloadStyle(style)">
                         <em class="fa fa-download"></em>
                     </button>
-                    <button ng-show="m_oController.m_oConstantsService.getUserId()===style.userId || style.sharedWithMe"
+                    <button ng-show="style.readOnly==false"
                             class="wapps-button" title='{{"DIALOG_EDIT_BUTTON"|translate}}'
                             ng-click="m_oController.openEditStyleDialog(style)">
                         <em class="fa fa-edit"></em>
