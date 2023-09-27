@@ -245,9 +245,9 @@ public class MODISUtils {
 		    					ModisItemForWriting oItem = buildModisItem(asProperties);
 		    					oModisRepo.insertModisItem(oItem);
 		    					iProdCounts++;
+		    					WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
 	    					}
 	    					
-	    					WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. product added to db: " + asProperties.getOrDefault(s_sFileName, "null"));
 	    				} else {
 	    					WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Impossible to read metadata and add product to db for line: " + sLine);
 	    				}
