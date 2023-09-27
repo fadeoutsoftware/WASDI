@@ -2277,7 +2277,8 @@ public class dbUtils {
 
             System.out.println("\t1 - Proceed with the import of all documents from the data provider");
             System.out.println("\t2 - Specify the lines of the CSV file to read and import the documents FROM THE DATA PROVIDER");
-            System.out.println("\t3 - Specify the lines of the CSV file to read and import the documents reading the metadata FROM THE CSV FILE");
+            System.out.println("\t3 - Specify the lines of the CSV file to read and import the documents FROM THE CSV FILE");
+            System.out.println("\t4 - Repair database reading metadata of missing documents from CSV file");
             System.out.println("\tx - back to main menu");
             System.out.println("");
 
@@ -2328,6 +2329,11 @@ public class dbUtils {
                 	MODISUtils.insertProductsFromCsv(iStartLine, iEndLine);
                 
                 return;
+            }
+            
+            if (sInputString.equals("4")) {
+            	System.out.println("You chose to fill the db with the missing data");
+            	MODISUtils.insertMissingProductsFromCsv();
             }
             
 
