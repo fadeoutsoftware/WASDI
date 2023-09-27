@@ -202,6 +202,7 @@ public class MODISUtils {
     }
     
     public static void insertMissingProductsFromCsv() throws Exception {
+    	WasdiLog.debugLog("insertMissingProductsFromCsv - read the whole CSV");
     	insertMissingProductsFromCsv(-1, -1);
     }
     
@@ -213,7 +214,7 @@ public class MODISUtils {
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
     	
-    	
+    	WasdiLog.debugLog("insertMissingProductsFromCsv - method started");
     	
     	try {
     		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
@@ -225,6 +226,7 @@ public class MODISUtils {
     			iCurrentLine ++;
     			
     			if (!bImportAll && iCurrentLine < iStartLine) {
+    		    	WasdiLog.debugLog("Skipping line: " + iCurrentLine);
     				continue;
     			}
     			
@@ -232,6 +234,8 @@ public class MODISUtils {
     				WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Lines have been read.");
     				break;
     			}
+    			
+		    	WasdiLog.debugLog("Reading line: " + iCurrentLine);
     			   			
     			try {
 	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)    				
