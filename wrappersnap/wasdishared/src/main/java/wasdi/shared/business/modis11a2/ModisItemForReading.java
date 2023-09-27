@@ -6,86 +6,80 @@ public class ModisItemForReading {
 		
 	}
 	
-	private String sFileName;
-	private long lFileSize;
-	private String sDayNightFlag;
+	private String fileName;
+	private long fileSize;
+	private String dayNightFlag;
 	
-	private Double dStartDate;
-	private Double dEndDate;
+	private Double startDate;
+	private Double endDate;
 
-	private ModisLocation oBoundingBox;
+	private ModisLocation boundingBox;
 
-	private String sInstrument; 
-	private String sSensor;
-	private String sLatitude;
-	private String sPlatform;
-	private String sUrl;
+	private String instrument; 
+	private String sensor;
+	private String platform;
+	private String url;
 	
-	public String getSFileName() {
-		return sFileName;
+	public String getFileName() {
+		return fileName;
 	}
-	public void setSFileName(String sFileName) {
-		this.sFileName = sFileName;
+	public void setFileName(String sFileName) {
+		this.fileName = sFileName;
 	}
-	public long getLFileSize() {
-		return lFileSize;
+	public long getFileSize() {
+		return fileSize;
 	}
-	public void setLFileSize(long lFileSize) {
-		this.lFileSize = lFileSize;
+	public void setFileSize(long lFileSize) {
+		this.fileSize = lFileSize;
 	}
-	public String getSDayNightFlag() {
-		return sDayNightFlag;
+	public String getDayNightFlag() {
+		return dayNightFlag;
 	}
-	public void setSDayNightFlag(String sDayNightFlag) {
-		this.sDayNightFlag = sDayNightFlag;
+	public void setDayNightFlag(String sDayNightFlag) {
+		this.dayNightFlag = sDayNightFlag;
 	}
-	public Double getDStartDate() {
-		return dStartDate;
+	public Double getStartDate() {
+		return startDate;
 	}
-	public void setDStartDate(Double dStartDate) {
-		this.dStartDate = dStartDate;
+	public void setStartDate(Double dStartDate) {
+		this.startDate = dStartDate;
 	}
-	public Double getDEndDate() {
-		return dEndDate;
+	public Double getEndDate() {
+		return endDate;
 	}
 	public void setDEndDate(Double dEndDate) {
-		this.dEndDate = dEndDate;
+		this.endDate = dEndDate;
 	}
-	public ModisLocation getOBoundingBox() {
-		return oBoundingBox;
+	public ModisLocation getBoundingBox() {
+		return boundingBox;
 	}
-	public void setOBoundingBox(ModisLocation oBoundingBox) {
-		this.oBoundingBox = oBoundingBox;
+	public void setBoundingBox(ModisLocation oBoundingBox) {
+		this.boundingBox = oBoundingBox;
 	}
-	public String getSInstrument() {
-		return sInstrument;
+	public String getInstrument() {
+		return instrument;
 	}
 	public void setSInstrument(String sInstrument) {
-		this.sInstrument = sInstrument;
+		this.instrument = sInstrument;
 	}
-	public String getSSensor() {
-		return sSensor;
+	public String getSensor() {
+		return sensor;
 	}
-	public void setSSensor(String sSensor) {
-		this.sSensor = sSensor;
+	public void setSensor(String sSensor) {
+		this.sensor = sSensor;
 	}
-	public String getSLatitude() {
-		return sLatitude;
-	}
-	public void setSLatitude(String sLatitude) {
-		this.sLatitude = sLatitude;
-	}
-	public String getSPlatform() {
-		return sPlatform;
+
+	public String getPlatform() {
+		return platform;
 	}
 	public void setSPlatform(String sPlatform) {
-		this.sPlatform = sPlatform;
+		this.platform = sPlatform;
 	}
-	public String getSUrl() {
-		return sUrl;
+	public String getUrl() {
+		return url;
 	}
-	public void setSUrl(String sUrl) {
-		this.sUrl = sUrl;
+	public void setUrl(String sUrl) {
+		this.url = sUrl;
 	}
 
 }
