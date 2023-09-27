@@ -2,7 +2,7 @@
     <!-- SHARING DATA -->
     <div class="container-fluid" ng-show="true">
         <div class="row give-permission-row">
-            <form class="d-flex flex-row">
+            <form class="d-flex flex-row align-items-center">
                 <div class="form-group mr-3" style="width: 45%">
                     <h4 class="text-success">
                         {{"DIALOG_WORKFLOW_TAB_SHARE_WF"|translate}}
@@ -19,9 +19,9 @@
                         placeholder='{{"DIALOG_PROCESSOR_SHARE_MAIL"|translate}}'
                     />
                 </div>
-                <div class="dropdown my-dropdown">
-                    <button class="btn btn-default dropdown-toggle w-100" type="button"
-                            id="dropdownPermissionSelection" data-toggle="dropdown" style="font-weight: 600;">
+                <div class="dropdown mb-4 mr-1 align-self-end">
+                    <button class="btn btn-default dropdown-toggle" type="button"
+                    id="dropdownPermissionSelection" data-toggle="dropdown" style="font-weight: 600;">
                         {{m_oController.m_sRights}}
                         <span class="caret"></span>
                     </button>
