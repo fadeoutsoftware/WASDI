@@ -31,7 +31,7 @@
                 <div class="row">
                     <!-- LIST OF FILES -->
                     <multiselect options="m_oController.m_aoListOfFiles" selected="m_oController.m_aoSelectedFiles"></multiselect>
-                    <button type="button" class="btn btn-primary btn-wasdi" ng-click="m_oController.ingestAllSelectedFiles()">
+                    <button type="button" class="btn btn-primary btn-wasdi" ng-click="m_oController.ingestAllSelectedFiles()" ng-show="m_oController.m_oConstantsService.isWorkspaceReadOnly()==false">
                         {{"DIALOG_SFTP_UPLOAD_ADD_TO_WORKSPACE_BUTTON"|translate}}
                     </button>
                 </div>

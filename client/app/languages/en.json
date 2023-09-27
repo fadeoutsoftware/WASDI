@@ -549,7 +549,6 @@
 	"WAP_AUTO_REVIEW":"NOT FAIR TO AUTO REVIEW",
 	"WAP_UPDATE":"UPDATE",
 	"WAP_DELETE":"DELETE",
-	"WAP_ADD_COMMENT":"ADD A COMMENT",
 	"WAP_SHOW_COMMENTS":"SHOW COMMENTS",
 	"WAP_HIDE_COMMENTS":"HIDE COMMENTS",
 	"WAP_NO_COMMENTS":"THERE ARE NO COMMENTS",
@@ -893,5 +892,7 @@
 	"DIALOG_EDIT_PROJECT_CHANGE_ACTIVE": "Change Active",
 
 	"DIALOG_EDIT_PROJECT_SELECT_ACTIVE_PROJECT": "Select the Active Project",
-	"MSG_ERROR_ACTIVE_PROJECT_REQUIRED": "A valid subscription and an active project are required. Please see the User Dashboard."
+	"MSG_ERROR_ACTIVE_PROJECT_REQUIRED": "A valid subscription and an active project are required. Please see the User Dashboard.",
+
+	"READ_ONLY" : "Read Only"
 }

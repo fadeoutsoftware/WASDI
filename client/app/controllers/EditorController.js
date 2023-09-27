@@ -1892,6 +1892,16 @@
         return true;
     };
 
+    EditorController.prototype.isWorkspaceReadOnly = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) return true;
+
+        try {
+            return this.m_oActiveWorkspace.readOnly;
+          } catch (error) {
+            return true;
+          }
+    }
+
 
     /**
      * GENERATE TREE
@@ -2039,6 +2049,7 @@
                             DeleteProduct: {
                                 label: sDelete,
                                 icon: "fa fa-trash",
+                                _disabled: oController.isWorkspaceReadOnly(),
 
                                 action: function (obj) {
                                     utilsVexDialogConfirm(
@@ -2212,6 +2223,7 @@
                             DeleteSelectedProduct: {
                                 label: oController.getDeleteLabel(),
                                 icon: "fa fa-trash",
+                                _disabled: oController.isWorkspaceReadOnly(),
 
                                 action: function (obj) {
                                     let asSelectedProducts =

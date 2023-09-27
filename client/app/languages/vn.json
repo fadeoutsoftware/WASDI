@@ -463,7 +463,6 @@
     "WAP_AUTO_REVIEW": "ĐÁNH GIÁ TỰ ĐỘNG KHÔNG CÔNG BẰNG",
     "WAP_UPDATE": "CẬP NHẬT",
     "WAP_DELETE": "XÓA",
-    "WAP_ADD_COMMENT": "THÊM MỘT BÌNH LUẬN",
     "WAP_SHOW_COMMENTS": "HIỂN THỊ BÌNH LUẬN",
     "WAP_HIDE_COMMENTS": "DẤU BÌNH LUẬN",
     "WAP_NO_COMMENTS": "KHÔNG CÓ BÌNH LUẬN",
@@ -678,5 +677,7 @@
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Phiên bản mới nhất",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Hành động",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Lỗi khi liên hệ với dịch vụ JupyterLab"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Lỗi khi liên hệ với dịch vụ JupyterLab",
+
+	"READ_ONLY" : "Read Only"
 }

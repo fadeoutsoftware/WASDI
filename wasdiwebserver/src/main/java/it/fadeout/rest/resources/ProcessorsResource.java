@@ -350,16 +350,18 @@ public class ProcessorsResource  {
 				
 				// See if this is a processor the user can access to
 				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
-
 				
 				DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel();
 				
-				if (oSharing != null) {
+				if (oProcessor.getUserId().equals(oUser.getUserId())) {
+					oDeployedProcessorViewModel.setReadOnly(false);
+				}				
+				else if (oSharing != null) {
 					oDeployedProcessorViewModel.setSharedWithMe(true);
 					oDeployedProcessorViewModel.setReadOnly(oSharing.readOnly());
 				}
-				if (oProcessor.getUserId().equals(oUser.getUserId())) {
-					oDeployedProcessorViewModel.setReadOnly(false);
+				else {
+					oDeployedProcessorViewModel.setReadOnly(true);
 				}
 				
 				oDeployedProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
@@ -610,6 +612,10 @@ public class ProcessorsResource  {
 						oAppListViewModel.setIsMine(false);
 						oAppListViewModel.setReadOnly(true);						
 					}
+				}
+				else {
+					oAppListViewModel.setIsMine(false);
+					oAppListViewModel.setReadOnly(true);					
 				}
 				
 				oAppListViewModel.setProcessorDescription(oProcessor.getDescription());

@@ -100,6 +100,7 @@
                                             <button
                                                 class="btn btn-danger btn-wasdi"
                                                 ng-click="m_oController.disablePermissionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser.userId)"
+                                                ng-show="m_oController.m_oConstantsService.isWorkspaceReadOnly()==false"
                                             >
                                                 <!--Remove Sharing-->
                                                 <i
@@ -107,9 +108,7 @@
                                                     aria-hidden="true"
                                                     style="margin-right: 0px"
                                                 ></i>
-                                                <span class="ng-binding"
-                                                    >{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span
-                                                >
+                                                <span class="ng-binding">{{"DIALOG_SHARE_WS_REMOVE"|translate}}</span>
                                             </button>
                                         </td>
                                     </tr>
