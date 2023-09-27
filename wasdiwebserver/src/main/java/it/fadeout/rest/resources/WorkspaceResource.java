@@ -24,8 +24,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.services.ProcessWorkspaceService;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.CloudProvider;
@@ -96,23 +94,24 @@ public class WorkspaceResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
-		List<WorkspaceListInfoViewModel> aoWSList = new ArrayList<>();
+		List<WorkspaceListInfoViewModel> aoUserWorkspacesList = new ArrayList<>();
 		
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.warnLog("WorkspaceResource.getListByUser: invalid session");
-			return aoWSList;
+			return aoUserWorkspacesList;
 		}
 
 		try {
 
 			WasdiLog.debugLog("WorkspaceResource.getListByUser: workspaces for " + oUser.getUserId());
-
+			
+			// Get the node list
 			NodeRepository oNodeRepository = new NodeRepository();
 			List<Node> aoNodeList = oNodeRepository.getNodesList();
-
-			Map<String, Node> aoNodeMap = aoNodeList.stream()
-					.collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
+			
+			// And create a map based on the node code
+			Map<String, Node> aoNodeMap = aoNodeList.stream().collect(Collectors.toMap(Node::getNodeCode, Function.identity()));
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
@@ -160,7 +159,7 @@ public class WorkspaceResource {
 					}
 				}
 
-				aoWSList.add(oWSViewModel);
+				aoUserWorkspacesList.add(oWSViewModel);
 			}
 
 			// Get the list of workspace shared with this user
@@ -185,6 +184,7 @@ public class WorkspaceResource {
 					oWSViewModel.setNodeCode(oWorkspace.getNodeCode());
 					oWSViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 					oWSViewModel.setPublic(oWorkspace.isPublic());
+					oWSViewModel.setReadonly(!aoSharedWorkspaces.get(iWorkspaces).canWrite());
 
 					if (!Utils.isNullOrEmpty(oWorkspace.getNodeCode())) {
 						if (oWorkspace.getNodeCode().equals("wasdi")) {
@@ -212,8 +212,7 @@ public class WorkspaceResource {
 						}
 					}
 
-					aoWSList.add(oWSViewModel);
-
+					aoUserWorkspacesList.add(oWSViewModel);
 				}
 			}
 
@@ -221,7 +220,7 @@ public class WorkspaceResource {
 			WasdiLog.errorLog("WorkspaceResource.getListByUser error: " + oEx);
 		}
 
-		return aoWSList;
+		return aoUserWorkspacesList;
 	}
 
 	/**
@@ -240,7 +239,7 @@ public class WorkspaceResource {
 
 		WasdiLog.debugLog("WorkspaceResource.GetWorkspaceEditorViewModel( WS: " + sWorkspaceId + ")");
 
-		WorkspaceEditorViewModel oVM = new WorkspaceEditorViewModel();
+		WorkspaceEditorViewModel oWorkspaceEditorViewModel = new WorkspaceEditorViewModel();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -253,31 +252,32 @@ public class WorkspaceResource {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
 				WasdiLog.warnLog("WorkspaceResource.getWorkspaceEditorViewModel: invalid workspace id");
-				return oVM;
+				return oWorkspaceEditorViewModel;
 			}
-
+			
+			// The user can access the workspace?
 			if(!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
 				WasdiLog.warnLog("WorkspaceResource.getWorkspaceEditorViewModel: user cannot access workspace info, aborting");
-				return oVM;
+				return oWorkspaceEditorViewModel;
 			}
 
 			// Create repo
 			WorkspaceRepository oWSRepository = new WorkspaceRepository();
-			
             UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			
 			// Get requested workspace
 			Workspace oWorkspace = oWSRepository.getWorkspace(sWorkspaceId);
-			oVM.setUserId(oWorkspace.getUserId());
-			oVM.setWorkspaceId(oWorkspace.getWorkspaceId());
-			oVM.setName(oWorkspace.getName());
-			oVM.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
-			oVM.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
-			oVM.setNodeCode(oWorkspace.getNodeCode());
-			oVM.setPublic(oWorkspace.isPublic());
+			oWorkspaceEditorViewModel.setUserId(oWorkspace.getUserId());
+			oWorkspaceEditorViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
+			oWorkspaceEditorViewModel.setName(oWorkspace.getName());
+			oWorkspaceEditorViewModel.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
+			oWorkspaceEditorViewModel.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
+			oWorkspaceEditorViewModel.setNodeCode(oWorkspace.getNodeCode());
+			oWorkspaceEditorViewModel.setPublic(oWorkspace.isPublic());
+			oWorkspaceEditorViewModel.setReadonly(!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oWorkspace.getWorkspaceId()));
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oVM.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
+			oWorkspaceEditorViewModel.setProcessesCount(oProcessWorkspaceRepository.countByWorkspace(sWorkspaceId)); 
 			// If the workspace is on another node, copy the url to the view model
 			if (oWorkspace.getNodeCode().equals("wasdi") == false) {
 				// Get the Node
@@ -286,34 +286,33 @@ public class WorkspaceResource {
 				Node oWorkspaceNode = oNodeRepository.getNodeByCode(sNodeCode);
 				if (oWorkspaceNode != null) {
 					if (oWorkspaceNode.getActive()) {
-						oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+						oWorkspaceEditorViewModel.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
 					} else {
-						oVM.setApiUrl(WasdiConfig.Current.baseUrl);
+						oWorkspaceEditorViewModel.setApiUrl(WasdiConfig.Current.baseUrl);
 					}
 
-					oVM.setActiveNode(oWorkspaceNode.getActive());
+					oWorkspaceEditorViewModel.setActiveNode(oWorkspaceNode.getActive());
 										
 					if (!Utils.isNullOrEmpty(oWorkspaceNode.getCloudProvider())) {
-						oVM.setCloudProvider(oWorkspaceNode.getCloudProvider());
+						oWorkspaceEditorViewModel.setCloudProvider(oWorkspaceNode.getCloudProvider());
 						
 						CloudProviderRepository oCloudProviderRepository = new CloudProviderRepository();
 						CloudProvider oCloudProvider = oCloudProviderRepository.getCloudProviderByCode(oWorkspaceNode.getCloudProvider());
 						
 						if (oCloudProvider != null) {
-							oVM.setSlaLink(oCloudProvider.getSlaLink());
+							oWorkspaceEditorViewModel.setSlaLink(oCloudProvider.getSlaLink());
 						}
 						
 					}
 					else {
-						oVM.setCloudProvider(oWorkspaceNode.getNodeCode());
+						oWorkspaceEditorViewModel.setCloudProvider(oWorkspaceNode.getNodeCode());
 					}
 				}
 			
 			}
 			else {
-				oVM.setCloudProvider("wasdi");
-
-				oVM.setActiveNode(true);
+				oWorkspaceEditorViewModel.setCloudProvider("wasdi");
+				oWorkspaceEditorViewModel.setActiveNode(true);
 			}
 
 			// Get Sharings
@@ -321,19 +320,19 @@ public class WorkspaceResource {
 			
 			// Add Sharings to View Model
 			if (aoSharings != null) {
-				if (oVM.getSharedUsers() == null) {
-					oVM.setSharedUsers(new ArrayList<String>());
+				if (oWorkspaceEditorViewModel.getSharedUsers() == null) {
+					oWorkspaceEditorViewModel.setSharedUsers(new ArrayList<String>());
 				}
 
 				for (UserResourcePermission oSharing : aoSharings) {
-					oVM.getSharedUsers().add(oSharing.getUserId());
+					oWorkspaceEditorViewModel.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog( "WorkspaceResource.getWorkspaceEditorViewModel error: " + oEx);
 		}
 
-		return oVM;
+		return oWorkspaceEditorViewModel;
 	}
 
 	/**

@@ -39,8 +39,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.SnapWorkflow;
