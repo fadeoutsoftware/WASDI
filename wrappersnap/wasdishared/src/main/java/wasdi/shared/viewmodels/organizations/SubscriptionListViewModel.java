@@ -13,7 +13,7 @@ public class SubscriptionListViewModel {
 	private String reason;
 	private boolean buySuccess;
 	private Long runningTime;
-	private boolean readyOnly=false;
+	private boolean readOnly=false;
 	
 	public String getSubscriptionId() {
 		return subscriptionId;
@@ -81,11 +81,11 @@ public class SubscriptionListViewModel {
 	public void setRunningTime(Long runningTime) {
 		this.runningTime = runningTime;
 	}
-	public boolean isReadyOnly() {
-		return readyOnly;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
-	public void setReadyOnly(boolean readyOnly) {
-		this.readyOnly = readyOnly;
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

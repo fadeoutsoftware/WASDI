@@ -97,7 +97,7 @@ SubscriptionsManageController = (function () {
             return false;
         }
 
-        var oController = this;
+        //var oController = this;
 
         this.m_oModalService.showModal({
             templateUrl: "dialogs/subscription-projects/SubscriptionProjectsDialog.html",
@@ -113,7 +113,7 @@ SubscriptionsManageController = (function () {
                 backdrop: 'static'
             })
             modal.close.then(function () {
-                oController.initializeProjectsInfo();
+                //oController.initializeProjectsInfo();
             })
 
         })

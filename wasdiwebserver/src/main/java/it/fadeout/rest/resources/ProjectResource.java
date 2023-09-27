@@ -143,8 +143,6 @@ public class ProjectResource {
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		List<ProjectListViewModel> aoProjectList = new ArrayList<>();
-
 		// Domain Check
 		if (oUser == null) {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: invalid session");
@@ -159,12 +157,14 @@ public class ProjectResource {
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();						
 		}		
 		
-		if (PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+		if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 			WasdiLog.warnLog("ProjectResource.getListBySubscription: user cannot access the subscription");
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_CANNOT_ACCESS.name())).build();			
 		}
 
 		try {
+			
+			List<ProjectListViewModel> aoProjectList = new ArrayList<>();
 
 			String sSubscriptionName = null;
 

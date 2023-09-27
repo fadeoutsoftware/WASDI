@@ -137,7 +137,7 @@ public class SubscriptionResource {
 				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
 				
 				if (oSubscriptionViewModel != null) {
-					oSubscriptionViewModel.setReadyOnly(false);
+					oSubscriptionViewModel.setReadOnly(false);
 					aoSubscriptionLVM.add(oSubscriptionViewModel);
 				}
 				else {
@@ -166,7 +166,7 @@ public class SubscriptionResource {
 						
 						if (oSubscriptionViewModel != null) {
 							
-							oSubscriptionViewModel.setReadyOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+							oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
 							aoSubscriptionLVM.add(oSubscriptionViewModel);
 						}
 						else {
@@ -201,7 +201,7 @@ public class SubscriptionResource {
 							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
 	
 					if (oSubscriptionViewModel!=null) {
-						oSubscriptionViewModel.setReadyOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
+						oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId()));
 						aoSubscriptionLVM.add(oSubscriptionViewModel);
 					}
 					else {

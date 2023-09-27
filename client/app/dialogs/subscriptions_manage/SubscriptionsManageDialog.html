@@ -38,7 +38,7 @@
                                     title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}
                                     ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId, false)">
                                     <!--Show Users-->
-                                    <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
+                                    <i  ng-show="oSubscription.readOnly === false" class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
                                 </button>
                                 <button class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
@@ -49,9 +49,8 @@
 
 
 
-                                <button class="btn btn-primary btn-wasdi"
+                                <button ng-show="oSubscription.readOnly === false" 3class="btn btn-primary btn-wasdi"
                                     title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                                    ng-show="oSubscription.readOnly"
                                     ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                                     <!--Edit Subscription-->
                                     <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
