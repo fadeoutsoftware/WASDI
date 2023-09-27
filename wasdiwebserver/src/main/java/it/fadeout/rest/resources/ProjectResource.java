@@ -35,6 +35,17 @@ import wasdi.shared.viewmodels.organizations.ProjectListViewModel;
 import wasdi.shared.viewmodels.organizations.ProjectViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 
+
+/**
+ * Projects Resource.
+ * 	Hosts the api to let the user create new projects and select the active one.
+ * 		.create edit and delete projects
+ * 		.set active projects
+ * 		.read projects
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/projects")
 public class ProjectResource {
 	/**

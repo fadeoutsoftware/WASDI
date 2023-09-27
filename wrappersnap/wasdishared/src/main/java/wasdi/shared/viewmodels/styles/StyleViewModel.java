@@ -16,6 +16,7 @@ public class StyleViewModel {
 	private String description;
 	private boolean isPublic;
 	private String userId;
+	private boolean readOnly;
 
 	// This field should be initialized before return the view model checking in the style sharing
 	// through the repositories 
@@ -93,6 +94,14 @@ public class StyleViewModel {
 
 	public void setSharedWithMe(boolean sharedWithMe) {
 		this.sharedWithMe = sharedWithMe;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

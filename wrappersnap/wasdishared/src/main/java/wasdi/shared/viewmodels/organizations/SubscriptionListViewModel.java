@@ -5,20 +5,16 @@ public class SubscriptionListViewModel {
 	private String subscriptionId;
 	private String ownerUserId;
 	private String name;
-//	private String description;
 	private String typeId;
 	private String typeName;
-//	private Double buyDate;
 	private String startDate;
 	private String endDate;
-//	private int durationDays;
-//	private String userId;
-//	private String organizationId;
 	private String organizationName;
 	private String reason;
 	private boolean buySuccess;
-	private boolean adminRole;
 	private Long runningTime;
+	private boolean readyOnly=false;
+	
 	public String getSubscriptionId() {
 		return subscriptionId;
 	}
@@ -79,17 +75,17 @@ public class SubscriptionListViewModel {
 	public void setBuySuccess(boolean buySuccess) {
 		this.buySuccess = buySuccess;
 	}
-	public boolean isAdminRole() {
-		return adminRole;
-	}
-	public void setAdminRole(boolean adminRole) {
-		this.adminRole = adminRole;
-	}
 	public Long getRunningTime() {
 		return runningTime;
 	}
 	public void setRunningTime(Long runningTime) {
 		this.runningTime = runningTime;
+	}
+	public boolean isReadyOnly() {
+		return readyOnly;
+	}
+	public void setReadyOnly(boolean readyOnly) {
+		this.readyOnly = readyOnly;
 	}
 
 }

@@ -34,56 +34,35 @@
                             <td>{{m_oController.configureDates(oSubscription.endDate)}}</td>
                             <td style="width: 3rem">{{oSubscription.reason}}</td>
                             <td>
-                                <button ng-show="oSubscription.adminRole === true" class="btn btn-primary btn-wasdi"
+                                <button ng-show="oSubscription.readOnly === false" class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}
                                     ng-click="m_oController.showUsersBySubscription(oSubscription.subscriptionId, false)">
                                     <!--Show Users-->
                                     <i class="fa fa-users fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
-                                    <!--
-                                        <span class="ng-binding"
-                                            >{{"USER_SUBSCRIPTIONS_SHOW_USERS"|translate}}</span
-                                        >
-                                        -->
                                 </button>
                                 <button class="btn btn-primary btn-wasdi"
                                     title={{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}
                                     ng-click="m_oController.showProjectsBySubscription(oSubscription.subscriptionId, oSubscription.name)">
                                     <!--Show Projects-->
                                     <i class="fa fa-briefcase fa-lg" aria-hidden="true" style="margin-right: 0px"></i>
-                                    <!--
-                                        <span class="ng-binding"
-                                            >{{"USER_SUBSCRIPTIONS_SHOW_PROJECTS"|translate}}</span
-                                        >
-                                        -->
                                 </button>
 
 
 
                                 <button class="btn btn-primary btn-wasdi"
                                     title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                                    ng-show="!oSubscription.adminRole"
+                                    ng-show="oSubscription.readOnly"
                                     ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, false)">
                                     <!--Edit Subscription-->
                                     <i class="fa fa-eye" aria-hidden="true" style="margin-right: 0px"></i>
-                                    <!--
-                                        <span class="ng-binding"
-                                            >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
-                                        >
-                                        -->
                                 </button>
                                 <button class="btn btn-primary btn-wasdi"
                                     title={{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}
-                                    ng-show="oSubscription.adminRole"
+                                    ng-show="!oSubscription.readOnly"
                                     ng-click="m_oController.showSubscriptionEditForm(oSubscription.subscriptionId, true)">
                                     <!--Edit Subscription-->
                                     <i class="fa fa-edit" aria-hidden="true" style="margin-right: 0px"></i>
-                                    <!--
-                                        <span class="ng-binding"
-                                            >{{"DIALOG_EDIT_SUBSCRIPTION_EDIT"|translate}}</span
-                                        >
-                                        -->
                                 </button>
-
 
 
                                 <button class="btn btn-danger btn-wasdi"
@@ -91,11 +70,6 @@
                                     ng-click="m_oController.deleteSubscription(oSubscription)">
                                     <!--Delete Subscription-->
                                     <i class="fa fa-times" aria-hidden="true" style="margin-right: 0px"></i>
-                                    <!--
-                                        <span class="ng-binding"
-                                            >{{"DIALOG_EDIT_SUBSCRIPTION_DELETE"|translate}}</span
-                                        >
-                                        -->
                                 </button>
 
                             </td>

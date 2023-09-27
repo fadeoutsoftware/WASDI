@@ -106,4 +106,13 @@ public class UserResourcePermission {
 			return false;
 		}
 	}
+	
+	public boolean readOnly() {
+		try {
+			return this.getPermissions().equals(UserAccessRights.READ.getAccessRight());
+		}
+		catch (Exception oEx) {
+			return false;
+		}
+	}	
 }

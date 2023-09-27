@@ -58,13 +58,36 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.styles.StyleSharingViewModel;
 import wasdi.shared.viewmodels.styles.StyleViewModel;
 
+/**
+ * Style Resource
+ * Hosts the API to let the user upload and manage SLD styles in WASDI
+ * Styles are saved in a WASDI Path that can be obtained using PathsConfig.getStylesPath()
+ * 
+ * 	.Upload Style SLD XML
+ * 	.Edit, Delete Styles
+ * 	.Share Styles with other users
+ * 	.Download styles
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/styles")
 public class StyleResource {
 
+	/**
+	 * Uploads a SLD Style in WASDI
+	 * 
+	 * @param oFileInputStream Stream of the SLD file
+	 * @param sSessionId Session Id
+	 * @param sName Name to assign to the style
+	 * @param sDescription Description to assign to the style
+	 * @param bPublic True to set the style public
+	 * @return Primitive result with bool flag and string value
+	 */
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public PrimitiveResult uploadFile(@FormDataParam("file") InputStream oFileInputStream,
+	public Response uploadFile(@FormDataParam("file") InputStream oFileInputStream,
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) {
@@ -80,7 +103,7 @@ public class StyleResource {
 			if (oUser == null) {
 				WasdiLog.warnLog("StyleResource.uploadFile: invalid session");
 				oResult.setStringValue("Invalid session");
-				return oResult;
+				return Response.status(Status.UNAUTHORIZED).entity(oResult).build();
 			}
 
 			String sUserId = oUser.getUserId();
@@ -89,7 +112,7 @@ public class StyleResource {
 			if (isStyleNameTaken(sName)) {
 				WasdiLog.warnLog("StyleResource.uploadFile: name already used");
 				oResult.setStringValue("The style's name is already used.");
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			// File checking
@@ -98,7 +121,7 @@ public class StyleResource {
 			if (oFileInputStream == null) {
 				WasdiLog.warnLog("StyleResource.uploadFile: invalid file");
 				oResult.setStringValue("Invalid file");
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			// filesystem-side work
@@ -121,22 +144,36 @@ public class StyleResource {
 
 			try (FileReader oFileReader = new FileReader(oStyleSldFile)) {
 				insertStyle(sUserId, sStyleId, sName, sDescription, oStyleSldFile.getPath(), bPublic);
-			} catch (Exception oEx) {
+			} 
+			catch (Exception oEx) {
 				WasdiLog.errorLog("StyleResource.uploadFile: " + oEx);
 				oResult.setStringValue("Error saving the style.");
-				return oResult;
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
 			}
 
 			//geoserver-side work
 			geoServerAddStyle(oStyleSldFile.getPath());
+			
+			oResult.setBoolValue(true);
+			return Response.ok().entity(oResult).build();
+			
 		} catch (Exception oEx2) {
 			WasdiLog.errorLog("StyleResource.uploadFile: " + oEx2);
+			oResult.setBoolValue(true);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
+			
 		}
 
-		oResult.setBoolValue(true);
-		return oResult;
     }
 
+	/**
+	 * Updates a SLD file
+	 * @param oFileInputStream stream of the updated file
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id 
+	 * @param bZipped True if the file is zipped
+	 * @return http ok or other status
+	 */
 	@POST
 	@Path("/updatefile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -144,6 +181,7 @@ public class StyleResource {
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("styleId") String sStyleId,
 			@QueryParam("zipped") Boolean bZipped) {
+		
 		WasdiLog.debugLog("StyleResource.updateFile( InputStream, StyleId: " + sStyleId);
 
 		try {
@@ -176,7 +214,7 @@ public class StyleResource {
 
 			if (oStyle == null) {
 				WasdiLog.warnLog("StyleResource.updateFile: style not found on DB");
-				return Response.notModified("StyleId not found, please check parameters").build();
+				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
 			if (!PermissionsUtils.canUserWriteStyle(oUser.getUserId(), sStyleId)) {
@@ -259,7 +297,6 @@ public class StyleResource {
 				computationalNodesUpdateStyle(sSessionId, sStyleId, oStyleSldFile.getPath());
 			}
 
-
 			//geoserver-side work
 			geoServerUpdateStyleIfExists(oStyle.getName(), oStyleSldFile.getPath());
 		} catch (Exception oEx2) {
@@ -270,6 +307,12 @@ public class StyleResource {
 		return Response.ok().build();
 	}
 
+	/**
+	 * Get the XML content of a Style
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @return XML content of the SLD
+	 */
 	@GET
 	@Path("/getxml")
 	@Produces(MediaType.APPLICATION_XML)
@@ -323,6 +366,13 @@ public class StyleResource {
 		return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 
+	/**
+	 * Updates the style using the text xml
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @param sStyleXml Updated XML (SLD)
+	 * @return http response
+	 */
 	@POST
 	@Path("/updatexml")
 	public Response updateXML(@HeaderParam("x-session-token") String sSessionId,
@@ -334,6 +384,14 @@ public class StyleResource {
 		return updateFile(new ByteArrayInputStream(sStyleXml.getBytes(Charset.forName("UTF-8"))), sSessionId, sStyleId, false);
 	}
 
+	/**
+	 * Update the attributies of a style
+	 * @param sSessionId Session Id
+	 * @param sStyleId Style Id
+	 * @param sDescription Description 
+	 * @param bPublic True to set it public
+	 * @return http response
+	 */
 	@POST
 	@Path("/updateparams")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -360,8 +418,11 @@ public class StyleResource {
 		StyleRepository oStyleRepository = new StyleRepository();
 		Style oStyle = oStyleRepository.getStyle(sStyleId);
 
-		if (oStyle == null)
-			return Response.status(404).build();
+		if (oStyle == null) {
+			WasdiLog.errorLog("StyleResource.updateParams: style not found");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+			
 
 		oStyle.setDescription(sDescription);
 		oStyle.setIsPublic(bPublic);
@@ -389,13 +450,25 @@ public class StyleResource {
 		List<StyleViewModel> aoRetStyles = new ArrayList<>();
 
 		try {
+			// Here we take the list of all the users' styles + the public ones
 			List<Style> aoDbStyles = oStyleRepository.getStylePublicAndByUser(sUserId);
-
-			for (Style oCurWF : aoDbStyles) {
-				StyleViewModel oVM = StyleViewModel.getFromStyle(oCurWF);
-				// check if it was shared, if so, set shared with me to true
-				oVM.setSharedWithMe(false);
-				aoRetStyles.add(oVM);
+			
+			for (Style oCurrentStyle : aoDbStyles) {
+				// Convert the style in view model
+				StyleViewModel oStyleViewModel = StyleViewModel.getFromStyle(oCurrentStyle);
+				
+				// Are we the owner?
+				if (oCurrentStyle.getUserId().equals(oUser.getUserId())) {
+					// Yes: not shared, our own, not read only
+					oStyleViewModel.setSharedWithMe(false);
+					oStyleViewModel.setReadOnly(false);
+				}
+				else {
+					// For now lets assume is read only
+					oStyleViewModel.setReadOnly(true);
+				}
+				
+				aoRetStyles.add(oStyleViewModel);
 			}
 
 			// find sharings by userId
@@ -404,20 +477,26 @@ public class StyleResource {
 
 			// For all the shared styles
 			for (UserResourcePermission oSharing : aoStyleSharing) {
-				// Create the VM
+				
+				// Create the View Model of the style
 				Style oSharedWithMe = oStyleRepository.getStyle(oSharing.getResourceId());
-				StyleViewModel oVM = StyleViewModel.getFromStyle(oSharedWithMe);
+				StyleViewModel oStyleViewModel = StyleViewModel.getFromStyle(oSharedWithMe);
 
-				if (!oVM.isPublic()) {
+				if (!oStyleViewModel.isPublic()) {
 					// This is shared and not public: add to return list
-					oVM.setSharedWithMe(true);
-					aoRetStyles.add(oVM);
-				} else {
-					// This is shared but public, so this is already in our return list
+					oStyleViewModel.setSharedWithMe(true);
+					// Keep if read only or not
+					oStyleViewModel.setReadOnly(!oSharing.canWrite());
+					aoRetStyles.add(oStyleViewModel);
+				} 
+				else {
+					// This is shared but public, so this must be already in our return list
 					for (StyleViewModel oStyle : aoRetStyles) {
 						// Find it and set shared flag = true
 						if (oSharedWithMe.getStyleId().equals(oStyle.getStyleId())) {
+							// So is shared and we can correct if read only ro not
 							oStyle.setSharedWithMe(true);
+							oStyleViewModel.setReadOnly(!oSharing.canWrite());
 						}
 					}
 				}

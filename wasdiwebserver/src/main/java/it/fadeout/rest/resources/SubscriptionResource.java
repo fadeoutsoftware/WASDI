@@ -49,7 +49,6 @@ import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.ProjectEditorViewModel;
-import wasdi.shared.viewmodels.organizations.ProjectListViewModel;
 import wasdi.shared.viewmodels.organizations.StripePaymentDetail;
 import wasdi.shared.viewmodels.organizations.SubscriptionListViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionSharingViewModel;
@@ -57,6 +56,30 @@ import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.organizations.SubscriptionTypeViewModel;
 import wasdi.shared.viewmodels.organizations.SubscriptionViewModel;
 
+/**
+ * Subscriptions Resource.
+ * 
+ * Host the API to let the user create (and buy) new subscriptions, and to handle the existing ones.
+ * 
+ * The payment is implemented using Stripe ( https://stripe.com/ )
+ * When the user tries to buy a subscription:
+ * 	.an unique code is created
+ * 	.an entity not cofirmed is added to the database
+ * 	.a link to the stripe platform for paying is created
+ * 	.The user is redirected to stripe to pay
+ * 	.if the payment is ok, stripe will call back a WASDI api with the secret code
+ * 	.WASDI can retrive information from stripe to check that the payment is ok and activate it
+ * 
+ * Everytime a subscription is created, a project with the same name is also created by default.
+ * 
+ * 	.Create, edit and delete subscriptions
+ * 	.Share subscriptions with other users
+ * 	.Generate the Stripe payment url
+ * 	.Confirm the Stripe payment results
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/subscriptions")
 public class SubscriptionResource {
 
@@ -98,13 +121,10 @@ public class SubscriptionResource {
 
 			// Get the list of Subscriptions owned by the user
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
 			List<Subscription> aoOwnedSubscriptions = oSubscriptionRepository.getSubscriptionsByUser(oUser.getUserId());
 
 			Set<String> asOwnedSubscriptionIds = aoOwnedSubscriptions.stream().map(Subscription::getSubscriptionId).collect(Collectors.toSet());
-
 			Set<String> asOrganizationIdsOfOwnedSubscriptions = aoOwnedSubscriptions.stream().map(Subscription::getOrganizationId).filter(Objects::nonNull).collect(Collectors.toSet());
-
 			Map<String, String> aoOrganizationNamesOfOwnedSubscriptions = getOrganizationNamesById(asOrganizationIdsOfOwnedSubscriptions);
 
 			// For each
@@ -117,23 +137,25 @@ public class SubscriptionResource {
 				SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedSubscriptions.get(oSubscription.getOrganizationId()), "owner");
 				
 				if (oSubscriptionViewModel != null) {
+					oSubscriptionViewModel.setReadyOnly(false);
 					aoSubscriptionLVM.add(oSubscriptionViewModel);
 				}
 				else {
 					WasdiLog.warnLog("SubscriptionResource.getListByUser: Error converting a Owned Subscription, jumping");
 				}
 			}
-
+			
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			
 			// Get the list of Subscriptions shared by organizations
-
 			Set<String> asOrganizationIdsOfOwnedByOrSharedWithUser = new OrganizationResource().getIdsOfOrganizationsOwnedByOrSharedWithUser(oUser.getUserId());
-
 			Map<String, String> aoOrganizationNamesOfOwnedByOrSharedWithUser = getOrganizationNamesById(asOrganizationIdsOfOwnedByOrSharedWithUser);
-
+			
 			List<Subscription> aoOrganizationalSubscriptions = getSubscriptionsSharedByOrganizations(asOrganizationIdsOfOwnedByOrSharedWithUser);
 			
 			for (Subscription oSubscription : aoOrganizationalSubscriptions) {
 				if (!asOwnedSubscriptionIds.contains(oSubscription.getSubscriptionId())) {
+					
 					boolean bToAdd=true;
 					if (bValid) {
 						bToAdd = oSubscription.isValid();
@@ -143,6 +165,16 @@ public class SubscriptionResource {
 						SubscriptionListViewModel oSubscriptionViewModel = convertSubscriptionToViewModel(oSubscription, oUser.getUserId(), aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()), "shared by " + aoOrganizationNamesOfOwnedByOrSharedWithUser.get(oSubscription.getOrganizationId()));
 						
 						if (oSubscriptionViewModel != null) {
+							
+							UserResourcePermission oSharing = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId());
+							
+							if (oSharing == null) {
+								oSubscriptionViewModel.setReadyOnly(true);
+							}
+							else {
+								oSubscriptionViewModel.setReadyOnly(oSharing.readOnly());
+							}
+							
 							aoSubscriptionLVM.add(oSubscriptionViewModel);
 						}
 						else {
@@ -156,18 +188,12 @@ public class SubscriptionResource {
 
 			// Get the list of Subscriptions shared with this user
 			List<Subscription> aoSharedSubscriptions = getSubscriptionsSharedWithUser(oUser.getUserId());
-
-
-			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 			List<UserResourcePermission> aoSubscriptionSharings = oUserResourcePermissionRepository.getSubscriptionSharingsByUserId(oUser.getUserId());
 
-			Map<String, String> aoSubscriptionUser = aoSubscriptionSharings.stream()
-					.collect(Collectors.toMap(UserResourcePermission::getResourceId, UserResourcePermission::getUserId));
+			Map<String, String> aoSubscriptionUser = aoSubscriptionSharings.stream().collect(Collectors.toMap(UserResourcePermission::getResourceId, UserResourcePermission::getUserId));
 
 
-			List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSharedSubscriptions.stream()
-					.map(Subscription::getOrganizationId)
-					.collect(Collectors.toList());
+			List<String> asOrganizationIdsOfDirectSubscriptionSharings = aoSharedSubscriptions.stream().map(Subscription::getOrganizationId).collect(Collectors.toList());
 
 			Map<String, String> asNamesOfOrganizationsOfDirectSubscriptionSharings = getOrganizationNamesById(asOrganizationIdsOfDirectSubscriptionSharings);
 
@@ -183,6 +209,16 @@ public class SubscriptionResource {
 							"shared by " + aoSubscriptionUser.get(oSubscription.getSubscriptionId()));
 	
 					if (oSubscriptionViewModel!=null) {
+						
+						UserResourcePermission oSharing = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), oSubscriptionViewModel.getSubscriptionId());
+						
+						if (oSharing == null) {
+							oSubscriptionViewModel.setReadyOnly(true);
+						}
+						else {
+							oSubscriptionViewModel.setReadyOnly(oSharing.readOnly());
+						}
+						
 						aoSubscriptionLVM.add(oSubscriptionViewModel);
 					}
 					else {
@@ -211,7 +247,7 @@ public class SubscriptionResource {
 			@QueryParam("subscription") String sSubscriptionId) {
 		WasdiLog.debugLog("SubscriptionResource.getSubscriptionViewModel( Subscription: " + sSubscriptionId + ")");
 
-		SubscriptionViewModel oVM = new SubscriptionViewModel();
+		SubscriptionViewModel oSubscriptionViewModel = new SubscriptionViewModel();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
@@ -219,19 +255,19 @@ public class SubscriptionResource {
 			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: invalid session");
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		// Domain Check
+		if (Utils.isNullOrEmpty(sSubscriptionId)) {
+			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: invalid subscription id");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+		}
+
+		if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
+			WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: user cannot access subscription info, aborting");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
+		}		
 
 		try {
-			// Domain Check
-			if (Utils.isNullOrEmpty(sSubscriptionId)) {
-				WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: invalid subscription id");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
-			}
-
-			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
-				WasdiLog.warnLog("SubscriptionResource.getSubscriptionViewModel: user cannot access subscription info, aborting");
-				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the subscription info.")).build();
-			}
-
 			// Create repo
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			// Get requested subscription
@@ -250,10 +286,12 @@ public class SubscriptionResource {
 				sOrganizationName = oOrganization.getName();
 			}
 
-			oVM = convert(oSubscription, sOrganizationName);
+			oSubscriptionViewModel = convert(oSubscription, sOrganizationName);
+			oSubscriptionViewModel.setReadOnly(!PermissionsUtils.canUserWriteSubscription(oUser.getUserId(), sSubscriptionId));
 
-			return Response.ok(oVM).build();
-		} catch (Exception oEx) {
+			return Response.ok(oSubscriptionViewModel).build();
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog( "SubscriptionResource.getSubscriptionViewModel: " + oEx);
 			return Response.serverError().build();
 		}
@@ -288,7 +326,6 @@ public class SubscriptionResource {
 				WasdiLog.debugLog("SubscriptionResource.createSubscription: a subscription with the same name already exists. Changing the name to " + sName);
 			}
 			
-
 			Subscription oSubscription = convertViewModelToSubscription(oSubscriptionViewModel);
 			oSubscription.setUserId(oUser.getUserId());
 			oSubscription.setSubscriptionId(Utils.getRandomName());
@@ -392,13 +429,19 @@ public class SubscriptionResource {
 		}
 	}
 
+	/**
+	 * Deletes a Subscription
+	 * @param sSessionId Session Id
+	 * @param sSubscriptionId Subscription Id
+	 * @return SuccessResponse or ErrorResponse: both are a view model with a simple message property
+	 */
 	@DELETE
 	@Path("/delete")
-	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("subscription") String sSubscriptionId) {
+	public Response deleteSubscription(@HeaderParam("x-session-token") String sSessionId, @QueryParam("subscription") String sSubscriptionId) {
 		
 		WasdiLog.debugLog("SubscriptionResource.deleteSubscription( Subscription: " + sSubscriptionId + " )");
-
+		
+		// Check the user id
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
@@ -406,20 +449,25 @@ public class SubscriptionResource {
 			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
+		// And the subscription id
+		if (Utils.isNullOrEmpty(sSubscriptionId)) {
+			WasdiLog.warnLog("SubscriptionResource.deleteSubscription: invalid subscription id");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
+		}		
+		
 		try {
-			if (Utils.isNullOrEmpty(sSubscriptionId)) {
-				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: invalid subscription id");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid subscriptionId.")).build();
-			}
-
+			
+			// Take the repository and read the subscription
 			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
 			Subscription oSubscription = oSubscriptionRepository.getSubscriptionById(sSubscriptionId);
-
+			
+			// Subscription must exists
 			if (oSubscription == null) {
 				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: subscription does not exist");
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No subscription with the name exists.")).build();
 			}
 			
+			// And the user must be able to access it
 			if (!PermissionsUtils.canUserAccessSubscription(oUser.getUserId(), sSubscriptionId)) {
 				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: user cannot access subscription");
 				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("Forbidden.")).build();
@@ -430,53 +478,33 @@ public class SubscriptionResource {
 			String sSubscriptionOwner = oSubscription.getUserId();
 
 			if (!sSubscriptionOwner.equals(oUser.getUserId())) {
-				// The current uses is not the owner of the subscription
+				// The current user is not the owner of the subscription
 				UserResourcePermission oPermission = oUserResourcePermissionRepository.getSubscriptionSharingByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
 
 				if (oPermission == null) {
-					WasdiLog.debugLog("SubscriptionResource.deleteSubscription: the subscription is shared by an organization and cannot be individually removed:" + sSubscriptionOwner);
-
-					return Response.ok(new SuccessResponse("Subscriptions shared by an organization cannot be removed")).build();
+					WasdiLog.errorLog("SubscriptionResource.deleteSubscription: our user " + oUser.getUserId() + " is not the owner of the Subscription " + sSubscriptionId + " [" + sSubscriptionOwner+ "] but has not Perimssions: how can access it?!?!");
+					return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse("Subscription cannot be removed")).build();
 				} 
 				else {
 					WasdiLog.debugLog("SubscriptionResource.deleteSubscription: user " + oUser.getUserId() + " is not the owner [" + sSubscriptionOwner + "]: delete the sharing, not the subscription");
 					oUserResourcePermissionRepository.deletePermissionsByUserIdAndSubscriptionId(oUser.getUserId(), sSubscriptionId);
-
 					return Response.ok(new SuccessResponse("Sharing removed")).build();
 				}
 			}
-
-			if (oUserResourcePermissionRepository.isSubscriptionShared(sSubscriptionId)) {
-				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: the subscription is shared with users");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with users. Before deleting the subscription, please remove the sharings.")).build();
-			}
-
-			String sOrganizationId = oSubscription.getOrganizationId();
-
-			if (sOrganizationId != null) {
-				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: the subscription is shared with an organization");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is shared with an organization. Before deleting the subscription, please remove the sharing.")).build();
-			}
-
-
-			ProjectResource oProjectResource = new ProjectResource();
-			Response oResponse = oProjectResource.getListBySubscription(sSessionId, sSubscriptionId);
-
-			@SuppressWarnings("unchecked")
-			List<ProjectListViewModel> aoProjectList = (List<ProjectListViewModel>) oResponse.getEntity();
-
-			if (!aoProjectList.isEmpty()) {
-				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: the subscription has associated projects");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The subscription cannot be removed as it is used by projects. Before deleting the subscription, please remove the projects.")).build();
-			}
-
-			if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
-				return Response.ok(new SuccessResponse("Done")).build();
-			} 
 			else {
-				WasdiLog.warnLog("SubscriptionResource.deleteSubscription: deletion failed");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the subscription failed.")).build();
-			}			
+				WasdiLog.debugLog("This is the owner: lets clean all");
+				oUserResourcePermissionRepository.deletePermissionsBySubscriptionId(sSubscriptionId);
+				ProjectRepository oProjectRepository = new ProjectRepository();
+				oProjectRepository.deleteBySubscription(sSubscriptionId);
+				
+				if (oSubscriptionRepository.deleteSubscription(sSubscriptionId)) {
+					return Response.ok(new SuccessResponse("Done")).build();
+				} 
+				else {
+					WasdiLog.warnLog("SubscriptionResource.deleteSubscription: deletion failed");
+					return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Error deleting the subscription.")).build();
+				}				
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SubscriptionResource.deleteSubscription: error ", oEx);
@@ -484,6 +512,12 @@ public class SubscriptionResource {
 		}
 	}
 
+	/**
+	 * Get the types of available subscriptions
+	 * 
+	 * @param sSessionId Session Id
+	 * @return List of SubscriptionTypeViewModel
+	 */
 	@GET
 	@Path("/types")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -542,8 +576,7 @@ public class SubscriptionResource {
 		}
 		
 		// Can the user access this resource?
-		if (!PermissionsUtils.canUserWriteSubscription(oRequestingUser.getUserId(), sSubscriptionId)
-				&& !UserApplicationRole.isAdmin(oRequestingUser)) {
+		if (!PermissionsUtils.canUserWriteSubscription(oRequestingUser.getUserId(), sSubscriptionId) && !UserApplicationRole.isAdmin(oRequestingUser)) {
 			WasdiLog.warnLog("SubscriptionResource.shareSubscription:user cannot access subscription");
 			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_SUBSCRIPTION.name())).build();
 		}
@@ -573,9 +606,8 @@ public class SubscriptionResource {
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
 			if (!oUserResourcePermissionRepository.isSubscriptionSharedWithUser(sDestinationUserId, sSubscriptionId)) {
-				UserResourcePermission oSubscriptionSharing =
-						new UserResourcePermission(ResourceTypes.SUBSCRIPTION.getResourceType(), sSubscriptionId, sDestinationUserId, oSubscription.getUserId(), oRequestingUser.getUserId(), sRights);
-
+				
+				UserResourcePermission oSubscriptionSharing = new UserResourcePermission(ResourceTypes.SUBSCRIPTION.getResourceType(), sSubscriptionId, sDestinationUserId, oSubscription.getUserId(), oRequestingUser.getUserId(), sRights);
 				oUserResourcePermissionRepository.insertPermission(oSubscriptionSharing);
 
 				return Response.ok(new SuccessResponse("Done")).build();
@@ -640,6 +672,13 @@ public class SubscriptionResource {
 
 	}
 
+	/**
+	 * Removes the sharing of an user with the subscription
+	 * @param sSessionId Session Id 
+	 * @param sSubscriptionId Subscription id
+	 * @param sUserId User to remove from the subscription 
+	 * @return SuccessResponse or ErrorResponse
+	 */
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -728,10 +767,14 @@ public class SubscriptionResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name())).build();
 		}
 	}
-
-
-
-
+	
+	/**
+	 * Generates the Stripe Payment Url
+	 * @param sSessionId Session Id
+	 * @param sSubscriptionId Subscription Id
+	 * @param sWorkspaceId Workspace Id
+	 * @return SuccessResponse with url in the message or ErrorResponse with the code of the error 
+	 */
 	@GET
 	@Path("/stripe/paymentUrl")
 	public Response getStripePaymentUrl(@HeaderParam("x-session-token") String sSessionId,
@@ -810,7 +853,15 @@ public class SubscriptionResource {
 			return Response.serverError().build();
 		}
 	}
-
+	
+	/**
+	 * Confirms the subscription after the successful transaction from Stripe
+	 * The API should be called from Stripe. It connects again to Stripe to verify that the info is correct
+	 * If all is fine it activates the subscription
+	 * 
+	 * @param sCheckoutSessionId Secret Checkout code used to link the stripe payment with the subscription
+	 * @return
+	 */
 	@GET
 	@Path("/stripe/confirmation/{CHECKOUT_SESSION_ID}")
 	public String confirmation(@PathParam("CHECKOUT_SESSION_ID") String sCheckoutSessionId) {
@@ -822,14 +873,13 @@ public class SubscriptionResource {
 		}
 
 		try {
-			StripeService oStripeResource = new StripeService();
-			StripePaymentDetail oStripePaymentDetail = oStripeResource.retrieveStripePaymentDetail(sCheckoutSessionId);
+			StripeService oStripeService = new StripeService();
+			StripePaymentDetail oStripePaymentDetail = oStripeService.retrieveStripePaymentDetail(sCheckoutSessionId);
 
 			String sClientReferenceId = oStripePaymentDetail.getClientReferenceId();
 
 			if (oStripePaymentDetail == null || Utils.isNullOrEmpty(sClientReferenceId)) {
 				WasdiLog.warnLog("SubscriptionResource.confirmation: Stripe returned an invalid result, aborting");
-
 				return null;
 			}
 
@@ -951,7 +1001,6 @@ public class SubscriptionResource {
 			oSubscriptionListViewModel.setEndDate(TimeEpochUtils.fromEpochToDateString(oSubscription.getEndDate()));		
 			oSubscriptionListViewModel.setBuySuccess(oSubscription.isBuySuccess());
 			oSubscriptionListViewModel.setOwnerUserId(oSubscription.getUserId());
-			oSubscriptionListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oSubscription.getUserId()));
 
 			return oSubscriptionListViewModel;			
 		}

@@ -419,11 +419,22 @@ public class WorkflowsResource {
 
             List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.getSnapWorkflowPublicAndByUser(sUserId);
 
-            for (SnapWorkflow oCurWF : aoDbWorkflows) {
-                SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oCurWF);
-                // check if it was shared, if so, set shared with me to true
-                oVM.setSharedWithMe(false);
-                aoRetWorkflows.add(oVM);
+            for (SnapWorkflow oCurrentWorkflow : aoDbWorkflows) {
+            	// Convert the Workflow in View Model
+                SnapWorkflowViewModel oWorkflowViewModel = SnapWorkflowViewModel.getFromWorkflow(oCurrentWorkflow);
+                
+				// Are we the owner?
+				if (oCurrentWorkflow.getUserId().equals(oUser.getUserId())) {
+					// Yes: not shared, our own, not read only
+					oWorkflowViewModel.setSharedWithMe(false);
+					oWorkflowViewModel.setReadOnly(false);
+				}
+				else {
+					// For now lets assume is read only
+					oWorkflowViewModel.setReadOnly(true);
+				}                
+                
+                aoRetWorkflows.add(oWorkflowViewModel);
             }
 
             // find sharings by userId
@@ -434,18 +445,21 @@ public class WorkflowsResource {
             for (UserResourcePermission oSharing : aoWorkflowSharing) {
                 // Create the VM
                 SnapWorkflow oSharedWithMe = oSnapWorkflowRepository.getSnapWorkflow(oSharing.getResourceId());
-                SnapWorkflowViewModel oVM = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
+                SnapWorkflowViewModel oWorkflowViewModel = SnapWorkflowViewModel.getFromWorkflow(oSharedWithMe);
 
-                if (oVM.isPublic() == false) {
+                if (oWorkflowViewModel.isPublic() == false) {
                     // This is shared and not public: add to return list
-                    oVM.setSharedWithMe(true);
-                    aoRetWorkflows.add(oVM);
+                    oWorkflowViewModel.setSharedWithMe(true);
+					// Keep if read only or not
+                    oWorkflowViewModel.setReadOnly(!oSharing.canWrite());                    
+                    aoRetWorkflows.add(oWorkflowViewModel);
                 } else {
                     // This is shared but public, so this is already in our return list
-                    for (SnapWorkflowViewModel oWorkFlow : aoRetWorkflows) {
+                    for (SnapWorkflowViewModel oCurrentWorkFlowViewModel : aoRetWorkflows) {
                         // Find it and set shared flag = true
-                        if (oSharedWithMe.getWorkflowId().equals(oWorkFlow.getWorkflowId())) {
-                            oWorkFlow.setSharedWithMe(true);
+                        if (oSharedWithMe.getWorkflowId().equals(oCurrentWorkFlowViewModel.getWorkflowId())) {
+                            oCurrentWorkFlowViewModel.setSharedWithMe(true);
+                            oCurrentWorkFlowViewModel.setReadOnly(!oSharing.canWrite());
                         }
                     }
                 }

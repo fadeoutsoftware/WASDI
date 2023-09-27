@@ -41,6 +41,18 @@ import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationSharingViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 
+/**
+ * Organizations Resource
+ * 
+ *  Hosts the API to let the users create and manage their own Organizations
+ *  
+ *  	.Create, Update and Delete Organizations
+ *  	.Read Organizations
+ *  	.Share organizations with other users
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/organizations")
 public class OrganizationResource {
 

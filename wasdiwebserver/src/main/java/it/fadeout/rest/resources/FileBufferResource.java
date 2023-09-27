@@ -47,6 +47,7 @@ import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
  * 	.import new files in WASDI from data providers
  *  .publish bands on geoserver
  *  .handle geoserver styles
+ *  .Share files between workspaces
  *  
  * @author p.campanella
  *

@@ -16,6 +16,8 @@ public class ProcessorParametersTemplateListViewModel {
 	private String processorId;
 	private String name;
 	private String updateDate;
+	private boolean readOnly;
+	
 	public String getTemplateId() {
 		return templateId;
 	}
@@ -45,6 +47,12 @@ public class ProcessorParametersTemplateListViewModel {
 	}
 	public void setUpdateDate(String updateDate) {
 		this.updateDate = updateDate;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

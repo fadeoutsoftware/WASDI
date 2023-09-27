@@ -20,7 +20,8 @@ import wasdi.shared.viewmodels.feedback.FeedbackViewModel;
  * Wasdi Resource.
  * 
  * Hosts API for:
- * 	.Keep Alive
+ * 	.Keep Alive (hello)
+ * 	.Send Feedback
  * 
  * @author p.campanella
  *

@@ -283,7 +283,7 @@ var StyleController = (function () {
 
             oController.isUploadingStyle = false;
         }, function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID STYLE FILE");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR UPLOADING STYLE");
             oController.cleanAllUploadStyleFields();
             oController.isUploadingStyle = false;
         });

@@ -37,6 +37,7 @@ public class AppDetailViewModel {
 	private int userRuns = 0;
 	private ArrayList<String> categoryNames = new ArrayList<String>();
 	private String logo;
+	private boolean readOnly;
 	
 	
 	public ArrayList<String> getCategories() {
@@ -194,6 +195,12 @@ public class AppDetailViewModel {
 	}
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 	
 }

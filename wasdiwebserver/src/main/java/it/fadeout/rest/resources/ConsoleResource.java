@@ -39,6 +39,17 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Console Resource
+ * 
+ * Hosts the API to create a Jupyter Notebook in a workspace:
+ * 	.create Notebook
+ * 	.Check if it is Active (ie up and running)
+ * 	.Check if it is ready (updated and Active)
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/console")
 public class ConsoleResource {
 

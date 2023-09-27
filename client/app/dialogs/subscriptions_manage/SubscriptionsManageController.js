@@ -180,7 +180,7 @@ SubscriptionsManageController = (function () {
             }
 
         }
-        if (oSubscription.adminRole === true) {
+        if (oSubscription.readOnly === false) {
             utilsVexDialogConfirm(sConfirmMsgOwner, oCallbackFunction);
         } else {
             utilsVexDialogConfirm(sConfirmMsgShare, oCallbackFunction);

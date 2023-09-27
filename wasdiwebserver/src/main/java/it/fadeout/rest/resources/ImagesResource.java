@@ -32,6 +32,23 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Images Resource.
+ * Hosts the API to upload and show Images in WASDI. 
+ * Images can be associated to different entities (ie User, Processor, Organization..).
+ * Each image must belong to a Collection. Collections of Images are declared in ImagesCollections
+ * 
+ * Given a collection, the image can also be set in a subfolder.
+ * 
+ * The API are:
+ * 	.upload image
+ * 	.get image
+ * 	.delete Image
+ * 	.There are 2 convience methods for Processor Logo and Images (for retro-compatiability)
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/images")
 public class ImagesResource {
 	

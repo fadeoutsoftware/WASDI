@@ -18,6 +18,8 @@ public class ProcessorParametersTemplateDetailViewModel {
 	private String jsonParameters;
     private String creationDate;
 	private String updateDate;
+	private boolean readOnly = false;
+	
 	public String getTemplateId() {
 		return templateId;
 	}
@@ -65,6 +67,12 @@ public class ProcessorParametersTemplateDetailViewModel {
 	}
 	public void setUpdateDate(String updateDate) {
 		this.updateDate = updateDate;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

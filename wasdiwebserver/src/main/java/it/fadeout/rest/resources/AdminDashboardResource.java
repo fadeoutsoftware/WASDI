@@ -46,6 +46,19 @@ import wasdi.shared.viewmodels.processors.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.users.UserViewModel;
 import wasdi.shared.viewmodels.workspaces.WorkspaceListInfoViewModel;
 
+/**
+ * Admin Dashboard Resource
+ * 
+ * Host the API for the Admin backend:
+ * 	.find users, workspace and processors also with partial names
+ * 	.Store and read Metrics Entries
+ * 
+ * The metrics are pushed by each node to the main one to let WASDI 
+ * decide the best node at runtime.
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/admin")
 public class AdminDashboardResource {
 

@@ -15,6 +15,7 @@ public class SubscriptionViewModel {
 	private String organizationId;
 	private String organizationName;
 	private boolean buySuccess;
+	private boolean readOnly;
 	
 	public String getSubscriptionId() {
 		return subscriptionId;
@@ -93,6 +94,12 @@ public class SubscriptionViewModel {
 	}
 	public void setBuySuccess(boolean buySuccess) {
 		this.buySuccess = buySuccess;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

@@ -347,16 +347,20 @@ public class ProcessorsResource  {
 				Processor oProcessor = aoDeployed.get(i);
 
 				UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
+				
+				// See if this is a processor the user can access to
+				if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor.getProcessorId())) continue;
 
-				if (oProcessor.getIsPublic() != 1) {
-					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
-						if (oSharing == null) continue;
-					}
-				}
 				
 				DeployedProcessorViewModel oDeployedProcessorViewModel = new DeployedProcessorViewModel();
 				
-				if (oSharing != null) oDeployedProcessorViewModel.setSharedWithMe(true);
+				if (oSharing != null) {
+					oDeployedProcessorViewModel.setSharedWithMe(true);
+					oDeployedProcessorViewModel.setReadOnly(oSharing.readOnly());
+				}
+				if (oProcessor.getUserId().equals(oUser.getUserId())) {
+					oDeployedProcessorViewModel.setReadOnly(false);
+				}
 				
 				oDeployedProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
 				oDeployedProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
@@ -419,7 +423,13 @@ public class ProcessorsResource  {
 				}
 			}
 			
-			if (oSharing != null) oDeployedProcessorViewModel.setSharedWithMe(true);
+			if (oSharing != null) {
+				oDeployedProcessorViewModel.setSharedWithMe(true);
+				oDeployedProcessorViewModel.setReadOnly(oSharing.readOnly());
+			}
+			if (oProcessor.getUserId().equals(oUser.getUserId()))  {
+				oDeployedProcessorViewModel.setReadOnly(false);
+			}
 			
 			oDeployedProcessorViewModel.setProcessorDescription(oProcessor.getDescription());
 			oDeployedProcessorViewModel.setProcessorId(oProcessor.getProcessorId());
@@ -586,10 +596,20 @@ public class ProcessorsResource  {
 				
 				oAppListViewModel.setIsMine(false);
 				
-				if (oProcessor.getUserId().equals(oUser.getUserId())) oAppListViewModel.setIsMine(true);
+				if (oProcessor.getUserId().equals(oUser.getUserId())) {
+					oAppListViewModel.setIsMine(true);
+					oAppListViewModel.setReadOnly(false);
+				}
 				
 				if (oSharing != null) {
-					if (oSharing.canWrite()) oAppListViewModel.setIsMine(true);
+					if (oSharing.canWrite()) {
+						oAppListViewModel.setIsMine(true);
+						oAppListViewModel.setReadOnly(false);
+					}
+					else {
+						oAppListViewModel.setIsMine(false);
+						oAppListViewModel.setReadOnly(true);						
+					}
 				}
 				
 				oAppListViewModel.setProcessorDescription(oProcessor.getDescription());
@@ -664,24 +684,24 @@ public class ProcessorsResource  {
 			}			
 			
 			UserResourcePermission oSharing = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(oUser.getUserId(), oProcessor.getProcessorId());
-
-			if (oProcessor.getIsPublic() != 1) {
-				if (oProcessor.getUserId().equals(oUser.getUserId()) == false) {
-					if (oSharing == null) {
-						return Response.status(Status.FORBIDDEN).build();
-					}
-				}
-			}
 			
 			ReviewRepository oReviewRepository = new ReviewRepository();
 			
 			oAppDetailViewModel.setIsMine(false);
 			
-			if (oProcessor.getUserId().equals(oUser.getUserId())) oAppDetailViewModel.setIsMine(true);
+			if (oProcessor.getUserId().equals(oUser.getUserId())) {
+				oAppDetailViewModel.setIsMine(true);
+				oAppDetailViewModel.setReadOnly(false);
+			}
 			
 			if (oSharing != null) {
 				if (oSharing.canWrite()) {
 					oAppDetailViewModel.setIsMine(true);
+					oAppDetailViewModel.setReadOnly(false);
+				}
+				else {
+					oAppDetailViewModel.setIsMine(false);
+					oAppDetailViewModel.setReadOnly(true);					
 				}
 			}
 			
