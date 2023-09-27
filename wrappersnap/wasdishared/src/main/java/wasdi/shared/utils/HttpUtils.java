@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.abdera.util.AbderaDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.io.CopyStreamException;
 import org.apache.commons.net.io.Util;
