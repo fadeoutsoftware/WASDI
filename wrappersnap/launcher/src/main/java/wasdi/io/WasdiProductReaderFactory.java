@@ -51,6 +51,10 @@ public class WasdiProductReaderFactory {
 			return new CmNcProductReader(oFile);
 		}
 
+		if (oFile.getName().toLowerCase().endsWith(".hdf")) {
+			return new ModisProductReader(oFile);
+		}
+
 		return new SnapProductReader(oFile);
 	}
 	
