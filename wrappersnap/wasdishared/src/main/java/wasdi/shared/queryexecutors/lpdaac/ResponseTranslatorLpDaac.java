@@ -50,7 +50,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.translate: null object");
 		
 		QueryResultViewModel oResult = new QueryResultViewModel();
-		oResult.setProvider("MODIS");		
+		oResult.setProvider("LPDAAC");		
 		
 		// set id, title
 		addMainInfo(oItem, oResult);
