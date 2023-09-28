@@ -11,7 +11,9 @@ import wasdi.shared.data.modis11a2.ModisRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
+import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class ModisProductReader extends WasdiProductReader {
@@ -32,6 +34,11 @@ public class ModisProductReader extends WasdiProductReader {
         
         if (m_oProductFile!=null) 
         	oViewModel.setFileName(m_oProductFile.getName());
+        
+        NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
+    	oNodeGroupViewModel.setNodeName("Bands");
+    	List<BandViewModel> oBands = new ArrayList<>();
+    	oNodeGroupViewModel.setBands(oBands);
         	
 		return oViewModel;
 	}
