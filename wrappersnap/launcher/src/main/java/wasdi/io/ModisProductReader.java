@@ -25,15 +25,12 @@ public class ModisProductReader extends WasdiProductReader {
 	@Override
 	public ProductViewModel getProductViewModel() {
 		ProductViewModel oViewModel = new ProductViewModel();
-		
 
-        if (m_oProduct != null) {
-        	oViewModel.setName(Utils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
-    		oViewModel.setProductFriendlyName(m_oProductFile.getName());
-        }
+        String sFileName = m_oProductFile != null ? m_oProductFile.getName() : "no_file_name";
         
-        if (m_oProductFile!=null) 
-        	oViewModel.setFileName(m_oProductFile.getName());
+    	oViewModel.setFileName(sFileName);
+    	oViewModel.setName(Utils.getFileNameWithoutLastExtension(sFileName));
+		oViewModel.setProductFriendlyName(Utils.getFileNameWithoutLastExtension(sFileName));
         
         NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
     	oNodeGroupViewModel.setNodeName("Bands");
