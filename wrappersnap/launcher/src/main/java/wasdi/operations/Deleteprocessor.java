@@ -50,7 +50,7 @@ public class Deleteprocessor extends Operation {
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
 	        bRet = oEngine.delete(oParameter);
 	                	
-        	// Check if it is valid
+        	// Check if we are in the main node
         	if (WasdiConfig.Current.isMainNode()) {
 				// Notify the user
 	        	String sName = oParameter.getName();

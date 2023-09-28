@@ -19,9 +19,33 @@ public class RunTimeUtils {
 	 * Execute a system task waiting the process to finish
 	 * @param sCommand main command to use 
 	 * @param asArgs List of args to pass to the command
+	 * @return True if the process is executed
 	 */
-	public static void shellExec(String sCommand, List<String> asArgs) {
-		shellExec(sCommand,asArgs,true);
+	public static boolean shellExec(String sCommand, List<String> asArgs) {
+		if (asArgs==null) asArgs = new ArrayList<String>();
+		asArgs.add(0, sCommand);
+		
+		return shellExec(sCommand,asArgs,true);
+	}
+	
+	/**
+	 * Execute a system task waiting the process to finish 
+	 * @param asArgs List of args to pass to the command
+	 * @return True if the process is executed
+	 */
+	public static boolean shellExec(List<String> asArgs) {
+		return shellExec(asArgs,true, true);
+	}	
+	
+	/**
+	 * Execute a system task
+	 * @param sCommand Main command
+	 * @param asArgs List of args to the command
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @return True if the process is executed
+	 */
+	public static boolean shellExec(String sCommand, List<String> asArgs, boolean bWait) {
+		return shellExec(sCommand, asArgs, bWait, true);
 	}
 	
 	/**
@@ -29,22 +53,26 @@ public class RunTimeUtils {
 	 * @param sCommand Main command
 	 * @param asArgs List of args to the command
 	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bLogCommandLine True to log the command line false to jump
+	 * @return True if the process is executed
 	 */
-	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		shellExec(sCommand, asArgs, bWait, true);
+	public static boolean shellExec(String sCommand, List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
+		if (asArgs==null) asArgs = new ArrayList<String>();
+		asArgs.add(0, sCommand);
+		
+		return shellExec(asArgs, bWait, bLogCommandLine);
 	}
-
+	
 	/**
 	 * Execute a system task
-	 * @param sCommand Main command
-	 * @param asArgs List of args to the command
+	 * @param asArgs List of arguments
 	 * @param bWait True to wait the process to finish, false to not wait
-	 * @param bLogCommandLine True to log the command line false to jump
+	 * @param bLogCommandLine  True to log the command line false to jump
+	 * @return True if the process is executed
 	 */
-	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
+	public static boolean shellExec(List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
 		try {
-			if (asArgs==null) asArgs = new ArrayList<String>();
-			asArgs.add(0, sCommand);
+			if (asArgs==null) return false;
 			
 			if (bLogCommandLine) {
 				String sCommandLine = "";
@@ -63,31 +91,63 @@ public class RunTimeUtils {
 				int iProcOuptut = oProcess.waitFor();				
 				WasdiLog.debugLog("RunTimeUtils.shellExec CommandLine RETURNED: " + iProcOuptut);
 			}
+			
+			return true;
 		}
 		catch (Exception e) {
 			WasdiLog.errorLog("RunTimeUtils.shellExec exception: " + e.getMessage());
-		}
+			return false;
+		}		
 	}
 	
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {
+	/**
+	 * Executes a command in the system registering the logs on a temp log file
+	 * @param sCommand Base Command
+	 * @param asArgs Arguments
+	 * @return True if the process is executed
+	 */
+	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {		
+		if (asArgs == null) asArgs = new ArrayList<>();
+		asArgs.add(0, sCommand);
+
 		return shellExecWithLogs(sCommand, asArgs, true);
 	}
+	
+	/**
+	 * Executes a command in the system registering the logs on a temp log file
+	 * @param sCommand Base Command
+	 * @param asArgs Arguments
+	 * @param bDelete True to delete the log file after the run
+	 * @return True if the process is executed
+	 */
+	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs, boolean bDelete) {
+		if (asArgs == null) asArgs = new ArrayList<>();
+		asArgs.add(0, sCommand);
+
+		return shellExecWithLogs(sCommand, asArgs, true);		
+	}	
+	
+	/**
+	 * Executes a command in the system registering the logs on a temp log file
+	 * @param asArgs list of commands and arg 
+	 * @return True if the process is executed
+	 */
+	public static boolean shellExecWithLogs(List<String> asArgs) {
+		return shellExecWithLogs(asArgs, true);
+	}
+	
 
 	/**
 	 * Executes a command in the system registering the logs on a temp log file
 	 * @param sCommand
 	 * @param asArgs
-	 * @return
+	 * @return True if the process is executed
 	 */
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs, boolean bDelete) {
+	public static boolean shellExecWithLogs(List<String> asArgs, boolean bDelete) {
 
 		try {
-			if (asArgs == null) {
-				asArgs = new ArrayList<>();
-			}
 
-			asArgs.add(0, sCommand);
-			
+			// Creat the command line
 			String sCommandLine = "";
 			
 			for (String sArg : asArgs) {
@@ -125,7 +185,8 @@ public class RunTimeUtils {
 				}
 
 				return true;
-			} else {
+			} 
+			else {
 				String sOutputFileContent = readLogFile(oLogFile);
 				WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
 
@@ -147,16 +208,19 @@ public class RunTimeUtils {
 	 * 
 	 * @param sFile fill path of the file
 	 */
-	public static void addRunPermission(String sFile)  {
+	public static boolean addRunPermission(String sFile)  {
 		try {
 			// Make it executable
 			Runtime.getRuntime().exec("chmod u+x " + sFile);
 
 			// And wait a little bit to make the chmod done
-			Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);			
+			Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);
+			
+			return true;
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
+			return false;
 		}
 	}
 	

@@ -46,16 +46,11 @@ public class Deployprocessor extends Operation {
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
 	        oEngine.setProcessWorkspace(oProcessWorkspace);
 	        
+	        // Deploy
 	        boolean bRet = oEngine.deploy(oParameter);
 	        
+	        // Notify the user
 	        try {
-	        	
-//	        	if (oEngine.isRunAfterDeploy()) {
-//					if (WasdiConfig.Current.isMainNode()) {
-//						oEngine.waitForApplicationToStart(oParameter);
-//						oEngine.refreshPackagesInfo(oParameter);
-//					}	        		
-//	        	}
 	        	
 	        	String sName = oParameter.getName();
 	        	

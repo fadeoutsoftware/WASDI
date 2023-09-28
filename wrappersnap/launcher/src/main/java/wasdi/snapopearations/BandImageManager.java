@@ -1,4 +1,4 @@
-package wasdi.shared.utils;
+package wasdi.snapopearations;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,7 +42,6 @@ import com.bc.ceres.grender.support.DefaultViewport;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class BandImageManager {
-
 	Product m_oProduct;
 	
 	private static class CachedSource {
@@ -309,5 +308,4 @@ public class BandImageManager {
             return layer instanceof ImageLayer;
         }
     }
-	
 }
