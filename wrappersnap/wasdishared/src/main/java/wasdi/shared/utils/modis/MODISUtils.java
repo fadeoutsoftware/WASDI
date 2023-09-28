@@ -69,12 +69,6 @@ public class MODISUtils {
 	private static final String s_sMODISBaseUrl = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/";
 
   
- 
-
-    public static void main( String[] args ) throws Exception {
-    	final String sCSVFilePath = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA/modis_mod11a2_v61_64f584ce5c8845f6/modis_mod11a2_v61_64f584ce5c8845f6.csv";
-    	insertProducts();
-    }
     
     public static void insertProducts() throws Exception {
     	insertProducts(-1, -1);
@@ -532,7 +526,7 @@ public class MODISUtils {
      */
     public static InputStream getResource(String sResource, String sUsername, String sPassword) throws Exception {
         int iRedirects = 0;
-        while( iRedirects < 10 ) {
+        while( iRedirects < 20 ) {
             ++iRedirects;
 
             URL oUrl = new URL(sResource);
@@ -552,7 +546,7 @@ public class MODISUtils {
 
             int status = oConnection.getResponseCode();
             if( status == 200 ) {
-                WasdiLog.debugLog("MODISUtils.getResource. Successfully connected, opening the input stream");
+                WasdiLog.debugLog("MODISUtils.getResource. Successfully connected, opening the input stream after " + iRedirects + " redirections");
             	return oConnection.getInputStream();
             }
  
@@ -573,5 +567,7 @@ public class MODISUtils {
         // If we get here, we exceeded our redirect limit
         throw new Exception("MODISUtils.getResource. Redirection limit exceeded");
     }
+    
+
 
 }
