@@ -29,7 +29,7 @@ public class ModisProductReader extends WasdiProductReader {
 
         if (m_oProduct != null) {
         	oViewModel.setName(Utils.getFileNameWithoutLastExtension(m_oProductFile.getName()));
-    		oViewModel.setProductFriendlyName(oViewModel.getName());
+    		oViewModel.setProductFriendlyName(m_oProductFile.getName());
         }
         
         if (m_oProductFile!=null) 
@@ -39,6 +39,7 @@ public class ModisProductReader extends WasdiProductReader {
     	oNodeGroupViewModel.setNodeName("Bands");
     	List<BandViewModel> oBands = new ArrayList<>();
     	oNodeGroupViewModel.setBands(oBands);
+    	oViewModel.setBandsGroups(oNodeGroupViewModel);
         	
 		return oViewModel;
 	}
