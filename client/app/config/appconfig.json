@@ -1017,20 +1017,6 @@
                     "regex": ".*"
                 }
             ]
-        },
-		{
-            "name": "Terra",
-            "indexname": "platformname",
-            "indexvalue": "TERRA",
-            "filters": [
-                {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "indexvalues": "MOD11A2",
-                    "regex": ".*",
-                    "indexvalue": "MOD11A2"
-                }
-            ]
         }
     ],
     "orbitsearch":{
