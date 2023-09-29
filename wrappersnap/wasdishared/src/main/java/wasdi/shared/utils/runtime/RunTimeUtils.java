@@ -76,6 +76,23 @@ public class RunTimeUtils {
 	 * @return True if the process is executed
 	 */
 	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		if (WasdiConfig.Current.shellExecLocally) {
+			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
+		}
+		else {
+			return dockerShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
+		}
+	}
+
+	/**
+	 * Execute a system task using the local (hosting) system
+	 * 
+	 * @param asArgs List of arguments
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bLogCommandLine  True to log the command line false to jump
+	 * @return True if the process is executed
+	 */
+	private static ShellExecReturn localShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
 		
 		// Shell exec return object
 		ShellExecReturn oReturn = new ShellExecReturn();
@@ -156,6 +173,18 @@ public class RunTimeUtils {
 		}		
 	}
 	
+	/**
+	 * Execute a system task using a dedicated docker image
+	 * 
+	 * @param asArgs List of arguments
+	 * @param bWait True to wait the process to finish, false to not wait
+	 * @param bLogCommandLine  True to log the command line false to jump
+	 * @return True if the process is executed
+	 */
+	private static ShellExecReturn dockerShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		ShellExecReturn oShellExecReturn = new ShellExecReturn();
+		return oShellExecReturn;
+	}
 	
 	/**
 	 * Adds the run permission to a file.
@@ -178,10 +207,27 @@ public class RunTimeUtils {
 		}
 	}
 	
+	/**
+	 * Executes a local system command.
+	 * The method creates a script with the content of the command, make it executable and run it locally.
+	 * 
+	 * @param sFolder Working folder
+	 * @param sCommand Command to execute
+	 * @return
+	 */
 	public static boolean runCommand(String sFolder, String sCommand) {
 		return runCommand(sFolder, sCommand, false);
 	}
 	
+	/**
+	 * Executes a local system command.
+	 * The method creates a script with the content of the command, make it executable and run it locally.
+	 * 
+	 * @param sFolder
+	 * @param sCommand
+	 * @param bRunInShell
+	 * @return
+	 */
 	public static boolean runCommand(String sFolder, String sCommand, boolean bRunInShell) {
 		return runCommand(sFolder, sCommand, false, true);
 	}
@@ -237,7 +283,7 @@ public class RunTimeUtils {
 				asArgs.add(sBuildScriptFile);
 			}
 			
-			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			ShellExecReturn oShellExecReturn = RunTimeUtils.localShellExec(asArgs, true, true, true, true);
 			
 			if (bDelete) {
 				FileUtils.forceDelete(oBuildScriptFile);

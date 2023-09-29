@@ -3,6 +3,7 @@ package wasdi.operations;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import wasdi.shared.LauncherOperations;
@@ -12,6 +13,8 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class Runmatlab extends Operation {
 
@@ -38,25 +41,17 @@ public class Runmatlab extends Operation {
 
             String sMatlabRunTimePath = WasdiConfig.Current.paths.matlabRuntimePath;
             String sConfigFilePath = PathsConfig.getProcessorFolder(oParameter.getProcessorName()) + "config.properties";
+            
+            ArrayList<String> asCmd = new ArrayList<>();
+            asCmd.add(sRunPath);
+            asCmd.add(sMatlabRunTimePath);
+            asCmd.add(sConfigFilePath);
 
-            String asCmd[] = new String[]{sRunPath, sMatlabRunTimePath, sConfigFilePath};
-
-            WasdiLog.debugLog("Runmatlab.executeOperation: shell exec " + Arrays.toString(asCmd));
-            ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
-
-            oProcBuilder.directory(new File(PathsConfig.getProcessorFolder(oParameter.getProcessorName())));
-            Process oProc = oProcBuilder.start();
-
-            BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
-
-            String sLine;
-            while ((sLine = oInput.readLine()) != null) {
-                WasdiLog.debugLog("Runmatlab.executeOperation: script stdout: " + sLine);
-            }
-
-            WasdiLog.debugLog("Runmatlab.executeOperation: waiting for the process to exit");
-
-            if (oProc.waitFor() == 0) {
+            WasdiLog.debugLog("Runmatlab.executeOperation: shell exec");
+            
+            ShellExecReturn oReturn = RunTimeUtils.shellExec(asCmd, true, true, false, true);
+            
+            if (oReturn.getOperationReturn() == 0) {
                 // ok
                 WasdiLog.debugLog("Runmatlab.executeOperation: process done with code 0");
                 

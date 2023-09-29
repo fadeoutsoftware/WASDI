@@ -93,22 +93,8 @@ public class GdalUtils {
 			asArgs.add("-wkt_format");
 			asArgs.add("WKT1");
 			
-			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			// Get the result
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sOutput = "";
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				sOutput += sLine + "\n";
-			
-			// Wait for the process to finish
-			oProcess.waitFor();
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			String sOutput = oShellExecReturn.getOperationLogs();
 			
 			try {
 				// Create the return object
@@ -258,14 +244,19 @@ public class GdalUtils {
     	return null;
     }
     
+    /**
+     * Converts an input file in the output file with WGS84 Projection
+     * @param sInputFile File to convert
+     * @param sOutputFile Converted file
+     */
     public static void convertToWGS84(String sInputFile, String sOutputFile) {
     	convertToWGS84(sInputFile, sOutputFile, null);
     }
     
     /**
      * Converts an input file in the output file with WGS84 Projection
-     * @param sInputFile
-     * @param sOutputFile
+     * @param sInputFile File to convert
+     * @param sOutputFile Converted file
      * @param sInputSrs Input source spatial reference. If not specified the SRS found in the input dataset will be used
      */
     public static void convertToWGS84(String sInputFile, String sOutputFile, String sInputSrs) {
@@ -289,18 +280,9 @@ public class GdalUtils {
     		asArgs.add(sInputFile);
     		asArgs.add(sOutputFile);
     		
-    		ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-    		Process oProcess;
-    		
-    		oProcessBuidler.redirectErrorStream(true);
-    		oProcess = oProcessBuidler.start();
-    		String sLine = "";
-    		
-    		BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-    		while ((sLine = oReader.readLine()) != null)
-    			WasdiLog.debugLog("GdalUtils.convertToWGS84 [gdal]: " + sLine);
-    		
-    		oProcess.waitFor();    	    		
+    		ShellExecReturn oReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+
+    		WasdiLog.debugLog("GdalUtils.convertToWGS84 [gdal]: " + oReturn.getOperationLogs());
     	}
     	catch (Exception oEx) {
     		WasdiLog.debugLog("GdalUtils.convertToWGS84: exception " + oEx.toString());
