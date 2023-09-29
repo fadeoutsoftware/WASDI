@@ -14,194 +14,148 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class RunTimeUtils {
-
-	/**
-	 * Execute a system task waiting the process to finish
-	 * @param sCommand main command to use 
-	 * @param asArgs List of args to pass to the command
-	 * @return True if the process is executed
-	 */
-	public static boolean shellExec(String sCommand, List<String> asArgs) {
-		if (asArgs==null) asArgs = new ArrayList<String>();
-		asArgs.add(0, sCommand);
-		
-		return shellExec(sCommand,asArgs,true);
-	}
+	
 	
 	/**
-	 * Execute a system task waiting the process to finish 
-	 * @param asArgs List of args to pass to the command
+	 * Execute a system task waiting the process to finish without collecting the logs
+	 * It logs the command line executed on the launcher logs
+	 *  
+	 * @param asArgs List of strings that represents the command and the list of arguments
 	 * @return True if the process is executed
 	 */
-	public static boolean shellExec(List<String> asArgs) {
-		return shellExec(asArgs,true, true);
+	public static ShellExecReturn shellExec(List<String> asArgs) {
+		return shellExec(asArgs,true);
 	}	
 	
 	/**
-	 * Execute a system task
-	 * @param sCommand Main command
-	 * @param asArgs List of args to the command
-	 * @param bWait True to wait the process to finish, false to not wait
-	 * @return True if the process is executed
+	 * Execute a system task without collecting the logs
+	 * It logs the command line executed on the launcher logs
+	 * 
+	 * @param asArgs List of strings that represents the command and the list of arguments 
+	 * @param bWait True if the method should wait the shell exec to finish, false otherwise
+	 * @return 
 	 */
-	public static boolean shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		return shellExec(sCommand, asArgs, bWait, true);
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait) {
+		return shellExec(asArgs, bWait, false);
+	}
+	
+	/**
+	 * Execute a system task 
+	 * It does not redirect the error streamn to std out
+	 * It logs the command line executed on the launcher logs
+	 * 
+	 * @param asArgs
+	 * @param bWait
+	 * @param bReadOutput
+	 * @return
+	 */
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput) {
+		return shellExec(asArgs, bWait, bReadOutput, false);
 	}
 	
 	/**
 	 * Execute a system task
-	 * @param sCommand Main command
-	 * @param asArgs List of args to the command
-	 * @param bWait True to wait the process to finish, false to not wait
-	 * @param bLogCommandLine True to log the command line false to jump
-	 * @return True if the process is executed
+	 * It logs the command line executed on the launcher logs
+	 * 
+	 * @param asArgs
+	 * @param bWait
+	 * @param bReadOutput
+	 * @param bRedirectError
+	 * @return
 	 */
-	public static boolean shellExec(String sCommand, List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
-		if (asArgs==null) asArgs = new ArrayList<String>();
-		asArgs.add(0, sCommand);
-		
-		return shellExec(asArgs, bWait, bLogCommandLine);
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError) {
+		return shellExec(asArgs, bWait, bReadOutput, bRedirectError, false);
 	}
-	
+
 	/**
 	 * Execute a system task
+	 * 
 	 * @param asArgs List of arguments
 	 * @param bWait True to wait the process to finish, false to not wait
 	 * @param bLogCommandLine  True to log the command line false to jump
 	 * @return True if the process is executed
 	 */
-	public static boolean shellExec(List<String> asArgs, boolean bWait, boolean bLogCommandLine) {
+	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		
+		// Shell exec return object
+		ShellExecReturn oReturn = new ShellExecReturn();
+		
+		// Set the asynch flag
+		oReturn.setAsynchOperation(!bWait);
+		
 		try {
-			if (asArgs==null) return false;
+			// We need args!
+			if (asArgs==null) {
+				WasdiLog.errorLog("RunTimeUtils.shellExec: Args are null");
+				return oReturn;
+			}
+			if (asArgs.size() == 0) {
+				WasdiLog.errorLog("RunTimeUtils.shellExec: Args are empty");
+				return oReturn;
+			}
 			
+			// If this is asynch, we cannot collect logs
+			if (bWait == false) { 
+				if (bReadOutput || bRedirectError) {
+					bReadOutput = false;
+					bRedirectError = false;
+					WasdiLog.warnLog("RunTimeUtils.shellExec: running with bWait = false, we cannot collect logs. Forcing ReadOutput and RedirectError to false (at least once was true!)");
+				}
+			}
+			
+			if (bRedirectError==true && bReadOutput==false) {
+				bRedirectError = false;
+				WasdiLog.warnLog("RunTimeUtils.shellExec: RedirectError makes no sense if we do not read output. Forcing to false");
+			}
+			
+			// Check if we need to log the command line or not
 			if (bLogCommandLine) {
+				// Initialize the command line
 				String sCommandLine = "";
 				
 				for (String sArg : asArgs) {
 					sCommandLine += sArg + " ";
 				}			
-			
+				
+				// and log it
 				WasdiLog.debugLog("RunTimeUtils.shellExec CommandLine: " + sCommandLine);
 			}
 			
+			// If we want to collect the logs, create the temp file
+			File oLogFile = null;
+			if (bReadOutput) oLogFile = createLogFile();
+			
+			// Create the process builder
 			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
+			
+			if (bRedirectError) oProcessBuilder.redirectErrorStream(true);
+			if (bReadOutput) oProcessBuilder.redirectOutput(oLogFile);
+			
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
-				int iProcOuptut = oProcess.waitFor();				
+				int iProcOuptut = oProcess.waitFor();
+				oReturn.setOperationReturn(iProcOuptut);
+				
+				if (bReadOutput) {
+					String sOutputFileContent = readLogFile(oLogFile);
+					oReturn.setOperationLogs(sOutputFileContent);
+					deleteLogFile(oLogFile);					
+				}
+				
 				WasdiLog.debugLog("RunTimeUtils.shellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 			
-			return true;
+			oReturn.setOperationOk(true);
+			
+			return oReturn;
 		}
 		catch (Exception e) {
 			WasdiLog.errorLog("RunTimeUtils.shellExec exception: " + e.getMessage());
-			return false;
+			return oReturn;
 		}		
 	}
 	
-	/**
-	 * Executes a command in the system registering the logs on a temp log file
-	 * @param sCommand Base Command
-	 * @param asArgs Arguments
-	 * @return True if the process is executed
-	 */
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs) {		
-		if (asArgs == null) asArgs = new ArrayList<>();
-		asArgs.add(0, sCommand);
-
-		return shellExecWithLogs(sCommand, asArgs, true);
-	}
-	
-	/**
-	 * Executes a command in the system registering the logs on a temp log file
-	 * @param sCommand Base Command
-	 * @param asArgs Arguments
-	 * @param bDelete True to delete the log file after the run
-	 * @return True if the process is executed
-	 */
-	public static boolean shellExecWithLogs(String sCommand, List<String> asArgs, boolean bDelete) {
-		if (asArgs == null) asArgs = new ArrayList<>();
-		asArgs.add(0, sCommand);
-
-		return shellExecWithLogs(sCommand, asArgs, true);		
-	}	
-	
-	/**
-	 * Executes a command in the system registering the logs on a temp log file
-	 * @param asArgs list of commands and arg 
-	 * @return True if the process is executed
-	 */
-	public static boolean shellExecWithLogs(List<String> asArgs) {
-		return shellExecWithLogs(asArgs, true);
-	}
-	
-
-	/**
-	 * Executes a command in the system registering the logs on a temp log file
-	 * @param sCommand
-	 * @param asArgs
-	 * @return True if the process is executed
-	 */
-	public static boolean shellExecWithLogs(List<String> asArgs, boolean bDelete) {
-
-		try {
-
-			// Creat the command line
-			String sCommandLine = "";
-			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}
-			
-			WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs CommandLine: " + sCommandLine);
-
-			File oLogFile = createLogFile();
-			
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-
-			oProcessBuilder.redirectErrorStream(true);
-			oProcessBuilder.redirectOutput(oLogFile);
-
-			Process oProcess = oProcessBuilder.start();
-
-			int iProcOuptut = oProcess.waitFor();				
-			WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs CommandLine RETURNED: " + iProcOuptut);
-
-			if (iProcOuptut == 0) {
-
-				String sOutputFileContent = readLogFile(oLogFile);
-				
-				WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
-				
-				if (bDelete) {
-					deleteLogFile(oLogFile);
-				}
-
-				if (!Utils.isNullOrEmpty(sOutputFileContent)) {
-					if (sOutputFileContent.trim().equalsIgnoreCase("false")) {
-						return false;
-					}
-				}
-
-				return true;
-			} 
-			else {
-				String sOutputFileContent = readLogFile(oLogFile);
-				WasdiLog.debugLog("RunTimeUtils.shellExecWithLogs sOutputFileContent: " + sOutputFileContent);
-
-				if (bDelete) {
-					deleteLogFile(oLogFile);
-				}
-
-				return false;
-			}
-		} catch (Exception e) {			
-			WasdiLog.errorLog("RunTimeUtils.shellExecWithLogs exception: " + e.getMessage());
-
-			return false;
-		}
-	}
 	
 	/**
 	 * Adds the run permission to a file.
@@ -275,19 +229,27 @@ public class RunTimeUtils {
 			boolean bResult = false;
 			
 			if (bRunInShell) {
+				asArgs.add("sh");
 				asArgs.add("-c");
 				asArgs.add(sBuildScriptFile);
-				bResult = RunTimeUtils.shellExecWithLogs("sh", asArgs, bDelete);				
 			}
 			else {
-				bResult = RunTimeUtils.shellExecWithLogs(sBuildScriptFile, asArgs, bDelete);
+				asArgs.add(sBuildScriptFile);
 			}
+			
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
 			
 			if (bDelete) {
 				FileUtils.forceDelete(oBuildScriptFile);
 			}
+			
+			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
+				if (oShellExecReturn.getOperationLogs().trim().equalsIgnoreCase("false")) {
+					oShellExecReturn.setOperationOk(false);
+				}
+			}			
 
-			if (bResult) {
+			if (oShellExecReturn.isOperationOk()) {
 				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command ran successfully.");
 			} else {
 				WasdiLog.debugLog("RunTimeUtils.runCommand: The shell command did not run successfully.");

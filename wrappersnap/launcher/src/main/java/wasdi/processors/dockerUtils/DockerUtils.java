@@ -713,33 +713,6 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.push: " + oEx.toString());
             return false;
         }
-    	/*
-    	try {
-    		
-
-    		
-            // Create the docker command
-            ArrayList<String> asArgs = new ArrayList<>();
-            // Push
-            asArgs.add("push");
-            // Option
-            asArgs.add("--all-tags");
-            
-            String sServerImage = sImage;
-            
-            asArgs.add(sServerImage);
-            
-            String sCommand = "docker";
-			
-            RunTimeUtils.shellExec(sCommand, asArgs, true);    		
-    		
-    	} catch (Exception oEx) {
-    		WasdiLog.errorLog("DockerWasdiLog.login: " + oEx.toString());
-            return false;
-        }
-    	
-    	return true;
-    	*/
     }
     
     /**

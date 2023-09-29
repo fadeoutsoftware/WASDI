@@ -13,6 +13,8 @@ import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 
 /**
  * Wrapper of GDAL utils
@@ -440,28 +442,17 @@ public class GdalUtils {
 				asArgs.add(sProductFile);
 			}
 			
-			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-		
-			String sCommand = "";
-			for (String sArg : asArgs) {
-				sCommand += sArg + " ";
+			// Run the command
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			
+			// Is there an output to log?
+			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
+				WasdiLog.debugLog(oShellExecReturn.getOperationLogs());
 			}
 			
-			WasdiLog.debugLog("Mosaic.runGDALMosaic: Command = " + sCommand);
+			File oOutputFile = new File(sWorkspacePath+sOuptutFile); 
 			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				WasdiLog.debugLog("[gdal]: " + sLine);
-			
-			oProcess.waitFor();
-			
-			if (new File(sWorkspacePath+sOuptutFile).exists()) {
+			if (oOutputFile.exists()) {
 				// Done
 				WasdiLog.debugLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
 			}
