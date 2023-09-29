@@ -135,7 +135,7 @@ public class ModisRepository extends MongoRepository  {
 				+ "[" + dWest + ", " + dNorth + "] "
 				+ "]";
 
-		boolean bValidCoordinates = !Utils.isNullOrEmpty(dWest) && !Utils.isNullOrEmpty(dNorth) && !Utils.isNullOrEmpty(dEast) && !Utils.isNullOrEmpty(dSouth); 
+		boolean bValidCoordinates = dWest != null && dNorth != null && dEast != null && dSouth != null; 
 		
 		if (bValidCoordinates) {
 		asQueryFilters.add(  

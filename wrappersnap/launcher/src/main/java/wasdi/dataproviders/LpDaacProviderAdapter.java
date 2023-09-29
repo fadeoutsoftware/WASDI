@@ -45,7 +45,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. File url: " + sFileURL);
-		
+				
 		String sDownloadUrl = null;
 		
 		try {			
@@ -69,13 +69,20 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	 
             /* Retrieve a stream for the resource */
             oInputStream = MODISUtils.getResource(sDownloadUrl, sDownloadUser, sDownloadPassword);
+            
+            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Input stream opened. Is it not null? " + (oInputStream != null));
 
 	        File oSaveDir = new File(sSaveDirOnServer);
+	        
+			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. New file opened at: " + sSaveDirOnServer);
 
             String sSavedFilePath = oSaveDir + File.separator + sDownloadUrl.substring(sDownloadUrl.lastIndexOf('/') + 1).trim();
+            
+			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Path of the output strea,: " + sSaveDirOnServer);
+
             Path outputPath = Paths.get(sSavedFilePath);
             Files.copy(oInputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-
+            
     		WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. File path downloaded at: " + sSavedFilePath);
     		
     		sDownloadUrl = sSavedFilePath;
