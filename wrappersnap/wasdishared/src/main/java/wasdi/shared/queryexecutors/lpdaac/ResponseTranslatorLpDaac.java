@@ -164,6 +164,7 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		if (sItem == null) {
 			sItem = "";
 		}
+		oLink.append(sItem);
 
 		oResult.getProperties().put(SLINK, oLink.toString());
 		oResult.setLink(oLink.toString());
