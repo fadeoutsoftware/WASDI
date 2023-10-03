@@ -1,0 +1,75 @@
+# {{ ansible_managed }}
+version: "3"
+
+# Default project name: all containers are
+# prefixed with this value
+name: "wasdi-cli-toolbox"
+
+# In any cases, we use a pre-existing network:
+#   - either the client has his own network
+#   - or we create it in a previous step
+networks:
+  default:
+    name: "{{ sWasdiDockerNetworkName }}"
+    driver: "bridge"
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+      com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
+      com.docker.network.driver.mtu: "1500"
+    external: {{ bWasdiDockerNetworkMustBeCreated | default(False) | string | lower }}
+    ipam:
+      driver: "default"
+      config:
+        - subnet: "{{ sWasdiDockerNetworkSubnet }}"
+          gateway: "{{ sWasdiDockerNetworkGateway }}"
+
+services:
+  {{ sWasdiContainerToolboxServiceName }}:
+    build:
+      context: .
+      tags:
+        - {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}:/data:rw
+
+  wasdi-backup-mongo:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_MODULE=mongodb
+      - TOOLBOX_SUBMODULE=backupDatabaseLogicalDump
+    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    volumes:
+      - /data/wasdi/docker/volume/wasdi-toolbox:/data:rw
+
+  wasdi-backup-postgresql:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_MODULE=postgresql
+      - TOOLBOX_SUBMODULE=backupDatabaseLogicalDump
+    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    volumes:
+      - /data/wasdi/docker/volume/wasdi-toolbox:/data:rw
