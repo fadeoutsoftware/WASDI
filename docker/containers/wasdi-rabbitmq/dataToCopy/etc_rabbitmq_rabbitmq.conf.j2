@@ -1,0 +1,19 @@
+# Listen on 0.0.0.0:{{ sWasdiContainerRabbitMqPortMainInternal }}
+#listeners.tcp.default = 0.0.0.0:{{ sWasdiContainerRabbitMqPortMainInternal }}
+listeners.tcp.default = {{ sWasdiContainerRabbitMqPortMainInternal }}
+
+# Load definition when node boot
+load_definitions = /etc/rabbitmq/definitions.json
+
+# Enable log in console
+log.console = true
+log.console.level = debug
+
+# Disable log in files
+log.file = false
+
+# Disable log through syslog
+log.syslog = false
+
+# Force the web stomp port on {{ sWasdiContainerRabbitMqPortWebStompInternal }}
+web_stomp.tcp.port = {{ sWasdiContainerRabbitMqPortWebStompInternal }}

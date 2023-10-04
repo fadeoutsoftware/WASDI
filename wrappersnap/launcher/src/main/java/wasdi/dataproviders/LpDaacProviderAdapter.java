@@ -45,7 +45,7 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace, int iMaxRetry) throws Exception {
 		
 		WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. File url: " + sFileURL);
-		
+				
 		String sDownloadUrl = null;
 		
 		try {			
@@ -69,19 +69,39 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
 	 
             /* Retrieve a stream for the resource */
             oInputStream = MODISUtils.getResource(sDownloadUrl, sDownloadUser, sDownloadPassword);
-
+            
+            if (oInputStream == null) {
+            	WasdiLog.errorLog("LpDaacProviderAdapter.executeDownloadFile. Input stream is null. Nothing to download.");
+            	return null;
+            }
+            	
+            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Input stream is not null. Proceed to save the stream on file."); 
+            
 	        File oSaveDir = new File(sSaveDirOnServer);
+            
+            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. New file created at: " + sSaveDirOnServer);
 
             String sSavedFilePath = oSaveDir + File.separator + sDownloadUrl.substring(sDownloadUrl.lastIndexOf('/') + 1).trim();
+            
+			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Path of the output stream: " + sSavedFilePath);
+			// sSaveDirOnServer contains the path until the workspace. However, if the workspace has just been created, the workspace
+			// directory is not yet present and needs to be created
+			File oTargetFile = new File(sSavedFilePath);
+			File oTargetDir = oTargetFile.getParentFile();
+			boolean oDirCreated = oTargetDir.mkdirs();
+			if (oDirCreated)
+				WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Workspace directory has been crated");
             Path outputPath = Paths.get(sSavedFilePath);
             Files.copy(oInputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-
+            
     		WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. File path downloaded at: " + sSavedFilePath);
     		
     		sDownloadUrl = sSavedFilePath;
         }
         catch( Exception oEx) {
 			WasdiLog.errorLog("LpDaacProviderAdapter.executeDownloadFile: exception when trying to download the file " + oEx.getMessage());
+			return null;
+			
         } finally {
         	if (oInputStream != null)
         		oInputStream.close();

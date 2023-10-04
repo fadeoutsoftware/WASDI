@@ -45,12 +45,11 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
     echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
     echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
-    echo "deb http://lu.archive.ubuntu.com/ubuntu jammy main" > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install \
         ca-certificates && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
-    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get dist-upgrade && \
