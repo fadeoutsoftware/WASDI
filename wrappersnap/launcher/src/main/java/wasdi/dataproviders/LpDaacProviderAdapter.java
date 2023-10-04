@@ -71,30 +71,26 @@ public class LpDaacProviderAdapter extends ProviderAdapter {
             oInputStream = MODISUtils.getResource(sDownloadUrl, sDownloadUser, sDownloadPassword);
             
             if (oInputStream == null) {
-                WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Input stream is null. Nothing to download.");
+            	WasdiLog.errorLog("LpDaacProviderAdapter.executeDownloadFile. Input stream is null. Nothing to download.");
             	return null;
             }
+            	
+            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Input stream is not null. Proceed to save the stream on file."); 
             
-            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Input stream opened. Is it not null? " + (oInputStream != null));
-
 	        File oSaveDir = new File(sSaveDirOnServer);
-	        
-			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. New file opened at: " + sSaveDirOnServer);
+            
+            WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. New file created at: " + sSaveDirOnServer);
 
             String sSavedFilePath = oSaveDir + File.separator + sDownloadUrl.substring(sDownloadUrl.lastIndexOf('/') + 1).trim();
             
 			WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Path of the output stream: " + sSavedFilePath);
-			
 			// sSaveDirOnServer contains the path until the workspace. However, if the workspace has just been created, the workspace
 			// directory is not yet present and needs to be created
 			File oTargetFile = new File(sSavedFilePath);
 			File oTargetDir = oTargetFile.getParentFile();
 			boolean oDirCreated = oTargetDir.mkdirs();
-			
 			if (oDirCreated)
-	    		WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. workspace directory has been crated");
-
-
+				WasdiLog.debugLog("LpDaacProviderAdapter.executeDownloadFile. Workspace directory has been crated");
             Path outputPath = Paths.get(sSavedFilePath);
             Files.copy(oInputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
             
