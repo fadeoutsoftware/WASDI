@@ -48,7 +48,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
     echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
     echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
-    echo "deb http://lu.archive.ubuntu.com/ubuntu/ ${sUbuntuDistributionName} main restricted" > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install ca-certificates && \
     echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${sUbuntuDistributionName} main restricted universe multiverse" > /etc/apt/sources.list && \
