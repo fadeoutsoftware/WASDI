@@ -149,7 +149,6 @@ var HomeController = (function () {
             oUser.sessionId = data.sessionId;
             oUser.role = data.role;
             oUser.type = data.type; 
-            oUser.grantedAuthorities = data.grantedAuthorities;
             oController.m_oConstantsService.setUser(oUser);//set user
             oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
 

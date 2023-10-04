@@ -9,6 +9,7 @@ let SubscriptionUsersController = (function () {
         this.m_oModalService = oModalService; 
 
         this.m_sUserEmail = "";
+        this.m_sRights = "read";
 
         this.m_sSelectedSubscriptionId = this.oExtras.subscriptionId;
 
@@ -20,7 +21,7 @@ let SubscriptionUsersController = (function () {
         }
     }
 
-    SubscriptionUsersController.prototype.shareSubscription = function (sUserId) {
+    SubscriptionUsersController.prototype.shareSubscription = function (sUserId, sRights) {
         let oController = this;
 
         if (utilsIsObjectNullOrUndefined(sUserId)) {
@@ -34,7 +35,7 @@ let SubscriptionUsersController = (function () {
             return false;
         }
 
-        this.m_oSubscriptionService.addSubscriptionSharing(this.m_sSelectedSubscriptionId, sUserId).then(
+        this.m_oSubscriptionService.addSubscriptionSharing(this.m_sSelectedSubscriptionId, sUserId, sRights).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response.data)) {
                     if (response.data.message === "Done") {
@@ -43,8 +44,9 @@ let SubscriptionUsersController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({ userId: sUserId });
-                        oController.m_sUserEmail = "";
+                        oController.m_aoUsersList.push({ userId: sUserId, permissions: sRights });
+                        
+                        
                     } else if (response.data.message === "Already Shared.") {
                         let oDialog = utilsVexDialogAlertBottomRightCorner(
                             `SUBSCRIPTION ALREADY SHARED WITH ${sUserId}`
@@ -52,9 +54,11 @@ let SubscriptionUsersController = (function () {
                         utilsVexCloseDialogAfter(4000, oDialog);
 
                         oController.m_aoUsersList.push({ userId: sUserId });
-                        oController.m_sUserEmail = "";
                     }
                 }
+
+                oController.m_sUserEmail = "";
+                oController.m_sRights = "read";
 
                 return true;
             }, function (error) {

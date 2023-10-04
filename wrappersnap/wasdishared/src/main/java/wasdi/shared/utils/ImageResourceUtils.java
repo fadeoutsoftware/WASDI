@@ -9,7 +9,8 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.common.io.Files;
 
 import wasdi.shared.business.ImagesCollections;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.log.WasdiLog;
@@ -120,23 +121,13 @@ public class ImageResourceUtils {
 		
 	}
 	
-	/**
-	 * Get the base path of images in WASDI
-	 * @return
-	 */
-	public static String getImagesBasePath() {
-		String sWasdiBasePath = WasdiConfig.Current.paths.downloadRootPath;
-		if (!sWasdiBasePath.endsWith("/")) sWasdiBasePath+="/";
-		String sImagesBasePath = sWasdiBasePath + "images/";
-		return sImagesBasePath;
-	}
 	
 	/**
 	 * Get the path of a subofolder of images in WASDI
 	 * @return
 	 */
 	public static String getImagesSubPath(String sCollection, String sFolder) {
-		String sPath = getImagesBasePath();
+		String sPath = PathsConfig.getImagesBasePath();
 		sPath += sCollection;
 		if (!sPath.endsWith("/")) sPath += "/";
 		

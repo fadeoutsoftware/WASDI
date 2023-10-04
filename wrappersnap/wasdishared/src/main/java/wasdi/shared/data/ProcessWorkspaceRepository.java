@@ -28,12 +28,12 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessWorkspaceAggregatorByUserIdResult;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
-import wasdi.shared.business.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorBySubscriptionAndProjectResult;
+import wasdi.shared.business.aggregators.ProcessWorkspaceAggregatorByUserIdResult;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

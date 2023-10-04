@@ -421,6 +421,7 @@
 	"DIALOG_WS_INFO_FILES": "Total fișiere :",
 	"DIALOG_WS_INFO_PROCS": "Procese executate :",
 	"DIALOG_WS_INFO_SHARINGS": "Partajare spațiului de lucru :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	
 	"DIALOG_PARAMS_TITLE": "Parametrii librăriei",
 	"DIALOG_PARAMS_FILTER_HELP": "Filtrare nume șablon...",
@@ -727,5 +728,7 @@
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Ultima versiune",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Acțiuni",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Eroare la contactarea serviciului JupyterLab"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Eroare la contactarea serviciului JupyterLab",
+
+	"READ_ONLY" : "Read Only"
 }

@@ -1,6 +1,6 @@
 package wasdi.processors.dockerUtils;
 
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 
 public class DockerUtils2 extends DockerUtils {
 

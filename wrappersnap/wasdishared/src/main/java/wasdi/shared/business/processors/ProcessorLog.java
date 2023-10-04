@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.business.processors;
 
 /**
  * Represent a row of the log of a custom processor.

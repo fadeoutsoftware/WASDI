@@ -385,6 +385,7 @@
 	"DIALOG_WS_INFO_FILES": "File totali :",
 	"DIALOG_WS_INFO_PROCS": "Processi eseguiti :",
 	"DIALOG_WS_INFO_SHARINGS": "Condivisioni del Workspace :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	"DIALOG_PARAMS_TITLE": "Libreria parametri app",
 	"DIALOG_PARAMS_FILTER_HELP": "Filtra nome del template...",
 	"DIALOG_PARAMS_ADD": "Aggiungi",
@@ -462,7 +463,6 @@
 	"WAP_AUTO_REVIEW": "AUTO-RECENSIONE NON POSSIBILE",
 	"WAP_UPDATE": "AGGIORNA",
 	"WAP_DELETE": "CANCELLA",
-	"WAP_ADD_COMMENT": "AGGIUNGI UN COMMENTO",
 	"WAP_SHOW_COMMENTS": "MOSTRA COMMENTI",
 	"WAP_HIDE_COMMENTS": "NASCONDI COMMENTI",
 	"WAP_NO_COMMENTS": "NON CI SONO COMMENTI",
@@ -677,5 +677,7 @@
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Ultima versione",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Azioni",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Errore nel servizio JupyterLab"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Errore nel servizio JupyterLab",
+
+	"READ_ONLY" : "Read Only"
 }

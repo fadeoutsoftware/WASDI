@@ -24,11 +24,13 @@ import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
 import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -79,8 +81,13 @@ public class CatalogResources {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				WasdiLog.debugLog("CatalogResources.downloadEntryByName: invalid session");
+				WasdiLog.warnLog("CatalogResources.downloadEntryByName: invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				WasdiLog.warnLog("CatalogResources.downloadEntryByName: user cannot access workspace");
+				return Response.status(Status.FORBIDDEN).build();				
 			}
 			
 			// Get the File object
@@ -141,12 +148,17 @@ public class CatalogResources {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResources.checkFileByNode: invalid session");
+			WasdiLog.warnLog("CatalogResources.checkFileByNode: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResources.checkFileByNode: user cannot access workspace");
+			return Response.status(Status.FORBIDDEN).build();			
+		}
+		
 		try {
-			String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
+			String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFileName;
 
 			File oFile = new File(sTargetFilePath);
 			
@@ -179,25 +191,35 @@ public class CatalogResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspaceId)
 	{
-		WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
+		try {
+			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName");
 
-		User oUser = Wasdi.getUserFromSession(sSessionId);
+			User oUser = Wasdi.getUserFromSession(sSessionId);
 
-		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResources.checkDownloadEntryAvailabilityByName: invalid session");
-			return Response.status(Status.UNAUTHORIZED).build();
+			if (oUser == null) {
+				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
+				return Response.status(Status.FORBIDDEN).build();			
+			}
+
+			File oFile = this.getEntryFile(sFileName,sWorkspaceId);
+			
+			if(oFile == null) {
+				return Response.serverError().build();	
+			}
+
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(oFile != null);
+			return Response.ok(oResult).build();			
 		}
-
-		File oFile = this.getEntryFile(sFileName,sWorkspaceId);
-		
-		if(oFile == null) {
-			return Response.serverError().build();	
+		catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResources.checkDownloadEntryAvailabilityByName: exception " + oEx.toString());
+			return Response.serverError().build();
 		}
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(oFile != null);
-		return Response.ok(oResult).build();		
-
 	}
 
 	/**
@@ -221,10 +243,24 @@ public class CatalogResources {
 
 		// Check user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResource.ingestFile: invalid session");
+			WasdiLog.warnLog("CatalogResource.ingestFile: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();		
 		}
+		
+		if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot write in the workspace");
+			return Response.status(Status.FORBIDDEN).build();			
+		}		
+		
+		if (!Utils.isNullOrEmpty(sStyle)) {
+			if (!PermissionsUtils.canUserAccessStyle(oUser.getUserId(), sStyle)) {
+				WasdiLog.warnLog("CatalogResources.checkDownloadEntryAvailabilityByName: user cannot access workspace");
+				return Response.status(Status.UNAUTHORIZED).build();			
+			}			
+		}
+		
 		String sUserId = oUser.getUserId();		
 
 		// Find the sftp folder
@@ -263,7 +299,7 @@ public class CatalogResources {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("DownloadResource.ingestFile: " + oEx);
+			WasdiLog.errorLog("CatalogResource.ingestFile: " + oEx);
 		}
 
 		return Response.serverError().build();
@@ -292,17 +328,24 @@ public class CatalogResources {
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: invalid session");
+			WasdiLog.warnLog("CatalogResource.ingestFileInWorkspace: invalid session");
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;		
+		}
+		
+		if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResource.ingestFileInWorkspace: user cannot write in the workspace");
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;			
 		}
 		
 		// Get the user account
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: computed file path: " + sFilePath);
 		
@@ -319,7 +362,7 @@ public class CatalogResources {
 				WasdiLog.debugLog("CatalogResource.ingestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -384,18 +427,26 @@ public class CatalogResources {
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
-			WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: invalid session");
+			WasdiLog.warnLog("CatalogResource.copyFileToSftp: computed file path: invalid session");
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;		
 		}
 		
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResource.copyFileToSftp: user cannot access the workspace");
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;			
+		}		
+		
 		// Get the user account
 		String sUserId = oUser.getUserId();
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+		String sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 		
 		WasdiLog.debugLog("CatalogResource.copyFileToSftp: computed file path: " + sFilePath);
 		
@@ -412,7 +463,7 @@ public class CatalogResources {
 				WasdiLog.debugLog("CatalogResource.copyFileToSftp: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
+				sFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -478,7 +529,7 @@ public class CatalogResources {
 
 		//input validation
 		if(null == oFtpTransferVM) {
-			WasdiLog.debugLog("CatalogResource.ftpTransferFile: invalid session");
+			WasdiLog.warnLog("CatalogResource.ftpTransferFile: invalid input View Model");
 			// check appropriateness
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setStringValue("Null arguments");
@@ -489,10 +540,19 @@ public class CatalogResources {
 		
 		if(null==oUser) {
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			WasdiLog.warnLog("CatalogResource.ftpTransferFile: invalid session");
 			oResult.setStringValue("Invalid Session");
 			return oResult;
 		}
 		
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResource.ftpTransferFile: user cannot access the workspace");
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;			
+		}		
+				
 		String sUserId = oUser.getUserId();
 
 		try {
@@ -537,7 +597,7 @@ public class CatalogResources {
 	{
 		WasdiLog.debugLog("CatalogResources.getEntryFile( fileName : " + sFileName + " )");
 				
-		String sTargetFilePath = Wasdi.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
+		String sTargetFilePath = PathsConfig.getWorkspacePath(Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.getDownloadedFileByPath(sTargetFilePath);

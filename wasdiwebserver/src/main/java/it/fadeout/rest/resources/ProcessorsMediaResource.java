@@ -19,15 +19,16 @@ import javax.ws.rs.core.Response.Status;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.AppCategory;
 import wasdi.shared.business.Comment;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.Review;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.CommentRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.ReviewRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
+import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.processors.AppCategoryViewModel;
@@ -68,7 +69,7 @@ public class ProcessorsMediaResource {
 		
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.getCategories: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.getCategories: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -106,7 +107,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -115,9 +116,8 @@ public class ProcessorsMediaResource {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-
 		if( oProcessor != null && Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: invalid processor");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: invalid processor");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -125,14 +125,14 @@ public class ProcessorsMediaResource {
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if( oReviewRepository.isTheOwnerOfTheReview(sProcessorId,sReviewId,sUserId) == false ){
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: user is not the review owner");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: user is not the review owner");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		int iDeletedCount = oReviewRepository.deleteReview(sProcessorId, sReviewId);
 
 		if( iDeletedCount == 0 ){
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteReview: return count of db operation is 0");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteReview: return count of db operation is 0");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
@@ -173,7 +173,7 @@ public class ProcessorsMediaResource {
 		
 		// Check the user session
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteComment: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -184,7 +184,7 @@ public class ProcessorsMediaResource {
 
 
 		if (oReview != null && Utils.isNullOrEmpty(oReview.getTitle()) && Utils.isNullOrEmpty(oReview.getComment())) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid review");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteComment: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -192,14 +192,14 @@ public class ProcessorsMediaResource {
 		
 		//CHEK USER ID TOKEN AND USER ID IN VIEW MODEL ARE ==
 		if (!oCommentRepository.isTheOwnerOfTheComment(sReviewId, sCommentId, sUserId)) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: invalid comment");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteComment: invalid comment");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		int iDeletedCount = oCommentRepository.deleteComment(sReviewId, sCommentId);
 
 		if (iDeletedCount == 0) {
-			WasdiLog.debugLog("ProcessorsMediaResource.deleteComment: delete returned 0");
+			WasdiLog.warnLog("ProcessorsMediaResource.deleteComment: delete returned 0");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -221,14 +221,14 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.updateReview: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.updateReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
 		
 		if(oReviewViewModel == null ){
-			WasdiLog.debugLog("ProcessorsMediaResource.updateReview: invalid review");
+			WasdiLog.warnLog("ProcessorsMediaResource.updateReview: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -265,14 +265,14 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.updateComment: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		String sUserId = oUser.getUserId();
 		
 		if (oCommentViewModel == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: invalid comment");
+			WasdiLog.warnLog("ProcessorsMediaResource.updateComment: invalid comment");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -282,7 +282,7 @@ public class ProcessorsMediaResource {
 		
 		boolean isUpdated = oCommentRepository.updateComment(oComment);
 		if (isUpdated == false) {
-			WasdiLog.debugLog("ProcessorsMediaResource.updateComment: the update was not good");
+			WasdiLog.warnLog("ProcessorsMediaResource.updateComment: the update was not good");
 			return Response.status(Status.BAD_REQUEST).build();
 		} else {
 			return Response.status(Status.OK).build();
@@ -304,12 +304,12 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid user");
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if(oReviewViewModel == null ){
-			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid view model");
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
@@ -317,14 +317,14 @@ public class ProcessorsMediaResource {
 				
 		//CHECK THE VALUE OF THE VOTE === 1 - 5
 		if( isValidVote(oReviewViewModel.getVote()) == false ){
-			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid vote");
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: invalid vote");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		String sProcessorId = oReviewViewModel.getProcessorId();
 		
 		if (Utils.isNullOrEmpty(sProcessorId)) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addReview: invalid proc id");
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: invalid proc id");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -333,9 +333,14 @@ public class ProcessorsMediaResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addReview: processor null " + sProcessorId);
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: processor null " + sProcessorId);
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addReview: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}		
 		
 		ReviewRepository oReviewRepository =  new ReviewRepository();
 		
@@ -366,12 +371,12 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid user");
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (oCommentViewModel == null ) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid view model");
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}		
 		
@@ -380,7 +385,7 @@ public class ProcessorsMediaResource {
 		String sReviewId = oCommentViewModel.getReviewId();
 		
 		if (Utils.isNullOrEmpty(sReviewId)) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addComment: invalid parent review id");
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: invalid parent review id");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -389,9 +394,23 @@ public class ProcessorsMediaResource {
 		Review oReview = oReviewRepository.getReview(sReviewId);
 		
 		if (oReview == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.addComment: review null " + sReviewId);
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: review null " + sReviewId);
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
+		
+		String sProcessorId = oReview.getProcessorId();
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: processor null " + sProcessorId);
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(sUserId, oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.addComment: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
 		
 		CommentRepository oCommentRepository =  new CommentRepository();
 		
@@ -419,7 +438,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -427,13 +446,17 @@ public class ProcessorsMediaResource {
 		Processor oProcessor = oProcessorRepository.getProcessorByName(sProcessorName);
 		
 		if(oProcessor == null || Utils.isNullOrEmpty(oProcessor.getName()) ) {
-			WasdiLog.debugLog("ProcessorsMediaResource.getReviewListByProcessor: invalid processor");
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: invalid processor");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
+		
 		if (iPage==null) iPage = 0;
 		if (iItemsPerPage==null) iItemsPerPage = 4;
-		
 		
 		// Get all the reviews
 		ReviewRepository oReviewRepository =  new ReviewRepository();
@@ -481,7 +504,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -489,9 +512,23 @@ public class ProcessorsMediaResource {
 		Review oReview = oReviewRepository.getReview(sReviewId);
 		
 		if (oReview == null || Utils.isNullOrEmpty(oReview.getId())) {
-			WasdiLog.debugLog("ProcessorsMediaResource.getCommentListByReview: invalid review");
+			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: invalid review");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+		
+		String sProcessorId = oReview.getProcessorId();
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		
+		if (oProcessor == null) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getCommentListByReview: processor null " + sProcessorId);
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+			WasdiLog.warnLog("ProcessorsMediaResource.getReviewListByProcessor: User cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
+		}			
 		
 		// Get all the comments
 		CommentRepository oCommentRepository = new CommentRepository();
@@ -522,7 +559,7 @@ public class ProcessorsMediaResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		// Check the user session
 		if(oUser == null){
-			WasdiLog.debugLog("ProcessorsMediaResource.getPublishers: invalid session");
+			WasdiLog.warnLog("ProcessorsMediaResource.getPublishers: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -742,25 +779,5 @@ public class ProcessorsMediaResource {
 
 		return oListViewModel;
 	}
-	
-	/**
-	 * Transform the Comment object into a Comment DetailViewModel.
-	 * @param oComment the comment object
-	 * @return a detail view model
-	 */
-	private static CommentDetailViewModel getDetailViewModel(Comment oComment) {
-		if (oComment == null) {
-			return null; 
-		}
-
-		CommentDetailViewModel oDetailViewModel = new CommentDetailViewModel();
-		oDetailViewModel.setCommentId(oComment.getCommentId());
-		oDetailViewModel.setReviewId(oComment.getReviewId());
-		oDetailViewModel.setUserId(oComment.getUserId());
-		oDetailViewModel.setDate(new Date(oComment.getDate().longValue()));
-		oDetailViewModel.setText(oComment.getText());
-
-		return oDetailViewModel;
-	}	
 }
 

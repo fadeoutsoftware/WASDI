@@ -1,4 +1,4 @@
-package wasdi.shared.business;
+package wasdi.shared.business.processors;
 
 import java.util.ArrayList;
 

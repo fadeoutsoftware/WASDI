@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.LauncherMain;
 import wasdi.io.WasdiProductReader;
 import wasdi.io.WasdiProductReaderFactory;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.payloads.IngestPayload;
@@ -61,7 +61,7 @@ public class Ingest extends Operation {
             // Update status
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 0);
 
-            String sDestinationPath = LauncherMain.getWorkspacePath(oParameter);
+            String sDestinationPath = PathsConfig.getWorkspacePath(oParameter);
 
             File oDstDir = new File(sDestinationPath);
 

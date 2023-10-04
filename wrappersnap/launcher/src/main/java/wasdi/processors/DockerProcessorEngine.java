@@ -27,8 +27,9 @@ import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -145,7 +146,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // First Check if processor exists
             Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-            String sProcessorFolder = getProcessorFolder(sProcessorName);
+            String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
             // Create the file
             File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
@@ -321,7 +322,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         try {
 
             // Check workspace folder
-            String sWorkspacePath = LauncherMain.getWorkspacePath(oParameter);
+            String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
 
             File oWorkspacePath = new File(sWorkspacePath);
 
@@ -373,7 +374,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	}
             	else {
             		File oZipFile = new File(sProcessorZipFile);
-            		bResult = unzipProcessor(getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
+            		bResult = unzipProcessor(PathsConfig.getProcessorFolder(oProcessor), oZipFile.getName(), oParameter.getProcessObjId());
             	}
             	
             	if (!bResult) {
@@ -386,7 +387,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
             
             // Check if the container is started
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
@@ -612,7 +613,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 }
             }
 
-            String sProcessorFolder = getProcessorFolder(sProcessorName);
+            String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
             File oProcessorFolder = new File(sProcessorFolder);
 
@@ -728,7 +729,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 return false;
             }
 
-            String sProcessorFolder = getProcessorFolder(sProcessorName);
+            String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 
             WasdiLog.infoLog("DockerProcessorEngine.redeploy: update docker for " + sProcessorName);
 
@@ -989,7 +990,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
 		// Set the processor path
-		String sProcessorFolder = this.getProcessorFolder(sProcessorName);
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 		File oProcessorFolder = new File(sProcessorFolder);
 
 		// Is the processor installed in this node?
@@ -1003,7 +1004,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		int iPort = oProcessor.getPort();
 
         // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
         
         // Check if the container is started
         boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
@@ -1302,7 +1303,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
 			
 			// And get the processor folder
-			String sProcessorFolder = getProcessorFolder(oProcessor.getName());
+			String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor.getName());
 			
 			// Create the docker utils
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);

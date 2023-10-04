@@ -1,10 +1,10 @@
 package wasdi.operations;
 
-import wasdi.LauncherMain;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -41,7 +41,7 @@ public class Readmetadata extends Operation {
 
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
-            String sProductPath = LauncherMain.getWorkspacePath(oReadMetadataParameter) + sProductName;
+            String sProductPath = PathsConfig.getWorkspacePath(oReadMetadataParameter) + sProductName;
 
             DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sProductPath);
             

@@ -42,8 +42,8 @@ service('SubscriptionService', ['$http',  'ConstantsService', function ($http, o
     }
 
     // Add sharing
-    this.addSubscriptionSharing = function (sSubscriptionId, sUserId) {
-        return this.m_oHttp.post(this.APIURL + '/subscriptions/share/add?subscription=' + sSubscriptionId + '&userId=' + sUserId);
+    this.addSubscriptionSharing = function (sSubscriptionId, sUserId, sRights) {
+        return this.m_oHttp.post(this.APIURL + '/subscriptions/share/add?subscription=' + sSubscriptionId + '&userId=' + sUserId+ "&rights="+sRights);
     }
 
     // Remove sharing

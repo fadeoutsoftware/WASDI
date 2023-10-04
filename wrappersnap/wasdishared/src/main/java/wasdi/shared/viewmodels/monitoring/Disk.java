@@ -1,14 +1,5 @@
 package wasdi.shared.viewmodels.monitoring;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
 public class Disk {
 
 	private String mountpoint;
@@ -83,6 +74,30 @@ public class Disk {
 		}
 
 		return oValue;
+	}
+
+	public String getMountpoint() {
+		return mountpoint;
+	}
+
+	public void setMountpoint(String mountpoint) {
+		this.mountpoint = mountpoint;
+	}
+
+	public DataBlockAbsolute getAbsolute() {
+		return absolute;
+	}
+
+	public void setAbsolute(DataBlockAbsolute absolute) {
+		this.absolute = absolute;
+	}
+
+	public DataBlockPercentage getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(DataBlockPercentage percentage) {
+		this.percentage = percentage;
 	}
 
 }

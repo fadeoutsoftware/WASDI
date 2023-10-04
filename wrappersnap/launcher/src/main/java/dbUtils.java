@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,10 +22,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.processors.PythonPipProcessorEngine2;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -34,19 +32,21 @@ import wasdi.shared.business.Node;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorLog;
-import wasdi.shared.business.ProcessorUI;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.Project;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Subscription;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserResourcePermission;
-import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorLog;
+import wasdi.shared.business.processors.ProcessorUI;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserResourcePermission;
+import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.MongoConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -75,6 +75,7 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.modis.MODISUtils;
 import wasdi.shared.viewmodels.ogcprocesses.ProcessList;
 import wasdi.shared.viewmodels.organizations.SubscriptionType;
 import wasdi.shared.viewmodels.products.BandViewModel;
@@ -327,9 +328,8 @@ public class dbUtils {
     }
     
     public static void redeployProcessor(Processor oProcessor) {
-        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
         
-        String sProcessorFolder = sBasePath + "/processors/" + oProcessor.getName() + "/";
+        String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor);
         
         if (new File(sProcessorFolder).exists() == false) {
         	System.out.println("Processor " + oProcessor.getName() + " Does not exists in path " + sProcessorFolder);
@@ -481,8 +481,7 @@ public class dbUtils {
                 for (Processor oProcessor : aoProcessors) {
 
                     String sProcessorName = oProcessor.getName();
-                    String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                    String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+                    String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
                     File oUiFile = new File(sProcessorPath + "/ui.json");
 
                     if (oUiFile.exists()) {
@@ -516,8 +515,7 @@ public class dbUtils {
                 	
                 	if (oProcessor.getType().equals(sProcessorType)) {
                         String sProcessorName = oProcessor.getName();
-                        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                        String sProcessorPath = sBasePath + "/processors/" + sProcessorName;
+                        String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
                         File oProcessorFolder = new File(sProcessorPath);
 
                         if (oProcessorFolder.exists()) {
@@ -794,11 +792,7 @@ public class dbUtils {
                 SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
                 List<SnapWorkflow> aoWorkflows = oSnapWorkflowRepository.getList();
 
-                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                if (!sBasePath.endsWith("/")) {
-                    sBasePath += "/";
-                }
-                sBasePath += "workflows/";
+                String sBasePath = PathsConfig.getWorkflowsPath();
 
                 File oDestinationPath = new File(sBasePath);
 
@@ -906,10 +900,7 @@ public class dbUtils {
                 // Clean the user folder
                 System.out.println("Deleting User Folder ");
 
-                String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-                if (!sBasePath.endsWith("/")) {
-                    sBasePath += "/";
-                }
+                String sBasePath = PathsConfig.getWasdiBasePath();
                 sBasePath += sUserId;
                 sBasePath += "/";
 
@@ -929,19 +920,6 @@ public class dbUtils {
         }
     }
 
-    private static String getWorkspacePath(String sWorkspaceOwner, String sWorkspaceId) throws IOException {
-        String sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-        if (!sBasePath.endsWith("/")) {
-            sBasePath += "/";
-        }
-        sBasePath += sWorkspaceOwner;
-        sBasePath += "/";
-        sBasePath += sWorkspaceId;
-        sBasePath += "/";
-
-        return sBasePath;
-    }
-
     private static void deleteWorkspace(String sWorkspaceId, String sWorkspaceOwner) {
 
         try {
@@ -959,7 +937,7 @@ public class dbUtils {
             }
 
             // get workspace path
-            String sWorkspacePath = getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
+            String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
             System.out.println("deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -1250,7 +1228,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
                 System.out.println("Deleting Workspace " + sWorkspaceId + " of user " + sWorkspaceOwner);
 
@@ -1397,7 +1375,7 @@ public class dbUtils {
                 String sWorkspaceOwner = oWS.getUserId();
 
                 // get workspace path
-                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 
                 // Check and create the folder
                 File oWorkspaceFolder = new File(sWorkspacePath);
@@ -1582,7 +1560,7 @@ public class dbUtils {
 	                String sWorkspaceOwner = oWS.getUserId();
 
 	                // get workspace path
-	                String sWorkspacePath = WasdiConfig.Current.paths.downloadRootPath + "/" + sWorkspaceOwner + "/" + sWorkspaceId;
+	                String sWorkspacePath = PathsConfig.getWorkspacePath(sWorkspaceOwner, sWorkspaceId);
 	                
 	                File oWorkspacePath = new File(sWorkspacePath);
 	                
@@ -2291,6 +2269,79 @@ public class dbUtils {
 		}
 	}    
 
+	
+	private static void modis() {
+		try {
+			
+            System.out.println("This tool will parse the config file and ingest in WASDI the MOD11A2 data from the LP DAAC catalogue. ");
+
+            System.out.println("\t1 - Proceed with the import of all documents from the data provider");
+            System.out.println("\t2 - Specify the lines of the CSV file to read and import the documents FROM THE DATA PROVIDER");
+            System.out.println("\t3 - Specify the lines of the CSV file to read and import the documents FROM THE CSV FILE");
+            System.out.println("\t4 - Repair database reading metadata of missing documents from CSV file");
+            System.out.println("\tx - back to main menu");
+            System.out.println("");
+
+            String sInputString = s_oScanner.nextLine();
+
+            if (sInputString.equals("x")) {
+                return;
+            }
+
+            if (sInputString.equals("1")) {
+            	System.out.println("you chose to import all the documents");
+            	 MODISUtils.insertProducts();
+            	 return;
+            }
+            
+            if (sInputString.equals("2") || sInputString.equals("3")) {
+            	System.out.println("Specify the number of the starting line and the ending line in the CSV file, separated by a space");
+            	System.out.println("");
+            	
+                String sLineIndeces = s_oScanner.nextLine();
+                String[] asIndeces = sLineIndeces.split(" ");
+                
+                if (asIndeces.length < 2 || asIndeces.length > 2) {
+                	System.out.println("Number of starting and ending line not specified in the correct format. Returning to the main menu.");
+                	return;
+                }
+                
+                int iStartLine = Integer.MIN_VALUE;
+                int iEndLine = Integer.MIN_VALUE;
+                try {
+                	iStartLine = Integer.parseInt(asIndeces[0]);
+                	iEndLine = Integer.parseInt(asIndeces[1]);
+                } catch (NumberFormatException oE) {
+                	System.out.println("One of the parameters is not a number. Returning to the main menu.");
+                	return;
+                }
+                
+                if (iStartLine > iEndLine) {
+                	System.out.println("The number of the start line should be less or equal than the number of the ending line. Returning to the main menu.");
+                	return;
+                }
+                
+                System.out.println("You chose to import the documents in the lines included between " + iStartLine + " and " + iEndLine);
+                
+                if (sInputString.equals("2"))
+                	MODISUtils.insertProducts(iStartLine, iEndLine);
+                else
+                	MODISUtils.insertProductsFromCsv(iStartLine, iEndLine);
+                
+                return;
+            }
+            
+            if (sInputString.equals("4")) {
+            	System.out.println("You chose to fill the db with the missing data");
+            	MODISUtils.insertMissingProductsFromCsv();
+            }
+            
+
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+	}
+	
     public static void main(String[] args) {
 
         try {
@@ -2348,7 +2399,25 @@ public class dbUtils {
                 MongoRepository.addMongoConnection("local", WasdiConfig.Current.mongoLocal.user, WasdiConfig.Current.mongoLocal.password, WasdiConfig.Current.mongoLocal.address, WasdiConfig.Current.mongoLocal.replicaName, WasdiConfig.Current.mongoLocal.dbName);
             }
             
+            // add connection to ecostress db
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
+            
+            // add connection to modis db
+            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
+            if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
+            	try {
+            		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+            		ObjectMapper oMapper = new ObjectMapper(); 
+		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+	            } catch (Exception oEx) {
+	            	System.err.println("Db Utils - Error while reading the MODIS db configuration. Exit. " + oEx.getMessage());
+	            	System.exit(-1);
+	            }
+            } else {
+                System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
+                System.exit(-1); 
+            }
             
             //testEOEPCALogin();
 
@@ -2374,6 +2443,7 @@ public class dbUtils {
                 System.out.println("\t12 - Logs");
                 System.out.println("\t13 - EcoStress");
                 System.out.println("\t14 - Subscriptions");
+                System.out.println("\t15 - MOD11A2 data import");
                 System.out.println("\tx - Exit");
                 System.out.println("");
 
@@ -2408,7 +2478,9 @@ public class dbUtils {
                     ecoStress();
                 } else if (sInputString.equals("14")) {
                     subscriptions();
-                }  
+                } else if (sInputString.equals("15")) {
+                	modis();
+                }
                 else if (sInputString.toLowerCase().equals("x")) {
                     bExit = true;
                 } else {

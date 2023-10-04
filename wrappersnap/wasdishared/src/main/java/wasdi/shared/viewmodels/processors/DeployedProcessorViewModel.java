@@ -21,7 +21,7 @@ public class DeployedProcessorViewModel {
 	private int minuteTimeout = 180;
 	private String type = "";
 	private Boolean sharedWithMe = false;
-	
+	private boolean readOnly = false;
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -88,6 +88,12 @@ public class DeployedProcessorViewModel {
 	}
 	public void setMinuteTimeout(int minuteTimeout) {
 		this.minuteTimeout = minuteTimeout;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

@@ -31,7 +31,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.viewmodels.search.QueryResultViewModel;
 
 /**
  * Created by p.campanella on 14/10/2016.

@@ -1,19 +1,20 @@
 package wasdi.shared.viewmodels;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class HttpCallResponse {
 
 	private Integer responseCode = -1;
 	private String responseBody = "";
+	public Integer getResponseCode() {
+		return responseCode;
+	}
+	public void setResponseCode(Integer responseCode) {
+		this.responseCode = responseCode;
+	}
+	public String getResponseBody() {
+		return responseBody;
+	}
+	public void setResponseBody(String responseBody) {
+		this.responseBody = responseBody;
+	}
 
 }

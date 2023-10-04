@@ -193,10 +193,10 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	
 	
 	private boolean isBoundingBoxValid(QueryViewModel oQueryViewModel) {
-		return !(Utils.isNullOrEmpty(oQueryViewModel.north) 
-				|| Utils.isNullOrEmpty(oQueryViewModel.south)
-				|| Utils.isNullOrEmpty(oQueryViewModel.west)
-				|| Utils.isNullOrEmpty(oQueryViewModel.east));
+		return oQueryViewModel.north != null 
+				&& oQueryViewModel.south != null
+				&& oQueryViewModel.west != null
+				&& oQueryViewModel.east != null;
 	}
 	
 	private String[] getTimelinessAttributeAndCode(String sPlatform, String sTimeliness) {
