@@ -1,6 +1,6 @@
-package wasdi.processors.dockerUtils.containersViewModels;
+package wasdi.shared.utils.docker.containersViewModels;
 
-import wasdi.processors.dockerUtils.containersViewModels.constants.ConsistencyTypes;
+import wasdi.shared.utils.docker.containersViewModels.constants.ConsistencyTypes;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

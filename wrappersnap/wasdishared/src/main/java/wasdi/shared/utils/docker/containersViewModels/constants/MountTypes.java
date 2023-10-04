@@ -1,4 +1,4 @@
-package wasdi.processors.dockerUtils.containersViewModels.constants;
+package wasdi.shared.utils.docker.containersViewModels.constants;
 
 public class MountTypes {
 	public static String BIND = "bind";

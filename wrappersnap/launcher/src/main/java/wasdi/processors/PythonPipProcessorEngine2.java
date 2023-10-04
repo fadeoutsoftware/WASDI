@@ -2,7 +2,6 @@ package wasdi.processors;
 
 import java.util.List;
 
-import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.config.DockerRegistryConfig;
@@ -13,6 +12,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

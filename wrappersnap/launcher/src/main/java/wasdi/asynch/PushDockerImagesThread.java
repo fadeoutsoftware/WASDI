@@ -2,11 +2,11 @@ package wasdi.asynch;
 
 import java.util.ArrayList;
 
-import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class PushDockerImagesThread extends Thread {

@@ -1,4 +1,4 @@
-package wasdi.processors.dockerUtils.containersViewModels.constants;
+package wasdi.shared.utils.docker.containersViewModels.constants;
 
 /**
  * Represents the different states of a container

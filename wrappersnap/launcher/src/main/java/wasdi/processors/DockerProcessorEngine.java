@@ -23,7 +23,6 @@ import com.google.common.io.CharStreams;
 
 import wasdi.LauncherMain;
 import wasdi.asynch.PushDockerImagesThread;
-import wasdi.processors.dockerUtils.DockerUtils;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
@@ -42,6 +41,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 

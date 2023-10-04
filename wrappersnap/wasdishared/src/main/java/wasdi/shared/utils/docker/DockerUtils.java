@@ -1,4 +1,4 @@
-package wasdi.processors.dockerUtils;
+package wasdi.shared.utils.docker;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -17,13 +17,6 @@ import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import wasdi.processors.dockerUtils.containersViewModels.AuthToken;
-import wasdi.processors.dockerUtils.containersViewModels.ContainerInfo;
-import wasdi.processors.dockerUtils.containersViewModels.CreateParams;
-import wasdi.processors.dockerUtils.containersViewModels.LoginInfo;
-import wasdi.processors.dockerUtils.containersViewModels.MountVolumeParam;
-import wasdi.processors.dockerUtils.containersViewModels.constants.ContainerStates;
-import wasdi.processors.dockerUtils.containersViewModels.constants.MountTypes;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
@@ -33,6 +26,13 @@ import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
+import wasdi.shared.utils.docker.containersViewModels.AuthToken;
+import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
+import wasdi.shared.utils.docker.containersViewModels.CreateParams;
+import wasdi.shared.utils.docker.containersViewModels.LoginInfo;
+import wasdi.shared.utils.docker.containersViewModels.MountVolumeParam;
+import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
+import wasdi.shared.utils.docker.containersViewModels.constants.MountTypes;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
