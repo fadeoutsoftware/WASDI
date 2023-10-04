@@ -39,9 +39,14 @@ public class DockersConfig {
 	public Integer numberOfAttemptsToPingTheServer = 4;
 
 	/**
-	 * The amount of time (in millis) to wait between the attempts
+	 * The amount of time (in millis) to wait between the attempts to check if the docker is started
 	 */
 	public Integer millisBetweenAttmpts = 5000;
+	
+	/**
+	 * The amount of time (in millis) to wait between the calls to the docker engine api to request the status of a docker
+	 */
+	public Integer millisBetweenStatusPolling = 1000;
 	
 	/**
 	 * The amout of time  (in millis) to wait for docker to complete delete operation

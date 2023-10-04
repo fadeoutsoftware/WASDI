@@ -49,10 +49,6 @@ public class PathsConfig {
 	 */
 	public String geoserverDataDir;
 	/**
-	 * Matlab runtime path
-	 */
-	public String matlabRuntimePath;
-	/**
 	 * Sen 2 Core bin path
 	 */
 	public String sen2CorePath;

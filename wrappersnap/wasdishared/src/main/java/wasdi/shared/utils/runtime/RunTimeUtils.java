@@ -12,8 +12,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import wasdi.shared.config.ShellExecItemConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class RunTimeUtils {
@@ -186,6 +188,65 @@ public class RunTimeUtils {
 	 */
 	private static ShellExecReturn dockerShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
 		ShellExecReturn oShellExecReturn = new ShellExecReturn();
+		oShellExecReturn.setOperationOk(false);
+		
+		if (asArgs == null) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: arg are null");
+			return oShellExecReturn;
+		}
+
+		if (asArgs.size()<=0) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: arg are empty");
+			return oShellExecReturn;
+		}
+
+		// Get the shell exec item
+		ShellExecItemConfig oShellExecItem = WasdiConfig.Current.dockers.getShellExecItem(asArgs.get(0));
+		
+		if (oShellExecItem == null) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to find the command, try locally");
+			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
+		}
+		
+		DockerUtils oDockerUtils = new DockerUtils(null, null, null);
+		
+		if (!oShellExecItem.includeFistCommand) asArgs.remove(0);
+		
+		String sContainerName = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs);
+		
+		if (Utils.isNullOrEmpty(sContainerName)) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container name from run");
+			return oShellExecReturn;
+		}
+		else {
+			if (bWait) {
+				
+				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container to make its job");
+				
+				boolean bFinished = oDockerUtils.waitForContainerToFinish(sContainerName);
+				
+				if (!bFinished) {
+					WasdiLog.warnLog("RunTimeUtils.dockerShellExec: it looks we had some problems waiting the docker to finish :(");
+					return oShellExecReturn;
+				}
+				
+				oShellExecReturn.setAsynchOperation(false);
+				oShellExecReturn.setOperationOk(true);
+				
+				if (bReadOutput || bRedirectError) {
+					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: collect also the logs");
+					String sLogs = oDockerUtils.getContainerLogsByContainerName(sContainerName);
+					oShellExecReturn.setOperationLogs(sLogs);
+				}
+			}
+			else {
+				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: no need to wait, we return");
+				oShellExecReturn.setAsynchOperation(true);
+				oShellExecReturn.setOperationOk(true);
+			}
+		}
+		
+		
 		return oShellExecReturn;
 	}
 	
