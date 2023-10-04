@@ -1,9 +1,13 @@
 package wasdi.shared.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -85,6 +89,11 @@ public class DockersConfig {
 	public String additionalDockerRunParameter = "";
 	
 	/**
+	 * Map the local shell exec commands in equivalent docker commands
+	 */
+	public Map<String, ShellExecItemConfig> shellExecCommands = new HashMap<>();
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */
@@ -93,10 +102,61 @@ public class DockersConfig {
 			Collections.sort(registers, Comparator.comparing(DockerRegistryConfig::getPriority));
 		}		
 		catch (Exception oEx) {
-			WasdiLog.debugLog("DockersConfig.getRegisters: Exception ordering the registers list");
+			WasdiLog.errorLog("DockersConfig.getRegisters: Exception ordering the registers list");
 		}
 		
 		return registers;
+	}
+	
+	/**
+	 * Safe get a ShellExecItemConfig
+	 * @param sCommand Command we are searching for
+	 * @return Equivalent ShellExecItemConfig or null in case of any problem
+	 */
+	public ShellExecItemConfig getShellExecItem(String sCommand) {
+		
+		// Check if we have the  command
+		if (Utils.isNullOrEmpty(sCommand)) {
+			WasdiLog.warnLog("DockersConfig.getShellExecItem: the command is null or empty");
+			return null;
+		}
+		
+		// Check if we have the maps of commands
+		if (shellExecCommands == null) {
+			WasdiLog.warnLog("DockersConfig.getShellExecItem: the map dictionary is null");
+			return null;			
+		}
+		
+		try {
+			
+			// Get just the command, without any path
+			File oCommandAsFile = new File(sCommand);
+			String sSimplifiedCommand = oCommandAsFile.getName();
+			
+			// We need to have a command!
+			if (Utils.isNullOrEmpty(sSimplifiedCommand)) {
+				WasdiLog.warnLog("DockersConfig.getShellExecItem: impossible to get the command without paths");
+				return null;				
+			}
+			
+			// Is this in the map?
+			if (shellExecCommands.containsKey(sSimplifiedCommand)) {
+				// Ok return the right ShellExecItemConfig
+				return shellExecCommands.get(sSimplifiedCommand);
+			}
+			else {
+				// We do not have it
+				WasdiLog.warnLog("DockersConfig.getShellExecItem: command not found " + sCommand);
+				return null;
+			}
+			
+		}
+		catch (Exception oEx) {
+			// What happened?
+			WasdiLog.errorLog("DockersConfig.getShellExecItem: Exception getting the command " + sCommand, oEx);
+			return null;
+		}
+
 	}
 	
 }

@@ -3,6 +3,7 @@ package wasdi.scheduler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,6 +17,8 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 
 public class ProcessScheduler {
 	
@@ -342,7 +345,7 @@ public class ProcessScheduler {
 				
 				// Check if it is alive
 				if (!Utils.isNullOrEmpty(sPid)) {
-					if (!Utils.isProcessStillAllive(sPid)) {
+					if (!RunTimeUtils.isProcessStillAllive(sPid)) {
 						// PID does not exists: recheck and remove
 						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
 						
@@ -458,7 +461,7 @@ public class ProcessScheduler {
 				
 				// Check if it is alive
 				if (!Utils.isNullOrEmpty(sPid)) {
-					if (!Utils.isProcessStillAllive(sPid)) {
+					if (!RunTimeUtils.isProcessStillAllive(sPid)) {
 						// PID does not exists: recheck and remove
 						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
 						
@@ -674,16 +677,16 @@ public class ProcessScheduler {
 	
 			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
 			WasdiLog.infoLog(sShellExString);
-
 			
-			Process oSystemProc = Runtime.getRuntime().exec(sShellExString);
+			ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sShellExString.split(" ")));
+			RunTimeUtils.shellExec(asCmd, false);
+			
 			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
 			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
 			
 		} 
-		catch (IOException oEx) {
+		catch (Exception oEx) {
 			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());
-			oEx.printStackTrace();
 			WasdiLog.errorLog(m_sLogPrefix + "executeProcess : try to set the process in Error");
 			
 			try {
@@ -700,10 +703,8 @@ public class ProcessScheduler {
 		}
 		catch(Throwable oThrowable) {
 			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oThrowable.toString());
-			oThrowable.printStackTrace();
 			return null;
 		}
-		
 		
 		return oProcessWorkspace.getProcessObjId();
 	}
@@ -713,20 +714,12 @@ public class ProcessScheduler {
 	 * @param iPid
 	 * @return
 	 */
-	private int stopProcess(int iPid) {
+	private boolean stopProcess(int iPid) {
 		try {
-			// kill process command
-			String sShellExString = m_sKillCommand + " " + iPid;
-			
-			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: shell exec " + sShellExString);
-			
-			Process oProc;
-		
-			oProc = Runtime.getRuntime().exec(sShellExString);
-			return oProc.waitFor();
-		} catch (Exception e) {
-			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: exception: " + e.getMessage());
-			return -1;
+			return RunTimeUtils.killProcess(iPid);
+		} catch (Exception oEx) {
+			WasdiLog.infoLog(m_sLogPrefix + "stopProcess: exception: " + oEx.getMessage());
+			return false;
 		}
 	}
 	

@@ -1,10 +1,13 @@
 package wasdi.shared.utils.runtime;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -193,8 +196,15 @@ public class RunTimeUtils {
 	 */
 	public static boolean addRunPermission(String sFile)  {
 		try {
+			
+			ArrayList<String> asCmd = new ArrayList<>();
+			
 			// Make it executable
-			Runtime.getRuntime().exec("chmod u+x " + sFile);
+			asCmd.add("chmod");
+			asCmd.add("u+x");
+			asCmd.add(sFile);
+			
+			shellExec(asCmd, false);
 
 			// And wait a little bit to make the chmod done
 			Thread.sleep(WasdiConfig.Current.msWaitAfterChmod);
@@ -203,6 +213,35 @@ public class RunTimeUtils {
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * Kill a running process
+	 * @param iPid PID of the process to kill
+	 * @return true or false
+	 */
+	public static boolean killProcess(int iPid) {
+		try {
+			if (iPid > 0) {
+				// Pid exists, kill the process
+				String sShellExString = WasdiConfig.Current.scheduler.killCommand;
+				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
+				sShellExString += " " + iPid;
+				
+				ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sShellExString.split(" ")));
+				
+				shellExec(asCmd, true);
+				
+				return true;
+
+			} else {
+				WasdiLog.errorLog("RunTimeUtils.killProcess: Process pid not <= 0");
+				return false;
+			}
+		} catch (Exception oE) {
+			WasdiLog.errorLog("RunTimeUtils.killProcess: ", oE);
 			return false;
 		}
 	}
@@ -306,6 +345,57 @@ public class RunTimeUtils {
 			WasdiLog.errorLog("RunTimeUtils.runCommand: " + oEx.toString());
 			return false;
 		}
+	}
+	
+	/**
+	 * Check if a process is alive starting from PID
+	 * The function tryes to support both Windows and Linux
+	 * 
+	 * @param sPidStr String representing the PID of the process
+	 * @return
+	 */
+	public static boolean isProcessStillAllive(String sPidStr) {
+		
+	    String sOS = System.getProperty("os.name").toLowerCase();
+	    String sCommand = null;
+	    
+	    if (sOS.indexOf("win") >= 0) {
+	    	//Check alive Windows mode
+	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
+	    } 
+	    else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
+	    	//Check alive Linux/Unix mode
+	        sCommand = "ps -p " + sPidStr;            
+	    } 
+	    else {
+	    	//("Unsuported OS: go on Linux")
+	    	sCommand = "ps -p " + sPidStr;
+	    }
+	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
+	}
+	
+	/**
+	 * Checks if a specific process identified by a PID is still running.
+	 * 
+	 * @param sPid
+	 * @param sCommand
+	 * @return
+	 */
+	private static boolean isProcessIdRunning(String sPid, String sCommand) {
+	    try {
+	    	
+	    	ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sCommand.split(" ")));
+	    	
+	    	ShellExecReturn oReturn = shellExec(asCmd, true, true, true, true);
+	    	
+	    	if (oReturn.getOperationLogs().contains(sPid)) return true;
+	    	
+	        return false;
+	        
+	    } catch (Exception oEx) {
+	    	WasdiLog.debugLog("RunTimeUtils.isProcessIdRunning: Got exception using system command [{}] " + sCommand);
+	        return false;
+	    }
 	}	
 
 	/**
