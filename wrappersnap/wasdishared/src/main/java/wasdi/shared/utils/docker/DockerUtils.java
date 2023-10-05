@@ -1444,14 +1444,14 @@ public class DockerUtils {
             		// Mount the /data/wasdi/ folder
             		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
             		
-            		// Add the volume with the Processor Code
-            		MountVolumeParam oProcessorPath = new MountVolumeParam();
-            		oProcessorPath.Source = m_sProcessorFolder;
-            		oProcessorPath.Target = "/wasdi";
-            		oProcessorPath.ReadOnly = false;
-            		oProcessorPath.Type= MountTypes.BIND;
-            		
-            		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);
+//            		// Add the volume with the Processor Code
+//            		MountVolumeParam oProcessorPath = new MountVolumeParam();
+//            		oProcessorPath.Source = m_sProcessorFolder;
+//            		oProcessorPath.Target = "/wasdi";
+//            		oProcessorPath.ReadOnly = false;
+//            		oProcessorPath.Type= MountTypes.BIND;
+//            		
+//            		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);
             		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
