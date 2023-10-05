@@ -1163,7 +1163,7 @@ public class DockerUtils {
     		sUrl += "containers/json";
     		
     		if (bAll) {
-    			sUrl += "&all=true";
+    			sUrl += "?all=true";
     		}
     		
     		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
