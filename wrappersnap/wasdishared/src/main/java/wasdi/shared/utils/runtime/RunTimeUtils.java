@@ -210,12 +210,24 @@ public class RunTimeUtils {
 		
 		DockerUtils oDockerUtils = new DockerUtils(null, null, null);
 		
-		if (!oShellExecItem.includeFistCommand) asArgs.remove(0);
+		if (!oShellExecItem.includeFistCommand) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing the first element of args");
+			asArgs.remove(0);
+		}
+		
+		if (oShellExecItem.removePathFromFirstArg) {
+			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing path from the first arg");
+			if (asArgs.size()>0) {
+				String sCommand = asArgs.get(0);
+				File oFile = new File(sCommand);
+				asArgs.set(0, oFile.getName());
+			}
+		}
 		
 		String sContainerName = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs);
 		
 		if (Utils.isNullOrEmpty(sContainerName)) {
-			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container name from run");
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container name from Docker utils.run: we stop here");
 			return oShellExecReturn;
 		}
 		else {

@@ -250,6 +250,12 @@ public class DockerUtils {
         	HashMap<String, String> asHeaders = new HashMap<>();
         	asHeaders.put("Content-type","application/x-tar");
         	
+    		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
+        		WasdiLog.debugLog("DOCKER URL DUMP");
+        		WasdiLog.debugLog(sUrl);
+        		WasdiLog.debugLog("------------------");            			
+    		}        	
+        	
         	// Finally make the call
         	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders, null, null);
         	
@@ -387,16 +393,7 @@ public class DockerUtils {
             		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
             		
             		// Set the image
-            		oContainerCreateParams.Image = sImageName;
-            		
-            		// Add the volume with workspace data
-//            		MountVolumeParam oWorkingPath = new MountVolumeParam();
-//            		oWorkingPath.Source = sMountWorkspaceFolder;
-//            		oWorkingPath.Target = "/data/wasdi";
-//            		oWorkingPath.ReadOnly = false;
-//            		oWorkingPath.Type= MountTypes.BIND;
-//            		
-//            		oContainerCreateParams.HostConfig.Mounts.add(oWorkingPath);
+            		oContainerCreateParams.Image = sImageName;            		
             		
             		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+"/data/wasdi");
             		
@@ -428,12 +425,8 @@ public class DockerUtils {
                         	}
                     	}
                     }
-            		   
-                    // This is no longer supported!!
-//                    if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.additionalDockerRunParameter)) {
-//                    	asArgs.add(WasdiConfig.Current.dockers.additionalDockerRunParameter);
-//                    }
             		
+                    
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		
@@ -441,6 +434,12 @@ public class DockerUtils {
             			WasdiLog.errorLog("DockerUtils.start: impossible to get the payload to create the container. We cannot proceed :(");
             			return false;
             		}
+            		
+            		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
+                		WasdiLog.debugLog("DOCKER PAYLOAD DUMP");
+                		WasdiLog.debugLog(sContainerCreateParams);
+                		WasdiLog.debugLog("------------------");            			
+            		}              		
             		
             		// We need to set the json Content-Type
             		HashMap<String, String> asHeaders = new HashMap<>();
@@ -584,6 +583,11 @@ public class DockerUtils {
         return true;
     }
     
+    /**
+     * Log in a Docker Registry
+     * @param oDockerRegistryConfig
+     * @return
+     */
     public String loginInRegistry(DockerRegistryConfig oDockerRegistryConfig) {
     	return loginInRegistry(oDockerRegistryConfig.address, oDockerRegistryConfig.user, oDockerRegistryConfig.password);
     }
@@ -1442,16 +1446,7 @@ public class DockerUtils {
             		oContainerCreateParams.Image = sImageName;            		
             		
             		// Mount the /data/wasdi/ folder
-            		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
-            		
-//            		// Add the volume with the Processor Code
-//            		MountVolumeParam oProcessorPath = new MountVolumeParam();
-//            		oProcessorPath.Source = m_sProcessorFolder;
-//            		oProcessorPath.Target = "/wasdi";
-//            		oProcessorPath.ReadOnly = false;
-//            		oProcessorPath.Type= MountTypes.BIND;
-//            		
-//            		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);
+            		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");            		
             		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
@@ -1478,9 +1473,11 @@ public class DockerUtils {
             			return "";
             		}
             		
-            		WasdiLog.debugLog("JSON PAYLOAD DUMP");
-            		WasdiLog.debugLog(sContainerCreateParams);
-            		WasdiLog.debugLog("------------------");
+            		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
+                		WasdiLog.debugLog("DOCKER JSON PAYLOAD DUMP");
+                		WasdiLog.debugLog(sContainerCreateParams);
+                		WasdiLog.debugLog("------------------");            			
+            		}
             		
             		// We need to set the json Content-Type
             		HashMap<String, String> asHeaders = new HashMap<>();
@@ -1509,7 +1506,7 @@ public class DockerUtils {
         		sContainerName = oContainerInfo.Id;
         	}
             
-            WasdiLog.debugLog("DockerUtils.run: Starting Container Named" + sContainerName + " created");
+            WasdiLog.debugLog("DockerUtils.run: Starting Container Named" + sContainerName);
             
             // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
@@ -1532,6 +1529,7 @@ public class DockerUtils {
     		else {
     			// Error!
     			WasdiLog.errorLog("DockerUtils.run: Impossible to start Container " + sContainerName);
+    			WasdiLog.errorLog("DockerUtils.run: Message Received " + oResponse.getResponseBody());
     			return "";
     		}
             

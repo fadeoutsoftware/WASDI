@@ -94,6 +94,10 @@ public class DockersConfig {
 	public String additionalDockerRunParameter = "";
 	
 	/**
+	 * Set to true to enable the log of the payload for the calls made to the Docker Engine API
+	 */
+	public boolean logDockerAPICallsPayload = false;
+	/**
 	 * Map the local shell exec commands in equivalent docker commands
 	 */
 	public Map<String, ShellExecItemConfig> shellExecCommands = new HashMap<>();

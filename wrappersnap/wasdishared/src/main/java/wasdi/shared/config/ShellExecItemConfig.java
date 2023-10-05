@@ -35,4 +35,9 @@ public class ShellExecItemConfig {
 	 * is configured to be dockerized.
 	 */
 	public boolean forceLocal = false;
+	
+	/**
+	 * If true, WASDI will remove the path (if present) from the first command in the arg list
+	 */
+	public boolean removePathFromFirstArg = false;
 }
