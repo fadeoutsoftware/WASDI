@@ -108,12 +108,17 @@ public final class HttpUtils {
 				}
 			}
 
-			WasdiLog.debugLog("HttpUtils.httpGet: Sending 'GET' request to URL : " + sUrl);
+			if (WasdiConfig.Current.logHttpCalls) {
+				WasdiLog.debugLog("HttpUtils.httpGet: Sending 'GET' request to URL : " + sUrl);
+			}
 
 			try {
 				// Read server response code
 				int iResponseCode = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.httpGet: Response Code : " + iResponseCode);
+				
+				if (WasdiConfig.Current.logHttpCalls) {
+					WasdiLog.debugLog("HttpUtils.httpGet: Response Code : " + iResponseCode);
+				}
 				
 				// Save it in our Return Object
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
@@ -271,11 +276,19 @@ public final class HttpUtils {
 				bLog = false;
 			}
 			
-			if (bLog) WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
+			if (bLog)  {
+				if (WasdiConfig.Current.logHttpCalls) {
+					WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
+				}
+			}
 
 			try {
 				int iResponseCode = oConnection.getResponseCode();
-				if (bLog) WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
+				if (bLog) {
+					if (WasdiConfig.Current.logHttpCalls) {
+						WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
+					}
+				}
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 				
@@ -434,7 +447,10 @@ public final class HttpUtils {
 
 				// response
 				int iResponse = oConnection.getResponseCode();
-				WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
+				
+				if (WasdiConfig.Current.logHttpCalls) {
+					WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
+				}
 
 				InputStream oResponseInputStream = null;
 
@@ -447,8 +463,11 @@ public final class HttpUtils {
 				}
 				if(null!=oResponseInputStream) {
 					Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-					String sMessage = "HttpUtils.uploadFile: " + oByteArrayOutputStream.toString();
-					WasdiLog.debugLog(sMessage);
+					
+					if (WasdiConfig.Current.logHttpCalls) {
+						String sMessage = "HttpUtils.uploadFile: " + oByteArrayOutputStream.toString();
+						WasdiLog.debugLog(sMessage);
+					}
 				} else {
 					throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 				}

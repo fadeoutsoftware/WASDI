@@ -81,6 +81,12 @@ public class RunTimeUtils {
 	 * @return True if the process is executed
 	 */
 	public static ShellExecReturn shellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		
+		// Check if we need to log the command line or not
+		if (bLogCommandLine) {
+			logCommandLine(asArgs);
+		}
+		
 		if (WasdiConfig.Current.shellExecLocally) {
 			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
 		}
@@ -108,11 +114,11 @@ public class RunTimeUtils {
 		try {
 			// We need args!
 			if (asArgs==null) {
-				WasdiLog.errorLog("RunTimeUtils.shellExec: Args are null");
+				WasdiLog.errorLog("RunTimeUtils.localShellExec: Args are null");
 				return oReturn;
 			}
 			if (asArgs.size() == 0) {
-				WasdiLog.errorLog("RunTimeUtils.shellExec: Args are empty");
+				WasdiLog.errorLog("RunTimeUtils.localShellExec: Args are empty");
 				return oReturn;
 			}
 			
@@ -121,28 +127,15 @@ public class RunTimeUtils {
 				if (bReadOutput || bRedirectError) {
 					bReadOutput = false;
 					bRedirectError = false;
-					WasdiLog.warnLog("RunTimeUtils.shellExec: running with bWait = false, we cannot collect logs. Forcing ReadOutput and RedirectError to false (at least once was true!)");
+					WasdiLog.warnLog("RunTimeUtils.localShellExec: running with bWait = false, we cannot collect logs. Forcing ReadOutput and RedirectError to false (at least once was true!)");
 				}
 			}
 			
 			if (bRedirectError==true && bReadOutput==false) {
 				bRedirectError = false;
-				WasdiLog.warnLog("RunTimeUtils.shellExec: RedirectError makes no sense if we do not read output. Forcing to false");
+				WasdiLog.warnLog("RunTimeUtils.localShellExec: RedirectError makes no sense if we do not read output. Forcing to false");
 			}
-			
-			// Check if we need to log the command line or not
-			if (bLogCommandLine) {
-				// Initialize the command line
-				String sCommandLine = "";
-				
-				for (String sArg : asArgs) {
-					sCommandLine += sArg + " ";
-				}			
-				
-				// and log it
-				WasdiLog.debugLog("RunTimeUtils.shellExec CommandLine: " + sCommandLine);
-			}
-			
+						
 			// If we want to collect the logs, create the temp file
 			File oLogFile = null;
 			if (bReadOutput) oLogFile = createLogFile();
@@ -165,7 +158,7 @@ public class RunTimeUtils {
 					deleteLogFile(oLogFile);					
 				}
 				
-				WasdiLog.debugLog("RunTimeUtils.shellExec CommandLine RETURNED: " + iProcOuptut);
+				WasdiLog.debugLog("RunTimeUtils.localShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 			
 			oReturn.setOperationOk(true);
@@ -173,7 +166,7 @@ public class RunTimeUtils {
 			return oReturn;
 		}
 		catch (Exception e) {
-			WasdiLog.errorLog("RunTimeUtils.shellExec exception: " + e.getMessage());
+			WasdiLog.errorLog("RunTimeUtils.localShellExec exception: " + e.getMessage());
 			return oReturn;
 		}		
 	}
@@ -187,14 +180,16 @@ public class RunTimeUtils {
 	 * @return True if the process is executed
 	 */
 	private static ShellExecReturn dockerShellExec(List<String> asArgs, boolean bWait, boolean bReadOutput, boolean bRedirectError, boolean bLogCommandLine) {
+		// Prepare the return object
 		ShellExecReturn oShellExecReturn = new ShellExecReturn();
 		oShellExecReturn.setOperationOk(false);
 		
+		// We need args
 		if (asArgs == null) {
 			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: arg are null");
 			return oShellExecReturn;
 		}
-
+ 
 		if (asArgs.size()<=0) {
 			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: arg are empty");
 			return oShellExecReturn;
@@ -204,17 +199,22 @@ public class RunTimeUtils {
 		ShellExecItemConfig oShellExecItem = WasdiConfig.Current.dockers.getShellExecItem(asArgs.get(0));
 		
 		if (oShellExecItem == null) {
-			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to find the command, try locally");
+			// Not found - Not good
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to find the command " + asArgs.get(0)+ ", try locally");
 			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
 		}
 		
+		WasdiLog.debugLog("RunTimeUtils.dockerShellExec: got Shell Exec Item for " + asArgs.get(0));
+		
 		DockerUtils oDockerUtils = new DockerUtils();
 		
+		// Check if the first command is included or not
 		if (!oShellExecItem.includeFistCommand) {
 			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing the first element of args");
 			asArgs.remove(0);
 		}
 		
+		// Check if we need to clean the path
 		if (oShellExecItem.removePathFromFirstArg) {
 			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing path from the first arg");
 			if (asArgs.size()>0) {
@@ -224,13 +224,17 @@ public class RunTimeUtils {
 			}
 		}
 		
-		String sContainerName = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs);
+		// Create and run the docker
+		String sContainerName = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true);
 		
+		// Did we got a Container Name?
 		if (Utils.isNullOrEmpty(sContainerName)) {
 			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container name from Docker utils.run: we stop here");
 			return oShellExecReturn;
 		}
 		else {
+			
+			// Do we need to wait for it?
 			if (bWait) {
 				
 				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container " + sContainerName + " to make its job");
@@ -482,6 +486,24 @@ public class RunTimeUtils {
 		File oLogFile = new File(sTmpFolder + Utils.getRandomName() + ".log");
 
 		return oLogFile;
+	}
+	
+	/**
+	 * Logs the command line
+	 * @param asArgs
+	 */
+	protected static void logCommandLine(List<String> asArgs) {
+		// Initialize the command line
+		String sCommandLine = "";
+		
+		if (asArgs!=null) {
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}			
+		}
+				
+		// and log it
+		WasdiLog.debugLog("RunTimeUtils.logCommandLine CommandLine: " + sCommandLine);		
 	}
 	
 	/**

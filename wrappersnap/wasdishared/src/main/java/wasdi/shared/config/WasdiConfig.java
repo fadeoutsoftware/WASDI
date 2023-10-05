@@ -80,6 +80,10 @@ public class WasdiConfig {
 	public boolean shellExecLocally=true;
 	
 	/**
+	 * Set true to activate the logs of the http calls
+	 */
+	public boolean logHttpCalls=true;
+	/**
 	 * Mongo db Configuration
 	 */
 	public MongoConfig mongoMain;

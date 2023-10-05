@@ -1386,7 +1386,7 @@ public class DockerUtils {
      * @param asArg Args to be passed as CMD parameter
      * @return The Id of the container if created, empty string in case of problems
      */
-    public String run(String sImageName, String sImageVersion, List<String> asArg) {
+    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer) {
 
         try {
         	
@@ -1439,7 +1439,13 @@ public class DockerUtils {
             }
         	
             // Search first of all if the container is already here
-        	ContainerInfo oContainerInfo = getContainerInfoByImageName(sImageName, sImageVersion);
+        	ContainerInfo oContainerInfo = null;
+        	
+        	// Shall we try to re-use a contanier?
+        	if (!bAlwaysRecreateContainer) {
+        		// Yes! Maybe I'll find it?
+        		oContainerInfo = getContainerInfoByImageName(sImageName, sImageVersion); 
+        	}
         	
         	if (oContainerInfo == null) {
         		
@@ -1514,7 +1520,7 @@ public class DockerUtils {
             			return "";
             		}
             		
-            		WasdiLog.debugLog("DockerUtils.run: Container created");
+            		WasdiLog.debugLog("DockerUtils.run: Container created. Message = " + oResponse.getResponseBody());
             		
             	}
             	catch (Exception oEx) {
