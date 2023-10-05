@@ -1097,6 +1097,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByContainerName(String sContainerName) {
     	
     	try {
+    		WasdiLog.debugLog("DockerUtils.getContainerInfo: Searching for container named: " + sContainerName );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
                         

@@ -233,7 +233,7 @@ public class RunTimeUtils {
 		else {
 			if (bWait) {
 				
-				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container to make its job");
+				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container " + sContainerName + " to make its job");
 				
 				boolean bFinished = oDockerUtils.waitForContainerToFinish(sContainerName);
 				
