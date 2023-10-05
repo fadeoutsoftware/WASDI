@@ -1421,7 +1421,7 @@ public class DockerUtils {
         		WasdiLog.debugLog("DockerUtils.run: the container is not available");
         		
         		// Since we are creating the Container, we need to set up our name
-        		sContainerName = sImageName + "_" + sImageVersion + "_" + Utils.getRandomNumber(1, 5000);
+        		sContainerName = sImageName.replace(":", "_") + "_" + Utils.getRandomNumber(1, 5000);
         		WasdiLog.debugLog("DockerUtils.run: try to create a container named " + sContainerName);
         		
         		// Create the container
@@ -1477,6 +1477,10 @@ public class DockerUtils {
             			WasdiLog.errorLog("DockerUtils.run: impossible to get the payload to create the container. We cannot proceed :(");
             			return "";
             		}
+            		
+            		WasdiLog.debugLog("JSON PAYLOAD DUMP");
+            		WasdiLog.debugLog(sContainerCreateParams);
+            		WasdiLog.debugLog("------------------");
             		
             		// We need to set the json Content-Type
             		HashMap<String, String> asHeaders = new HashMap<>();
