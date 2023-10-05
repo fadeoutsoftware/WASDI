@@ -1098,7 +1098,7 @@ public class DockerUtils {
     	
     	try {
     		
-    		List<Object> aoOutputJsonMap = getContainersInfo();
+    		List<Object> aoOutputJsonMap = getContainersInfo(true);
                         
             for (Object oContainer : aoOutputJsonMap) {
 				try {
@@ -1142,17 +1142,29 @@ public class DockerUtils {
     		WasdiLog.errorLog("DockerUtils.getContainerInfo: " + oEx.toString());
             return null;
         }
-    }    
+    }
+    
+    /**
+     * Get the list of running containers from docker
+     * @return
+     */
+    protected List<Object> getContainersInfo() {
+    	return getContainersInfo(false);
+    }
     
     /**
      * Get the list of containers from docker
      * @return List of objects as returned by Docker API
      */
-    protected List<Object> getContainersInfo() {
+    protected List<Object> getContainersInfo(boolean bAll) {
     	try {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		sUrl += "containers/json";
+    		
+    		if (bAll) {
+    			sUrl += "&all=true";
+    		}
     		
     		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
