@@ -29,6 +29,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.containersViewModels.AuthToken;
 import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
+import wasdi.shared.utils.docker.containersViewModels.CreateContainerResponse;
 import wasdi.shared.utils.docker.containersViewModels.CreateParams;
 import wasdi.shared.utils.docker.containersViewModels.LoginInfo;
 import wasdi.shared.utils.docker.containersViewModels.MountVolumeParam;
@@ -380,13 +381,11 @@ public class DockerUtils {
         			}
         		}
         		
-        		
         		// Since we are creating the Container, we need to set up our name
         		sContainerName = m_oProcessor.getName() + "_" + m_oProcessor.getVersion() + "_" + Utils.getRandomNumber(1, 5000);
         		WasdiLog.debugLog("DockerUtils.start: ok is image pulled create the container named " + sContainerName);
         		
         		// Create the container
-        		
             	try {
             		// API URL
             		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
@@ -1001,12 +1000,21 @@ public class DockerUtils {
     
     
     /**
-     * Check if a container is started
-     * @param sProcessorName
-     * @param sVersion
-     * @return
+     * Check if a container is started with a specific timeout
+     * @param sContainerId Container Id
+     * @return true when done. False in case of errors
      */
-    public boolean waitForContainerToFinish(String sContainerName) {
+    public boolean waitForContainerToFinish(String sContainerId) {
+    	return waitForContainerToFinish(sContainerId, -1);
+    }
+    
+    /**
+     * Check if a container is started with a specific timeout
+     * @param sContainerId  Container Id
+     * @param iMsTimeout Max Milliseconds to wait. -1 for infinite
+     * @return true when done. False in case of errors
+     */
+    public boolean waitForContainerToFinish(String sContainerId, int iMsTimeout) {
     	
     	try {
     		
@@ -1017,7 +1025,7 @@ public class DockerUtils {
     		
     		while (!bFinished) {
     			
-        		ContainerInfo oContainer = getContainerInfoByContainerName(sContainerName);
+        		ContainerInfo oContainer = getContainerInfoByContainerId(sContainerId);
         		
         		if (oContainer == null) {
         			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container not found, so for sure not started");
@@ -1097,7 +1105,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByContainerName(String sContainerName) {
     	
     	try {
-    		WasdiLog.debugLog("DockerUtils.getContainerInfo: Searching for container named: " + sContainerName );
+    		WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: Searching for container named: " + sContainerName );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
     		
@@ -1120,29 +1128,63 @@ public class DockerUtils {
 					}
 					
 					if (bFound) {
-						WasdiLog.debugLog("DockerUtils.getContainerInfo: found my container " + sContainerName );
-						
-						ContainerInfo oContainerInfo = new ContainerInfo();
-						oContainerInfo.Id = (String) oContainerMap.get("Id");
-						oContainerInfo.Image = (String) oContainerMap.get("Image");
-						oContainerInfo.ImageId = (String) oContainerMap.get("ImageId");
-						oContainerInfo.State = (String) oContainerMap.get("State");
-						oContainerInfo.Status = (String) oContainerMap.get("Status");
-						oContainerInfo.Names = (List<String>) oContainerMap.get("Names");
-						
-						return oContainerInfo;
+						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerName: found my container " + sContainerName );						
+						return convertContainerMapToContainerInfo(oContainerMap);
 					}
 					
 				}
 		    	catch (Exception oEx) {
-		    		WasdiLog.errorLog("DockerUtils.getContainerInfo: error parsing a container json entity " + oEx.toString());
+		    		WasdiLog.errorLog("DockerUtils.getContainerInfoByContainerName: error parsing a container json entity " + oEx.toString());
 		        }
 			}
     		
     		return null;
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("DockerUtils.getContainerInfo: " + oEx.toString());
+    		WasdiLog.errorLog("DockerUtils.getContainerInfoByContainerName: " + oEx.toString());
+            return null;
+        }
+    }
+    
+    
+    /**
+     * Get the info of a container starting from the name
+     * @param sContainerId Name of the container
+     * @return ContainerInfo or null
+     */
+    @SuppressWarnings("unchecked")
+	public ContainerInfo getContainerInfoByContainerId(String sContainerId) {
+    	
+    	try {
+    		WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: Searching for container id: " + sContainerId );
+    		
+    		List<Object> aoOutputJsonMap = getContainersInfo(true);
+    		
+    		if (!sContainerId.startsWith("/")) sContainerId = "/" + sContainerId;
+                        
+            for (Object oContainer : aoOutputJsonMap) {
+				try {
+					LinkedHashMap<String, Object> oContainerMap = (LinkedHashMap<String, Object>) oContainer;
+					
+					String sId = (String) oContainerMap.get("Id");
+					
+					if (Utils.isNullOrEmpty(sId)) continue;
+					
+					if (sId.equals(sContainerId)) {
+						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: found my container " + sContainerId );						
+						return convertContainerMapToContainerInfo(oContainerMap);
+					}					
+					
+				}
+		    	catch (Exception oEx) {
+		    		WasdiLog.errorLog("DockerUtils.getContainerInfoByContainerId: error parsing a container json entity " + oEx.toString());
+		        }
+			}
+    		
+    		return null;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.getContainerInfoByContainerId: " + oEx.toString());
             return null;
         }
     }
@@ -1410,6 +1452,8 @@ public class DockerUtils {
             String sToken = "";
             // Name of the container
             String sContainerName = "";
+            // Id of the container
+            String sContainerId = "";            
             
             // Check if we need to login in the registry
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
@@ -1522,6 +1566,16 @@ public class DockerUtils {
             		
             		WasdiLog.debugLog("DockerUtils.run: Container created. Message = " + oResponse.getResponseBody());
             		
+            		String sCreateResult = oResponse.getResponseBody();
+            		CreateContainerResponse oCreateContainerResponse = JsonUtils.s_oMapper.readValue(sCreateResult,CreateContainerResponse.class);
+            		
+            		if (oCreateContainerResponse != null) {
+            			WasdiLog.debugLog("DockerUtils.run: got the response, ContainerId = " + oCreateContainerResponse.Id);
+            			sContainerId = oCreateContainerResponse.Id;
+            		}
+            		else {
+            			WasdiLog.warnLog("DockerUtils.run: impossible to get or transalte the api return, so not container id available");
+            		}            		
             	}
             	catch (Exception oEx) {
             		WasdiLog.errorLog("DockerUtils.run exception creating the container: " + oEx.toString());
@@ -1531,15 +1585,15 @@ public class DockerUtils {
         	else {        		
         		// If the container exists, we can take the ID
         		WasdiLog.debugLog("DockerUtils.run: Container already found, we will use the id");
-        		sContainerName = oContainerInfo.Id;
+        		sContainerId = oContainerInfo.Id;
         	}
             
-            WasdiLog.debugLog("DockerUtils.run: Starting Container Named" + sContainerName);
+            WasdiLog.debugLog("DockerUtils.run: Starting Container Named " + sContainerName + " Id " + sContainerId);
             
             // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
-    		sUrl+="containers/" + sContainerName + "/start";
+    		sUrl+="containers/" + sContainerId + "/start";
     		
     		// Make the call
     		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
@@ -1547,12 +1601,12 @@ public class DockerUtils {
     		if (oResponse.getResponseCode() == 204) {
     			// Started Well
     			WasdiLog.debugLog("DockerUtils.run: Container " + sContainerName + " started");
-    			return sContainerName;
+    			return sContainerId;
     		}
     		else if (oResponse.getResponseCode() == 304) {
     			// ALready Started (but so why we did not detected this before?!?)
     			WasdiLog.debugLog("DockerUtils.run: Container " + sContainerName + " wasd already started");
-    			return sContainerName;
+    			return sContainerId;
     		}
     		else {
     			// Error!

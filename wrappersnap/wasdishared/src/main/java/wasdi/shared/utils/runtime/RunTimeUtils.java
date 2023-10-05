@@ -225,11 +225,11 @@ public class RunTimeUtils {
 		}
 		
 		// Create and run the docker
-		String sContainerName = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true);
+		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true);
 		
 		// Did we got a Container Name?
-		if (Utils.isNullOrEmpty(sContainerName)) {
-			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container name from Docker utils.run: we stop here");
+		if (Utils.isNullOrEmpty(sContainerId)) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: impossible to get the container id from Docker utils.run: we stop here");
 			return oShellExecReturn;
 		}
 		else {
@@ -237,13 +237,15 @@ public class RunTimeUtils {
 			// Do we need to wait for it?
 			if (bWait) {
 				
-				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container " + sContainerName + " to make its job");
-				
-				boolean bFinished = oDockerUtils.waitForContainerToFinish(sContainerName);
+				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: wait for the container " + sContainerId + " to make its job");
+				boolean bFinished = oDockerUtils.waitForContainerToFinish(sContainerId);
 				
 				if (!bFinished) {
 					WasdiLog.warnLog("RunTimeUtils.dockerShellExec: it looks we had some problems waiting the docker to finish :(");
 					return oShellExecReturn;
+				}
+				else {
+					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: job done");
 				}
 				
 				oShellExecReturn.setAsynchOperation(false);
@@ -251,7 +253,7 @@ public class RunTimeUtils {
 				
 				if (bReadOutput || bRedirectError) {
 					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: collect also the logs");
-					String sLogs = oDockerUtils.getContainerLogsByContainerName(sContainerName);
+					String sLogs = oDockerUtils.getContainerLogsByContainerName(sContainerId);
 					oShellExecReturn.setOperationLogs(sLogs);
 				}
 			}
@@ -261,7 +263,6 @@ public class RunTimeUtils {
 				oShellExecReturn.setOperationOk(true);
 			}
 		}
-		
 		
 		return oShellExecReturn;
 	}
