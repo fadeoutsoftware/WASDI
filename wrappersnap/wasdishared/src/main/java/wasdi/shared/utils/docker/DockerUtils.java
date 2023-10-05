@@ -1160,8 +1160,6 @@ public class DockerUtils {
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
     		
-    		if (!sContainerId.startsWith("/")) sContainerId = "/" + sContainerId;
-                        
             for (Object oContainer : aoOutputJsonMap) {
 				try {
 					LinkedHashMap<String, Object> oContainerMap = (LinkedHashMap<String, Object>) oContainer;

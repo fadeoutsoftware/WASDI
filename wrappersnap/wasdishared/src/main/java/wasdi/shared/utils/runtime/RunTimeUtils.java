@@ -248,6 +248,10 @@ public class RunTimeUtils {
 					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: job done");
 				}
 				
+				// Clean the container
+				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: clean the container");
+				oDockerUtils.removeContainer(sContainerId, true);
+				
 				oShellExecReturn.setAsynchOperation(false);
 				oShellExecReturn.setOperationOk(true);
 				

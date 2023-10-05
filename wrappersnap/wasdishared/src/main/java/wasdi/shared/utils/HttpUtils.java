@@ -107,8 +107,19 @@ public final class HttpUtils {
 					oConnection.setRequestProperty(asEntry.getKey(), asEntry.getValue());
 				}
 			}
-
-			if (WasdiConfig.Current.logHttpCalls) {
+			
+			boolean bLog = true;
+			
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
+			}
+			
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
 				WasdiLog.debugLog("HttpUtils.httpGet: Sending 'GET' request to URL : " + sUrl);
 			}
 
@@ -116,7 +127,7 @@ public final class HttpUtils {
 				// Read server response code
 				int iResponseCode = oConnection.getResponseCode();
 				
-				if (WasdiConfig.Current.logHttpCalls) {
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
 					WasdiLog.debugLog("HttpUtils.httpGet: Response Code : " + iResponseCode);
 				}
 				
@@ -269,25 +280,27 @@ public final class HttpUtils {
 				oOutputStream.write(ayBytes);
 			}			
 
-			// Avoid log spam when we check the token
+			// Avoid log spam when we call local addresses
 			boolean bLog = true;
 			
-			if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
-				bLog = false;
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
 			}
 			
-			if (bLog)  {
-				if (WasdiConfig.Current.logHttpCalls) {
-					WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
-				}
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpPost: Sending 'POST' request to URL : " + sUrl);
 			}
 
 			try {
 				int iResponseCode = oConnection.getResponseCode();
-				if (bLog) {
-					if (WasdiConfig.Current.logHttpCalls) {
-						WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
-					}
+				
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
+					WasdiLog.debugLog("HttpUtils.httpPost: Response Code : " + iResponseCode);
 				}
 				
 				oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
@@ -404,6 +417,20 @@ public final class HttpUtils {
 			sFileName = oFile.getName();
 		}
 		
+		boolean bLog = true;
+		
+		if (WasdiConfig.Current.filterInternalHttpCalls) {
+			if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+				bLog = false;
+			}
+			if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+				bLog = false;
+			}				
+		}
+		
+		if (WasdiConfig.Current.logHttpCalls && bLog) {
+			WasdiLog.debugLog("HttpUtils.httpPostFile: calling url " + sUrl);
+		}
 
 		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
 		try (FileInputStream oInputStream = new FileInputStream(oFile)) {
@@ -448,7 +475,7 @@ public final class HttpUtils {
 				// response
 				int iResponse = oConnection.getResponseCode();
 				
-				if (WasdiConfig.Current.logHttpCalls) {
+				if (WasdiConfig.Current.logHttpCalls && bLog) {
 					WasdiLog.debugLog("HttpUtils.httpPostFile: server returned " + iResponse);
 				}
 
@@ -518,6 +545,22 @@ public final class HttpUtils {
 
 		try {
 			URL oURL = new URL(sUrl);
+			
+			boolean bLog = true;
+			
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
+			}
+			
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpPut: calling url " + sUrl);
+			}
+			
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 
 			if(!Utils.isNullOrEmpty(sAuth)) {
@@ -586,6 +629,22 @@ public final class HttpUtils {
 		}
 
 		try {
+			
+			boolean bLog = true;
+			
+			if (WasdiConfig.Current.filterInternalHttpCalls) {
+				if (sUrl.contains(WasdiConfig.Current.keycloack.introspectAddress)) {
+					bLog = false;
+				}
+				if (sUrl.contains(WasdiConfig.Current.dockers.internalDockerAPIAddress)) {
+					bLog = false;
+				}				
+			}
+			
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpDelete: calling url " + sUrl);
+			}
+			
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 
@@ -605,6 +664,10 @@ public final class HttpUtils {
 			oConnection.connect();
 
 			int iResponseCode =  oConnection.getResponseCode();
+			
+			if (WasdiConfig.Current.logHttpCalls && bLog) {
+				WasdiLog.debugLog("HttpUtils.httpDelete: response code " + iResponseCode);
+			}
 			
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 

@@ -83,6 +83,13 @@ public class WasdiConfig {
 	 * Set true to activate the logs of the http calls
 	 */
 	public boolean logHttpCalls=true;
+	
+	
+	/**
+	 * Set true to NOT filter the internal http calls (keycloak, docker..).
+	 * If the general logHttpCalls is False, this does not change
+	 */
+	public boolean filterInternalHttpCalls=true;
 	/**
 	 * Mongo db Configuration
 	 */
