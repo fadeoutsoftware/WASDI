@@ -1100,6 +1100,8 @@ public class DockerUtils {
     		WasdiLog.debugLog("DockerUtils.getContainerInfo: Searching for container named: " + sContainerName );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
+    		
+    		if (!sContainerName.startsWith("/")) sContainerName = "/" + sContainerName;
                         
             for (Object oContainer : aoOutputJsonMap) {
 				try {
