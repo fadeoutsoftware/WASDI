@@ -136,7 +136,7 @@ public class CreateParams {
 				
 				for (int iCmds = 0; iCmds<Cmd.size(); iCmds++) {
 					String sCmd = Cmd.get(iCmds);
-					sReturn += "\"" + sCmd + "\"";
+					sReturn += "\"" + sCmd.replace("\"", "\\\"") + "\"";
 					if (iCmds<Cmd.size()-1) sReturn +=",\n";
 				}
 				sReturn += "],\n";				
