@@ -1619,14 +1619,14 @@ public class DockerUtils {
     }    
     
     /**
-     * Get the logs of a container from the name
+     * Get the logs of a container from the Id
      * @return List of objects as returned by Docker API
      */
-    public String getContainerLogsByContainerName(String sContainerName) {
+    public String getContainerLogsByContainerId(String sContainerId) {
     	try {
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
-    		sUrl += "containers/"+sContainerName+"/logs?stdout=true&stderr=true";
+    		sUrl += "containers/"+sContainerId+"/logs?stdout=true&stderr=true";
     		
     		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
@@ -1634,7 +1634,8 @@ public class DockerUtils {
     			return "";
     		}
     		else {
-    			return oResponse.getResponseBody();
+    			String sResponseBody = oResponse.getResponseBody();
+    			return sResponseBody.replaceAll("[\\x00-\\x09\\x11\\x12\\x14-\\x1F\\x7F]", "");
     		}    		
     	}
     	catch (Exception oEx) {

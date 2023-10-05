@@ -253,7 +253,7 @@ public class RunTimeUtils {
 				
 				if (bReadOutput || bRedirectError) {
 					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: collect also the logs");
-					String sLogs = oDockerUtils.getContainerLogsByContainerName(sContainerId);
+					String sLogs = oDockerUtils.getContainerLogsByContainerId(sContainerId);
 					oShellExecReturn.setOperationLogs(sLogs);
 				}
 				
