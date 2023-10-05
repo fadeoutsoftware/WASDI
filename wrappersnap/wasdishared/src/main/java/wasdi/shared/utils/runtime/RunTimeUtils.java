@@ -208,7 +208,7 @@ public class RunTimeUtils {
 			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);
 		}
 		
-		DockerUtils oDockerUtils = new DockerUtils(null, null, null);
+		DockerUtils oDockerUtils = new DockerUtils();
 		
 		if (!oShellExecItem.includeFistCommand) {
 			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing the first element of args");

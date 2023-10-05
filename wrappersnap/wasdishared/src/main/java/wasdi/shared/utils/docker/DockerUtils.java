@@ -64,6 +64,13 @@ public class DockerUtils {
      */
     protected String m_sDockerRegistry = "";
     
+    public DockerUtils() {
+    	m_oProcessor = null;
+    	m_sProcessorFolder = "";
+    	m_sDockerRegistry = "";
+    	m_sWasdiSystemUser = WasdiConfig.Current.tomcatUser;
+    }
+    
     /**
      * Create a new instance
      *
