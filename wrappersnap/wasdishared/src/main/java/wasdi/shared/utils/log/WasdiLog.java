@@ -130,7 +130,8 @@ public class WasdiLog {
 		}
 		//else {
 			String sFinalLine = sPrefix + oNow + ": " + sMessage;
-			System.out.println(sFinalLine);			
+			System.out.println(sFinalLine);
+			System.out.flush();
 		//}
 	}
 }
