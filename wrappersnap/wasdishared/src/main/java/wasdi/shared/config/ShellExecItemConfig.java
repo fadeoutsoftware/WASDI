@@ -1,5 +1,7 @@
 package wasdi.shared.config;
 
+import java.util.ArrayList;
+
 /**
  * Represent an external program or command that can be executed by WASDI
  * In the standard installation each command is executed with a Shell Execute
@@ -40,4 +42,9 @@ public class ShellExecItemConfig {
 	 * If true, WASDI will remove the path (if present) from the first command in the arg list
 	 */
 	public boolean removePathFromFirstArg = false;
+	
+	/**
+	 * List of strings that are additional moung points for this specific docker
+	 */
+	public ArrayList<String> additionalMountPoints = new ArrayList<>();
 }

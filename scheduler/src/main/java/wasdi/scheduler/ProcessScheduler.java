@@ -684,11 +684,16 @@ public class ProcessScheduler {
 				asCmd.add(0, "launcher");
 			}
 			
-			RunTimeUtils.shellExec(asCmd, false);
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asCmd, false);
 			
-			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
-			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
-			
+			if (oShellExecReturn.isOperationOk()) {
+				WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
+				m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());				
+			}
+			else {
+				// We use throw here just not to duplicate the recovery code in catch
+				throw new Exception("Error calling shell execute on launcher");
+			}
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  Exception" + oEx.toString());

@@ -225,7 +225,7 @@ public class RunTimeUtils {
 		}
 		
 		// Create and run the docker
-		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true);
+		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints);
 		
 		// Did we got a Container Name?
 		if (Utils.isNullOrEmpty(sContainerId)) {

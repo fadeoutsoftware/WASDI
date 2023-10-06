@@ -1434,7 +1434,7 @@ public class DockerUtils {
      * @param asArg Args to be passed as CMD parameter
      * @return The Id of the container if created, empty string in case of problems
      */
-    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer) {
+    public String run(String sImageName, String sImageVersion, List<String> asArg, boolean bAlwaysRecreateContainer,  ArrayList<String> asAdditionalMountPoints) {
 
         try {
         	
@@ -1523,7 +1523,13 @@ public class DockerUtils {
             		oContainerCreateParams.Image = sImageName;            		
             		
             		// Mount the /data/wasdi/ folder
-            		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");            		
+            		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
+            		
+            		if (asAdditionalMountPoints!=null) {
+            			for (String sMountPoint : asAdditionalMountPoints) {
+            				oContainerCreateParams.HostConfig.Binds.add(sMountPoint);
+						}
+            		}
             		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
