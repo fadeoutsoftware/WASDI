@@ -25,7 +25,7 @@ public class CreateParams {
 	public boolean AttachStdin = false;
 	public boolean AttachStdout = true;
 	public boolean AttachStderr = true;
-	public boolean Tty = false;
+	public boolean Tty = true;
 	public boolean OpenStdin = false;
 	public boolean StdinOnce = false;
 	public ArrayList<String> Env = new ArrayList<>();
