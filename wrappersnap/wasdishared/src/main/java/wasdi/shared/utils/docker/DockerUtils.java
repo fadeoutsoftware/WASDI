@@ -1656,8 +1656,13 @@ public class DockerUtils {
     		}
     		else {
     			String sResponseBody = oResponse.getResponseBody();
-    			//sResponseBody = sResponseBody.replaceAll("[\\x00-\\x09\\x11\\x12\\x14-\\x1F\\x7F]", "");
+    			sResponseBody = sResponseBody.replaceAll("[\\x00-\\x09\\x11\\x12\\x14-\\x1F\\x7F]", "");
     			sResponseBody = sResponseBody.replaceAll("[^\\p{ASCII}]", "");
+    			
+    			String sEncoded = StringUtils.encodeUrl(sResponseBody);
+    			WasdiLog.debugLog("DockerUtils.getContainerLogsByContainerName: Encoded String");
+    			WasdiLog.debugLog(sEncoded);
+    			
     			return sResponseBody;
     		}    		
     	}

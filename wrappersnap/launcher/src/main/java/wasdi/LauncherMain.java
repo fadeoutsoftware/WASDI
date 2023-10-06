@@ -103,6 +103,8 @@ public class LauncherMain  {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+    	
+    	System.out.println("PRINTLN - Start");
 
         try {
         	// Set crypto Policy for sftp connections
@@ -111,6 +113,9 @@ public class LauncherMain  {
             // configure log4j2
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             String sThisFilePath = oCurrentFile.getParentFile().getPath();
+            
+            System.out.println("PRINTLN - Launcher Path " + sThisFilePath);
+            
             WasdiFileUtils.loadLogConfigFile(sThisFilePath);
             
         } catch (Exception exp) {
