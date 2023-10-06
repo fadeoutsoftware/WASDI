@@ -104,6 +104,12 @@ public class DockersConfig {
 	public Map<String, ShellExecItemConfig> shellExecCommands = new HashMap<>();
 	
 	/**
+	 * If true, it removes the containers created for each shell execute
+	 * If false, for debug, it will keep the containers for access the logs
+	 */
+	public boolean removeDockersAfterShellExec = true;
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */

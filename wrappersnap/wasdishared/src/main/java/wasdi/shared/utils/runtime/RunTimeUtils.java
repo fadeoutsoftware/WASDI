@@ -258,8 +258,13 @@ public class RunTimeUtils {
 				}
 				
 				// Clean the container
-				//WasdiLog.debugLog("RunTimeUtils.dockerShellExec: clean the container");
-				//oDockerUtils.removeContainer(sContainerId, true);				
+				if (WasdiConfig.Current.dockers.removeDockersAfterShellExec) {
+					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: clean the container");
+					oDockerUtils.removeContainer(sContainerId, true);					
+				}
+				else {
+					WasdiLog.debugLog("RunTimeUtils.dockerShellExec: Container NOT cleaned: dockers.removeDockersAfterShellExec is false!!");
+				}
 			}
 			else {
 				WasdiLog.debugLog("RunTimeUtils.dockerShellExec: no need to wait, we return");
