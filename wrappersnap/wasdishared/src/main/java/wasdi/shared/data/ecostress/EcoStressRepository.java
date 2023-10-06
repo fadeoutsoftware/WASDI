@@ -76,8 +76,6 @@ public class EcoStressRepository extends MongoRepository {
 			Long lDateFrom, Long lDateTo, int iRelativeOrbit, String sDayNightFlag) {
 		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
 
-		System.out.println(sCoordinates);
-
 		String sQuery = 
 				"   {\r\n" + 
 				"     location: {\r\n" + 
@@ -128,8 +126,6 @@ public class EcoStressRepository extends MongoRepository {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
 
-		System.out.println(sQuery);
-
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
 
@@ -170,8 +166,6 @@ public class EcoStressRepository extends MongoRepository {
 			int iRelativeOrbit, String sDayNightFlag) {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
-
-		System.out.println(sQuery);
 
 		try {
 			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));

@@ -366,7 +366,7 @@ public class LauncherMain  {
                 try {
                     oLogLevel = Level.parse(sSnapLogLevel);
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file Level " + oEx.toString());
+                    WasdiLog.errorLog("LauncherMain.configureSNAP: exception configuring SNAP log file Level " + oEx.toString());
                 }
 
                 try {
@@ -385,7 +385,7 @@ public class LauncherMain  {
                     oSnapLogger.addHandler(oFileHandler);
 
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
+                	WasdiLog.errorLog("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
             } else {
                 WasdiLog.debugLog("SNAP Log file not active: clean log handlers");
@@ -403,7 +403,7 @@ public class LauncherMain  {
 					}
 
                 } catch (Exception oEx) {
-                    System.out.println("LauncherMain.configureSNAP: exception cleaning SNAP log Handlers " + oEx.toString());
+                	WasdiLog.errorLog("LauncherMain.configureSNAP: exception cleaning SNAP log Handlers " + oEx.toString());
                 }                
             }
             

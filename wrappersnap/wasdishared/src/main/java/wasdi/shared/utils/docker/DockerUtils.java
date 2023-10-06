@@ -382,7 +382,7 @@ public class DockerUtils {
         		}
         		
         		// Since we are creating the Container, we need to set up our name
-        		sContainerName = m_oProcessor.getName() + "_" + m_oProcessor.getVersion() + "_" + Utils.getRandomNumber(1, 5000);
+        		sContainerName = m_oProcessor.getName() + "_" + m_oProcessor.getVersion() + "_" + Utils.getRandomName();
         		WasdiLog.debugLog("DockerUtils.start: ok is image pulled create the container named " + sContainerName);
         		
         		// Create the container

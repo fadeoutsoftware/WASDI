@@ -548,7 +548,7 @@ public class ZipFileUtils {
 				//				oFis.close();				
 			}
 		} catch (Exception oE) {
-			System.out.println("ZipFileUtils.zipFile: " + oE);
+			WasdiLog.errorLog("ZipFileUtils.zipFile: ", oE);
 		}
 	}
 

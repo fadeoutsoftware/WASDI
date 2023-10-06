@@ -116,9 +116,9 @@ public class CreoDias2ProviderAdapter extends ProviderAdapter {
 			
 			JSONObject jsonO = new JSONObject(sResponse.getResponseBody());
 			JSONArray arr = jsonO.getJSONArray("value");
-			System.out.println(arr.length());
+			
 			JSONObject jsonObject = (JSONObject) arr.get(0);
-			System.out.println(jsonObject.optString("ContentLength"));	
+				
 			
 			
 			JSONObject oJsonBody = new JSONObject(sResponse.getResponseBody());

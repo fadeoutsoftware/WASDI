@@ -168,7 +168,6 @@ public class ModisRepository extends MongoRepository  {
 
 		String sQuery = "   { " + String.join(", ", asQueryFilters) + "   }";
 		
-	System.out.println(sQuery);
 		
 		return sQuery;
 	}
