@@ -30,7 +30,7 @@ public class ShellExecItemConfig {
 	 * True by default, all the parts of the command line are passed as docker args
 	 * If false, the first element of the shell execute will NOT be passed to the docker command line
 	 */
-	public boolean includeFistCommand=true;
+	public boolean includeFirstCommand=true;
 	
 	/**
 	 * False by default. If it is set to true, the command is executed locally also if WASDI 

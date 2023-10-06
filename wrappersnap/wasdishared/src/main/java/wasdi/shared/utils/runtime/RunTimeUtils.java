@@ -209,7 +209,7 @@ public class RunTimeUtils {
 		DockerUtils oDockerUtils = new DockerUtils();
 		
 		// Check if the first command is included or not
-		if (!oShellExecItem.includeFistCommand) {
+		if (!oShellExecItem.includeFirstCommand) {
 			WasdiLog.debugLog("RunTimeUtils.dockerShellExec: removing the first element of args");
 			asArgs.remove(0);
 		}
