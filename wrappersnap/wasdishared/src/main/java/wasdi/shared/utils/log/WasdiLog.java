@@ -127,11 +127,11 @@ public class WasdiLog {
 					s_oLoggerWrapper.info(sMessage);
 				}
 			}
-			
 		}
-		
-		String sFinalLine = sPrefix + oNow + ": " + sMessage;
-		System.out.println(sFinalLine);
+		else {
+			String sFinalLine = sPrefix + oNow + ": " + sMessage;
+			System.out.println(sFinalLine);			
+		}
 	}
 	
 	///////// end log
