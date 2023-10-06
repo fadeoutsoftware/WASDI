@@ -679,6 +679,11 @@ public class ProcessScheduler {
 			WasdiLog.infoLog(sShellExString);
 			
 			ArrayList<String> asCmd = new ArrayList<>(Arrays.asList(sShellExString.split(" ")));
+			
+			if (WasdiConfig.Current.shellExecLocally == false) {
+				asCmd.add(0, "launcher");
+			}
+			
 			RunTimeUtils.shellExec(asCmd, false);
 			
 			WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");

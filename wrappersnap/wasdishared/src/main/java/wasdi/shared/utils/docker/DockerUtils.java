@@ -1016,32 +1016,14 @@ public class DockerUtils {
      */
     public boolean waitForContainerToFinish(String sContainerId, int iMsTimeout) {
     	
-// NOTE: Bertrand found this alternative to evaluate Hmm sorry maybe I misunderstood something BUT
-// https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerWait    	
-//    	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
-//    		sUrl += "containers/" + sContainerId +"/wait";
-//    		
-//    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl,"");
-//    		
-//    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
-//    			WasdiLog.warnLog("DockerUtils.waitForContainerToFinish: not good, received " + oResponse.getResponseBody());
-//    			return false;
-//    		}
-//    		else {
-//    			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container " + sContainerId + " is finished received " + oResponse.getResponseBody());
-//    			return true;
-//    		}
-//    	}
-//    	catch (Exception oEx) {
-//            WasdiLog.errorLog("DockerUtils.waitForContainerToFinish: exception converting API result " + oEx);
-//            return false;
-//        }
-    	
     	try {
     		
-    		boolean bFinished = false;    		
+    		boolean bFinished = false;
+    		
+    		int iLoopCount = 0;
+    		int iLogMaxCount = WasdiConfig.Current.dockers.numberOfPollStatusPollingCycleForLog;
+    		
+    		if (iLogMaxCount<=1) iLogMaxCount = 1;
     		
     		while (!bFinished) {
     			
@@ -1054,6 +1036,11 @@ public class DockerUtils {
         		
         		if (oContainer.State.equals(ContainerStates.EXITED) || oContainer.State.equals(ContainerStates.DEAD)) return true;
         		else {
+        			
+        			if (iLoopCount%iLogMaxCount == 0) {
+        				WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: still waiting");
+        			}
+        			
         			try {
         				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenStatusPolling);
         			}
@@ -1061,6 +1048,8 @@ public class DockerUtils {
 						
 					}
         		}
+        		
+        		iLoopCount++;
     		}
     		
     		return true;
@@ -1175,7 +1164,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByContainerId(String sContainerId) {
     	
     	try {
-    		WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: Searching for container id: " + sContainerId );
+    		//WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: Searching for container id: " + sContainerId );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
     		
@@ -1188,7 +1177,7 @@ public class DockerUtils {
 					if (Utils.isNullOrEmpty(sId)) continue;
 					
 					if (sId.equals(sContainerId)) {
-						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: found my container " + sContainerId );						
+						//WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: found my container " + sContainerId );						
 						return convertContainerMapToContainerInfo(oContainerMap);
 					}					
 					

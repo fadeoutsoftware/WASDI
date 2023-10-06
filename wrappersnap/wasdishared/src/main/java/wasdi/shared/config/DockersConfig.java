@@ -49,6 +49,12 @@ public class DockersConfig {
 	public Integer millisBetweenStatusPolling = 1000;
 	
 	/**
+	 * Set the number of cycles that must be executed before the waitContainer function logs something
+	 * to show that is alive
+	 */
+	public Integer numberOfPollStatusPollingCycleForLog = 30;
+	
+	/**
 	 * The amout of time  (in millis) to wait for docker to complete delete operation
 	 */
 	public Integer millisWaitAfterDelete = 15000;
@@ -87,11 +93,6 @@ public class DockersConfig {
 	 * Path of file with logs of the dockers build 
 	 */
 	public String dockersDeployLogFilePath = "/var/log/wasdi/dockers.log";
-	
-	/**
-	 * Additional run paramters for the run docker command
-	 */
-	public String additionalDockerRunParameter = "";
 	
 	/**
 	 * Set to true to enable the log of the payload for the calls made to the Docker Engine API
