@@ -1016,61 +1016,59 @@ public class DockerUtils {
      */
     public boolean waitForContainerToFinish(String sContainerId, int iMsTimeout) {
     	
-    	try {
-    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		sUrl += "containers/" + sContainerId +"/wait";
-    		
-    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl,"");
-    		
-    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
-    			WasdiLog.warnLog("DockerUtils.waitForContainerToFinish: not good, received " + oResponse.getResponseBody());
-    			return false;
-    		}
-    		else {
-    			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container " + sContainerId + " is finished received " + oResponse.getResponseBody());
-    			return true;
-    		}
-    	}
-    	catch (Exception oEx) {
-            WasdiLog.errorLog("DockerUtils.waitForContainerToFinish: exception converting API result " + oEx);
-            return false;
-        }
-    	
+// NOTE: Bertrand found this alternative to evaluate Hmm sorry maybe I misunderstood something BUT
+// https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerWait    	
 //    	try {
+//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+//    		if (!sUrl.endsWith("/")) sUrl += "/";
+//    		sUrl += "containers/" + sContainerId +"/wait";
 //    		
-//    		boolean bFinished = false;
+//    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl,"");
 //    		
-//    		// NOTE: Bertrand found this alternative to evaluate Hmm sorry maybe I misunderstood something BUT
-//    		// https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerWait
-//    		
-//    		while (!bFinished) {
-//    			
-//        		ContainerInfo oContainer = getContainerInfoByContainerId(sContainerId);
-//        		
-//        		if (oContainer == null) {
-//        			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container not found, so for sure not started");
-//        			return false;
-//        		}
-//        		
-//        		if (oContainer.State.equals(ContainerStates.EXITED) || oContainer.State.equals(ContainerStates.DEAD)) return true;
-//        		else {
-//        			try {
-//        				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenStatusPolling);
-//        			}
-//        			catch (Exception oEx) {
-//						
-//					}
-//        		}
+//    		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+//    			WasdiLog.warnLog("DockerUtils.waitForContainerToFinish: not good, received " + oResponse.getResponseBody());
+//    			return false;
 //    		}
-//    		
-//    		return true;
-//    		
+//    		else {
+//    			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container " + sContainerId + " is finished received " + oResponse.getResponseBody());
+//    			return true;
+//    		}
 //    	}
 //    	catch (Exception oEx) {
-//    		WasdiLog.errorLog("DockerUtils.waitForContainerToFinish: " + oEx.toString());
+//            WasdiLog.errorLog("DockerUtils.waitForContainerToFinish: exception converting API result " + oEx);
 //            return false;
 //        }
+    	
+    	try {
+    		
+    		boolean bFinished = false;    		
+    		
+    		while (!bFinished) {
+    			
+        		ContainerInfo oContainer = getContainerInfoByContainerId(sContainerId);
+        		
+        		if (oContainer == null) {
+        			WasdiLog.debugLog("DockerUtils.waitForContainerToFinish: container not found, so for sure not started");
+        			return false;
+        		}
+        		
+        		if (oContainer.State.equals(ContainerStates.EXITED) || oContainer.State.equals(ContainerStates.DEAD)) return true;
+        		else {
+        			try {
+        				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenStatusPolling);
+        			}
+        			catch (Exception oEx) {
+						
+					}
+        		}
+    		}
+    		
+    		return true;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerUtils.waitForContainerToFinish: " + oEx.toString());
+            return false;
+        }
     }    
     
     /**
@@ -1177,7 +1175,7 @@ public class DockerUtils {
 	public ContainerInfo getContainerInfoByContainerId(String sContainerId) {
     	
     	try {
-    		//WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: Searching for container id: " + sContainerId );
+    		WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: Searching for container id: " + sContainerId );
     		
     		List<Object> aoOutputJsonMap = getContainersInfo(true);
     		
@@ -1190,7 +1188,7 @@ public class DockerUtils {
 					if (Utils.isNullOrEmpty(sId)) continue;
 					
 					if (sId.equals(sContainerId)) {
-						//WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: found my container " + sContainerId );						
+						WasdiLog.debugLog("DockerUtils.getContainerInfoByContainerId: found my container " + sContainerId );						
 						return convertContainerMapToContainerInfo(oContainerMap);
 					}					
 					
