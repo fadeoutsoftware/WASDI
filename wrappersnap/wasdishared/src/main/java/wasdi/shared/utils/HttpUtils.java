@@ -348,13 +348,15 @@ public final class HttpUtils {
 					}
 				}
 			} catch (Exception oEint) {
-				WasdiLog.debugLog("HttpUtils.httpPost error: " + oEint);
+				WasdiLog.debugLog("HttpUtils.httpPost error internal: " + oEint);
+				oEint.printStackTrace();
 			} finally {
 				oConnection.disconnect();
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("HttpUtils.httpPost error: " + oE);
+			WasdiLog.debugLog("HttpUtils.httpPost error external: " + oE);
+			oE.printStackTrace();
 		}
 
 		return oHttpCallResponse;
