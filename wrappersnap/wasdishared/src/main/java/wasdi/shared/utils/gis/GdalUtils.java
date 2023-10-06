@@ -429,7 +429,7 @@ public class GdalUtils {
 			
 			// Is there an output to log?
 			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
-				WasdiLog.debugLog(oShellExecReturn.getOperationLogs());
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: logs = " + oShellExecReturn.getOperationLogs());
 			}
 			
 			File oOutputFile = new File(sWorkspacePath+sOuptutFile); 
