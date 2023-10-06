@@ -34,7 +34,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.1.0
+Version 0.8.1.1
 
 Last Update: 22/09/2023
 
@@ -4009,6 +4009,18 @@ def getlayerWMS(sProduct, sBand):
     oResult["layerId"] = oPayload["layerId"]
     return json.dumps(oResult)
 
+
+def asynchGetFileFromWorkspaceName(sSourceWorkspaceName, sFileName):
+    """
+    Trigger the operation to Take a file from another workspace and put it in the actual one.
+    sSourceWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+
+    Return an empty string in case of problems or the process Obj Id of the import process if ok
+    """
+    sWorkspaceId = getWorkspaceIdByName(sSourceWorkspaceName)
+    return asynchGetFileFromWorkspaceId(sWorkspaceId, sFileName)
+
 def getFileFromWorkspaceName(sSourceWorkspaceName, sFileName):
     """
     Takes a file from another workspace and put it in the actual one.
@@ -4023,24 +4035,42 @@ def getFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
     Takes a file from another workspace and put it in the actual one.
     sSourceWorkspaceId: Id of the Workspace that must have the file
     sFileName: File to import in the actual Active Workspace
+
+    Return true if the file is taken, false in case of problems
+    """
+
+    sProcId = asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName)
+    if sProcId != "":
+        sStatus = waitProcess(sProcId)
+        if sStatus == "DONE":
+            return True
+    return  False
+
+def asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
+    """
+    Trigger the operation to Take a file from another workspace and put it in the actual one.
+    sSourceWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+
+    Return an empty string in case of problems or the process Obj Id of the import process if ok
     """
     if sFileName is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: file name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: file name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sFileName) < 1:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: File name too short' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: File name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     if sSourceWorkspaceId is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: SourceWorkspaceId name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sSourceWorkspaceId) < 1:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name too short' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: SourceWorkspaceId name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     sUrl = getWorkspaceBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
@@ -4057,18 +4087,34 @@ def getFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+        wasdiLog("[ERROR] waspy.asynchGetFileFromWorkspaceId: there was an error contacting the API " + str(oEx))
 
     if oResult is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: failed contacting the server' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: failed contacting the server' +
                  '  ******************************************************************************')
-        return False
+        return ""
     elif not oResult.ok and not 500 == oResult.status_code:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
-        return False
+        return ""
     else:
-        return oResult.ok
+        aoJson = oResult.json()
+        if "stringValue" in aoJson:
+            sProcessID = aoJson['stringValue']
+            return sProcessID
+        else:
+            wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: cannot extract processing identifier from response, aborting')
+            return ""
+
+def asynchSendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
+    """
+    Trigger the operation to send a file in another workspace
+    sDestinationWorkspaceName: Name of the Workspace where we need to copy the file
+    sFileName: File to send to the new workspace
+    """
+    sWorkspaceId = getWorkspaceIdByName(sDestinationWorkspaceName)
+    return asynchSendFileToWorkspaceId(sWorkspaceId, sFileName)
+
 
 def sendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
     """
@@ -4081,27 +4127,43 @@ def sendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
 
 def sendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
     """
-    Takes a file from another workspace and put it in the actual one.
-    sDestinationWorkspaceId: Id of the Workspace that must have the file
-    sFileName: File to import in the actual Active Workspace
+    Sends a file from another workspace
+    sDestinationWorkspaceId: Id of the Workspace where to send the file
+    sFileName: File to send
+
+    Return true if the file is sent, false in case of problems
+    """
+
+    sProcId = asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName)
+    if sProcId != "":
+        sStatus = waitProcess(sProcId)
+        if sStatus == "DONE":
+            return True
+    return  False
+
+def asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
+    """
+    Trigger the operation to Send a file from another workspace
+    sDestinationWorkspaceId: Id of the Workspace where to send the file
+    sFileName: File to send
     """
     if sFileName is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: file name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: file name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sFileName) < 1:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: File name too short' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: File name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     if sDestinationWorkspaceId is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: sDestinationWorkspaceId name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sDestinationWorkspaceId) < 1:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name too short' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: sDestinationWorkspaceId name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     sUrl = getWorkspaceBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
@@ -4118,18 +4180,24 @@ def sendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+        wasdiLog("[ERROR] waspy.asynchSendFileToWorkspaceId: there was an error contacting the API " + str(oEx))
 
     if oResult is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: failed contacting the server' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: failed contacting the server' +
                  '  ******************************************************************************')
-        return False
+        return ""
     elif not oResult.ok and not 500 == oResult.status_code:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
-        return False
+        return ""
     else:
-        return oResult.ok
+        aoJson = oResult.json()
+        if "stringValue" in aoJson:
+            sProcessID = aoJson['stringValue']
+            return sProcessID
+        else:
+            wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: cannot extract processing identifier from response, aborting')
+            return ""
 
 if __name__ == '__main__':
     _log(

@@ -6,6 +6,11 @@ WASDI python programming library CHANGELOG.md, according to the
 
 ## [0.8.1.0] - 2023-09-22
 ### Added
+- send file To Workspace asynch
+- get file From Workspace asynch
+
+## [0.8.1.0] - 2023-09-22
+### Added
 - send file To Workspace
 - get file From Workspace
 
