@@ -4,7 +4,7 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
-## [0.8.1.5] - 2023-10-09
+## [0.8.1.6] - 2023-10-09
 ### Added
 - send file To Workspace asynch and synch
 - get file From Workspace asynch and synch
