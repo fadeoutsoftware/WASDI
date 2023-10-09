@@ -14,7 +14,7 @@ with io.open("README.md", "r", encoding="utf8") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.8.1.0",
+    version="0.8.1.1",
     author="WASDI Sarl",
     author_email="info@wasdi.cloud",
     description="The WASDI Python library",
