@@ -545,5 +545,12 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik/security.yml:/etc/traefik/security.yml:ro"
+{% if bWasdiContainerTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
+{% for aCurrentTraefikSslCertificate in aoWasdiContainerTraefikSslCertificates %}
+      - "{{ aCurrentTraefikSslCertificate['srcCertFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['certFile'] }}:ro"
+      - "{{ aCurrentTraefikSslCertificate['srcKeyFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['keyFile'] }}:ro"
+{% endfor %}
+{% else %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
+{% endif %}
 {% endif %}
