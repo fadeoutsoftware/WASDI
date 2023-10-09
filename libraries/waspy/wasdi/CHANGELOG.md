@@ -4,13 +4,16 @@ WASDI python programming library CHANGELOG.md, according to the
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
 
-## [0.8.1.1] - 2023-10-09
+## [0.8.1.5] - 2023-10-09
 ### Added
-- send file To Workspace asynch
-- get file From Workspace asynch
+- send file To Workspace asynch and synch
+- get file From Workspace asynch and synch
 - Support of the environment variable WASDI_WEBSERVER_URL to set the base url
 ### Fixed
-- copy file to sftp, check if file exists was done with full path, only name was needed
+- copyFileToSftp copy file to sftp, check if file exists was done with full path, only name was needed
+- init: SessionId and ProcId set to empty string if none
+- Synch send file to workspace: the status must be taken from destination workspace url
+- waitProcess: Do not wait 5 seconds more if the status is done
 
 ## [0.8.1.0] - 2023-09-22
 ### Added

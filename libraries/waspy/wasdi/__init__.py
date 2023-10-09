@@ -641,12 +641,16 @@ def init(sConfigFilePath=None):
         m_sSessionId = _getEnvironmentVariable("WASDI_SESSION_ID")
         if m_sSessionId is not None:
             print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+        if m_sSessionId is None:
+            m_sSessionId = ""
 
     # Check if we have the my proc id in env
     if not m_sMyProcId or m_sMyProcId == '':
         m_sMyProcId = _getEnvironmentVariable("WASDI_PROCESS_WORKSPACE_ID")
         if m_sMyProcId is not None:
             print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+        if m_sMyProcId is None:
+            m_sMyProcId = ""
 
     if m_sSessionId is not None and m_sSessionId != '':
         asHeaders = _getStandardHeaders()
@@ -1256,11 +1260,12 @@ def getSavePath():
     return sFullPath
 
 
-def getProcessStatus(sProcessId):
+def getProcessStatus(sProcessId, sDestinationWorkspaceUrl = None):
     """
     get the status of a Process
 
     :param sProcessId: Id of the process to query
+    :param sDestinationWorkspaceUrl: allow to ask for a status of a Process That is not in the actual Active Node
     :return: the status or 'ERROR' if there was any error
 
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
@@ -1281,7 +1286,10 @@ def getProcessStatus(sProcessId):
     asHeaders = _getStandardHeaders()
     payload = {'procws': sProcessId}
 
-    sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
+    if sDestinationWorkspaceUrl is not None and sDestinationWorkspaceUrl!="":
+        sUrl = sDestinationWorkspaceUrl + '/process/getstatusbyid'
+    else:
+        sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
@@ -1395,7 +1403,7 @@ def updateStatus(sStatus, iPerc=-1):
         return ''
 
 
-def waitProcess(sProcessId):
+def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
     """
     Wait for a process to End
 
@@ -1419,7 +1427,11 @@ def waitProcess(sProcessId):
         sStatus = ''
 
         while sStatus not in {"DONE", "STOPPED", "ERROR"}:
-            sStatus = getProcessStatus(sProcessId)
+            sStatus = getProcessStatus(sProcessId, sDestinationWorkspaceUrl)
+
+            if sStatus in {"DONE", "STOPPED", "ERROR"}:
+                break
+
             time.sleep(5)
     except:
         _log("[ERROR] Exception in the waitProcess")
@@ -1507,7 +1519,7 @@ def waitProcesses(asProcIdList):
             # Sleep a little bit
             sleep(5)
             # Trace the time needed
-            iTotalTime = iTotalTime + 2
+            iTotalTime = iTotalTime + 5
 
     # Wait to be resumed
     _waitForResume()
@@ -1616,12 +1628,9 @@ def setPayload(data):
     :param data: data to save in the payload. Suggestion is to use JSON
     return None
     """
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sMyProcId
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
-        setProcessPayload(m_sMyProcId, data)
+        setProcessPayload(getProcId(), data)
     else:
         _log('wasdi.setPayload( ' + str(data))
 
@@ -1855,15 +1864,13 @@ def wasdiLog(sLogRow):
     :param sLogRow: text to log
     :return: None
     """
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
+    global m_iRequestsTimeout
 
     sForceLogRow = str(sLogRow)
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         asHeaders = _getStandardHeaders()
-        sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + m_sMyProcId
+        sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + getProcId()
         try:
             oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
@@ -4137,6 +4144,8 @@ def getFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
 
     sProcId = asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName)
     if sProcId != "":
+        if sProcId == "PRODUCT_ALREADY_PRESENT":
+            return True
         sStatus = waitProcess(sProcId)
         if sStatus == "DONE":
             return True
@@ -4168,15 +4177,16 @@ def asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
                  '  ******************************************************************************')
         return ""
 
-    sUrl = getWorkspaceBaseUrl()
+    sUrl = getBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
     sUrl += sSourceWorkspaceId
     sUrl += "&destinationWorkspaceId="
     sUrl += getActiveWorkspaceId()
     sUrl += "&productName="
     sUrl += sFileName
-    sUrl += "&parent="
-    sUrl += getProcId()
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        sUrl += "&parent="
+        sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 
@@ -4231,8 +4241,15 @@ def sendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
     """
 
     sProcId = asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName)
+
+    sDestinationWorkspaceUrl = getWorkspaceUrlByWsId(sDestinationWorkspaceId)
+    if sDestinationWorkspaceUrl is None:
+        sDestinationWorkspaceUrl = getBaseUrl()
+
     if sProcId != "":
-        sStatus = waitProcess(sProcId)
+        if sProcId == "PRODUCT_ALREADY_PRESENT":
+            return True
+        sStatus = waitProcess(sProcId, sDestinationWorkspaceUrl)
         if sStatus == "DONE":
             return True
     return  False
@@ -4261,15 +4278,16 @@ def asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
                  '  ******************************************************************************')
         return ""
 
-    sUrl = getWorkspaceBaseUrl()
+    sUrl = getBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
     sUrl += getActiveWorkspaceId()
     sUrl += "&destinationWorkspaceId="
     sUrl += sDestinationWorkspaceId
     sUrl += "&productName="
     sUrl += sFileName
-    sUrl += "&parent="
-    sUrl += getProcId()
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        sUrl += "&parent="
+        sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 

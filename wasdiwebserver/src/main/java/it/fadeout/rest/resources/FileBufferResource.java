@@ -85,7 +85,7 @@ public class FileBufferResource {
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException {
 		
-		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId + "sDestinationWorkspaceId: " + sDestinationWorkspaceId + "sProductName: " + sProductName);
+		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId + "sDestinationWorkspaceId: " + sDestinationWorkspaceId + " sProductName: " + sProductName);
 
 		PrimitiveResult oResult = new PrimitiveResult();
 
@@ -217,13 +217,13 @@ public class FileBufferResource {
 			}
 
 			String sDestinationFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sDestinationWorkspaceUserId, sDestinationWorkspaceId) + sProductName);
-			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sProductName, sDestinationWorkspaceId);
+			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sDestinationFilePath, sDestinationWorkspaceId);
 
 			if (oProductDestinationWorkspace != null) {
 				WasdiLog.warnLog("FileBufferResource.share: product already present in the destination workspace");
-				oResult.setStringValue("The product is already present in the destination workspace.");
+				oResult.setStringValue("PRODUCT_ALREADY_PRESENT");
 
-				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
+				return Response.status(Status.OK).entity(oResult).build();
 			}
 
 			String sProcessObjId = Utils.getRandomName();
