@@ -114,7 +114,9 @@ services:
         - {{ sWasdiContainerKeycloakServiceName }}:{{ sWasdiBuildVersion }}
     command:
       - "start"
+{% if bWasdiContainerKeycloakNewInstance | default(False) == True %}
       - "--import-realm"
+{% endif %}
     depends_on:
       - {{ sWasdiContainerPostgresqlKeycloakServiceName }}
     entrypoint:
@@ -165,8 +167,8 @@ services:
         soft: {{ sWasdiKeycloakUlimitNofile }}
         hard: {{ sWasdiKeycloakUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
-      - {{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
 
   {{ sWasdiContainerPostgresqlKeycloakServiceName }}:
     environment:
@@ -181,7 +183,7 @@ services:
         hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
-      - {{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 
   # MongoDB > main node
   {{ sWasdiContainerMongoMainServiceName }}:
@@ -209,7 +211,7 @@ services:
         hard: {{ sWasdiMongoMainUlimitNofile }}
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoMainServiceName }}/data01:/data/db:rw
-      - {{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerMongoMainServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoMainServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 {% if sWasdiServerTypeIsComputational == True %}
 
@@ -239,7 +241,7 @@ services:
         hard: {{ sWasdiMongoComputationalUlimitNofile }}
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoComputationalServiceName }}/data01:/data/db:rw
-      - {{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerMongoComputationalServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoComputationalServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 {% if sWasdiServerTypeIsMain == True %}
 
@@ -542,6 +544,6 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "{{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik/security.yml:/etc/traefik/security.yml:ro"
-      - "{{ sWasdiDataDockerMountRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
+      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik/security.yml:/etc/traefik/security.yml:ro"
+      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
 {% endif %}
