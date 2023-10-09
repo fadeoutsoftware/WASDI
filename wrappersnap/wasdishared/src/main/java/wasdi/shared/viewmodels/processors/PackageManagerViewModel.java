@@ -2,6 +2,10 @@ package wasdi.shared.viewmodels.processors;
 
 public class PackageManagerViewModel {
 	
+	public PackageManagerViewModel() {
+		
+	}
+	
 	public PackageManagerViewModel(String sName, String sVersion, int iMajor, int iMinor, int iPatch) {
 		this.name = sName;
 		this.version = sVersion;
