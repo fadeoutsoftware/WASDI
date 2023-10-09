@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
@@ -76,19 +77,20 @@ public class FileBufferResource {
 	@GET
 	@Path("share")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult share(@HeaderParam("x-session-token") String sSessionId,
+	public Response share(@HeaderParam("x-session-token") String sSessionId,
 									@QueryParam("originWorkspaceId") String sOriginWorkspaceId,
 									@QueryParam("destinationWorkspaceId") String sDestinationWorkspaceId,
 									@QueryParam("productName") String sProductName,
 									@QueryParam("parent") String sParentProcessWorkspaceId)
 			throws IOException {
 		
-		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId + "sDestinationWorkspaceId: " + sDestinationWorkspaceId + "sProductName: " + sProductName);
+		WasdiLog.debugLog("FileBufferResource.share, sOriginWorkspaceId: " + sOriginWorkspaceId + "sDestinationWorkspaceId: " + sDestinationWorkspaceId + " sProductName: " + sProductName);
 
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
+		oResult.setStringValue("");
 		
 		try {
 			// Check User and Session
@@ -97,7 +99,7 @@ public class FileBufferResource {
 			if (oUser == null) {
 				WasdiLog.warnLog("FileBufferResource.share: invalid session");
 				oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-				return oResult;
+				return Response.status(Status.UNAUTHORIZED).entity(oResult).build();
 			}
 
 			String sUserId = oUser.getUserId();
@@ -109,7 +111,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// Check if there is no malicius attemp
@@ -117,7 +119,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: Injection attempt from users");
 				oResult.setStringValue("Invalid origin workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// check the user can access the origin workspace
@@ -126,7 +128,7 @@ public class FileBufferResource {
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				oResult.setStringValue("Invalid origin workspace.");
 
-				return oResult;
+				return Response.status(Status.FORBIDDEN).entity(oResult).build();
 			}			
 			
 			// Get the origin workspace
@@ -137,7 +139,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid origin workspace");
 				oResult.setStringValue("Invalid origin workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			// Check if we have a destination workspace
@@ -145,7 +147,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// That is not malicius
@@ -153,7 +155,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: Injection attempt from users");
 				oResult.setStringValue("Invalid destination workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			//check the user can write in the destination workspace
@@ -162,7 +164,7 @@ public class FileBufferResource {
 				oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
 				oResult.setStringValue("Invalid destination workspace.");
 
-				return oResult;
+				return Response.status(Status.FORBIDDEN).entity(oResult).build();
 			}					
 			
 			// Take the destination workspace
@@ -173,7 +175,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid destination workspace");
 				oResult.setStringValue("Invalid destination workspace.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// Check the product
@@ -184,7 +186,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// That is not malicious
@@ -192,7 +194,7 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share( Product Name: " + sProductName + " ): Injection attempt from users");
 				oResult.setStringValue("Invalid product name.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 			
 			// Take relevant info of the origin workspace
@@ -210,17 +212,17 @@ public class FileBufferResource {
 				WasdiLog.warnLog("FileBufferResource.share: invalid product name");
 				oResult.setStringValue("Invalid product name.");
 
-				return oResult;
+				return Response.status(Status.BAD_REQUEST).entity(oResult).build();
 			}
 
 			String sDestinationFilePath = WasdiFileUtils.fixPathSeparator(PathsConfig.getWorkspacePath(sDestinationWorkspaceUserId, sDestinationWorkspaceId) + sProductName);
-			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sProductName, sDestinationWorkspaceId);
+			ProductWorkspace oProductDestinationWorkspace = oProductWorkspaceRepository.getProductWorkspace(sDestinationFilePath, sDestinationWorkspaceId);
 
 			if (oProductDestinationWorkspace != null) {
 				WasdiLog.warnLog("FileBufferResource.share: product already present in the destination workspace");
-				oResult.setStringValue("The product is already present in the destination workspace.");
+				oResult.setStringValue("PRODUCT_ALREADY_PRESENT");
 
-				return oResult;
+				return Response.status(Status.OK).entity(oResult).build();
 			}
 
 			String sProcessObjId = Utils.getRandomName();
@@ -243,13 +245,18 @@ public class FileBufferResource {
 			oParameter.setProcessObjId(sProcessObjId);
 
 			String sPath = WasdiConfig.Current.paths.serializationPath;
+			
+			oResult.setStringValue(sProcessObjId);
+			oResult.setBoolValue(true);
+			oResult.setIntValue(Status.OK.getStatusCode());
 
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			oResult = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			
+			return Response.status(Status.fromStatusCode(oResult.getIntValue())).entity(oResult).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("FileBufferResource.share: " + oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(oResult).build();
 		}
-
-		return oResult;
 	}
 	
 	/**
