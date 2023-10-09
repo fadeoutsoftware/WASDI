@@ -9,6 +9,7 @@ import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.payloads.MosaicPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class Mosaic extends Operation {
@@ -31,12 +32,11 @@ public class Mosaic extends Operation {
         try {
         	MosaicParameter oParameter = (MosaicParameter) oParam;
         	
-        	wasdi.snapopearations.Mosaic oMosaic = new wasdi.snapopearations.Mosaic(oParameter);
-            // Set the proccess workspace logger
-            oMosaic.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
-
+        	m_oProcessWorkspaceLogger.log("Running Mosaic");
+        	
             // Run the gdal mosaic
-            if (oMosaic.runGDALMosaic()) {
+            if (GdalUtils.runGDALMosaic(oParameter)) {
+            	
                 WasdiLog.debugLog("Mosaic.executeOperation done");
                 
                 oProcessWorkspace.setProgressPerc(100);
@@ -50,8 +50,7 @@ public class Mosaic extends Operation {
                 String sFileOutputFullPath = PathsConfig.getWorkspacePath(oParameter) + oParameter.getDestinationProductName();
 
                 // And add it to the db
-                addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath, oParameter.getWorkspace(),
-                        oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
+                addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath, oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
 
                 m_oProcessWorkspaceLogger.log("Done " + new EndMessageProvider().getGood());
 
@@ -74,7 +73,8 @@ public class Mosaic extends Operation {
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
                 
                 return true;
-            } else {
+            } 
+            else {
                 // error
                 WasdiLog.debugLog("Mosaic.executeOperation: error");
                 

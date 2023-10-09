@@ -22,9 +22,6 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 
 import org.apache.commons.net.io.Util;
-//import org.esa.snap.core.util.SystemUtils;
-//import org.esa.snap.runtime.Config;
-//import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;

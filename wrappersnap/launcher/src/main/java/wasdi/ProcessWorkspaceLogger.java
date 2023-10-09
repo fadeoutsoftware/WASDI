@@ -5,6 +5,7 @@ import java.util.Date;
 import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessWorkspaceLogger {
 	
@@ -18,7 +19,7 @@ public class ProcessWorkspaceLogger {
 	public void log(String sLogLine) {
 		
 		if (Utils.isNullOrEmpty(m_sProcessWorkspaceId)) {
-			System.out.println("ProcessWorkspaceLogger: Proc WS Id not valid. Log on console - " + sLogLine);
+			WasdiLog.warnLog("ProcessWorkspaceLogger: Proc WS Id not valid. Log on console - " + sLogLine);
 		}
 		else {
 			ProcessorLog oProcessorLog = new ProcessorLog();

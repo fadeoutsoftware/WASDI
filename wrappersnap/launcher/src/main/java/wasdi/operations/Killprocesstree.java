@@ -24,6 +24,7 @@ import wasdi.shared.parameters.KillProcessTreeParameter;
 import wasdi.shared.utils.LauncherOperationsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Killprocesstree extends Operation {
 
@@ -163,20 +164,9 @@ public class Killprocesstree extends Operation {
 
 		try {
 			int iPid = oProcessToKill.getPid();
+			
+			RunTimeUtils.killProcess(iPid);
 
-			if (iPid > 0) {
-				// Pid exists, kill the process
-				String sShellExString = WasdiConfig.Current.scheduler.killCommand;
-				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
-				sShellExString += " " + iPid;
-
-				WasdiLog.infoLog("Killprocesstree.killProcess: shell exec " + sShellExString);
-				Process oProc = Runtime.getRuntime().exec(sShellExString);
-				WasdiLog.infoLog("Killprocesstree.killProcess: kill result: " + oProc.waitFor());
-
-			} else {
-				WasdiLog.errorLog("Killprocesstree.killProcess: Process pid not in data");
-			}
 		} catch (Exception oE) {
 			WasdiLog.errorLog("Killprocesstree.killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}

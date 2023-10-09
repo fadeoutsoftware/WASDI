@@ -73,6 +73,24 @@ public class WasdiConfig {
 	public int msWaitAfterChmod = 1000;
 	
 	/**
+	 * Set it WASDI should shell exec external components using the local system or using corresponding docker images.
+	 * External components are for example gdal, sen2core, snaphu..
+	 * Set this flag false to use the fully dockerized wasdi 
+	 */
+	public boolean shellExecLocally=true;
+	
+	/**
+	 * Set true to activate the logs of the http calls
+	 */
+	public boolean logHttpCalls=true;
+	
+	
+	/**
+	 * Set true to NOT filter the internal http calls (keycloak, docker..).
+	 * If the general logHttpCalls is False, this does not change
+	 */
+	public boolean filterInternalHttpCalls=true;
+	/**
 	 * Mongo db Configuration
 	 */
 	public MongoConfig mongoMain;

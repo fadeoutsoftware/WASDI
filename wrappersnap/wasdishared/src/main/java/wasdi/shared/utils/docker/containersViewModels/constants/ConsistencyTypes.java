@@ -1,4 +1,4 @@
-package wasdi.processors.dockerUtils.containersViewModels.constants;
+package wasdi.shared.utils.docker.containersViewModels.constants;
 
 public class ConsistencyTypes {
 	public static String DEFAULT = "default";

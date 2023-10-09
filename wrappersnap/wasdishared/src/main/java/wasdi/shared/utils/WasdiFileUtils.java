@@ -1007,12 +1007,12 @@ public class WasdiFileUtils {
         String sPropertyValue = System.getProperty("log4j2.configurationFile");
 
         if (Utils.isNullOrEmpty(sPropertyValue) || !fileExists(sPropertyValue)) {
+        	
         	sLogConfigFilePath = sCurrentJarDirectory + "/log4j2.xml";
+        	
         	LoggerContext oContext = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false); 
             File oLogConfigFile = new File(sLogConfigFilePath);
             oContext.setConfigLocation(oLogConfigFile.toURI());
 	    }
 	}
-	
-
 }

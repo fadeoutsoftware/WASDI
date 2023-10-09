@@ -19,6 +19,8 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.GeorefProductViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
@@ -337,18 +339,8 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 			asArgs.add(sInputPath + sBand + ".vrt");
 
 			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				WasdiLog.debugLog("Publishband.convertS5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();			
+			ShellExecReturn oTranslateReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			WasdiLog.debugLog("Publishband.convertS5PtoGeotiff [gdal]: " + oTranslateReturn.getOperationLogs());
 			
 			asArgs = new ArrayList<String>();
 			sGdalCommand = "gdalwarp";
@@ -362,16 +354,9 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 			asArgs.add(sInputPath + sBand+ ".vrt");
 			asArgs.add(sInputPath + sOutputFile);
 			
-			oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			while ((sLine = oReader.readLine()) != null)
-				WasdiLog.debugLog("Publishband.convertSentine5PtoGeotiff [gdal]: " + sLine);
-			
-			oProcess.waitFor();
+			// Execute the process
+			ShellExecReturn oWarpReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			WasdiLog.debugLog("Publishband.convertSentine5PtoGeotiff [gdal]: " + oWarpReturn.getOperationLogs());
 			
 			return new File(sInputPath + sOutputFile);
 		}

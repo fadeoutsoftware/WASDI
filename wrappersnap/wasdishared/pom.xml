@@ -46,11 +46,7 @@
         <sVersionLombok>1.18.22</sVersionLombok>
         <sVersionMockFtpServer>2.7.1</sVersionMockFtpServer>
         <sVersionMongoDb>4.3.4</sVersionMongoDb>
-        <sVersionProbav>2.2.0</sVersionProbav>
-        <sVersionS1tbx>9.0.2</sVersionS1tbx>
-        <sVersionS2tbx>8.0.7</sVersionS2tbx>
-        <sVersionS3tbx>9.0.3</sVersionS3tbx>
-        <sVersionSnap>9.0.4</sVersionSnap>
+        <sVersionGeoTools>20.0</sVersionGeoTools>
     </properties>
 
     <build>
@@ -178,40 +174,6 @@
             <artifactId>gson</artifactId>
             <version>${sVersionGson}</version>
         </dependency>
-        <!-- S1 -->
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-calibration</artifactId>
-            <version>${sVersionS1tbx}</version>
-        </dependency>
-        <!-- S2 -->
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>${sVersionS2tbx}</version>
-        </dependency>
-        <!-- SNAP -->
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-rcp</artifactId>
-            <version>${sVersionSnap}</version>
-        </dependency>
-        <!-- PROBAV -->
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-kit</artifactId>
-            <version>${sVersionProbav}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-reader</artifactId>
-            <version>${sVersionProbav}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -277,19 +239,35 @@
             <artifactId>commons-lang3</artifactId>
             <version>${sVersionCommonsLang3}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${sVersionLombok}</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>${sVersionAwsJavaSdkS3}</version>
         </dependency>
+        
+        <!-- GEO TOOLS https://mvnrepository.com/artifact/org.geotools -->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-cql</artifactId>
+            <version>${sVersionGeoTools}</version>
+        </dependency>           
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.14.2</version>
+		</dependency>        
     </dependencies>
 
     <repositories>

@@ -1,4 +1,4 @@
-package wasdi.processors.dockerUtils.containersViewModels;
+package wasdi.shared.utils.docker.containersViewModels;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class CreateParams {
 	public boolean AttachStdin = false;
 	public boolean AttachStdout = true;
 	public boolean AttachStderr = true;
-	public boolean Tty = false;
+	public boolean Tty = true;
 	public boolean OpenStdin = false;
 	public boolean StdinOnce = false;
 	public ArrayList<String> Env = new ArrayList<>();
@@ -136,7 +136,7 @@ public class CreateParams {
 				
 				for (int iCmds = 0; iCmds<Cmd.size(); iCmds++) {
 					String sCmd = Cmd.get(iCmds);
-					sReturn += "\"" + sCmd + "\"";
+					sReturn += "\"" + sCmd.replace("\"", "\\\"") + "\"";
 					if (iCmds<Cmd.size()-1) sReturn +=",\n";
 				}
 				sReturn += "],\n";				

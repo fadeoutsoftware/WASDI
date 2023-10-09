@@ -1,6 +1,7 @@
 package wasdi.operations;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 
@@ -13,6 +14,7 @@ import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Sen2cor extends Operation {
 
@@ -54,14 +56,13 @@ public class Sen2cor extends Operation {
                     String sSen2CorPath = WasdiConfig.Current.paths.sen2CorePath;
                     WasdiLog.debugLog("Sen2core.executeOperation: Extraction completed, begin conversion");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
-                    ProcessBuilder oProcessBuilder = new ProcessBuilder(sSen2CorPath, sDestinationPath + sL1ProductName + ".SAFE");
-
-                    Process oProcess = oProcessBuilder
-                            .inheritIO() // this is enabled for debugging
-                            .start();
-                    // Wait for the process to complete
-                    oProcess.waitFor();
-
+                    
+                    ArrayList<String> asArgs = new ArrayList<>();
+                    asArgs.add(sSen2CorPath);
+                    asArgs.add(sDestinationPath + sL1ProductName + ".SAFE");
+                    
+                    // Run the tool
+                    RunTimeUtils.shellExec(asArgs, true);
 
                     // 5 - ZipIt -> L2A.zip
                     WasdiLog.debugLog("Sen2core.executeOperation: Conversion done, begin compression of L2 archive");

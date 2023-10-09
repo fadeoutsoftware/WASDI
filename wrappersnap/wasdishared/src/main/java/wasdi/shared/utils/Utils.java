@@ -401,50 +401,6 @@ public class Utils {
 		return String.format("%.1f %sB", lBytes / Math.pow(iUnit, iExp), sPrefix);
 	}
 	
-	/**
-	 * Check if a process is alive starting from PID
-	 * @param sPidStr
-	 * @return
-	 */
-	public static boolean isProcessStillAllive(String sPidStr) {
-	    String sOS = System.getProperty("os.name").toLowerCase();
-	    String sCommand = null;
-	    if (sOS.indexOf("win") >= 0) {
-	    	//("Check alive Windows mode. Pid: " + sPidStr)
-	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
-	    } else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
-	    	//("Check alive Linux/Unix mode. Pid: " + sPidStr)
-	        sCommand = "ps -p " + sPidStr;            
-	    } else {
-	    	//("Unsuported OS: go on Linux")
-	    	sCommand = "ps -p " + sPidStr;
-	    }
-	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
-	}
-	
-	private static boolean isProcessIdRunning(String sPid, String sCommand) {
-		//("Command " + sCommand )
-	    try {
-	        Runtime oRunTime = Runtime.getRuntime();
-	        Process oProcess = oRunTime.exec(sCommand);
-
-	        InputStreamReader oInputStreamReader = new InputStreamReader(oProcess.getInputStream());
-	        BufferedReader oBufferedReader = new BufferedReader(oInputStreamReader);
-	        String sLine = null;
-	        while ((sLine= oBufferedReader.readLine()) != null) {
-	            if (sLine.contains(sPid + " ")) {
-	                return true;
-	            }
-	        }
-
-	        return false;
-	    } catch (Exception oEx) {
-	    	WasdiLog.debugLog("Got exception using system command [{}] " + sCommand);
-	        return true;
-	    }
-	}
-
-	
 	private static char randomChar() {
 		return (char) (s_oUtilsRandom.nextInt(26) + 'a');
 	}

@@ -22,7 +22,6 @@ import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.geotools.referencing.CRS;
 
 import wasdi.shared.queryexecutors.Platforms;
-import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -34,6 +33,7 @@ import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
+import wasdi.snapopearations.BandImageManager;
 
 public class SnapProductReader extends WasdiProductReader {
 

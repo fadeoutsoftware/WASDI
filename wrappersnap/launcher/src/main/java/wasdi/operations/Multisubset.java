@@ -14,6 +14,7 @@ import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Multisubset extends Operation {
 
@@ -125,20 +126,7 @@ public class Multisubset extends Operation {
                 asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 
                 // Execute the process
-                ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-                Process oProcess;
-
-                String sCommand = "";
-                for (String sArg : asArgs) {
-                    sCommand += sArg + " ";
-                }
-
-                WasdiLog.debugLog("Multisubset.executeOperation Command Line " + sCommand);
-
-                // oProcessBuidler.redirectErrorStream(true);
-                oProcess = oProcessBuidler.start();
-
-                oProcess.waitFor();
+                RunTimeUtils.shellExec(asArgs, true);
 
                 File oTileFile = new File(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 

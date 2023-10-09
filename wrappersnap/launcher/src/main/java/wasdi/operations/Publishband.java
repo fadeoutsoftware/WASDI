@@ -24,13 +24,13 @@ import wasdi.shared.geoserver.Publisher;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.payloads.PublishBandPayload;
-import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.products.PublishBandResultViewModel;
+import wasdi.snapopearations.BandImageManager;
 
 public class Publishband extends Operation {
 
