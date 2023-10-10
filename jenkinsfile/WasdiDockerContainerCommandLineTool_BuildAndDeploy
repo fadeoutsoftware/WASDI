@@ -58,23 +58,11 @@ pipeline {
       }
     }
 
-    stage('MAVEN - BUILD') {
-      steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package", label: "Create packages"
-      }
-    }
-
-    stage('MAVEN - EXECUTE TEST') {
-      steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
-      }
-    }
-
     stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
+          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerGdal=true sDeployWasdiContainerSen2cor=true sDeployWasdiContainerSnaphu=true'
         """,
         label: "Build the WASDI client container"
       }
@@ -87,32 +75,13 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiJavaArtifact.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook playbooks/deployDockerContainerWasdiCommandLineTool.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
               echo oError.getMessage()
               throw oError
             }
-          }
-        }
-      }
-    }
-
-    stage('ANALYZE THE CODE WITH SONARQUBE') {
-      steps {
-        script {
-          if ( env.executeSonarqube.toBoolean() && env.sCurrentEnvironmentLower == 'test' ) {
-            withCredentials([
-                string(credentialsId: 'SONARQUBE_JDK_HOME', variable: 'SONARQUBE_JDK_HOME'),
-                string(credentialsId: 'SONARQUBE_PROJECT_KEY', variable: 'SONARQUBE_PROJECT_KEY'),
-                string(credentialsId: 'SONARQUBE_TOKEN', variable: 'SONARQUBE_TOKEN'),
-                string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
-            ]) {
-                sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} sonar:sonar --define revision=${env.sCurrentRevision} --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} --define sonar.host.url=${SONARQUBE_URL} --define sonar.login=${SONARQUBE_TOKEN} --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}", label: "Execute the scanner of Sonarqube"
-            }
-          } else {
-            echo "Nothing to do."
           }
         }
       }
