@@ -46,7 +46,7 @@ public class ProcessExample   {
 
   public static final String JSON_PROPERTY_ARGUMENTS = "arguments";
   @JsonProperty(JSON_PROPERTY_ARGUMENTS)
-  private Map<String, ProcessArgumentValue> arguments = new HashMap<>();
+  private Map<String, Object> arguments = new HashMap<>();
 
   public static final String JSON_PROPERTY_RETURNS = "returns";
   @JsonProperty(JSON_PROPERTY_RETURNS)
@@ -92,7 +92,7 @@ public class ProcessExample   {
     this.description = description;
   }
 
-  public ProcessExample arguments(Map<String, ProcessArgumentValue> arguments) {
+  public ProcessExample arguments(Map<String, Object> arguments) {
     this.arguments = arguments;
     return this;
   }
@@ -109,11 +109,11 @@ public class ProcessExample   {
   @JsonProperty(value = "arguments")
   @ApiModelProperty(required = true, value = "")
   @NotNull @Valid 
-  public Map<String, ProcessArgumentValue> getArguments() {
+  public Map<String, Object> getArguments() {
     return arguments;
   }
 
-  public void setArguments(Map<String, ProcessArgumentValue> arguments) {
+  public void setArguments(Map<String, Object> arguments) {
     this.arguments = arguments;
   }
 

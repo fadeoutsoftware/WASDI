@@ -288,33 +288,36 @@ public class WasdiOpenEoServer extends ResourceConfig {
 				}				
 			}
 			catch (Exception oKeyEx) {
-				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				WasdiLog.errorLog("WasdiOpenEOServer.getUserFromAuthenticationHeader: exception contacting keycloak: " + oKeyEx.toString());
 			}
 
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
-			} else {
-				//check session against DB
+			} 
+			else {
 				
+				//check session against DB
 				SessionRepository oSessionRepository = new SessionRepository();
 				UserSession oUserSession = oSessionRepository.getSession(sSessionId);
 				
-				if(null==oUserSession) {
+				if(oUserSession==null) {
 					return null;
-				} else {
+				} 
+				else {
 					sUserId = oUserSession.getUserId();
 				}
 				if(!Utils.isNullOrEmpty(sUserId)){
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
-				} else {
+				} 
+				else {
 					return null;
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("WasdiOpenEOServer.getUserFromAuthenticationHeader: something bad happened: " + oE);
 		}
 
 		return oUser;

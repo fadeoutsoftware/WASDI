@@ -13,6 +13,7 @@ public class OpenEO {
 	public String description = "";
 	public boolean production = false;
 	public String openEOWasdiAppName = "wasdiopeneo";
+	public String processes_config = "/etc/wasdi/openeo_processes.json";
 	public ArrayList<OpenEOCollection> collections = new ArrayList<>();
 	
 	/**
