@@ -28,8 +28,10 @@ import javax.ws.rs.core.Response.Status;
 
 import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Asset;
+import net.wasdi.openeoserver.viewmodels.BatchJob;
 import net.wasdi.openeoserver.viewmodels.BatchJobResult;
 import net.wasdi.openeoserver.viewmodels.BatchJobResultGeometry;
+import net.wasdi.openeoserver.viewmodels.BatchJobs;
 import net.wasdi.openeoserver.viewmodels.DescribeJob200Response;
 import net.wasdi.openeoserver.viewmodels.DescribeJob200Response.StatusEnum;
 import net.wasdi.openeoserver.viewmodels.Error;
@@ -43,6 +45,7 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.OpenEOJob;
 import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.processors.*;
 import wasdi.shared.business.users.*;
 import wasdi.shared.business.Workspace;
@@ -116,7 +119,7 @@ public class JobsApi  {
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.createJob", "InternalServerError", oEx.getMessage())).build();
 		}
     }
     
@@ -137,7 +140,7 @@ public class JobsApi  {
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.debugJob", "InternalServerError", oEx.getMessage())).build();
 		}
     	return Response.ok().build();
     }
@@ -145,24 +148,57 @@ public class JobsApi  {
     @javax.ws.rs.DELETE
     @Path("/{job_id}")
     @Produces({ "application/json" })
-    public Response deleteJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @HeaderParam("Authorization") String sAuthorization) {
+    public Response deleteJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			WasdiLog.warnLog("JobsApi.deleteJob: invalid credentials");
 			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
     	}
     	
     	try {
     		
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
+    		
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		OpenEOJob oJob = oOpenEOJobRepository.getOpenEOJob(sJobId);
+    		
+    		if (oJob == null) {
+        		WasdiLog.warnLog("JobsApi.deleteJob: EO Job not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidJob", "Invalid Job")).build();    			
+    		}
+    		
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oJob.getWorkspaceId());
+    		
+    		if (oWorkspace == null) {
+        		WasdiLog.warnLog("JobsApi.deleteJob: Workspace not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
+    		}
+    		
+    		String sBaseUrl = getBaseUrl(oWorkspace);
+    		
+    		boolean bRet = killProcessWorkspace(sJobId,sBaseUrl,sSessionId);
+    		
+    		if (!bRet) {
+        		WasdiLog.errorLog("JobsApi.deleteJob: kill process workspace returned false ");    		    		
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.deleteJob", "InternalServerError", "Impossible to stop the process")).build();    			
+    		}
+    		
+    		// Clean the db
+    		oOpenEOJobRepository.deleteOpenEOJob(sJobId);
+    		
+    		// Clean the workspace
+    		deleteWorkspace(oWorkspace.getWorkspaceId(), sBaseUrl, sSessionId);
+    		
+    		return Response.status(Status.NO_CONTENT).build();
+    		
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		WasdiLog.errorLog("JobsApi.deleteJob error: " , oEx);    		    		
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.deleteJob", "InternalServerError", oEx.getMessage())).build();
 		}
-    	
-    	return Response.ok().build();
     }
     
     @javax.ws.rs.GET
@@ -196,19 +232,7 @@ public class JobsApi  {
         		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
     		}
     		
-    		String sBaseUrl = WasdiConfig.Current.baseUrl;
-    		
-    		if (oWorkspace.getNodeCode().equals("wasdi") == false) {
-    			NodeRepository oNodeRepository = new NodeRepository();
-    			Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
-    			
-    			if (oNode == null) {
-            		WasdiLog.debugLog("JobsApi.describeJob: Node not found ");
-            		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidNode", "Invalid Node")).build();    			    				
-    			}
-    			
-    			sBaseUrl = oNode.getNodeBaseAddress();
-    		}
+    		String sBaseUrl = getBaseUrl(oWorkspace);
     		
     		DescribeJob200Response oDescribeJob200Response = new DescribeJob200Response();
     		oDescribeJob200Response.setId(sJobId);
@@ -250,7 +274,7 @@ public class JobsApi  {
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.estimateJob", "InternalServerError", oEx.getMessage())).build();
 		}
     	
     	return Response.ok().build();
@@ -269,13 +293,42 @@ public class JobsApi  {
     	
     	try {
     		
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
+    		
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		List<OpenEOJob> aoJobs = oOpenEOJobRepository.getOpenEOJobsByUser(oUser.getUserId());
+    		
+    		BatchJobs oBatchJobs = new BatchJobs();
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		
+    		for (OpenEOJob oJob : aoJobs) {
+    			
+    			BatchJob oBatchJobViewModel = new BatchJob();
+    			
+    			oBatchJobViewModel.setId(oJob.getJobId());
+    			
+    			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oJob.getWorkspaceId());
+    			String sBaseUrl = getBaseUrl(oWorkspace);
+    			ProcessWorkspaceViewModel oProcessWorkspaceViewModel = getProcessWorkspace(oJob.getJobId(), sBaseUrl, sSessionId);
+    			
+    			StatusEnum oOtherStatus = wasdiStateToOpenEOState(oProcessWorkspaceViewModel.getStatus());
+    			oBatchJobViewModel.setStatus(BatchJob.StatusEnum.fromValue(oOtherStatus.toString()));
+    			oBatchJobViewModel.setProgress(new BigDecimal(oProcessWorkspaceViewModel.getProgressPerc()));
+    			oBatchJobViewModel.setCreated(Utils.getWasdiDate(oProcessWorkspaceViewModel.getOperationDate()));
+    			oBatchJobViewModel.setUpdated(Utils.getWasdiDate(oProcessWorkspaceViewModel.getLastChangeDate()));
+    			
+    			oBatchJobs.addJobsItem(oBatchJobViewModel);
+			}
+    		
+    		return Response.ok().entity(oBatchJobs).build();
+    		
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.listJobs", "InternalServerError", oEx.getMessage())).build();
 		}
     	
-    	return Response.ok().build();
+    	
     }
     
     @javax.ws.rs.GET
@@ -558,24 +611,48 @@ public class JobsApi  {
     @javax.ws.rs.DELETE
     @Path("/{job_id}/results")
     @Produces({ "application/json" })
-    public Response stopJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @HeaderParam("Authorization") String sAuthorization) {
+    public Response stopJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String sJobId, @HeaderParam("Authorization") String sAuthorization) {
     	
     	User oUser = WasdiOpenEoServer.getUserFromAuthenticationHeader(sAuthorization);
     	
     	if (oUser == null) {
-			WasdiLog.debugLog("CollectionsApi.describeCollection: invalid credentials");
+			WasdiLog.debugLog("JobsApi.stopJob: invalid credentials");
 			return Response.status(Status.UNAUTHORIZED).entity(Error.getUnathorizedError()).build();    		
     	}
-    	
     	try {
+    		String sSessionId = sAuthorization.substring("Bearer basic//".length());
     		
+    		OpenEOJobRepository oOpenEOJobRepository = new OpenEOJobRepository();
+    		OpenEOJob oJob = oOpenEOJobRepository.getOpenEOJob(sJobId);
+    		
+    		if (oJob == null) {
+        		WasdiLog.warnLog("JobsApi.stopJob: EO Job not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidJob", "Invalid Job")).build();    			
+    		}
+    		
+    		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+    		Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oJob.getWorkspaceId());
+    		
+    		if (oWorkspace == null) {
+        		WasdiLog.warnLog("JobsApi.stopJob: Workspace not found ");
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
+    		}
+    		
+    		String sBaseUrl = getBaseUrl(oWorkspace);
+    		
+    		boolean bRet = killProcessWorkspace(sJobId,sBaseUrl,sSessionId);
+    		
+    		if (!bRet) {
+        		WasdiLog.errorLog("JobsApi.stopJob: kill process workspace returned false ");    		    		
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.deleteJob", "InternalServerError", "Impossible to stop the process")).build();    			
+    		}
+    		
+    		return Response.status(Status.NO_CONTENT).build();
     	}
     	catch (Exception oEx) {
-    		WasdiLog.errorLog("JobsApi.method error: " , oEx);    		    		
+    		WasdiLog.errorLog("JobsApi.stopJob error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("JobsApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
-    	
-    	return Response.ok().build();
     }
     @javax.ws.rs.PATCH
     public Response updateJob(@PathParam("job_id") @NotNull  @Pattern(regexp="^[\\w\\-\\.~]+$") String jobId, @NotNull @Valid  UpdateBatchJobRequest updateBatchJobRequest, @HeaderParam("Authorization") String sAuthorization) {
@@ -682,15 +759,38 @@ public class JobsApi  {
     	return null;
     }
     
+    protected String getBaseUrl(Workspace oWorkspace) {
+		String sBaseUrl = WasdiConfig.Current.baseUrl;
+		
+		try {
+			if (oWorkspace.getNodeCode().equals("wasdi") == false) {
+				NodeRepository oNodeRepository = new NodeRepository();
+				Node oNode = oNodeRepository.getNodeByCode(oWorkspace.getNodeCode());
+				
+				if (oNode == null) {
+	        		WasdiLog.debugLog("JobsApi.getBaseUrl: Node not found ");		    				
+				}
+				else {
+					sBaseUrl = oNode.getNodeBaseAddress();
+				}
+			}    				
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("JobsApi.getBaseUrl: exception ", oEx);
+		}
+		
+		return sBaseUrl;
+    }
+    
 	/**
-	 * Get WASDI Process Status 
+	 * Get WASDI Process Workspace 
 	 * @param sProcessId Process Id
-	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 * @return  ProcessWorkspaceView Model
 	 */
 	protected ProcessWorkspaceViewModel getProcessWorkspace(String sProcessId, String sBaseUrl, String sSessionId) {
-		WasdiLog.debugLog("ProcessesResource.getProcessStatus( " + sProcessId + " )");
+		WasdiLog.debugLog("JobsApi.getProcessWorkspace( " + sProcessId + " )");
 		if(null==sProcessId || sProcessId.isEmpty()) {
-			WasdiLog.debugLog("ProcessesResource.getProcessStatus: process id null or empty, aborting");
+			WasdiLog.debugLog("JobsApi.getProcessWorkspace: process id null or empty, aborting");
 			return null;
 		}
 		try {
@@ -711,10 +811,72 @@ public class JobsApi  {
 			return oProcWS;
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessesResource.getProcessStatus: " + oEx.toString());
+			WasdiLog.errorLog("JobsApi.getProcessWorkspace: " + oEx.toString());
 		}	  
 		return null;
 	}
+	
+	/**
+	 * Kill a WASDI Process
+	 * @param sProcessId Process Id
+	 * @return  Process Status as a String: CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
+	 */
+	protected boolean killProcessWorkspace(String sProcessId, String sBaseUrl, String sSessionId) {
+		WasdiLog.debugLog("JobsApi.killProcessWorkspace( " + sProcessId + " )");
+		if(null==sProcessId || sProcessId.isEmpty()) {
+			WasdiLog.debugLog("JobsApi.killProcessWorkspace: process id null or empty, aborting");
+			return false;
+		}
+		try {
+			if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
+			// Create the API call
+			String sUrl = sBaseUrl + "process/delete?procws="+sProcessId+"&treeKill=true";
+
+			// Add session token
+			Map<String, String> asHeaders = new HashMap<String, String>();
+			asHeaders.put("x-session-token", sSessionId);
+			
+			// Call the API
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpGet(sUrl, asHeaders); 
+			
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("JobsApi.killProcessWorkspace: " + oEx.toString());
+		}	  
+		return false;
+	}
+	
+	/**
+	 * Deletes a WASDI Workspace
+	 * @param sWorkspaceId Workspace Id
+	 * @return  
+	 */
+	protected boolean deleteWorkspace(String sWorkspaceId, String sBaseUrl, String sSessionId) {
+		WasdiLog.debugLog("JobsApi.deleteWorkspace( " + sWorkspaceId + " )");
+		if(null==sWorkspaceId || sWorkspaceId.isEmpty()) {
+			WasdiLog.debugLog("JobsApi.deleteWorkspace: process id null or empty, aborting");
+			return false;
+		}
+		try {
+			if (!sBaseUrl.endsWith("/")) sBaseUrl += "/";
+			// Create the API call
+			String sUrl = sBaseUrl + "ws/delete?workspace="+sWorkspaceId+"&deletelayer=true&deletefile=true";
+
+			// Add session token
+			Map<String, String> asHeaders = new HashMap<String, String>();
+			asHeaders.put("x-session-token", sSessionId);
+			
+			// Call the API
+			HttpCallResponse oHttpCallResponse = HttpUtils.httpDelete(sUrl, asHeaders); 
+			
+			return true;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("JobsApi.deleteWorkspace: " + oEx.toString());
+		}	  
+		return false;
+	}	
 	
 	/**
 	 * Check if the input string is a Valid Status

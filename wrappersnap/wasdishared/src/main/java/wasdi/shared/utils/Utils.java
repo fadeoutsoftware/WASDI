@@ -221,7 +221,8 @@ public class Utils {
 
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sWasdiDate);
-		} catch (ParseException e) {
+		} catch (Exception oE) {
+			WasdiLog.errorLog("Utils.getWasdiDate( " + sWasdiDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
@@ -230,8 +231,8 @@ public class Utils {
 
 		try {
 			return SIMPLE_DATE_FORMAT_yyyyMMdd.get().parse(sDate);
-		} catch (ParseException oE) {
-			WasdiLog.debugLog("Utils.getYyyyMMddDate( " + sDate + "  ): could not be parsed due to " + oE);
+		} catch (Exception oE) {
+			WasdiLog.errorLog("Utils.getYyyyMMddDate( " + sDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
@@ -243,8 +244,8 @@ public class Utils {
 
 		try {
 			return SIMPLE_DATE_FORMAT_yyyyMMddTZ.get().parse(sDate);
-		} catch (ParseException oE) {
-			WasdiLog.debugLog("Utils.getYyyyMMddTZDate( " + sDate + "  ): could not be parsed due to " + oE);
+		} catch (Exception oE) {
+			WasdiLog.errorLog("Utils.getYyyyMMddTZDate( " + sDate + "  ): could not be parsed due to " + oE);
 			return null;
 		}
 	}
