@@ -119,9 +119,7 @@ public class WasdiOpenEoServer extends ResourceConfig {
 		}
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("Local Database config exception " + oEx.toString());
-		}
-
-		MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);		
+		}		
 		
 		WasdiLog.debugLog("-------- WASDI Open EO Server Init done -------\n\n");
 		WasdiLog.debugLog("-----------------------------------------------");

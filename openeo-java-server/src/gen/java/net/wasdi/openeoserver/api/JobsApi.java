@@ -55,7 +55,9 @@ import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
@@ -492,8 +494,21 @@ public class JobsApi  {
 			oParameter.setVersion(oProcessor.getVersion());
 			oParameter.setOGCProcess(true);
 			
+			String sParameters = oOpenEOJob.getParameters();
 			
-			oParameter.setJson(oOpenEOJob.getParameters());
+			Map<String, Object> aoOpenEOParameters = JsonUtils.jsonToMapOfObjects(sParameters);
+			
+			if (aoOpenEOParameters.containsKey("process")) {
+				String sProcessJson = JsonUtils.stringify(aoOpenEOParameters.get("process"));
+				aoOpenEOParameters.put("process_encoded", StringUtils.encodeUrl(sProcessJson));
+				sParameters = JsonUtils.stringify(aoOpenEOParameters);
+				WasdiLog.debugLog("JobsApi.startJob: added encoded process key to params");
+			}
+			else {
+				WasdiLog.warnLog("JobsApi.startJob: we did not found the process key in the parameters!!");
+			}
+			
+			oParameter.setJson(sParameters);
 			
 			// Serialize the parameters
 			String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
@@ -501,7 +516,7 @@ public class JobsApi  {
 			// We call WASDI to execute: there the platform will make the routing to the right node
 			String sUrl = WasdiConfig.Current.baseUrl;
 			if (sUrl.endsWith("/") == false) sUrl += "/";
-			sUrl += "processing/run?operation=RUNPROCESSOR&name=" + URLEncoder.encode(oProcessor.getName(), java.nio.charset.StandardCharsets.UTF_8.toString());
+			sUrl += "processing/run?operation=RUNPROCESSOR&name=" + StringUtils.encodeUrl(oProcessor.getName());
 			
 			HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, sPayload, HttpUtils.getStandardHeaders(sSessionId)); 
 			// call the API to really execute the processor 
