@@ -24,7 +24,6 @@ pipeline {
         echo "env.sSourceBranch     = " + env.sSourceBranch
         echo "env.sWasdiAnsiblePath = " + env.sWasdiAnsiblePath
         echo "env.WORKSPACE         = " + env.WORKSPACE
-        echo "env.sBrTest           = " + env.sBrTest
 
         sh script: "pwd", label: "Current location"
 
@@ -34,8 +33,6 @@ pipeline {
         sh script: "npm --version", label: "Tool > npm > current version"
         sh script: "which sass", label: "Tool > sass > path"
         sh script: "sass --version", label: "Tool > sass > current version"
-
-        error "This pipeline stops here!"
       }
     }
 
