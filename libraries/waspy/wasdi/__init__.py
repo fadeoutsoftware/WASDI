@@ -34,7 +34,7 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.1.0
+Version 0.8.1.1
 
 Last Update: 22/09/2023
 
@@ -64,31 +64,52 @@ import inspect
 from datetime import datetime
 
 # Initialize "Members"
+
+# WASDI User
 m_sUser = None
+# Password
 m_sPassword = None
 
+# Active Workspace Id
 m_sActiveWorkspace = None
+# Owner of the Active Workspace
 m_sWorkspaceOwner = ''
+# Active  workspace specific url
 m_sWorkspaceBaseUrl = ''
 
+# Path of the parameters file
 m_sParametersFilePath = None
+# Session Id
 m_sSessionId = ''
+# Flag to detect if the session is valid
 m_bValidSession = False
+# Local base path
 m_sBasePath = None
 
+# True to activate auto download
 m_bDownloadActive = True
+# True to activate auto upload
 m_bUploadActive = True
+# True to enable verbose logs of the lib
 m_bVerbose = True
+# Dictionary with the input parameters
 m_aoParamsDictionary = {}
 
+# Process Workspace Id of this application
 m_sMyProcId = ''
+# Base url: by default the main wasdi server
 m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
 #m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+# The launcher set this flag true when working on a wasdi node
 m_bIsOnServer = False
+# The launcher set this flag true when working on a cloud that is not a wasdi node
 m_bIsOnExternalServer = False
+# Set true if the app is on server and the data folder mounted is only for the workspace folder
+m_bOnlyWorkspaceFolderMounted = False
+# Timeout for the http calls
 m_iRequestsTimeout = 2 * 60
+# Specific timeout for the upload http calls
 m_iUploadTimeout = 10 * 60
-
 
 def printStatus():
     """Prints status
@@ -121,8 +142,6 @@ def printStatus():
 
 def setVerbose(bVerbose):
     """Sets verbosity
-
-
     :param boolean bVerbose: False non verbose, True verbose
     :return:
     """
@@ -172,6 +191,9 @@ def getParametersDict():
 
     if "workspaceid" in aoReturnDict:
         del aoReturnDict["workspaceid"]
+
+    if "password" in aoReturnDict:
+        del aoReturnDict["password"]
 
     return aoReturnDict
 
@@ -472,7 +494,7 @@ def setActiveWorkspaceId(sActiveWorkspace):
     """
     Set the Active Workspace Id
 
-    :param sActiveWorkpsace: Active Workspace Id
+    :param sActiveWorkspace: Active Workspace Id
     """
     global m_sActiveWorkspace
     m_sActiveWorkspace = sActiveWorkspace
@@ -526,6 +548,13 @@ def refreshParameters():
     _loadParams()
 
 
+def _getEnvironmentVariable(sVariable):
+    try:
+        sValue = os.environ[sVariable]
+        return sValue
+    except KeyError:
+        return None
+
 def init(sConfigFilePath=None):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
@@ -539,10 +568,20 @@ def init(sConfigFilePath=None):
     global m_sSessionId
     global m_sBasePath
     global m_bValidSession
+    global m_sMyProcId
 
-    sWname = None
-    sWId = None
+    sWorkspaceName = None
+    sWorkspaceId = None
     m_bValidSession = False
+
+    sEnvBaseUrl = _getEnvironmentVariable('WASDI_WEBSERVER_URL')
+
+    if sEnvBaseUrl is not None:
+        if sEnvBaseUrl!="":
+            if sEnvBaseUrl.endswith("/"):
+                sEnvBaseUrl = sEnvBaseUrl[:-1]
+            m_sBaseUrl = sEnvBaseUrl
+            print('[INFO] Base Url read by WASDI_WEBSERVER_URL: ' + m_sBaseUrl)
 
     # P.Campanella 2022/08/30: if there is no config file, try the default notebook one
     if sConfigFilePath is None:
@@ -550,10 +589,15 @@ def init(sConfigFilePath=None):
             sConfigFilePath = "/home/wasdi/notebook/notebook_config.cfg"
 
     if sConfigFilePath is not None:
-        bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
+        bConfigOk, sWorkspaceName, sWorkspaceId = _loadConfig(sConfigFilePath)
 
         if bConfigOk is True:
             _loadParams()
+
+    if m_sUser is None:
+        m_sUser = _getEnvironmentVariable("WASDI_USER")
+        if m_sUser is not None:
+            print('[INFO] waspy.init: user read in the env WASDI_USER variable')
 
     if m_sUser is None and m_sPassword is None:
 
@@ -564,8 +608,8 @@ def init(sConfigFilePath=None):
         m_sUser = m_sUser.rstrip()
         m_sPassword = m_sPassword.rstrip()
 
-        if sWId is None and sWname is None:
-            sWname = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
+        if sWorkspaceId is None and sWorkspaceName is None:
+            sWorkspaceName = input('[INFO] waspy.init: Please Insert Active Workspace Name (Enter to jump):')
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given' +
@@ -573,14 +617,42 @@ def init(sConfigFilePath=None):
         return False
 
     if m_sBasePath is None:
+        # If it was not on config:
         if getIsOnServer() is True:
+            #Default on server
             m_sBasePath = '/data/wasdi/'
         else:
+            #Default on local pc
             sHome = os.path.expanduser("~")
             # the empty string at the end adds a separator
             m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
-    if m_sSessionId != '':
+        sEnvBasePath = _getEnvironmentVariable('WASDI_BASE_PATH')
+
+        if sEnvBasePath is not None:
+            if sEnvBasePath != "":
+                if not sEnvBasePath.endswith("/"):
+                    sEnvBasePath = sEnvBasePath + "/"
+                m_sBasePath = sEnvBasePath
+                print('[INFO] Base Path read by WASDI_BASE_PATH: ' + m_sBasePath)
+
+    # Check if we have the session id in env
+    if not m_sSessionId or m_sSessionId=='':
+        m_sSessionId = _getEnvironmentVariable("WASDI_SESSION_ID")
+        if m_sSessionId is not None:
+            print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+        if m_sSessionId is None:
+            m_sSessionId = ""
+
+    # Check if we have the my proc id in env
+    if not m_sMyProcId or m_sMyProcId == '':
+        m_sMyProcId = _getEnvironmentVariable("WASDI_PROCESS_WORKSPACE_ID")
+        if m_sMyProcId is not None:
+            print('[INFO] waspy.init: session id read in the env WASDI_SESSION_ID variable')
+        if m_sMyProcId is None:
+            m_sMyProcId = ""
+
+    if m_sSessionId is not None and m_sSessionId != '':
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/auth/checksession'
 
@@ -640,12 +712,20 @@ def init(sConfigFilePath=None):
 
     if m_bValidSession is True:
         _log('[INFO] waspy.init: WASPY successfully initiated :-)')
-        sW = getActiveWorkspaceId()
-        if (sW is None) or (len(sW) < 1):
-            if sWname is not None:
-                openWorkspace(sWname)
-            elif sWId is not None:
-                openWorkspaceById(sWId)
+        sActuallyActiveWorkspace = getActiveWorkspaceId()
+        if (sActuallyActiveWorkspace is None) or (len(sActuallyActiveWorkspace) < 1):
+
+            # Check if the workspace id is NOT set by config
+            if sWorkspaceId is None and sWorkspaceName is None:
+                # And in case if we have it in env
+                sWorkspaceId = _getEnvironmentVariable("WASDI_WORKSPACE_ID")
+                if sWorkspaceId is not None:
+                    print('[INFO] waspy.init: workspace id read in the env WASDI_WORKSPACE_ID variable')
+
+            if sWorkspaceName is not None:
+                openWorkspace(sWorkspaceName)
+            elif sWorkspaceId is not None:
+                openWorkspaceById(sWorkspaceId)
     else:
         print('[ERROR] waspy.init: could not init WASPY :-(' +
               '  ******************************************************************************')
@@ -950,6 +1030,8 @@ def openWorkspaceById(sWorkspaceId):
     if not m_sWorkspaceBaseUrl:
         m_sWorkspaceBaseUrl = getBaseUrl()
 
+    _createWorkspaceFolder()
+
     return m_sActiveWorkspace
 
 
@@ -970,7 +1052,20 @@ def openWorkspace(sWorkspaceName):
     if not m_sWorkspaceBaseUrl:
         m_sWorkspaceBaseUrl = getBaseUrl()
 
+    _createWorkspaceFolder()
+
     return m_sActiveWorkspace
+
+def _createWorkspaceFolder():
+    """
+    Creates the workspace folder
+    """
+    try:
+        sWorkspacePath = _internalGetPath("")
+        if not os.path.exists(sWorkspacePath):
+                os.makedirs(sWorkspacePath)
+    except:
+        print('[ERROR] waspy._createWorkspaceFolder: cannot create Workspace Path !!! folder ' + sWorkspacePath)
 
 
 def getProductsByWorkspace(sWorkspaceName):
@@ -1085,6 +1180,20 @@ def getPath(sFile=''):
     else:
         return getSavePath() + str(sFile)
 
+def _internalGetPath(sProductName):
+    """
+    Iternal get path. Resolve the path of a Product
+    """
+    global m_bIsOnServer
+    global m_bIsOnExternalServer
+    global m_bOnlyWorkspaceFolderMounted
+    global m_sActiveWorkspace
+    global m_sWorkspaceOwner
+    if m_bOnlyWorkspaceFolderMounted and (m_bIsOnServer or m_bIsOnExternalServer):
+        return os.path.join(getBasePath(), sProductName)
+    else:
+        return os.path.join(getBasePath(), m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
+
 
 def getFullProductPath(sProductName):
     """
@@ -1100,14 +1209,12 @@ def getFullProductPath(sProductName):
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
-    if getIsOnServer() is True:
-        sFullPath = '/data/wasdi/'
-    else:
-        sFullPath = m_sBasePath
+    sFullPath = getBasePath()
 
     # Normalize the path and extract the name
     sProductName = os.path.basename(os.path.normpath(sProductName))
-    sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
+
+    sFullPath = _internalGetPath(sProductName)
 
     # If we are on the local PC
     if getIsOnServer() is False:
@@ -1148,22 +1255,17 @@ def getSavePath():
     global m_sActiveWorkspace
     global m_sUser
 
-    if getIsOnServer() is True:
-        sFullPath = '/data/wasdi/'
-    else:
-        sFullPath = m_sBasePath
-
-    # empty string at the ends adds a final separator
-    sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, "")
+    sFullPath = _internalGetPath("")
 
     return sFullPath
 
 
-def getProcessStatus(sProcessId):
+def getProcessStatus(sProcessId, sDestinationWorkspaceUrl = None):
     """
     get the status of a Process
 
     :param sProcessId: Id of the process to query
+    :param sDestinationWorkspaceUrl: allow to ask for a status of a Process That is not in the actual Active Node
     :return: the status or 'ERROR' if there was any error
 
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR, WAITING, READY
@@ -1184,7 +1286,10 @@ def getProcessStatus(sProcessId):
     asHeaders = _getStandardHeaders()
     payload = {'procws': sProcessId}
 
-    sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
+    if sDestinationWorkspaceUrl is not None and sDestinationWorkspaceUrl!="":
+        sUrl = sDestinationWorkspaceUrl + '/process/getstatusbyid'
+    else:
+        sUrl = getWorkspaceBaseUrl() + '/process/getstatusbyid'
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, params=payload, timeout=m_iRequestsTimeout)
@@ -1298,7 +1403,7 @@ def updateStatus(sStatus, iPerc=-1):
         return ''
 
 
-def waitProcess(sProcessId):
+def waitProcess(sProcessId, sDestinationWorkspaceUrl=None):
     """
     Wait for a process to End
 
@@ -1322,7 +1427,11 @@ def waitProcess(sProcessId):
         sStatus = ''
 
         while sStatus not in {"DONE", "STOPPED", "ERROR"}:
-            sStatus = getProcessStatus(sProcessId)
+            sStatus = getProcessStatus(sProcessId, sDestinationWorkspaceUrl)
+
+            if sStatus in {"DONE", "STOPPED", "ERROR"}:
+                break
+
             time.sleep(5)
     except:
         _log("[ERROR] Exception in the waitProcess")
@@ -1410,7 +1519,7 @@ def waitProcesses(asProcIdList):
             # Sleep a little bit
             sleep(5)
             # Trace the time needed
-            iTotalTime = iTotalTime + 2
+            iTotalTime = iTotalTime + 5
 
     # Wait to be resumed
     _waitForResume()
@@ -1519,12 +1628,9 @@ def setPayload(data):
     :param data: data to save in the payload. Suggestion is to use JSON
     return None
     """
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sMyProcId
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
-        setProcessPayload(m_sMyProcId, data)
+        setProcessPayload(getProcId(), data)
     else:
         _log('wasdi.setPayload( ' + str(data))
 
@@ -1758,15 +1864,13 @@ def wasdiLog(sLogRow):
     :param sLogRow: text to log
     :return: None
     """
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
+    global m_iRequestsTimeout
 
     sForceLogRow = str(sLogRow)
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         asHeaders = _getStandardHeaders()
-        sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + m_sMyProcId
+        sUrl = getWorkspaceBaseUrl() + '/processors/logs/add?processworkspace=' + getProcId()
         try:
             oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders, timeout=m_iRequestsTimeout)
         except Exception as oEx:
@@ -2875,7 +2979,7 @@ def multiSubset(sInputFile, asOutputFiles, adLatN, adLonW, adLatS, adLonE, bBigT
         return ''
 
     sUrl = m_sBaseUrl + "/processing/multisubset?source=" + sInputFile + "&name=" + \
-           sInputFile + "&workspace=" + m_sActiveWorkspace
+           sInputFile + "&workspace=" + getActiveWorkspaceId()
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         sUrl += "&parent="
@@ -3231,8 +3335,7 @@ def copyFileToSftp(sFileName, bAsynch=None, sRelativePath=None):
     sResult = ''
     try:
         if getUploadActive() is True:
-            sFilePath = os.path.join(getSavePath(), sFileName)
-            if fileExistsOnWasdi(sFilePath) is False:
+            if fileExistsOnWasdi(sFileName) is False:
                 _log('[INFO] waspy.copyFileToSftp: remote file is missing, uploading')
                 try:
                     _uploadFile(sFileName)
@@ -3996,7 +4099,7 @@ def getlayerWMS(sProduct, sBand):
     iCountRetries = 10
     oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
     while not ('payload' in oPublishedBandResponse and 'layerId' in oPublishedBandResponse['payload']):
-        if (iCountRetries == 0):
+        if iCountRetries == 0:
             wasdiLog('[ERROR] getlayerWMS: reached the maximum number of attempt ( ' + str(type(iCountRetries)) + ') Aborting operation')
             return
         oPublishedBandResponse = asynchPublishBand(sProduct, sBand)
@@ -4008,6 +4111,18 @@ def getlayerWMS(sProduct, sBand):
     oResult["server"] = oPayload["geoserverUrl"]
     oResult["layerId"] = oPayload["layerId"]
     return json.dumps(oResult)
+
+
+def asynchGetFileFromWorkspaceName(sSourceWorkspaceName, sFileName):
+    """
+    Trigger the operation to Take a file from another workspace and put it in the actual one.
+    sSourceWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+
+    Return an empty string in case of problems or the process Obj Id of the import process if ok
+    """
+    sWorkspaceId = getWorkspaceIdByName(sSourceWorkspaceName)
+    return asynchGetFileFromWorkspaceId(sWorkspaceId, sFileName)
 
 def getFileFromWorkspaceName(sSourceWorkspaceName, sFileName):
     """
@@ -4023,52 +4138,89 @@ def getFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
     Takes a file from another workspace and put it in the actual one.
     sSourceWorkspaceId: Id of the Workspace that must have the file
     sFileName: File to import in the actual Active Workspace
+
+    Return true if the file is taken, false in case of problems
+    """
+
+    sProcId = asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName)
+    if sProcId != "":
+        if sProcId == "PRODUCT_ALREADY_PRESENT":
+            return True
+        sStatus = waitProcess(sProcId)
+        if sStatus == "DONE":
+            return True
+    return  False
+
+def asynchGetFileFromWorkspaceId(sSourceWorkspaceId, sFileName):
+    """
+    Trigger the operation to Take a file from another workspace and put it in the actual one.
+    sSourceWorkspaceId: Id of the Workspace that must have the file
+    sFileName: File to import in the actual Active Workspace
+
+    Return an empty string in case of problems or the process Obj Id of the import process if ok
     """
     if sFileName is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: file name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: file name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sFileName) < 1:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: File name too short' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: File name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     if sSourceWorkspaceId is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: SourceWorkspaceId name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sSourceWorkspaceId) < 1:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: SourceWorkspaceId name too short' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: SourceWorkspaceId name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
-    sUrl = getWorkspaceBaseUrl()
+    sUrl = getBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
     sUrl += sSourceWorkspaceId
     sUrl += "&destinationWorkspaceId="
     sUrl += getActiveWorkspaceId()
     sUrl += "&productName="
     sUrl += sFileName
-    sUrl += "&parent="
-    sUrl += getProcId()
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        sUrl += "&parent="
+        sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+        wasdiLog("[ERROR] waspy.asynchGetFileFromWorkspaceId: there was an error contacting the API " + str(oEx))
 
     if oResult is None:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: failed contacting the server' +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: failed contacting the server' +
                  '  ******************************************************************************')
-        return False
+        return ""
     elif not oResult.ok and not 500 == oResult.status_code:
-        wasdiLog('[ERROR] waspy.getFileFromWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+        wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
-        return False
+        return ""
     else:
-        return oResult.ok
+        aoJson = oResult.json()
+        if "stringValue" in aoJson:
+            sProcessID = aoJson['stringValue']
+            return sProcessID
+        else:
+            wasdiLog('[ERROR] waspy.asynchGetFileFromWorkspaceId: cannot extract processing identifier from response, aborting')
+            return ""
+
+def asynchSendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
+    """
+    Trigger the operation to send a file in another workspace
+    sDestinationWorkspaceName: Name of the Workspace where we need to copy the file
+    sFileName: File to send to the new workspace
+    """
+    sWorkspaceId = getWorkspaceIdByName(sDestinationWorkspaceName)
+    return asynchSendFileToWorkspaceId(sWorkspaceId, sFileName)
+
 
 def sendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
     """
@@ -4081,57 +4233,127 @@ def sendFileToWorkspaceName(sDestinationWorkspaceName, sFileName):
 
 def sendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
     """
-    Takes a file from another workspace and put it in the actual one.
-    sDestinationWorkspaceId: Id of the Workspace that must have the file
-    sFileName: File to import in the actual Active Workspace
+    Sends a file from another workspace
+    sDestinationWorkspaceId: Id of the Workspace where to send the file
+    sFileName: File to send
+
+    Return true if the file is sent, false in case of problems
+    """
+
+    sProcId = asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName)
+
+    sDestinationWorkspaceUrl = getWorkspaceUrlByWsId(sDestinationWorkspaceId)
+    if sDestinationWorkspaceUrl is None:
+        sDestinationWorkspaceUrl = getBaseUrl()
+
+    if sProcId != "":
+        if sProcId == "PRODUCT_ALREADY_PRESENT":
+            return True
+        sStatus = waitProcess(sProcId, sDestinationWorkspaceUrl)
+        if sStatus == "DONE":
+            return True
+    return  False
+
+def asynchSendFileToWorkspaceId(sDestinationWorkspaceId, sFileName):
+    """
+    Trigger the operation to Send a file from another workspace
+    sDestinationWorkspaceId: Id of the Workspace where to send the file
+    sFileName: File to send
     """
     if sFileName is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: file name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: file name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sFileName) < 1:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: File name too short' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: File name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
     if sDestinationWorkspaceId is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name must not be None' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: sDestinationWorkspaceId name must not be None' +
                  '  ******************************************************************************')
-        return False
+        return ""
     if len(sDestinationWorkspaceId) < 1:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: sDestinationWorkspaceId name too short' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: sDestinationWorkspaceId name too short' +
                  '  ******************************************************************************')
-        return False
+        return ""
 
-    sUrl = getWorkspaceBaseUrl()
+    sUrl = getBaseUrl()
     sUrl += "/filebuffer/share?originWorkspaceId="
     sUrl += getActiveWorkspaceId()
     sUrl += "&destinationWorkspaceId="
     sUrl += sDestinationWorkspaceId
     sUrl += "&productName="
     sUrl += sFileName
-    sUrl += "&parent="
-    sUrl += getProcId()
+    if getIsOnServer() is True or getIsOnExternalServer() is True:
+        sUrl += "&parent="
+        sUrl += getProcId()
 
     asHeaders = _getStandardHeaders()
 
     try:
         oResult = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
     except Exception as oEx:
-        wasdiLog("[ERROR] there was an error contacting the API " + str(oEx))
+        wasdiLog("[ERROR] waspy.asynchSendFileToWorkspaceId: there was an error contacting the API " + str(oEx))
 
     if oResult is None:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: failed contacting the server' +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: failed contacting the server' +
                  '  ******************************************************************************')
-        return False
+        return ""
     elif not oResult.ok and not 500 == oResult.status_code:
-        wasdiLog('[ERROR] waspy.sendFileToWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
+        wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: unexpected failure, server returned: ' + str(oResult.status_code) +
                  '  ******************************************************************************')
-        return False
+        return ""
     else:
-        return oResult.ok
+        aoJson = oResult.json()
+        if "stringValue" in aoJson:
+            sProcessID = aoJson['stringValue']
+            return sProcessID
+        else:
+            wasdiLog('[ERROR] waspy.asynchSendFileToWorkspaceId: cannot extract processing identifier from response, aborting')
+            return ""
+
+def getProductBandNames(sFileName):
+    """
+        Gets the list of bands of a file as strings
+
+        :param sFileName: name of the file to query for list of bands
+        :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
+        """
+
+    sUrl = getBaseUrl()
+    sUrl += "/product/byname?name="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] waspy.getProductBandNames: there was an error contacting the API " + str(oEx))
+
+    try:
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProductBandNames: cannot get bbox for product' +
+                     '  ')
+        elif oResponse.ok is not True:
+            wasdiLog('[ERROR] waspy.getProductBandNames: cannot get product decription, server returned: ' + str(oResponse.status_code) + '  ')
+        else:
+            oJsonResponse = oResponse.json()
+            if ("bandsGroups" in oJsonResponse):
+                asBands = []
+
+                for oBand in oJsonResponse["bandsGroups"]["bands"]:
+                    asBands.append(oBand["name"])
+
+                return asBands
+
+    except:
+        return []
+
+    return []
 
 if __name__ == '__main__':
-    _log(
-        'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net'
-    )
+    _log('WASPY - The WASDI Python Library. Include in your code to develop space processors. Visit www.wasdi.net')

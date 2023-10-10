@@ -595,6 +595,7 @@
             case "MULTISUBSET":
             case "RASTERGEOMETRICRESAMPLE":
             case "REGRID":
+            case "SHARE":
                 oController.receivedNewProductMessage(oMessage);
                 break;
             case "DELETE":
