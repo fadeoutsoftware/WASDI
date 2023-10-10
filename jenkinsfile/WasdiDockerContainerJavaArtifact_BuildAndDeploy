@@ -93,7 +93,7 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/pullWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
+                ansible-playbook playbooks/deployDockerContainerWasdiJavaArtifact.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
