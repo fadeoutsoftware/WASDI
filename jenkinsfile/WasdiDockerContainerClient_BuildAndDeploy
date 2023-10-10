@@ -84,6 +84,16 @@ pipeline {
         label: "Build the WASDI client container"
       }
     }
+
+    stage('DEPLOYMENT') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/pullWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiClient=true'
+        """,
+        label: "Deploy the WASDI client container"
+      }
+    }
   }
 
   post {

@@ -86,7 +86,6 @@ pipeline {
       }
     }
 
-    /*
     stage('DEPLOYMENT') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
@@ -94,7 +93,7 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployWasdiArtifact.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'wasdiDeploymentAll=True sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook playbooks/pullWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
@@ -105,7 +104,6 @@ pipeline {
         }
       }
     }
-    */
 
     stage('ANALYZE THE CODE WITH SONARQUBE') {
       steps {
