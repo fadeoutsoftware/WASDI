@@ -1,11 +1,21 @@
 package wasdi.shared.utils;
 
 import java.io.*;
+import java.net.URLConnection;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.net.io.Util;
 
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -418,6 +428,128 @@ public class SocketUtils {
 		}
 
 		return oHttpCallResponse;
+	}
+	
+	/**
+	 * 
+	 * @param sUrl
+	 * @param sFileName
+	 * @param asHeaders
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean httpPostFile(String sPath, String sDockerHostAddress, String sFileName, Map<String, String> asHeaders) throws IOException {
+		File oFile = new File(sFileName);
+		if (!oFile.exists()) {
+			WasdiLog.errorLog("SocketUtils.httpPostFile: file not found.");
+			return false;
+		}
+		
+		String sZippedFile = null;
+
+		// Check if we need to zip this file
+		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
+
+			WasdiLog.debugLog("HttpUtils.httpPostFile: File not zipped, zip it");
+
+			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
+
+			String sTemp = "tmp-" + iRandom + File.separator;
+			String sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
+
+			if (!sTempPath.endsWith(File.separator)) {
+				sTempPath += File.separator;
+			}
+			sTempPath += sTemp;
+
+			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
+			if (oPath.toFile().mkdir()) {
+				WasdiLog.debugLog("SocketUtils.httpPostFile: Temporary directory created");
+			} else {
+				throw new IOException("SocketUtils.httpPostFile: Can't create temporary dir " + sTempPath);
+			}
+
+			sZippedFile = sTempPath+iRandom + ".zip";
+
+			File oZippedFile = new File(sTempPath+iRandom + ".zip");
+			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
+			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
+
+			oOutZipStream.close();
+
+			String sOldFileName = oFile.getName();
+
+			oFile = new File(sZippedFile);
+
+			sPath = sPath.replace(sOldFileName, oFile.getName());
+
+			sFileName = oFile.getName();
+		}
+		
+		
+		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+		try (FileInputStream oInputStream = new FileInputStream(oFile)) {
+			//request
+			
+			DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
+			
+			if (oHttpClient == null) {
+				WasdiLog.errorLog("SocketUtils.httpPostFile. Docker HTTP client is null. Returning an empty response.");
+				return false;
+			}	
+			
+			if (asHeaders == null) {
+				asHeaders = new HashMap<String, String>();
+			}
+			
+			asHeaders.put("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+			asHeaders.put("Connection", "Keep-Alive");
+			asHeaders.put("User-Agent", "WasdiLib.Java");
+			
+			
+			
+			String sStart = "--" + sBoundary + "\r\n" 
+					+ "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n"
+					+ "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n"
+					+ "Content-Transfer-Encoding: binary" + "\r\n"
+					+ "\r\n";
+			List<Byte> ayStartByteList = Arrays.asList(ArrayUtils.toObject(sStart.getBytes()));
+			
+			List<Byte> ayByteList = Arrays.asList(ArrayUtils.toObject(oInputStream.readAllBytes()));
+
+			String sEnd = "\r\n\r\n--" + sBoundary + "--\r\n";
+			List<Byte> ayEndByteList = Arrays.asList(ArrayUtils.toObject(sEnd.getBytes()));
+			
+			ayStartByteList.addAll(ayByteList);
+			ayStartByteList.addAll(ayEndByteList);
+			
+			Byte [] ayPayload = new Byte[ayStartByteList.size()];
+			Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ArrayUtils.toPrimitive(ayStartByteList.toArray(ayPayload)));
+			
+			try (Response oResponse = oHttpClient.execute(oRequest)) {
+				WasdiLog.debugLog("SocketUtils.httpPostFile: Request successfully executed");
+			} catch (Exception oEx) {
+				WasdiLog.debugLog("SocketUtils.httpPostFile: Exception when trying to execute the request" + oEx.getMessage());
+				return false;
+			} finally {
+				try {
+					oHttpClient.close();
+					oInputStream.close();
+				} catch (IOException oEx) {
+					WasdiLog.debugLog("SocketUtils.httpPut: Impossible to close the connection " + oEx.getMessage());
+					return false;
+				}
+			}		
+			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("SocketUtils.httpPostFile: could not open file due to: " + oE.getMessage() + ", aborting");
+			return false;
+		}
+		
+		return true;
+		
+		
+		
 	}
 	
 	
