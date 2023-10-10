@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Add a label to facilitate the cleaning
+LABEL com.wasdi.type="dynamic"
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -98,14 +102,13 @@ RUN apt-get update && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
+USER {{ sWasdiSystemUserName }}
+
+
 # Set the workdir
 WORKDIR {{ sWasdiComponentLauncherRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiComponentLauncherRootDirectoryOwner }}:{{ sWasdiComponentLauncherRootDirectoryGroup }} ./dataToCopy/docker-entrypoint.sh /docker-entrypoint.sh
-#COPY --chown={{ sWasdiComponentLauncherRootDirectoryOwner }}:{{ sWasdiComponentLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentLauncherTargetFileName }} {{ sWasdiComponentLauncherRootDirectoryPath }}/{{ sWasdiComponentLauncherTargetFileName }}
-
-
-# Start the container
-ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
+COPY --chown={{ sWasdiComponentLauncherRootDirectoryOwner }}:{{ sWasdiComponentLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentLauncherTargetFileName }} {{ sWasdiComponentLauncherRootDirectoryPath }}/{{ sWasdiComponentLauncherTargetFileName }}

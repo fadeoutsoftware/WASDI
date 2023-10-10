@@ -20,7 +20,6 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:infinispan:config:11.0 http://www.infinispan.org/schemas/infinispan-config-11.0.xsd"
         xmlns="urn:infinispan:config:11.0">
-{% if bWasdiKeycloakIsCluster | default(False) == True %}
 
     <!-- CONFIGURATION FOR THE CLUSTER -->
     <jgroups>
@@ -41,10 +40,9 @@
 
     </jgroups>
     <!-- /CONFIGURATION FOR THE CLUSTER -->
-{% endif %}
 
     <cache-container name="keycloak">
-        <transport lock-timeout="60000"{% if bWasdiKeycloakIsCluster | default(False) == True %} stack="postgres-jdbc-ping-tcp"{% endif %} />
+        <transport lock-timeout="60000" stack="postgres-jdbc-ping-tcp" />
 
         <local-cache name="realms">
             <encoding>

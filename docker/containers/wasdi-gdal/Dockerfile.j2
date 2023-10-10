@@ -4,6 +4,10 @@ FROM ubuntu:22.04
 MAINTAINER "WASDI SARL"
 
 
+# Add a label to facilitate the cleaning
+LABEL com.wasdi.type="dynamic"
+
+
 # From now, all commands executed are executed with the user 'root'
 USER root
 

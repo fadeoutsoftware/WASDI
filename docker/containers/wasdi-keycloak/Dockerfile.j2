@@ -91,7 +91,7 @@ WORKDIR {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}
 
 
 # Copy data
-COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/opt_keycloak_conf_cache-ispn.xml {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/conf/cache-ispn.xml
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/opt_keycloak_conf_cache-ispn-cluster.xml {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/conf/cache-ispn-cluster.xml
 COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/opt_keycloak_conf_quarkus.properties {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/conf/quarkus.properties
 
 
