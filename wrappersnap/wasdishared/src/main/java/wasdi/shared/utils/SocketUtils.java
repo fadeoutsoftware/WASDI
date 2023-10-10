@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.net.io.Util;
 
@@ -18,23 +17,47 @@ import com.github.dockerjava.transport.DockerHttpClient.Response;
 
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
+import wasdi.shared.config.WasdiConfig;
 
 
 public class SocketUtils {
 	
-	
 	/**
-	 * @return a basic configuration of the docker client, mainly to manage the differences in the way we communicate with the
-	 * docker daemon in different operating systems (named pipes in Windows, unix sockets in Linux) 
+	 * Created an instance of a docker http client 
+	 * @param sDockerHostAddress docker host address
+	 * @return an instance of a docker HTTP client. Null if an error occurs.
 	 */
-	private static DockerClientConfig getDockerClientConfig() {
-		String osName = System.getProperty("os.name");
+	private static DockerHttpClient initializeDockerClient(String sDockerHostAddress) {
 		
-		String sDockerHost = "unix:///var/run/docker.sock";
-		if (osName.toLowerCase().startsWith("windows")) {
-			sDockerHost = "npipe:////./pipe/docker_engine";
+		DockerHttpClient oHttpClient = null;
+		
+		try {
+			DockerClientConfig oConfig =  (Utils.isNullOrEmpty(sDockerHostAddress)) 
+					? getDockerClientConfig()
+					: getDockerClientConfig(sDockerHostAddress);
+			
+			oHttpClient = getDockerHttpClient(oConfig);
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("SocketUtils.initializeDockerClient. Error in the initialization of the Docker HTTP client." + oEx.getMessage());
 		}
 		
+		return oHttpClient;
+	}
+	
+	/**
+	 * created a DockerClientConfig reading the docker host address from the wasdi config file
+	 */
+	private static DockerClientConfig getDockerClientConfig() {
+		String sDockerHost = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+		return getDockerClientConfig(sDockerHost);
+	}
+	
+	
+	/**
+	 * @param sDockerHost: the socket address of the docker host
+	 * @return a basic configuration of the docker client, with the host set to the address being passed as parameter
+	 */
+	private static DockerClientConfig getDockerClientConfig(String sDockerHost) {
 		// this is a very basic configuration of the docker client. The builder supports more options (see: https://github.com/docker-java/docker-java/blob/main/docs/getting_started.md)
 		return DefaultDockerClientConfig.createDefaultConfigBuilder()
 			    .withDockerHost(sDockerHost) 
@@ -42,12 +65,16 @@ public class SocketUtils {
 			    .build();			
 	}
 	
-
+	
+	/**
+	 * Create an instance of the Docker Http Client based on Apache HttpClient package
+	 * @param oDockerClientConfig the configuration for the client
+	 * @return an instance of the Docker Http client
+	 */
 	private static DockerHttpClient getDockerHttpClient(DockerClientConfig oDockerClientConfig) {
 		DockerHttpClient oHttpClient = new ApacheDockerHttpClient.Builder()
 			    .dockerHost(oDockerClientConfig.getDockerHost())
-			    .connectionTimeout(Duration.ofMillis(10000L)) //TODO: this can be replaced with: WasdiConfig.Current.connectionTimeout
-			    .responseTimeout(Duration.ofMillis(10000L)) // TODO: this is a parameter that we do not set in the HttpUtils: do we want that?
+			    .connectionTimeout(Duration.ofMillis(WasdiConfig.Current.connectionTimeout))
 			    .build();
 		
 		return oHttpClient;
@@ -74,7 +101,7 @@ public class SocketUtils {
 	 * @return
 	 */
 	public static Request createRequest(Request.Method eMethod, String sPath, Map<String, String> asHeaders, byte [] ayPayloadBytes) {
-		
+				
 		Request.Builder oRequestBuilder = Request.builder()
 			    .method(eMethod)
 			    .path(sPath); // e:g: "/containers/json"
@@ -92,15 +119,13 @@ public class SocketUtils {
 	
 	
 	public static void copyHeaders(Map<String, List<String>> aoReceivedHeaders, Map<String, List<String>> aoOutputHeaders) {
-		try {
-			
+		try {		
 			if (aoReceivedHeaders != null && !aoReceivedHeaders.isEmpty()) {
 				// Copy in the ouput dictionary
 				for (Map.Entry<String, List<String>> oEntry : aoReceivedHeaders.entrySet()) {
 					aoOutputHeaders.put(oEntry.getKey(), oEntry.getValue());
 				}
-			}
-			
+			}		
 		} catch(Exception oEx) {
 			WasdiLog.errorLog("SocketUtils.copyHeaders: Exception getting the output headers ", oEx);
 		}
@@ -108,29 +133,43 @@ public class SocketUtils {
 	
 	/**
 	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpGet(String sPath) {
+		return httpGet(sPath, null, null, null, null);
+	}
+	
+	/**
+	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @param sDockerHostAddress unix socket address of the docker host
 	 * @param asHeaders Map of the headers to add to the http call
 	 * @param aoOutputHeaders Map of response headers
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpGet(String sPath, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders) {
+	public static HttpCallResponse httpGet(String sPath, String sDockerHostAddress, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders, Map<String, String> asQueryParams) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 
 		String sResult = null;
 		
 		if (Utils.isNullOrEmpty(sPath)) {
-			WasdiLog.errorLog("SocketUtils.httpGet: No Docker enpoint specified. Returning an empty result");
+			WasdiLog.errorLog("SocketUtils.httpGet: No Docker enpoint specified. Returning an empty result.");
 			return oHttpCallResponse;
 		}
 		
-		DockerClientConfig oConfig = getDockerClientConfig();
+		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
 		
-		DockerHttpClient oHttpClient = getDockerHttpClient(oConfig);
+		if (oHttpClient == null) {
+			WasdiLog.errorLog("SocketUtils.httpGet. Docker HTTP client is null. Returning an empty response.");
+			return oHttpCallResponse;
+		}
 			
 		Request oRequest = createRequest(Request.Method.GET, sPath, asHeaders, null);
 
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
+			
+			WasdiLog.debugLog("SocketUtils.httpGet: Response code " + iResponseCode);
 			
 			oHttpCallResponse.setResponseCode(Integer.valueOf(iResponseCode));
 			
@@ -140,6 +179,7 @@ public class SocketUtils {
 
 			// here we are not making a difference between a successful code or an error code. 
 			InputStream oInputStream = oResponse.getBody();
+			System.out.println(oInputStream.toString());
 			
 			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 			
@@ -149,15 +189,14 @@ public class SocketUtils {
 				oHttpCallResponse.setResponseBody(sResult);
 				oInputStream.close();
 			}
-
-			
+		
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SocketUtils.httpGet: Exception " + oEx);
+			WasdiLog.errorLog("SocketUtils.httpGet: Exception " + oEx.getMessage());
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpGet: Impossible to close the connection " + oEx);
+				WasdiLog.errorLog("SocketUtils.httpGet: Impossible to close the connection " + oEx.getMessage());
 			}
 		}
 		
@@ -167,12 +206,44 @@ public class SocketUtils {
 	
 	/**
 	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
-	 * @param ayBytes the array of bytes to write in the payload of the request
+	 * @param sPayload the POST request' body
+	 * @param asHeaders map of request headers 
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpPost(String sPath, String sPayload, Map<String, String> asHeaders) {
+		if (sPayload == null) sPayload = "";
+		return httpPost(sPath, null, sPayload.getBytes(), asHeaders, null);
+	}
+	
+	/**
+	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @param ayBytes the array of bytes to write in the POST request's body
+	 * @param asHeaders map of request headers 
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpPost(String sPath, byte []ayBytes, Map<String, String> asHeaders) {
+		return httpPost(sPath, null, ayBytes, asHeaders, null);
+	}
+	
+	/**
+	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @param sPayload the POST request' body
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpPost(String sPath, String sPayload) {
+		if (sPayload == null) sPayload = "";
+		return httpPost(sPath, null, sPayload.getBytes(), null, null);
+	}
+	
+	/**
+	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @param sDockerHostAddress unix socket address of the docker host
+	 * @param ayBytes the array of bytes to write in the POST request's body
 	 * @param asHeaders map of request headers 
 	 * @param aoOutputHeaders Map of response headers
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpPost(String sPath, byte []ayBytes, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders) {
+	public static HttpCallResponse httpPost(String sPath, String sDockerHostAddress, byte []ayBytes, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		
@@ -183,9 +254,12 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 		
-		DockerClientConfig oConfig = getDockerClientConfig();
+		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
 		
-		DockerHttpClient oHttpClient = getDockerHttpClient(oConfig);
+		if (oHttpClient == null) {
+			WasdiLog.errorLog("SocketUtils.httpPost. Docker HTTP client is null. Returning an empty response.");
+			return oHttpCallResponse;
+		}
 		
 		Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ayBytes);
 		
@@ -209,15 +283,14 @@ public class SocketUtils {
 				oHttpCallResponse.setResponseBody(sResult);
 				oInputStream.close();
 			}
-
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SocketUtils.httpPost: Exception " + oEx);
+			WasdiLog.debugLog("SocketUtils.httpPost: Exception " + oEx.getMessage());
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpPost: Impossible to close the connection " + oEx);
+				WasdiLog.debugLog("SocketUtils.httpPost: Impossible to close the connection " + oEx.getMessage());
 			}
 		}
 		return oHttpCallResponse;
@@ -226,10 +299,19 @@ public class SocketUtils {
 	
 	/**
 	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
+	 */
+	public static HttpCallResponse httpDelete(String sPath) {
+		return httpDelete(sPath, null, null);
+	}
+	
+	/**
+	 * @param sPath a path to an endpoint in the Docker Engine API (see: https://docs.docker.com/engine/api/v1.42/). Eg. "containers/json")
+	 * @param sDockerHostAddress unix socket address of the docker host
 	 * @param asHeaders headers dictionary
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpDelete(String sPath, Map<String, String> asHeaders) {
+	public static HttpCallResponse httpDelete(String sPath, String sDockerHostAddress, Map<String, String> asHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		
@@ -240,9 +322,12 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 		
-		DockerClientConfig oConfig = getDockerClientConfig();
+		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
 		
-		DockerHttpClient oHttpClient = getDockerHttpClient(oConfig);	
+		if (oHttpClient == null) {
+			WasdiLog.errorLog("SocketUtils.httpDelete. Docker HTTP client is null. Returning an empty response.");
+			return oHttpCallResponse;
+		}	
 
 		Request oRequest = createRequest(Request.Method.DELETE, sPath, asHeaders, null);
 		
@@ -266,12 +351,12 @@ public class SocketUtils {
 
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SocketUtils.httpDelete: Exception " + oEx);
+			WasdiLog.debugLog("SocketUtils.httpDelete: Exception " + oEx.getMessage());
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpDelete: Impossible to close the connection " + oEx);
+				WasdiLog.debugLog("SocketUtils.httpDelete: Impossible to close the connection " + oEx.getMessage());
 			}
 		}
 
@@ -283,20 +368,23 @@ public class SocketUtils {
 	 * @param asHeaders headers dictionary
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpPut(String sPath, Map<String, String> asHeaders, byte[] ayBytes) {
+	public static HttpCallResponse httpPut(String sPath, String sDockerHostAddress, Map<String, String> asHeaders, byte[] ayBytes) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		
 		String sResult = null;
 		
 		if (Utils.isNullOrEmpty(sPath)) {
-			WasdiLog.errorLog("SocketUtils.httpDelete: No Docker enpoint specified. Returning an empty result");
+			WasdiLog.errorLog("SocketUtils.httpPut: No Docker enpoint specified. Returning an empty result");
 			return oHttpCallResponse;
 		}
 		
-		DockerClientConfig oConfig = getDockerClientConfig();
+		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
 		
-		DockerHttpClient oHttpClient = getDockerHttpClient(oConfig);	
+		if (oHttpClient == null) {
+			WasdiLog.errorLog("SocketUtils.httpPut. Docker HTTP client is null. Returning an empty response.");
+			return oHttpCallResponse;
+		}	
 
 		Request oRequest = createRequest(Request.Method.PUT, sPath, asHeaders, ayBytes);
 		
@@ -320,12 +408,12 @@ public class SocketUtils {
 
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SocketUtils.httpDelete: Exception " + oEx);
+			WasdiLog.debugLog("SocketUtils.httpPut: Exception " + oEx.getMessage());
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpDelete: Impossible to close the connection " + oEx);
+				WasdiLog.debugLog("SocketUtils.httpPut: Impossible to close the connection " + oEx.getMessage());
 			}
 		}
 
@@ -337,29 +425,40 @@ public class SocketUtils {
 		
 		// TRY GET
 		
-		// get the list or running container
-		HttpCallResponse oRes = httpGet("/containers/json", null, null);
+		// get the list of running container
+		HttpCallResponse oRes = httpGet("/containers/json", null, null, null, null);
 		System.out.println(oRes.getResponseCode());
 		System.out.println(oRes.getResponseBody());
 		
-		// get details about a specific container
-		String sContainerId = "59104ddc2870b7f98bbef12866b3a26845df1b50c7d7c9a18c33ce806547ec21";	
-		HttpCallResponse oResInspect = httpGet("/containers/" + sContainerId + "/json", null, null);
-		System.out.println(oResInspect.getResponseCode());
-		System.out.println(oResInspect.getResponseBody());
+		// get the list of all container, not only the running ones (test for query parameters)
+//		Map<String, String> asQueryParams = new HashMap<String, String>();
+//		asQueryParams.put("all", "true");
+//		asQueryParams.put("filters", "{\"name\":\"hello\"}");
+//		HttpCallResponse oResAllCintainers = httpGet("/containers/json", null, null, asQueryParams);
+//		System.out.println(oResAllCintainers.getResponseCode());
+//		System.out.println(oResAllCintainers.getResponseBody());
+		
+//		// get details about a specific container
+//		String sContainerId = "container_id";	
+//		HttpCallResponse oResInspect = httpGet("/containers/" + sContainerId + "/json", null, null, null);
+//		System.out.println(oResInspect.getResponseCode());
+//		System.out.println(oResInspect.getResponseBody());
 		
 		
 		// TRY POST
 		
 		// we try to modify the value of the CPU quota for the container...
 		Map<String, String> asHeaders = getStandardHeaderForRequestWithPayload();
-		String sJsonBody = "{ \"CpuQuota\": 40000 }";
-		byte[] oyBodyBytes = sJsonBody.getBytes();
-		HttpCallResponse oResUpdate = httpPost("/containers/" + sContainerId + "/update", oyBodyBytes, asHeaders, null);
-		System.out.println(oResUpdate.getResponseCode());
-		System.out.println(oResUpdate.getResponseBody());
+//		String sJsonBody = "{ \"CpuQuota\": 40000 }";
+//		byte[] oyBodyBytes = sJsonBody.getBytes();
+//		HttpCallResponse oResUpdate = httpPost("/containers/" + sContainerId + "/update", oyBodyBytes, asHeaders, null, null);
+//		System.out.println(oResUpdate.getResponseCode());
+//		System.out.println(oResUpdate.getResponseBody());
 		
 		
+		oRes = httpPost("/containers/container_id/start", null, "".getBytes(), null, null);
+		System.out.println(oRes.getResponseCode());
+		System.out.println(oRes.getResponseBody());
 	}
 
 }
