@@ -508,12 +508,13 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				aoInputParams = (Map<String, Object>) MongoRepository.s_oMapper.readValue(sJsonParams, Map.class);
 			    
 			} catch (Exception oEr) {
-			    WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, try to decode", oEr);
+			    WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, try to decode");
 			    
 			    String sDecodedParams = java.net.URLDecoder.decode(sJsonParams, StandardCharsets.UTF_8.name());
 			    
 			    try {
 			    	aoInputParams = (Map<String, Object>) MongoRepository.s_oMapper.readValue(sDecodedParams, Map.class);
+			    	WasdiLog.debugLog("EoepcaProcessorEngine.run: ok decode done");
 			    }
 			    catch (Exception oExInner) {
 			    	WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, also after the decode", oEr);

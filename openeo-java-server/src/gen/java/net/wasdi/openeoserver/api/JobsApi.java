@@ -500,7 +500,11 @@ public class JobsApi  {
 			
 			if (aoOpenEOParameters.containsKey("process")) {
 				String sProcessJson = JsonUtils.stringify(aoOpenEOParameters.get("process"));
+				
+				aoOpenEOParameters = new HashMap<String, Object>();
+				
 				aoOpenEOParameters.put("process_encoded", StringUtils.encodeUrl(sProcessJson));
+				aoOpenEOParameters.put("process", "");
 				sParameters = JsonUtils.stringify(aoOpenEOParameters);
 				WasdiLog.debugLog("JobsApi.startJob: added encoded process key to params");
 			}
