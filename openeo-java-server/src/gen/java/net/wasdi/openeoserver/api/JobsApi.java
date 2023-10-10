@@ -163,7 +163,7 @@ public class JobsApi  {
     		
     		if (oJob == null) {
         		WasdiLog.warnLog("JobsApi.deleteJob: EO Job not found ");
-        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidJob", "Invalid Job")).build();    			
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.deleteJob", "InvalidJob", "Invalid Job")).build();    			
     		}
     		
     		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
@@ -171,12 +171,12 @@ public class JobsApi  {
     		
     		if (oWorkspace == null) {
         		WasdiLog.warnLog("JobsApi.deleteJob: Workspace not found ");
-        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.describeJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
+        		return Response.status(Status.BAD_REQUEST).entity(Error.getError("JobsApi.deleteJob", "InvalidWorkspace", "Invalid Workspace")).build();    			
     		}
     		
     		String sBaseUrl = getBaseUrl(oWorkspace);
     		
-    		ProcessWorkspaceViewModel oProcessWorkspaceViewModel = getProcessWorkspace(oJob.getJobId(), sBaseUrl, sSessionId);
+    		ProcessWorkspaceViewModel oProcessWorkspaceViewModel = getProcessWorkspace(sJobId, sBaseUrl, sSessionId);
     		
     		if (oProcessWorkspaceViewModel.getStatus().equals("CREATED") || oProcessWorkspaceViewModel.getStatus().equals("RUNNING")||oProcessWorkspaceViewModel.getStatus().equals("READY")||oProcessWorkspaceViewModel.getStatus().equals("WAITING")) {    			
         		boolean bRet = killProcessWorkspace(sJobId,sBaseUrl,sSessionId);
