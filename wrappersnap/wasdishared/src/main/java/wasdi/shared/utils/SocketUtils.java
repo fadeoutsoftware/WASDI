@@ -127,6 +127,32 @@ public class SocketUtils {
 		return oRequestBuilder.build();
 	}
 	
+	/**
+	 * Build a request to send to the Docker Engine
+	 * @param eMethod http method
+	 * @param sPath path to the endpoint
+	 * @param asHeaders map with the request headers
+	 * @asParams asQueryParams map with query parameters
+	 * @param ayPayloadInStream input stream of the payload 
+	 * @return
+	 */
+	public static Request createRequest(Request.Method eMethod, String sPath, Map<String, String> asHeaders, InputStream ayPayloadInStream) {
+				
+		Request.Builder oRequestBuilder = Request.builder()
+			    .method(eMethod)
+			    .path(sPath); // e:g: "/containers/json"
+		
+		if (asHeaders != null && !asHeaders.isEmpty()) {
+			oRequestBuilder.headers(asHeaders);
+		}
+		
+		if (ayPayloadInStream != null) {
+			oRequestBuilder.body(ayPayloadInStream);
+		}
+		
+		return oRequestBuilder.build();
+	}
+	
 	
 	public static void copyHeaders(Map<String, List<String>> aoReceivedHeaders, Map<String, List<String>> aoOutputHeaders) {
 		try {		
@@ -174,7 +200,8 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 			
-		Request oRequest = createRequest(Request.Method.GET, sPath, asHeaders, null);
+		byte[] ayEmptyPayload = {};
+		Request oRequest = createRequest(Request.Method.GET, sPath, asHeaders, ayEmptyPayload);
 
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
@@ -339,7 +366,8 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}	
 
-		Request oRequest = createRequest(Request.Method.DELETE, sPath, asHeaders, null);
+		byte[] ayEmptyPayload = {};
+		Request oRequest = createRequest(Request.Method.DELETE, sPath, asHeaders, ayEmptyPayload);
 		
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
 			int iResponseCode = oResponse.getStatusCode();
@@ -432,125 +460,78 @@ public class SocketUtils {
 	
 	/**
 	 * 
-	 * @param sUrl
-	 * @param sFileName
+	 * @param sPath path to the Docker API Engine endpoint
+	 * @param sFileName path to the TAR file, containing the DockerFile in its root
 	 * @param asHeaders
-	 * @return
-	 * @throws IOException
+	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static boolean httpPostFile(String sPath, String sDockerHostAddress, String sFileName, Map<String, String> asHeaders) throws IOException {
+	public static HttpCallResponse httpPostFile(String sPath, String sDockerHostAddress, String sFileName, Map<String, String> asHeaders) {
+		
+		HttpCallResponse oHttpResponse = new HttpCallResponse();
+		
 		File oFile = new File(sFileName);
 		if (!oFile.exists()) {
 			WasdiLog.errorLog("SocketUtils.httpPostFile: file not found.");
-			return false;
+			return oHttpResponse;
 		}
+
+		InputStream oFileInStream = null;
 		
-		String sZippedFile = null;
-
-		// Check if we need to zip this file
-		if (!oFile.getName().toUpperCase().endsWith("ZIP")) {
-
-			WasdiLog.debugLog("HttpUtils.httpPostFile: File not zipped, zip it");
-
-			int iRandom = new SecureRandom().nextInt() & Integer.MAX_VALUE;
-
-			String sTemp = "tmp-" + iRandom + File.separator;
-			String sTempPath = WasdiFileUtils.fixPathSeparator(oFile.getParentFile().getPath());
-
-			if (!sTempPath.endsWith(File.separator)) {
-				sTempPath += File.separator;
-			}
-			sTempPath += sTemp;
-
-			Path oPath = Paths.get(sTempPath).toAbsolutePath().normalize();
-			if (oPath.toFile().mkdir()) {
-				WasdiLog.debugLog("SocketUtils.httpPostFile: Temporary directory created");
-			} else {
-				throw new IOException("SocketUtils.httpPostFile: Can't create temporary dir " + sTempPath);
-			}
-
-			sZippedFile = sTempPath+iRandom + ".zip";
-
-			File oZippedFile = new File(sTempPath+iRandom + ".zip");
-			ZipOutputStream oOutZipStream = new ZipOutputStream(new FileOutputStream(oZippedFile));
-			ZipFileUtils.zipFile(oFile, oFile.getName(), oOutZipStream);
-
-			oOutZipStream.close();
-
-			String sOldFileName = oFile.getName();
-
-			oFile = new File(sZippedFile);
-
-			sPath = sPath.replace(sOldFileName, oFile.getName());
-
-			sFileName = oFile.getName();
-		}
-		
-		
-		String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
-		try (FileInputStream oInputStream = new FileInputStream(oFile)) {
-			//request
+		try {
 			
 			DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
 			
 			if (oHttpClient == null) {
 				WasdiLog.errorLog("SocketUtils.httpPostFile. Docker HTTP client is null. Returning an empty response.");
-				return false;
+				return oHttpResponse;
 			}	
 			
-			if (asHeaders == null) {
-				asHeaders = new HashMap<String, String>();
-			}
+			oFileInStream = new FileInputStream(oFile);
 			
-			asHeaders.put("Content-Type", "multipart/form-data; boundary=" + sBoundary);
-			asHeaders.put("Connection", "Keep-Alive");
-			asHeaders.put("User-Agent", "WasdiLib.Java");
+			Request oRequest = createRequest(Request.Method.POST, sPath, null, oFileInStream);
 			
-			
-			
-			String sStart = "--" + sBoundary + "\r\n" 
-					+ "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n"
-					+ "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n"
-					+ "Content-Transfer-Encoding: binary" + "\r\n"
-					+ "\r\n";
-			List<Byte> ayStartByteList = Arrays.asList(ArrayUtils.toObject(sStart.getBytes()));
-			
-			List<Byte> ayByteList = Arrays.asList(ArrayUtils.toObject(oInputStream.readAllBytes()));
-
-			String sEnd = "\r\n\r\n--" + sBoundary + "--\r\n";
-			List<Byte> ayEndByteList = Arrays.asList(ArrayUtils.toObject(sEnd.getBytes()));
-			
-			ayStartByteList.addAll(ayByteList);
-			ayStartByteList.addAll(ayEndByteList);
-			
-			Byte [] ayPayload = new Byte[ayStartByteList.size()];
-			Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ArrayUtils.toPrimitive(ayStartByteList.toArray(ayPayload)));
 			
 			try (Response oResponse = oHttpClient.execute(oRequest)) {
-				WasdiLog.debugLog("SocketUtils.httpPostFile: Request successfully executed");
+				
+				int iResponseCode = oResponse.getStatusCode();
+				
+				oHttpResponse.setResponseCode(Integer.valueOf(iResponseCode));
+				
+				
+				// here we are not making a difference between a successful code or an error code. 
+				InputStream oInputStreamBodu = oResponse.getBody();
+				
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+				
+				String sResult = "";
+				if (oInputStreamBodu != null) {
+					Util.copyStream(oInputStreamBodu, oBytearrayOutputStream);
+					sResult = oBytearrayOutputStream.toString();
+					oHttpResponse.setResponseBody(sResult);
+					oInputStreamBodu.close();
+				}
+
+				
 			} catch (Exception oEx) {
 				WasdiLog.debugLog("SocketUtils.httpPostFile: Exception when trying to execute the request" + oEx.getMessage());
-				return false;
 			} finally {
 				try {
 					oHttpClient.close();
-					oInputStream.close();
+					if (oFileInStream != null) oFileInStream.close();
 				} catch (IOException oEx) {
 					WasdiLog.debugLog("SocketUtils.httpPut: Impossible to close the connection " + oEx.getMessage());
-					return false;
 				}
 			}		
 			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("SocketUtils.httpPostFile: could not open file due to: " + oE.getMessage() + ", aborting");
-			return false;
 		}
 		
-		return true;
-		
-		
+		return oHttpResponse;
 		
 	}
+	
+	
 	
 	
 	public static void main (String [] args) throws Exception {
@@ -558,9 +539,9 @@ public class SocketUtils {
 		// TRY GET
 		
 		// get the list of running container
-		HttpCallResponse oRes = httpGet("/containers/json", null, null, null, null);
-		System.out.println(oRes.getResponseCode());
-		System.out.println(oRes.getResponseBody());
+//		HttpCallResponse oRes = httpGet("/containers/json", null, null, null, null);
+//		System.out.println(oRes.getResponseCode());
+//		System.out.println(oRes.getResponseBody());
 		
 		// get the list of all container, not only the running ones (test for query parameters)
 //		Map<String, String> asQueryParams = new HashMap<String, String>();
