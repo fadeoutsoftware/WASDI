@@ -7,6 +7,9 @@
     "connectionTimeout": {{ aoWasdiConfiguration['connectionTimeout'] }},
     "readTimeout": {{ aoWasdiConfiguration['readTimeout'] }},
     "msWaitAfterChmod": {{ aoWasdiConfiguration['msWaitAfterChmod'] }},
+    "shellExecLocally": {{ aoWasdiConfiguration['shellExecLocally'] | lower }},
+    "logHttpCalls": {{ aoWasdiConfiguration['logHttpCalls'] | lower }},
+    "filterInternalHttpCalls": {{ aoWasdiConfiguration['filterInternalHttpCalls'] | lower }},
     "mongoMain": {
         "address": "{{ aoWasdiConfiguration['mongoMain']['address'] }}",
         "dbName": "{{ aoWasdiConfiguration['mongoMain']['dbName'] }}",
@@ -127,6 +130,7 @@
         "production": {{ aoWasdiConfiguration['openEO']['production'] | lower }},
         "description": "{{ aoWasdiConfiguration['openEO']['description'] }}",
         "openEOWasdiAppName": "{{ aoWasdiConfiguration['openEO']['openEOWasdiAppName'] }}",
+        "processes_config": "{{ aoWasdiConfiguration['openEO']['processes_config'] }}",
         "collections": [
 {% for oDictCurrentCollection in aoWasdiConfiguration['openEO']['collections'] | default({}) %}
             {
@@ -444,7 +448,6 @@
         "gdalRetileCommand": "{{ aoWasdiConfiguration['geoserver']['gdalRetileCommand'] }}"
     },
     "dockers": {
-        "additionalDockerRunParameter": "{{ aoWasdiConfiguration['dockers']['additionalDockerRunParameter'] }}",
         "dockerComposeCommand": "{{ aoWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
         "dockersDeployLogFilePath": "{{ aoWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
         "eoepca": {
@@ -474,9 +477,13 @@
         "millisWaitAfterDeployScriptCreated": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDeployScriptCreated'] }},
         "millisWaitForLogin": {{ aoWasdiConfiguration['dockers']['millisWaitForLogin'] }},
         "numberOfAttemptsToPingTheServer": {{ aoWasdiConfiguration['dockers']['numberOfAttemptsToPingTheServer'] }},
+        "millisBetweenStatusPolling": {{ aoWasdiConfiguration['dockers']['millisBetweenStatusPolling'] }},
+        "numberOfPollStatusPollingCycleForLog": {{ aoWasdiConfiguration['dockers']['numberOfPollStatusPollingCycleForLog'] }},
         "pipInstallWasdiAddress": "{{ aoWasdiConfiguration['dockers']['pipInstallWasdiAddress'] }}",
+        "logDockerAPICallsPayload": {{ aoWasdiConfiguration['dockers']['logDockerAPICallsPayload'] | lower }},
+        "removeDockersAfterShellExec": {{ aoWasdiConfiguration['dockers']['removeDockersAfterShellExec'] | lower }},
 {% if aoWasdiConfiguration['dockers']['registers'] | length == 0 %}
-        "registers": []
+        "registers": [],
 {% else %}
         "registers": [
 {% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['registers'] %}
@@ -491,7 +498,35 @@
 {% endif %}
 {% endfor %}
 
-        ]
+        ],
+{% endif %}
+{% if aoWasdiConfiguration['dockers']['shellExecCommands'] | length == 0 %}
+        "shellExecCommands": {}
+{% else %}
+        "shellExecCommands": {
+{% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['shellExecCommands'] %}
+            "{{ sCurrentDockerRegistry }}": {
+                "dockerImage": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['dockerImage'] }}",
+                "containerVersion": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['containerVersion'] }}",
+                "includeFirstCommand": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['includeFirstCommand'] | lower }},
+                "removePathFromFirstArg": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['removePathFromFirstArg'] | lower }},
+                "forceLocal": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['forceLocal'] | lower }},
+{% if aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] | length == 0 %}
+                "additionalMountPoints": []
+{% else %}
+                "additionalMountPoints": [
+{% for sCurrentAdditionalMountPoint in aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] %}
+                    "{{ sCurrentAdditionalMountPoint }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ]
+{% endif %}
+            }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        }
 {% endif %}
     },
     "scheduler": {
