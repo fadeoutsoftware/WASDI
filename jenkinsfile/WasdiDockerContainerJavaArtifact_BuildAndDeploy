@@ -70,12 +70,6 @@ pipeline {
       }
     }
 
-    stage('MAVEN - UPLOAD IN NEXUS') {
-      steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
-      }
-    }
-
     stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
@@ -93,7 +87,7 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/pullWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
+                ansible-playbook playbooks/deployDockerContainerWasdiJavaArtifact.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
@@ -102,6 +96,16 @@ pipeline {
             }
           }
         }
+      }
+    }
+
+    stage('START CONTAINERS') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --check --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Start the containers"
       }
     }
 
