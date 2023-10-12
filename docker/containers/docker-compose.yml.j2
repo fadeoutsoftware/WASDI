@@ -5,9 +5,6 @@ version: "3"
 # prefixed with this value
 name: "wasdi"
 
-# In any cases, we use a pre-existing network:
-#   - either the client has his own network
-#   - or we create it in a previous step
 networks:
   default:
     name: "{{ sWasdiDockerNetworkName }}"
@@ -18,7 +15,8 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {{ bWasdiDockerNetworkMustBeCreated | default(False) | string | lower }}
+    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
+
     ipam:
       driver: "default"
       config:
@@ -28,10 +26,6 @@ networks:
 services:
 {% if sWasdiServerTypeIsMain == True %}
   {{ sWasdiContainerWasdiClientServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerWasdiClientServiceName }}
-      tags:
-        - {{ sWasdiContainerWasdiClientServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiContainerKeycloakServiceName }}
@@ -40,7 +34,7 @@ services:
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
       - {{ sWasdiContainerTraefikServiceName }}
-    image: {{ sWasdiContainerWasdiClientServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerWasdiClientServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -65,10 +59,6 @@ services:
 
 {% endif %}
   {{ sWasdiContainerGeoserverServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerGeoserverServiceName }}
-      tags:
-        - {{ sWasdiContainerGeoserverServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerTraefikServiceName }}
     environment:
@@ -77,7 +67,7 @@ services:
 {% if sWasdiContainerGeoserverEnvironmentJavaOpts | default('') != '' %}
       - JAVA_OPTS={{ sWasdiContainerGeoserverEnvironmentJavaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerGeoserverServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerGeoserverServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -108,10 +98,6 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiContainerKeycloakServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerKeycloakServiceName }}
-      tags:
-        - {{ sWasdiContainerKeycloakServiceName }}:{{ sWasdiBuildVersion }}
     command:
       - "start"
 {% if bWasdiContainerKeycloakNewInstance | default(False) == True %}
@@ -140,7 +126,7 @@ services:
       - KC_PROXY=edge
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
-    image: "{{ sWasdiContainerKeycloakImageName }}:{{ sWasdiBuildVersion }}"
+    image: "{{ sWasdiContainerKeycloakImageName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -246,10 +232,6 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiContainerRabbitMqServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerRabbitMqServiceName }}
-      tags:
-        - {{ sWasdiContainerRabbitMqServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerTraefikServiceName }}
     environment:
@@ -259,7 +241,7 @@ services:
       - RABBITMQ_NODENAME={{ sWasdiContainerRabbitMqServiceName }}
       - RABBITMQ_NODE_PORT={{ sWasdiContainerRabbitMqPortMainInternal }}
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
-    image: {{ sWasdiContainerRabbitMqServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerRabbitMqServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.mw_{{ sWasdiContainerRabbitMqServiceName }}.stripprefix.prefixes=/rabbit-stomp"
@@ -302,10 +284,6 @@ services:
 {% endif %}
 
   {{ sWasdiContainerWasdiSchedulerServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerWasdiSchedulerServiceName }}
-      tags:
-        - {{ sWasdiContainerWasdiSchedulerServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerMongoMainServiceName }}
@@ -313,7 +291,7 @@ services:
 {% if sWasdiServerTypeIsComputational == True %}
       - {{ sWasdiContainerMongoComputationalServiceName }}
 {% endif %}
-    image: {{ sWasdiContainerWasdiSchedulerServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerWasdiSchedulerServiceName }}:latest
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -324,10 +302,6 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
-      tags:
-        - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiContainerKeycloakServiceName }}
@@ -343,7 +317,7 @@ services:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -375,10 +349,6 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
-      tags:
-        - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiContainerKeycloakServiceName }}
@@ -394,7 +364,7 @@ services:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -427,10 +397,6 @@ services:
 {% endif %}
 
   {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
-    build:
-      context: ./{{ sWasdiContainerTomcatWasdiWebServerServiceName }}
-      tags:
-        - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:{{ sWasdiBuildVersion }}
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiContainerKeycloakServiceName }}
@@ -446,7 +412,7 @@ services:
 {% if sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
