@@ -1,21 +1,11 @@
 package wasdi.shared.utils;
 
 import java.io.*;
-import java.net.URLConnection;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
-import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.net.io.Util;
 
 import com.github.dockerjava.core.DefaultDockerClientConfig;
