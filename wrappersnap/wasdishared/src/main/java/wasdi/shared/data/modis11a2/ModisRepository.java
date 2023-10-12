@@ -6,10 +6,6 @@ import java.util.List;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 import wasdi.shared.business.modis11a2.ModisItemForReading;
 import wasdi.shared.business.modis11a2.ModisItemForWriting;
@@ -20,16 +16,9 @@ import wasdi.shared.utils.log.WasdiLog;
 
 public class ModisRepository extends MongoRepository  {
 	
-//	String connectionString;
-//	String databaseName;
-//	String collectionName;
-	
 	public ModisRepository() {
 		m_sThisCollection = "catalog"; 
 		m_sRepoDb = "modis"; 
-//		connectionString = "mongodb://localhost:27017";
-//		databaseName = "testDb";
-//		collectionName = "testModis";
 	}
 	
 	public void insertModisItem(ModisItemForWriting oNewDocument) {
@@ -56,23 +45,7 @@ public class ModisRepository extends MongoRepository  {
 				getCollection(m_sThisCollection).insertOne(oDocument);
 				String sResult = oDocument.getObjectId("_id").toHexString();
 				WasdiLog.debugLog("ModisRepository.insertModisItem. Result id: " + sResult);
-				
-				
-//		        try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
-//		            // Get a reference to the database
-//		            MongoDatabase database = mongoClient.getDatabase(databaseName);
-//
-//		            // Get a reference to the collection
-//		            MongoCollection<Document> collection = database.getCollection(collectionName);
-//
-//
-//		            // Insert the document into the collection
-//		            collection.insertOne(oDocument);
-//
-//		            WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
-//		        } catch (Exception oEx) {
-//					WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
-//		        }			
+							
 
 			} catch (Exception oEx) {
 				WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when trying to insert the document in the db" + oEx);
@@ -88,26 +61,6 @@ public class ModisRepository extends MongoRepository  {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
 		
-		
-//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
-//	        // Get a reference to the database
-//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
-//
-//	        // Get a reference to the collection
-//	        MongoCollection<Document> collection = database.getCollection(collectionName);
-//
-//
-//	        // Insert the document into the collection
-//	        long lCount = collection.countDocuments(Document.parse(sQuery));
-//	        
-//	        
-//	        return lCount;
-//
-//	    } catch (Exception oEx) {
-//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
-//	    }	
-		
-
 		try {	
 			
 			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
@@ -174,34 +127,13 @@ public class ModisRepository extends MongoRepository  {
 	}
 	
 	
-	/**
-	 * Get all the Modis Items
-	 * @return the full list of items
-	 */
+
 	public List<ModisItemForReading> getModisItemList(Double dWest, Double dNorth, Double dEast, Double dSouth, 
 			Long lDateFrom, Long lDateTo, int iOffset, int iLimit, String sFileName) {
 
 		final List<ModisItemForReading> aoReturnList = new ArrayList<>();
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, lDateFrom, lDateTo, sFileName);
-
-//		System.out.println(sQuery);
-		
-//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
-//	        // Get a reference to the database
-//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
-//
-//	        // Get a reference to the collection
-//	        MongoCollection<Document> collection = database.getCollection(collectionName);
-//
-//
-//	        // Insert the document into the collection
-//	        collection.find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
-//
-//	        WasdiLog.debugLog("ModisRepository.countItems: Document inserted successfully!");
-//	    } catch (Exception oEx) {
-//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
-//	    }	
 		
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
@@ -228,29 +160,6 @@ public class ModisRepository extends MongoRepository  {
 		}
 		
 		return -1;
-		
-//		try (MongoClient mongoClient = MongoClients.create(connectionString)) { 
-//			
-//			Document oQuery = new Document("fileName", sFileName);
-//			
-//	        // Get a reference to the database
-//	        MongoDatabase database = mongoClient.getDatabase(databaseName);
-//
-//	        // Get a reference to the collection
-//	        MongoCollection<Document> collection = database.getCollection(collectionName);
-//
-//
-//	        // Insert the document into the collection
-//	        long lCount = collection.countDocuments(oQuery);
-//	        
-//	        return lCount;
-//
-//	    } catch (Exception oEx) {
-//			WasdiLog.errorLog("ModisRepository.insertModisItem: Exception when connecting to the db" + oEx);
-//	    }	
-//		
-//
-//		return -1;
 		
 	}
 	
