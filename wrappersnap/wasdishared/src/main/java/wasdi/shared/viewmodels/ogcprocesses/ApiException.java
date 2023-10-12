@@ -1,7 +1,5 @@
 package wasdi.shared.viewmodels.ogcprocesses;
 
-import java.util.HashMap;
-
 import wasdi.shared.utils.Utils;
 
 public class ApiException  {

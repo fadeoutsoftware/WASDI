@@ -27,6 +27,7 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
@@ -191,7 +192,7 @@ public class WasdiGraph {
 			WasdiLog.infoLog("WasdiGraph.execute: start");
 			
 	        //check input file
-	        String sWorkspaceDir = LauncherMain.getWorkspacePath(m_oParams);
+	        String sWorkspaceDir = PathsConfig.getWorkspacePath(m_oParams);
 	        File oWorkspaceDir = new File(sWorkspaceDir);
 	        
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 

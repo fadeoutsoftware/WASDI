@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 
-import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.Sen2CorParameter;
@@ -35,7 +35,7 @@ public class Sen2cor extends Operation {
     		
     		Sen2CorParameter oSen2CorParameter = (Sen2CorParameter) oParam;
     		
-            String sDestinationPath = LauncherMain.getWorkspacePath(oSen2CorParameter);
+            String sDestinationPath = PathsConfig.getWorkspacePath(oSen2CorParameter);
             String sL1ProductName = oSen2CorParameter.getProductName();
             String sL2ProductName = sL1ProductName.replace("L1C", "L2A");
             

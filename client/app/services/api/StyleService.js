@@ -70,8 +70,8 @@
      }
  
      // Add sharing
-     this.addStyleSharing = function (sStyleId, sUserId) {
-         return this.m_oHttp.put(this.APIURL + '/styles/share/add?styleId=' + sStyleId + '&userId=' + sUserId);
+     this.addStyleSharing = function (sStyleId, sUserId, sRights) {
+         return this.m_oHttp.put(this.APIURL + '/styles/share/add?styleId=' + sStyleId + '&userId=' + sUserId+"&rights="+sRights);
      }
  
      // Remove sharing

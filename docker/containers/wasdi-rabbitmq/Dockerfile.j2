@@ -1,0 +1,92 @@
+FROM ubuntu:22.04
+
+
+MAINTAINER "WASDI SARL"
+
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+# This environment variable is setted to avoid packages to ask a confirmation
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# This variable is setted to make Python stop creating files '.pyc'
+ENV PYTHONDONTWRITEBYTECODE="False"
+
+# This variable is setted to force the 'print' method of Python to flush message directly
+ENV PYTHONUNBUFFERED="True"
+
+
+# RUN generic to create user, group, directories, etc
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiContainerRabbitMqInstanceGroupName }} && \
+    useradd --create-home --home-dir /home/{{ sWasdiContainerRabbitMqInstanceUserName }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiContainerRabbitMqInstanceUserName }}
+
+
+# RUN generic to update the system and install common packages
+RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
+    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+    apt-get update && \
+    apt-get install \
+        ca-certificates && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get dist-upgrade && \
+    apt-get install \
+        curl \
+        nano \
+        tar \
+        unzip \
+        wget && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# RUN specific to install RabbitMQ
+RUN apt-get update && \
+    apt-get install \
+        rabbitmq-server && \
+    echo "{{ sWasdiContainerRabbitMqInstanceErlangCookie }}" > /root/.erlang.cookie && \
+    echo "{{ sWasdiContainerRabbitMqInstanceErlangCookie }}" > /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie && \
+    mkdir --parents \
+        /var/log/rabbitmq \
+        /var/run/rabbitmq && \
+    chmod 400 \
+        /root/.erlang.cookie \
+        /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie && \
+    chmod 770 \
+        /etc/rabbitmq \
+        /var/log/rabbitmq \
+        /var/run/rabbitmq && \
+    chown --recursive {{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} \
+        /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie \
+        /etc/rabbitmq \
+        {{ sWasdiContainerRabbitMqInstanceBaseDirectoryPath }} \
+        /var/log/rabbitmq/ \
+        /var/run/rabbitmq/ && \
+    rm --force /etc/rabbitmq/rabbitmq-env.conf && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# From now, all commands executed are executed with the user '{{ sWasdiContainerRabbitMqInstanceUserName }}'
+USER {{ sWasdiContainerRabbitMqInstanceUserName }}
+
+
+# Set the workdir
+WORKDIR /home/{{ sWasdiContainerRabbitMqInstanceUserName }}
+
+
+# Copy data
+COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_definitions.json /etc/rabbitmq/definitions.json
+COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_enabled_plugins /etc/rabbitmq/enabled_plugins
+COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+
+
+# Start the container
+CMD ["/usr/lib/rabbitmq/bin/rabbitmq-server"]

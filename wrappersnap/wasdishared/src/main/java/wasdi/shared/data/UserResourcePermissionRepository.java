@@ -12,7 +12,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.ResourceTypes;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -68,27 +69,27 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public List<UserResourcePermission> getOrganizationSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("organization", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getSubscriptionSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("subscription", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("workspace", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.WORKSPACE.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getStyleSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("style", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.STYLE.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getWorkflowSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("workflow", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.WORKFLOW.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getProcessorSharingsByOwnerId(String sUserId) {
-		return getPermissionsByTypeAndOwnerId("processor", sUserId);
+		return getPermissionsByTypeAndOwnerId(ResourceTypes.PROCESSOR.getResourceType(), sUserId);
 	}
 
 
@@ -124,31 +125,31 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public List<UserResourcePermission> getOrganizationSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("organization", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getSubscriptionSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("subscription", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("workspace", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.WORKSPACE.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getStyleSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("style", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.STYLE.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getWorkflowSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("workflow", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.WORKFLOW.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getProcessorSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("processor", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.PROCESSOR.getResourceType(), sUserId);
 	}
 
 	public List<UserResourcePermission> getProcessorParametersTemplateSharingsByUserId(String sUserId) {
-		return getPermissionsByTypeAndUserId("processorparameterstemplate", sUserId);
+		return getPermissionsByTypeAndUserId(ResourceTypes.PARAMETER.getResourceType(), sUserId);
 	}
 
 
@@ -212,39 +213,39 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public List<UserResourcePermission> getNodeSharingsByNodeCode(String sNodeCode) {
-		return getPermissionsByTypeAndResourceId("node", sNodeCode);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.NODE.getResourceType(), sNodeCode);
 	}
 
 	public List<UserResourcePermission> getOrganizationSharingsByOrganizationId(String sOrganizationId) {
-		return getPermissionsByTypeAndResourceId("organization", sOrganizationId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId);
 	}
 
 	public List<UserResourcePermission> getOrganizationSharingsByOrganizationIds(List<String> asOrganizationIds) {
-		return getPermissionsByTypeAndResourceIds("organization", asOrganizationIds);
+		return getPermissionsByTypeAndResourceIds(ResourceTypes.ORGANIZATION.getResourceType(), asOrganizationIds);
 	}
 
 	public List<UserResourcePermission> getSubscriptionSharingsBySubscriptionId(String sSubscriptionId) {
-		return getPermissionsByTypeAndResourceId("subscription", sSubscriptionId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sSubscriptionId);
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharingsByWorkspaceId(String sWorkspaceId) {
-		return getPermissionsByTypeAndResourceId("workspace", sWorkspaceId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sWorkspaceId);
 	}
 
 	public List<UserResourcePermission> getStyleSharingsByStyleId(String sStyleId) {
-		return getPermissionsByTypeAndResourceId("style", sStyleId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.STYLE.getResourceType(), sStyleId);
 	}
 
 	public List<UserResourcePermission> getWorkflowSharingsByWorkflowId(String sWorkflowId) {
-		return getPermissionsByTypeAndResourceId("workflow", sWorkflowId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sWorkflowId);
 	}
 
 	public List<UserResourcePermission> getProcessorSharingsByProcessorId(String sProcessorId) {
-		return getPermissionsByTypeAndResourceId("processor", sProcessorId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sProcessorId);
 	}
 
 	public List<UserResourcePermission> getProcessorParametersTemplateSharingsByProcessorParametersTemplateId(String sProcessorParametersTemplateId) {
-		return getPermissionsByTypeAndResourceId("processorparameterstemplate", sProcessorParametersTemplateId);
+		return getPermissionsByTypeAndResourceId(ResourceTypes.PARAMETER.getResourceType(), sProcessorParametersTemplateId);
 	}
 
 
@@ -337,31 +338,31 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public UserResourcePermission getOrganizationSharingByUserIdAndOrganizationId(String sUserId, String sOrganizationId) {
-		return getPermissionByTypeAndUserIdAndResourceId("organization", sUserId, sOrganizationId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId, sOrganizationId);
 	}
 
 	public UserResourcePermission getSubscriptionSharingByUserIdAndSubscriptionId(String sUserId, String sSubscriptionId) {
-		return getPermissionByTypeAndUserIdAndResourceId("subscription", sUserId, sSubscriptionId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId, sSubscriptionId);
 	}
 
 	public UserResourcePermission getWorkspaceSharingByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
-		return getPermissionByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sWorkspaceId);
 	}
 
 	public UserResourcePermission getStyleSharingByUserIdAndStyleId(String sUserId, String sStyleId) {
-		return getPermissionByTypeAndUserIdAndResourceId("style", sUserId, sStyleId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.STYLE.getResourceType(), sUserId, sStyleId);
 	}
 
 	public UserResourcePermission getWorkflowSharingByUserIdAndWorkflowId(String sUserId, String sWorkflowId) {
-		return getPermissionByTypeAndUserIdAndResourceId("workflow", sUserId, sWorkflowId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sUserId, sWorkflowId);
 	}
 
 	public UserResourcePermission getProcessorSharingByUserIdAndProcessorId(String sUserId, String sProcessorId) {
-		return getPermissionByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sUserId, sProcessorId);
 	}
 
 	public UserResourcePermission getProcessorParametersTemplateSharingByUserIdAndProcessorParametersTemplateId(String sUserId, String sProcessorParametersTemplateId) {
-		return getPermissionByTypeAndUserIdAndResourceId("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
+		return getPermissionByTypeAndUserIdAndResourceId(ResourceTypes.PARAMETER.getResourceType(), sUserId, sProcessorParametersTemplateId);
 	}
 
 
@@ -396,35 +397,35 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public List<UserResourcePermission> getNodeSharings() {
-		return getPermissionsByType("node");
+		return getPermissionsByType(ResourceTypes.NODE.getResourceType());
 	}
 
 	public List<UserResourcePermission> getOrganizationSharings() {
-		return getPermissionsByType("organization");
+		return getPermissionsByType(ResourceTypes.ORGANIZATION.getResourceType());
 	}
 
 	public List<UserResourcePermission> getSubscriptionSharings() {
-		return getPermissionsByType("subscription");
+		return getPermissionsByType(ResourceTypes.SUBSCRIPTION.getResourceType());
 	}
 
 	public List<UserResourcePermission> getWorkspaceSharings() {
-		return getPermissionsByType("workspace");
+		return getPermissionsByType(ResourceTypes.WORKSPACE.getResourceType());
 	}
 
 	public List<UserResourcePermission> getStyleSharings() {
-		return getPermissionsByType("style");
+		return getPermissionsByType(ResourceTypes.STYLE.getResourceType());
 	}
 
 	public List<UserResourcePermission> getWorkflowSharings() {
-		return getPermissionsByType("workflow");
+		return getPermissionsByType(ResourceTypes.WORKFLOW.getResourceType());
 	}
 
 	public List<UserResourcePermission> getProcessorSharings() {
-		return getPermissionsByType("processor");
+		return getPermissionsByType(ResourceTypes.PROCESSOR.getResourceType());
 	}
 
 	public List<UserResourcePermission> getProcessorParametersTemplateSharings() {
-		return getPermissionsByType("processorparameterstemplate");
+		return getPermissionsByType(ResourceTypes.PARAMETER.getResourceType());
 	}
 
 
@@ -472,35 +473,35 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public int deletePermissionsByNodeCode(String sNodeCode) {
-		return deletePermissionsByTypeAndResourceId("node", sNodeCode);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.NODE.getResourceType(), sNodeCode);
 	}
 
 	public int deletePermissionsByOrganizationId(String sOrganizationId) {
-		return deletePermissionsByTypeAndResourceId("organization", sOrganizationId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId);
 	}
 
 	public int deletePermissionsBySubscriptionId(String sSubscriptionId) {
-		return deletePermissionsByTypeAndResourceId("subscription", sSubscriptionId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sSubscriptionId);
 	}
 
 	public int deletePermissionsByWorkspaceId(String sWorkspaceId) {
-		return deletePermissionsByTypeAndResourceId("workspace", sWorkspaceId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sWorkspaceId);
 	}
 
 	public int deletePermissionsByStyleId(String sStyleId) {
-		return deletePermissionsByTypeAndResourceId("style", sStyleId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.STYLE.getResourceType(), sStyleId);
 	}
 
 	public int deletePermissionsByWorkflowId(String sWorkflowId) {
-		return deletePermissionsByTypeAndResourceId("workflow", sWorkflowId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sWorkflowId);
 	}
 
 	public int deletePermissionsByProcessorId(String sProcessorId) {
-		return deletePermissionsByTypeAndResourceId("processor", sProcessorId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sProcessorId);
 	}
 	
 	public int deletePermissionsByProcessorParameterTemplateId(String sProcessorParameterTemplateId) {
-		return deletePermissionsByTypeAndResourceId("processorparameterstemplate", sProcessorParameterTemplateId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.PARAMETER.getResourceType(), sProcessorParameterTemplateId);
 	}	
 
 
@@ -548,27 +549,27 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public int deleteOrganizationPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("organization", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId);
 	}
 
 	public int deleteSubscriptionPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("subscription", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId);
 	}
 
 	public int deleteWorkspacePermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("workspace", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sUserId);
 	}
 
 	public int deleteStylePermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("style", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.STYLE.getResourceType(), sUserId);
 	}
 
 	public int deleteWorkflowPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("workflow", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sUserId);
 	}
 
 	public int deleteProcessorPermissionsByUserId(String sUserId) {
-		return deletePermissionsByTypeAndResourceId("processor", sUserId);
+		return deletePermissionsByTypeAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sUserId);
 	}
 
 
@@ -624,35 +625,35 @@ public class UserResourcePermissionRepository extends MongoRepository {
 	}
 
 	public int deletePermissionsByUserIdAndNodeCode(String sUserId, String sNodeCode) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("node", sUserId, sNodeCode);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.NODE.getResourceType(), sUserId, sNodeCode);
 	}
 
 	public int deletePermissionsByUserIdAndOrganizationId(String sUserId, String sOrganizationId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("organization", sUserId, sOrganizationId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.ORGANIZATION.getResourceType(), sUserId, sOrganizationId);
 	}
 
 	public int deletePermissionsByUserIdAndSubscriptionId(String sUserId, String sSubscriptionId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("subscription", sUserId, sSubscriptionId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId, sSubscriptionId);
 	}
 
 	public int deletePermissionsByUserIdAndWorkspaceId(String sUserId, String sWorkspaceId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("workspace", sUserId, sWorkspaceId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sWorkspaceId);
 	}
 
 	public int deletePermissionsByUserIdAndStyleId(String sUserId, String sStyleId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("style", sUserId, sStyleId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.STYLE.getResourceType(), sUserId, sStyleId);
 	}
 
 	public int deletePermissionsByUserIdAndWorkflowId(String sUserId, String sWorkflowId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("workflow", sUserId, sWorkflowId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.WORKFLOW.getResourceType(), sUserId, sWorkflowId);
 	}
 
 	public int deletePermissionsByUserIdAndProcessorId(String sUserId, String sProcessorId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("processor", sUserId, sProcessorId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.PROCESSOR.getResourceType(), sUserId, sProcessorId);
 	}
 
 	public int deletePermissionsByUserIdAndProcessorParametersTemplateId(String sUserId, String sProcessorParametersTemplateId) {
-		return deletePermissionsByTypeAndUserIdAndResourceId("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
+		return deletePermissionsByTypeAndUserIdAndResourceId(ResourceTypes.PARAMETER.getResourceType(), sUserId, sProcessorParametersTemplateId);
 	}
 
 
@@ -685,51 +686,50 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType
-					+ ", " + sUserId + ", " + sResourceId + "): error: " + oE);
+			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType + ", " + sUserId + ", " + sResourceId + "): error: " + oE);
 		}
 
 		return false;
 	}
 
 	public boolean isNodeSharedWithUser(String sUserId, String sNodeCode) {
-		return isResourceOfTypeSharedWithUser("node", sUserId, sNodeCode);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.NODE.getResourceType(), sUserId, sNodeCode);
 	}
 
 	public boolean isOrganizationSharedWithUser(String sUserId, String sOrganizationId) {
-		return isResourceOfTypeSharedWithUser("organization", sUserId, sOrganizationId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.ORGANIZATION.getResourceType(), sUserId, sOrganizationId);
 	}
 
 	public boolean isOrganizationShared(String sOrganizationId) {
-		return isResourceShared("organization", sOrganizationId);
+		return isResourceShared(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId);
 	}
 
 	public boolean isSubscriptionShared(String sSubscriptionId) {
-		return isResourceShared("subscription", sSubscriptionId);
+		return isResourceShared(ResourceTypes.SUBSCRIPTION.getResourceType(), sSubscriptionId);
 	}
 
 	public boolean isSubscriptionSharedWithUser(String sUserId, String sSubscriptionId) {
-		return isResourceOfTypeSharedWithUser("subscription", sUserId, sSubscriptionId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId, sSubscriptionId);
 	}
 
 	public boolean isWorkspaceSharedWithUser(String sUserId, String sWorkspaceId) {
-		return isResourceOfTypeSharedWithUser("workspace", sUserId, sWorkspaceId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sWorkspaceId);
 	}
 
 	public boolean isStyleSharedWithUser(String sUserId, String sStyleId) {
-		return isResourceOfTypeSharedWithUser("style", sUserId, sStyleId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.STYLE.getResourceType(), sUserId, sStyleId);
 	}
 
 	public boolean isWorkflowSharedWithUser(String sUserId, String sWorkflowId) {
-		return isResourceOfTypeSharedWithUser("workflow", sUserId, sWorkflowId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.WORKFLOW.getResourceType(), sUserId, sWorkflowId);
 	}
 
 	public boolean isProcessorSharedWithUser(String sUserId, String sProcessorId) {
-		return isResourceOfTypeSharedWithUser("processor", sUserId, sProcessorId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.PROCESSOR.getResourceType(), sUserId, sProcessorId);
 	}
 
 	public boolean isProcessorParametersTemplateSharedWithUser(String sUserId, String sProcessorParametersTemplateId) {
-		return isResourceOfTypeSharedWithUser("processorparameterstemplate", sUserId, sProcessorParametersTemplateId);
+		return isResourceOfTypeSharedWithUser(ResourceTypes.PARAMETER.getResourceType(), sUserId, sProcessorParametersTemplateId);
 	}
 
 }

@@ -157,6 +157,10 @@ var ProcessorController = (function () {
          */
         this.m_sUserEmail = "";
         /**
+         * User access rights
+         */
+        this.m_sRights = "read";
+        /**
          * List of user id that has access to the processor
          * @type {*[]}
          */
@@ -644,7 +648,8 @@ var ProcessorController = (function () {
      */
     ProcessorController.prototype.shareProcessorByUserEmail = function (
         sProcessorId,
-        sEmail
+        sEmail,
+        sRights
     ) {
         if (
             utilsIsObjectNullOrUndefined(sProcessorId) === true ||
@@ -658,7 +663,7 @@ var ProcessorController = (function () {
         var sFinalProcessorId = sProcessorId;
 
         var oController = this;
-        this.m_oProcessorService.putShareProcessor(sProcessorId, sEmail).then(
+        this.m_oProcessorService.putShareProcessor(sProcessorId, sEmail, sRights).then(
             function (data) {
                 if (
                     utilsIsObjectNullOrUndefined(data.data) === false &&
@@ -680,6 +685,7 @@ var ProcessorController = (function () {
 
                     utilsVexDialogAlertTop(sMessage);
                 }
+                oController.m_sRights = "read";
                 oController.getListOfEnableUsers(sFinalProcessorId);
             },
             function (error) {

@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.json.JSONObject;
@@ -628,11 +629,35 @@ public class WasdiFileUtils {
 				return false;
 			}
 			return isShapeFile(oFile.getName());
-		} catch (Exception oE) {
-			WasdiLog.debugLog("WasdiFileUtils.isShapeFile( File ): " + oE);
+		} 
+		catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isShapeFile( File ): ", oE);
 		}
 		return false;
 	}
+	
+	/***
+	 * Check if a file is a "classic" image type.
+	 * The images accepted are "jpg", "png", "svg" at the moment.
+	 * 
+	 * @param oFile
+	 * @return
+	 */
+	public static boolean isImageFile(File oFile) {
+		try {
+			String sFileName = oFile.getName();
+			String sExt = FilenameUtils.getExtension(sFileName);
+
+			if(ImageResourceUtils.isValidExtension(sExt)){
+				return true;
+			}					
+		}
+		catch (Exception oE) {
+			WasdiLog.errorLog("WasdiFileUtils.isImageFile( File ): ", oE);
+		}
+
+		return false;
+	}	
 	
 	public static boolean isSentinel5PFile(File oFile) {
 		try {
@@ -860,6 +885,8 @@ public class WasdiFileUtils {
 			}
 			else if (sFileName.toUpperCase().startsWith("SKYWATCH_")) {
 				return Platforms.EARTHCACHE;
+			} else if (sFileName.toUpperCase().startsWith("MOD11A2")) {
+				return Platforms.TERRA;
 			}
 			else if (sFileName.toUpperCase().startsWith("MCD43A1")
 					|| sFileName.toUpperCase().startsWith("MCD43A2")

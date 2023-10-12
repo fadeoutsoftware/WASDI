@@ -3,10 +3,10 @@ package wasdi.operations;
 import java.io.File;
 import java.util.ArrayList;
 
-import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MultiSubsetParameter;
 import wasdi.shared.parameters.settings.MultiSubsetSetting;
@@ -121,8 +121,8 @@ public class Multisubset extends Operation {
                     asArgs.add("BIGTIFF=YES");
                 }
 
-                asArgs.add(LauncherMain.getWorkspacePath(oParameter) + sSourceProduct);
-                asArgs.add(LauncherMain.getWorkspacePath(oParameter) + sOutputProduct);
+                asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sSourceProduct);
+                asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 
                 // Execute the process
                 ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
@@ -140,10 +140,10 @@ public class Multisubset extends Operation {
 
                 oProcess.waitFor();
 
-                File oTileFile = new File(LauncherMain.getWorkspacePath(oParameter) + sOutputProduct);
+                File oTileFile = new File(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 
                 if (oTileFile.exists()) {
-                    String sOutputPath = LauncherMain.getWorkspacePath(oParameter) + sOutputProduct;
+                    String sOutputPath = PathsConfig.getWorkspacePath(oParameter) + sOutputProduct;
 
                     WasdiLog.debugLog("Multisubset.executeOperation done for index " + iTiles);
 

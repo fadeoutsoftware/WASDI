@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MosaicParameter;
@@ -150,15 +150,28 @@ public class ProcessingResources {
         WasdiLog.debugLog("ProcessingResources.sen2CorConversion");
 
         if (sProductName == null || sWorkspaceId == null) {
-            WasdiLog.debugLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
+            WasdiLog.warnLog("ProcessingResources.sen2CorConversion Passed null parameters..skipping");
             return Response.status(Status.BAD_REQUEST).build();
         }
         
         User oUser = Wasdi.getUserFromSession(sSessionId);
         if (oUser == null) {
-            WasdiLog.debugLog("ProcessingResources.sen2CorConversion: user not found");
+            WasdiLog.warnLog("ProcessingResources.sen2CorConversion: user not found");
             return Response.status(Status.UNAUTHORIZED).build();
-        }        
+        } 
+        
+        
+        // Check the subscription
+        if (!PermissionsUtils.userHasValidSubscription(oUser)) {
+        	WasdiLog.warnLog("ProcessingResources.sen2CorConversion: invalid subscription");
+            return Response.status(Status.FORBIDDEN).build();     	
+        }
+        
+        // Check if we can write the workspace        
+        if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
+            WasdiLog.warnLog("ProcessingResources.sen2CorConversion: user canno write workspace");
+            return Response.status(Status.FORBIDDEN).build();        	
+        }
 
         WasdiLog.debugLog("ProcessingResources.sen2CorConversion( Level 1 Source: " + sProductName + ", Level 2 : " + sProductName.replace("L1", "L2") + ", Ws:" + sWorkspaceId + " )");
 
@@ -213,7 +226,7 @@ public class ProcessingResources {
         
         // Is valid?
         if (oUser == null) {
-        	WasdiLog.debugLog("ProsessingResources.callExecuteSNAPOperation: invalid session");
+        	WasdiLog.warnLog("ProsessingResources.callExecuteSNAPOperation: invalid session");
             // Not authorized
             oResult.setIntValue(401);
             oResult.setBoolValue(false);
@@ -224,7 +237,7 @@ public class ProcessingResources {
         // Check the subscription
         if (!PermissionsUtils.userHasValidSubscription(oUser)) {
         	
-        	WasdiLog.debugLog("ProsessingResources.callExecuteSNAPOperation: invalid subscription");
+        	WasdiLog.warnLog("ProsessingResources.callExecuteSNAPOperation: invalid subscription");
         	
             // Not authorized
             oResult.setIntValue(401);
@@ -235,9 +248,9 @@ public class ProcessingResources {
         
         
         // Check if the user can access the workspace
-        if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+        if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), sWorkspaceId)) {
         	
-        	WasdiLog.debugLog("ProsessingResources.callExecuteSNAPOperation: user cannot access workspace");
+        	WasdiLog.warnLog("ProsessingResources.callExecuteSNAPOperation: user cannot write workspace");
         	
             // Not authorized
             oResult.setIntValue(401);
@@ -332,7 +345,7 @@ public class ProcessingResources {
         	
         	// Validate the Launcher Operation
             if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationType)) {
-            	WasdiLog.debugLog("ProsessingResources.runProcess: invalid Launcher Operation");
+            	WasdiLog.warnLog("ProsessingResources.runProcess: invalid Launcher Operation");
                 // Bad request
                 oResult.setIntValue(400);
                 oResult.setBoolValue(false);
@@ -345,7 +358,7 @@ public class ProcessingResources {
 
             // Is valid user?
             if (oUser==null) {
-            	WasdiLog.debugLog("ProsessingResources.runProcess: invalid session");
+            	WasdiLog.warnLog("ProsessingResources.runProcess: invalid session");
                 // Not authorised
                 oResult.setIntValue(401);
                 oResult.setBoolValue(false);
@@ -355,7 +368,7 @@ public class ProcessingResources {
             
             // Is there a valid subscription?
             if (!PermissionsUtils.userHasValidSubscription(oUser)) {
-            	WasdiLog.debugLog("ProsessingResources.runProcess: invalid subscription");
+            	WasdiLog.warnLog("ProsessingResources.runProcess: invalid subscription");
                 // Not authorised
                 oResult.setIntValue(401);
                 oResult.setBoolValue(false);
@@ -367,7 +380,7 @@ public class ProcessingResources {
             BaseParameter oParameter = BaseParameter.getParameterFromOperationType(sOperationType);
 
             if (oParameter == null) {
-            	WasdiLog.debugLog("ProsessingResources.runProcess: impossible to cast the parameter");
+            	WasdiLog.warnLog("ProsessingResources.runProcess: impossible to cast the parameter");
             	
                 // Error
                 oResult.setIntValue(500);
@@ -380,7 +393,10 @@ public class ProcessingResources {
             oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
             
             // Can the user access the workspace?
-            if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), oParameter.getWorkspace())) {
+            if (!PermissionsUtils.canUserWriteWorkspace(oUser.getUserId(), oParameter.getWorkspace())) {
+            	
+            	WasdiLog.warnLog("ProsessingResources.runProcess: user cannot write in the workspace");
+            	
                 // Not authorised
                 oResult.setIntValue(401);
                 oResult.setBoolValue(false);

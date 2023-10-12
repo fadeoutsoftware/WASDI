@@ -310,7 +310,7 @@ Is out of the scope of this tutorial to go in the details of the Angular code of
 
  
 Add your Directive to the User Interface
----------------------------
+-----------------------------------------------
 
 Now we have all the elements, we need to add our control to the Marketplace Application User Interface page.
 The file is in **partials/wasdiapplicationui.html**.
@@ -336,7 +336,7 @@ In our case is done in this snippet:
 Where we put as options of the directive the elements we got from the JSON and we ask to save the output in aoSelected, that will be used by our ListBox class in the getValue method.
 
 Add a button to the online editor
----------------------------
+------------------------------------
 To help our developers, there is a very basic on line editor of the UI. There every control has a button that the Developer can click to see a mockup of the json required to define that control.
 
 The file is a dialog and can be found:

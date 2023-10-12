@@ -1,7 +1,7 @@
 package wasdi.shared.parameters;
 
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.utils.Utils;
 
 /**

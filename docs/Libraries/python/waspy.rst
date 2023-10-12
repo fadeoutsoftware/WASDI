@@ -52,41 +52,10 @@ Tested with: Python 2.7, Python 3.7
 Methods
 -------------------
 
-
 addFileToWASDI
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
    :members: addFileToWASDI
-   :noindex:
-
-printStatus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: printStatus
-   :noindex:
-
-setVerbose
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: setVerbose
-   :noindex:
-
-getVerbose
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getVerbose
-   :noindex:
-
-getParametersDict
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getParametersDict
-   :noindex:
-
-setParametersDict
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: setParametersDict
    :noindex:
 
 addParameter
@@ -101,40 +70,10 @@ getParameter
    :members: getParameter
    :noindex:
 
-setUser
+getParametersDict
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: setUser
-   :noindex:
-
-getUser
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getUser
-   :noindex:
-
-setPassword
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: setPassword
-   :noindex:
-
-getPassword
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getPassword
-   :noindex:
-
-setSessionId
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: setSessionId
-   :noindex:
-
-setParametersFilePath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: setParametersFilePath
+   :members: getParametersDict
    :noindex:
 
 getParametersFilePath
@@ -149,23 +88,58 @@ getSessionId
    :members: getSessionId
    :noindex:
 
-setBasePath
+
+getPassword
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: setBasePath
+   :members: getPassword
    :noindex:
 
-getBasePath
+getUser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: getBasePath
+   :members: getUser
    :noindex:
 
-setBaseUrl
+getVerbose
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: setBaseUrl
+   :members: getVerbose
    :noindex:
+
+getWorkflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getWorkflows
+   :noindex:
+
+
+
+getFoundProductName
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getFoundProductName
+   :noindex:
+
+getProductBBOX
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getProductBBOX
+   :noindex:
+
+
+getProcessorPath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getProcessorPath
+   :noindex:
+
+getProcessesByWorkspace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getProcessesByWorkspace
+   :noindex:
+
 
 getBaseUrl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -359,34 +333,83 @@ getProcessStatus
    :members: getProcessStatus
    :noindex:
 
-updateProcessStatus
+deleteProduct
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: updateProcessStatus
+   :members: deleteProduct
    :noindex:
 
-updateStatus
+mosaic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: updateStatus
+   :members: mosaic
    :noindex:
 
-waitProcess
+printStatus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: waitProcess
+   :members: printStatus
    :noindex:
 
-waitProcesses
+searchEOImages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: waitProcesses
+   :members: searchEOImages
    :noindex:
 
-updateProgressPerc
+setVerbose
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
-   :members: updateProgressPerc
+   :members: setVerbose
+   :noindex:
+
+setParametersDict
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setParametersDict
+   :noindex:
+
+setUser
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setUser
+   :noindex:
+
+setPassword
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setPassword
+   :noindex:
+
+setSessionId
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setSessionId
+   :noindex:
+
+setParametersFilePath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setParametersFilePath
+   :noindex:
+
+
+setBasePath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setBasePath
+   :noindex:
+
+getBasePath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: getBasePath
+   :noindex:
+
+setBaseUrl
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: setBaseUrl
    :noindex:
 
 setProcessPayload
@@ -425,6 +448,38 @@ saveFile
    :members: saveFile
    :noindex:
 
+updateProgressPerc
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: updateProgressPerc
+   :noindex:
+
+updateProcessStatus
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: updateProcessStatus
+   :noindex:
+
+updateStatus
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: updateStatus
+   :noindex:
+
+waitProcess
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: waitProcess
+   :noindex:
+
+waitProcesses
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: waitProcesses
+   :noindex:
+
+
+
 _downloadFile
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
@@ -437,23 +492,9 @@ wasdiLog
    :members: wasdiLog
    :noindex:
 
-deleteProduct
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: deleteProduct
-   :noindex:
 
-searchEOImages
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: searchEOImages
-   :noindex:
 
-getFoundProductName
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getFoundProductName
-   :noindex:
+
 
 fileExistsOnWasdi
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -461,11 +502,6 @@ fileExistsOnWasdi
    :members: fileExistsOnWasdi
    :noindex:
 
-getProductBBOX
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getProductBBOX
-   :noindex:
 
 importProductByFileUrl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -503,6 +539,12 @@ asynchImportProductList
    :members: asynchImportProductList
    :noindex:
 
+asynchAddFileToWASDI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: wasdi
+   :members: asynchAddFileToWASDI
+   :noindex:
+
 importAndPreprocess
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: wasdi
@@ -527,17 +569,6 @@ _uploadFile
    :members: _uploadFile
    :noindex:
 
-addFileToWASDI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: addFileToWASDI
-   :noindex:
-
-asynchAddFileToWASDI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: asynchAddFileToWASDI
-   :noindex:
 
 subset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -552,11 +583,7 @@ multiSubset
    :members: multiSubset
    :noindex:
 
-getWorkflows
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getWorkflows
-   :noindex:
+
 
 executeWorkflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -576,11 +603,7 @@ asynchMosaic
    :members: asynchMosaic
    :noindex:
 
-mosaic
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: mosaic
-   :noindex:
+
 
 copyFileToSftp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -588,17 +611,6 @@ copyFileToSftp
    :members: copyFileToSftp
    :noindex:
 
-getProcessorPath
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getProcessorPath
-   :noindex:
-
-getProcessesByWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: wasdi
-   :members: getProcessesByWorkspace
-   :noindex:
 
 _log
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -19,7 +17,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.Purge;
-import it.geosolutions.geoserver.rest.GeoServerRESTPublisher.UploadMethod;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.HTTPUtils;
 import it.geosolutions.geoserver.rest.decoder.RESTBoundingBox;

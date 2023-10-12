@@ -6,8 +6,8 @@
         <div class="pt-1 pb-3 px-3 h-100 app-item" ng-click="m_oController.selectProcessor(processor)" ng-class="{'selected' : m_oController._selectedProcessor == processor}">
             <div class="row-v4">
                 <div class="col-v4-12">
-                    <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title='{{"DIALOG_DOWNLOAD_BUTTON"|translate}}' ng-click="m_oController.downloadClick(processor)"><em class="fa fa-download"></em></button>
-                    <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title='{{"DIALOG_EDIT_BUTTON"|translate}}' ng-click="m_oController.editClick(processor)"><em class="fa fa-edit"></em></button>
+                    <button ng-show="processor.readOnly==false" class="wapps-button" title='{{"DIALOG_DOWNLOAD_BUTTON"|translate}}' ng-click="m_oController.downloadClick(processor)"><em class="fa fa-download"></em></button>
+                    <button ng-show="processor.readOnly==false" class="wapps-button" title='{{"DIALOG_EDIT_BUTTON"|translate}}' ng-click="m_oController.editClick(processor)"><em class="fa fa-edit"></em></button>
                     <button ng-show="m_oController.m_oConstantsService.getUserId()===processor.publisher || processor.sharedWithMe" class="wapps-button" title='{{"DIALOG_DELETE_BUTTON"|translate}}' ng-click="m_oController.deleteClick(processor)"><em class="fa fa-times"></em></button>
                     <button                                                                                                         class="wapps-button" title='{{"DIALOG_WAPPS_ITEMS_FILTER"|translate}}' ng-click="m_oController.paramsClick(processor)"><em class="fa fa-book"></em></button>                    
                     <em ng-show="m_oController.m_oConstantsService.getUserId()!==processor.publisher" class="fa fa-times" style="color:transparent"></em>

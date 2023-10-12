@@ -5,7 +5,7 @@
 .. _SynchAsynch:
 
 Synchronous and Asynchronous WASDI programming
-===========================
+==================================================
 
 Introduction
 ---------------------------
@@ -209,7 +209,7 @@ As it has been stated before, to execute another application is always an asynch
 This snippet of code is the core for the optimization of your application.
 
 Suggested WASDI App Organization
----------------------------
+--------------------------------------
 In our experience the best way to develop your wasdi application is an old advise: "Dividi et Impera".
 
 Usually WASDI applications are developed to manipulate satellite data to obtain a value added product in output.

@@ -20,6 +20,7 @@ public class SnapWorkflowViewModel {
 	// through the repositories 
 	// default value to false;
 	private boolean sharedWithMe = false;
+	private boolean readOnly = false;
 
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
 	private ArrayList<String> inputFileNames = new ArrayList<>();
@@ -125,6 +126,12 @@ public class SnapWorkflowViewModel {
         oVM.setUserId(oWorkflow.getUserId());
         oVM.setNodeUrl(oWorkflow.getNodeUrl());
         return oVM;
+	}
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 	
 }

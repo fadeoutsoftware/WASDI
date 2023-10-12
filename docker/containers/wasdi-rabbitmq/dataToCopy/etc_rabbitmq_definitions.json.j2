@@ -1,0 +1,51 @@
+{
+    "bindings": [],
+    "exchanges": [],
+    "global_parameters": [],
+    "parameters": [],
+    "permissions": [
+        {
+            "configure": ".*",
+            "read": ".*",
+            "user": "{{ sWasdiAdministratorUsername }}",
+            "vhost": "/",
+            "write": ".*"
+        },
+        {
+            "configure": ".*",
+            "read": ".*",
+            "user": "{{ sWasdiContainerRabbitMqInstanceApplicationUserName }}",
+            "vhost": "/",
+            "write": ".*"
+        }
+    ],
+    "policies": [],
+    "queues": [],
+    "topic_permissions": [],
+    "users": [
+        {
+            "limits": {},
+            "name": "{{ sWasdiAdministratorUsername }}",
+            "password": "{{ sWasdiAdministratorPassword }}",
+            "tags": [
+                "administrator"
+            ]
+        },
+        {
+            "limits": {},
+            "name": "{{ sWasdiContainerRabbitMqInstanceApplicationUserName }}",
+            "password": "{{ sWasdiContainerRabbitMqInstanceApplicationUserPassword }}",
+            "tags": []
+        }
+    ],
+    "vhosts": [
+        {
+            "limits": [],
+            "metadata": {
+                "description": "Default virtual host",
+                "tags": []
+            },
+            "name": "/"
+        }
+    ]
+}

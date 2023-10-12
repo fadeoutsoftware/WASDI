@@ -1,8 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.UserApplicationPermission.PROCESSOR_PARAMETERS_TEMPLATE_READ;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,13 +21,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorParametersTemplate;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorParametersTemplate;
+import wasdi.shared.business.users.ResourceTypes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -39,6 +36,7 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.processorParametersTemplates.ProcessorParametersTemplateSharingViewModel;
 import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateDetailViewModel;
@@ -47,27 +45,15 @@ import wasdi.shared.viewmodels.processors.ProcessorParametersTemplateListViewMod
 /**
  * ProcessorParametersTemplate Resource.
  * 
- * Hosts the API for: .handle ProcessorParametersTemplate
+ * Hosts the API for: 
+ * 	.create edit and delete ProcessorParametersTemplate
+ * 	.Share processor parameters with other users
  * 
  * @author PetruPetrescu
  *
  */
 @Path("processorParamTempl")
 public class ProcessorParametersTemplateResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE";
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE";
-
-	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
-	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
-	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
-
-	private static final String MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE = "MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE";
-	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
-	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
 
 	/**
 	 * Deletes a processor parameters template.
@@ -94,13 +80,13 @@ public class ProcessorParametersTemplateResource {
 
 		// Check the user session
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oUser.getUserId(), sTemplateId)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: user cannot access parameter template");
-			return Response.status(Status.UNAUTHORIZED).build();
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteProcessorParametersTemplate: user cannot access parameter template");
+			return Response.status(Status.FORBIDDEN).build();
 		}
 
 		String sUserId = oUser.getUserId();
@@ -119,7 +105,6 @@ public class ProcessorParametersTemplateResource {
 		// Check if this is the owner or a shared user
 		if (!oProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate(sTemplateId, sUserId)) {
 			// Shared User: we just delete the sharing
-			
 			iDeletedCount = oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorParametersTemplateId(sUserId, sTemplateId);
 		}
 		else {
@@ -148,27 +133,26 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@POST
 	@Path("/update")
-	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
-			ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
+	public Response updateProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate");
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		String sUserId = oUser.getUserId();
 
 		if (oDetailViewModel == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: body null");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: body null");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(sUserId, oDetailViewModel.getTemplateId())) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: user cannot access this parameter");
-			return Response.status(Status.BAD_REQUEST).build();
+		if (!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, oDetailViewModel.getTemplateId())) {
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.updateProcessorParametersTemplate: user cannot write this parameter");
+			return Response.status(Status.FORBIDDEN).build();
 		}
 
 		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
@@ -195,50 +179,61 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@POST
 	@Path("/add")
-	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
-			ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
+	public Response addProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId, ProcessorParametersTemplateDetailViewModel oDetailViewModel) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate");
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid user");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid user");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		if (oDetailViewModel == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid view model");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid view model");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		String sProcessorId = oDetailViewModel.getProcessorId();
 
 		if (Utils.isNullOrEmpty(sProcessorId)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid processorId");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: invalid processorId");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+		try {
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
-		if (oProcessor == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: processor null " + sProcessorId);
-			return Response.status(Status.BAD_REQUEST).build();
+			if (oProcessor == null) {
+				WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: processor null " + sProcessorId);
+				return Response.status(Status.BAD_REQUEST).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+				WasdiLog.warnLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: user canno access the processor");
+				return Response.status(Status.FORBIDDEN).build();
+			}		
+			
+			String sUserId = oUser.getUserId();
+
+			ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
+
+			ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, Utils.getRandomName());
+
+			Date oDate = new Date();
+			oTemplate.setCreationDate((double) oDate.getTime());
+			oTemplate.setUpdateDate((double) oDate.getTime());
+
+			oProcessorParametersTemplateRepository.insertProcessorParametersTemplate(oTemplate);
+
+			return Response.status(Status.OK).build();			
 		}
-		
-		String sUserId = oUser.getUserId();
-
-		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-
-		ProcessorParametersTemplate oTemplate = getTemplateFromDetailViewModel(oDetailViewModel, sUserId, Utils.getRandomName());
-
-		Date oDate = new Date();
-		oTemplate.setCreationDate((double) oDate.getTime());
-		oTemplate.setUpdateDate((double) oDate.getTime());
-
-		oProcessorParametersTemplateRepository.insertProcessorParametersTemplate(oTemplate);
-
-		return Response.status(Status.OK).build();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.addProcessorParametersTemplate: error ", oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -250,31 +245,37 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@GET
 	@Path("/get")
-	public Response getProcessorParameterTemplateById(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("templateId") String sTemplateId) {
+	public Response getProcessorParameterTemplateById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("templateId") String sTemplateId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById");
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplateById: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
 		String sUserId = oUser.getUserId();
 
 		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(sUserId, sTemplateId)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParameterTemplateById: user cannot access the parameter");
-			return Response.status(Status.UNAUTHORIZED).build();
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParameterTemplateById: user cannot access the parameter");
+			return Response.status(Status.FORBIDDEN).build();
 		}
+		
+		try {
+			// Get all the ProcessorParametersTemplates
+			ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
+			ProcessorParametersTemplate oTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sTemplateId);
 
-		// Get all the ProcessorParametersTemplates
-		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-		ProcessorParametersTemplate oTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sTemplateId);
+			ProcessorParametersTemplateDetailViewModel oDetailViewModel = getDetailViewModel(oTemplate);
+			oDetailViewModel.setReadOnly(!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, sTemplateId));
 
-		ProcessorParametersTemplateDetailViewModel oDetailViewModel = getDetailViewModel(oTemplate);
-
-		return Response.ok(oDetailViewModel).build();
+			return Response.ok(oDetailViewModel).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.getProcessorParameterTemplateById: error ", oEx);
+			return Response.serverError().build();
+		}
 	}
 
 	/**
@@ -286,14 +287,13 @@ public class ProcessorParametersTemplateResource {
 	 */
 	@GET
 	@Path("/getlist")
-	public Response getProcessorParametersTemplatesListByProcessor(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("processorId") String sProcessorId) {
+	public Response getProcessorParametersTemplatesListByProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor");
 
 		// Check the user session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -301,36 +301,49 @@ public class ProcessorParametersTemplateResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 
 		if (oProcessor == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: invalid processor");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: invalid processor");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
-
-		String sUserId = oUser.getUserId();
-
-		// Get all the ProcessorParametersTemplates
-		ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
-
-		List<ProcessorParametersTemplate> aoUnfilteredTemplates = oProcessorParametersTemplateRepository
-				.getProcessorParametersTemplatesByProcessor(sProcessorId);
-
-		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-		List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getProcessorParametersTemplateSharingsByUserId(sUserId);
-
-		Map<String, UserResourcePermission> aoSharingsMap = aoSharings.stream()
-				.collect(Collectors.toMap(UserResourcePermission::getResourceId, Function.identity()));
-
-		List<ProcessorParametersTemplate> aoTemplates = new ArrayList<>();
-
-		for (ProcessorParametersTemplate oTemplate : aoUnfilteredTemplates) {
-			if (oTemplate.getUserId().equals(sUserId) || aoSharingsMap.containsKey(oTemplate.getTemplateId())) {
-				aoTemplates.add(oTemplate);
-			}
+		
+		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessor)) {
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: user canno access the processor");
+			return Response.status(Status.FORBIDDEN).build();
 		}
+		
+		try {
+			String sUserId = oUser.getUserId();
 
-		// Cast in a list
-		List<ProcessorParametersTemplateListViewModel> aoListViewModel = getListViewModels(aoTemplates);
+			// Get all the ProcessorParametersTemplates
+			ProcessorParametersTemplateRepository oProcessorParametersTemplateRepository = new ProcessorParametersTemplateRepository();
 
-		return Response.ok(aoListViewModel).build();
+			List<ProcessorParametersTemplate> aoUnfilteredTemplates = oProcessorParametersTemplateRepository.getProcessorParametersTemplatesByProcessor(sProcessorId);
+
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getProcessorParametersTemplateSharingsByUserId(sUserId);
+
+			Map<String, UserResourcePermission> aoSharingsMap = aoSharings.stream().collect(Collectors.toMap(UserResourcePermission::getResourceId, Function.identity()));
+
+			List<ProcessorParametersTemplate> aoTemplates = new ArrayList<>();
+
+			for (ProcessorParametersTemplate oTemplate : aoUnfilteredTemplates) {
+				if (oTemplate.getUserId().equals(sUserId) || aoSharingsMap.containsKey(oTemplate.getTemplateId())) {
+					aoTemplates.add(oTemplate);
+				}
+			}
+
+			// Cast in a list
+			List<ProcessorParametersTemplateListViewModel> aoListViewModel = getListViewModels(aoTemplates);
+			
+			for (ProcessorParametersTemplateListViewModel oActualParameterViewModel : aoListViewModel) {
+				oActualParameterViewModel.setReadOnly(!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, oActualParameterViewModel.getTemplateId()));
+			}
+
+			return Response.ok(aoListViewModel).build();			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.getProcessorParametersTemplatesListByProcessor: error ", oEx);
+			return Response.serverError().build();
+		}		
 	}
 
 	/**
@@ -345,7 +358,7 @@ public class ProcessorParametersTemplateResource {
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult shareProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sDestinationUserId) {
+			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate( WS: " + sProcessorParametersTemplateId + ", User: " + sDestinationUserId + " )");
 
@@ -356,12 +369,17 @@ public class ProcessorParametersTemplateResource {
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
+		}
+		
+		// Use Read By default
+		if (!UserAccessRights.isValidAccessRight(sRights)) {
+			sRights = UserAccessRights.READ.getAccessRight();
 		}
 		
 		// Check if the processorParametersTemplate exists
@@ -369,44 +387,34 @@ public class ProcessorParametersTemplateResource {
 		ProcessorParametersTemplate oProcessorParametersTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sProcessorParametersTemplateId);
 		
 		if (oProcessorParametersTemplate == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid processorParametersTemplate");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: invalid processorParametersTemplate");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE);
-
-			return oResult;
-		}
-
-		// Can the user access this section?
-		if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), PROCESSOR_PARAMETERS_TEMPLATE_READ)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + oRequesterUser.getUserId() + " cannot access the section " + ", aborting");
-
-			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_PROCESSOR_PARAMETERS_TEMPLATE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_PROCESSOR_PARAMETERS_TEMPLATE.name());
 
 			return oResult;
 		}
 		
 		// Can the user access this resource?
-		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oRequesterUser.getUserId(), sProcessorParametersTemplateId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + sProcessorParametersTemplateId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
+		if (!PermissionsUtils.canUserWriteProcessorParametersTemplate(oRequesterUser.getUserId(), sProcessorParametersTemplateId)
+				&& !UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + sProcessorParametersTemplateId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
 			oResult.setIntValue(Status.FORBIDDEN.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_PROCESSOR_PARAMETERS_TEMPLATE.name());
 
 			return oResult;
 		}		
 		
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			if (UserApplicationRole.isAdmin(oRequesterUser)) {
 				// A user that has Admin rights should be able to auto-share the resource.
 			} else {
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: auto sharing not so smart");
+				WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: auto sharing not so smart");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_SHARING_WITH_ONESELF);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_ONESELF.name());
 
 				return oResult;
 			}
@@ -414,10 +422,10 @@ public class ProcessorParametersTemplateResource {
 		
 		// Cannot share with the owner
 		if (oProcessorParametersTemplate.getUserId().equals(sDestinationUserId)) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: sharing with the owner not so smart");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: sharing with the owner not so smart");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_OWNER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_OWNER.name());
 
 			return oResult;
 		}
@@ -427,10 +435,10 @@ public class ProcessorParametersTemplateResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: Destination user does not exists");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: Destination user does not exists");
 
 			oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER.name());
 
 			return oResult;
 		}
@@ -450,7 +458,7 @@ public class ProcessorParametersTemplateResource {
 
 			if (!oUserResourcePermissionRepository.isProcessorParametersTemplateSharedWithUser(sDestinationUserId, sProcessorParametersTemplateId)) {
 				UserResourcePermission oProcessorParametersTemplateSharing =
-						new UserResourcePermission("processorparameterstemplate", sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId(), "write");
+						new UserResourcePermission(ResourceTypes.PARAMETER.getResourceType(), sProcessorParametersTemplateId, sDestinationUserId, oProcessorParametersTemplate.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oProcessorParametersTemplateSharing);				
 			} else {
@@ -465,59 +473,26 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_INSERT_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name());
 
 			return oResult;
 		}
 
-		sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oProcessorParametersTemplate.getName(), sProcessorName);
-
-		oResult.setStringValue("Done");
-		oResult.setBoolValue(true);
-
-		return oResult;
-	}
-
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sProcessorParametersTemplateName, String sProcessorName) {
 		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
+			String sTitle = "WASDI " + sProcessorName + " Parameter " + oProcessorParametersTemplate.getName() + " shared with you";
 			
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: sMercuriusAPIAddress is null");
-			}
-			else {
-				
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: send notification");
-				
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-				Message oMessage = new Message();
-				
-				String sTitle = "WASDI " + sProcessorName + " Parameter " + sProcessorParametersTemplateName + " shared with you";
-				
-				oMessage.setTilte(sTitle);
-				
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-				
-				oMessage.setSender(sSender);
-				
-				String sMessage = "The user " + sRequesterUserId + " shared with you the parameters " + sProcessorParametersTemplateName + " of " + sProcessorName + " WASDI Application.";
-
-				oMessage.setMessage(sMessage);
-		
-				Integer iPositiveSucceded = 0;
-								
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-				
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
-			}
-				
+			String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the parameters " + oProcessorParametersTemplate.getName() + " of " + sProcessorName + " WASDI Application.";
+			
+			WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.sendNotificationEmail: notification exception " + oEx.toString());
 		}
+		
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+
+		return oResult;
 	}
 
 	/**
@@ -530,9 +505,9 @@ public class ProcessorParametersTemplateResource {
 	@GET
 	@Path("share/byprocessorParametersTemplate")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public List<ProcessorParametersTemplateSharingViewModel> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId) {
+	public List<ProcessorParametersTemplateSharingViewModel> getEnabledUsersSharedProcTemplates(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId) {
 
-		WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnableUsersSharedWorksace( WS: " + sProcessorParametersTemplateId + " )");
+		WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates( WS: " + sProcessorParametersTemplateId + " )");
 
 	
 		List<UserResourcePermission> aoProcessorParametersTemplateSharing = null;
@@ -540,8 +515,13 @@ public class ProcessorParametersTemplateResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.getEnableUsersSharedWorksace: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates: invalid session");
 			return aoProcessorParametersTemplateSharingViewModels;
+		}
+		
+		if (!PermissionsUtils.canUserAccessProcessorParametersTemplate(oOwnerUser.getUserId(), sProcessorParametersTemplateId)) {
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates: user cannot access this parameter");
+			return aoProcessorParametersTemplateSharingViewModels;			
 		}
 
 		try {
@@ -554,6 +534,7 @@ public class ProcessorParametersTemplateResource {
 					oProcessorParametersTemplateSharingViewModel.setOwnerId(oProcessorParametersTemplateSharing.getUserId());
 					oProcessorParametersTemplateSharingViewModel.setUserId(oProcessorParametersTemplateSharing.getUserId());
 					oProcessorParametersTemplateSharingViewModel.setProcessorParametersTemplateId(oProcessorParametersTemplateSharing.getResourceId());
+					oProcessorParametersTemplateSharingViewModel.setPermissions(oProcessorParametersTemplateSharing.getPermissions());
 
 					aoProcessorParametersTemplateSharingViewModels.add(oProcessorParametersTemplateSharingViewModel);
 				}
@@ -561,7 +542,7 @@ public class ProcessorParametersTemplateResource {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("ProcessorParametersTemplateResource.getEnableUsersSharedWorksace: " + oEx);
+			WasdiLog.errorLog("ProcessorParametersTemplateResource.getEnabledUsersSharedProcTemplates: " + oEx);
 			return aoProcessorParametersTemplateSharingViewModels;
 		}
 
@@ -569,6 +550,13 @@ public class ProcessorParametersTemplateResource {
 
 	}
 
+	/**
+	 * Removes one user from the sharings of a parameter
+	 * @param sSessionId Session Id
+	 * @param sProcessorParametersTemplateId Parameter Template Id
+	 * @param sUserId User Id to remove
+	 * @return Primitive Result
+	 */
 	@DELETE
 	@Path("share/delete")
 	@Produces({ "application/xml", "application/json", "text/xml" })
@@ -582,10 +570,10 @@ public class ProcessorParametersTemplateResource {
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oRequestingUser == null) {
-			WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid session");
+			WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid session");
 
 			oResult.setIntValue(Status.UNAUTHORIZED.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_INVALID_SESSION);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name());
 
 			return oResult;
 		}
@@ -596,10 +584,10 @@ public class ProcessorParametersTemplateResource {
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 
 			if (oDestinationUser == null) {
-				WasdiLog.debugLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid destination user");
+				WasdiLog.warnLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: invalid destination user");
 
 				oResult.setIntValue(Status.BAD_REQUEST.getStatusCode());
-				oResult.setStringValue(MSG_ERROR_INVALID_DESTINATION_USER);
+				oResult.setStringValue(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name());
 
 				return oResult;
 			}
@@ -610,7 +598,7 @@ public class ProcessorParametersTemplateResource {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.deleteUserSharedProcessorParametersTemplate: " + oEx);
 
 			oResult.setIntValue(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			oResult.setStringValue(MSG_ERROR_IN_DELETE_PROCESS);
+			oResult.setStringValue(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name());
 
 			return oResult;
 		}
@@ -635,9 +623,7 @@ public class ProcessorParametersTemplateResource {
 			return null;
 		}
 
-		return aoTemplates.stream()
-				.map(ProcessorParametersTemplateResource::getListViewModel)
-				.collect(Collectors.toList());
+		return aoTemplates.stream().map(ProcessorParametersTemplateResource::getListViewModel).collect(Collectors.toList());
 	}
 
 	/**

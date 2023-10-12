@@ -77,8 +77,8 @@
      }
  
      // Add sharing
-     this.addWorkflowSharing = function (sWorkflowId, sUserId) {
-         return this.m_oHttp.put(this.APIURL + '/workflows/share/add?workflowId=' + sWorkflowId + '&userId=' + sUserId);
+     this.addWorkflowSharing = function (sWorkflowId, sUserId, sRights) {
+         return this.m_oHttp.put(this.APIURL + '/workflows/share/add?workflowId=' + sWorkflowId + '&userId=' + sUserId+ "&rights="+sRights);
      }
  
      // Remove sharing

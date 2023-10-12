@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions;
 
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;

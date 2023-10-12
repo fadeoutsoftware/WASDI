@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
 
-import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceLogger;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.Utils;
@@ -113,7 +113,7 @@ public class Mosaic {
 			if (!bVrt) {
 				// Output file
 				asArgs.add("-o");
-				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(PathsConfig.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 				// Output format
@@ -183,13 +183,13 @@ public class Mosaic {
 				}
 				
 			
-				asArgs.add(LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
+				asArgs.add(PathsConfig.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 				processWorkspaceLog("Setting output file " + m_sOuptutFile);
 				
 			}
 						
 			// Get Base Path
-			String sWorkspacePath = LauncherMain.getWorkspacePath(m_oMosaicParameter);
+			String sWorkspacePath = PathsConfig.getWorkspacePath(m_oMosaicParameter);
 			
 			// for each product
 			for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
@@ -243,7 +243,7 @@ public class Mosaic {
 		} 
         catch (Throwable e) {
         	processWorkspaceLog("There was an exception...");
-			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + PathsConfig.getWorkspacePath(m_oMosaicParameter) + m_sOuptutFile);
 			WasdiLog.errorLog("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}

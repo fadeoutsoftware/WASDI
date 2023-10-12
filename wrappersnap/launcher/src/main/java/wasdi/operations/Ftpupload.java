@@ -6,9 +6,9 @@ import java.io.IOException;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.payloads.FTPUploadPayload;
@@ -56,7 +56,7 @@ public class Ftpupload extends Operation {
 
                 m_oProcessWorkspaceLogger.log("Moving " + oParameter.getLocalFileName() + " to " + oParameter.getFtpServer() + ":" + oParameter.getPort().toString());
 
-                String sFullLocalPath = LauncherMain.getWorkspacePath(oParam) + oParameter.getLocalFileName();
+                String sFullLocalPath = PathsConfig.getWorkspacePath(oParam) + oParameter.getLocalFileName();
 
                 updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 3);
                 File oFile = new File(sFullLocalPath);

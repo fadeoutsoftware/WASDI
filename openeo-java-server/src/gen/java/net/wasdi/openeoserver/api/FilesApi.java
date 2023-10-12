@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response.Status;
 import io.swagger.annotations.ApiParam;
 import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.*;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/files")

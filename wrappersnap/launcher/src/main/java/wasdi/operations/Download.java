@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.Product;
 
-import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.dataproviders.ProviderAdapter;
 import wasdi.dataproviders.ProviderAdapterFactory;
@@ -19,6 +18,7 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -121,7 +121,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             // set file size
             setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
             
-            String sDownloadPath = LauncherMain.getWorkspacePath(oParameter);
+            String sDownloadPath = PathsConfig.getWorkspacePath(oParameter);
 
             // Product view Model
             ProductViewModel oVM = null;
@@ -131,8 +131,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             WasdiLog.debugLog("Download.executeOperation: File to download: " + sFileNameWithoutPath);
             m_oProcessWorkspaceLogger.log("FILE " + sFileNameWithoutPath);
             
+            
             // Check if the file is already available
-            DownloadedFile oAlreadyDownloaded = fileAlreadyAvailable(sFileNameWithoutPath);
+            DownloadedFile oAlreadyDownloaded = fileAlreadyAvailable(sFileNameWithoutPath, oParameter.getWorkspace(), oParameter.getWorkspaceOwnerId());
             
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
             
@@ -359,9 +360,9 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
      * @param sFileNameWithoutPath
      * @return
      */
-	protected DownloadedFile fileAlreadyAvailable(String sFileNameWithoutPath) {
+	protected DownloadedFile fileAlreadyAvailable(String sFileNameWithoutPath, String sWorkspaceId, String sWorkspaceOwnerId) {
 
-        String sDownloadPath = WasdiConfig.Current.paths.downloadRootPath;
+        String sDownloadPath = PathsConfig.getWorkspacePath(sWorkspaceOwnerId, sWorkspaceId);
         
         DownloadedFile oAlreadyDownloaded = null;
         
@@ -376,7 +377,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
 
             if (oAlreadyDownloaded == null) {
             	
-            	// Check if it is already downloaded, in any workpsace
+            	// Check if it is already downloaded, in any other workpsace
             	
                 WasdiLog.debugLog("Download.fileAlreadyAvailable: Product NOT found in the workspace, search in other workspaces");
                 
@@ -405,7 +406,7 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
                 WasdiLog.debugLog("Download.fileAlreadyAvailable: Check if file exists");
 
                 // Check the path where we want the file
-                String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
+                String sDestinationFileWithPath = PathsConfig.getWorkspacePath(sWorkspaceOwnerId, sWorkspaceId) + sFileNameWithoutPath;
 
                 // Is it different?
                 if (sDestinationFileWithPath.equals(sFileNameWithFullPath) == false) {
@@ -430,10 +431,8 @@ public class Download extends Operation implements ProcessWorkspaceUpdateSubscri
             
             return oAlreadyDownloaded;
             
-        } catch (Exception oEx) {
-        	
-            WasdiLog.errorLog("Download.executeOperation: Exception "
-                    + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        } catch (Exception oEx) {        	
+            WasdiLog.errorLog("Download.fileAlreadyAvailable: Exception ", oEx);
         }
 
         return oAlreadyDownloaded;		

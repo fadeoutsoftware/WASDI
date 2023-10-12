@@ -1,10 +1,5 @@
 package wasdi.shared.viewmodels.processors;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * Image Import View Model
  * 
@@ -13,10 +8,6 @@ import lombok.Setter;
  * @author PetruPetrescu
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ImageImportViewModel {
 
 	private String fileUrl;
@@ -25,5 +16,41 @@ public class ImageImportViewModel {
 	private String workspace;
 	private String bbox;
 	private String parent;
+	public String getFileUrl() {
+		return fileUrl;
+	}
+	public void setFileUrl(String fileUrl) {
+		this.fileUrl = fileUrl;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getProvider() {
+		return provider;
+	}
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
+	public String getWorkspace() {
+		return workspace;
+	}
+	public void setWorkspace(String workspace) {
+		this.workspace = workspace;
+	}
+	public String getBbox() {
+		return bbox;
+	}
+	public void setBbox(String bbox) {
+		this.bbox = bbox;
+	}
+	public String getParent() {
+		return parent;
+	}
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
 
 }

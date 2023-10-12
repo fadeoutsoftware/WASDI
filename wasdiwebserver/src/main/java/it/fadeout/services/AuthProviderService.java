@@ -1,5 +1,5 @@
 package it.fadeout.services;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 /**

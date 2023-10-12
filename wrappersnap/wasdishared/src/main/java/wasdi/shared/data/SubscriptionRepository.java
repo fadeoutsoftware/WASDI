@@ -16,7 +16,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.Organization;
 import wasdi.shared.business.Subscription;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -498,8 +498,6 @@ public class SubscriptionRepository extends MongoRepository {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error searching not-owned subscriptions " + oEx.toString());
 		}
-		
-		
 
 		return aoReturnList;
 		

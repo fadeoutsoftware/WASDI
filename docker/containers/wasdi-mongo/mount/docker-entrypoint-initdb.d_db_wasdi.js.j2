@@ -1,0 +1,157 @@
+dbAdmin = db.getSiblingDB('admin');
+
+dbAdmin.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+
+dbWasdi = db.getSiblingDB('wasdi');
+
+dbWasdi.counter.createIndex(
+    {
+        'sequence': 1
+    },
+    {
+        name: 'idx_sequence_001'
+    }
+);
+
+dbWasdi.processorlog.createIndex(
+    {
+        'processWorkspaceId': 1
+    },
+    {
+        name: 'idx_processWorkspaceId_001'
+    }
+);
+
+dbWasdi.processorsharing.createIndex(
+    {
+        'userId': 1,
+        'processorId': 1
+    },
+    {
+        name: 'idx_userId_processorId_001'
+    }
+);
+
+dbWasdi.processworkpsace.createIndex(
+    {
+        'productName': 1
+    },
+    {
+        name: 'idx_productName_001'
+    }
+);
+
+dbWasdi.processworkpsace.createIndex(
+    {
+        'processObjId': 1
+    },
+    {
+        name: 'idx_processObjId_001'
+    }
+);
+
+dbWasdi.processworkpsace.createIndex(
+    {
+        'status': 1
+    },
+    {
+        name: 'idx_status_001'
+    }
+);
+
+dbWasdi.processworkpsace.createIndex(
+    {
+        'workspaceId': 1
+    },
+    {
+        name: 'idx_workspaceId_001'
+    }
+);
+
+dbWasdi.reviews.createIndex(
+    {
+        'processorId': 1
+    },
+    {
+        name: 'idx_processorId_001'
+    }
+);
+
+dbWasdi.sessions.createIndex(
+    {
+        'sessionId': 1
+    },
+    {
+        name: 'idx_sessionId_001'
+    }
+);
+
+dbWasdi.sessions.createIndex(
+    {
+        'lastTouch': 1,
+        'userId': 1
+    },
+    {
+        name: 'idx_lastTouch_userId_001'
+    }
+);
+
+dbWasdi.users.createIndex(
+    {
+        'userId': 1
+    },
+    {
+        name: 'idx_userId_001'
+    }
+);
+
+dbWasdi.workspaces.createIndex(
+    {
+        'workspaceId': 1
+    },
+    {
+        name: 'idx_workspaceId_001'
+    }
+);
+
+dbWasdi.workspacessharing.createIndex(
+    {
+        'workspaceId': 1
+    },
+    {
+        name: 'idx_workspaceId_001'
+    }
+);
+
+dbWasdi.createUser(
+    {
+        user: _getEnv('sWasdiContainerMongoMainDatabaseUsername'),
+        pwd: _getEnv('sWasdiContainerMongoMainDatabasePassword'),
+        roles: [
+            {
+                role: 'readWrite',
+                db: 'wasdi'
+            }
+        ]
+    }
+);
+{% if sWasdiContainerMongoMainDatabaseBackupUsername != "" and sWasdiContainerMongoMainDatabaseBackupPassword != "" %}
+
+dbAdmin.createUser(
+    {
+        user: _getEnv('sWasdiContainerMongoMainDatabaseBackupUsername'),
+        pwd: _getEnv('sWasdiContainerMongoMainDatabaseBackupPassword'),
+        roles: [
+            {
+                role: 'backup',
+                db: 'admin'
+            }
+        ]
+    }
+);
+{% endif %}

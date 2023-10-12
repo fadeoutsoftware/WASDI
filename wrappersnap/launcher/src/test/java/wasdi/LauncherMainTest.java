@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 
 import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.UserSession;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;

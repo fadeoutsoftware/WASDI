@@ -9,6 +9,7 @@ let OrganizationUsersController = (function () {
         this.m_oModalService = oModalService;
 
         this.m_sUserEmail = "";
+        this.m_sRights = "read";
 
         this.m_sSelectedOrganizationId = this.oExtras.organizationId;
 
@@ -20,7 +21,7 @@ let OrganizationUsersController = (function () {
         }
     }
 
-    OrganizationUsersController.prototype.shareOrganization = function (sUserId) {
+    OrganizationUsersController.prototype.shareOrganization = function (sUserId, sRights) {
         let oController = this;
 
         if (utilsIsObjectNullOrUndefined(sUserId)) {
@@ -34,7 +35,11 @@ let OrganizationUsersController = (function () {
             return false;
         }
 
-        this.m_oOrganizationService.addOrganizationSharing(this.m_sSelectedOrganizationId, sUserId).then(
+        if (utilsIsStrNullOrEmpty(sRights)) {
+            sRights = "read"
+        }        
+
+        this.m_oOrganizationService.addOrganizationSharing(this.m_sSelectedOrganizationId, sUserId, sRights).then(
             function (response) {
                 if (!utilsIsObjectNullOrUndefined(response.data)) {
                     if (response.data.message === "Done") {
@@ -43,8 +48,9 @@ let OrganizationUsersController = (function () {
                         );
                         utilsVexCloseDialogAfter(4000, oDialog);
 
-                        oController.m_aoUsersList.push({ userId: sUserId });
+                        oController.m_aoUsersList.push({ userId: sUserId , permissions: sRights});
                         oController.m_sUserEmail = "";
+                        oController.m_sRights = "read";
                     } else if (response.data.message === "Already Shared.") {
                         let oDialog = utilsVexDialogAlertBottomRightCorner(
                             `ORGANIZATION ALREADY SHARED WITH ${sUserId}`

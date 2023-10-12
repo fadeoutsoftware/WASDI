@@ -317,7 +317,7 @@
                         </li>
                         <!-- ADMIN DASHBOARD BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
-                            ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0"
+                            ng-show="m_oController.m_oUser.role != null && m_oController.m_oUser.role == 'ADMIN'"
                             title={{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}>
                             <a ng-click="m_oController.openAdminDashboard();" href="">
                                 <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>

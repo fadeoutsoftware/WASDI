@@ -21,10 +21,11 @@ import it.fadeout.Wasdi;
 import it.fadeout.threads.UpdateProcessorEnvironmentWorker;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
@@ -43,165 +44,217 @@ import wasdi.shared.viewmodels.processors.PackageManagerFullInfoViewModel;
 import wasdi.shared.viewmodels.processors.PackageManagerViewModel;
 import wasdi.shared.viewmodels.processors.PackageViewModel;
 
+/**
+ * Package Manager Resource
+ * 
+ * Offers the API to allow the users to interact with the package manager of their application hosted in WASDI.
+ * 
+ * 	.get the list of packages
+ * 	.execute actions on the package manager
+ * 	.get the version of the package manager itself
+ * 	.get the list of actions executed on a single application (history of users' operations)
+ * 
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/packageManager")
 public class PackageManagerResource {
 	
+	/**
+	 * Get the list of packages in an application
+	 * 
+	 * @param sSessionId Session Id
+	 * @param sName Application Name
+	 * @return list of PackageViewModel
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/listPackages")
-	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName) throws Exception {
+	public Response getListPackages(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getListPackages( " + "Name: " + sName + ", " + " )");
 		
-		List<PackageViewModel> aoPackages = new ArrayList<>();
-		
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getListPackages: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
-		
-		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
+
+		try {
+			List<PackageViewModel> aoPackages = new ArrayList<>();
+			
+			
+			if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+				WasdiLog.warnLog("PackageManagerResource.getListPackages: user cannot access the processor");
+				return Response.status(Status.FORBIDDEN).build();			
+			}
+			
+			String sContentAsJson = readPackagesInfoFile(sName);
+
+			if (Utils.isNullOrEmpty(sContentAsJson)) {
+				WasdiLog.warnLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+			PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
+
+			if (oPackageManagerFullInfoViewModel == null) {
+				WasdiLog.warnLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+			List<PackageViewModel> aoPackagesOutdated = oPackageManagerFullInfoViewModel.getOutdated();
+
+			if (aoPackagesOutdated != null) {
+				aoPackages.addAll(aoPackagesOutdated);
+			}
+
+			List<PackageViewModel> aoPackagesUptodate = oPackageManagerFullInfoViewModel.getUptodate();
+
+			if (aoPackagesUptodate != null) {
+				aoPackages.addAll(aoPackagesUptodate);
+			}
+
+			List<PackageViewModel> aoPackagesAll = oPackageManagerFullInfoViewModel.getAll();
+
+			if (aoPackagesAll != null) {
+				aoPackages.addAll(aoPackagesAll);
+			}
+
+			Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
+			Collections.sort(aoPackages, oComparator);
+
+			return Response.ok(aoPackages).build();			
 		}
-		
-		String sContentAsJson = readPackagesInfoFile(sName);
-
-		if (Utils.isNullOrEmpty(sContentAsJson)) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: " + "the packagesInfo.json is null or empty");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
-
-		if (oPackageManagerFullInfoViewModel == null) {
-			WasdiLog.debugLog("PackageManagerResource.getListPackages: the packagesInfo.json content could not be parsed");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		List<PackageViewModel> aoPackagesOutdated = oPackageManagerFullInfoViewModel.getOutdated();
-
-		if (aoPackagesOutdated != null) {
-			aoPackages.addAll(aoPackagesOutdated);
-		}
-
-		List<PackageViewModel> aoPackagesUptodate = oPackageManagerFullInfoViewModel.getUptodate();
-
-		if (aoPackagesUptodate != null) {
-			aoPackages.addAll(aoPackagesUptodate);
-		}
-
-		List<PackageViewModel> aoPackagesAll = oPackageManagerFullInfoViewModel.getAll();
-
-		if (aoPackagesAll != null) {
-			aoPackages.addAll(aoPackagesAll);
-		}
-
-		Comparator<PackageViewModel> oComparator = Comparator.comparing(PackageViewModel::getPackageName, String.CASE_INSENSITIVE_ORDER);
-		Collections.sort(aoPackages, oComparator);
-
-		return Response.ok(aoPackages).build();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.getListPackages: exception ", oEx);
+			return Response.serverError().build();
+		}		
 	}
 
+	/**
+	 * Get the list of actions executed on an application
+	 * 
+	 * @param sSessionId Session Id
+	 * @param sName Name of the application
+	 * @return List of strings
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/environmentActions")
-	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName) throws Exception {
+	public Response getEnvironmentActionsList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList( " + "Name: " + sName + ", " + " )");
-
-		List<String> asEnvActions = new ArrayList<>();
-
+		
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
-		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
-		}		
-		
-		if (WasdiConfig.Current.isMainNode() == false) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
-			return Response.status(Status.BAD_REQUEST).build();			
+		try {
+			List<String> asEnvActions = new ArrayList<>();
+
+			
+			if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
+				WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: user cannot access the processor");
+				return Response.status(Status.FORBIDDEN).build();			
+			}		
+			
+			if (WasdiConfig.Current.isMainNode() == false) {
+				WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: this API is for the main node");
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			String sContent = readEnvironmentActionsFile(sName);
+
+			if (Utils.isNullOrEmpty(sContent)) {
+				WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+			asEnvActions = parseEnvironmentActionsContent(sContent);
+
+			return Response.ok(asEnvActions).build();			
 		}
-		
-		String sContent = readEnvironmentActionsFile(sName);
-
-		if (Utils.isNullOrEmpty(sContent)) {
-			WasdiLog.debugLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.getEnvironmentActionsList: exception ", oEx);
+			return Response.serverError().build();
 		}
-
-		asEnvActions = parseEnvironmentActionsContent(sContent);
-
-		return Response.ok(asEnvActions).build();
 	}
 	
+	/**
+	 * Get the version of the Package Manager of an application
+	 * @param sSessionId Session Id
+	 * @param sName Name of the application
+	 * @return
+	 * @throws Exception
+	 */
 	@GET
 	@Path("/managerVersion")
-	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("name") String sName) throws Exception {
+	public Response getManagerVersion(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) {
 		WasdiLog.debugLog("PackageManagerResource.getManagerVersion( " + "Name: " + sName + " )");
 		
 		// Check session
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		if (oUser == null) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid session");
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: invalid session");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
 		if (Utils.isNullOrEmpty(sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: invalid app name");
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: invalid app name");
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if (!PermissionsUtils.canUserAccessProcessorByName(oUser.getUserId(), sName)) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
-			return Response.status(Status.UNAUTHORIZED).build();			
+			WasdiLog.warnLog("PackageManagerResource.getManagerVersion: user cannot access the processor");
+			return Response.status(Status.FORBIDDEN).build();			
 		}		
-
-
-		// Trying to read the Package Manager info from the packagesInfo.json file.
-		// If the info is valid, reply using it
-
-		String sContentAsJson = readPackagesInfoFile(sName);
-
-		if (!Utils.isNullOrEmpty(sContentAsJson)) {
-
-			PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
-
-			if (oPackageManagerFullInfoViewModel != null) {
-				PackageManagerViewModel oPackageManagerVM = oPackageManagerFullInfoViewModel.getPackageManager();
-
-				return Response.ok(oPackageManagerVM).build();
-			}
-		}
-
-		// Otherwise, if the Package Manager info from the packagesInfo.json file is not valid, make a live call.
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
 		
-		if (oProcessorToRun==null) {
-			WasdiLog.debugLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-
-		PackageManagerViewModel oPackageManagerVM = null;
-
 		try {
-			IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
+			// Trying to read the Package Manager info from the packagesInfo.json file.
+			// If the info is valid, reply using it
+			String sContentAsJson = readPackagesInfoFile(sName);
 
-			oPackageManagerVM = oPackageManager.getManagerVersion();
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
+			if (!Utils.isNullOrEmpty(sContentAsJson)) {
+
+				PackageManagerFullInfoViewModel oPackageManagerFullInfoViewModel = MongoRepository.s_oMapper.readValue(sContentAsJson, new TypeReference<PackageManagerFullInfoViewModel>(){});
+
+				if (oPackageManagerFullInfoViewModel != null) {
+					PackageManagerViewModel oPackageManagerVM = oPackageManagerFullInfoViewModel.getPackageManager();
+
+					return Response.ok(oPackageManagerVM).build();
+				}
+			}
+
+			// Otherwise, if the Package Manager info from the packagesInfo.json file is not valid, make a live call.
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToRun = oProcessorRepository.getProcessorByName(sName);
+			
+			if (oProcessorToRun==null) {
+				WasdiLog.warnLog("PackageManagerResource.getManagerVersion: processor not found " + sName);
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+			PackageManagerViewModel oPackageManagerVM = null;
+
+			try {
+				IPackageManager oPackageManager = getPackageManager(oProcessorToRun);
+
+				oPackageManagerVM = oPackageManager.getManagerVersion();
+			} catch (Exception oEx) {
+				WasdiLog.errorLog("PackageManagerResource.getManagerVersion: " + oEx);
+			}
+
+			return Response.ok(oPackageManagerVM).build();			
 		}
-
-		return Response.ok(oPackageManagerVM).build();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PackageManagerResource.getManagerVersion: exception ", oEx);
+			return Response.serverError().build();
+		}
 	}
 	
 	/**
@@ -226,7 +279,7 @@ public class PackageManagerResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
+				WasdiLog.warnLog("ProcessorResources.environmentupdate( Session: " + sSessionId + ", Processor: " + sProcessorId + ", WS: " + sWorkspaceId + " ): invalid session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -235,13 +288,13 @@ public class PackageManagerResource {
 			Processor oProcessorToForceUpdate = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessorToForceUpdate == null) {
-				WasdiLog.debugLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: unable to find processor " + sProcessorId);
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
-				WasdiLog.debugLog("PackageManagerResource.environmentupdate: user cannot access the processor");
-				return Response.status(Status.UNAUTHORIZED).build();			
+			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), oProcessorToForceUpdate.getProcessorId())) {
+				WasdiLog.warnLog("PackageManagerResource.environmentupdate: user cannot write the processor");
+				return Response.status(Status.FORBIDDEN).build();			
 			}			
 			
 			// Schedule the process to run the operation in the environment
@@ -347,7 +400,7 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.readPackagesInfoFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 
@@ -383,7 +436,7 @@ public class PackageManagerResource {
 			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
 
 			// Take path of the processor
-			String sProcessorPath = Wasdi.getDownloadPath() + "processors/" + sProcessorName;
+			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
 			java.nio.file.Path oDirPath = java.nio.file.Paths.get(sProcessorPath).toAbsolutePath().normalize();
 			File oDirFile = oDirPath.toFile();
 

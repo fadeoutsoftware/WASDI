@@ -13,7 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import wasdi.jwasdilib.WasdiLib;
 import wasdi.shared.business.Schedule;
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.UserSession;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ScheduleRepository;
@@ -27,14 +28,6 @@ import wasdi.shared.utils.log.WasdiLog;
 public class Trigger {
 	
 	/**
-	 * Default Base Path
-	 */
-	String m_sBasePath = "/data/wasdi/";
-	/**
-	 * Default Base Url
-	 */
-	String m_sBaseUrl = WasdiConfig.Current.baseUrl;
-	/**
 	 * Static Logger that references the "Trigger" logger
 	 */
 	public static Logger s_oLogger = LogManager.getLogger(Trigger.class);
@@ -44,9 +37,6 @@ public class Trigger {
 		try {
 			// Read Mongo configuration
 			MongoRepository.readConfig();
-			// Read base path and url
-			m_sBasePath = WasdiConfig.Current.paths.downloadRootPath;
-			m_sBaseUrl = WasdiConfig.Current.baseUrl;
 		} 
 		catch (Throwable oEx) {
 			oEx.printStackTrace();
@@ -161,10 +151,10 @@ public class Trigger {
 		oWasdiLib.setUser(oSchedule.getUserId());
 		oWasdiLib.setActiveWorkspace(oSchedule.getWorkspaceId());
 		oWasdiLib.setSessionId(oUserSession.getSessionId());
-		oWasdiLib.setBasePath(m_sBasePath);
+		oWasdiLib.setBasePath(PathsConfig.getWasdiBasePath());
 		oWasdiLib.setIsOnServer(true);
 		oWasdiLib.setDownloadActive(false);
-		oWasdiLib.setBaseUrl(m_sBaseUrl);
+		oWasdiLib.setBaseUrl(WasdiConfig.Current.baseUrl);
 		
 		// Init the lib
 		if (oWasdiLib.internalInit()) {

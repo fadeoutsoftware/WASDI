@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Return:
+# - 0 if the request concerns a shell
+# - 1 else
+function requestForShell() {
+    local sRequest="${1}"
+    local aShell=(
+        "bash"
+        "/bin/bash"
+        "/usr/bin/bash"
+        "dash"
+        "/bin/dash"
+        "/usr/bin/dash"
+        "sh"
+        "/bin/sh"
+        "/usr/bin/sh"
+    )
+
+    # Empty value == not a shell
+    if [[ -z "${sRequest}" ]]
+    then
+        return 1
+    fi
+
+    for sCurrentValue in "${aShell[@]}"
+    do
+        if [[ "${sCurrentValue}" == "${sRequest}" ]]
+        then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+
+# Users
+sCurrentUser="$(whoami)"
+sWasdiSystemUserName="{{ sWasdiSystemUserName }}"
+
+
+# Debug
+echo "[DEBUG] User: ${sCurrentUser}"
+echo "[DEBUG] Passed to the container: ${@}"
+
+
+# Change owner of directories when the user is not {{ sWasdiDataPartitionRootDirectoryPath }}
+echo "[DEBUG] Change owner of {{ sWasdiDataPartitionRootDirectoryPath }}"
+
+if [[ "${sCurrentUser}" == "root" ]]
+then
+    find {{ sWasdiDataPartitionRootDirectoryPath }} -type d ! -user {{ sWasdiDataPartitionRootDirectoryOwner }} -exec chown {{ sWasdiDataPartitionRootDirectoryOwner }} {} \;
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[DEBUG] OK"
+    else
+        echo "[DEBUG] ERROR"
+    fi
+else
+    echo "[DEBUG] Nothing to do as we are not root (user == '${sCurrentUser}')"
+fi
+
+# Change group of directories when the group is not {{ sWasdiDataPartitionRootDirectoryPath }}
+echo "[DEBUG] Change group of {{ sWasdiDataPartitionRootDirectoryPath }}"
+
+if [[ "${sCurrentUser}" == "root" ]]
+then
+    find {{ sWasdiDataPartitionRootDirectoryPath }} -type d ! -group {{ sWasdiDataPartitionRootDirectoryGroup }} -exec chgrp {{ sWasdiDataPartitionRootDirectoryGroup }} {} \;
+
+    if [[ ${?} -eq 0 ]]
+    then
+        echo "[DEBUG] OK"
+    else
+        echo "[DEBUG] ERROR"
+    fi
+else
+    echo "[DEBUG] Nothing to do as we are not root (user == '${sCurrentUser}')"
+fi
+
+
+# Test the request to know if it is a shell or not
+requestForShell "${1}"
+iReturnCode=${?}
+
+# If a shell is requested
+if [[ ${iReturnCode} -eq 0 ]]
+then
+    echo "[DEBUG] Shell request"
+    exec ${@}
+
+# Execute the requested command as ${sWasdiSystemUserName}
+else
+    sCommand="java -Xmx18g -Xms1024m -XX:+StartAttachListener -XX:+AggressiveOpts -Xverify:none -Djava.library.path=/usr/lib/jni -Dsun.awt.nopixfmt=true -Dsun.java2d.dpiaware=false -Dsnap.parallelism=8 -Dsun.zip.disableMemoryMapping=true -jar {{ sWasdiComponentLauncherRootDirectoryPath }}/{{ sWasdiComponentLauncherTargetFileName }} --config {{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfigDocker.json"
+
+    if [[ "${sCurrentUser}" == "${sWasdiSystemUserName}" ]]
+    then
+        echo "[DEBUG] Software request executed directly as ${sWasdiSystemUserName}"
+        exec ${sCommand}
+    else
+        echo "[DEBUG] Software request executed with runuser as ${sWasdiSystemUserName}"
+        runuser ${sWasdiSystemUserName} --command "${sCommand}"
+    fi
+fi

@@ -48,7 +48,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
     echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
     echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
-    echo "deb http://lu.archive.ubuntu.com/ubuntu/ ${sUbuntuDistributionName} main restricted" > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install ca-certificates && \
     echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${sUbuntuDistributionName} main restricted universe multiverse" > /etc/apt/sources.list && \
@@ -95,21 +94,19 @@ WORKDIR ${sContainerUserHomeDirectory}/application
 USER ${sContainerUserName}
 
 
-# Create a virtual environment
-# [IN OUR VENV] Install needed Python libraries
-# Please note:
-#   - 'wasdi' is installed independently to be able to set the repository
-#   - there is no cache: I suppose because it is too much dynamic
-RUN python3 -m venv --system-site-packages ${sContainerUserHomeDirectory}/venv && \
-    pip3 install --no-cache-dir --no-compile ${sContainerPipWasdiArguments} wasdi && \
-    pip3 install --no-cache-dir --no-compile \
-        numpy
-
-
 # Copy:
 #   - the tool to install package
 #   - the application files
 COPY --chown=${sContainerUserName}:${sContainerGroupName} ./ ${sContainerUserHomeDirectory}/application/
+
+
+# Create a virtual environment
+# [IN OUR VENV] Install needed Python libraries
+# Please note 'wasdi' is installed independently to be able to set the repository
+RUN python3 -m venv --system-site-packages ${sContainerUserHomeDirectory}/venv && \
+    pip3 install --no-cache-dir --no-compile ${sContainerPipWasdiArguments} wasdi && \
+    pip3 install --no-cache-dir --no-compile \
+        numpy
 
 
 # Install EO expert libraries only if ${sContainerUserHomeDirectory}/application/pip.txt exists

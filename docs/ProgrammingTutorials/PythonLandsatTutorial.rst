@@ -190,6 +190,7 @@ Let's debug to see the effects of this.
 If the setup is correct so far, we should see the output from the wasdi library that shows the initialization has gone well. Something like this:
 
 .. code-block:: python
+    
     [INFO] _loadParams: wasdi could not load param file. That is fine, you can still load it later, don't worry
     [INFO] waspy.init: returned session is: 0d3f3ef1-f4c3-4202-9015-6ca17fc21cc7
     [INFO] waspy.init: WASPY successfully initiated :-)

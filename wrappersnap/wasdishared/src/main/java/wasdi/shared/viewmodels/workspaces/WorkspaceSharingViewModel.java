@@ -20,6 +20,11 @@ public class WorkspaceSharingViewModel {
      * Workspace Owner
      */
     private  String ownerId;
+    
+    /**
+     * Sharing permissions
+     */
+    private  String permissions;
 
     public String getWorkspaceId() {
         return workspaceId;
@@ -44,4 +49,12 @@ public class WorkspaceSharingViewModel {
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
     }
+
+	public String getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
+	}
 }

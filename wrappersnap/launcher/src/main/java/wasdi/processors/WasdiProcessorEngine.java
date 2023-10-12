@@ -5,8 +5,9 @@ import java.util.Map;
 
 import wasdi.ProcessWorkspaceLogger;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.rabbit.Send;
@@ -184,7 +185,7 @@ public abstract class WasdiProcessorEngine {
 		// First Check if processor exists
 		String sProcessorName = oProcessorParameter.getName();
 		
-		String sProcessorFolder = getProcessorFolder(sProcessorName);
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 		
 		File oProcessorFolderFile = new File(sProcessorFolder);
 		
@@ -223,7 +224,7 @@ public abstract class WasdiProcessorEngine {
 
 			String sUrl = sBaseUrl + "processors/downloadprocessor?processorId=" + sProcessorId;
 
-			String sSavePath = getProcessorFolder(oProcessor.getName());
+			String sSavePath = PathsConfig.getProcessorFolder(oProcessor.getName());
 			String sOutputFilePath = sSavePath + sProcessorId + ".zip";
 
 			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(sSessionId);
@@ -313,31 +314,6 @@ public abstract class WasdiProcessorEngine {
 		this.m_oSendToRabbit = m_oSendToRabbit;
 	}
 	
-	/**
-	 * Get the processor folder by Processor
-	 * @param oProcessor Processor Object
-	 * @return the folder of the processor
-	 */
-	public String getProcessorFolder(Processor oProcessor) {
-		if (oProcessor == null) return null;
-		return getProcessorFolder(oProcessor.getName());
-	}
-
-	/**
-	 * Get the processor folder by processor name
-	 * @param sProcessorName the name of the processor
-	 * @return the folder of the processor
-	 */
-	public String getProcessorFolder(String sProcessorName) {
-		// Set the processor path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-
-		if (!sDownloadRootPath.endsWith(File.separator)) sDownloadRootPath = sDownloadRootPath + File.separator;
-
-		String sProcessorFolder = sDownloadRootPath + "processors" + File.separator + sProcessorName + File.separator;
-
-		return sProcessorFolder;
-	}
 
 	/**
 	 * Get the template folder of the processor by processor name
@@ -361,7 +337,7 @@ public abstract class WasdiProcessorEngine {
 	 * @return
 	 */
 	public String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
-		return getProcessorFolder(sProcessorName) + "var" + s_sFILE_SEPARATOR + "general_common.env";
+		return PathsConfig.getProcessorFolder(sProcessorName) + "var" + s_sFILE_SEPARATOR + "general_common.env";
 	}
 
 	/**

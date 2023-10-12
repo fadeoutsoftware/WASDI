@@ -237,7 +237,7 @@ public class StyleRepository extends MongoRepository {
 	 * @param sStyleId a valid style id
 	 * @return true if the user launched the style, false otherwise
 	 */
-	public boolean isStyleOwnedByUser(String sUserId, String sStyleId) {
+	public boolean isOwnedByUser(String sUserId, String sStyleId) {
 		try {
 			Document oDoc = getCollection(m_sThisCollection).find(Filters.and(
 					Filters.eq("userId", sUserId),

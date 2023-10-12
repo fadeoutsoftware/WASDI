@@ -22,8 +22,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.ImagesCollections;
-import wasdi.shared.business.Processor;
-import wasdi.shared.business.User;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.User;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.ImageFile;
 import wasdi.shared.utils.ImageResourceUtils;
@@ -32,6 +32,23 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
+/**
+ * Images Resource.
+ * Hosts the API to upload and show Images in WASDI. 
+ * Images can be associated to different entities (ie User, Processor, Organization..).
+ * Each image must belong to a Collection. Collections of Images are declared in ImagesCollections
+ * 
+ * Given a collection, the image can also be set in a subfolder.
+ * 
+ * The API are:
+ * 	.upload image
+ * 	.get image
+ * 	.delete Image
+ * 	.There are 2 convience methods for Processor Logo and Images (for retro-compatiability)
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/images")
 public class ImagesResource {
 	
@@ -59,23 +76,23 @@ public class ImagesResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: invalid user or session");
+				WasdiLog.warnLog("ImagesResource.uploadImage: invalid user or session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
 			if (!ImageResourceUtils.isValidCollection(sCollection)) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: invalid collection");
+				WasdiLog.warnLog("ImagesResource.uploadImage: invalid collection");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}
 			
 			if (Utils.isNullOrEmpty(sImageName)) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: invalid image name");
+				WasdiLog.warnLog("ImagesResource.uploadImage: invalid image name");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}			
 			
-			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: user cannot access image");
-				return Response.status(Status.UNAUTHORIZED).build();				
+			if (!PermissionsUtils.canUserWriteImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+				WasdiLog.warnLog("ImagesResource.uploadImage: user cannot access image");
+				return Response.status(Status.FORBIDDEN).build();				
 			}
 						
 			if (Utils.isNullOrEmpty(sFolder)) {
@@ -84,7 +101,7 @@ public class ImagesResource {
 			
 			//sanity check: is sImageName safe? It must be a file name, not a path
 			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\") || sFolder.contains("/") || sFolder.contains("\\") ) {
-				WasdiLog.debugLog("ImagesResource.uploadImage: Image or Collection name looks like a path" );
+				WasdiLog.warnLog("ImagesResource.uploadImage: Image or Collection name looks like a path" );
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
@@ -100,13 +117,13 @@ public class ImagesResource {
 				WasdiLog.debugLog("ImagesResource.uploadImage: FileName " + sFileName + " Extension: " + sExt);
 			} 
 			else {
-				WasdiLog.debugLog("ImagesResource.uploadImage: File metadata not available");
+				WasdiLog.warnLog("ImagesResource.uploadImage: File metadata not available");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 			
 			// Check if this is an accepted file extension
 			if(ImageResourceUtils.isValidExtension(sExt) == false ){
-				WasdiLog.debugLog("ImagesResource.uploadImage: extension invalid");
+				WasdiLog.warnLog("ImagesResource.uploadImage: extension invalid");
 				return Response.status(Status.BAD_REQUEST).build();
 			}
 
@@ -146,7 +163,7 @@ public class ImagesResource {
 		    boolean bIsSaved =  oOutputImage.saveImage(oInputFileStream);
 		    
 		    if(bIsSaved == false){
-		    	WasdiLog.debugLog("ImagesResource.uploadImage:  not saved!");
+		    	WasdiLog.warnLog("ImagesResource.uploadImage:  not saved!");
 		    	return Response.status(Status.BAD_REQUEST).build();
 		    }
 		    
@@ -207,30 +224,30 @@ public class ImagesResource {
 			User oUser = Wasdi.getUserFromSession(sTokenSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ImagesResource.getImage: no valid user or session");
+				WasdiLog.warnLog("ImagesResource.getImage: no valid user or session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
 			if (!ImageResourceUtils.isValidCollection(sCollection)) {
-				WasdiLog.debugLog("ImagesResource.getImage: invalid collection");
+				WasdiLog.warnLog("ImagesResource.getImage: invalid collection");
 				return Response.status(Status.BAD_REQUEST).build();			
 			}
 			
 			if(Utils.isNullOrEmpty(sImageName)) {
-				WasdiLog.debugLog("ImagesResource.getImage: Image name is null" );
+				WasdiLog.warnLog("ImagesResource.getImage: Image name is null" );
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 			
 			if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
-				WasdiLog.debugLog("ImagesResource.getImage: invalid user or session");
-				return Response.status(Status.UNAUTHORIZED).build();				
+				WasdiLog.warnLog("ImagesResource.getImage: invalid user or session");
+				return Response.status(Status.FORBIDDEN).build();				
 			}			
 			
 			if (sFolder==null) sFolder="";
 			
 			//sanity check: are the inputs safe? It must be a file name, not a path
 			if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
-				WasdiLog.debugLog("ImagesResource.getImage: Image or Collection name looks like a path" );
+				WasdiLog.warnLog("ImagesResource.getImage: Image or Collection name looks like a path" );
 				return Response.status(Status.BAD_REQUEST).build();
 			}			
 					
@@ -243,7 +260,7 @@ public class ImagesResource {
 			
 			//Check the logo and extension
 			if(oLogo.exists() == false){
-				WasdiLog.debugLog("ImagesResource.getImage: unable to find image in " + sAbsolutePath);
+				WasdiLog.warnLog("ImagesResource.getImage: unable to find image in " + sAbsolutePath);
 				return Response.status(Status.NO_CONTENT).build();
 			}
 			
@@ -274,30 +291,30 @@ public class ImagesResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: user or session invalid");
+			WasdiLog.warnLog("ImagesResource.deleteImage: user or session invalid");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 						
 		if(Utils.isNullOrEmpty(sImageName)) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: Image name is null" );
+			WasdiLog.warnLog("ImagesResource.deleteImage: Image name is null" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		if (!ImageResourceUtils.isValidCollection(sCollection)) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: invalid collection");
+			WasdiLog.warnLog("ImagesResource.deleteImage: invalid collection");
 			return Response.status(Status.BAD_REQUEST).build();			
 		}
 		
-		if (!PermissionsUtils.canUserAccessImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: invalid user or session");
-			return Response.status(Status.UNAUTHORIZED).build();				
+		if (!PermissionsUtils.canUserWriteImage(oUser.getUserId(), sCollection, sFolder, sImageName)) {
+			WasdiLog.warnLog("ImagesResource.deleteImage: invalid user or session");
+			return Response.status(Status.FORBIDDEN).build();				
 		}		
 		
 		if (sFolder==null) sFolder="";		
 
 		//sanity check: is sImageName safe? It must be a file name, not a path
 		if(sImageName.contains("/") || sImageName.contains("\\") || sCollection.contains("/") || sCollection.contains("\\")|| sFolder.contains("/") || sFolder.contains("\\")) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: Image or Collection name looks like a path" );
+			WasdiLog.warnLog("ImagesResource.deleteImage: Image or Collection name looks like a path" );
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -307,14 +324,14 @@ public class ImagesResource {
 		File oFile = new File(sFilePath);
 		
 		if (!oFile.exists()) {
-			WasdiLog.debugLog("ImagesResource.deleteImage: file " + sImageName +" not found");
+			WasdiLog.warnLog("ImagesResource.deleteImage: file " + sImageName +" not found");
 			return Response.status(Status.NOT_FOUND).build();			
 		}
 				
 		//delete file
 		try {
 			if (!oFile.delete()) {
-				WasdiLog.debugLog("ImagesResource.deleteImage: error deleting file ");
+				WasdiLog.warnLog("ImagesResource.deleteImage: error deleting file ");
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();				
 			}
 		} catch (Exception oE) {
@@ -349,7 +366,7 @@ public class ImagesResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				WasdiLog.debugLog("ImagesResource.uploadProcessorLogo: invalid user or session");
+				WasdiLog.warnLog("ImagesResource.uploadProcessorLogo: invalid user or session");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -358,13 +375,13 @@ public class ImagesResource {
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 			
 			if (oProcessor == null) {
-				WasdiLog.debugLog("ImagesResource.uploadProcessorLogo: unable to find processor " + sProcessorId);
+				WasdiLog.warnLog("ImagesResource.uploadProcessorLogo: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
 			
-			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
-				WasdiLog.debugLog("ImagesResource.uploadProcessorLogo: processor not accesable by user " + oUser.getUserId());
-				return Response.status(Status.UNAUTHORIZED).build();								
+			if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), sProcessorId)) {
+				WasdiLog.warnLog("ImagesResource.uploadProcessorLogo: processor not accesable by user " + oUser.getUserId());
+				return Response.status(Status.FORBIDDEN).build();								
 			}
 			
 			String sFileName = ImageResourceUtils.s_sDEFAULT_LOGO_PROCESSOR_NAME;
@@ -414,7 +431,7 @@ public class ImagesResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser==null) {
-			WasdiLog.debugLog("ImagesResource.uploadProcessorImage: user or session invalid");
+			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: user or session invalid");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -422,13 +439,13 @@ public class ImagesResource {
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
 		if (oProcessor == null) {
-			WasdiLog.debugLog("ImagesResource.uploadProcessorImage: unable to find processor " + sProcessorId);
+			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: unable to find processor " + sProcessorId);
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
-		if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
-			WasdiLog.debugLog("ImagesResource.uploadProcessorImage: user cannot access " + oUser.getUserId());
-			return Response.status(Status.UNAUTHORIZED).build();								
+		if (!PermissionsUtils.canUserWriteProcessor(oUser.getUserId(), sProcessorId)) {
+			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: user cannot access " + oUser.getUserId());
+			return Response.status(Status.FORBIDDEN).build();								
 		}
 				
 		// Take path
@@ -445,7 +462,7 @@ public class ImagesResource {
 		WasdiLog.debugLog("ImagesResource.uploadProcessorImage: available file name: " + sAvaibleFileName);
 		
 		if(sAvaibleFileName.isEmpty()){
-			WasdiLog.debugLog("ImagesResource.uploadProcessorImage: max images count reached");
+			WasdiLog.warnLog("ImagesResource.uploadProcessorImage: max images count reached");
 			//the user have reach the max number of images 
 	    	return Response.status(Status.BAD_REQUEST).build();
 		}

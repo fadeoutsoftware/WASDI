@@ -1,14 +1,5 @@
 package wasdi.shared.viewmodels.monitoring;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
 public class Memory {
 
 	private DataBlockAbsolute absolute;
@@ -82,6 +73,22 @@ public class Memory {
 		}
 
 		return oValue;
+	}
+
+	public DataBlockAbsolute getAbsolute() {
+		return absolute;
+	}
+
+	public void setAbsolute(DataBlockAbsolute absolute) {
+		this.absolute = absolute;
+	}
+
+	public DataBlockPercentage getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(DataBlockPercentage percentage) {
+		this.percentage = percentage;
 	}
 
 }

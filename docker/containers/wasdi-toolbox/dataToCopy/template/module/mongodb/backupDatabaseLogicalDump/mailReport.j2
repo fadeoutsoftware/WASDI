@@ -1,0 +1,18 @@
+{% raw %}Hi,
+
+Please find the MongoDB backup report:
+{%- for currentLine in data %}
+  - alias '{{ currentLine['aliasName'] }}':
+    - state: {{ currentLine['state'] }}
+{%- if currentLine['message'] != [] %}
+    - additionnal message:
+{%- for currentMessage in currentLine['message'] %}
+      - {{ currentMessage }}
+{%- endfor %}
+{%- endif %}
+    - backup start time: {{ currentLine['startTime'] }}
+    - backup end time: {{ currentLine['endTime'] }}
+{%- endfor %}
+
+Best regards,
+Sysadmin{% endraw %}

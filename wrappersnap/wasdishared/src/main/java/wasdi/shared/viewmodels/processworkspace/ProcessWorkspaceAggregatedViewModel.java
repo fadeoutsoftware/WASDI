@@ -1,16 +1,5 @@
 package wasdi.shared.viewmodels.processworkspace;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class ProcessWorkspaceAggregatedViewModel {
 
 	private String schedulerName;
@@ -42,5 +31,61 @@ public class ProcessWorkspaceAggregatedViewModel {
 		}
 
 		return iTotal;
+	}
+
+	public String getSchedulerName() {
+		return schedulerName;
+	}
+
+	public void setSchedulerName(String schedulerName) {
+		this.schedulerName = schedulerName;
+	}
+
+	public String getOperationType() {
+		return operationType;
+	}
+
+	public void setOperationType(String operationType) {
+		this.operationType = operationType;
+	}
+
+	public String getOperationSubType() {
+		return operationSubType;
+	}
+
+	public void setOperationSubType(String operationSubType) {
+		this.operationSubType = operationSubType;
+	}
+
+	public Integer getProcCreated() {
+		return procCreated;
+	}
+
+	public void setProcCreated(Integer procCreated) {
+		this.procCreated = procCreated;
+	}
+
+	public Integer getProcRunning() {
+		return procRunning;
+	}
+
+	public void setProcRunning(Integer procRunning) {
+		this.procRunning = procRunning;
+	}
+
+	public Integer getProcWaiting() {
+		return procWaiting;
+	}
+
+	public void setProcWaiting(Integer procWaiting) {
+		this.procWaiting = procWaiting;
+	}
+
+	public Integer getProcReady() {
+		return procReady;
+	}
+
+	public void setProcReady(Integer procReady) {
+		this.procReady = procReady;
 	}
 }

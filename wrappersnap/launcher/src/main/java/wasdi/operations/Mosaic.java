@@ -1,9 +1,9 @@
 package wasdi.operations;
 
-import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.settings.MosaicSetting;
@@ -47,7 +47,7 @@ public class Mosaic extends Operation {
                 m_oProcessWorkspaceLogger.log("Adding output file to the workspace");
 
                 // Get the full path of the output
-                String sFileOutputFullPath = LauncherMain.getWorkspacePath(oParameter) + oParameter.getDestinationProductName();
+                String sFileOutputFullPath = PathsConfig.getWorkspacePath(oParameter) + oParameter.getDestinationProductName();
 
                 // And add it to the db
                 addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath, oParameter.getWorkspace(),

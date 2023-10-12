@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ -n "${GEOSERVER_DATA_DIR}" ]]
+then
+    echo "[DEBUG] \${GEOSERVER_DATA_DIR} = ${GEOSERVER_DATA_DIR}"
+
+    if [[ -d "{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir" && -d "${GEOSERVER_DATA_DIR}" ]]
+    then
+        echo "[DEBUG] '{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir' exists"
+        echo "[DEBUG] '${GEOSERVER_DATA_DIR}' exists"
+
+        if [[ -z "$(ls --almost-all ${GEOSERVER_DATA_DIR})" ]]
+        then
+            echo "[DEBUG] Copy '{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir/' in '${GEOSERVER_DATA_DIR}/'"
+            cp --recursive --preserve {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/data_dir/* ${GEOSERVER_DATA_DIR}/.
+        fi
+    fi
+fi
+
+if [[ -f "${GEOSERVER_DATA_DIR}/security/config.xml" ]]
+then
+    echo "[DEBUG] Reconfigure ${GEOSERVER_DATA_DIR}/security/config.xml"
+    sed --in-place 's/<configPasswordEncrypterName>pbePasswordEncoder<\/configPasswordEncrypterName>/<configPasswordEncrypterName>strongPbePasswordEncoder<\/configPasswordEncrypterName>/g' ${GEOSERVER_DATA_DIR}/security/config.xml
+fi
+
+if [[ -f "${GEOSERVER_DATA_DIR}/security/masterpw.info" ]]
+then
+    echo "[DEBUG] Delete '${GEOSERVER_DATA_DIR}/security/masterpw.info'"
+    rm --force ${GEOSERVER_DATA_DIR}/security/masterpw.info
+fi
+
+exec "$@"

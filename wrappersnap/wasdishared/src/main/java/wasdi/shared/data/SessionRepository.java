@@ -12,7 +12,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.UserSession;
+import wasdi.shared.business.users.UserSession;
 import wasdi.shared.utils.Utils;
 
 /**

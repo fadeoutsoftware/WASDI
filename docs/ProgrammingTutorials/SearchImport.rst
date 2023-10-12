@@ -683,7 +683,7 @@ Sentinel-3 Parameters
 
 **.producttype:** This is the Product Type. Its value is determined by the following conditions: 
 
-* If .productlevel is set to “L1” it can be of type "SR_1_SRA___”, "SR_1_SRA_A_" or “SR_1_SRA_BS”.
+* If .productlevel is set to “L1” it can be of type "SR_1_SRA___”, "SR_1_SRA_A_” or “SR_1_SRA_BS”.
 
 * If .productlevel is set to “L2” it can be of type “SR_2_LAN___”
 

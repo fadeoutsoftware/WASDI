@@ -1,0 +1,84 @@
+FROM ubuntu:22.04
+
+
+MAINTAINER "WASDI SARL"
+
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+# This environment variable is setted to avoid packages to ask a confirmation
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# This variable is setted to make Python stop creating files '.pyc'
+ENV PYTHONDONTWRITEBYTECODE="False"
+
+# This variable is setted to force the 'print' method of Python to flush message directly
+ENV PYTHONUNBUFFERED="True"
+
+
+# RUN generic to create user, group, directories, etc
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
+    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+
+
+# RUN generic to update the system and install common packages
+RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
+    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+    apt-get update && \
+    apt-get install \
+        ca-certificates && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get dist-upgrade && \
+    apt-get install \
+        curl \
+        nano \
+        tar \
+        unzip \
+        wget && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# RUN specific to install Sen2cor
+RUN apt-get update && \
+    apt-get install \
+        file && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+
+
+# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
+USER {{ sWasdiSystemUserName }}
+
+
+# RUN specific to install Sen2cor
+RUN mkdir --parents {{ sWasdiSen2corRootDirectoryPath }} && \
+    chown {{ sWasdiSen2corRootDirectoryOwner }}:{{ sWasdiSen2corRootDirectoryGroup }} {{ sWasdiSen2corRootDirectoryPath }} && \
+    chmod {{ sWasdiSen2corRootDirectoryMode }} {{ sWasdiSen2corRootDirectoryPath }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiSen2corSourceUrl }} --output-document=/tmp/{{ sWasdiSen2corSourceUrl | basename }} && \
+    chmod 0755 /tmp/{{ sWasdiSen2corSourceUrl | basename }} && \
+    /tmp/{{ sWasdiSen2corSourceUrl | basename }} --nox11 --target {{ sWasdiSen2corRootDirectoryPath }}/{{ sWasdiSen2corVersion }} && \
+    rm --force /tmp/{{ sWasdiSen2corSourceUrl | basename }}
+
+ENV PATH="{{ sWasdiSen2corRootDirectoryPath }}/{{ sWasdiSen2corVersion }}/bin:${PATH}"
+ENV S2L2APPHOME={{ sWasdiSen2corRootDirectoryPath }}/{{ sWasdiSen2corVersion }}
+ENV S2L2APPCFG={{ sWasdiSystemUserHome }}/sen2cor/{{ sWasdiSen2corVersion }}/cfg
+
+
+# Set the workdir
+WORKDIR {{ sWasdiSen2corRootDirectoryPath }}/{{ sWasdiSen2corVersion }}
+
+
+# Start the container
+CMD ["L2A_Process", "--help"]

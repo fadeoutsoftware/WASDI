@@ -3,7 +3,7 @@ package wasdi.shared.utils;
 //import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.validator.routines.EmailValidator;
 
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.User;
 import wasdi.shared.viewmodels.users.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.users.LoginInfo;
 import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;

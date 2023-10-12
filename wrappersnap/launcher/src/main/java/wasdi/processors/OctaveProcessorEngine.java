@@ -7,7 +7,8 @@ import java.io.IOException;
 
 import com.google.common.io.Files;
 
-import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.processors.ProcessorTypes;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
@@ -30,7 +31,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 		
 		String sProcessorName = oParameter.getName();
 		
-		String sProcessorFolder = getProcessorFolder(sProcessorName);
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
 		
 		// Generate shell script file
 		String sMainFile = sProcessorFolder+"myProcessor.m";
@@ -104,7 +105,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 			}
 			
 			// Get the processor Path
-			String sDestinationFilePath = getProcessorFolder(m_oParameter.getName());
+			String sDestinationFilePath = PathsConfig.getProcessorFolder(m_oParameter.getName());
 			
 			// Lib folder
 			File oLibFolder = new File(sLibFilePath);

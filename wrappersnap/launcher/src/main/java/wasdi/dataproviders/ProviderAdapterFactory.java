@@ -43,6 +43,7 @@ public class ProviderAdapterFactory {
 		aoDownloaders.put("COPERNICUSMARINE", CMProviderAdapter::new);
 		aoDownloaders.put("CLOUDFERRO", CloudferroProviderAdapter::new);
 		aoDownloaders.put("SKYWATCH", SkywatchProviderAdapter::new);
+		aoDownloaders.put("LPDAAC", LpDaacProviderAdapter::new);
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 

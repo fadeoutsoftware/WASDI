@@ -18,7 +18,7 @@ import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Collection;
 import net.wasdi.openeoserver.viewmodels.Collections;
 import net.wasdi.openeoserver.viewmodels.Error;
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.*;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.config.openEO.OpenEOCollection;
 import wasdi.shared.utils.log.WasdiLog;

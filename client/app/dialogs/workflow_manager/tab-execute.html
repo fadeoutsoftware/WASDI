@@ -36,7 +36,7 @@
                                         ng-click="m_oController.downloadWorkflow(workflow)">
                                     <em class="fa fa-download"></em>
                                 </button>
-                                <button ng-show="m_oController.isTheOwnerOfWorkflow(workflow) || workflow.sharedWithMe"
+                                <button ng-show="workflow.readOnly==false"
                                         class="wapps-button"
                                         ng-click="m_oController.openEditWorkflowDialog(workflow)">
                                     <em class="fa fa-edit"></em>
@@ -113,7 +113,7 @@
                 </div>
 
                 <button class="my-button my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
-                        data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
+                        data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null || m_oController.m_oConstantsService.isWorkspaceReadOnly()==true">
                     {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON" | translate}}
                 </button>
 

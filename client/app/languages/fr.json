@@ -387,6 +387,7 @@
 	"DIALOG_WS_INFO_FILES": "Fichiers totaux :",
 	"DIALOG_WS_INFO_PROCS": "Processus exécutés :",
 	"DIALOG_WS_INFO_SHARINGS": "Partage d'espace de travail :",
+	"DIALOG_WS_INFO_PUBLIC": "Make Workspace Public",
 	"DIALOG_PARAMS_TITLE": "App Params Library",
 	"DIALOG_PARAMS_FILTER_HELP": "Nom du modèle pour filtrer...",
 	"DIALOG_PARAMS_ADD": "Ajouter",
@@ -464,7 +465,6 @@
 	"WAP_AUTO_REVIEW":"PAS JUSTE DE S'AUTO-NOTER",
 	"WAP_UPDATE":"METTRE À JOUR",
 	"WAP_DELETE":"SUPPRIMER",
-	"WAP_ADD_COMMENT":"AJOUTER UN COMMENTAIRE",
 	"WAP_SHOW_COMMENTS":"VOIR LES COMMENTAIRES",
 	"WAP_HIDE_COMMENTS":"CACHER LES COMMENTAIRES",
 	"WAP_NO_COMMENTS":"IL N'Y A AUCUN COMMENTAIRE",
@@ -680,5 +680,7 @@
 	"DIALOG_PACKAGE_MANAGER_LATEST_VERSION": "Dernière version",
 	"DIALOG_PACKAGE_MANAGER_ACTIONS": "Actions",
 
-	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Erreur de contact avec le service JupyterLab"
+	"EDITOR_ERROR_CONSOLE_NOT_REACHABLE": "Erreur de contact avec le service JupyterLab",
+
+	"READ_ONLY" : "Read Only"
 }

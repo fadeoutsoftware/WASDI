@@ -352,6 +352,20 @@ service('ConstantsService', [function () {
     };
 
     /**
+     * Checks if the active workspace is read only
+     * @returns true or false
+     */
+    this.isWorkspaceReadOnly = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) return true;
+
+        try {
+            return this.m_oActiveWorkspace.readOnly;
+          } catch (error) {
+            return true;
+          }
+    }    
+
+    /**
      * Set the name of the processor selected in the store
      * @param sProcessorName
      */
@@ -467,52 +481,6 @@ service('ConstantsService', [function () {
         this.deleteCookie("oUser");
         this.m_oUser = null;
     }
-
-    /**
-     * Logout from google
-     */
-    /*
-    this.logOutGoogle = function ()
-    {
-        try
-        {
-            if (_.isNil(gapi) == false)
-            {
-                var oController = this;
-                if (_.isNil(gapi.auth2) === true)
-                {
-                    gapi.load('auth2', function () {
-                        gapi.auth2.init();
-                        oController.googleSignOutAPI();
-                    });
-                }
-                else
-                {
-                    this.googleSignOutAPI();
-                }
-            }
-            else
-            {
-                throw "Google API null or undefined, cannot perform logout";
-            }
-        }catch (e)
-        {
-            console.error("logOutGoogle(): ", e);
-        }
-    }
-    */
-    /**
-     * Goggle sign out
-     */
-    /*
-    this.googleSignOutAPI = function()
-    {
-        var auth2 = gapi.auth2.getAuthInstance();
-        auth2.signOut().then(function () {
-            console.log('User signed out.');
-        });
-    };
-    */
 
     /**
      * Get WASDI OGC WMS Server address

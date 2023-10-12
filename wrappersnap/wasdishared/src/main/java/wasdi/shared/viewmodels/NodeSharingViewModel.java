@@ -1,17 +1,20 @@
 package wasdi.shared.viewmodels;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class NodeSharingViewModel {
 
-	private  String nodeCode;
-	private  String userId;
+	private String nodeCode;
+	private String userId;
+	public String getNodeCode() {
+		return nodeCode;
+	}
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
 }

@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import wasdi.shared.config.DataProviderConfig;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.utils.log.WasdiLog;
@@ -60,7 +61,7 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
 		String fileName = extractFileNameFromUrl(oDownloadFileParameter.getUrl());
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + fileName;
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + fileName;
 
 		if (doesFileExist(expectedDownloadFilePath)) {
 			System.out.println("trying to delete the file: " + expectedDownloadFilePath);
@@ -95,7 +96,7 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
 		String fileName = extractFileNameFromUrl(oDownloadFileParameter.getUrl());
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + fileName;
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + fileName;
 
 		if (doesFileExist(expectedDownloadFilePath)) {
 			System.out.println("trying to delete the file: " + expectedDownloadFilePath);
@@ -129,7 +130,7 @@ public class LauncherMainLsaTest extends LauncherMainTest {
 
 		DownloadFileParameter oDownloadFileParameter = readOrCreateDownloadFileParameter(parameterFilePath, parameterFileName);
 
-		String expectedDownloadFilePath = LauncherMain.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
+		String expectedDownloadFilePath = PathsConfig.getWorkspacePath(oDownloadFileParameter) + extractFileNameFromUrl(oDownloadFileParameter.getUrl());
 
 		if (doesFileExist(expectedDownloadFilePath)) {
 			System.out.println("trying to delete the file: " + expectedDownloadFilePath);

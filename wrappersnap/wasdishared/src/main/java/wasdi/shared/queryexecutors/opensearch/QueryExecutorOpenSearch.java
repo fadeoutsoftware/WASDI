@@ -2,7 +2,6 @@ package wasdi.shared.queryexecutors.opensearch;
 
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;

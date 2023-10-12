@@ -1,6 +1,6 @@
 package wasdi.shared.business;
 
-import lombok.EqualsAndHashCode;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Process Workspace Entity
@@ -15,7 +15,6 @@ import lombok.EqualsAndHashCode;
  * 
  * Created by s.adamo on 31/01/2017.
  */
-@EqualsAndHashCode
 public class ProcessWorkspace {
 
 	/**
@@ -277,5 +276,21 @@ public class ProcessWorkspace {
 	public void setSubscriptionId(String subscriptionId) {
 		this.subscriptionId = subscriptionId;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		try {
+			if (obj instanceof ProcessWorkspace) {
+				ProcessWorkspace oTheOther = (ProcessWorkspace) obj;
+				if (oTheOther.getProcessObjId().equals(this.processObjId)) return true;
+				else return false;
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessWorkspace.equals: ", oEx);
+		}
+		
+		return super.equals(obj);
+	}
+	
 }

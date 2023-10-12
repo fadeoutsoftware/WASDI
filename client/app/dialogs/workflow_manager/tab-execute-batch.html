@@ -91,7 +91,7 @@
                         <button class="btn btn-primary btn-wasdi btn-mdlg"
                                 ng-click="m_oController.runWorkFlowPerProducts();"
                                 ng-class="{ 'disabled' : m_oController.isPossibleDoUpload()}"
-                                ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()"
+                                ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct() && m_oController.m_oConstantsService.isWorkspaceReadOnly()==false"
                                 data-dismiss="modal">
                             {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON" | translate}}
                         </button>

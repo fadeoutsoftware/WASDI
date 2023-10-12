@@ -431,7 +431,7 @@ var AdminDashboardController = (function () {
         var oController = this;
 
         this.m_oAdminDashboardService
-            .addResourcePermission(sResourceType, sResourceId, sUserEmail)
+            .addResourcePermission(sResourceType, sResourceId, sUserEmail, 'read')
             .then(
                 function (data) {
                     if (utilsIsObjectNullOrUndefined(data.data) === false) {

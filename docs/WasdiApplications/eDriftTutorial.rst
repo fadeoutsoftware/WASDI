@@ -9,6 +9,7 @@ The flood-related algorithms available in WASDI support automated mapping of flo
 
 * Open area
 * Urban area
+
 with:
 
 * Sentinel-1, Sentinel-2 or a combination of the 2 missions

@@ -43,6 +43,8 @@ public class Platforms {
 
 	public static String EARTHCACHE = "Earthcache";
 	
+	public static String TERRA = "TERRA";
+	
 	// Creodias 2 new platforms
 	public static String SMOS = "SMOS";
 	public static String TERRAAQUA = "Terraaqua";

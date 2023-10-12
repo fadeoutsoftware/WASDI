@@ -35,12 +35,12 @@ public class Workspace {
 	 * Project Id
 	 */
 	private String projectId;
-
-//	/**
-//	 * Subscription Id
-//	 */
-//	private String subscriptionId;
-
+	
+	/**
+	 * Flat to know if it is public or not
+	 */
+	private boolean isPublic = false;
+	
     public String getNodeCode() {
 		return nodeCode;
 	}
@@ -97,18 +97,18 @@ public class Workspace {
 		this.projectId = projectId;
 	}
 
-//	public String getSubscriptionId() {
-//		return subscriptionId;
-//	}
-//
-//	public void setSubscriptionId(String subscriptionId) {
-//		this.subscriptionId = subscriptionId;
-//	}
+	public boolean isPublic() {
+		return isPublic;
+	}
 
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+	
 	@Override
 	public String toString() {
 		return "Workspace [workspaceId=" + workspaceId + ", name=" + name + ", userId=" + userId + ", creationDate="
 				+ creationDate + ", lastEditDate=" + lastEditDate + ", nodeCode=" + nodeCode  + ", projectId="
-				+ projectId + /*", subscriptionId=" + subscriptionId +*/ "]";
-	}
+				+ projectId + "]";
+	}	
 }

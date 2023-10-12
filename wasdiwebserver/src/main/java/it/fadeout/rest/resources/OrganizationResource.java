@@ -1,8 +1,5 @@
 package it.fadeout.rest.resources;
 
-import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
-import static wasdi.shared.business.UserApplicationPermission.ORGANIZATION_READ;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,12 +19,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
 import wasdi.shared.business.Organization;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserApplicationRole;
-import wasdi.shared.business.UserResourcePermission;
+import wasdi.shared.business.Subscription;
+import wasdi.shared.business.users.ResourceTypes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserApplicationRole;
+import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.SubscriptionRepository;
@@ -36,29 +34,28 @@ import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.viewmodels.ClientMessageCodes;
 import wasdi.shared.viewmodels.ErrorResponse;
 import wasdi.shared.viewmodels.SuccessResponse;
 import wasdi.shared.viewmodels.organizations.OrganizationEditorViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationListViewModel;
-import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 import wasdi.shared.viewmodels.organizations.OrganizationSharingViewModel;
+import wasdi.shared.viewmodels.organizations.OrganizationViewModel;
 
+/**
+ * Organizations Resource
+ * 
+ *  Hosts the API to let the users create and manage their own Organizations
+ *  
+ *  	.Create, Update and Delete Organizations
+ *  	.Read Organizations
+ *  	.Share organizations with other users
+ * 
+ * @author p.campanella
+ *
+ */
 @Path("/organizations")
 public class OrganizationResource {
-
-	private static final String MSG_ERROR_INVALID_SESSION = "MSG_ERROR_INVALID_SESSION";
-
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_ORGANIZATION = "MSG_ERROR_NO_ACCESS_RIGHTS_APPLICATION_RESOURCE_ORGANIZATION";
-	private static final String MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION = "MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION";
-
-	private static final String MSG_ERROR_SHARING_WITH_OWNER = "MSG_ERROR_SHARING_WITH_OWNER";
-	private static final String MSG_ERROR_SHARING_WITH_ONESELF = "MSG_ERROR_SHARING_WITH_ONESELF";
-	private static final String MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER = "MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER";
-
-	private static final String MSG_ERROR_INVALID_ORGANIZATION = "MSG_ERROR_INVALID_ORGANIZATION";
-	private static final String MSG_ERROR_INVALID_DESTINATION_USER = "MSG_ERROR_INVALID_DESTINATION_USER";
-	private static final String MSG_ERROR_IN_DELETE_PROCESS = "MSG_ERROR_IN_DELETE_PROCESS";
-	private static final String MSG_ERROR_IN_INSERT_PROCESS = "MSG_ERROR_IN_INSERT_PROCESS";
 
 	/**
 	 * Get the list of organizations associated to a user.
@@ -71,30 +68,30 @@ public class OrganizationResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public Response getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 
-		WasdiLog.debugLog("OrganizationResource.getListByUser");
-
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		// Domain Check
 		if (oUser == null) {
-			WasdiLog.debugLog("OrganizationResource.getListByUser: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.getListByUser: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
 
 		try {
 			
 			List<OrganizationListViewModel> aoOrganizationLVM = new ArrayList<>();
-
-			WasdiLog.debugLog("OrganizationResource.getListByUser: organizations for " + oUser.getUserId());
-
-
+			
 			// Get the list of Organizations owned by the user
-
 			List<Organization> aoOwnedOrganizations = getOrganizationsOwnedByUser(oUser.getUserId());
 
 			List<OrganizationListViewModel> aoOwnedOrganizationLVM = aoOwnedOrganizations.stream()
-					.map(t -> convert(t, oUser.getUserId()))
+					.map(oOrganization -> convert(oOrganization, oUser.getUserId()))
 					.collect(Collectors.toList());
+			
+			for (OrganizationListViewModel oOwnedOrganization : aoOwnedOrganizationLVM) {
+				oOwnedOrganization.setReadOnly(false);
+			}
 
 			aoOrganizationLVM.addAll(aoOwnedOrganizationLVM);
 
@@ -106,11 +103,16 @@ public class OrganizationResource {
 			List<OrganizationListViewModel> aoSharedOrganizationLVM = aoSharedOrganizations.stream()
 					.map(t -> convert(t, oUser.getUserId()))
 					.collect(Collectors.toList());
+			
+			for (OrganizationListViewModel oSharedOrganization : aoSharedOrganizationLVM) {
+				oSharedOrganization.setReadOnly(!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), oSharedOrganization.getOrganizationId()));
+			}			
 
 			aoOrganizationLVM.addAll(aoSharedOrganizationLVM);
 
 			return Response.ok(aoOrganizationLVM).build();
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("OrganizationResource.getListByUser: " + oEx);
 			return Response.serverError().build();
 		}
@@ -129,24 +131,25 @@ public class OrganizationResource {
 			@QueryParam("organization") String sOrganizationId) {
 		WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel( Organization: " + sOrganizationId + ")");
 
-		OrganizationViewModel oVM = new OrganizationViewModel();
+		OrganizationViewModel oOrganizationViewModel = new OrganizationViewModel();
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.getOrganizationViewModel: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		try {
 			// Domain Check
 			if (Utils.isNullOrEmpty(sOrganizationId)) {
+				WasdiLog.warnLog("OrganizationResource.getOrganizationViewModel: organization id null or empty");
 				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
 			}
 
 			if (!PermissionsUtils.canUserAccessOrganization(oUser.getUserId(), sOrganizationId)) {
-				WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: user cannot access organization info, aborting");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The user cannot access the organization info.")).build();
+				WasdiLog.warnLog("OrganizationResource.getOrganizationViewModel: user cannot access organization, aborting");
+				return Response.status(Status.FORBIDDEN).entity(new ErrorResponse("The user cannot access the organization info.")).build();
 			}
 
 			WasdiLog.debugLog("OrganizationResource.getOrganizationViewModel: read organizations " + sOrganizationId);
@@ -158,24 +161,25 @@ public class OrganizationResource {
 			// Get requested organization
 			Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
-			oVM = convert(oOrganization);
+			oOrganizationViewModel = convert(oOrganization);
+			
+			oOrganizationViewModel.setReadOnly(!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), sOrganizationId));
 
 			// Get Sharings
-			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository
-					.getOrganizationSharingsByOrganizationId(oOrganization.getOrganizationId());
+			List<UserResourcePermission> aoSharings = oUserResourcePermissionRepository.getOrganizationSharingsByOrganizationId(oOrganization.getOrganizationId());
 
 			// Add Sharings to View Model
 			if (aoSharings != null) {
-				if (oVM.getSharedUsers() == null) {
-					oVM.setSharedUsers(new ArrayList<String>());
+				if (oOrganizationViewModel.getSharedUsers() == null) {
+					oOrganizationViewModel.setSharedUsers(new ArrayList<String>());
 				}
 
 				for (UserResourcePermission oSharing : aoSharings) {
-					oVM.getSharedUsers().add(oSharing.getUserId());
+					oOrganizationViewModel.getSharedUsers().add(oSharing.getUserId());
 				}
 			}
 
-			return Response.ok(oVM).build();
+			return Response.ok(oOrganizationViewModel).build();
 		} catch (Exception oEx) {
 			WasdiLog.errorLog( "OrganizationResource.getOrganizationViewModel: " + oEx);
 			return Response.serverError().build();
@@ -195,36 +199,42 @@ public class OrganizationResource {
 		WasdiLog.debugLog("OrganizationResource.createOrganization");
 		
 		if (oOrganizationEditorViewModel == null) {
-			WasdiLog.debugLog("OrganizationResource.createOrganization: null body");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_ORGANIZATION)).build();			
+			WasdiLog.warnLog("OrganizationResource.createOrganization: null body");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_ORGANIZATION.name())).build();			
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("OrganizationResource.createOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.createOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		try {
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
 
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
 
-		Organization oExistingOrganization = oOrganizationRepository.getByName(oOrganizationEditorViewModel.getName());
+			if (oExistingOrganization != null) {
+				WasdiLog.warnLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An organization with the same name already exists.")).build();
+			}
 
-		if (oExistingOrganization != null) {
-			WasdiLog.debugLog("OrganizationResource.createOrganization: a different organization with the same name already exists");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An organization with the same name already exists.")).build();
+			Organization oOrganization = convert(oOrganizationEditorViewModel);
+			oOrganization.setUserId(oUser.getUserId());
+			oOrganization.setOrganizationId(Utils.getRandomName());
+
+			if (oOrganizationRepository.insertOrganization(oOrganization)) {
+				return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
+			} else {
+				WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
+				return Response.serverError().build();
+			}			
 		}
-
-		Organization oOrganization = convert(oOrganizationEditorViewModel);
-		oOrganization.setUserId(oUser.getUserId());
-		oOrganization.setOrganizationId(Utils.getRandomName());
-
-		if (oOrganizationRepository.insertOrganization(oOrganization)) {
-			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
-		} else {
-			WasdiLog.debugLog("OrganizationResource.createOrganization( " + oOrganizationEditorViewModel.getName() + " ): insertion failed");
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OrganizationResource.createOrganization: " + oEx);
 			return Response.serverError().build();
-		}
+		}		
 	}
 
 	/**
@@ -240,20 +250,20 @@ public class OrganizationResource {
 		WasdiLog.debugLog("OrganizationResource.updateOrganization");
 		
 		if (oOrganizationEditorViewModel == null) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: body null");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_ORGANIZATION)).build();			
+			WasdiLog.warnLog("OrganizationResource.updateOrganization: body null");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_ORGANIZATION.name())).build();			
 		}
 
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.updateOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 		
-		if (!PermissionsUtils.canUserAccessOrganization(oUser.getUserId(), oOrganizationEditorViewModel.getOrganizationId())) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: user cannot access the organization");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION)).build();			
+		if (!PermissionsUtils.canUserWriteOrganization(oUser.getUserId(), oOrganizationEditorViewModel.getOrganizationId())) {
+			WasdiLog.warnLog("OrganizationResource.updateOrganization: user cannot access the organization");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION.name())).build();			
 		}
 
 		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
@@ -261,7 +271,7 @@ public class OrganizationResource {
 		Organization oExistingOrganization = oOrganizationRepository.getById(oOrganizationEditorViewModel.getOrganizationId());
 
 		if (oExistingOrganization == null) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: organization does not exist");
+			WasdiLog.warnLog("OrganizationResource.updateOrganization: organization does not exist");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the Id exists.")).build();
 		}
 
@@ -269,7 +279,7 @@ public class OrganizationResource {
 
 		if (oExistingOrganizationWithTheSameName != null
 				&& !oExistingOrganizationWithTheSameName.getOrganizationId().equalsIgnoreCase(oExistingOrganization.getOrganizationId())) {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization: a different organization with the same name already exists");
+			WasdiLog.warnLog("OrganizationResource.updateOrganization: a different organization with the same name already exists");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("An organization with the same name already exists.")).build();
 		}
 
@@ -280,11 +290,17 @@ public class OrganizationResource {
 		if (oOrganizationRepository.updateOrganization(oOrganization)) {
 			return Response.ok(new SuccessResponse(oOrganization.getOrganizationId())).build();
 		} else {
-			WasdiLog.debugLog("OrganizationResource.updateOrganization( " + oOrganizationEditorViewModel.getName() + " ): update failed");
+			WasdiLog.warnLog("OrganizationResource.updateOrganization( " + oOrganizationEditorViewModel.getName() + " ): update failed");
 			return Response.serverError().build();
 		}
 	}
 
+	/**
+	 * Deletes and organization
+	 * @param sSessionId Session Id
+	 * @param sOrganizationId Organization Id
+	 * @return 
+	 */
 	@DELETE
 	@Path("/delete")
 	public Response deleteOrganization(@HeaderParam("x-session-token") String sSessionId,
@@ -294,53 +310,62 @@ public class OrganizationResource {
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.deleteOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sOrganizationId)) {
+			WasdiLog.warnLog("OrganizationResource.deleteOrganization: sOrganizationId null or empty");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
 		}
+		
+		try  {
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 
-		OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			if (oOrganization == null) {
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization: organization does not exist");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the name exists.")).build();
+			}
 
-		Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-		if (oOrganization == null) {
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization: organization does not exist");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("No organization with the name exists.")).build();
+			String sOrganizationOwner = oOrganization.getUserId();
+
+			if (!sOrganizationOwner.equals(oUser.getUserId())) {
+				// The current uses is not the owner of the organization
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
+				oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
+
+				return Response.ok(new SuccessResponse(sOrganizationId)).build();
+			}
+			
+			WasdiLog.debugLog("OrganizationResource.deleteOrganization: cleaning permissions of the organization");
+			oUserResourcePermissionRepository.deletePermissionsByOrganizationId(sOrganizationId);
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			List<Subscription> aoInvolvedSubscriptions = oSubscriptionRepository.getSubscriptionsByOrganization(sOrganizationId);
+			
+			if (aoInvolvedSubscriptions != null) {
+				if (aoInvolvedSubscriptions.size()>0) WasdiLog.debugLog("OrganizationResource.deleteOrganization: cleaning subscriptions related to the deleting organization");
+				for (Subscription oSubscription : aoInvolvedSubscriptions) {
+					oSubscription.setOrganizationId("");
+					oSubscriptionRepository.updateSubscription(oSubscription);
+				}
+			}
+
+			if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
+				return Response.ok(new SuccessResponse(sOrganizationId)).build();
+			} else {
+				WasdiLog.warnLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the organization failed.")).build();
+			}
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("OrganizationResource.deleteOrganization error: " + oEx);
+			return Response.serverError().build();
 		}
 
-		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
-		String sOrganizationOwner = oOrganization.getUserId();
-
-		if (!sOrganizationOwner.equals(oUser.getUserId())) {
-			// The current uses is not the owner of the organization
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization: user " + oUser.getUserId() + " is not the owner [" + sOrganizationOwner + "]: delete the sharing, not the organization");
-			oUserResourcePermissionRepository.deletePermissionsByUserIdAndOrganizationId(oUser.getUserId(), sOrganizationId);
-
-			return Response.ok(new SuccessResponse(sOrganizationId)).build();
-		}
-
-		if (oUserResourcePermissionRepository.isOrganizationShared(sOrganizationId)) {
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization is shared with users");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it has users. Before deleting the organization, please remove the users.")).build();
-		}
-
-		SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
-
-		if (oSubscriptionRepository.organizationHasSubscriptions(sOrganizationId)) {
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization: the organization shares subscriptions");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The organization cannot be removed as it shares subscriptions. Before deleting the organization, please remove the sharings.")).build();
-		}
-
-		if (oOrganizationRepository.deleteOrganization(sOrganizationId)) {
-			return Response.ok(new SuccessResponse(sOrganizationId)).build();
-		} else {
-			WasdiLog.debugLog("OrganizationResource.deleteOrganization( " + sOrganizationId + " ): deletion failed");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("The deletion of the organization failed.")).build();
-		}
 	}
 
 	/**
@@ -354,20 +379,24 @@ public class OrganizationResource {
 	@POST
 	@Path("share/add")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId) {
+	public Response shareOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
 		WasdiLog.debugLog("OrganizationResource.ShareOrganization( Organization: " + sOrganizationId + ", User: " + sDestinationUserId + " )");
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
 		if (oRequesterUser == null) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.shareOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
+		
+		// Use Read By default
+		if (!UserAccessRights.isValidAccessRight(sRights)) {
+			sRights = UserAccessRights.READ.getAccessRight();
+		}		
 
 		if (Utils.isNullOrEmpty(sOrganizationId)) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: invalid organization");
+			WasdiLog.warnLog("OrganizationResource.shareOrganization: invalid organization");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
 		}
 		
@@ -376,34 +405,34 @@ public class OrganizationResource {
 		Organization oOrganization = oOrganizationRepository.getById(sOrganizationId);
 		
 		if (oOrganization == null) {
-			WasdiLog.debugLog("OrganizationResource.ShareOrganization: invalid organization");
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_ORGANIZATION)).build();
+			WasdiLog.warnLog("OrganizationResource.ShareOrganization: invalid organization");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_ORGANIZATION.name())).build();
 		}
 
 		// Can the user access this resource?
-		if (!PermissionsUtils.canUserAccessOrganization(oRequesterUser.getUserId(), sOrganizationId)
-				&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: " + sOrganizationId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
+		if (!PermissionsUtils.canUserWriteOrganization(oRequesterUser.getUserId(), sOrganizationId)
+				&& !UserApplicationRole.isAdmin(oRequesterUser)) {
+			WasdiLog.warnLog("OrganizationResource.shareOrganization: " + sOrganizationId + " cannot be accessed by " + oRequesterUser.getUserId() + ", aborting");
 
-			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION)).build();
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_NO_ACCESS_RIGHTS_OBJECT_ORGANIZATION.name())).build();
 		}
 
 		// Cannot Autoshare
 		if (oRequesterUser.getUserId().equals(sDestinationUserId)) {
-			if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+			if (UserApplicationRole.isAdmin(oRequesterUser)) {
 				// A user that has Admin rights should be able to auto-share the resource.
 			} else {
-				WasdiLog.debugLog("OrganizationResource.shareOrganization: auto sharing not so smart");
+				WasdiLog.warnLog("OrganizationResource.shareOrganization: auto sharing not so smart");
 
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_ONESELF)).build();
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_SHARING_WITH_ONESELF.name())).build();
 			}
 		}
 
 		// Cannot share with the owner
 		if (sDestinationUserId.equals(oOrganization.getUserId())) {
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: sharing with the owner not so smart");
+			WasdiLog.warnLog("OrganizationResource.shareOrganization: sharing with the owner not so smart");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_OWNER)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_SHARING_WITH_OWNER.name())).build();
 		}
 
 		UserRepository oUserRepository = new UserRepository();
@@ -411,9 +440,9 @@ public class OrganizationResource {
 
 		if (oDestinationUser == null) {
 			//No. So it is neither the owner or a shared one
-			WasdiLog.debugLog("OrganizationResource.shareOrganization: Destination user does not exists");
+			WasdiLog.warnLog("OrganizationResource.shareOrganization: Destination user does not exists");
 
-			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER)).build();
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_SHARING_WITH_NON_EXISTENT_USER.name())).build();
 		}
 
 		try {
@@ -421,63 +450,28 @@ public class OrganizationResource {
 
 			if (!oUserResourcePermissionRepository.isOrganizationSharedWithUser(sDestinationUserId, sOrganizationId)) {
 				UserResourcePermission oOrganizationSharing =
-						new UserResourcePermission("organization", sOrganizationId, sDestinationUserId, oOrganization.getUserId(), oRequesterUser.getUserId(), "write");
+						new UserResourcePermission(ResourceTypes.ORGANIZATION.getResourceType(), sOrganizationId, sDestinationUserId, oOrganization.getUserId(), oRequesterUser.getUserId(), sRights);
 
 				oUserResourcePermissionRepository.insertPermission(oOrganizationSharing);
-
-				sendNotificationEmail(oRequesterUser.getUserId(), sDestinationUserId, oOrganization.getName());
+				
+				try {
+					String sTitle = "Organization " +  oOrganization.getName() + " Shared";
+					String sMessage = "The user " + oRequesterUser.getUserId() + " shared with you the organization: " + oOrganization.getName();
+					WasdiResource.sendEmail(WasdiConfig.Current.notifications.sftpManagementMailSender, sDestinationUserId, sTitle, sMessage);
+				}
+				catch (Exception oEx) {
+					WasdiLog.errorLog("OrganizationResource.shareOrganization: notification exception " + oEx.toString());
+				}				
 
 				return Response.ok(new SuccessResponse("Done")).build();
 			} else {
-				WasdiLog.debugLog("OrganizationResource.shareOrganization: already shared!");
+				WasdiLog.warnLog("OrganizationResource.shareOrganization: already shared!");
 				return Response.ok(new SuccessResponse("Already Shared.")).build();
 			}
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("OrganizationResource.shareOrganization: " + oEx);
 
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_INSERT_PROCESS)).build();
-		}
-	}
-
-	private static void sendNotificationEmail(String sRequesterUserId, String sDestinationUserId, String sOrganizationName) {
-		try {
-			String sMercuriusAPIAddress = WasdiConfig.Current.notifications.mercuriusAPIAddress;
-
-			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				WasdiLog.debugLog("OrganizationResource.sendNotificationEmail: sMercuriusAPIAddress is null");
-			}
-			else {
-
-				WasdiLog.debugLog("OrganizationResource.sendNotificationEmail: send notification");
-
-				MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-				Message oMessage = new Message();
-
-				String sTitle = "Organization " + sOrganizationName + " Shared";
-
-				oMessage.setTilte(sTitle);
-
-				String sSender = WasdiConfig.Current.notifications.sftpManagementMailSender;
-				if (sSender==null) {
-					sSender = "wasdi@wasdi.net";
-				}
-
-				oMessage.setSender(sSender);
-
-				String sMessage = "The user " + sRequesterUserId + " shared with you the organization: " + sOrganizationName;
-
-				oMessage.setMessage(sMessage);
-
-				Integer iPositiveSucceded = 0;
-
-				iPositiveSucceded = oAPI.sendMailDirect(sDestinationUserId, oMessage);
-				
-				WasdiLog.debugLog("OrganizationResource.sendNotificationEmail: notification sent with result " + iPositiveSucceded);
-			}
-
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("OrganizationResource.sendNotificationEmail: notification exception " + oEx.toString());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_INSERT_PROCESS.name())).build();
 		}
 	}
 
@@ -491,9 +485,9 @@ public class OrganizationResource {
 	@GET
 	@Path("share/byorganization")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public Response getEnableUsersSharedOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
+	public Response getEnabledUsersSharedOrganization(@HeaderParam("x-session-token") String sSessionId, @QueryParam("organization") String sOrganizationId) {
 
-		WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedOrganization( Organization: " + sOrganizationId + " )");
+		WasdiLog.debugLog("OrganizationResource.getEnabledUsersSharedOrganization( Organization: " + sOrganizationId + " )");
 
 	
 		List<UserResourcePermission> aoOrganizationSharing = null;
@@ -501,8 +495,18 @@ public class OrganizationResource {
 
 		User oOwnerUser = Wasdi.getUserFromSession(sSessionId);
 		if (oOwnerUser == null) {
-			WasdiLog.debugLog("OrganizationResource.getEnableUsersSharedOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
+		}
+		
+		if (Utils.isNullOrEmpty(sOrganizationId)) {
+			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: invalid organization");
+			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
+		}
+		
+		if (!PermissionsUtils.canUserAccessOrganization(oOwnerUser.getUserId(), sOrganizationId)) {
+			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: user cannot access organization");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();			
 		}
 
 		try {
@@ -515,6 +519,8 @@ public class OrganizationResource {
 					oOrganizationSharingViewModel.setOwnerId(oOrganizationSharing.getUserId());
 					oOrganizationSharingViewModel.setUserId(oOrganizationSharing.getUserId());
 					oOrganizationSharingViewModel.setOrganizationId(oOrganizationSharing.getResourceId());
+					oOrganizationSharingViewModel.setPermissions(oOrganizationSharing.getPermissions());
+					
 
 					aoOrganizationSharingViewModels.add(oOrganizationSharingViewModel);
 				}
@@ -522,7 +528,7 @@ public class OrganizationResource {
 
 			return Response.ok(aoOrganizationSharingViewModels).build();
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("OrganizationResource.getEnableUsersSharedOrganization: " + oEx);
+			WasdiLog.errorLog("OrganizationResource.getEnabledUsersSharedOrganization: " + oEx);
 			return Response.serverError().build();
 		}
 
@@ -540,14 +546,19 @@ public class OrganizationResource {
 		User oRequestingUser = Wasdi.getUserFromSession(sSessionId);
 
 		if (oRequestingUser == null) {
-			WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization: invalid session");
-			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(MSG_ERROR_INVALID_SESSION)).build();
+			WasdiLog.warnLog("OrganizationResource.deleteUserSharedOrganization: invalid session");
+			return Response.status(Status.UNAUTHORIZED).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();
 		}
 
 		if (Utils.isNullOrEmpty(sOrganizationId)) {
-			WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization: invalid organization id");
+			WasdiLog.warnLog("OrganizationResource.deleteUserSharedOrganization: invalid organization id");
 			return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse("Invalid organizationId.")).build();
 		}
+		
+		if (!PermissionsUtils.canUserWriteOrganization(oRequestingUser.getUserId(), sOrganizationId)) {
+			WasdiLog.warnLog("OrganizationResource.getEnableUsersSharedOrganization: user cannot write organization");
+			return Response.status(Status.FORBIDDEN).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_SESSION.name())).build();			
+		}		
 
 		try {
 
@@ -555,8 +566,8 @@ public class OrganizationResource {
 			User oDestinationUser = oUserRepository.getUser(sUserId);
 
 			if (oDestinationUser == null) {
-				WasdiLog.debugLog("OrganizationResource.deleteUserSharedOrganization: invalid destination user");
-				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(MSG_ERROR_INVALID_DESTINATION_USER)).build();
+				WasdiLog.warnLog("OrganizationResource.deleteUserSharedOrganization: invalid destination user");
+				return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_INVALID_DESTINATION_USER.name())).build();
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
@@ -566,7 +577,7 @@ public class OrganizationResource {
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("OrganizationResource.deleteUserSharedOrganization: " + oEx);
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(MSG_ERROR_IN_DELETE_PROCESS)).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(ClientMessageCodes.MSG_ERROR_IN_DELETE_PROCESS.name())).build();
 		}
 	}
 
@@ -579,7 +590,6 @@ public class OrganizationResource {
 		oOrganizationViewModel.setAddress(oOrganization.getAddress());
 		oOrganizationViewModel.setEmail(oOrganization.getEmail());
 		oOrganizationViewModel.setUrl(oOrganization.getUrl());
-//		oOrganizationViewModel.setlogo(oOrganization.getLogo());
 
 		return oOrganizationViewModel;
 	}
@@ -589,35 +599,19 @@ public class OrganizationResource {
 		oOrganizationListViewModel.setOrganizationId(oOrganization.getOrganizationId());
 		oOrganizationListViewModel.setName(oOrganization.getName());
 		oOrganizationListViewModel.setOwnerUserId(oOrganization.getUserId());
-		oOrganizationListViewModel.setAdminRole(sCurrentUserId.equalsIgnoreCase(oOrganization.getUserId()));
 
 		return oOrganizationListViewModel;
 	}
 
-	private static Organization convert(OrganizationViewModel oOrganizationViewModel) {
-		Organization oOrganization = new Organization();
-		oOrganization.setOrganizationId(oOrganizationViewModel.getOrganizationId());
-		oOrganization.setUserId(oOrganizationViewModel.getUserId());
-		oOrganization.setName(oOrganizationViewModel.getName());
-		oOrganization.setDescription(oOrganizationViewModel.getDescription());
-		oOrganization.setAddress(oOrganizationViewModel.getAddress());
-		oOrganization.setEmail(oOrganizationViewModel.getEmail());
-		oOrganization.setUrl(oOrganizationViewModel.getUrl());
-//		oOrganization.setlogo(oOrganizationViewModel.getLogo());
-
-		return oOrganization;
-	}
-
 	private static Organization convert(OrganizationEditorViewModel oOrganizationEditorViewModel) {
 		Organization oOrganization = new Organization();
+		
 		oOrganization.setOrganizationId(oOrganizationEditorViewModel.getOrganizationId());
-//		oOrganization.setUserId(oOrganizationEditorViewModel.getUserId());
 		oOrganization.setName(oOrganizationEditorViewModel.getName());
 		oOrganization.setDescription(oOrganizationEditorViewModel.getDescription());
 		oOrganization.setAddress(oOrganizationEditorViewModel.getAddress());
 		oOrganization.setEmail(oOrganizationEditorViewModel.getEmail());
 		oOrganization.setUrl(oOrganizationEditorViewModel.getUrl());
-//		oOrganization.setlogo(oOrganizationEditorViewModel.getLogo());
 
 		return oOrganization;
 	}

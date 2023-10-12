@@ -1,21 +1,16 @@
 package wasdi.shared.business;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * Reprents a cloud provider where a WASDI node can be installed
  * 
  * @author p.campanella
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class CloudProvider {
+	
+	public CloudProvider() {
+	
+	}
 	
 	/**
 	 * Unique Cloud Provider Guid 
@@ -46,5 +41,53 @@ public class CloudProvider {
 	 * Brief description
 	 */
 	private String description;
+
+	public String getCloudProviderId() {
+		return cloudProviderId;
+	}
+
+	public void setCloudProviderId(String cloudProviderId) {
+		this.cloudProviderId = cloudProviderId;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getMainLink() {
+		return mainLink;
+	}
+
+	public void setMainLink(String mainLink) {
+		this.mainLink = mainLink;
+	}
+
+	public String getContact() {
+		return contact;
+	}
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+	public String getSlaLink() {
+		return slaLink;
+	}
+
+	public void setSlaLink(String slaLink) {
+		this.slaLink = slaLink;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 }

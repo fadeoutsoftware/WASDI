@@ -91,6 +91,7 @@
                    
                     <p class="mb-0 mr-1" style="cursor: pointer;" ng-click="m_oController.setSortType()">{{"EDITOR_TITLE_PANEL_PRODUCTS" | translate}}</p>
                     <span class="badge mr-1">{{m_oController.m_aoProducts.length}}</span>
+                    <span class="badge mr-1" ng-show="m_oController.isWorkspaceReadOnly()">{{"READ_ONLY" | translate}}</span>
                     <i class="fa fa-arrow-up" aria-hidden="true" ng-show="m_oController.sSortType === 'asc'"></i>
                     <i class="fa fa-arrow-down" aria-hidden="true" ng-show="m_oController.sSortType === 'desc'"></i>
                     <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip"

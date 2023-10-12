@@ -9,13 +9,16 @@ package wasdi.shared.utils;
 import java.util.List;
 
 import wasdi.shared.business.ImagesCollections;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.Style;
 import wasdi.shared.business.Subscription;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserResourcePermission;
-import wasdi.shared.business.UserType;
+import wasdi.shared.business.Workspace;
+import wasdi.shared.business.processors.Processor;
+import wasdi.shared.business.users.ResourceTypes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.business.users.UserAccessRights;
+import wasdi.shared.business.users.UserResourcePermission;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.data.OrganizationRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorParametersTemplateRepository;
@@ -62,6 +65,11 @@ public class PermissionsUtils {
 	}
 	
 	
+	/**
+	 * Get the type of a user
+	 * @param oUser User Entity
+	 * @return Type String (see UserType enum)
+	 */
 	public static String getUserType(User oUser) {
 		if (oUser == null) return UserType.NONE.name();
 		return getUserType(oUser.getUserId());
@@ -138,13 +146,21 @@ public class PermissionsUtils {
 			}
 
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.getWorkspace(sWorkspaceId);
 			
-			if (oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
+			if (oWorkspace == null) {
+				return false;
+			}
+			
+			if (oWorkspace.getUserId().equals(sUserId)) {
+				return true;
+			}
+			
+			if (oWorkspace.isPublic()) {
 				return true;
 			}
 
 			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
-
 			return oUserResourcePermissionRepository.isWorkspaceSharedWithUser(sUserId, sWorkspaceId);
 		} catch (Exception oE) {
 			WasdiLog.errorLog("PermissionsUtils.canUserAccessWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
@@ -152,6 +168,33 @@ public class PermissionsUtils {
 
 		return false;
 	}
+	
+	/**
+	 * Check if a User Can Write in a Workspace
+	 * @param sUserId a valid userId
+	 * @param sWorkspaceId a valid workspaceId
+	 * @return true if the user can write in the workspace, false otherwise
+	 */
+	public static boolean canUserWriteWorkspace(String sUserId, String sWorkspaceId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkspaceId)) {
+				return false;
+			}
+
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			
+			if (oWorkspaceRepository.isOwnedByUser(sUserId, sWorkspaceId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sWorkspaceId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteWorkspace( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+		}
+
+		return false;
+	}	
 
 	/**
 	 * Check if a User can Access and Organization
@@ -179,6 +222,33 @@ public class PermissionsUtils {
 
 		return false;
 	}
+	
+	/**
+	 * Check if a User Can Write in a Organization
+	 * @param sUserId a valid userId
+	 * @param sOrganizationId a valid organization
+	 * @return true if the user can write the organization, false otherwise
+	 */
+	public static boolean canUserWriteOrganization(String sUserId, String sOrganizationId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sOrganizationId)) {
+				return false;
+			}
+
+			OrganizationRepository oOrganizationRepository = new OrganizationRepository();
+			
+			if (oOrganizationRepository.isOwnedByUser(sUserId, sOrganizationId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.ORGANIZATION.getResourceType(), sUserId, sOrganizationId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteOrganization( " + sUserId + ", " + sOrganizationId + " ): error: " + oE);
+		}
+
+		return false;
+	}	
 
 	/**
 	 * Check if a User can Access a Subscription
@@ -220,6 +290,35 @@ public class PermissionsUtils {
 
 		return false;
 	}
+	
+	
+	
+	/**
+	 * Check if a User Can Write a Subscription
+	 * @param sUserId a valid userId
+	 * @param sSubscriptionId a valid Subscription
+	 * @return true if the user can write the subscription, false otherwise
+	 */
+	public static boolean canUserWriteSubscription(String sUserId, String sSubscriptionId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sSubscriptionId)) {
+				return false;
+			}
+
+			SubscriptionRepository oSubscriptionRepository = new SubscriptionRepository();
+			
+			if (oSubscriptionRepository.isOwnedByUser(sUserId, sSubscriptionId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.SUBSCRIPTION.getResourceType(), sUserId, sSubscriptionId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteSubscription( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
+		}
+
+		return false;
+	}		
 
 	/**
 	 * Check if a User can access a Style
@@ -245,7 +344,7 @@ public class PermissionsUtils {
 				return true;
 			}
 			
-			if (oStyleRepository.isStyleOwnedByUser(sUserId, sStyleId)) {
+			if (oStyleRepository.isOwnedByUser(sUserId, sStyleId)) {
 				return true;
 			}
 
@@ -260,6 +359,32 @@ public class PermissionsUtils {
 	}
 
 
+	/**
+	 * Check if a User Can Write a Style
+	 * @param sUserId a valid userId
+	 * @param sStyleId a valid style
+	 * @return true if the user can write the style, false otherwise
+	 */
+	public static boolean canUserWriteStyle(String sUserId, String sStyleId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sStyleId)) {
+				return false;
+			}
+
+			StyleRepository oSubscriptionRepository = new StyleRepository();
+			
+			if (oSubscriptionRepository.isOwnedByUser(sUserId, sStyleId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.STYLE.getResourceType(), sUserId, sStyleId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteStyle( " + sUserId + ", " + sStyleId + " ): error: " + oE);
+		}
+
+		return false;
+	}
 
 	/**
 	 * Check if a User can access a Process Workspace
@@ -288,6 +413,33 @@ public class PermissionsUtils {
 
 		return false;
 	}
+	
+	/**
+	 * Check if a User Can Write a ProcessWorkspace
+	 * @param sUserId a valid userId
+	 * @param sProcessWorkspaceId a valid ProcessWorkspace
+	 * @return true if the user can write the ProcessWorkspace, false otherwise
+	 */
+	public static boolean canUserWriteProcessWorkspace(String sUserId, String sProcessWorkspaceId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessWorkspaceId)) {
+				return false;
+			}
+
+			ProcessWorkspaceRepository oSubscriptionRepository = new ProcessWorkspaceRepository();
+			
+			if (oSubscriptionRepository.isProcessOwnedByUser(sUserId, sProcessWorkspaceId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.WORKSPACE.getResourceType(), sUserId, sProcessWorkspaceId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessWorkspace( " + sUserId + ", " + sProcessWorkspaceId + " ): error: " + oE);
+		}
+
+		return false;
+	}	
 
 	/**
 	 * Check if a User can access a Processor Parameter Template
@@ -317,6 +469,33 @@ public class PermissionsUtils {
 
 		return false;
 	}
+	
+	/**
+	 * Check if a User Can Write a ProcessorParametersTemplate
+	 * @param sUserId a valid userId
+	 * @param sProcessorParametersTemplateId a valid ProcessorParametersTemplate
+	 * @return true if the user can write the ProcessorParametersTemplate, false otherwise
+	 */
+	public static boolean canUserWriteProcessorParametersTemplate(String sUserId, String sProcessorParametersTemplateId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessorParametersTemplateId)) {
+				return false;
+			}
+
+			ProcessorParametersTemplateRepository oSubscriptionRepository = new ProcessorParametersTemplateRepository();
+			
+			if (oSubscriptionRepository.isTheOwnerOfTheTemplate(sUserId, sProcessorParametersTemplateId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.PARAMETER.getResourceType(), sUserId, sProcessorParametersTemplateId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessorParametersTemplate( " + sUserId + ", " + sProcessorParametersTemplateId + " ): error: " + oE);
+		}
+
+		return false;
+	}	
 	
 	/**
 	 * Check if a user can access a processor
@@ -388,6 +567,77 @@ public class PermissionsUtils {
 		}
 
 		return false;		
+	}
+	
+	/**
+	 * Check if a user can write a processor
+	 * @param sUserId
+	 * @param sProcessorId
+	 * @return
+	 */
+	public static boolean canUserWriteProcessor(String sUserId, String sProcessorId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sProcessorId)) {
+				return false;
+			}
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			return canUserWriteProcessor(sUserId, oProcessor);
+			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserAccessProcessor( " + sUserId + ", " + sProcessorId + " ): error: " + oE);
+		}
+
+		return false;		
+	}	
+	
+	
+	
+	/**
+	 * Check if a User Can Write a Processor by name
+	 * @param sUserId
+	 * @param sName
+	 * @return
+	 */
+	public static boolean canUserWriteProcessorByName(String sUserId, String sName) { 
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sName)) {
+				return false;
+			}
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			
+			Processor oProcessor = oProcessorRepository.getProcessorByName(sName);
+			
+			return canUserWriteProcessor(sUserId, oProcessor);			
+		} catch (Exception oE) {
+			WasdiLog.debugLog("PermissionsUtils.canUserWriteProcessorByName( " + sUserId + ", " + sName + " ): error: " + oE);
+		}
+
+		return false;		
+	}
+	
+	/**
+	 * Check if a User Can Write a Processor
+	 * @param sUserId a valid userId
+	 * @param oProcessor a valid Processor
+	 * @return true if the user can write the Processor, false otherwise
+	 */
+	public static boolean canUserWriteProcessor(String sUserId, Processor oProcessor) {
+		try {
+			if (oProcessor == null) return false;
+			if (oProcessor.getUserId().equals(sUserId)) return true;
+
+			return canUserWriteResource(ResourceTypes.PROCESSOR.getResourceType(), sUserId, oProcessor.getProcessorId());
+
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteProcessor( " + sUserId + ", " + oProcessor.getProcessorId() + " ): error: " + oE);
+		}
+
+		return false;
 	}	
 	
 	/**
@@ -433,6 +683,50 @@ public class PermissionsUtils {
 		return false;			
 	}
 	
+	
+	/**
+	 * Check if a user can write a specific image
+	 * @param sUserId User requesting the access
+	 * @param sCollection Image Collection 
+	 * @param sFolder Folder name
+	 * @param sImage Image name
+	 * @return
+	 */
+	public static boolean canUserWriteImage(String sUserId, String sCollection, String sFolder, String sImage) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sCollection)) {
+				return false;
+			}
+			
+			if (!ImageResourceUtils.isValidCollection(sCollection)) {
+				return false;
+			}
+			
+			if (sCollection.equals(ImagesCollections.PROCESSORS.getFolder())) {
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				Processor oProcessor = oProcessorRepository.getProcessorByName(sFolder);
+				
+				if (oProcessor == null) return false;
+				return canUserWriteProcessor(sUserId, oProcessor.getProcessorId());
+			}
+			else if (sCollection.equals(ImagesCollections.USERS.getFolder())) {
+				if (sUserId.equals(sFolder)) return true;
+				else return false;
+			}
+			else if (sCollection.equals(ImagesCollections.ORGANIZATIONS.getFolder())) {
+				return canUserWriteOrganization(sUserId, sFolder);
+			}
+			
+			return false;
+			
+		} 
+		catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserAccessImage error: " + oE);
+		}
+
+		return false;			
+	}	
+	
 	/**
 	 * Check if a user can access a workflow or not
 	 * @param sUserId User requesting the access
@@ -461,6 +755,55 @@ public class PermissionsUtils {
 		}
 		
 		return false;
+	}
+	
+	
+	/**
+	 * Check if a User Can Write a Workflow
+	 * @param sUserId a valid userId
+	 * @param sWorkflowId a valid Workflow
+	 * @return true if the user can write the Workflow, false otherwise
+	 */
+	public static boolean canUserWriteWorkflow(String sUserId, String sWorkflowId) {
+		try {
+			if (Utils.isNullOrEmpty(sUserId) || Utils.isNullOrEmpty(sWorkflowId)) {
+				return false;
+			}
+
+			SnapWorkflowRepository oSubscriptionRepository = new SnapWorkflowRepository();
+			SnapWorkflow oWorkflow = oSubscriptionRepository.getSnapWorkflow(sWorkflowId);
+			
+			if (oWorkflow == null) return false;
+			
+			if (oWorkflow.getUserId().equals(sUserId)) {
+				return true;
+			}
+
+			return canUserWriteResource(ResourceTypes.WORKFLOW.getResourceType(), sUserId, sWorkflowId);
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteWorkflow( " + sUserId + ", " + sWorkflowId + " ): error: " + oE);
+		}
+
+		return false;
+	}	
+	
+	public static boolean canUserWriteResource(String sResourceType, String sUserId, String sWorkspaceId) {
+		
+		try {
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			UserResourcePermission oPermission = oUserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId(sResourceType, sUserId, sWorkspaceId);
+			
+			if (oPermission == null) return false;
+			
+			if (oPermission.getPermissions().equals(UserAccessRights.WRITE.getAccessRight())) return true;
+			
+			return false;			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("PermissionsUtils.canUserWriteResource error: " + oEx);
+			return false;
+		}
 	}
 }
  

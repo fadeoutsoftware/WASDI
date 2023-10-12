@@ -1,10 +1,6 @@
 package wasdi.processors.dockerUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,8 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -30,7 +24,7 @@ import wasdi.processors.dockerUtils.containersViewModels.LoginInfo;
 import wasdi.processors.dockerUtils.containersViewModels.MountVolumeParam;
 import wasdi.processors.dockerUtils.containersViewModels.constants.ContainerStates;
 import wasdi.processors.dockerUtils.containersViewModels.constants.MountTypes;
-import wasdi.shared.business.Processor;
+import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
@@ -40,7 +34,6 @@ import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.runtime.RunTimeUtils;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 /**
@@ -98,7 +91,7 @@ public class DockerUtils {
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
         m_oProcessor = oProcessor;
-        m_sProcessorFolder = sProcessorFolder;
+        m_sProcessorFolder = sProcessorFolder; 
         m_sWasdiSystemUser = sTomcatUser;
         m_sDockerRegistry = sDockerRegistry;
     }    

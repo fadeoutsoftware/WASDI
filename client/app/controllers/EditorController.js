@@ -595,6 +595,7 @@
             case "MULTISUBSET":
             case "RASTERGEOMETRICRESAMPLE":
             case "REGRID":
+            case "SHARE":
                 oController.receivedNewProductMessage(oMessage);
                 break;
             case "DELETE":
@@ -1634,8 +1635,8 @@
         var oOptions = {
             titleModal: sMessage,
             buttonName: sMessage,
-            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId,
-            currentNodeCode: this.m_oActiveWorkspace.nodeCode
+            excludedWorkspaceId: this.m_oActiveWorkspace.workspaceId//,
+            //currentNodeCode: this.m_oActiveWorkspace.nodeCode
         };
 
         var oThat = this;
@@ -1892,6 +1893,16 @@
         return true;
     };
 
+    EditorController.prototype.isWorkspaceReadOnly = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) return true;
+
+        try {
+            return this.m_oActiveWorkspace.readOnly;
+          } catch (error) {
+            return true;
+          }
+    }
+
 
     /**
      * GENERATE TREE
@@ -2039,6 +2050,7 @@
                             DeleteProduct: {
                                 label: sDelete,
                                 icon: "fa fa-trash",
+                                _disabled: oController.isWorkspaceReadOnly(),
 
                                 action: function (obj) {
                                     utilsVexDialogConfirm(
@@ -2212,6 +2224,7 @@
                             DeleteSelectedProduct: {
                                 label: oController.getDeleteLabel(),
                                 icon: "fa fa-trash",
+                                _disabled: oController.isWorkspaceReadOnly(),
 
                                 action: function (obj) {
                                     let asSelectedProducts =

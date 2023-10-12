@@ -9,7 +9,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 
-import wasdi.shared.business.ProcessorParametersTemplate;
+import wasdi.shared.business.processors.ProcessorParametersTemplate;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

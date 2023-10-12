@@ -5,7 +5,6 @@ import org.bson.Document;
 import com.mongodb.BasicDBObject;
 
 import wasdi.shared.business.OgcProcessesTask;
-import wasdi.shared.business.Processor;
 import wasdi.shared.utils.Utils;
 
 /**

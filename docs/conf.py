@@ -10,9 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
@@ -32,7 +32,8 @@ extensions = ['javasphinx',
 'sphinx.ext.autodoc',
 'sphinxcontrib.matlab',
 'myst_parser',
-'sphinx_js']
+'sphinx_js',
+'sphinxcontrib.youtube']
 
 js_language = 'typescript'
 js_source_path = '../libraries/jswasdilib/src/lib/TS-index.ts'

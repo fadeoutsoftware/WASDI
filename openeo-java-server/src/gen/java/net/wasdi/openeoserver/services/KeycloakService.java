@@ -6,7 +6,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import wasdi.shared.business.User;
+import wasdi.shared.business.users.*;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.TimeEpochUtils;

@@ -3,7 +3,7 @@ package wasdi.shared.viewmodels.users;
 import java.util.Collections;
 import java.util.Set;
 
-import wasdi.shared.business.UserType;
+import wasdi.shared.business.users.UserType;
 import wasdi.shared.utils.Utils;
 
 /**
