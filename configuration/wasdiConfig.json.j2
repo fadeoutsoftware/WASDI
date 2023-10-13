@@ -28,6 +28,13 @@
         "user": "{{ aoWasdiConfiguration['mongoEcostress']['user'] }}",
         "password": "{{ aoWasdiConfiguration['mongoEcostress']['password'] }}"
     },
+    "mongoStatistics": {
+        "address": "{{ aoWasdiConfiguration['mongoStatistics']['address'] }}",
+        "dbName": "{{ aoWasdiConfiguration['mongoStatistics']['dbName'] }}",
+        "replicaName": "{{ aoWasdiConfiguration['mongoStatistics']['replicaName'] }}",
+        "user": "{{ aoWasdiConfiguration['mongoStatistics']['user'] }}",
+        "password": "{{ aoWasdiConfiguration['mongoStatistics']['password'] }}"
+    },
     "keycloack": {
         "address": "{{ aoWasdiConfiguration['keycloak']['baseUrl'] }}{{ aoWasdiConfiguration['keycloak']['address'] }}",
         "cliSecret": "{{ aoWasdiConfiguration['keycloak']['cliSecret'] }}",
