@@ -22,7 +22,7 @@ import wasdi.shared.viewmodels.HttpCallResponse;
 public class PipProcessorEngine extends DockerProcessorEngine {
 
 
-	protected String [] m_asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "pandas", "rasterio", "wheel", "wasdi" };
+	protected String [] m_asDockerTemplatePackages = { "flask", "gunicorn", "requests", "numpy", "pandas", "rasterio", "wheel", "wasdi", "time", "datetime" };
 
 	public PipProcessorEngine() {
 		super();
