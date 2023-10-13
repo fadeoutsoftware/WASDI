@@ -35,13 +35,11 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getCountResult(String sQueryResult) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	
@@ -61,11 +59,21 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		return oResult;
 	}
 	
+	/**
+	 * add the product id and the title to the query result view model
+	 * @param oItem the object representing a MODIS product, read from the DB
+	 * @param oResult the result view model
+	 */
 	private void addMainInfo(ModisItemForReading oItem, QueryResultViewModel oResult) {
 		oResult.setId(oItem.getFileName());
 		oResult.setTitle(oItem.getFileName());
 	}
 	
+	/**
+	 * add the product id and the title to the query result view model
+	 * @param sLocation the object representing the bounding box, as stored in the DB
+	 * @param oResult the result view model
+	 */
 	private void addFootPrint(ModisLocation sLocation, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(sLocation, "ResponseTranslatorModis.addFootPrint: input sLocation is null");
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addFootPrint: QueryResultViewModel is null");
@@ -104,7 +112,11 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		}
 	}
 	
-	
+	/**
+	 * Reads the properties of a MODIS product and add them to the result view model
+	 * @param oItem  oItem the object representing a MODIS product, read from the DB
+	 * @param oResult the result view model
+	 */
 	private void addProperties(ModisItemForReading oItem, QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oItem, "ResponseTranslatorModis.addProperties: input oItem is null");
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: QueryResultViewModel is null");
@@ -140,6 +152,10 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 
 	}
 	
+	/**
+	 * Builds the link that will be passed to the provider adapter and adds it to the result view model
+	 * @param oResult the result view model
+	 */
 	private void addLink(QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addProperties: result view model is null");
 
@@ -170,6 +186,10 @@ public class ResponseTranslatorLpDaac extends ResponseTranslator {
 		oResult.setLink(oLink.toString());
 	}
 	
+	/**
+	 * Builds the summary and adds it to the result view model
+	 * @param oResult the result view model
+	 */
 	private void addSummary(QueryResultViewModel oResult) {
 		Preconditions.checkNotNull(oResult, "ResponseTranslatorModis.addSummary: QueryResultViewModel is null");
 

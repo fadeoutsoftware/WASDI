@@ -37,6 +37,8 @@ public class MODISUtils {
 		DataProviderConfig oDataProvider = WasdiConfig.Current.getDataProviderConfig("LPDAAC");
 		s_sUsername = oDataProvider.user;
 		s_sPassword = oDataProvider.password;
+		
+		// this is the CSV file downloaded from https://earthexplorer.usgs.gov/ and containing the list of all MOD11A6 products, with some of their metadata
 		s_sCSVFilePath = WasdiConfig.Current.paths.userHomePath + "modis_mod11a2_v61_64f584ce5c8845f6.csv"; 
 	}
 	
@@ -56,31 +58,39 @@ public class MODISUtils {
 	private static final String s_sPlatform = "PlatformShortName";
 	
 	// KEY TO ACCESS THE PARAMETERS MAP
-	private static final String s_sBoundingBox = "BoundingBox"; // the corners of the bounding box will be stored in the following order
+	private static final String s_sBoundingBox = "BoundingBox";
 	private static final String s_sUrl = "url";
 	
 
     /*
-     * Prefix used to identify redirects to URS for the purpose of adding authentication headers. For test, this should be:
-     * https://uat.urs.earthdata.nasa.gov for test
+     * Prefix used to identify redirects to URS url, where the authentication is performed before accessing a MODIS product. 
      */
     private static final String s_URSUrl = "https://urs.earthdata.nasa.gov";
     
+    /**
+     * Base URL where MOD11A2 products are available for download
+     */
 	private static final String s_sMODISBaseUrl = "https://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.061/";
 
   
-    
+    /**
+     * When no parameter is specified, all products in the CSV file are read
+     * @throws Exception
+     */
     public static void insertProducts() throws Exception {
     	insertProducts(-1, -1);
     }
     
     /**
-     * Populate the collection on Mongo
-     * @param sCSVFilePath the path to the CSV file containing the list of product names
+     * Populate the MODIS catalogue on Mongo, importing the products specified in the CSV files, in the lines included between iStartLine and iEndLine.
+     * To populate the db, the method will establish a connection to the data provider and try to read the metadata of the products from the XML files available ONLINE,
+     * for each product. 
+     * To avoid external connections to the data provider, then the method insertProductsFromCSV should be used. 
+     * @param iStartLine line of the CSV file containing the first product to be imported
+     * @param iEndLine line of the CSV file containing the last product to be imported
      * @return
-     * @throws Exception
      */
-    public static void insertProducts(int iStartLine, int iEndLine) throws Exception {
+    public static void insertProducts(int iStartLine, int iEndLine) {
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
@@ -88,20 +98,21 @@ public class MODISUtils {
     	try {
     		oReader = new BufferedReader(new FileReader(s_sCSVFilePath));  
     		String sLine = "";
-    		int iCurrentLine = 0; // the variable stores the number of the current line of the file being read
+    		int iCurrentLine = 0; // the variable stores the number of the current line of the CSV file being read
     		boolean bImportAll = iStartLine == -1 && iEndLine == -1;
     		
     		while ((sLine = oReader.readLine()) != null) {
     			iCurrentLine ++;
     			
+    			// if we are not importing all the products and we didn't reach yet the starting line, then we just more to the next line
     			if (!bImportAll && iCurrentLine < iStartLine) {
     				continue;
     			}
     			
+    			// if we are not importing all the products and already passed the ending line, then we can stop reading the other lines
     			if (!bImportAll && iCurrentLine > iEndLine) {
     				break;
     			}
-    			
     			
     			String[] asMetadata = sLine.split(","); 
     			String sGranuleId = asMetadata[0];
@@ -110,7 +121,7 @@ public class MODISUtils {
     			String sProductDirectoryUrl = s_sMODISBaseUrl + sStartDate;
     			String sProductFileUrl = sProductDirectoryUrl + "/" + sGranuleId;
     			String sXMLUrlPath = sProductFileUrl + ".xml";
-    			WasdiLog.debugLog("MODISUtils.insertProducts: tring to read XML metadata file at URL: " + sXMLUrlPath);
+    			WasdiLog.debugLog("MODISUtils.insertProducts: trying to read XML metadata file at URL: " + sXMLUrlPath);
     			
     			try {
 	    			if (iCurrentLine - 1 > 0) { // if the line is not the first (the one containing the name of the columns)
@@ -134,13 +145,25 @@ public class MODISUtils {
     	} catch (IOException oEx) {
     		WasdiLog.errorLog("MODISUtils.insertProducts. Error while populating the database with MODIS products " + oEx.getMessage());
     	} finally {
-    		if (oReader != null) 
-    			oReader.close();
+    		if (oReader != null)
+				try {
+					oReader.close();
+				} catch (IOException oEx) {
+		    		WasdiLog.errorLog("MODISUtils.insertProducts. Error while closing the buffer reader: " + oEx.getMessage());
+				}
     		WasdiLog.debugLog("MODISUtils.insertProducts. Number of products added to the db: " + iProdCounts);
     	}	
     }
     
-    public static void insertProductsFromCsv(int iStartLine, int iEndLine) throws Exception{
+    /**
+     * Populate the MODIS catalogue on Mongo, importing the products specified in the CSV files, in the lines included between iStartLine and iEndLine.
+     * To populate the db, the method will ONLY RELY on the metadata stored in the CSV file (this should reduce the time required to populate the db, since no connection
+     * to the external provider is needed)
+     * @param iStartLine line of the CSV file containing the first product to be imported
+     * @param iEndLine line of the CSV file containing the last product to be imported
+     * @return
+     */
+    public static void insertProductsFromCsv(int iStartLine, int iEndLine) {
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
@@ -156,10 +179,12 @@ public class MODISUtils {
     		while ((sLine = oReader.readLine()) != null) {
     			iCurrentLine ++;
     			
+    			// if we are not importing all the products and we didn't reach yet the starting line, then we just more to the next line
     			if (!bImportAll && iCurrentLine < iStartLine) {
     				continue;
     			}
     			
+    			// if we are not importing all the products and already passed the ending line, then we can stop reading the other lines
     			if (!bImportAll && iCurrentLine > iEndLine) {
     				WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Lines have been read.");
     				break;
@@ -189,8 +214,12 @@ public class MODISUtils {
     	} catch (IOException oEx) {
     		WasdiLog.errorLog("MODISUtils.insertProductsFromCsv. Error while populating the database with MODIS products " + oEx.getMessage());
     	} finally {
-    		if (oReader != null) 
-    			oReader.close();
+    		if (oReader != null)
+				try {
+					oReader.close();
+				} catch (IOException oEx) {
+		    		WasdiLog.errorLog("MODISUtils.insertProductsFromCsv. Error while closing the buffer reader: " + oEx.getMessage());
+				}
     		WasdiLog.debugLog("MODISUtils.insertProductsFromCsv. Number of products added to the db: " + iProdCounts);
     	}	
     }
@@ -201,9 +230,14 @@ public class MODISUtils {
     }
     
     /**
-     * Tries to repair the database reading from the CSV the metadata related to the MODIS products that were not added in the db
+     * When importing the MODIS products reading the metadata from the XML files available in the data provider online, if could happen that the XML can not be accessed.
+     * In that case, the product will not be added to the database. 
+     * This method tries to repair the database, checking which products, among those listed in the CSV file, are missing in the database and adds those products
+     * reading the metadata directly from the CSV file. In that case, only the size of the product will miss, since it is not stored in the CSV file. 
+     * @param iStartLine first line of the csv file to read, and eventually start adding the corresponding product
+     * @param iEndLine list last line of the csv file to read
      */
-    public static void insertMissingProductsFromCsv(int iStartLine, int iEndLine) throws Exception{
+    public static void insertMissingProductsFromCsv(int iStartLine, int iEndLine){
     	BufferedReader oReader = null;
     	ModisRepository oModisRepo = new ModisRepository();
     	int iProdCounts = 0;
@@ -259,12 +293,21 @@ public class MODISUtils {
     	} catch (IOException oEx) {
     		WasdiLog.errorLog("MODISUtils.insertMissingProductsFromCsv. Error while populating the database with MODIS products " + oEx.getMessage());
     	} finally {
-    		if (oReader != null) 
-    			oReader.close();
+    		if (oReader != null)
+				try {
+					oReader.close();
+				} catch (IOException oEx) {
+		    		WasdiLog.errorLog("MODISUtils.insertMissingProductsFromCsv. Error while closing the buffer reader: " + oEx.getMessage());
+				}
     		WasdiLog.debugLog("MODISUtils.insertMissingProductsFromCsv. Number of products added to the db: " + iProdCounts);
     	}	
     }
     
+    /**
+     * Takes a line from the CSV file, and builds the map that represents the metadata of a MODIS product 
+     * @param sLine a line extracted from the CSV file and representing the metadata of a product
+     * @return the map representing the metadata of a MODIS product
+     */
     private static Map<String, String> buildProperties(String sLine) {
     	
     	if (Utils.isNullOrEmpty(sLine)) {
@@ -313,50 +356,15 @@ public class MODISUtils {
 		
 		return asProperties;	
     }
+
     
-    
-//    public static void tryDownloadFile(String sUrlFile) throws Exception {
-//    	String sUsername = "*";
-//        String sPassword = "*";
-//        System.out.println("Accessing resource " + sUrlFile);
-//        
-//            /*
-//             * Set up a cookie handler to maintain session cookies. A custom
-//             * CookiePolicy could be used to limit cookies to just the resource
-//             * server and URS.
-//             */
-//            CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-//        
-//            
-//           System.out.println("Try to download file: " + sUrlFile);
-//           
-//           InputStream inputStream = null;
-//         
-//        try {
-//        	inputStream = getResource(sUrlFile, sUsername, sPassword);
-//	
-//	        // Check if the save directory exists; if not, create it
-//	        String savingDir = "C:/Users/valentina.leone/Desktop/WORK/MODIS_MODA";
-//	        File oSaveDir = new File(savingDir);
-//
-//
-//            String saveName = oSaveDir + File.separator + sUrlFile.substring(sUrlFile.lastIndexOf('/') + 1).trim();
-//            Path outputPath = Paths.get(saveName);
-//
-//            // Download the file using NIO
-//            Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-//
-//            System.out.println("Downloaded file: " + saveName);
-//            
-//            inputStream.close();
-//       } catch (IOException e) {
-//        e.printStackTrace();
-//        if (inputStream != null)
-//        	inputStream.close();
-//       }
-//    }
-    
-    
+    /**
+     * Given the URL of a XML file containing the metadata of a MODIS products, access the XML online and returns a string representation of its content, 
+     * preserving its original XML representation.
+     * @param sXMLUrlFile the URL of the XML file containing the metadata of a XML product
+     * @return the string representing the XML content of the file
+     * @throws IOException
+     */
     public static String readXmlFile(String sXMLUrlFile) throws IOException {
     	WasdiLog.debugLog("MODISUtils.readXmlFile. Accessing resource: " + sXMLUrlFile);
         
@@ -379,7 +387,7 @@ public class MODISUtils {
             sXMLMetadata = oStringBuilder.toString();
         }
         catch( Exception oEx) {
-        	WasdiLog.errorLog("Error while trying to read the metadata file: " + sXMLUrlFile + ". " + oEx.getMessage());
+        	WasdiLog.errorLog("MODISUtils.readXmlFile. Error while trying to read the metadata file: " + sXMLUrlFile + ". " + oEx.getMessage());
         } finally {
         	if (oIn != null)
         		oIn.close();
@@ -389,13 +397,23 @@ public class MODISUtils {
     	return sXMLMetadata;     
     }
     
-    
+    /**
+     * Returns the long representing the epoch, for a given date and time
+     * @param sDate the date in the format yyyy-MM-dd
+     * @param sTime the time in the format HH:mm:ss.SSSSSS
+     * @return the long representing the epoch for the given date and time
+     */
 	private static Long parseDate(String sDate, String sTime) {
 		String sComposedDate = sDate + "T" + sTime.substring(0, 12) + "Z";
 		return TimeEpochUtils.fromDateStringToEpoch(sComposedDate);
 	}
 	
     
+	/**
+	 * Given the map storing the metadata for a MODIS product, builds the object that will be passed to MongoDB for creating and storing the corresponding document
+	 * @param asProperties the map containing the metadata for a MODIS product
+	 * @return the object to pass to MongoDB for creating the corresponding entry in the db 
+	 */
     private static ModisItemForWriting buildModisItem(Map<String, String> asProperties) {
     	ModisItemForWriting oItem = new ModisItemForWriting();
     	
@@ -432,9 +450,9 @@ public class MODISUtils {
     }
     
     /**
-     * Parse the XML string containing the metadata and populate a map
-     * @param sXMLString
-     * @param sProductFileUrl
+     * Parse the XML string representing the metadata of a product and populate a map with the metadata of interest
+     * @param sXMLString the string representation of the XML file read from the data provider and containing the metadata of a product
+     * @param sProductFileUrl the URL where the product is stored, on the data provider
      * @return
      */
     private static Map<String, String> parseXML(String sXMLString, String sProductFileUrl) {
@@ -458,6 +476,12 @@ public class MODISUtils {
 		return asProperties;
     }
     
+    /**
+     * Given a string representing the XML content of a MODIS metadata file, extracts the value associated to a specific tag
+     * @param sXml the string representing the XML content
+     * @param sPropertyName the name of a tag (without the opening and closure marks)
+     * @return the value associated to the tag
+     */
 	public static String readProperty(String sXml, String sPropertyName) {
 		String sValue = null;
 
@@ -472,6 +496,11 @@ public class MODISUtils {
 		return sValue;
 	}
     
+	/**
+	 * Given a string representing the XML content of a MODIS metadata file, extracts the the bounding box
+	 * @param sXMLString the string representing the XML content
+	 * @return the JSON string representing the bounding box, in the format required to store the information on Mongo
+	 */
 	private static String readBoundingBox(String sXMLString) {
 		String sBoundingBoxProperty =  readProperty(sXMLString, s_sBoundary);
 		String[] asLines = sBoundingBoxProperty.split("\n");
@@ -521,8 +550,13 @@ public class MODISUtils {
 	}
 
     
-    /*
-     * Returns an input stream for a designated resource on a URSauthenticated remote server.
+    /**
+     * Returns an input stream for a designated resource on a URS authenticated remote server.
+     * This is where the access to the LPDAAC data provider is done.
+     * @param sResource the URL to access
+     * @param sUsername username for authentication on URS EARTHDATA by NASA
+     * @param sPassword password for authentication on URS EARTHDATA by NASA
+     * @return the input stream for the resource
      */
     public static InputStream getResource(String sResource, String sUsername, String sPassword) throws Exception {
         int iRedirects = 0;
