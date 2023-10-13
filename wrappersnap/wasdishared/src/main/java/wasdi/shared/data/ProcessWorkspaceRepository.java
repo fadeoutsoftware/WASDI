@@ -1214,6 +1214,28 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    
+    /**
+     * Get the processes older that the timestamp specified
+     * @param dTimestamp timestamp of the limit. It will return all the proc ws LATER than this timestamp
+     * @return
+     */
+    public List<ProcessWorkspace> getProcessOlderThan(Long dTimestamp) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+        	Bson oTImeFilter = Filters.gt("operationTimestamp", dTimestamp);
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oTImeFilter).sort(new BasicDBObject("operationTimestamp", 1)).allowDiskUse(true);
+            fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
     /**
      * Get a Process Workpsace from product name
      * @param sProductName
