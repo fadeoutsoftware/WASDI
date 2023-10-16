@@ -43,7 +43,7 @@ public class Landsat5ProductReader extends SnapProductReader {
 				return null;
 			}
 			if(!sFileNameFromProvider.toUpperCase().startsWith("LS05_") || !sFileNameFromProvider.toLowerCase().endsWith(".zip")) {
-				WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a LANDSAT-5 file name");
+				WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: " + sFileNameFromProvider + " does not look like a LANDSAT-5 file name");
 				return null;
 			}
 		} catch (Exception oE) {
@@ -59,6 +59,13 @@ public class Landsat5ProductReader extends SnapProductReader {
 			File oZipFile = new File(sDownloadedFileFullPath); 	// zip file downloaded from the data provider
 			
 			File oUnzippedFolder = new File(sDownloadPath + File.separator + sFileName);	// folder where the file shoulf be unzipped
+			if (oUnzippedFolder.mkdir()) {
+				WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: unzipped folder created: " + oUnzippedFolder.getAbsolutePath());
+			} else {
+				WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: unzipped folder NOT created. Stopping the operation");
+				return null; 
+			}
+			
 			ZipFileUtils.cleanUnzipFile(oZipFile, oUnzippedFolder);
 
 			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: starting deletion of all files in the main product folder");
@@ -69,6 +76,8 @@ public class Landsat5ProductReader extends SnapProductReader {
 					oFile.delete();
 				}
 			}
+			
+			WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: deletion ended");
 			
 			// we make sure that the only file left after deletion is a the ".TIFF" folder
 			if (oUnzippedFolder.listFiles().length == 1 
@@ -91,18 +100,20 @@ public class Landsat5ProductReader extends SnapProductReader {
 				} else {
 					WasdiLog.debugLog("Landsat5ProductReader.adjustFileAfterDownload: Be aware that the .TIFF subfolder still had some files inside and it has not been deleted.");
 				}
+				
+				// now that we moved all the files in ".TIFF" folder to the main unzipped directory, we can proceed to zip the folder, cleaned up from un-necessary files
+				ZipFileUtils oZipUtils = new ZipFileUtils();
+				String sSanitizedZipPath = sDownloadPath + File.separator + sFileName + ".zip";
+				oZipUtils.zipFolder(oUnzippedFolder.getAbsolutePath(), sSanitizedZipPath);
+				
+				// once the zip has been produced, we can remove the unzipped folder
+				WasdiFileUtils.deleteFile(sDownloadedFileFullPath);
+				
+				m_oProductFile = new File(sSanitizedZipPath); // here we change the pointer to the file, from the zip file to the _MTL.txt file, which provides the information for reading the bands
+				sDownloadedFileFullPath = sSanitizedZipPath; // here I should put the name of the first folder
 			}
 			
-			// now that we moved all the files in ".TIFF" folder to the main unzipped directory, we can proceed to zip the folder, cleaned up from un-necessary files
-			ZipFileUtils oZipUtils = new ZipFileUtils();
-			String sSanitizedZipPath = sDownloadPath + File.separator + sFileName + ".zip";
-			oZipUtils.zipFolder(oUnzippedFolder.getAbsolutePath(), sSanitizedZipPath);
-			
-			// once the zip has been produced, we can remove the unzipped folder
-			WasdiFileUtils.deleteFile(sDownloadedFileFullPath);
-			
-			m_oProductFile = new File(sSanitizedZipPath); // here we change the pointer to the file, from the zip file to the _MTL.txt file, which provides the information for reading the bands
-			sDownloadedFileFullPath = sSanitizedZipPath; // here I should put the name of the first folder
+
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("Landsat5ProductReader.adjustFileAfterDownload: error ", oEx);
