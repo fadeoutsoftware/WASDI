@@ -1,0 +1,124 @@
+{
+	"processes": [
+		{
+			"id": "apply",
+			"summary": "Apply a process to each pixel",
+			"description": "Applies a *unary* process to each pixel value in the data cube (i.e. a local operation). A unary process takes a single value and returns a single value, for example ``abs()`` or ``linear_scale_range()``.",
+			"categories": [
+				"cubes"
+			],
+			"parameters": [
+				{
+					"name": "data",
+					"description": "A data cube.",
+					"schema": {
+						"type": "object",
+						"subtype": "datacube"
+					}
+				},
+				{
+					"name": "process",
+					"description": "A unary process to be applied on each value, may consist of multiple sub-processes.",
+					"schema": {
+						"type": "object",
+						"subtype": "process-graph",
+						"parameters": [
+							{
+								"name": "x",
+								"description": "The value to process.",
+								"schema": {
+									"description": "Any data type."
+								}
+							}
+						]
+					}
+				}
+			],
+			"returns": {
+				"description": "A data cube with the newly computed values. The resolution, cardinality and the number of dimensions are the same as for the original data cube.",
+				"schema": {
+					"type": "object",
+					"subtype": "datacube"
+				}
+			}
+		},
+		{
+			"id": "multiply",
+			"summary": "Multiplication of two numbers",
+			"description": "Multiplies the two numbers `x` and `y` (*x * y*) and returns the computed product.\n\nNo-data values are taken into account so that `null` is returned if any element is such a value.\n\nThe computations follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/8766229) whenever the processing environment supports it.",
+			"categories": [
+				"math"
+			],
+			"parameters": [
+				{
+					"name": "x",
+					"description": "The multiplier.",
+					"schema": {
+						"type": "number"
+					}
+				},
+				{
+					"name": "y",
+					"description": "The multiplicand.",
+					"schema": {
+						"type": "number"
+					}
+				}
+			],
+			"returns": {
+				"description": "The computed product of the two numbers.",
+				"schema": {
+					"type": "number"
+				}
+			},
+			"exceptions": {
+				"MultiplicandMissing": {
+					"message": "Multiplication requires at least two numbers."
+				}
+			},
+			"examples": [
+				{
+					"arguments": {
+						"x": 5,
+						"y": 2.5
+					},
+					"returns": 12.5
+				},
+				{
+					"arguments": {
+						"x": -2,
+						"y": -4
+					},
+					"returns": 8
+				},
+				{
+					"arguments": {
+						"x": 1,
+						"y": null
+					},
+					"returns": null
+				}
+			],
+			"links": [
+				{
+					"rel": "about",
+					"href": "http://mathworld.wolfram.com/Product.html",
+					"title": "Product explained by Wolfram MathWorld"
+				},
+				{
+					"rel": "about",
+					"href": "https://ieeexplore.ieee.org/document/8766229",
+					"title": "IEEE Standard 754-2019 for Floating-Point Arithmetic"
+				}
+			]
+		}
+	],
+	"links": [
+		{
+			"rel": "alternate",
+			"href": "https://openeo.example/processes",
+			"type": "text/html",
+			"title": "HTML version of the processes"
+		}
+	]
+}

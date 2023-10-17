@@ -32,10 +32,8 @@ import io.swagger.annotations.ApiModelProperty;
 import net.wasdi.openeoserver.viewmodels.Provider.RolesEnum;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.config.openEO.OpenEOCollection;
-import wasdi.shared.config.openEO.OpenEOCubeDimension;
 import wasdi.shared.config.openEO.OpenEOProvider;
 import wasdi.shared.utils.TimeEpochUtils;
-import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 /**

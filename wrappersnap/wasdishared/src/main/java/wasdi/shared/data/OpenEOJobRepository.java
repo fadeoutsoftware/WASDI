@@ -1,11 +1,17 @@
 package wasdi.shared.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.OpenEOJob;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class OpenEOJobRepository extends MongoRepository  {
 	/**
@@ -92,10 +98,32 @@ public class OpenEOJobRepository extends MongoRepository  {
             	return s_oMapper.readValue(sJSON, OpenEOJob.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+            WasdiLog.errorLog("OpenEOJobRepository.getOpenEOJob: error ", oEx);
         }
 
         return  null;
     	
     }
+    
+    /**
+     * Read an Open EO Job
+     * @param sJobId Id of the related Process Workspace
+     * @return OgcProcessesTask or null
+     */
+    public List<OpenEOJob> getOpenEOJobsByUser(String sUserId) {
+    	
+        final ArrayList<OpenEOJob> aoReturnList = new ArrayList<OpenEOJob>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
+            
+            fillList(aoReturnList, oWSDocuments, OpenEOJob.class);
+            
+        } catch (Exception oEx) {
+        	WasdiLog.errorLog("OpenEOJobRepository.getOpenEOJobsByUser: error ", oEx);
+        }
+
+        return aoReturnList; 
+    	
+    }    
 }

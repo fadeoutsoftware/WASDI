@@ -502,15 +502,24 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			
 			String sJsonParams = oParameter.getJson();
 			
-			String sDecodedParams = sJsonParams;
-			
+			Map<String,Object> aoInputParams= null;
+
 			try {
-			    sDecodedParams = java.net.URLDecoder.decode(sJsonParams, StandardCharsets.UTF_8.name());
+				aoInputParams = (Map<String, Object>) MongoRepository.s_oMapper.readValue(sJsonParams, Map.class);
+			    
 			} catch (Exception oEr) {
-			    WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters ", oEr);
+			    WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, try to decode");
+			    
+			    String sDecodedParams = java.net.URLDecoder.decode(sJsonParams, StandardCharsets.UTF_8.name());
+			    
+			    try {
+			    	aoInputParams = (Map<String, Object>) MongoRepository.s_oMapper.readValue(sDecodedParams, Map.class);
+			    	WasdiLog.debugLog("EoepcaProcessorEngine.run: ok decode done");
+			    }
+			    catch (Exception oExInner) {
+			    	WasdiLog.errorLog("EoepcaProcessorEngine.run: error decoding the Json Parameters, also after the decode", oEr);
+			    }
 			}
-			
-			Map<String,Object> aoInputParams= (Map<String, Object>) MongoRepository.s_oMapper.readValue(sDecodedParams, Map.class);
 			
 			aoInputParams.put("wasdi__ws__id", oParameter.getWorkspace());
 			aoInputParams.put("wasdi__session__id", oParameter.getSessionID());

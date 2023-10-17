@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiModelProperty;
   Processes.JSON_PROPERTY_PROCESSES,
   Processes.JSON_PROPERTY_LINKS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2023-03-29T12:14:04.450152500+02:00[Europe/Rome]")
+
 public class Processes   {
   public static final String JSON_PROPERTY_PROCESSES = "processes";
   @JsonProperty(JSON_PROPERTY_PROCESSES)
