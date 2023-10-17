@@ -47,7 +47,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ParameterSchema   {
   public static final String JSON_PROPERTY_TYPE = "type";
   @JsonProperty(JSON_PROPERTY_TYPE)
-  private JsonSchemaType1 type;
+  private String type;
 
   public static final String JSON_PROPERTY_SUBTYPE = "subtype";
   @JsonProperty(JSON_PROPERTY_SUBTYPE)
@@ -85,7 +85,7 @@ public class ParameterSchema   {
   @JsonProperty(JSON_PROPERTY_DEPRECATED)
   private Boolean deprecated = false;
 
-  public ParameterSchema type(JsonSchemaType1 type) {
+  public ParameterSchema type(String type) {
     this.type = type;
     return this;
   }
@@ -97,11 +97,11 @@ public class ParameterSchema   {
   @JsonProperty(value = "type")
   @ApiModelProperty(value = "")
   @Valid 
-  public JsonSchemaType1 getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(JsonSchemaType1 type) {
+  public void setType(String type) {
     this.type = type;
   }
 

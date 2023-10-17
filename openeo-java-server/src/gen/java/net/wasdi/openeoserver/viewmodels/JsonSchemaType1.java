@@ -15,16 +15,33 @@ package net.wasdi.openeoserver.viewmodels;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import io.swagger.annotations.ApiModel;
-
 /**
  * The allowed basic data type(s) for a value according to [JSON Schema draft-07](https://json-schema.org/draft-07/json-schema-validation.html#rfc.section.6.1.1).  If this property is not present, all data types are allowed.
  */
-@JsonPropertyOrder({
-})
 public class JsonSchemaType1   {
+	
+	Object value;
+	
+	public Object getValue() {
+		return value;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	public JsonSchemaType1() {
+
+	}
+	
+	public JsonSchemaType1(Object oValue) {
+		value = oValue;
+	}
+	
+	public JsonSchemaType1(String oValue) {
+		value = oValue;
+	}	
+
 
   @Override
   public boolean equals(Object o) {
@@ -41,16 +58,7 @@ public class JsonSchemaType1   {
   public int hashCode() {
     return Objects.hash();
   }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class JsonSchemaType1 {\n");
-    
-    sb.append("}");
-    return sb.toString();
-  }
-
+  
   /**
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
