@@ -279,8 +279,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		else {
 			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  we are not the main node, nothing to do");
 			return true;			
-		}
-		
+		}		
 	}
 	
 	@Override
