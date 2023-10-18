@@ -136,15 +136,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		
-		String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
-		
-		if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
-		
-		if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
-			sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
-		}
-		
-		sBaseAddress += "wps3/";
+		String sBaseAddress = getEOEPCAAddress();		
 		
 		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 		
@@ -449,6 +441,30 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	}
 	
 	/**
+	 * Get the base address of the ADES Component of the configured EOEPCA Instance
+	 * @return
+	 */
+	protected String getEOEPCAAddress() {
+		try {
+			String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
+			
+			if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
+			
+			if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
+				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
+			}
+			
+			sBaseAddress += "wps3/";
+			
+			return sBaseAddress;
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("EoepcaProcessorEngine.getEOEPCAAddress: Exception " + oEx.toString());
+			return "";
+		}		
+	}
+	
+	/**
 	 * Executes an EOEPCA Processor
 	 */
 	@Override
@@ -474,23 +490,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
         }
         
 		try {
-			String sProcessorFolder = PathsConfig.getProcessorFolder(oParameter.getName());
-			
-			File oProcFolder = new File(sProcessorFolder);
-			
-//			if (!oProcFolder.exists()) {
-//				this.deploy(oParameter);
-//			}
-			
-			String sBaseAddress = WasdiConfig.Current.dockers.eoepca.adesServerAddress;
-			
-			if (!sBaseAddress.endsWith("/")) sBaseAddress += "/";
-			
-			if (!Utils.isNullOrEmpty(WasdiConfig.Current.dockers.eoepca.user)) {
-				sBaseAddress += WasdiConfig.Current.dockers.eoepca.user + "/";
-			}
-			
-			sBaseAddress += "wps3/";
+			String sBaseAddress = getEOEPCAAddress();			
 			
 			OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 			
@@ -546,8 +546,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
             long lTimeSpentMs = 0;
             int iThreadSleepMs = 2000;
             boolean bForcedError = false;
-            
-            
 			
 			while(true) {
 				
@@ -650,10 +648,32 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		// And we work with our main register
 		m_sDockerRegistry = aoRegisters.get(0).address;
 		
+		// This remove the container and the image both locally and on the registers
 		boolean bDeleted = super.delete(oParameter);
+		 
 		
-		// TODO: remove the image from the registers 
-		// Undeploy from ADES?
+		// Get the Ades Address
+		String sBaseAddress = getEOEPCAAddress();
+		// Create the client
+		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
+		
+		// Login
+		if (loginInEOEpca(oOgcProcessesClient)) {
+			
+			// Undeploy from ADES
+			Execute oUndeployInputParams = new Execute();
+			// Set the parameter with the identifier of the application to un-deploy
+			oUndeployInputParams.getInputs().put("applicationPackage", oParameter.getName()+"-1_0");
+			
+			// We need headers?
+			if (oOgcProcessesClient.getHeaders() != null) {
+				oOgcProcessesClient.getHeaders().put("Content-Type", "application/json");
+				oOgcProcessesClient.getHeaders().put("Prefer", "respond-async");				
+			}
+			
+			// Call the undeploy processor
+			oOgcProcessesClient.executeProcess("UndeployProcess", oUndeployInputParams);
+		}
 		
 		return bDeleted;
 	}
@@ -739,8 +759,14 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	@Override
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		// Library update is not possible in EOEPCA. It needs a full rebuild
-		return true;
+		if (WasdiConfig.Current.isMainNode()) {
+			WasdiLog.debugLog("EoepcaProcessorEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
+			return redeploy(oParameter);
+		}
+		else {
+			WasdiLog.debugLog("EoepcaProcessorEngine.libraryUpdate:  we are not the main node, nothing to do");
+			return true;			
+		}	
 	}
 	
 	/**
