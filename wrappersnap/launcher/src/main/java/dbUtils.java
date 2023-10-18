@@ -41,6 +41,7 @@ import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.business.processors.ProcessorLog;
 import wasdi.shared.business.processors.ProcessorUI;
+import wasdi.shared.business.statistics.Job;
 import wasdi.shared.business.users.User;
 import wasdi.shared.business.users.UserResourcePermission;
 import wasdi.shared.business.users.UserSession;
@@ -64,6 +65,7 @@ import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
@@ -1796,6 +1798,7 @@ public class dbUtils {
             System.out.println("So you want to work with process workspaces?");
 
             System.out.println("\t1 - Delete ProcessWorkspace where Workspace does not exist");
+            System.out.println("\t2 - Align Local Process Workspaces to Statistics Centralized Db");
             System.out.println("\tx - back");
             System.out.println("");
 
@@ -1853,10 +1856,63 @@ public class dbUtils {
 
                 System.out.println("Clean done!! Bye");
             }
+            else if (sInputString.equals("2")) {
+            	alignJobsToCentralDb();
+            }
 
         } catch (Exception oEx) {
             System.out.println("processWorkpsaces Exception: " + oEx);
             oEx.printStackTrace();
+        }
+    }
+    
+    public static void alignJobsToCentralDb() {
+    	try {
+    		
+    		System.out.println("alignJobsToCentralDb: search last insterted job for node " + WasdiConfig.Current.nodeCode);
+    		JobsRepository oJobsRepository = new JobsRepository();
+    		Job oLastJob = oJobsRepository.getLastJobFromNode(WasdiConfig.Current.nodeCode);
+    		
+    		Long lLastTimestamp = 0L;
+    		
+    		if (oLastJob != null) {
+    			if (oLastJob.getCreatedTimestamp()!=null) {
+    				lLastTimestamp = oLastJob.getCreatedTimestamp();	
+    			}
+    		}
+
+    		if (lLastTimestamp<=0) {
+    			System.out.println("alignJobsToCentralDb: no jobs found, import all the db");
+    		}
+    		else {
+    			System.out.println("alignJobsToCentralDb: serach jobs after " + lLastTimestamp);
+    		}
+    		
+    		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+    		List<ProcessWorkspace> aoProcessWorkspacesToImport = oProcessWorkspaceRepository.getProcessOlderThan(lLastTimestamp);
+    		
+    		if (aoProcessWorkspacesToImport == null) {
+    			System.out.println("alignJobsToCentralDb: error connecting db, the list is null.");
+    			return;
+    		}
+    		else {
+    			System.out.println("alignJobsToCentralDb: found "  + aoProcessWorkspacesToImport.size() + " Jobs to import");
+    		}
+    		
+    		int iTenPercent = aoProcessWorkspacesToImport.size()/10;
+    		
+    		for (int iProcesses = 0; iProcesses < aoProcessWorkspacesToImport.size(); iProcesses++) {
+    			ProcessWorkspace oProcessWorkspace = aoProcessWorkspacesToImport.get(iProcesses);
+				Job oJob = new Job(oProcessWorkspace);
+				oJobsRepository.insertJob(oJob);
+				
+				if ((iProcesses%iTenPercent)==0) {
+					System.out.println("alignJobsToCentralDb: importing, done another 10%");
+				}
+    		}
+    	}
+    	catch (Exception oEx) {
+            System.out.println("processWorkpsaces Exception: " + oEx);
         }
     }
 
@@ -2402,22 +2458,28 @@ public class dbUtils {
             // add connection to ecostress db
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
             
-            // add connection to modis db
-            String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
-            if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
-            	try {
-            		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
-            		ObjectMapper oMapper = new ObjectMapper(); 
-		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
-		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
-	            } catch (Exception oEx) {
-	            	System.err.println("Db Utils - Error while reading the MODIS db configuration. Exit. " + oEx.getMessage());
-	            	System.exit(-1);
-	            }
-            } else {
-                System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
-                System.exit(-1); 
+            try {
+                // add connection to modis db
+                String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
+                if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
+                	try {
+                		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+                		ObjectMapper oMapper = new ObjectMapper(); 
+    		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
+    		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
+    	            } catch (Exception oEx) {
+    	            	System.err.println("Db Utils - Error while reading the MODIS db configuration. Exit. " + oEx.getMessage());
+    	            }
+                } else {
+                    System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db. Exit");
+                }            	
             }
+            catch (Exception oEx1) {
+            	System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db.");
+			}
+            
+            // add connection to statistics db
+            MongoRepository.addMongoConnection("wasdi-stats", WasdiConfig.Current.mongoStatistics.user, WasdiConfig.Current.mongoStatistics.password, WasdiConfig.Current.mongoStatistics.address, WasdiConfig.Current.mongoStatistics.replicaName, WasdiConfig.Current.mongoStatistics.dbName);
             
             //testEOEPCALogin();
 
