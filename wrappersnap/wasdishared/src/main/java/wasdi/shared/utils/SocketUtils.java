@@ -559,9 +559,9 @@ public class SocketUtils {
 //		System.out.println(oResUpdate.getResponseBody());
 		
 		
-		oRes = httpPost("/containers/container_id/start", null, "".getBytes(), null, null);
-		System.out.println(oRes.getResponseCode());
-		System.out.println(oRes.getResponseBody());
+//		oRes = httpPost("/containers/container_id/start", null, "".getBytes(), null, null);
+//		System.out.println(oRes.getResponseCode());
+//		System.out.println(oRes.getResponseBody());
 	}
 
 }

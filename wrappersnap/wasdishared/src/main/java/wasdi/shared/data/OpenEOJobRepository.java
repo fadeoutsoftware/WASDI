@@ -9,7 +9,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.OpenEOJob;
-import wasdi.shared.business.Workspace;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 

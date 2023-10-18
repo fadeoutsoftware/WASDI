@@ -1,6 +1,5 @@
 package wasdi.processors;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
