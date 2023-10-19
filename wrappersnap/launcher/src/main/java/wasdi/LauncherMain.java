@@ -120,9 +120,14 @@ public class LauncherMain  {
 
         WasdiLog.debugLog("WASDI Launcher Main Start");
         
-        // Set the logger for the shared lib
-        WasdiLog.setLoggerWrapper(s_oLogger);
-        WasdiLog.debugLog("Logger added");
+        if (WasdiConfig.Current.useLog4J) {
+            // Set the logger for the shared lib
+            WasdiLog.setLoggerWrapper(s_oLogger);
+            WasdiLog.debugLog("Logger added");
+        }
+        else { 
+        	WasdiLog.debugLog("WADSI Configured to log on console");
+        }
 
         // We need to read the command line parameters.
 

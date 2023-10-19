@@ -80,6 +80,12 @@ public class WasdiConfig {
 	public boolean shellExecLocally=true;
 	
 	/**
+	 * Set to true to use the log4j configuration to configure the loggers.
+	 * If it is false, the app will just log on the standard output
+	 */
+	public boolean useLog4J = true;
+	
+	/**
 	 * Set true to activate the logs of the http calls
 	 */
 	public boolean logHttpCalls=true;
