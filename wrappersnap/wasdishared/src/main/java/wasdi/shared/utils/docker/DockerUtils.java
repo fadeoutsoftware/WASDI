@@ -175,8 +175,8 @@ public class DockerUtils {
 
         try {
         	// Docker API Url
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
 
             // Generate Docker Name
             String sProcessorName = m_oProcessor.getName();
@@ -185,7 +185,7 @@ public class DockerUtils {
             String sImageBaseName = "wasdi/" + sProcessorName + ":" + m_oProcessor.getVersion();
             sImageName = sImageBaseName;
             
-            String sUrl = "/build?t=" + StringUtils.encodeUrl(sImageName);
+            sUrl += "build?t=" + StringUtils.encodeUrl(sImageName);
             
             // Do we have a registry?
             if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
