@@ -1524,9 +1524,9 @@ public class DockerUtils {
         		// Create the container
             	try {
             		// API URL
-//            		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//            		if (!sUrl.endsWith("/")) sUrl += "/";
-            		String sUrl = "/containers/create?name=" + sContainerName;
+            		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+            		if (!sUrl.endsWith("/")) sUrl += "/";
+            		sUrl += "containers/create?name=" + sContainerName;
             		
             		// Create the Payload to send to create the container
             		CreateParams oContainerCreateParams = new CreateParams();
@@ -1617,9 +1617,9 @@ public class DockerUtils {
             WasdiLog.debugLog("DockerUtils.run: Starting Container Named " + sContainerName + " Id " + sContainerId);
             
             // Prepare the url to start it
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		String sUrl ="/containers/" + sContainerId + "/start";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		sUrl +="containers/" + sContainerId + "/start";
     		
     		// Make the call
     		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "");
