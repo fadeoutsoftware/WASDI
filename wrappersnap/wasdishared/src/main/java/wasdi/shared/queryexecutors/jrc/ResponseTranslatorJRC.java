@@ -41,7 +41,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		List<QueryResultViewModel>  aoResults = new ArrayList<>();
 		
 		int iNumInsertions = 0;
-		int iStartingIndex = iOffset * iLimit;
+		int iStartingIndex = iOffset;
 		int iCurrentEntry = 0;
 		for (Entry<String, String> oEntry : aoTilesMap.entrySet()) {
 			
@@ -109,8 +109,8 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		int iMaxLat = Collections.max(asLat);
 		int iMinLat = Collections.min(asLat);
 		
-		double dMaxLong = QueryExecutorJRC.translateLatitude(iMaxLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		double dMinLong = QueryExecutorJRC.translateLatitude(iMinLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
+		double dMaxLong = QueryExecutorJRC.translateLongitude(iMaxLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
+		double dMinLong = QueryExecutorJRC.translateLongitude(iMinLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
 		
 		double dMaxLat = QueryExecutorJRC.translateLatitude(iMaxLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
 		double dMinLat = QueryExecutorJRC.translateLatitude(iMinLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
