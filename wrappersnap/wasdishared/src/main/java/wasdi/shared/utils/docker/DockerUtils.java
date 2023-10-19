@@ -553,7 +553,12 @@ public class DockerUtils {
                 	sDockerName = m_sDockerRegistry + "/" + sDockerName;
                 }
                 
+                WasdiLog.debugLog("DockerUtils.delete: calling get Container Id From Wasdi App Name");
+                
                 String sId = getContainerIdFromWasdiAppName(sProcessorName, sVersion);
+                
+                WasdiLog.debugLog("DockerUtils.delete: call Remove Container");
+                
                 boolean bContainersRemoved = removeContainer(sId, true);
                 
                 if (!bContainersRemoved) {
@@ -764,6 +769,7 @@ public class DockerUtils {
     		HttpCallResponse oResponse = SocketUtils.httpGet(sUrl);
     		
     		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
+    			WasdiLog.warnLog("DockerUtils.getContainerIdFromWasdiAppName: get returned " + oResponse.getResponseCode());
     			return "";
     		}
     		
@@ -785,16 +791,18 @@ public class DockerUtils {
 					String sImageName = oContainerMap.get("Image");
 					
 					if (sImageName.endsWith(sMyImage)) {
-						WasdiLog.debugLog("DockerUtils.DockerUtils.getContainerIdFromWasdiAppName: found my container " + sMyImage + " Docker Image = " +sImageName);
+						WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: found my container " + sMyImage + " Docker Image = " +sImageName);
 						sId = oContainerMap.get("Id");
 						return sId;
 					}
 					
 				}
 		    	catch (Exception oEx) {
-		    		WasdiLog.errorLog("DockerUtils.DockerUtils.getContainerIdFromWasdiAppName: error parsing a container json entity " + oEx.toString());
+		    		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: error parsing a container json entity " + oEx.toString());
 		        }
-			}    		
+			}
+            
+            WasdiLog.debugLog("DockerUtils.getContainerIdFromWasdiAppName: no images found" );
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("DockerUtils.getContainerIdFromWasdiAppName: " + oEx.toString());
@@ -887,6 +895,9 @@ public class DockerUtils {
 //    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
             if (!Utils.isNullOrEmpty(sId)) {
+            	
+            	WasdiLog.debugLog("DockerUtils.removeContainer: search id " + sId);
+            	
 //        		if (!sUrl.endsWith("/")) sUrl += "/";
         		String sUrl = "/containers/" + sId;
         		
@@ -902,6 +913,9 @@ public class DockerUtils {
         		else {
         			return true;
         		}
+            }
+            else {
+            	WasdiLog.debugLog("DockerUtils.removeContainer: sId is null or empty, nothing to do");
             }
     		
     		return false;

@@ -206,7 +206,6 @@ public class SocketUtils {
 
 			// here we are not making a difference between a successful code or an error code. 
 			InputStream oInputStream = oResponse.getBody();
-			System.out.println(oInputStream.toString());
 			
 			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 			
