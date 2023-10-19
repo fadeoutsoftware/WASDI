@@ -119,15 +119,6 @@ public class LauncherMain  {
         }
 
         WasdiLog.debugLog("WASDI Launcher Main Start");
-        
-        if (WasdiConfig.Current.useLog4J) {
-            // Set the logger for the shared lib
-            WasdiLog.setLoggerWrapper(s_oLogger);
-            WasdiLog.debugLog("Logger added");
-        }
-        else { 
-        	WasdiLog.debugLog("WADSI Configured to log on console");
-        }
 
         // We need to read the command line parameters.
 
@@ -184,12 +175,21 @@ public class LauncherMain  {
             System.err.println("Launcher Main - config file not found. Exit");
             System.exit(-1);
         }
+        
+        if (WasdiConfig.Current.useLog4J) {
+            // Set the logger for the shared lib
+            WasdiLog.setLoggerWrapper(s_oLogger);
+            WasdiLog.debugLog("Logger added");
+        }
+        else { 
+        	WasdiLog.debugLog("WADSI Configured to log on console");
+        }        
 
         try {
 
             // Set Rabbit Factory Params
         	RabbitFactory.readConfig();
-
+        	
             // Set the Mongo Config
             MongoRepository.readConfig();
 
