@@ -271,7 +271,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					String sActivateLink = oLinks.get("activate").toString();
 					
 					// Post the request
-					HttpUtils.httpPost(sActivateLink, null, getPlanetHeaders());
+					HttpUtils.httpPost(sActivateLink, "", getPlanetHeaders());
 					
 					WasdiLog.debugLog("PLANETProviderAdapter.activateAsset: activation request sent");
 					
