@@ -555,6 +555,20 @@
                 }
             ]
         },
+		{
+            "name": "THEMATIC TILES",
+            "indexname": "platformname",
+            "indexvalue": "StaticTiles",
+            "filters": [
+                {
+                    "indexname": "producttype",
+                    "indexlabel": "Product Type",
+                    "indexvalues": "GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0",
+                    "regex": ".*",
+                    "indexvalue":"GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0"
+                }
+            ]
+        },
         {
             "name": "IMERG",
             "indexname": "platformname",
