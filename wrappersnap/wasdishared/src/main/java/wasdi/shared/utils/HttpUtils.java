@@ -86,6 +86,10 @@ public final class HttpUtils {
 
 		try {
 			
+			if (sUrl.startsWith("unix:///")) {
+				return SocketUtils.httpGet(sUrl, asHeaders, aoOutputHeaders);
+			}
+			
 			// Create the Url and relative Connection
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -234,6 +238,10 @@ public final class HttpUtils {
 		return httpPost(sUrl, sPayload.getBytes(), asHeaders, sAuth, aoOutputHeaders);
 	}
 	
+	public static HttpCallResponse httpPost(String sUrl, byte []ayBytes, Map<String, String> asHeaders) {
+		return httpPost(sUrl, ayBytes, asHeaders, "", null);
+	}
+	
 	/**
 	 * Standard http post utility function
 	 * @param sUrl url to call
@@ -248,6 +256,11 @@ public final class HttpUtils {
 
 		String sResult = null;
 		try {
+			
+			if (sUrl.startsWith("unix:///")) {
+				return SocketUtils.httpPost(sUrl, ayBytes, asHeaders, aoOutputHeaders);
+			}
+			
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 			
@@ -374,6 +387,22 @@ public final class HttpUtils {
 		if (!oFile.exists()) {
 			WasdiLog.errorLog("Wasdi.httpPostFile: file not found");
 			return false;
+		}
+		
+		if (!Utils.isNullOrEmpty(sUrl)) {
+			if (sUrl.startsWith("unix:///")) {
+				HttpCallResponse oResponse = SocketUtils.httpPostFile(sUrl, sFileName, asHeaders);
+				
+				if (oResponse != null) {
+					if (oResponse.getResponseCode()>=200 && oResponse.getResponseCode()<=299) {
+						return true;
+					}
+					return false;
+				}
+				else {
+					return false;
+				}
+			}
 		}
 
 		String sZippedFile = null;
@@ -544,6 +573,18 @@ public final class HttpUtils {
 	public static String httpPut(String sUrl, String sPayload, Map<String, String> asHeaders, String sAuth) {
 
 		try {
+			
+			if (sUrl.startsWith("unix:///")) {
+				HttpCallResponse oResponse = SocketUtils.httpPut(sUrl, asHeaders, sPayload.getBytes());
+				
+				if (oResponse != null) {
+					return oResponse.getResponseBody();
+				}
+				else {
+					return "";
+				}
+			}
+			
 			URL oURL = new URL(sUrl);
 			
 			boolean bLog = true;
@@ -629,6 +670,11 @@ public final class HttpUtils {
 		}
 
 		try {
+			
+			if (sUrl.startsWith("unix:///")) {
+				return SocketUtils.httpDelete(sUrl, asHeaders);
+			}
+			
 			
 			boolean bLog = true;
 			

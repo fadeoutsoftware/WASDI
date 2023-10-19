@@ -171,7 +171,7 @@ public class SocketUtils {
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
 	public static HttpCallResponse httpGet(String sPath) {
-		return httpGet(sPath, null, null, null, null);
+		return httpGet(sPath, null, null);
 	}
 	
 	/**
@@ -181,7 +181,7 @@ public class SocketUtils {
 	 * @param aoOutputHeaders Map of response headers
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpGet(String sPath, String sDockerHostAddress, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders, Map<String, String> asQueryParams) {
+	public static HttpCallResponse httpGet(String sPath, Map<String, String> asHeaders, Map<String, List<String>> aoOutputHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 
@@ -192,12 +192,16 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 		
-		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
+		DockerHttpClient oHttpClient = initializeDockerClient();
 		
 		if (oHttpClient == null) {
 			WasdiLog.errorLog("SocketUtils.httpGet. Docker HTTP client is null. Returning an empty response.");
 			return oHttpCallResponse;
 		}
+		
+		String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+		sPath = sPath.substring(sBaseAddress.length());		
 			
 		byte[] ayEmptyPayload = {};
 		Request oRequest = createRequest(Request.Method.GET, sPath, asHeaders, ayEmptyPayload);
@@ -343,7 +347,7 @@ public class SocketUtils {
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
 	public static HttpCallResponse httpDelete(String sPath) {
-		return httpDelete(sPath, null, null);
+		return httpDelete(sPath, null);
 	}
 	
 	/**
@@ -352,7 +356,7 @@ public class SocketUtils {
 	 * @param asHeaders headers dictionary
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpDelete(String sPath, String sDockerHostAddress, Map<String, String> asHeaders) {
+	public static HttpCallResponse httpDelete(String sPath, Map<String, String> asHeaders) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		
@@ -363,12 +367,16 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 		
-		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
+		DockerHttpClient oHttpClient = initializeDockerClient();
 		
 		if (oHttpClient == null) {
 			WasdiLog.errorLog("SocketUtils.httpDelete. Docker HTTP client is null. Returning an empty response.");
 			return oHttpCallResponse;
 		}	
+		
+		String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+		sPath = sPath.substring(sBaseAddress.length());		
 
 		byte[] ayEmptyPayload = {};
 		Request oRequest = createRequest(Request.Method.DELETE, sPath, asHeaders, ayEmptyPayload);
@@ -410,7 +418,7 @@ public class SocketUtils {
 	 * @param asHeaders headers dictionary
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpPut(String sPath, String sDockerHostAddress, Map<String, String> asHeaders, byte[] ayBytes) {
+	public static HttpCallResponse httpPut(String sPath, Map<String, String> asHeaders, byte[] ayBytes) {
 		
 		HttpCallResponse oHttpCallResponse = new HttpCallResponse();
 		
@@ -421,13 +429,17 @@ public class SocketUtils {
 			return oHttpCallResponse;
 		}
 		
-		DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
+		DockerHttpClient oHttpClient = initializeDockerClient();
 		
 		if (oHttpClient == null) {
 			WasdiLog.errorLog("SocketUtils.httpPut. Docker HTTP client is null. Returning an empty response.");
 			return oHttpCallResponse;
 		}	
 
+		String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+		sPath = sPath.substring(sBaseAddress.length());
+		
 		Request oRequest = createRequest(Request.Method.PUT, sPath, asHeaders, ayBytes);
 		
 		try (Response oResponse = oHttpClient.execute(oRequest)) {
@@ -469,7 +481,7 @@ public class SocketUtils {
 	 * @param asHeaders
 	 * @return HttpCallResponse object that contains the Response Body and the Response Code
 	 */
-	public static HttpCallResponse httpPostFile(String sPath, String sDockerHostAddress, String sFileName, Map<String, String> asHeaders) {
+	public static HttpCallResponse httpPostFile(String sPath, String sFileName, Map<String, String> asHeaders) {
 		
 		HttpCallResponse oHttpResponse = new HttpCallResponse();
 		
@@ -483,7 +495,7 @@ public class SocketUtils {
 		
 		try {
 			
-			DockerHttpClient oHttpClient = initializeDockerClient(sDockerHostAddress);
+			DockerHttpClient oHttpClient = initializeDockerClient();
 			
 			if (oHttpClient == null) {
 				WasdiLog.errorLog("SocketUtils.httpPostFile. Docker HTTP client is null. Returning an empty response.");
@@ -491,6 +503,10 @@ public class SocketUtils {
 			}	
 			
 			oFileInStream = new FileInputStream(oFile);
+			
+			String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+			if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+			sPath = sPath.substring(sBaseAddress.length());			
 			
 			Request oRequest = createRequest(Request.Method.POST, sPath, null, oFileInStream);
 			

@@ -23,7 +23,6 @@ import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
-import wasdi.shared.utils.SocketUtils;
 import wasdi.shared.utils.StringUtils;
 import wasdi.shared.utils.TarUtils;
 import wasdi.shared.utils.Utils;
@@ -266,7 +265,7 @@ public class DockerUtils {
     		}        	
         	
         	// Finally make the call
-        	HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
+        	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
         	
         	// Delete the tar
         	WasdiFileUtils.deleteFile(sTarFileOuput);
@@ -389,9 +388,9 @@ public class DockerUtils {
         		// Create the container
             	try {
             		// API URL
-//            		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//            		if (!sUrl.endsWith("/")) sUrl += "/";
-            		String sUrl = "/containers/create?name=" + sContainerName;
+            		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+            		if (!sUrl.endsWith("/")) sUrl += "/";
+            		sUrl += "containers/create?name=" + sContainerName;
             		
             		// Create the Payload to send to create the container
             		CreateParams oContainerCreateParams = new CreateParams();
@@ -453,7 +452,7 @@ public class DockerUtils {
             		asHeaders.put("Content-Type", "application/json");
             		
             		// Is a post!
-            		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
+            		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
             		
             		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
             			// Here is not good
@@ -478,12 +477,12 @@ public class DockerUtils {
             WasdiLog.debugLog("DockerUtils.start: Starting Container Named" + sContainerName + " created");
             
             // Prepare the url to start it
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		String sUrl ="/containers/" + sContainerName + "/start";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		sUrl +="containers/" + sContainerName + "/start";
     		
     		// Make the call
-    		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "");
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
     		
     		if (oResponse.getResponseCode() == 204) {
     			// Started Well
@@ -616,11 +615,11 @@ public class DockerUtils {
     	
     	try {
     		// Get the API Address
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		// Auth end-point
-    		String sUrl = "/auth";
+    		sUrl += "auth";
     		
     		// Prepare the login info
     		LoginInfo oLoginInfo = new LoginInfo();
@@ -634,7 +633,7 @@ public class DockerUtils {
     		String sLoginInfo = JsonUtils.stringify(oLoginInfo);
     		
     		// Make the post
-    		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, sLoginInfo);
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sLoginInfo);
     		
     		if (oResponse.getResponseCode() == 200) {
     			// Here we should had our Token
@@ -673,8 +672,8 @@ public class DockerUtils {
     	try {
     		
     		// Get the docker address
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		if (sImage.contains(":")) {
     			WasdiLog.debugLog("DockerUtils.push image contains a tag: remove it");
@@ -685,7 +684,7 @@ public class DockerUtils {
     		String sEncodedServerImage = StringUtils.encodeUrl(sImage);
     		
     		// Add the query parameter
-    		String sUrl = "images/"+sEncodedServerImage + "/push";
+    		sUrl += "images/"+sEncodedServerImage + "/push";
     		
     		// We need a couple of headers
     		HashMap<String, String> asHeaders = new HashMap<>();
@@ -695,7 +694,7 @@ public class DockerUtils {
     		asHeaders.put("X-Registry-Auth", sToken);    		
     		
     		// Is a post!
-    		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "", asHeaders);
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
     		
     		if (oResponse.getResponseCode() == 200) {
     			return true;
@@ -720,14 +719,14 @@ public class DockerUtils {
     	try {
     		
     		// Get the docker address
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		// Url Encode
     		String sEncodedServerImage = StringUtils.encodeUrl(sImage);
     		
     		// Add the query parameter
-    		String sUrl ="/images/create?fromImage="+sEncodedServerImage;
+    		sUrl += "images/create?fromImage="+sEncodedServerImage;
     		
     		// We need a couple of headers
     		HashMap<String, String> asHeaders = new HashMap<>();
@@ -737,7 +736,7 @@ public class DockerUtils {
     		asHeaders.put("X-Registry-Auth", sToken);    		
     		
     		// Is a post!
-    		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "", asHeaders);
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "", asHeaders);
     		
     		if (oResponse.getResponseCode() == 200) {
     			return true;
@@ -761,12 +760,12 @@ public class DockerUtils {
      */
     protected String getContainerIdFromWasdiAppName(String sProcessorName, String sVersion) {
     	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
-    		String sUrl = "/containers/json";
+    		sUrl += "containers/json";
     		
-    		HttpCallResponse oResponse = SocketUtils.httpGet(sUrl);
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
     		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
     			WasdiLog.warnLog("DockerUtils.getContainerIdFromWasdiAppName: get returned " + oResponse.getResponseCode());
@@ -844,13 +843,13 @@ public class DockerUtils {
      */
     public boolean stop(String sId) {
        	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
             if (!Utils.isNullOrEmpty(sId)) {
-//        		if (!sUrl.endsWith("/")) sUrl += "/";
-        		String sUrl = "/containers/" + sId + "/stop";
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "containers/" + sId + "/stop";
         		
-        		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "");
+        		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
         		
         		if (oResponse.getResponseCode()==204||oResponse.getResponseCode()==304) {
         			return true;
@@ -892,20 +891,20 @@ public class DockerUtils {
      */
     public boolean removeContainer(String sId, boolean bForce) {
        	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
             if (!Utils.isNullOrEmpty(sId)) {
             	
             	WasdiLog.debugLog("DockerUtils.removeContainer: search id " + sId);
             	
-//        		if (!sUrl.endsWith("/")) sUrl += "/";
-        		String sUrl = "/containers/" + sId;
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "containers/" + sId;
         		
         		if (bForce) {
         			sUrl+="?force=true";
         		}
         		
-        		HttpCallResponse oResponse = SocketUtils.httpDelete(sUrl);
+        		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
         		
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
         			return false;
@@ -944,17 +943,17 @@ public class DockerUtils {
      */
     boolean removeImage(String sImageName, boolean bForce) {
        	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
                         
             if (!Utils.isNullOrEmpty(sImageName)) {
-//        		if (!sUrl.endsWith("/")) sUrl += "/";
-        		String sUrl = "/images/" + sImageName;
+        		if (!sUrl.endsWith("/")) sUrl += "/";
+        		sUrl += "images/" + sImageName;
         		
         		if (bForce) {
         			sUrl+="?force=true";
         		}
         		
-        		HttpCallResponse oResponse = SocketUtils.httpDelete(sUrl);
+        		HttpCallResponse oResponse = HttpUtils.httpDelete(sUrl);
         		
         		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
         			return false;
@@ -1224,15 +1223,15 @@ public class DockerUtils {
      */
     protected List<Object> getContainersInfo(boolean bAll) {
     	try {
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		String sUrl = "/containers/json";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		sUrl += "containers/json";
     		
     		if (bAll) {
     			sUrl += "?all=true";
     		}
     		
-    		HttpCallResponse oResponse = SocketUtils.httpGet(sUrl);
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
     		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
     			return null;
@@ -1308,14 +1307,14 @@ public class DockerUtils {
     	
     	try {
     		// Get the internal API address
-//    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
     		
     		// End point to get the list of images
-    		String sUrl = "/images/json";
+    		sUrl += "images/json";
     		
     		// Get the list
-    		HttpCallResponse oResponse = SocketUtils.httpGet(sUrl);
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
     			return false;
     		}
@@ -1582,7 +1581,7 @@ public class DockerUtils {
             		asHeaders.put("Content-Type", "application/json");
             		
             		// Is a post!
-            		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
+            		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, sContainerCreateParams, asHeaders);
             		
             		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
             			// Here is not good
@@ -1622,7 +1621,7 @@ public class DockerUtils {
     		sUrl +="containers/" + sContainerId + "/start";
     		
     		// Make the call
-    		HttpCallResponse oResponse = SocketUtils.httpPost(sUrl, "");
+    		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
     		
     		if (oResponse.getResponseCode() == 204) {
     			// Started Well
@@ -1653,11 +1652,11 @@ public class DockerUtils {
      */
     public String getContainerLogsByContainerId(String sContainerId) {
     	try {
-//    		String sUrl =  WasdiConfig.Current.dockers.internalDockerAPIAddress;
-//    		if (!sUrl.endsWith("/")) sUrl += "/";
-    		String sUrl = "/containers/"+sContainerId+"/logs?stdout=true&stderr=true";
+    		String sUrl =  WasdiConfig.Current.dockers.internalDockerAPIAddress;
+    		if (!sUrl.endsWith("/")) sUrl += "/";
+    		sUrl += "containers/"+sContainerId+"/logs?stdout=true&stderr=true";
     		
-    		HttpCallResponse oResponse = SocketUtils.httpGet(sUrl);
+    		HttpCallResponse oResponse = HttpUtils.httpGet(sUrl);
     		
     		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
     			return "";
