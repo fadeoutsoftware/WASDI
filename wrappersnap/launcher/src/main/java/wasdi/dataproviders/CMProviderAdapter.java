@@ -72,10 +72,9 @@ public class CMProviderAdapter extends ProviderAdapter {
 			for (String sDomainUrl : asLinks) {
 				String sDownloadProductResult = CMHttpUtils.downloadProduct(sService, sProduct, sQuery, sDomainUrl, m_sProviderUser, m_sProviderPassword, sSaveDirOnServer);
 
-				if (sDownloadProductResult != null) {
+				if (!Utils.isNullOrEmpty(sDownloadProductResult)) {
 					return sDownloadProductResult;
 				}
-				
 			}
 
 			try {
