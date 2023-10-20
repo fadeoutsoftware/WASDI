@@ -14,6 +14,7 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
+import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -26,6 +27,7 @@ import org.osgeo.proj4j.ProjCoordinate;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
@@ -34,12 +36,27 @@ public class QueryExecutorJRC extends QueryExecutor {
 	
 	protected final static String s_sESRI54009 = "ESRI:54009";
 	protected final static String s_sEPSG4326 = "EPSG:4326";
+	private String m_sShapeMaskPath;
 	
 	public QueryExecutorJRC() {
 		m_sProvider = "JRC";
 		m_oQueryTranslator = new QueryTranslatorJRC();
 		m_oResponseTranslator = new ResponseTranslatorJRC();
 		m_asSupportedPlatforms.add(Platforms.STATICS_TILES);
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		
+		try {
+			JSONObject oAppConf = WasdiFileUtils.loadJsonFromFile(m_sParserConfigPath);
+			m_sShapeMaskPath = oAppConf.getString("shapeMaskPath");
+			
+		}
+		catch (Exception oEx) {
+			WasdiLog.debugLog("QueryExecutorVIIRS.init(): exception reading parser config file " + m_sParserConfigPath);
+		}		
 	}
 
 	@Override
@@ -109,17 +126,17 @@ public class QueryExecutorJRC extends QueryExecutor {
 		return aoResults;
 	}
 	
-	private static Map<String, String> getTilesInArea(Double oWest, Double oNorth, Double oEast, Double oSouth) {
+	private Map<String, String> getTilesInArea(Double oWest, Double oNorth, Double oEast, Double oSouth) {
 		
 		Map<String, String> aooTiles = new LinkedHashMap <String, String>(); // we choose an implementation that maintains the insertion order (useful for paginated queries)
 		
-		String sShapeFileMask = "C:/Users/valentina.leone/Desktop/WORK/GHS/GHSL_data_54009_shapefile/GHSL2_0_MWD_L1_tile_schema_land.shp"; // TODO: questo parametro dovrà essere letto da qualche parte
+//		String sShapeFileMask = "C:/Users/valentina.leone/Desktop/WORK/GHS/GHSL_data_54009_shapefile/GHSL2_0_MWD_L1_tile_schema_land.shp"; // TODO: questo parametro dovrà essere letto da qualche parte
 		
-		synchronized (sShapeFileMask) {
+		synchronized (m_sShapeMaskPath) {
 			
 			// Get the Data Store
 			try {
-				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(sShapeFileMask));
+				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sShapeMaskPath));
 				
 				FeatureSource<SimpleFeatureType, SimpleFeature> aoSource = oStore.getFeatureSource();
 				
@@ -153,7 +170,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 	}
 	
 	
-	private static Filter getFilter(Double oWest, Double oNorth, Double oEast, Double oSouth) {
+	private Filter getFilter(Double oWest, Double oNorth, Double oEast, Double oSouth) {
 		
 		if (oWest != null && oNorth != null && oEast != null && oSouth != null ) {
 			double sMinLong = oWest.doubleValue();

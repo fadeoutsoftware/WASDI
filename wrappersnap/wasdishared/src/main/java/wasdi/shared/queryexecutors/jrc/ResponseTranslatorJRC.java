@@ -16,6 +16,7 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 public class ResponseTranslatorJRC extends ResponseTranslator {
 	
 	private static final String s_sTilesDownloadLink = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_BUILT_S_GLOBE_R2023A/GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10/V1-0/tiles/";
+	public static final String s_sFileNamePrefix = "GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_";
 	public static final String s_sLinkSeparator = ";";
 	public static final int s_iLinkIndex = 0;
 	public static final int s_iFileNameIndex = 1;
@@ -66,7 +67,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		QueryResultViewModel oRes = new QueryResultViewModel();
 		
 		try {
-			String sTitle = "GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_" + sTileId; // TODO: prendere i risultati in modo più intelligente
+			String sTitle = s_sFileNamePrefix + sTileId; 
 			String sFootprint = getWasdiFormatFootPrint(sTileFootprint);
 			String sLink = getLink(sTitle, sFootprint);
 			
@@ -84,8 +85,8 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 	}
 	
-	private String getWasdiFormatFootPrint(String sESRI54009Footprint) {
-		String sPrefix = sESRI54009Footprint.substring(0, 16);
+	public static String getWasdiFormatFootPrint(String sESRI54009Footprint) {
+		String sPrefix = sESRI54009Footprint.substring(0, 16); // this should be the string "MULTYPOLIGON ((("
 		String sSuffix = sESRI54009Footprint.substring(sESRI54009Footprint.length() - 3, sESRI54009Footprint.length());
 		
 		String sSanitizedESRIFootprint = sESRI54009Footprint.substring(16, sESRI54009Footprint.length() - 3);
@@ -114,30 +115,16 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 		double dMaxLat = QueryExecutorJRC.translateLatitude(iMaxLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
 		double dMinLat = QueryExecutorJRC.translateLatitude(iMinLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		
-		
-//		List<String> asTranslatedCoordinates = asPairs.stream()
-//				.map(sPair -> sPair.split(" "))
-//				.map(asCoords -> getEPSGCoordinates(asCoords[0], asCoords[1]))
-//				.collect(Collectors.toList());
+
 		
 		String sCoord = dMinLong + " " + dMaxLat + ", " + dMaxLong + " " + dMaxLat + ", " + dMaxLong + " " + dMinLat + ", " + dMinLong + " " + dMinLat + ", " + dMinLong + " " + dMaxLat;
 		
 		
 		// now we can for the footprint in wasdi format
-//		String sTargetCoordinates = String.join(", ", asTranslatedCoordinates);
 		return sPrefix + sCoord + sSuffix;
 		
 	}
 
-	
-	private String getEPSGCoordinates(String sESRILongitude, String sESRILatitude) {
-		double dLongitude = Integer.parseInt(sESRILongitude.trim());
-		double dLatitude = Integer.parseInt(sESRILatitude.trim());
-		double[] adEPGSCoordinates = QueryExecutorJRC.translateCoordinate(dLongitude, dLatitude, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		return adEPGSCoordinates[0] + " " + adEPGSCoordinates[1];
-		
-	}
 	
 	private String getLink(String sTitle, String sBoundingBox) {
 		StringBuilder oBuilder = new StringBuilder();
