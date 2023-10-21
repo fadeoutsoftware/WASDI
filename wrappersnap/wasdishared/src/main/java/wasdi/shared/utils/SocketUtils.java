@@ -304,7 +304,7 @@ public class SocketUtils {
 		if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
 		sPath = sPath.substring(sBaseAddress.length());
 		
-		WasdiLog.errorLog("SocketUtils.httpPost: computed path " + sPath);
+		//WasdiLog.errorLog("SocketUtils.httpPost: computed path " + sPath);
 		
 		Request oRequest = createRequest(Request.Method.POST, sPath, asHeaders, ayBytes);
 		
