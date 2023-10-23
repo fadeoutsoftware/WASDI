@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap ;
 
+import org.apache.logging.log4j.util.Strings;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -27,6 +28,7 @@ import org.osgeo.proj4j.ProjCoordinate;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
 import wasdi.shared.queryexecutors.QueryExecutor;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -81,7 +83,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		try {
 			
-			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS);
+			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS, oQueryVM.productName);
 			iCount = oTilesMap.size();
 			
 		} catch (Exception oEx) {
@@ -113,9 +115,10 @@ public class QueryExecutorJRC extends QueryExecutor {
 		Double oS = oQueryVM.south != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
 		Double oN = oQueryVM.north != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
 		
+		
 		try {
 			
-			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS);
+			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS, oQueryVM.productName);
 			
 			aoResults = ((ResponseTranslatorJRC) m_oResponseTranslator).translateResults(oTilesMap, oQuery.getLimit(), oQuery.getOffset());
 			
@@ -126,7 +129,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 		return aoResults;
 	}
 	
-	private Map<String, String> getTilesInArea(Double oWest, Double oNorth, Double oEast, Double oSouth) {
+	private Map<String, String> getTilesInArea(Double oWest, Double oNorth, Double oEast, Double oSouth, String sProductName) {
 		
 		Map<String, String> aooTiles = new LinkedHashMap <String, String>(); // we choose an implementation that maintains the insertion order (useful for paginated queries)
 		
@@ -142,27 +145,33 @@ public class QueryExecutorJRC extends QueryExecutor {
 				
 				FeatureSource<SimpleFeatureType, SimpleFeature> aoSource = oStore.getFeatureSource();
 				
-				Filter oFilter = getFilter(oWest, oNorth, oEast, oSouth);
+				Filter oFilter = getFilter(oWest, oNorth, oEast, oSouth, sProductName);
 				
-				FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
+				if (oFilter != null) {
 				
-				FeatureIterator<SimpleFeature> aoFeatures = oCollection.features();
-				
-				while (aoFeatures.hasNext()) {
-					SimpleFeature oFeature = aoFeatures.next();
-	                
-	                List<Object> aoAttributes = oFeature.getAttributes();
-	                
-	                String sBoundingBoxESRI = aoAttributes.get(0).toString();
-	                
-	                String sTileId = aoAttributes.get(1).toString();
-	                
-	                aooTiles.put(sTileId, sBoundingBoxESRI);
-	                
-				}		
+					FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
+					
+					FeatureIterator<SimpleFeature> aoFeatures = oCollection.features();
+					
+					while (aoFeatures.hasNext()) {
+						SimpleFeature oFeature = aoFeatures.next();
+		                
+		                List<Object> aoAttributes = oFeature.getAttributes();
+		                
+		                String sBoundingBoxESRI = aoAttributes.get(0).toString();
+		                
+		                String sTileId = aoAttributes.get(1).toString();
+		                
+		                aooTiles.put(sTileId, sBoundingBoxESRI);
+		                
+					}	
+				} 
+				else {
+					WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. The returned filter is null." );
+				}
 				
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
+				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
 			} 
 			finally {
 				if (oStore != null) {
@@ -176,21 +185,44 @@ public class QueryExecutorJRC extends QueryExecutor {
 	}
 	
 	
-	private Filter getFilter(Double oWest, Double oNorth, Double oEast, Double oSouth) {
+	private Filter getFilter(Double oWest, Double oNorth, Double oEast, Double oSouth, String sProductName) {
+		Filter oFilter = null;
+		
+		List<String> asFilterElements = new ArrayList<>(); 
 		
 		if (oWest != null && oNorth != null && oEast != null && oSouth != null ) {
 			double sMinLong = oWest.doubleValue();
 			double sMinLat = oSouth.doubleValue();
 			double sMaxLong = oEast.doubleValue();
 			double sMaxLat = oNorth.doubleValue();
-			try {
-				return ECQL.toFilter("BBOX(the_geom, " + sMinLong + ", " + sMinLat + ", " +sMaxLong + ", " + sMaxLat + ")");
-			} catch (CQLException oEx) {
-				WasdiLog.debugLog("QueryExecutorJRC.getFilter. Error while creating the filter for the shape mask. " + oEx.getMessage());
-			}
+			
+			String sQueryBbox = "BBOX(the_geom, " + sMinLong + ", " + sMinLat + ", " +sMaxLong + ", " + sMaxLat + ")";
+			asFilterElements.add(sQueryBbox);
 		}
 		
-		return Filter.INCLUDE;
+		if (!Utils.isNullOrEmpty(sProductName)) {
+			String sNameWithoutPrefix = sProductName.replace(ResponseTranslatorJRC.s_sFileNamePrefix, "");
+			String sTileId = WasdiFileUtils.removeZipExtension(sNameWithoutPrefix);
+			
+			String sQueryTileId = "tile_id='" + sTileId + "'";
+			asFilterElements.add(sQueryTileId);
+		}
+		
+
+		try { 
+			if (asFilterElements.isEmpty()) {
+				oFilter = Filter.INCLUDE;
+			}
+			else {
+				String sFilter = String.join(" AND ", asFilterElements);
+				oFilter = ECQL.toFilter(sFilter);
+			}	
+			
+		} catch (CQLException oEx) {
+			WasdiLog.debugLog("QueryExecutorJRC.getFilter. Error while creating the filter for the shape mask. " + oEx.getMessage());
+		}
+		
+		return oFilter;
 	}
 	
 	public static double translateLongitude(double dLongitude, String sSourceEncoding, String sTargetEncoding) {
