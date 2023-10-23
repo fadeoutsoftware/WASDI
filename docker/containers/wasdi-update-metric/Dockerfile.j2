@@ -50,7 +50,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# RUN specific to install all elements related to the toolbox
+# RUN specific to install all elements related to the service
 RUN apt-get update && \
     apt-get install \
         python3-cpuinfo \
@@ -64,7 +64,7 @@ RUN apt-get update && \
 USER {{ sWasdiSystemUserName }}
 
 
-# RUN specific to install all elements related to the toolbox
+# RUN specific to install all elements related to the service
 RUN mkdir --parents {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
         {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
     chmod {{ sWasdiComponentUpdateMetricRootDirectoryMode }} {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
