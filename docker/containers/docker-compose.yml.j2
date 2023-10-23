@@ -34,7 +34,7 @@ services:
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
       - {{ sWasdiContainerTraefikServiceName }}
-    image: {{ sWasdiContainerWasdiClientServiceName }}:latest
+    image: "{{ sWasdiContainerWasdiClientServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -67,7 +67,7 @@ services:
 {% if sWasdiContainerGeoserverEnvironmentJavaOpts | default('') != '' %}
       - JAVA_OPTS={{ sWasdiContainerGeoserverEnvironmentJavaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerGeoserverServiceName }}:latest
+    image: "{{ sWasdiContainerGeoserverServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -126,7 +126,7 @@ services:
       - KC_PROXY=edge
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
-    image: "{{ sWasdiContainerKeycloakImageName }}:latest
+    image: "{{ sWasdiContainerKeycloakImageName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -181,7 +181,7 @@ services:
       - sWasdiContainerMongoMainDatabaseUsername=${sWasdiContainerMongoMainDatabaseUsername}
       - sWasdiContainerMongoMainDatabaseBackupPassword=${sWasdiContainerMongoMainDatabaseBackupPassword}
       - sWasdiContainerMongoMainDatabaseBackupUsername=${sWasdiContainerMongoMainDatabaseBackupUsername}
-    image: mongo:{{ sWasdiContainerMongoMainVersion }}
+    image: "mongo:{{ sWasdiContainerMongoMainVersion }}"
 {% if sWasdiContainerMongoMainInternalPort | default("") != ""
     and sWasdiContainerMongoMainExternalPort | default("") != ""
     and aWasdiContainerMongoMainExternalIp | default([]) | length > 0 %}
@@ -211,7 +211,7 @@ services:
       - sWasdiContainerMongoComputationalDatabaseUsername=${sWasdiContainerMongoComputationalDatabaseUsername}
       - sWasdiContainerMongoComputationalDatabaseBackupPassword=${sWasdiContainerMongoComputationalDatabaseBackupPassword}
       - sWasdiContainerMongoComputationalDatabaseBackupUsername=${sWasdiContainerMongoComputationalDatabaseBackupUsername}
-    image: mongo:{{ sWasdiContainerMongoComputationalVersion }}
+    image: "mongo:{{ sWasdiContainerMongoComputationalVersion }}"
 {% if sWasdiContainerMongoComputationalInternalPort | default("") != ""
     and sWasdiContainerMongoComputationalExternalPort | default("") != ""
     and aWasdiContainerMongoComputationalExternalIp | default([]) | length > 0 %}
@@ -241,7 +241,7 @@ services:
       - RABBITMQ_NODENAME={{ sWasdiContainerRabbitMqServiceName }}
       - RABBITMQ_NODE_PORT={{ sWasdiContainerRabbitMqPortMainInternal }}
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
-    image: {{ sWasdiContainerRabbitMqServiceName }}:latest
+    image: "{{ sWasdiContainerRabbitMqServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.mw_{{ sWasdiContainerRabbitMqServiceName }}.stripprefix.prefixes=/rabbit-stomp"
@@ -282,6 +282,7 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
 {% endif %}
+{% if ( sWasdiServerTypeIsMain == True or sWasdiServerTypeIsComputational == True ) and ( sHostState | lower ) == "primary" %}
 
   {{ sWasdiContainerWasdiSchedulerServiceName }}:
     depends_on:
@@ -291,7 +292,7 @@ services:
 {% if sWasdiServerTypeIsComputational == True %}
       - {{ sWasdiContainerMongoComputationalServiceName }}
 {% endif %}
-    image: {{ sWasdiContainerWasdiSchedulerServiceName }}:latest
+    image: "{{ sWasdiContainerWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -299,6 +300,7 @@ services:
         hard: {{ sWasdiSchedulerUlimitNofile }}
     volumes:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+{% endif %}
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
@@ -317,7 +319,7 @@ services:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:latest
+    image: "{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -364,7 +366,7 @@ services:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:latest
+    image: "{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -399,20 +401,22 @@ services:
   {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiContainerKeycloakServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
+      - {{ sWasdiContainerKeycloakServiceName }}
       - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
 {% if sWasdiServerTypeIsComputational == True %}
       - {{ sWasdiContainerMongoComputationalServiceName }}
 {% endif %}
+{% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerRabbitMqServiceName }}
+{% endif %}
       - {{ sWasdiContainerTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:latest
+    image: "{{ sWasdiContainerTomcatWasdiWebServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"

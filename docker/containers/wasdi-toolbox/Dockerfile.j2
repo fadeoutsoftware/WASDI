@@ -113,7 +113,7 @@ WORKDIR {{ sWasdiToolboxRootDirectoryPath }}/code
 
 
 # Copy data
-COPY --chown=appwasdi:appwasdi ./dataToCopy/code/ {{ sWasdiToolboxRootDirectoryPath }}/code/
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/code/ {{ sWasdiToolboxRootDirectoryPath }}/code/
 
 
 # ENTRYPOINT
