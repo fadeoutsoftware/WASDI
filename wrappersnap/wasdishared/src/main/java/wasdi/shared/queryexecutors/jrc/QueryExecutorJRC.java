@@ -175,11 +175,6 @@ public class QueryExecutorJRC extends QueryExecutor {
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
 			} 
-			finally {
-				if (oStore != null) {
-					oStore.dispose();
-				}
-			}
 			
 		}
 		
