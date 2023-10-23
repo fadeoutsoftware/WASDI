@@ -1,0 +1,3 @@
+{
+    "shapeMaskPath": "{{ sWasdiDataConfigurationRootDirectoryPath }}/GHSL2_0_MWD_L1_tile_schema_land.shp"
+}
