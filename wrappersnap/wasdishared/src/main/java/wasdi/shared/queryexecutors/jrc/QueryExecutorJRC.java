@@ -137,6 +137,8 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		synchronized (m_sShapeMaskPath) {
 			
+			WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Reading shape file: " + m_sShapeMaskPath);
+
 			FileDataStore oStore = null;
 			
 			// Get the Data Store
@@ -147,11 +149,14 @@ public class QueryExecutorJRC extends QueryExecutor {
 				
 				Filter oFilter = getFilter(oWest, oNorth, oEast, oSouth, sProductName);
 				
+				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Generated filter: " + oFilter.toString());
+				
 				if (oFilter != null) {
 				
 					FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
 					
 					FeatureIterator<SimpleFeature> aoFeatures = oCollection.features();
+					
 					
 					while (aoFeatures.hasNext()) {
 						SimpleFeature oFeature = aoFeatures.next();
@@ -166,9 +171,6 @@ public class QueryExecutorJRC extends QueryExecutor {
 		                
 					}	
 				} 
-				else {
-					WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. The returned filter is null." );
-				}
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
@@ -217,6 +219,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 				String sFilter = String.join(" AND ", asFilterElements);
 				oFilter = ECQL.toFilter(sFilter);
 			}	
+			
 			
 		} catch (CQLException oEx) {
 			WasdiLog.debugLog("QueryExecutorJRC.getFilter. Error while creating the filter for the shape mask. " + oEx.getMessage());
