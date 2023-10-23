@@ -70,8 +70,6 @@ RUN groupadd --gid {{ sWasdiBackupSystemGroupId }} --non-unique {{ sWasdiBackupS
         python3-pip \
         python3-psycopg2 \
         python3-venv && \
-    mkdir --parents {{ sWasdiLogRootDirectoryPath }} && \
-    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} {{ sWasdiLogRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
