@@ -134,9 +134,11 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		synchronized (m_sShapeMaskPath) {
 			
+			FileDataStore oStore = null;
+			
 			// Get the Data Store
 			try {
-				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(m_sShapeMaskPath));
+				oStore = FileDataStoreFinder.getDataStore(new File(m_sShapeMaskPath));
 				
 				FeatureSource<SimpleFeatureType, SimpleFeature> aoSource = oStore.getFeatureSource();
 				
@@ -157,11 +159,15 @@ public class QueryExecutorJRC extends QueryExecutor {
 	                
 	                aooTiles.put(sTileId, sBoundingBoxESRI);
 	                
-				}	
-				
+				}		
 				
 			} catch (IOException oEx) {
 				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
+			} 
+			finally {
+				if (oStore != null) {
+					oStore.dispose();
+				}
 			}
 			
 		}

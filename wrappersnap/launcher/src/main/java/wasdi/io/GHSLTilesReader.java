@@ -102,9 +102,11 @@ public class GHSLTilesReader extends WasdiProductReader {
 		
 		synchronized (sShapeMaskPath) {
 			
+			FileDataStore oStore = null;
+			
 			// Get the Data Store
 			try {
-				FileDataStore oStore = FileDataStoreFinder.getDataStore(new File(sShapeMaskPath));
+				oStore = FileDataStoreFinder.getDataStore(new File(sShapeMaskPath));
 				
 				FeatureSource<SimpleFeatureType, SimpleFeature> aoSource = oStore.getFeatureSource();
 				
@@ -165,6 +167,10 @@ public class GHSLTilesReader extends WasdiProductReader {
 				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error reading the shape file. " + oEx.getMessage() );
 			} catch (CQLException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error while creating  " + oEx.getMessage() );
+			}
+			finally {
+				if (oStore != null) 
+					oStore.dispose();
 			}
 		}
 			
