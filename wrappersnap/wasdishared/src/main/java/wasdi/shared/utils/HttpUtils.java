@@ -739,7 +739,7 @@ public final class HttpUtils {
 					// 	opens an output stream to save into file
 					Util.copyStream(oInputStream, oOutputStream);
 				} catch (Exception oEx) {
-					oEx.printStackTrace();
+					WasdiLog.errorLog("HttpUtils.downloadFile: error ", oEx);
 				}
 				return sOutputFilePath;
 			} else {
