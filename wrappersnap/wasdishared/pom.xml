@@ -183,7 +183,7 @@
 		    <groupId>org.geotools</groupId>
 		    <artifactId>gt-xml</artifactId>
 		    <version>29.2</version>
-		</dependency> ->
+		</dependency> -->
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
