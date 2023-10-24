@@ -524,3 +524,20 @@ services:
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
 {% endif %}
 {% endif %}
+{% if bWasdiComponentUpdateMetricEnabled == True %}
+
+  {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
+    # Disable until we are ready to start all containers
+    #depends_on:
+    #  - {{ sWasdiContainerKeycloakServiceName }}
+    #  - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
+    image: "{{ sWasdiContainerWasdiUpdateMetricServiceName }}:latest"
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiUpdateMetricUlimitNofile }}
+        hard: {{ sWasdiUpdateMetricUlimitNofile }}
+    volumes:
+      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - {{ sWasdiDataPartitionRootDirectoryPath }}:{{ sWasdiDataPartitionRootDirectoryPath }}:ro
+{% endif %}
