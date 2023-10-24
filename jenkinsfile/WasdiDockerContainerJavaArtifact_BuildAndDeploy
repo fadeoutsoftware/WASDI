@@ -53,7 +53,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + DEPLOY THEM"
+          currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + BUILD THE CONTAINERS + DEPLOY THEM"
         }
       }
     }
@@ -99,13 +99,13 @@ pipeline {
       }
     }
 
-    stage('START CONTAINERS') {
+    stage('START OR RESTART THE CONTAINERS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --check --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --check --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
         """,
-        label: "Start the containers"
+        label: "Start or restart the containers"
       }
     }
 

@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF TOOLBOX CONTAINER + DEPLOY IT"
+          currentBuild.description = "WASDI - BUILD OF UPDATE METRIC CONTAINER + DEPLOY IT"
         }
       }
     }
@@ -76,13 +76,13 @@ pipeline {
       }
     }
 
-    stage('RESTART THE CONTAINER') {
+    stage('START OR RESTART THE CONTAINER') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
         """,
-        label: "Build the toolbox container"
+        label: "Start or restart the container"
       }
     }
   }
