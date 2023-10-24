@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap ;
 
-import org.apache.logging.log4j.util.Strings;
-import org.geotools.data.FeatureSource;
-import org.geotools.data.FileDataStore;
-import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.*;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
@@ -153,7 +150,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 				
 				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Generated filter: " + oFilter.toString());
 				
-				if (oFilter != null) {
+//				if (oFilter != null) {
 				
 					FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
 					
@@ -172,7 +169,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 		                aooTiles.put(sTileId, sBoundingBoxESRI);
 		                
 					}	
-				} 
+//				} 
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
@@ -218,6 +215,9 @@ public class QueryExecutorJRC extends QueryExecutor {
 		try { 
 			if (asFilterElements.isEmpty()) {
 				oFilter = Filter.INCLUDE;
+			}
+			else if (asFilterElements.size() == 1) {
+				oFilter = ECQL.toFilter(asFilterElements.get(0));
 			}
 			else {
 				String sFilter = String.join(" AND ", asFilterElements);
