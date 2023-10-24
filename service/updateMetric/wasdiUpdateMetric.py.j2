@@ -35,40 +35,40 @@ class EngineException(object):
         self.oLogging.error(
             'Script: %(errorScript)s'
             %{
-                'errorScript': kwargs['dictError']['inspectError'][0][1]
+                'errorScript': kwargs['aoError']['inspectError'][0][1]
             }
         )
 
         self.oLogging.error(
             'Line (approximately): %(errorInLine)s'
             %{
-                'errorInLine': kwargs['dictError']['inspectError'][0][2]
+                'errorInLine': kwargs['aoError']['inspectError'][0][2]
             }
         )
 
         self.oLogging.error(
             'Method: %(errorFunctionName)s'
             %{
-                'errorFunctionName': kwargs['dictError']['inspectError'][0][3]
+                'errorFunctionName': kwargs['aoError']['inspectError'][0][3]
             }
         )
 
         self.oLogging.error(
             'Type of error: %(errorType)s'
             %{
-                'errorType': kwargs['dictError']['sysError'][0]
+                'errorType': kwargs['aoError']['sysError'][0]
             }
         )
 
         self.oLogging.error(
             'Error message: %(errorMessage)s'
             %{
-                'errorMessage': kwargs['dictError']['sysError'][1]
+                'errorMessage': kwargs['aoError']['sysError'][1]
             }
         )
 
         tracebackIndex = 1
-        for currentTracebackMessage in traceback.format_tb(kwargs['dictError']['sysError'][2]):
+        for currentTracebackMessage in traceback.format_tb(kwargs['aoError']['sysError'][2]):
             self.oLogging.error(
                 'Traceback - Line %(tracebackIndex)s: %(traceBackMessage)s'
                 %{
@@ -129,45 +129,45 @@ dictionnary with metrics taken.
 class SystemResourceMetric(object):
     def __init__(self, **kwargs):
         self.oLogging = kwargs['oLogging']
-        self.listPartition = []
-        self.listLicense = []
+        self.aPartition = []
+        self.aLicense = []
 
-        if 'listLicense' in kwargs:
-            for value in kwargs['listLicense']:
-                dictToAppend = OrderedDict(
+        if 'aLicense' in kwargs:
+            for sValue in kwargs['aLicense']:
+                aoToAppend = OrderedDict(
                     {
-                        "name": value,
-                        "fileToRead": kwargs['listLicense'][value]['fileToRead'],
-                        "valuesToConsiderTrue": [(value.lower()) for value in kwargs['listLicense'][value]['valuesToConsiderTrue']]
+                        "name": sValue,
+                        "fileToRead": kwargs['aLicense'][sValue]['fileToRead'],
+                        "valuesToConsiderTrue": [(sValueToConsiderTrue.lower()) for sValueToConsiderTrue in kwargs['aLicense'][sValue]['valuesToConsiderTrue']]
                     }
                 )
 
-                self.listLicense.append(dictToAppend)
+                self.aLicense.append(aoToAppend)
 
             # deduplicate the list
-            self.listLicense = list(
+            self.aLicense = list(
                 map(
                     json.loads, set(
                         map(json.dumps,
-                            self.listLicense
+                            self.aLicense
                         )
                     )
                 )
             )
 
-        if 'listPartition' in kwargs:
-            for value in kwargs['listPartition']:
-                if value not in self.listPartition:
-                    self.listPartition.append(value)
+        if 'aPartition' in kwargs:
+            for sValue in kwargs['aPartition']:
+                if sValue not in self.aPartition:
+                    self.aPartition.append(sValue)
 
         # this dict must be created after all others
-        self.dictMetric = OrderedDict(
+        self.aoMetric = OrderedDict(
             {
-                "node": kwargs['dictData']['node'],
+                "node": kwargs['aoData']['node'],
                 "timestamp": OrderedDict(
                     {
-                        "seconds": kwargs['dictData']['timestamp'],
-                        "millis": kwargs['dictData']['timestamp'] * 1000
+                        "seconds": kwargs['aoData']['timestamp'],
+                        "millis": kwargs['aoData']['timestamp'] * 1000
                     }
                 ),
                 "cpu": self.getCpu(),
@@ -178,19 +178,19 @@ class SystemResourceMetric(object):
         )
 
     def get(self):
-        return self.dictMetric
+        return self.aoMetric
 
 
     def getCpu(self):
-        dictResult = OrderedDict()
+        aoResult = OrderedDict()
 
         self.oLogging.info('Get CPU information')
 
         try:
-            dictCpuInfo = cpuinfo.get_cpu_info()
+            aoCpuInfo = cpuinfo.get_cpu_info()
             tupleCpuLoad = psutil.getloadavg()
 
-            dictResult = OrderedDict(
+            aoResult = OrderedDict(
                 {
                     "count": OrderedDict(
                         {
@@ -201,9 +201,9 @@ class SystemResourceMetric(object):
                     ),
                     "frequency": OrderedDict(
                         {
-                            "hz": dictCpuInfo['hz_advertised_raw'][0],
-                            "mhz": round(dictCpuInfo['hz_advertised_raw'][0] / 1000000),
-                            "ghz": round(dictCpuInfo['hz_advertised_raw'][0] / 1000000000, 2)
+                            "hz": aoCpuInfo['hz_advertised_raw'][0],
+                            "mhz": round(aoCpuInfo['hz_advertised_raw'][0] / 1000000),
+                            "ghz": round(aoCpuInfo['hz_advertised_raw'][0] / 1000000000, 2)
                         }
                     ),
                     "load": OrderedDict(
@@ -233,19 +233,19 @@ class SystemResourceMetric(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
             )
 
-        return dictResult
+        return aoResult
 
 
     def getDiskUsage(self):
-        listResult = []
+        aResult = []
 
-        for sCurrentPartition in self.listPartition:
+        for sCurrentPartition in self.aPartition:
             self.oLogging.info(
                 'Get disk usage for \'%(sCurrentPartition)s\''
                 %{
@@ -256,7 +256,7 @@ class SystemResourceMetric(object):
             try:
                 oDiskUsage = psutil.disk_usage(sCurrentPartition)
 
-                listResult.append(OrderedDict(
+                aResult.append(OrderedDict(
                     {
                         "mountpoint": sCurrentPartition,
                         "absolute": OrderedDict(
@@ -304,46 +304,46 @@ class SystemResourceMetric(object):
 
                 EngineException(
                     oLogging = self.oLogging,
-                    dictError = {
+                    aoError = {
                         'inspectError': inspect.stack(),
                         'sysError': sys.exc_info()
                     }
                 )
 
-        return listResult
+        return aResult
 
     def getLicense(self):
-        listResult = []
+        aResult = []
 
         self.oLogging.info('Get license information')
 
         try:
-            for dictCurrentLicense in self.listLicense:
+            for aoCurrentLicense in self.aLicense:
                 try:
-                    with open(dictCurrentLicense['fileToRead'], 'r', encoding='utf-8') as oLicenseFile:
-                        if oLicenseFile.read().strip().lower() in dictCurrentLicense['valuesToConsiderTrue']:
-                            listResult.append(
+                    with open(aoCurrentLicense['fileToRead'], 'r', encoding='utf-8') as oLicenseFile:
+                        if oLicenseFile.read().strip().lower() in aoCurrentLicense['valuesToConsiderTrue']:
+                            aResult.append(
                                 OrderedDict(
                                     {
-                                        "name": dictCurrentLicense['name'].lower(),
+                                        "name": aoCurrentLicense['name'].lower(),
                                         "status": True
                                     }
                                 )
                             )
                         else:
-                            listResult.append(
+                            aResult.append(
                                 OrderedDict(
                                     {
-                                        "name": dictCurrentLicense['name'].lower(),
+                                        "name": aoCurrentLicense['name'].lower(),
                                         "status": False
                                     }
                                 )
                             )
                 except FileNotFoundError:
-                    listResult.append(
+                    aResult.append(
                         OrderedDict(
                             {
-                                "name": dictCurrentLicense['name'].lower(),
+                                "name": aoCurrentLicense['name'].lower(),
                                 "status": False
                             }
                         )
@@ -353,23 +353,23 @@ class SystemResourceMetric(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
             )
 
-        return listResult
+        return aResult
 
     def getMemory(self):
-        dictResult = OrderedDict()
+        aoResult = OrderedDict()
 
         self.oLogging.info('Get memory information')
 
         try:
             oMemory = psutil.virtual_memory()
 
-            dictResult = OrderedDict(
+            aoResult = OrderedDict(
                 {
                     "absolute": OrderedDict(
                         {
@@ -422,13 +422,13 @@ class SystemResourceMetric(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
             )
 
-        return dictResult
+        return aoResult
 
 
 
@@ -444,7 +444,7 @@ class WasdiSystemResourceMain(object):
 
     def __init__(self, **kwargs):
         self.bReleased = False
-        self.dictConfiguration = None
+        self.aoConfiguration = None
         self.oKeycloakOpenId = None
         self.oLogging = kwargs['oLogging']
         self.sConfigurationFilePath = kwargs['sConfigurationFilePath']
@@ -457,23 +457,23 @@ class WasdiSystemResourceMain(object):
         - checks if the configuration file exists
         - if exists:
             - tries to read it
-            - set self.dictConfiguration with datas
+            - set self.aoConfiguration with datas
         - if not exists:
-            - set self.dictConfiguration to None
+            - set self.aoConfiguration to None
     '''
     def getConfiguration(self):
         try:
             with open(self.sConfigurationFilePath, 'r') as oConfigurationFile:
-                self.dictConfiguration = json.load(oConfigurationFile)
+                self.aoConfiguration = json.load(oConfigurationFile)
 
-                if 'keycloack' in self.dictConfiguration and 'keycloak' not in self.dictConfiguration:
-                    self.dictConfiguration['keycloak'] = self.dictConfiguration['keycloack']
+                if 'keycloack' in self.aoConfiguration and 'keycloak' not in self.aoConfiguration:
+                    self.aoConfiguration['keycloak'] = self.aoConfiguration['keycloack']
         except FileNotFoundError:
-            self.dictConfiguration = None
+            self.aoConfiguration = None
         except:
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 },
@@ -538,15 +538,15 @@ class WasdiSystemResourceMain(object):
         - kwargs['sAction']:
             - the endpoint to call
             - the prefix (the base URL) is taken from the WASDI configuration file
-        - kwargs['dictData']:
+        - kwargs['aoData']:
             - dictionnary passed as 'json' when
             sMethod is post or patch
             - if defined, we pass what was setted
             - else we pass an empty directionnary
-        - kwargs['dictHeaders'];
+        - kwargs['aoHeaders'];
             - if defined, we pass what was setted
             - else, we generate a default headers
-        - kwargs['dictParameters']:
+        - kwargs['aoParameters']:
             - if defined, we pass what was setted
             - else we pass an empty directionnary
         - kwargs['sMethod']:
@@ -559,7 +559,7 @@ class WasdiSystemResourceMain(object):
         - the answer (format = JSON): could be None too
     '''
     def wasdiApiExecute(self, **kwargs):
-        sUrl = self.apiBuildUrl(self.dictConfiguration['baseUrl'], kwargs['sAction'])
+        sUrl = self.apiBuildUrl(self.aoConfiguration['baseUrl'], kwargs['sAction'])
 
         self.oLogging.info(
             'Calling \'%(sUrl)s\''
@@ -569,37 +569,37 @@ class WasdiSystemResourceMain(object):
         )
 
         try:
-            if 'dictData' not in kwargs:
-                kwargs['dictData'] = {}
+            if 'aoData' not in kwargs:
+                kwargs['aoData'] = {}
 
-            if 'dictHeaders' not in kwargs:
-                kwargs['dictHeaders'] = {
+            if 'aoHeaders' not in kwargs:
+                kwargs['aoHeaders'] = {
                     'Content-type': 'application/json'
                 }
 
             if 'sSessionId' in kwargs:
-                kwargs['dictHeaders']['x-session-token'] = kwargs['sSessionId']
+                kwargs['aoHeaders']['x-session-token'] = kwargs['sSessionId']
 
-            if 'dictParameters' not in kwargs:
-                kwargs['dictParameters'] = {}
+            if 'aoParameters' not in kwargs:
+                kwargs['aoParameters'] = {}
 
 
             if kwargs['sMethod'].lower() == 'get':
                 oRequests = requests.request(
                     kwargs['sMethod'].upper(),
                     sUrl,
-                    headers = kwargs['dictHeaders'],
-                    params = kwargs['dictParameters'],
-                    timeout = self.dictConfiguration['metrics']['api']['endpoint']['timeout']
+                    headers = kwargs['aoHeaders'],
+                    params = kwargs['aoParameters'],
+                    timeout = self.aoConfiguration['metrics']['api']['endpoint']['timeout']
                 )
             elif kwargs['sMethod'].lower() in ['patch', 'post', 'put']:
                 oRequests = requests.request(
                     kwargs['sMethod'].upper(),
                     sUrl,
-                    headers = kwargs['dictHeaders'],
-                    json = kwargs['dictData'],
-                    params = kwargs['dictParameters'],
-                    timeout = self.dictConfiguration['metrics']['api']['endpoint']['timeout']
+                    headers = kwargs['aoHeaders'],
+                    json = kwargs['aoData'],
+                    params = kwargs['aoParameters'],
+                    timeout = self.aoConfiguration['metrics']['api']['endpoint']['timeout']
                 )
             else:
                 # other methods not implemented in this example
@@ -627,7 +627,7 @@ class WasdiSystemResourceMain(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
@@ -652,7 +652,7 @@ class WasdiSystemResourceMain(object):
         - None if the authentication failed
     '''
     def wasdiConnect(self):
-        if 'authenticationSystem' in self.dictConfiguration['metrics']['api']['authentication'] and self.dictConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
+        if 'authenticationSystem' in self.aoConfiguration['metrics']['api']['authentication'] and self.aoConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
             return self.wasdiConnectWithKeycloak()
 
         return self.wasdiConnectWithApi()
@@ -672,29 +672,29 @@ class WasdiSystemResourceMain(object):
         self.oLogging.info('Connecting to WASDI using the WASDI API')
 
         try:
-            dictData = {
-                'userId': self.dictConfiguration['metrics']['api']['authentication']['username'],
-                'userPassword': self.dictConfiguration['metrics']['api']['authentication']['password']
+            aoData = {
+                'userId': self.aoConfiguration['metrics']['api']['authentication']['username'],
+                'userPassword': self.aoConfiguration['metrics']['api']['authentication']['password']
             }
 
-            iReturnStatusCode, dictReturnValue = self.wasdiApiExecute(
-                sAction = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['authentication']['path'],
-                sMethod = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['authentication']['method'].lower(),
-                dictData = dictData
+            iReturnStatusCode, aoReturnValue = self.wasdiApiExecute(
+                sAction = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['authentication']['path'],
+                sMethod = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['authentication']['method'].lower(),
+                aoData = aoData
             )
 
-            if dictReturnValue == None or 'sessionId' not in dictReturnValue or dictReturnValue['sessionId'] == None:
+            if aoReturnValue == None or 'sessionId' not in aoReturnValue or aoReturnValue['sessionId'] == None:
                 self.oLogging.error('Unable to connect')
                 return None
 
             self.oLogging.info('OK: we are connected')
-            return dictReturnValue['sessionId']
+            return aoReturnValue['sessionId']
         except:
             self.oLogging.error('Unable to connect')
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
@@ -717,15 +717,15 @@ class WasdiSystemResourceMain(object):
 
         try:
             self.oKeycloakOpenId = KeycloakOpenID(
-                server_url = self.dictConfiguration['keycloak']['address'],
-                client_id = self.dictConfiguration['keycloak']['client'],
-                realm_name = self.dictConfiguration['keycloak']['realm'],
-                client_secret_key = self.dictConfiguration['keycloak']['clientSecret']
+                server_url = self.aoConfiguration['keycloak']['address'],
+                client_id = self.aoConfiguration['keycloak']['client'],
+                realm_name = self.aoConfiguration['keycloak']['realm'],
+                client_secret_key = self.aoConfiguration['keycloak']['clientSecret']
             )
 
             self.sKeycloakToken = self.oKeycloakOpenId.token(
-                self.dictConfiguration['metrics']['api']['authentication']['username'],
-                self.dictConfiguration['metrics']['api']['authentication']['password']
+                self.aoConfiguration['metrics']['api']['authentication']['username'],
+                self.aoConfiguration['metrics']['api']['authentication']['password']
             )
 
             self.oLogging.info('OK')
@@ -735,7 +735,7 @@ class WasdiSystemResourceMain(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
@@ -759,7 +759,7 @@ class WasdiSystemResourceMain(object):
         - False else
     '''
     def wasdiDisconnect(self):
-        if 'authenticationSystem' in self.dictConfiguration['metrics']['api']['authentication'] and self.dictConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
+        if 'authenticationSystem' in self.aoConfiguration['metrics']['api']['authentication'] and self.aoConfiguration['metrics']['api']['authentication']['authenticationSystem'].lower() == 'keycloak':
             return self.wasdiDisconnectFromKeycloak()
 
         return True
@@ -791,7 +791,7 @@ class WasdiSystemResourceMain(object):
 
             EngineException(
                 oLogging = self.oLogging,
-                dictError = {
+                aoError = {
                     'inspectError': inspect.stack(),
                     'sysError': sys.exc_info()
                 }
@@ -865,7 +865,7 @@ if __name__ == '__main__':
     oLogging.info('Read the WASDI configuration file')
     oWasdiSystemResourceMain.getConfiguration()
 
-    if type(oWasdiSystemResourceMain.dictConfiguration) == dict:
+    if type(oWasdiSystemResourceMain.aoConfiguration) == dict:
         oLogging.info('OK')
     else:
         oLogging.error('Unable to read the configuration file')
@@ -882,7 +882,7 @@ if __name__ == '__main__':
         '''
         CHANGE LOGGING MODE
         '''
-        if 'debug' in oWasdiSystemResourceMain.dictConfiguration['metrics'] and oWasdiSystemResourceMain.dictConfiguration['metrics']['debug'] == True:
+        if 'debug' in oWasdiSystemResourceMain.aoConfiguration['metrics'] and oWasdiSystemResourceMain.aoConfiguration['metrics']['debug'] == True:
             oLogging.setLevel(logging.DEBUG)
             oLogging.debug('The debug mode is enabled')
         else:
@@ -895,19 +895,19 @@ if __name__ == '__main__':
 
         oSystemResourceMetric = SystemResourceMetric(
             oLogging = oLogging,
-            dictData = {
-                "node": oWasdiSystemResourceMain.dictConfiguration['nodeCode'],
+            aoData = {
+                "node": oWasdiSystemResourceMain.aoConfiguration['nodeCode'],
                 "timestamp": datetime.datetime.now(datetime.timezone.utc).timestamp()
             },
-            listPartition = oWasdiSystemResourceMain.dictConfiguration['metrics']['metric']['partition'],
-            listLicense = oWasdiSystemResourceMain.dictConfiguration['metrics']['metric']['license']
+            aPartition = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['partition'],
+            aLicense = oWasdiSystemResourceMain.aoConfiguration['metrics']['metric']['license']
         )
 
 
         '''
         CREATE THE DATA TO SEND TO WASDI
         '''
-        dictData = oSystemResourceMetric.get()
+        aoData = oSystemResourceMetric.get()
         '''
         /CREATE THE DATA TO SEND TO WASDI
         '''
@@ -928,7 +928,7 @@ if __name__ == '__main__':
         sSessionId = oWasdiSystemResourceMain.wasdiConnect()
 
         if sSessionId is None:
-            time.sleep(oWasdiSystemResourceMain.dictConfiguration['metrics']['waitingTime'])
+            time.sleep(oWasdiSystemResourceMain.aoConfiguration['metrics']['waitingTime'])
             continue
         '''
         /AUTHENTICATE TO WASDI
@@ -938,11 +938,11 @@ if __name__ == '__main__':
         '''
         SEND DATA TO WASDI
         '''
-        iReturnStatusCode, dictReturnValue = oWasdiSystemResourceMain.wasdiApiExecute(
-            sAction = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['endpoint']['path'],
-            sMethod = oWasdiSystemResourceMain.dictConfiguration['metrics']['api']['endpoint']['method'].lower(),
+        iReturnStatusCode, aoReturnValue = oWasdiSystemResourceMain.wasdiApiExecute(
+            sAction = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['path'],
+            sMethod = oWasdiSystemResourceMain.aoConfiguration['metrics']['api']['endpoint']['method'].lower(),
             sSessionId = sSessionId,
-            dictData = dictData
+            aoData = aoData
         )
 
         oLogging.info('Response:')
@@ -953,8 +953,8 @@ if __name__ == '__main__':
             }
         )
 
-        if dictReturnValue != None:
-            for sKey, sValue in dictReturnValue.items():
+        if aoReturnValue != None:
+            for sKey, sValue in aoReturnValue.items():
                 oLogging.info(
                     '- key \'%(key)s\' = \'%(value)s\''
                     %{
@@ -964,7 +964,7 @@ if __name__ == '__main__':
                 )
 
         oLogging.debug('DATA:')
-        oLogging.debug(json.dumps(dictData, indent=4, default=str))
+        oLogging.debug(json.dumps(aoData, indent=4, default=str))
         '''
         /SEND DATA TO WASDI
         '''
@@ -986,7 +986,7 @@ if __name__ == '__main__':
         + if we haven't entered in the 'sleep' function
         '''
         if oWasdiSystemResourceMain.bReleased == False:
-            time.sleep(oWasdiSystemResourceMain.dictConfiguration['metrics']['waitingTime'])
+            time.sleep(oWasdiSystemResourceMain.aoConfiguration['metrics']['waitingTime'])
     '''
     /INFINITE LOOP
     '''
