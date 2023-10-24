@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.LinkedHashMap ;
 
 import org.geotools.data.*;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
@@ -143,33 +145,34 @@ public class QueryExecutorJRC extends QueryExecutor {
 			// Get the Data Store
 			try {
 				oStore = FileDataStoreFinder.getDataStore(new File(m_sShapeMaskPath));
-				
-				FeatureSource<SimpleFeatureType, SimpleFeature> aoSource = oStore.getFeatureSource();
-				
+				SimpleFeatureSource aoSource = oStore.getFeatureSource();
 				Filter oFilter = getFilter(oWest, oNorth, oEast, oSouth, sProductName);
 				
 				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Generated filter: " + oFilter.toString());
 				
-//				if (oFilter != null) {
+				if (oFilter != null) {
 				
-					FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
+					SimpleFeatureCollection oFilteredFeatures = aoSource.getFeatures(oFilter);
+				
 					
-					aoFeaturesIterator = oCollection.features();
+					if (oFilteredFeatures != null) {
 					
-					
-					while (aoFeaturesIterator.hasNext()) {
-						SimpleFeature oFeature = aoFeaturesIterator.next();
-		                
-		                List<Object> aoAttributes = oFeature.getAttributes();
-		                
-		                String sBoundingBoxESRI = aoAttributes.get(0).toString();
-		                
-		                String sTileId = aoAttributes.get(1).toString();
-		                
-		                aooTiles.put(sTileId, sBoundingBoxESRI);
-		                
-					}	
-//				} 
+						WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Some results after filtering features");
+						WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Number of filtered features: " + oFilteredFeatures.size());
+
+						aoFeaturesIterator = oFilteredFeatures.features();
+						
+						while (aoFeaturesIterator.hasNext()) {
+							
+							SimpleFeature oFeature = aoFeaturesIterator.next();
+			                List<Object> aoAttributes = oFeature.getAttributes();
+			                String sBoundingBoxESRI = aoAttributes.get(0).toString();
+			                String sTileId = aoAttributes.get(1).toString();
+			                aooTiles.put(sTileId, sBoundingBoxESRI);
+			                
+						}	
+					}
+				} 
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
