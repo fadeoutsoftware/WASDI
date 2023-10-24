@@ -195,12 +195,13 @@
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.geotools/gt-xml -->
-		<dependency>
+      <!-- https://mvnrepository.com/artifact/org.geotools/gt-xml -->
+<!--		<dependency>
 		    <groupId>org.geotools</groupId>
 		    <artifactId>gt-xml</artifactId>
 		    <version>29.2</version>
 		</dependency>
+		-->
         <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
