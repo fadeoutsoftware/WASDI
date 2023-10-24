@@ -47,7 +47,7 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINERS') {
+    stage('BUILD THE CONTAINER') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -73,6 +73,16 @@ pipeline {
             }
           }
         }
+      }
+    }
+
+    stage('RESTART THE CONTAINER') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
+        """,
+        label: "Build the toolbox container"
       }
     }
   }
