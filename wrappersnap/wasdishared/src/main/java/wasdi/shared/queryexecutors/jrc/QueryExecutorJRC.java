@@ -141,6 +141,8 @@ public class QueryExecutorJRC extends QueryExecutor {
 
 			FileDataStore oStore = null;
 			
+			FeatureIterator<SimpleFeature> aoFeaturesIterator = null;
+			
 			// Get the Data Store
 			try {
 				oStore = FileDataStoreFinder.getDataStore(new File(m_sShapeMaskPath));
@@ -155,11 +157,11 @@ public class QueryExecutorJRC extends QueryExecutor {
 				
 					FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
 					
-					FeatureIterator<SimpleFeature> aoFeatures = oCollection.features();
+					aoFeaturesIterator = oCollection.features();
 					
 					
-					while (aoFeatures.hasNext()) {
-						SimpleFeature oFeature = aoFeatures.next();
+					while (aoFeaturesIterator.hasNext()) {
+						SimpleFeature oFeature = aoFeaturesIterator.next();
 		                
 		                List<Object> aoAttributes = oFeature.getAttributes();
 		                
@@ -174,7 +176,14 @@ public class QueryExecutorJRC extends QueryExecutor {
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
-			} 
+			} finally {
+				if (aoFeaturesIterator != null) {
+					aoFeaturesIterator.close();
+				}
+				if (oStore != null) {
+					oStore.dispose();
+				}
+			}
 			
 		}
 		
