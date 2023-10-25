@@ -178,12 +178,6 @@
             <artifactId>gson</artifactId>
             <version>${sVersionGson}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.geotools.xsd/gt-xsd-core -->
-		<dependency>
-		    <groupId>org.geotools.xsd</groupId>
-		    <artifactId>gt-xsd-core</artifactId>
-		    <version>20.0</version>
-		</dependency>
         <!-- S1 -->
         <dependency>
             <groupId>org.esa.s1tbx</groupId>

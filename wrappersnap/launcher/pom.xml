@@ -195,12 +195,6 @@
             <artifactId>sshj</artifactId>
             <version>${sVersionSshj}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.geotools.xsd/gt-xsd-core -->
-		<dependency>
-		    <groupId>org.geotools.xsd</groupId>
-		    <artifactId>gt-xsd-core</artifactId>
-		    <version>20.0</version>
-		</dependency>
         <!-- SNAP -->
         <dependency>
             <groupId>org.esa.snap</groupId>
