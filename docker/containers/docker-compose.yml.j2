@@ -161,6 +161,8 @@ services:
       - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
       - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
       - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
+      - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
+      - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
     image: "{{ sWasdiContainerPostgresqlKeycloakImageName }}:{{ sWasdiContainerPostgresqlKeycloakImageVersion }}"
     restart: "unless-stopped"
     ulimits:
