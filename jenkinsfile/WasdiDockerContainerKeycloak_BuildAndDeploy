@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF TOOLBOX CONTAINER + DEPLOY IT"
+          currentBuild.description = "WASDI - UPDATE TRAEFIK VERSION AND RESTART IT"
         }
       }
     }
@@ -51,9 +51,9 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerToolbox=true'
+          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerKeycloak=true'
         """,
-        label: "Build the toolbox container"
+        label: "Build the Keycloak container"
       }
     }
 
@@ -64,7 +64,7 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerToolbox.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook playbooks/deployDockerContainerWasdiKeycloak.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion }}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
@@ -73,6 +73,16 @@ pipeline {
             }
           }
         }
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINER') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook playbooks/runWasdiDockerContainerWasdiKeycloak.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Start or restart the container"
       }
     }
   }
