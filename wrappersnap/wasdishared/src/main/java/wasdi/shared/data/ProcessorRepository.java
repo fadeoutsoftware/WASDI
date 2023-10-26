@@ -15,6 +15,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -175,7 +176,7 @@ public class ProcessorRepository extends  MongoRepository {
             oEx.printStackTrace();
         }
 
-        if (iPort == -1) iPort = 5000;
+        if (iPort == -1) iPort = WasdiConfig.Current.dockers.processorsInternalPort;
         else iPort++;
         
         return iPort;

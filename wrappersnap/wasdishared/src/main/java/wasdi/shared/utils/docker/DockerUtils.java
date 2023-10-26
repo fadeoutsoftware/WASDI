@@ -481,8 +481,12 @@ public class DockerUtils {
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
             		
             		// Expose the TCP Port
-            		oContainerCreateParams.ExposedPorts.add("5000/tcp");
-            		//oContainerCreateParams.HostConfig.PortBindings.put("5000/tcp", ""+iProcessorPort);
+            		oContainerCreateParams.ExposedPorts.add("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp");
+            		
+            		// If we are dockerized, no need to add the ip and port
+            		if (WasdiConfig.Current.shellExecLocally) {
+            			oContainerCreateParams.HostConfig.PortBindings.put("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp", ""+iProcessorPort);
+            		}
             		
                     // Extra hosts mapping, useful for some instances when the server host can't be resolved
                     // The symptoms of such problem is that the POST call from the Docker container timeouts

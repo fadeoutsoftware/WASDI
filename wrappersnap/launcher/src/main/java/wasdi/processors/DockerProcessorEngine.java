@@ -42,6 +42,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
+import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
@@ -392,10 +393,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             // Check if the container is started
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
             
+            String sContainerName = "";
+            
             if (!bIsContainerStarted) {
             	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
             	
-            	String sContainerName = oDockerUtils.start(); 
+            	sContainerName = oDockerUtils.start(); 
                 // Try to start Again the docker
                 if (Utils.isNullOrEmpty(sContainerName)) {
                 	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
@@ -411,12 +414,25 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             	WasdiLog.debugLog("DockerProcessorEngine.run: Processor just built and started, reconstruct the environment");
             	reconstructEnvironment(oParameter, oProcessor.getPort());
             }
+            else {
+            	
+            	// We need to get the container name
+            	ContainerInfo oContainerInfo =  oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessor.getVersion());
+            	
+            	if (oContainerInfo != null) {
+            		if (oContainerInfo.Names != null) {
+            			if (oContainerInfo.Names.size()>0) {
+            				sContainerName = oContainerInfo.Names.get(0);
+            			}
+            		}
+            	}            	
+            }
 
             // Decode JSON
             String sEncodedJson = oParameter.getJson();
             String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
 
-            WasdiLog.debugLog("DockerProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
+            WasdiLog.debugLog("DockerProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort() + " Container Name = " + sContainerName);
 
             // Json sanity check
             if (Utils.isNullOrEmpty(sJson)) {
@@ -436,9 +452,22 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             WasdiLog.debugLog("DockerProcessorEngine.run: Decoded JSON Parameter " + sJsonCopy);
+            
+            String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+            int iPort = oProcessor.getPort();
+            
+            if (WasdiConfig.Current.shellExecLocally == false) {
+            	if (!Utils.isNullOrEmpty(sContainerName)) {
+            		sIp = sContainerName;
+            		iPort = WasdiConfig.Current.dockers.processorsInternalPort;
+            	}
+            	else {
+            		WasdiLog.warnLog("DockerProcessorEngine.run: We are dockerized but we do not have a container name, not good..");
+            	}
+            }
 
             // Call localhost:port
-            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
+            String sUrl = "http://" + sIp + ":" + iPort + "/run/" + oParameter.getProcessObjId();
 
             sUrl += "?user=" + oParameter.getUserId();
             sUrl += "&sessionid=" + oParameter.getSessionID();
@@ -1219,6 +1248,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			if (!Utils.isNullOrEmpty(oParameter.getContainerName())) {
 				if (WasdiConfig.Current.shellExecLocally == false) {
 					sIp = oParameter.getContainerName();
+					iPort = WasdiConfig.Current.dockers.processorsInternalPort;
 				}
 			}
 
