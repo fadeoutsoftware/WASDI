@@ -84,6 +84,9 @@ public class DockerUtils {
      */
     protected String m_sDockerRegistry = "";
     
+    /**
+     * Basic Constructor. Set all the members to default value.
+     */
     public DockerUtils() {
     	m_oProcessor = null;
     	m_sProcessorFolder = "";
@@ -103,12 +106,11 @@ public class DockerUtils {
      * 
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
-     * @param sWorkingRootPath WASDI Working path
-     * @param sTomcatUser      User
-     * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder) {
+    	// Initialize the members
     	this();
+    	// and override with the ones provided
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder; 
     }    
@@ -118,12 +120,12 @@ public class DockerUtils {
      * 
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
-     * @param sWorkingRootPath WASDI Working path
-     * @param sTomcatUser      User
      * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sDockerRegistry) {
+    	// Initialize the members
     	this();
+    	// and override with the ones provided
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder;
         m_sDockerRegistry = sDockerRegistry;
@@ -177,43 +179,73 @@ public class DockerUtils {
 		this.m_sWasdiSystemUserName = sWasdiSystemUserName;
 	}    
 
+	/**
+	 * get the wasdi system group name
+	 * @return
+	 */
 	public String getWasdiSystemGroupName() {
 		return m_sWasdiSystemGroupName;
 	}
 
+	/**
+	 * set the wasdi system group name
+	 * @param sWasdiSystemGroupName
+	 */
 	public void setWasdiSystemGroupName(String sWasdiSystemGroupName) {
 		this.m_sWasdiSystemGroupName = sWasdiSystemGroupName;
 	}
 
+	/**
+	 * Get the wasdi system user id
+	 * @return
+	 */
 	public int getWasdiSystemUserId() {
 		return m_iWasdiSystemUserId;
 	}
-
+	
+	/**
+	 * Set the wasdi system user id
+	 * @param iWasdiSystemUserId
+	 */
 	public void setWasdiSystemUserId(int iWasdiSystemUserId) {
 		this.m_iWasdiSystemUserId = iWasdiSystemUserId;
 	}
 
+	/**
+	 * Get the wasdi system group id
+	 * @return
+	 */
 	public int getWasdiSystemGroupId() {
 		return m_iWasdiSystemGroupId;
 	}
 
+	/**
+	 * Get the wasdi system group id
+	 * @param iWasdiSystemGroupId
+	 */
 	public void setWasdiSystemGroupId(int iWasdiSystemGroupId) {
 		this.m_iWasdiSystemGroupId = iWasdiSystemGroupId;
 	}    
 	
-	
+	/**
+	 * Get the network mode
+	 * @return
+	 */
 	public String getDockerNetworkMode() {
 		return m_sDockerNetworkMode;
 	}
 
-
+	/**
+	 * Set the network node
+	 * @param sDockerNetworkMode
+	 */
 	public void setDockerNetworkMode(String sDockerNetworkMode) {
 		this.m_sDockerNetworkMode = sDockerNetworkMode;
 	} 
 	
 	/**
 	 * Address of the Docker Register in use. 
-	 * @return id of th
+	 * @return id of the registry
 	 */
 	public String getDockerRegistry() {
 		return m_sDockerRegistry;

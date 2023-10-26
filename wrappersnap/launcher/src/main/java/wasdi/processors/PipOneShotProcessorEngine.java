@@ -82,7 +82,7 @@ public class PipOneShotProcessorEngine extends DockerProcessorEngine {
 	
 
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
+	protected IPackageManager getPackageManager(String sUrl) {
 		return null;
 	}
 

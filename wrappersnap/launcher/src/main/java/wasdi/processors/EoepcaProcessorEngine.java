@@ -790,7 +790,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * Get the related package manager
 	 */
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
+	protected IPackageManager getPackageManager(String sUrl) {
 		return null;
 	}
 

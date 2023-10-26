@@ -29,8 +29,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 	}
 
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
-		IPackageManager oPackageManager = new PipPackageManagerImpl(sIp, iPort);
+	protected IPackageManager getPackageManager(String sUrl) {
+		IPackageManager oPackageManager = new PipPackageManagerImpl(sUrl);
 
 		return oPackageManager;
 	}
