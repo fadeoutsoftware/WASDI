@@ -194,7 +194,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
@@ -387,7 +387,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
             
             // Check if the container is started
             boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
@@ -622,7 +622,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             processWorkspaceLog("Delete Processor Docker");
 
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
@@ -750,7 +750,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             WasdiFileUtils.deleteFile(sProcessorFolder+"runwasdidocker.sh");
 
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
 
             if (bDeleteOldImage) {
                 // Delete the image
@@ -1007,7 +1007,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		int iPort = oProcessor.getPort();
 
         // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
         
         // Check if the container is started
         boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
@@ -1309,7 +1309,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor.getName());
 			
 			// Create the docker utils
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
 			
 			// Here we keep track of how many registers we tried
 			int iAvailableRegisters=0;

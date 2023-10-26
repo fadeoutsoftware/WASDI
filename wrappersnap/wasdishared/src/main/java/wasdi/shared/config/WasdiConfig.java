@@ -43,14 +43,24 @@ public class WasdiConfig {
 	public String usersDefaultNode;
 	
 	/**
-	 * System name of the tomcat user
+	 * System name of the wasdi user
 	 */
-	public String tomcatUser = "appwasdi";
+	public String systemUserName = "appwasdi";
 	
 	/**
-	 * Fixed Id of the system user
+	 * Id of the system user
 	 */
 	public Integer systemUserId = 2042;
+	
+	/**
+	 * System name of the wasdi group
+	 */
+	public String systemGroupName = "appwasdi";
+	
+	/**
+	 * Id of the system group
+	 */
+	public Integer systemGroupId = 2042;
 	
 	/**
 	 * Base url of WASDI API

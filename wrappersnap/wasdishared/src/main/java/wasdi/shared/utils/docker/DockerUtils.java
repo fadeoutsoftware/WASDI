@@ -58,8 +58,27 @@ public class DockerUtils {
     /**
      * User that run the docker
      */
-    protected String m_sWasdiSystemUser = "appwasdi";    
+    protected String m_sWasdiSystemUserName = "appwasdi";
+    
+    /**
+     * User that run the docker
+     */
+    protected String m_sWasdiSystemGroupName = "appwasdi";
+    
+    /**
+     * User that run the docker
+     */
+    protected int m_iWasdiSystemUserId = 2042;
+    
+    /**
+     * User that run the docker
+     */
+    protected int m_iWasdiSystemGroupId = 2042;
 
+    /**
+     * Network mode
+     */
+    protected String m_sDockerNetworkMode = "net-wasdi";
     /**
      * Docker registry in use
      */
@@ -69,20 +88,15 @@ public class DockerUtils {
     	m_oProcessor = null;
     	m_sProcessorFolder = "";
     	m_sDockerRegistry = "";
-    	m_sWasdiSystemUser = WasdiConfig.Current.tomcatUser;
+    	m_sWasdiSystemUserName = WasdiConfig.Current.systemUserName;
+    	m_sWasdiSystemGroupName = WasdiConfig.Current.systemGroupName;
+    	m_iWasdiSystemUserId = WasdiConfig.Current.systemUserId;
+    	m_iWasdiSystemGroupId = WasdiConfig.Current.systemGroupId;
+    	if (WasdiConfig.Current != null) {
+    		m_sDockerNetworkMode = WasdiConfig.Current.dockers.dockerNetworkMode;
+    	}
     }
     
-    /**
-     * Create a new instance
-     *
-     * @param oProcessor       Processor
-     * @param sProcessorFolder Processor Folder
-     * @param sWorkingRootPath WASDI Working path
-     * @param sWasdiSystemUser      User
-     */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWasdiSystemUser) {
-    	this(oProcessor, sProcessorFolder, sWasdiSystemUser, "");
-    }
     
     /**
      * Create a new instance
@@ -93,10 +107,25 @@ public class DockerUtils {
      * @param sTomcatUser      User
      * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
      */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
+    public DockerUtils(Processor oProcessor, String sProcessorFolder) {
+    	this();
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder; 
-        m_sWasdiSystemUser = sTomcatUser;
+    }    
+    
+    /**
+     * Create a new instance
+     * 
+     * @param oProcessor       Processor
+     * @param sProcessorFolder Processor Folder
+     * @param sWorkingRootPath WASDI Working path
+     * @param sTomcatUser      User
+     * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
+     */
+    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sDockerRegistry) {
+    	this();
+        m_oProcessor = oProcessor;
+        m_sProcessorFolder = sProcessorFolder;
         m_sDockerRegistry = sDockerRegistry;
     }    
     
@@ -136,18 +165,52 @@ public class DockerUtils {
 	 * Get the name of user to pass to docker. Empty string to avoid.
 	 * @return
 	 */
-	public String getUser() {
-		return m_sWasdiSystemUser;
+	public String getWasdiSystemUserName() {
+		return m_sWasdiSystemUserName;
 	}
 	
 	/**
 	 * Set the name of user to pass to docker. Empty string to avoid.
-	 * @param sUser
+	 * @param sWasdiSystemUserName
 	 */
-	public void setUser(String sUser) {
-		this.m_sWasdiSystemUser = sUser;
+	public void setWasdiSystemUserName(String sWasdiSystemUserName) {
+		this.m_sWasdiSystemUserName = sWasdiSystemUserName;
 	}    
 
+	public String getWasdiSystemGroupName() {
+		return m_sWasdiSystemGroupName;
+	}
+
+	public void setWasdiSystemGroupName(String sWasdiSystemGroupName) {
+		this.m_sWasdiSystemGroupName = sWasdiSystemGroupName;
+	}
+
+	public int getWasdiSystemUserId() {
+		return m_iWasdiSystemUserId;
+	}
+
+	public void setWasdiSystemUserId(int iWasdiSystemUserId) {
+		this.m_iWasdiSystemUserId = iWasdiSystemUserId;
+	}
+
+	public int getWasdiSystemGroupId() {
+		return m_iWasdiSystemGroupId;
+	}
+
+	public void setWasdiSystemGroupId(int iWasdiSystemGroupId) {
+		this.m_iWasdiSystemGroupId = iWasdiSystemGroupId;
+	}    
+	
+	
+	public String getDockerNetworkMode() {
+		return m_sDockerNetworkMode;
+	}
+
+
+	public void setDockerNetworkMode(String sDockerNetworkMode) {
+		this.m_sDockerNetworkMode = sDockerNetworkMode;
+	} 
+	
 	/**
 	 * Address of the Docker Register in use. 
 	 * @return id of th
@@ -211,7 +274,7 @@ public class DockerUtils {
             }
     		            	
         	// If we have user and or pip params, add the buildargs parameter
-        	if (!Utils.isNullOrEmpty(m_sWasdiSystemUser) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+        	if (!Utils.isNullOrEmpty(m_sWasdiSystemUserName) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
         		
         		WasdiLog.debugLog("DockerUtils.build: adding build args to url");
         		
@@ -219,8 +282,8 @@ public class DockerUtils {
         		
         		boolean bAdded = false;
         		
-                if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
-                	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\",\"USR_ID\":\"" + WasdiConfig.Current.systemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemUser+"\",\"GRP_ID\":\"" + WasdiConfig.Current.systemUserId+"\"";                    	
+                if (!Utils.isNullOrEmpty(m_sWasdiSystemUserName)) {
+                	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUserName+"\",\"USR_ID\":\"" + m_iWasdiSystemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemGroupName+"\",\"GRP_ID\":\"" + m_iWasdiSystemGroupId +"\"";                    	
                 	bAdded = true;
                 }
                 
@@ -317,7 +380,7 @@ public class DockerUtils {
         	if (Utils.isNullOrEmpty(sMountWorkspaceFolder)) {
         		sMountWorkspaceFolder = WasdiConfig.Current.paths.downloadRootPath;
         		if (!sMountWorkspaceFolder.endsWith(File.separator)) sMountWorkspaceFolder += File.separator;
-        	}        	
+        	}
         	
             // Get the Image name
             String sImageName = "wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
@@ -396,12 +459,14 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
             		// Set the user
-            		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
+            		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;            		
-            		
+            		// Mount the data folder
             		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+"/data/wasdi");
+            		// Set the network mode
+            		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
             		// Add the volume with the Processor Code
             		MountVolumeParam oProcessorPath = new MountVolumeParam();
@@ -1531,13 +1596,16 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
             		// Set the user
-            		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
+            		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;            		
             		
             		// Mount the /data/wasdi/ folder
             		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
+            		
+            		// Set the network mode
+            		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
             		if (asAdditionalMountPoints!=null) {
             			for (String sMountPoint : asAdditionalMountPoints) {
@@ -1677,6 +1745,6 @@ public class DockerUtils {
             WasdiLog.errorLog("DockerUtils.getContainerLogsByContainerName: exception converting API result " + oEx);
             return "";
         }    	
-    }    
-    
+    }
+
 }

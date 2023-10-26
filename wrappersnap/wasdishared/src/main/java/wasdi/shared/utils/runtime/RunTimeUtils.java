@@ -222,6 +222,14 @@ public class RunTimeUtils {
 			}
 		}
 		
+		if (oShellExecItem.overrideDockerConfig) {
+			oDockerUtils.setWasdiSystemGroupId(oShellExecItem.systemGroupId);
+			oDockerUtils.setWasdiSystemGroupName(oShellExecItem.systemGroupName);
+			oDockerUtils.setWasdiSystemUserId(oShellExecItem.systemUserId);
+			oDockerUtils.setWasdiSystemUserName(oShellExecItem.systemUserName);
+			oDockerUtils.setDockerNetworkMode(oShellExecItem.dockerNetworkMode);
+		}
+		
 		// Create and run the docker
 		String sContainerId = oDockerUtils.run(oShellExecItem.dockerImage, oShellExecItem.containerVersion, asArgs, true, oShellExecItem.additionalMountPoints);
 		
