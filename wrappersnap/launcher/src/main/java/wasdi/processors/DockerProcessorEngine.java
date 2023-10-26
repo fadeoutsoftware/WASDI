@@ -395,10 +395,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (!bIsContainerStarted) {
             	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
             	
+            	String sContainerName = oDockerUtils.start(); 
                 // Try to start Again the docker
-                if (oDockerUtils.start() == false) {
+                if (Utils.isNullOrEmpty(sContainerName)) {
                 	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
                 	return false;
+                }
+                else {
+                	oParameter.setContainerName(sContainerName);
                 }
                 
                 // Wait for it
@@ -1211,6 +1215,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 			int iPort = oProcessor.getPort();
+			
+			if (!Utils.isNullOrEmpty(oParameter.getContainerName())) {
+				if (WasdiConfig.Current.shellExecLocally == false) {
+					sIp = oParameter.getContainerName();
+				}
+			}
 
 
 			String sUrl = "http://" + sIp + ":" + iPort + "/hello";

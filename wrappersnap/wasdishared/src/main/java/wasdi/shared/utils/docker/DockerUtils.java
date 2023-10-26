@@ -347,13 +347,11 @@ public class DockerUtils {
 
         return sImageName;
     }
-    
-    
 
     /**
      * Run the docker
      */
-    public boolean start() {
+    public String start() {
         return start("");
     }
     
@@ -363,7 +361,7 @@ public class DockerUtils {
      * @param sMountWorkspaceFolder workspace folder to mount
      * 
      */
-    public boolean start(String sMountWorkspaceFolder) {
+    public String start(String sMountWorkspaceFolder) {
         return start(sMountWorkspaceFolder, m_oProcessor.getPort());
     }    
     
@@ -373,7 +371,7 @@ public class DockerUtils {
      * @param sMountWorkspaceFolder workspace folder to mount
      * @param iProcessorPort Port to use
      */
-    public boolean start(String sMountWorkspaceFolder, int iProcessorPort) {
+    public String start(String sMountWorkspaceFolder, int iProcessorPort) {
 
         try {
         	
@@ -425,6 +423,8 @@ public class DockerUtils {
             // Search first of all if the container is already here
         	ContainerInfo oContainerInfo = getContainerInfoByImageName(m_oProcessor.getName(), m_oProcessor.getVersion());
         	
+        	boolean bNameIsDefined = true;
+        	
         	if (oContainerInfo == null) {
         		
         		// No we do not have it
@@ -440,7 +440,7 @@ public class DockerUtils {
         			if (!bPullResult) {
         				// Impossible to pull, is a big problem
         				WasdiLog.errorLog("DockerUtils.start: Error pulling the image, we cannot proceed");
-        				return false;
+        				return "";
         			}
         		}
         		
@@ -482,7 +482,7 @@ public class DockerUtils {
             		
             		// Expose the TCP Port
             		oContainerCreateParams.ExposedPorts.add("5000/tcp");
-            		oContainerCreateParams.HostConfig.PortBindings.put("5000/tcp", ""+iProcessorPort);
+            		//oContainerCreateParams.HostConfig.PortBindings.put("5000/tcp", ""+iProcessorPort);
             		
                     // Extra hosts mapping, useful for some instances when the server host can't be resolved
                     // The symptoms of such problem is that the POST call from the Docker container timeouts
@@ -496,14 +496,13 @@ public class DockerUtils {
                         	}
                     	}
                     }
-            		
                     
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		
             		if (Utils.isNullOrEmpty(sContainerCreateParams)) {
             			WasdiLog.errorLog("DockerUtils.start: impossible to get the payload to create the container. We cannot proceed :(");
-            			return false;
+            			return "";
             		}
             		
             		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
@@ -522,7 +521,7 @@ public class DockerUtils {
             		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
             			// Here is not good
             			WasdiLog.errorLog("DockerUtils.start: impossible to create the container. We cannot proceed :(. ERROR = " + oResponse.getResponseBody());
-            			return false;
+            			return "";
             		}
             		
             		WasdiLog.debugLog("DockerUtils.start: Container created");
@@ -530,16 +529,20 @@ public class DockerUtils {
             	}
             	catch (Exception oEx) {
             		WasdiLog.errorLog("DockerUtils.start exception creating the container: " + oEx.toString());
-                    return false;
+                    return "";
                 }        		
         	}
         	else {        		
         		// If the container exists, we can take the ID
         		WasdiLog.debugLog("DockerUtils.start: Container already found, we will use the id");
+        		
+        		// Now we use the id to be sure, but we need to return the name after.
         		sContainerName = oContainerInfo.Id;
+        		// So here we remember this
+        		bNameIsDefined = false;
         	}
             
-            WasdiLog.debugLog("DockerUtils.start: Starting Container Named" + sContainerName + " created");
+            WasdiLog.debugLog("DockerUtils.start: Starting Container Named " + sContainerName + " created");
             
             // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
@@ -549,25 +552,37 @@ public class DockerUtils {
     		// Make the call
     		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
     		
+    		// Did we used the real name or the id?
+    		if (!bNameIsDefined) {
+    			// The id: check if we can saefly find the name
+    			if (oContainerInfo!=null) {
+    				if (oContainerInfo.Names != null) {
+    					if (oContainerInfo.Names.size()>0) {
+    						sContainerName = oContainerInfo.Names.get(0);
+    					}
+    				}
+    			}
+    		}
+    		
     		if (oResponse.getResponseCode() == 204) {
     			// Started Well
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " started");
-    			return true;
+    			return sContainerName;
     		}
     		else if (oResponse.getResponseCode() == 304) {
     			// ALready Started (but so why we did not detected this before?!?)
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " wasd already started");
-    			return true;
+    			return sContainerName;
     		}
     		else {
     			// Error!
     			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName);
-    			return false;
+    			return "";
     		}
             
         } catch (Exception oEx) {
         	WasdiLog.errorLog("DockerUtils.start error creating the container: " + oEx.toString());
-            return false;
+            return "";
         }
     }    
 
