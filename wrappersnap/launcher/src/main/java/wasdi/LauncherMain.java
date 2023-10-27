@@ -184,7 +184,7 @@ public class LauncherMain  {
         }
         else { 
         	WasdiLog.debugLog("WADSI Configured to log on console");
-        }        
+        }
 
         try {
 

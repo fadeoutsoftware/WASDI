@@ -94,17 +94,23 @@ public class WasdiScheduler
   		{
   			//no log4j configuration
   			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
-  			oEx.printStackTrace();
   		}
         
-	
-		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
-		WasdiLog.setLoggerWrapper(oLoggerWrapper);
+  		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
+  		
+        if (WasdiConfig.Current.useLog4J) {
+            // Set the logger for the shared lib
+            WasdiLog.setLoggerWrapper(oLoggerWrapper);
+            WasdiLog.debugLog("Logger added");
+        }
+        else { 
+        	WasdiLog.debugLog("WADSI Configured to log on console");
+        }
 		
 		WasdiLog.infoLog("main: Logger configured :-)\n");
 				
 		WasdiLog.infoLog("main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
-		
+
 		
 		//mongo config
 		try {
