@@ -30,7 +30,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return false;
@@ -47,7 +47,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -62,7 +62,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -103,7 +103,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -118,7 +118,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -163,7 +163,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -178,7 +178,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -191,7 +191,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			return lCounter > 0;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return true;
@@ -206,7 +206,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -264,7 +264,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
 					return oStyleSharing;
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", e);
 				}
 			}
 		} catch (Exception oE) {
@@ -290,12 +290,12 @@ public class UserResourcePermissionRepository extends MongoRepository {
 					oStyleSharing = s_oMapper.readValue(sJSON, UserResourcePermission.class);
 					return oStyleSharing;
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", e);
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId( " + sUserId
-					+ ", " + sResourceId + "): error: " + oE);
+			WasdiLog.errorLog("UserResourcePermissionRepository.getPermissionByTypeAndUserIdAndResourceId( " + sUserId
+					+ ", " + sResourceId + "): error: ", oE);
 		}
 
 		return null;
@@ -330,8 +330,8 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.getPermissionsByTypeAndUserIdAndResourceId( " + sUserId
-					+ ", " + sResourceId + "): error: " + oE);
+			WasdiLog.errorLog("UserResourcePermissionRepository.getPermissionsByTypeAndUserIdAndResourceId( " + sUserId
+					+ ", " + sResourceId + "): error: ", oE);
 		}
 
 		return aoReturnList;
@@ -375,7 +375,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -390,7 +390,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, UserResourcePermission.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -443,7 +443,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -466,7 +466,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -519,7 +519,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -542,7 +542,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -591,7 +591,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -618,7 +618,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserResourcePermissionRepository. : exception ", oEx);
 		}
 
 		return 0;
@@ -668,8 +668,8 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceSharedWithUser( " + sUserId + ", "
-					+ sResourceId + "): error: " + oE);
+			WasdiLog.errorLog("UserResourcePermissionRepository.isResourceSharedWithUser( " + sUserId + ", "
+					+ sResourceId + "): error: ",  oE);
 		}
 
 		return false;
@@ -686,7 +686,7 @@ public class UserResourcePermissionRepository extends MongoRepository {
 			}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType + ", " + sUserId + ", " + sResourceId + "): error: " + oE);
+			WasdiLog.errorLog("UserResourcePermissionRepository.isResourceOfTypeSharedWithUser( " + sType + ", " + sUserId + ", " + sResourceId + "): error: ", oE);
 		}
 
 		return false;
