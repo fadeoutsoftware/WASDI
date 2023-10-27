@@ -23,7 +23,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 	
 	@Override
 	protected IPackageManager getPackageManager(String sUrl) {
-		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
+		return null;
 	}
 		
 	@Override
@@ -129,7 +129,7 @@ public class OctaveProcessorEngine extends DockerProcessorEngine {
 			return super.libraryUpdate(oParameter);
 		}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
+			WasdiLog.debugLog("OctaveProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
 			return false;
 		}
 	}

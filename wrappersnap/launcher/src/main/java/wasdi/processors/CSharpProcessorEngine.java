@@ -20,7 +20,7 @@ public class CSharpProcessorEngine extends DockerProcessorEngine {
 
 	@Override
 	protected IPackageManager getPackageManager(String sUrl) {
-		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
+		return null;
 	}
 
 }
