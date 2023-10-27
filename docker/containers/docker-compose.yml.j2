@@ -303,7 +303,7 @@ services:
     volumes:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
 {% endif %}
-{% if bWasdiComponentTomcatOgcProcessesServerEnabled == True %}
+{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
@@ -352,7 +352,7 @@ services:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 {% endif %}
-{% if bWasdiComponentTomcatOpenEoServerEnabled == True %}
+{% if bWasdiTomcatOpenEoServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
