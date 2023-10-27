@@ -124,6 +124,7 @@ services:
       - KC_HTTP_RELATIVE_PATH=/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}
       - KC_LOG_LEVEL=debug
       - KC_PROXY=edge
+      - KC_TRANSACTION_XA_ENABLED=true
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
     image: "{{ sWasdiContainerKeycloakImageName }}:latest"
@@ -287,12 +288,13 @@ services:
 {% if bWasdiSchedulerEnabled == True %}
 
   {{ sWasdiSchedulerServiceName }}:
-    depends_on:
+    # Disable until we are ready to start all containers
+    #depends_on:
 {% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiContainerMongoMainServiceName }}
+#      - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
 {% if sWasdiServerTypeIsComputational == True %}
-      - {{ sWasdiContainerMongoComputationalServiceName }}
+#      - {{ sWasdiContainerMongoComputationalServiceName }}
 {% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
@@ -301,7 +303,9 @@ services:
         soft: {{ sWasdiSchedulerUlimitNofile }}
         hard: {{ sWasdiSchedulerUlimitNofile }}
     volumes:
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
+      - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
+      - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
 
@@ -516,7 +520,7 @@ services:
         soft: {{ sWasdiTraefikUlimitNofile }}
         hard: {{ sWasdiTraefikUlimitNofile }}
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik/security.yml:/etc/traefik/security.yml:ro"
 {% if bWasdiContainerTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
