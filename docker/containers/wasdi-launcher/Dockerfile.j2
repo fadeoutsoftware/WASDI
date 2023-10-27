@@ -93,11 +93,11 @@ RUN apt-get update && \
         libjhdf5-jni && \
     mkdir --parents \
         {{ sWasdiDataConfigurationRootDirectoryPath }} \
-        {{ sWasdiComponentLauncherRootDirectoryPath }} && \
+        {{ sWasdiLauncherRootDirectoryPath }} && \
     chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
     chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiComponentLauncherRootDirectoryOwner }}:{{ sWasdiComponentLauncherRootDirectoryGroup }} {{ sWasdiComponentLauncherRootDirectoryPath }} && \
-    chmod {{ sWasdiComponentLauncherRootDirectoryMode }} {{ sWasdiComponentLauncherRootDirectoryPath }} && \
+    chown {{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} {{ sWasdiLauncherRootDirectoryPath }} && \
+    chmod {{ sWasdiLauncherRootDirectoryMode }} {{ sWasdiLauncherRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -107,8 +107,8 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Set the workdir
-WORKDIR {{ sWasdiComponentLauncherRootDirectoryPath }}
+WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiComponentLauncherRootDirectoryOwner }}:{{ sWasdiComponentLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentLauncherTargetFileName }} {{ sWasdiComponentLauncherRootDirectoryPath }}/{{ sWasdiComponentLauncherTargetFileName }}
+COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherBuildTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherBuildTargetFileName }}

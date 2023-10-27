@@ -51,7 +51,9 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 
 # RUN specific to install all elements related to the toolbox
-RUN apt-get update && \
+RUN groupadd --gid {{ sWasdiBackupSystemGroupId }} --non-unique {{ sWasdiBackupSystemGroupName }} && \
+    useradd --create-home --home-dir {{ sWasdiBackupSystemUserHome }} --uid {{ sWasdiBackupSystemUserId }} --gid {{ sWasdiBackupSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiBackupSystemUserName }} && \
+    apt-get update && \
     apt-get install \
         gpg && \
     curl --fail --silent --show-error --location https://pgp.mongodb.com/server-4.4.asc | gpg --dearmor --output /usr/share/keyrings/mongodb-server-4.4.gpg && \
@@ -68,8 +70,6 @@ RUN apt-get update && \
         python3-pip \
         python3-psycopg2 \
         python3-venv && \
-    mkdir --parents {{ sWasdiLogRootDirectoryPath }} && \
-    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} {{ sWasdiLogRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -90,6 +90,16 @@ RUN mkdir --parents {{ sWasdiToolboxRootDirectoryPath }} \
         {{ sWasdiToolboxRootDirectoryPath }}/template \
         {{ sWasdiToolboxRootDirectoryPath }}/temporary \
         {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment && \
+    chmod 755 {{ sWasdiToolboxRootDirectoryPath }} \
+        {{ sWasdiToolboxRootDirectoryPath }}/code \
+        {{ sWasdiToolboxRootDirectoryPath }}/configuration \
+        {{ sWasdiToolboxRootDirectoryPath }}/output \
+        {{ sWasdiToolboxRootDirectoryPath }}/template \
+        {{ sWasdiToolboxRootDirectoryPath }}/temporary \
+        {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment && \
+    chmod 777 {{ sWasdiToolboxRootDirectoryPath }} \
+        {{ sWasdiToolboxRootDirectoryPath }}/template \
+        {{ sWasdiToolboxRootDirectoryPath }}/temporary && \
     python3 -m venv --system-site-packages {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment && \
     {{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \
         ConfigArgParse \
@@ -103,9 +113,14 @@ WORKDIR {{ sWasdiToolboxRootDirectoryPath }}/code
 
 
 # Copy data
-COPY --chown=appwasdi:appwasdi ./dataToCopy/code/ {{ sWasdiToolboxRootDirectoryPath }}/code/
-COPY --chown=appwasdi:appwasdi ./dataToCopy/configuration {{ sWasdiToolboxRootDirectoryPath }}/configuration/
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/code/ {{ sWasdiToolboxRootDirectoryPath }}/code/
 
 
 # ENTRYPOINT
-ENTRYPOINT ["{{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment/bin/python3", "{{ sWasdiToolboxRootDirectoryPath }}/code/toolbox.py", "--configuration-directory", "{{ sWasdiToolboxRootDirectoryPath }}/configuration", "--log-directory", "{{ sWasdiLogRootDirectoryPath }}"]
+ENTRYPOINT [ \
+    "{{ sWasdiToolboxRootDirectoryPath }}/pythonVirtualEnvironment/bin/python3", \
+    "{{ sWasdiToolboxRootDirectoryPath }}/code/toolbox.py", \
+    "--log-on-screen", \
+    "--configuration-directory", \
+    "{{ sWasdiToolboxRootDirectoryPath }}/configuration" \
+]

@@ -50,44 +50,12 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
-USER {{ sWasdiSystemUserName }}
-
-
-# RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }} \
-        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
-    chmod {{ sWasdiJreRootDirectoryMode }} {{ sWasdiJreRootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    rm --force /tmp/{{ sWasdiJre8SourceUrl | basename }}
-
-ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
-ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
-
-
-# From now, all commands executed are executed with the user 'root'
-USER root
-
-
-# RUN specific to install the Scheduler
+# RUN specific to install all elements related to the service
 RUN apt-get update && \
     apt-get install \
-        libjhdf4-jni \
-        libjhdf5-jni && \
-    mkdir --parents \
-        {{ sWasdiDataConfigurationRootDirectoryPath }} \
-        {{ sWasdiSchedulerRootDirectoryPath }} && \
-    chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} {{ sWasdiSchedulerRootDirectoryPath }} && \
-    chmod {{ sWasdiSchedulerRootDirectoryMode }} {{ sWasdiSchedulerRootDirectoryPath }} && \
+        python3-cpuinfo \
+        python3-pip \
+        python3-venv && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -96,19 +64,30 @@ RUN apt-get update && \
 USER {{ sWasdiSystemUserName }}
 
 
+# RUN specific to install all elements related to the service
+RUN mkdir --parents {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
+        {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    chmod {{ sWasdiComponentUpdateMetricRootDirectoryMode }} {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
+        {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    python3 -m venv --system-site-packages {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \
+        psutil \
+        python-keycloak \
+        urllib3
+
+
 # Set the workdir
-WORKDIR {{ sWasdiSchedulerRootDirectoryPath }}
+WORKDIR {{ sWasdiComponentUpdateMetricRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiSchedulerBuildTargetFileName }} {{ sWasdiSchedulerRootDirectoryPath }}/{{ sWasdiSchedulerBuildTargetFileName }}
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/wasdiUpdateMetric.py {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py
 
 
 # Start the container
 CMD [ \
-    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
-    "-jar", \
-    "{{ sWasdiSchedulerBuildTargetFileName }}", \
-    "--config", \
+    "{{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/python3", \
+    "{{ sWasdiComponentUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py", \
+    "--configuration-file", \
     "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfigDocker.json" \
 ]

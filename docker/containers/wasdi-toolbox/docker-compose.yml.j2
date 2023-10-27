@@ -5,9 +5,6 @@ version: "3"
 # prefixed with this value
 name: "wasdi-cli-toolbox"
 
-# In any cases, we use a pre-existing network:
-#   - either the client has his own network
-#   - or we create it in a previous step
 networks:
   default:
     name: "{{ sWasdiDockerNetworkName }}"
@@ -18,7 +15,8 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {{ bWasdiDockerNetworkMustBeCreated | default(False) | string | lower }}
+    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
+
     ipam:
       driver: "default"
       config:
@@ -27,11 +25,7 @@ networks:
 
 services:
   {{ sWasdiContainerToolboxServiceName }}:
-    build:
-      context: .
-      tags:
-        - {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
-    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerToolboxServiceName }}:latest
     restart: "no"
     ulimits:
       nofile:
@@ -46,16 +40,22 @@ services:
       - real
       - --mode-batch
     environment:
-      - TOOLBOX_MODULE=mongodb
-      - TOOLBOX_SUBMODULE=backupDatabaseLogicalDump
-    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
+      - TOOLBOX_MODULE_NAME=mongodb
+      - TOOLBOX_SUBMODULE_NAME=backupDatabaseLogicalDump
+    image: {{ sWasdiContainerToolboxServiceName }}:latest
     restart: "no"
     ulimits:
       nofile:
         soft: {{ sWasdiToolboxUlimitNofile }}
         hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
     volumes:
-      - /data/wasdi/docker/volume/wasdi-toolbox:/data:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+      - /data/wasdibck/cache/mongodb:/mnt/cache:rw
+      - /data/wasdibck/mongodb:/mnt/data:rw
 
   wasdi-backup-postgresql:
     command:
@@ -63,13 +63,19 @@ services:
       - real
       - --mode-batch
     environment:
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
       - TOOLBOX_MODULE=postgresql
       - TOOLBOX_SUBMODULE=backupDatabaseLogicalDump
-    image: {{ sWasdiContainerToolboxServiceName }}:{{ sWasdiBuildVersion }}
+    image: {{ sWasdiContainerToolboxServiceName }}:latest
     restart: "no"
     ulimits:
       nofile:
         soft: {{ sWasdiToolboxUlimitNofile }}
         hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
     volumes:
-      - /data/wasdi/docker/volume/wasdi-toolbox:/data:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+      - /data/wasdibck/cache/postgresql:/mnt/cache:rw
+      - /data/wasdibck/postgresql:/mnt/data:rw
