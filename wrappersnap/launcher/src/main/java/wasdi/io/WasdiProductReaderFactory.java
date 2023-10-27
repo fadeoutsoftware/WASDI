@@ -2,6 +2,7 @@ package wasdi.io;
 
 import java.io.File;
 
+import wasdi.shared.queryexecutors.jrc.ResponseTranslatorJRC;
 import wasdi.shared.utils.WasdiFileUtils;
 
 public class WasdiProductReaderFactory {
@@ -65,6 +66,10 @@ public class WasdiProductReaderFactory {
 
 		if (oFile.getName().toLowerCase().endsWith(".hdf")) {
 			return new ModisProductReader(oFile);
+		}
+		
+		if (oFile.getName().toUpperCase().startsWith(ResponseTranslatorJRC.s_sFileNamePrefix) && oFile.getName().endsWith(".zip")) {
+			return new GHSLTilesReader(oFile);
 		}
 
 		return new SnapProductReader(oFile);

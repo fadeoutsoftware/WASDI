@@ -280,6 +280,11 @@
 		    <artifactId>jsoup</artifactId>
 		    <version>1.14.2</version>
 		</dependency>        
+        <dependency>
+		    <groupId>org.osgeo</groupId>
+		    <artifactId>proj4j</artifactId>
+		    <version>0.1.0</version> 
+		</dependency>
     </dependencies>
 
     <repositories>
