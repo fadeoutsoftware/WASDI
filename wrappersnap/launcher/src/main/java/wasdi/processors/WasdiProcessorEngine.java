@@ -229,7 +229,7 @@ public abstract class WasdiProcessorEngine {
 			return HttpUtils.downloadFile(sUrl, asHeaders, sOutputFilePath);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("WasdiProcessorEngine.downloadProcessor: error", oEx);
 			return "";
 		}		
 	}

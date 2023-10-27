@@ -119,7 +119,7 @@ public class BandImageManager {
 							
 						}						
 					} catch (Exception e) {
-						e.printStackTrace();
+						WasdiLog.errorLog("BandImageManager: error: ", e);
 					}
 					try {
 						Thread.sleep(10000); //sleep for 10 seconds

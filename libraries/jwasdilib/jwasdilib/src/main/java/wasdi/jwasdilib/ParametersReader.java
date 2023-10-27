@@ -63,13 +63,13 @@ public class ParametersReader {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+        	System.out.println("ParametersReader.loadPropValues error " + e.toString());
         } finally {
         	try {
         		if (oInputStream != null) oInputStream.close();
         	}
         	catch (Exception oInEx) {
-        		oInEx.printStackTrace();
+        		System.out.println("ParametersReader.loadPropValues error " + oInEx.toString());
 			}
         	
         }

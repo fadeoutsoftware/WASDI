@@ -34,7 +34,7 @@ public final class DateUtils {
 			try {
 				return simpleDateFormat.parse(s);
 			} catch (ParseException e) {
-				e.printStackTrace();
+				System.out.println("WasdiLib error " + e.toString());
 			}
 		}
 

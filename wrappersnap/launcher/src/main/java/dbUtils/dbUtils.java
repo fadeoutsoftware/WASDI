@@ -125,7 +125,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println(" DOWNLOADED FILE EX " + oEx.toString());
-            oEx.printStackTrace();
             return false;
         }
 
@@ -236,7 +235,6 @@ public class dbUtils {
             }
         } catch (Exception oEx) {
             System.out.println("downloadedProducts: exception " + oEx.toString());
-            oEx.printStackTrace();
         }
     }
 
@@ -326,7 +324,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("productWorkspace: exception " + oEx);
-            oEx.printStackTrace();
         }
     }
     
@@ -574,7 +571,6 @@ public class dbUtils {
       
         } catch (Exception oEx) {
             System.out.println("processors redeploying Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -611,7 +607,6 @@ public class dbUtils {
         } catch (Exception oEx) {
 
             System.out.println("metadata Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -769,7 +764,6 @@ public class dbUtils {
             }
         } catch (Exception oEx) {
             System.out.println("password Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -821,7 +815,6 @@ public class dbUtils {
                             oSnapWorkflowRepository.updateSnapWorkflow(oWorkflow);
                         } catch (Exception oEx) {
                             System.out.println("File Copy Exception: " + oEx);
-                            oEx.printStackTrace();
                         }
                     } else {
                         System.out.println("File already exists, jump");
@@ -833,7 +826,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("Workflows Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -919,7 +911,6 @@ public class dbUtils {
             }
         } catch (Exception oEx) {
             System.out.println("USERS Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -1700,7 +1691,6 @@ public class dbUtils {
             }             
         } catch (Exception oEx) {
             System.out.println("Workspace Sharing Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -1785,7 +1775,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("Migrate Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -1863,7 +1852,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("processWorkpsaces Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
     
@@ -2013,7 +2001,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("logs Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -2098,7 +2085,6 @@ public class dbUtils {
 
         } catch (Exception oEx) {
             System.out.println("Categories Exception: " + oEx);
-            oEx.printStackTrace();
         }
     }
 
@@ -2234,7 +2220,7 @@ public class dbUtils {
             }
             
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Exception: " + e.toString());
 		}
 		
 	}
@@ -2322,7 +2308,7 @@ public class dbUtils {
             }
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Exception: " + e.toString());
 		}
 	}    
 
@@ -2395,7 +2381,7 @@ public class dbUtils {
             
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("Exception: " + oEx.toString());
 		}
 	}
 	
@@ -2559,7 +2545,7 @@ public class dbUtils {
             s_oScanner.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+        	System.out.println("Exception: " + e.toString());
         }
     }
 	

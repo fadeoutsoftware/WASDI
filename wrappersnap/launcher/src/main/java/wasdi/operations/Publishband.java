@@ -488,7 +488,7 @@ public class Publishband extends Operation {
             return HttpUtils.downloadFile(sUrl, asHeaders, sDestinationFileFullPath);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishBand.downloadStyle: error", oEx);
             return "";
         }
     }

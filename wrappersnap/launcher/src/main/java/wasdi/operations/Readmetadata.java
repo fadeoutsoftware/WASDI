@@ -109,8 +109,7 @@ public class Readmetadata extends Operation {
             return sMetadataFileName;
 
         } catch (Exception e) {
-            WasdiLog.debugLog("Readmetadata.asynchSaveMetadata: Exception = " + e.toString());
-            e.printStackTrace();
+            WasdiLog.errorLog("Readmetadata.asynchSaveMetadata: Exception = ", e);
         }
 
         // There was an error...
