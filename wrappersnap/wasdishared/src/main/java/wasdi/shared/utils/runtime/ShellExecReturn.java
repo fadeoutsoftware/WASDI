@@ -34,6 +34,12 @@ public class ShellExecReturn {
 	private String m_sOperationLogs = "";
 	
 	/**
+	 * If the shell exec is done in docker, here we will find our Container Id
+	 * Otherwise is an empty string
+	 */
+	private String m_sContainerId = "";
+	
+	/**
 	 * Flag on the success of the operation. If it is false, the operation neither started probably
 	 * @return
 	 */
@@ -95,6 +101,23 @@ public class ShellExecReturn {
 	 */
 	public void setAsynchOperation(boolean bAsynchOperation) {
 		this.m_bAsynchOperation = bAsynchOperation;
+	}
+
+	/**
+	 * Get the container id if the shell exec is done in docker
+	 * Empyt strings otherwise
+	 * @return
+	 */
+	public String getContainerId() {
+		return m_sContainerId;
+	}
+
+	/**
+	 * Set the container id
+	 * @param sContainerId
+	 */
+	public void setContainerId(String sContainerId) {
+		this.m_sContainerId = sContainerId;
 	}
 
 }

@@ -14,6 +14,8 @@ import wasdi.shared.config.ShellExecItemConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
+import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
+import wasdi.shared.utils.docker.containersViewModels.constants.ContainerStates;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class RunTimeUtils {
@@ -240,6 +242,8 @@ public class RunTimeUtils {
 		}
 		else {
 			
+			oShellExecReturn.setContainerId(sContainerId);
+			
 			// Do we need to wait for it?
 			if (bWait) {
 				
@@ -449,22 +453,39 @@ public class RunTimeUtils {
 	 */
 	public static boolean isProcessStillAllive(String sPidStr) {
 		
-	    String sOS = System.getProperty("os.name").toLowerCase();
-	    String sCommand = null;
-	    
-	    if (sOS.indexOf("win") >= 0) {
-	    	//Check alive Windows mode
-	        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
-	    } 
-	    else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
-	    	//Check alive Linux/Unix mode
-	        sCommand = "ps -p " + sPidStr;            
-	    } 
-	    else {
-	    	//("Unsuported OS: go on Linux")
-	    	sCommand = "ps -p " + sPidStr;
-	    }
-	    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation
+		if (WasdiConfig.Current.shellExecLocally) {
+		    String sOS = System.getProperty("os.name").toLowerCase();
+		    String sCommand = null;
+		    
+		    if (sOS.indexOf("win") >= 0) {
+		    	//Check alive Windows mode
+		        sCommand = "cmd /c tasklist /FI \"PID eq " + sPidStr + "\"";            
+		    } 
+		    else if (sOS.indexOf("nix") >= 0 || sOS.indexOf("nux") >= 0) {
+		    	//Check alive Linux/Unix mode
+		        sCommand = "ps -p " + sPidStr;            
+		    } 
+		    else {
+		    	//("Unsuported OS: go on Linux")
+		    	sCommand = "ps -p " + sPidStr;
+		    }
+		    return isProcessIdRunning(sPidStr, sCommand); // call generic implementation			
+		}
+		else {
+			DockerUtils oDockerUtils = new DockerUtils();
+			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerId(sPidStr);
+			
+			if (oContainerInfo == null) {
+				return false;
+			}
+			else {
+				if (oContainerInfo.Status.equals(ContainerStates.RUNNING)) return true;
+				else return false;
+			}
+			
+			
+		}
+		
 	}
 	
 	/**

@@ -338,15 +338,19 @@ public class ProcessScheduler {
 				if (m_aoLaunchedProcesses.containsKey(oRunningPws.getProcessObjId())) {
 					m_aoLaunchedProcesses.remove(oRunningPws.getProcessObjId());
 				}
-				
+
 				// Get the PID
-				String sPid = "" + oRunningPws.getPid();
+				String sPidOrContainerId = "" + oRunningPws.getPid();
+
+				if (!WasdiConfig.Current.shellExecLocally) {
+					sPidOrContainerId = oRunningPws.getContainerId();
+				}
 				
 				// Check if it is alive
-				if (!Utils.isNullOrEmpty(sPid)) {
-					if (!RunTimeUtils.isProcessStillAllive(sPid)) {
+				if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+					if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 						// PID does not exists: recheck and remove
-						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPid + ", status RUNNING but the process does not exists");
+						WasdiLog.infoLog(m_sLogPrefix + ".run: Process " + oRunningPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", status RUNNING but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oRunningPws.getProcessObjId());
@@ -687,6 +691,13 @@ public class ProcessScheduler {
 			
 			if (oShellExecReturn.isOperationOk()) {
 				WasdiLog.infoLog(m_sLogPrefix + "executeProcess: executed!!!");
+				
+				if (!Utils.isNullOrEmpty(oShellExecReturn.getContainerId())) {
+					ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+					oProcessWorkspace.setContainerId(oShellExecReturn.getContainerId());
+					oProcessWorkspaceRepository.updateProcess(oProcessWorkspace);
+				}
+				
 				m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());				
 			}
 			else {
