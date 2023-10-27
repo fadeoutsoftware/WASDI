@@ -74,13 +74,13 @@ pipeline {
 
     stage('MAVEN - EXECUTE TEST') {
       steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
+        sh script: "mvn --batch-mode -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --update-snapshots test", label: "Execute unit test"
       }
     }
 
     stage('MAVEN - UPLOAD IN NEXUS') {
       steps {
-        sh script: "mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
+        sh script: "mvn --batch-mode -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots deploy", label: "Upload in Nexus"
       }
     }
 
