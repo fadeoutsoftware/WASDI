@@ -256,13 +256,13 @@ public class QueryExecutorJRC extends QueryExecutor {
         CoordinateReferenceSystem oTargetCRSRS = oCrsFactory.createFromName(sTargetEncoding);
 
         // Create a CoordinateTransform instance
-        CoordinateTransform transform = new CoordinateTransformFactory().createTransform(oSourceCRSRS, oTargetCRSRS);
+        CoordinateTransform oTransform = new CoordinateTransformFactory().createTransform(oSourceCRSRS, oTargetCRSRS);
 
 
         // Transform the coordinates
         ProjCoordinate oSourceCoord = new ProjCoordinate(dLongitude, dLatitude);
         ProjCoordinate oTargetCoord = new ProjCoordinate();
-        transform.transform(oSourceCoord, oTargetCoord);
+        oTransform.transform(oSourceCoord, oTargetCoord);
 
         // Extract the transformed coordinates
         double dTargetLong = oTargetCoord.x;
@@ -273,4 +273,9 @@ public class QueryExecutorJRC extends QueryExecutor {
     
 
 
+    @Override
+    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+    	WasdiLog.debugLog("QueryExecutorJRC: sProduct: " + sProduct + " sProtocol: " + sProtocol + " sOriginalUrl: " + sOriginalUrl);
+    	return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+    }
 }

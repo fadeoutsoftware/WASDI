@@ -48,7 +48,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.insertProductWorkspace: exception ", oEx);
         }
 
         return false;
@@ -72,7 +72,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.getProductsByWorkspace: exception ", oEx);
         }
 
         return aoReturnList;
@@ -99,6 +99,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
     		return asWorkspaces ;    		
     	}
     	catch (Exception oEx) {
+    		WasdiLog.errorLog("ProductWorkspaceRepository.getWorkspaces: exception ", oEx);
     		return asWorkspaces;
 		}
     }
@@ -120,11 +121,10 @@ public class ProductWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.existsProductWorkspace: exception ", oEx);
         }
 
-        if (aoReturnList.size() > 0)
-            bExists = true;
+        if (aoReturnList.size() > 0) bExists = true;
 
         return bExists;
     }
@@ -147,11 +147,10 @@ public class ProductWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.getProductWorkspace: exception ", oEx);
         }
 
-        if (aoReturnList.size() > 0)
-            return aoReturnList.get(0);
+        if (aoReturnList.size() > 0) return aoReturnList.get(0);
 
         return null;
     }
@@ -175,7 +174,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.deleteByWorkspaceId: exception ", oEx);
         }
 
         return 0;
@@ -202,7 +201,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.deleteByProductNameWorkspace: exception ", oEx);
         }
 
         return 0;
@@ -227,7 +226,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.deleteByProductName: exception ", oEx);
         }
 
         return 0;
@@ -246,7 +245,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProductWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.getList: exception ", oEx);
         }
 
         return aoReturnList;    	
@@ -271,7 +270,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.updateProductWorkspace: exception ", oEx);
         }
 
         return  false;
@@ -296,7 +295,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.updateProductWorkspace: exception ", oEx);
         }
 
         return  false;
@@ -327,7 +326,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
                         oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
                         aoReturnList.add(oProductWorkspace);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                    	WasdiLog.errorLog("ProductWorkspaceRepository.getProductWorkspaceListByPath: exception ", e);
                     }            		
             	}
             }
@@ -335,7 +334,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
 				oCursor.close();
 			}
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProductWorkspaceRepository.getProductWorkspaceListByPath: exception ", oEx);
         }
 
         return aoReturnList;    	
