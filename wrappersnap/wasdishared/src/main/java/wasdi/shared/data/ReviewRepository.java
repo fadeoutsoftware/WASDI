@@ -27,7 +27,7 @@ public class ReviewRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, Review.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ReviewRepository.getReviews :error ", oEx);
         }
 
         return aoReturnList;
@@ -48,7 +48,7 @@ public class ReviewRepository extends MongoRepository {
             	return s_oMapper.readValue(sJSON, Review.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ReviewRepository.getReview :error ", oEx);
         }
 
         return  null;
@@ -65,23 +65,39 @@ public class ReviewRepository extends MongoRepository {
     	if (Utils.isNullOrEmpty(sProcessorId)) return 0;
     	if (Utils.isNullOrEmpty(sReviewId)) return 0;
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("processorId", sProcessorId);
-		oCriteria.append("id", sReviewId);
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("processorId", sProcessorId);
+    		oCriteria.append("id", sReviewId);
 
-        return delete(oCriteria,m_sThisCollection);
+            return delete(oCriteria,m_sThisCollection);
+    	}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ReviewRepository.deleteReview: ", oEx);
+			return -1;
+		}
+    	
     }
     
     public boolean updateReview(Review oReview) {
-       
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("processorId", oReview.getProcessorId());
-		oCriteria.append("id", oReview.getId());
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("processorId", oReview.getProcessorId());
+    		oCriteria.append("id", oReview.getId());
 
-        return  update(oCriteria,oReview,m_sThisCollection);
+            return  update(oCriteria,oReview,m_sThisCollection);    		
+    	}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ReviewRepository.updateReview: ", oEx);
+			return false;
+		}
+
+       
     }
     
 	public boolean isTheOwnerOfTheReview(String sProcessorId, String sReviewId ,String sUserId) {
+		
 		boolean bIsTheOwner = false;
 
         final ArrayList<Review> aoReturnList = new ArrayList<Review>();
@@ -95,7 +111,7 @@ public class ReviewRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, Review.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ReviewRepository.isTheOwnerOfTheReview :error ", oEx);
         }
 
         if(aoReturnList.size() > 0){
@@ -117,8 +133,9 @@ public class ReviewRepository extends MongoRepository {
 				bAlreadyVoted = true;
 			}
 			
-		} catch (Exception oEx) {
-			WasdiLog.debugLog("ReviewRepository.InsertReview: " + oEx);
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ReviewRepository.alreadyVoted: ", oEx);
 		}
 		return bAlreadyVoted;
 	}

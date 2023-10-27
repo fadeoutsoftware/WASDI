@@ -3,20 +3,19 @@ package wasdi.shared.queryexecutors.jrc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap ;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap ;
 
-import org.geotools.data.*;
+import org.geotools.data.FileDataStore;
+import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -275,7 +274,20 @@ public class QueryExecutorJRC extends QueryExecutor {
 
     @Override
     public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
-    	WasdiLog.debugLog("QueryExecutorJRC: sProduct: " + sProduct + " sProtocol: " + sProtocol + " sOriginalUrl: " + sOriginalUrl);
-    	return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+    	
+    	if (Utils.isNullOrEmpty(sOriginalUrl)) {
+    		WasdiLog.warnLog("QueryExecutorJRC.getUriFromProductName: sOriginalUrl is null, try to recover with the base implementation");
+    		return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+    	}
+    	else {
+    		String [] asParts = sOriginalUrl.split(";");
+    		if (asParts != null) {
+    			if (asParts.length>0) {
+    				return asParts[0];
+    			}
+    		}
+    	}
+    	
+    	return "";
     }
 }
