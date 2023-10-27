@@ -24,8 +24,8 @@ networks:
           gateway: "{{ sWasdiDockerNetworkGateway }}"
 
 services:
-{% if sWasdiServerTypeIsMain == True %}
-  {{ sWasdiContainerWasdiClientServiceName }}:
+{% if bWasdiClientEnabled == True %}
+  {{ sWasdiClientServiceName }}:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiContainerKeycloakServiceName }}
@@ -34,25 +34,25 @@ services:
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
       - {{ sWasdiContainerTraefikServiceName }}
-    image: "{{ sWasdiContainerWasdiClientServiceName }}:latest"
+    image: "{{ sWasdiClientServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=wasdi-secure-all@file"
 {% endif %}
-      - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.service=s_{{ sWasdiContainerWasdiClientServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerWasdiClientServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerWasdiClientServiceName }}.loadbalancer.server.port={{ sWasdiContainerWasdiClientInternalPort }}"
-{% if sWasdiContainerWasdiClientInternalPort | default("") != ""
-    and sWasdiContainerWasdiClientExternalPort | default("") != ""
-    and aWasdiContainerWasdiClientExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiClientServiceName }}.loadbalancer.server.port={{ sWasdiClientInternalPort }}"
+{% if sWasdiClientInternalPort | default("") != ""
+    and sWasdiClientExternalPort | default("") != ""
+    and aWasdiClientExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerWasdiClientExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerWasdiClientExternalPort }}:{{ sWasdiContainerWasdiClientInternalPort }}"
+{% for sCurrentExternalIp in aWasdiClientExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiClientExternalPort }}:{{ sWasdiClientInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
@@ -122,7 +122,7 @@ services:
       - KC_HOSTNAME_STRICT_HTTPS=false
       - KC_HTTP_ENABLED=true
       - KC_HTTP_RELATIVE_PATH=/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}
-      - KC_LOG_LEVEL=info
+      - KC_LOG_LEVEL=debug
       - KC_PROXY=edge
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
@@ -284,9 +284,9 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
 {% endif %}
-{% if ( sWasdiServerTypeIsMain == True or sWasdiServerTypeIsComputational == True ) and ( sHostState | lower ) == "primary" %}
+{% if bWasdiSchedulerEnabled == True %}
 
-  {{ sWasdiContainerWasdiSchedulerServiceName }}:
+  {{ sWasdiSchedulerServiceName }}:
     depends_on:
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerMongoMainServiceName }}
@@ -294,7 +294,7 @@ services:
 {% if sWasdiServerTypeIsComputational == True %}
       - {{ sWasdiContainerMongoComputationalServiceName }}
 {% endif %}
-    image: "{{ sWasdiContainerWasdiSchedulerServiceName }}:latest"
+    image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -303,7 +303,7 @@ services:
     volumes:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
 {% endif %}
-{% if sWasdiServerTypeIsMain == True %}
+{% if bWasdiComponentTomcatOgcProcessesServerEnabled == True %}
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
@@ -351,6 +351,8 @@ services:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+{% endif %}
+{% if bWasdiComponentTomcatOpenEoServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:

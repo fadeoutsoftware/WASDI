@@ -456,6 +456,7 @@
     },
     "dockers": {
         "dockerComposeCommand": "{{ aoWasdiConfiguration['dockers']['dockerComposeCommand'] }}",
+        "dockerNetworkMode": "{{ aoWasdiConfiguration['dockers']['dockerNetworkMode'] }}",
         "dockersDeployLogFilePath": "{{ aoWasdiConfiguration['dockers']['dockersDeployLogFilePath'] }}",
         "eoepca": {
             "dockerWriteFolder": "{{ aoWasdiConfiguration['dockers']['eoepca']['dockerWriteFolder'] }}",
@@ -477,18 +478,20 @@
 
         ],
 {% endif %}
+
+
         "internalDockerAPIAddress": "{{ aoWasdiConfiguration['dockers']['internalDockerAPIAddress'] }}",
         "internalDockersBaseAddress": "{{ aoWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
+        "logDockerAPICallsPayload": {{ aoWasdiConfiguration['dockers']['logDockerAPICallsPayload'] | lower }},
         "millisBetweenAttmpts": {{ aoWasdiConfiguration['dockers']['millisBetweenAttmpts'] }},
+        "millisBetweenStatusPolling": {{ aoWasdiConfiguration['dockers']['millisBetweenStatusPolling'] }},
         "millisWaitAfterDelete": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDelete'] }},
         "millisWaitAfterDeployScriptCreated": {{ aoWasdiConfiguration['dockers']['millisWaitAfterDeployScriptCreated'] }},
         "millisWaitForLogin": {{ aoWasdiConfiguration['dockers']['millisWaitForLogin'] }},
         "numberOfAttemptsToPingTheServer": {{ aoWasdiConfiguration['dockers']['numberOfAttemptsToPingTheServer'] }},
-        "millisBetweenStatusPolling": {{ aoWasdiConfiguration['dockers']['millisBetweenStatusPolling'] }},
         "numberOfPollStatusPollingCycleForLog": {{ aoWasdiConfiguration['dockers']['numberOfPollStatusPollingCycleForLog'] }},
         "pipInstallWasdiAddress": "{{ aoWasdiConfiguration['dockers']['pipInstallWasdiAddress'] }}",
-        "logDockerAPICallsPayload": {{ aoWasdiConfiguration['dockers']['logDockerAPICallsPayload'] | lower }},
-        "removeDockersAfterShellExec": {{ aoWasdiConfiguration['dockers']['removeDockersAfterShellExec'] | lower }},
+        "processorsInternalPort": {{ aoWasdiConfiguration['dockers']['processorsInternalPort'] }},
 {% if aoWasdiConfiguration['dockers']['registers'] | length == 0 %}
         "registers": [],
 {% else %}
@@ -507,19 +510,15 @@
 
         ],
 {% endif %}
+        "removeDockersAfterShellExec": {{ aoWasdiConfiguration['dockers']['removeDockersAfterShellExec'] | lower }},
 {% if aoWasdiConfiguration['dockers']['shellExecCommands'] | length == 0 %}
         "shellExecCommands": {}
 {% else %}
         "shellExecCommands": {
 {% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['shellExecCommands'] %}
             "{{ sCurrentDockerRegistry }}": {
-                "dockerImage": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['dockerImage'] }}",
-                "containerVersion": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['containerVersion'] }}",
-                "includeFirstCommand": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['includeFirstCommand'] | lower }},
-                "removePathFromFirstArg": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['removePathFromFirstArg'] | lower }},
-                "forceLocal": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['forceLocal'] | lower }},
 {% if aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] | length == 0 %}
-                "additionalMountPoints": []
+                "additionalMountPoints": [],
 {% else %}
                 "additionalMountPoints": [
 {% for sCurrentAdditionalMountPoint in aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] %}
@@ -527,8 +526,14 @@
 {% endif %}
 {% endfor %}
 
-                ]
+                ],
 {% endif %}
+                "containerVersion": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['containerVersion'] }}",
+                "dockerImage": "{{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['dockerImage'] }}",
+                "forceLocal": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['forceLocal'] | lower }},
+                "includeFirstCommand": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['includeFirstCommand'] | lower }},
+                "overrideDockerConfig": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['overrideDockerConfig'] | lower }},
+                "removePathFromFirstArg": {{ aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['removePathFromFirstArg'] | lower }}
             }{% if not loop.last %},
 {% endif %}
 {% endfor %}
@@ -578,6 +583,10 @@
         ]
 {% endif %}
     },
+    "systemUserName": "{{ aoWasdiConfiguration['systemUserName'] }}",
+    "systemUserId": "{{ aoWasdiConfiguration['systemUserId'] }}",
+    "systemGroupName": "{{ aoWasdiConfiguration['systemGroupName'] }}",
+    "systemGroupId": "{{ aoWasdiConfiguration['systemGroupId'] }}",
     "traefik": {
 {% if aoWasdiConfiguration['traefik']['firewallWhiteList'] | length == 0 %}
         "firewallWhiteList": []

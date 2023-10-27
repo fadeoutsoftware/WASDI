@@ -83,11 +83,11 @@ RUN apt-get update && \
         libjhdf5-jni && \
     mkdir --parents \
         {{ sWasdiDataConfigurationRootDirectoryPath }} \
-        {{ sWasdiComponentSchedulerRootDirectoryPath }} && \
+        {{ sWasdiSchedulerRootDirectoryPath }} && \
     chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
     chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiComponentSchedulerRootDirectoryOwner }}:{{ sWasdiComponentSchedulerRootDirectoryGroup }} {{ sWasdiComponentSchedulerRootDirectoryPath }} && \
-    chmod {{ sWasdiComponentSchedulerRootDirectoryMode }} {{ sWasdiComponentSchedulerRootDirectoryPath }} && \
+    chown {{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} {{ sWasdiSchedulerRootDirectoryPath }} && \
+    chmod {{ sWasdiSchedulerRootDirectoryMode }} {{ sWasdiSchedulerRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -97,18 +97,18 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Set the workdir
-WORKDIR {{ sWasdiComponentSchedulerRootDirectoryPath }}
+WORKDIR {{ sWasdiSchedulerRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiComponentSchedulerRootDirectoryOwner }}:{{ sWasdiComponentSchedulerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentSchedulerTargetFileName }} {{ sWasdiComponentSchedulerRootDirectoryPath }}/{{ sWasdiComponentSchedulerTargetFileName }}
+COPY --chown={{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiSchedulerTargetFileName }} {{ sWasdiSchedulerRootDirectoryPath }}/{{ sWasdiSchedulerTargetFileName }}
 
 
 # Start the container
 CMD [ \
     "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
     "-jar", \
-    "{{ sWasdiComponentSchedulerTargetFileName }}", \
+    "{{ sWasdiSchedulerTargetFileName }}", \
     "--config", \
     "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfigDocker.json" \
 ]

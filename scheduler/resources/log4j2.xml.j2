@@ -2,12 +2,12 @@
 <Configuration status="WARN">
     <Appenders>
 {% if bWasdiSyslogEnabled == true %}
-        <Syslog name="{{ sWasdiComponentSchedulerServiceName }}-syslog" appName="{{ sWasdiComponentSchedulerServiceName }}"
-            host="{{ sWasdiComponentSchedulerLogSyslogServerAddress }}" port="{{ sWasdiComponentSchedulerLogSyslogServerPort }}" protocol="{{ sWasdiComponentSchedulerLogSyslogProtocol }}"
+        <Syslog name="{{ sWasdiSchedulerServiceName }}-syslog" appName="{{ sWasdiSchedulerServiceName }}"
+            host="{{ sWasdiSchedulerLogSyslogServerAddress }}" port="{{ sWasdiSchedulerLogSyslogServerPort }}" protocol="{{ sWasdiSchedulerLogSyslogProtocol }}"
             connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
-            facility="{{ sWasdiComponentSchedulerLogSyslogFacility }}" format="RFC5424" />
+            facility="{{ sWasdiSchedulerLogSyslogFacility }}" format="RFC5424" />
 {% else %}
-        <RollingFile name="{{ sWasdiComponentSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiComponentSchedulerLogNativeFilePath }}" filePattern="{{ sWasdiComponentSchedulerLogNativeFilePath }}-%d{yyyy-MM-dd}">
+        <RollingFile name="{{ sWasdiSchedulerServiceName }}-native" append="true" fileName="{{ sWasdiSchedulerLogNativeFilePath }}" filePattern="{{ sWasdiSchedulerLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
@@ -20,9 +20,9 @@
     <Loggers>
         <Root level="debug">
 {% if bWasdiSyslogEnabled == true %}
-            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-syslog" />
+            <AppenderRef ref="{{ sWasdiSchedulerServiceName }}-syslog" />
 {% else %}
-            <AppenderRef ref="{{ sWasdiComponentSchedulerServiceName }}-native" />
+            <AppenderRef ref="{{ sWasdiSchedulerServiceName }}-native" />
 {% endif %}
         </Root>
     </Loggers>
