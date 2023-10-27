@@ -21,7 +21,7 @@ function showHelp() {
     echo "Usage: bash ${0} <directory> <file pattern> <number of instance to keep|default = 3>"
     echo
     echo "Example:"
-    echo "# bash ${0} {{ sWasdiComponentLauncherRootDirectoryPath }} {{ sWasdiComponentLauncherTargetFileName }}.?????????? 5"
+    echo "# bash ${0} {{ sWasdiLauncherRootDirectoryPath }} {{ sWasdiLauncherTargetFileName }}.?????????? 5"
 }
 
 sDirectory="${1}"
