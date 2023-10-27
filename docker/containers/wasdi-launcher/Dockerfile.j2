@@ -111,4 +111,4 @@ WORKDIR {{ sWasdiLauncherRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherTargetFileName }}
+COPY --chown={{ sWasdiLauncherRootDirectoryOwner }}:{{ sWasdiLauncherRootDirectoryGroup }} ./dataToCopy/{{ sWasdiLauncherBuildTargetFileName }} {{ sWasdiLauncherRootDirectoryPath }}/{{ sWasdiLauncherBuildTargetFileName }}
