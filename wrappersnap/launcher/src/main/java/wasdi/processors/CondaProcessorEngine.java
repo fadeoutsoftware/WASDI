@@ -30,8 +30,8 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 	}
 	
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
-		IPackageManager oPackageManager = new CondaPackageManagerImpl(sIp, iPort);
+	protected IPackageManager getPackageManager(String sUrl) {
+		IPackageManager oPackageManager = new CondaPackageManagerImpl(sUrl);
 
 		return oPackageManager;
 	}

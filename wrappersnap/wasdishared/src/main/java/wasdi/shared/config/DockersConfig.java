@@ -110,6 +110,16 @@ public class DockersConfig {
 	public boolean removeDockersAfterShellExec = true;
 	
 	/**
+	 * Docker Network mode. Note: can be overridden by the single shell Exec Items
+	 */
+	public String dockerNetworkMode ="net-wasdi";
+	
+	/**
+	 * Standard processors internal port
+	 */
+	public int processorsInternalPort = 5000;
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */

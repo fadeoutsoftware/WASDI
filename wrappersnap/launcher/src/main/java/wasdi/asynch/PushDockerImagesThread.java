@@ -42,7 +42,7 @@ public class PushDockerImagesThread extends Thread {
 				String sProcessorFolder = PathsConfig.getProcessorFolder(m_oProcessor);
 				
 				// Create the docker utils
-				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder, "");
+				DockerUtils oDockerUtils = new DockerUtils(m_oProcessor, sProcessorFolder);
 				
 				
 				// For each register: ordered by priority

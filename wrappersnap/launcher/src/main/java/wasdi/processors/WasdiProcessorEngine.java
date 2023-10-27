@@ -40,11 +40,6 @@ public abstract class WasdiProcessorEngine {
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
 	
 	/**
-	 * User to mount on Docker. If "" will not be added
-	 */
-	protected String m_sTomcatUser;
-	
-	/**
 	 * Processor Parameter of this operation
 	 */
 	ProcessorParameter m_oParameter;
@@ -121,7 +116,6 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public WasdiProcessorEngine() {
 		m_sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
-		m_sTomcatUser = WasdiConfig.Current.tomcatUser;
 	}
 			
 	/**
@@ -483,22 +477,6 @@ public abstract class WasdiProcessorEngine {
         }
         return true;
     }
-
-    /**
-     * Get the user to mount of the docker
-     * @return
-     */
-	public String getTomcatUser() {
-		return m_sTomcatUser;
-	}
-
-	/**
-	 * Set the user to mount of the docker
-	 * @param sTomcatUser
-	 */
-	public void setTomcatUser(String sTomcatUser) {
-		this.m_sTomcatUser = sTomcatUser;
-	}
 
 	/**
 	 * Flag to know if this application type needs to be ran after the deploy or not

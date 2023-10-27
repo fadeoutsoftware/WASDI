@@ -42,6 +42,7 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.docker.DockerUtils;
+import wasdi.shared.utils.docker.containersViewModels.ContainerInfo;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
@@ -194,7 +195,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             processWorkspaceLog("Start building Image");
 
             // Create Docker Util and deploy the docker
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
             m_sDockerImageName = oDockerUtils.build();
             
             if (Utils.isNullOrEmpty(m_sDockerImageName)) {
@@ -296,8 +297,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     	return run(oParameter, true);
     }
 
-
-
     /**
      * Run a Docker Processor
      * 
@@ -387,32 +386,20 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Create the Docker Utils Object
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
             
-            // Check if the container is started
-            boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
+            // Check if is started otherwise start it
+            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
             
-            if (!bIsContainerStarted) {
-            	WasdiLog.debugLog("DockerProcessorEngine.run: the container must be started");
-            	
-                // Try to start Again the docker
-                if (oDockerUtils.start() == false) {
-                	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
-                	return false;
-                }
-                
-                // Wait for it
-                waitForApplicationToStart(oParameter);                
-                
-            	WasdiLog.debugLog("DockerProcessorEngine.run: Processor just built and started, reconstruct the environment");
-            	reconstructEnvironment(oParameter, oProcessor.getPort());
+            // If we do not have a container name here, we are not in the position to continue
+            if (Utils.isNullOrEmpty(sContainerName)) {
+            	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
+            	return false;
             }
-
+            
             // Decode JSON
             String sEncodedJson = oParameter.getJson();
             String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-
-            WasdiLog.debugLog("DockerProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
 
             // Json sanity check
             if (Utils.isNullOrEmpty(sJson)) {
@@ -432,9 +419,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             WasdiLog.debugLog("DockerProcessorEngine.run: Decoded JSON Parameter " + sJsonCopy);
+                        
+            // Get the processor base url
+            String sBaseUrl = getProcessorUrl(oProcessor, sContainerName);
 
-            // Call localhost:port
-            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
+            // we need to run with the procid and other params
+            String sUrl = sBaseUrl + "/run/" + oParameter.getProcessObjId();
 
             sUrl += "?user=" + oParameter.getUserId();
             sUrl += "&sessionid=" + oParameter.getSessionID();
@@ -444,20 +434,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             // Create connection
             URL oProcessorUrl = new URL(sUrl);
-            
-			int iConnectionTimeOut = WasdiConfig.Current.connectionTimeout;
-			int iReadTimeOut = WasdiConfig.Current.readTimeout;
-			            
 
             WasdiLog.debugLog("DockerProcessorEngine.run: call open connection");
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
             oConnection.setRequestMethod("POST");
             oConnection.setRequestProperty("Content-Type", "application/json");
-            oConnection.setConnectTimeout(iConnectionTimeOut);
-            oConnection.setReadTimeout(iReadTimeOut);
+            oConnection.setConnectTimeout(WasdiConfig.Current.connectionTimeout);
+            oConnection.setReadTimeout(WasdiConfig.Current.readTimeout);
 
-            // Try to fetch the result from docker
+            // Try to fetch the result from the app
             OutputStream oOutputStream = oConnection.getOutputStream();
             oOutputStream.write(sJson.getBytes());
             oOutputStream.flush();
@@ -491,7 +477,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             String sStatus = oProcessWorkspace.getStatus();
 
             WasdiLog.debugLog("DockerProcessorEngine.run: process Status: " + sStatus);
-
             WasdiLog.debugLog("DockerProcessorEngine.run: process output: " + sJsonOutput);
 
             Map<String, String> oOutputJsonMap = null;
@@ -518,8 +503,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                     try {
                         dVersion = Double.parseDouble(sProcessorEngineVersion);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception oEx) {
+                        WasdiLog.errorLog("DockerProcessorEngine.run: error parsing processor version", oEx);
                     }
 
                     WasdiLog.debugLog("DockerProcessorEngine.run: processor engine version " + dVersion);
@@ -574,12 +559,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     }
 
     /**
-     * Deletes a docker image
+     * Deletes a Processor
      */
     public boolean delete(ProcessorParameter oParameter) {
-        // Get the docker Id or name from the param; we should save it in the build or run
-        // call docker rmi -f <containerId>
-
+    	
         if (oParameter == null) {
             WasdiLog.errorLog("DockerProcessorEngine.delete: oParameter is null");
             return false;
@@ -589,7 +572,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         ProcessWorkspace oProcessWorkspace = null;
 
         try {
-
         	
             oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
             oProcessWorkspace = m_oProcessWorkspace;
@@ -622,7 +604,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             processWorkspaceLog("Delete Processor Docker");
 
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
             // Set also the docker registry
             oDockerUtils.setDockerRegistry(m_sDockerRegistry);
             // Give the name of the processor to delete to be sure that it works also if oProcessor is already null
@@ -746,11 +728,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
             onAfterCopyTemplate(sProcessorFolder);
             
-            // Delete the run script: it will be recreated at the right moment
-            WasdiFileUtils.deleteFile(sProcessorFolder+"runwasdidocker.sh");
-
             // Create utils
-            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser, m_sDockerRegistry);
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sDockerRegistry);
 
             if (bDeleteOldImage) {
                 // Delete the image
@@ -820,9 +799,23 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
+            
+            // Create the docker utils
+            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+            // Get or start the container: we will reconstruct the env later
+            String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
+            
+            // If we do not have a container name here, we are not in the position to continue
+            if (Utils.isNullOrEmpty(sContainerName)) {
+            	WasdiLog.errorLog("DockerProcessorEngine.run: Impossible to start the application docker");
+            	return false;
+            }            
+            
+            // Get the processor url
+            String sBaseUrl = getProcessorUrl(oProcessor, sContainerName);
 
-            // Call localhost:port
-            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/--wasdiupdate";
+            // Call the update command
+            String sUrl = sBaseUrl + "/run/--wasdiupdate";
 
             // Connect to the docker
             URL oProcessorUrl = new URL(sUrl);
@@ -840,12 +833,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             
             BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
             String sOutputResult;
-            String sOutputCumulativeResult = "";
+            
             WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: Output from Server .... \n");
             while ((sOutputResult = oBufferedReader.readLine()) != null) {
             	WasdiLog.infoLog("DockerProcessorEngine.libraryUpdate: " + sOutputResult);
-
-                if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
             }
             oConnection.disconnect();
 
@@ -883,164 +874,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         }
     }
     
-    /**
-     * Get the specific instance of the Package Manager compatible with this instance
-     * @param sIp
-     * @param iPort
-     * @return
-     */
-    protected abstract IPackageManager getPackageManager(String sIp, int iPort);
-
-    /**
-     * Updates the processor environment
-     */
-	@Override
-	public boolean environmentUpdate(ProcessorParameter oParameter) {
-
-		if (oParameter == null) {
-			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: oParameter is null");
-			return false;
-		}
-
-		if (Utils.isNullOrEmpty(oParameter.getJson())) {
-			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: update command is null or empty");
-			return false;
-		}
-
-		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
-		ProcessWorkspace oProcessWorkspace = null;
-
-		try {
-			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			oProcessWorkspace = m_oProcessWorkspace;
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-
-			// First Check if processor exists
-			String sProcessorName = oParameter.getName();
-			String sProcessorId = oParameter.getProcessorID();
-
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-
-			// Check processor
-			if (oProcessor == null) {
-				WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: oProcessor is null [" + sProcessorId + "]");
-				return false;
-			}
-
-			WasdiLog.infoLog("DockerProcessorEngine.environmentUpdate: update env for " + sProcessorName);
-
-			String sJson = oParameter.getJson();
-			WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
-			JSONObject oJsonItem = new JSONObject(sJson);
-
-			Object oUpdateCommand = oJsonItem.get("updateCommand");
-
-			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
-				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
-			} else {
-				String sUpdateCommand = (String) oUpdateCommand;
-				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
-
-				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-				int iPort = oProcessor.getPort();
-
-				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
-				oPackageManager.operatePackageChange(sUpdateCommand);
-			}
-
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-
-			return true;
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate Exception", oEx);
-			try {
-
-				if (oProcessWorkspace != null) {
-					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
-						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
-					}
-
-					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
-				}
-			} catch (Exception e) {
-				WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate Exception", e);
-			}
-
-			return false;
-		}
-	}
-
-
-	/**
-	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
-	 * @param oParameter the processor parameter
-	 * @param iPort port of the processor server
-	 * @return
-	 */	
-	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
-		if (oParameter == null) {
-			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: oParameter is null");
-			return false;
-		}
-
-		String sProcessorName = oParameter.getName();
-		String sProcessorId = oParameter.getProcessorID();
-
-		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
-
-		// Set the processor path
-		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
-		File oProcessorFolder = new File(sProcessorFolder);
-
-		// Is the processor installed in this node?
-		if (!oProcessorFolder.exists()) {
-			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName + "] environment not updated in this node, return");
-			return false;
-		}
-		
-
-		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-		int iPort = oProcessor.getPort();
-
-        // Create the Docker Utils Object
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sTomcatUser, m_sDockerRegistry);
-        
-        // Check if the container is started
-        boolean bIsContainerStarted = oDockerUtils.isContainerStarted(sProcessorName, oProcessor.getVersion());
-        
-        if (!bIsContainerStarted) {
-        	WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: Container not started: starting it");
-        	oDockerUtils.start();
-        	waitForApplicationToStart(oParameter);
-        	this.reconstructEnvironment(oParameter, oProcessor.getPort());
-        }
-        
-		try {
-			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
-
-			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
-
-			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
-
-			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
-
-			if (!bResult) {
-				WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
-			}
-
-			return bResult;
-		} catch (Exception oEx) {
-			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: ", oEx);
-		}
-
-		return false;
-	}
-
-
 	/**
 	 * Waits some time to let application start
 	 * 
@@ -1208,12 +1041,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+            
+            // Get the processor url
+            String sBaseUrl = getProcessorUrl(oProcessor, oParameter.getContainerName());
 
-			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
-			int iPort = oProcessor.getPort();
-
-
-			String sUrl = "http://" + sIp + ":" + iPort + "/hello";
+			String sUrl = sBaseUrl + "/hello";
 			WasdiLog.debugLog("DockerProcessorEngine.isDockerServerUp: poll sUrl: " + sUrl);
 
 			Map<String, String> asHeaders = Collections.emptyMap();
@@ -1231,6 +1063,168 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		return false;
 	}
 
+
+    /**
+     * Get the specific instance of the Package Manager compatible with this instance
+     * @param sIp
+     * @param iPort
+     * @return
+     */
+    protected abstract IPackageManager getPackageManager(String sUrl);
+
+    /**
+     * Updates the processor environment
+     */
+	@Override
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
+
+		if (oParameter == null) {
+			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: oParameter is null");
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(oParameter.getJson())) {
+			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: update command is null or empty");
+			return false;
+		}
+
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;
+
+		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = m_oProcessWorkspace;
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+			// Check processor
+			if (oProcessor == null) {
+				WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate: oProcessor is null [" + sProcessorId + "]");
+				return false;
+			}
+
+			WasdiLog.infoLog("DockerProcessorEngine.environmentUpdate: update env for " + sProcessorName);
+
+			String sJson = oParameter.getJson();
+			WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
+			JSONObject oJsonItem = new JSONObject(sJson);
+
+			Object oUpdateCommand = oJsonItem.get("updateCommand");
+
+			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
+			} else {
+				String sUpdateCommand = (String) oUpdateCommand;
+				WasdiLog.debugLog("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
+				
+				DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+				String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter);
+				
+				String sUrl = getProcessorUrl(oProcessor, sContainerName);
+				
+				IPackageManager oPackageManager = getPackageManager(sUrl);
+				oPackageManager.operatePackageChange(sUpdateCommand);
+			}
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+
+			return true;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate Exception", oEx);
+			try {
+
+				if (oProcessWorkspace != null) {
+					// Check and set the operation end-date
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
+					}
+
+					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+				}
+			} catch (Exception e) {
+				WasdiLog.errorLog("DockerProcessorEngine.environmentUpdate Exception", e);
+			}
+
+			return false;
+		}
+	}
+
+	/**
+	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
+	 * @param oParameter the processor parameter
+	 * @param iPort port of the processor server
+	 * @return
+	 */	
+	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
+		if (oParameter == null) {
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: oParameter is null");
+			return false;
+		}
+
+		String sProcessorName = oParameter.getName();
+		String sProcessorId = oParameter.getProcessorID();
+
+		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+		// Set the processor path
+		String sProcessorFolder = PathsConfig.getProcessorFolder(sProcessorName);
+		File oProcessorFolder = new File(sProcessorFolder);
+
+		// Is the processor installed in this node?
+		if (!oProcessorFolder.exists()) {
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Processor [" + sProcessorName + "] environment not updated in this node, return");
+			return false;
+		}
+
+		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+		int iPort = oProcessor.getPort();
+
+        // Create the Docker Utils Object
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(sProcessorName), m_sDockerRegistry);
+        
+        String sContainerName = startContainerAndGetName(oDockerUtils, oProcessor, oParameter, false);
+        
+        // Try to start Again the docker
+        if (Utils.isNullOrEmpty(sContainerName)) {
+        	WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: Impossible to start the application docker");
+        	return false;
+        }
+        
+    	WasdiLog.debugLog("DockerProcessorEngine.refreshPackagesInfo: Processor started, reconstruct the environment");
+    	reconstructEnvironment(oParameter, oProcessor.getPort());        
+        
+		try {
+			String sUrl = getProcessorUrl(oProcessor, sContainerName);
+			
+			IPackageManager oPackageManager = getPackageManager(sUrl);
+
+			Map<String, Object> aoPackagesInfo = oPackageManager.getPackagesInfo();
+
+			String sFileFullPath = sProcessorFolder + "packagesInfo.json";
+
+			boolean bResult = WasdiFileUtils.writeMapAsJsonFile(aoPackagesInfo, sFileFullPath);
+
+			if (!bResult) {
+				WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: the packagesInfo.json file was not created.");
+			}
+
+			return bResult;
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.refreshPackagesInfo: ", oEx);
+		}
+
+		return false;
+	}
+
+	
 	@Override
 	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
 		
@@ -1262,12 +1256,17 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 				WasdiLog.debugLog("DockerProcessorEngine.reconstructEnvironment: got " + asActions.size() + " actions");
 				
 				// Yes! Lets re-do all
-				
-				// Take the ip
-				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+				ProcessorRepository oProcessorRepository = new ProcessorRepository();
+				Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
+	            // Create the Docker Utils Object
+	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
+	            
+	            // Check if is started otherwise start it
+	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
+	            String sProcessorUrl = getProcessorUrl(oProcessor, sContainerName);
 				
 				// Create package manager info
-				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+				IPackageManager oPackageManager = getPackageManager(sProcessorUrl);
 				
 				// For each command
 				for (String sUpdateCommand : asActions) {
@@ -1309,7 +1308,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			String sProcessorFolder = PathsConfig.getProcessorFolder(oProcessor.getName());
 			
 			// Create the docker utils
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sTomcatUser);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder);
 			
 			// Here we keep track of how many registers we tried
 			int iAvailableRegisters=0;
@@ -1391,5 +1390,125 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		return "";
 	}
 	
+    /**
+     * Get the url of a processor.
+     * It returns a pattern like:
+     * 
+     * if we are NOT Dockerized
+     * http://127.0.0.1:PROCESSOR_PORT
+     * 
+     * if we are Dockerized
+     * http://CONTAINER_NAME:STD_PORT
+     * 
+     * @param oProcessor
+     * @param sContainerName
+     * @return
+     */
+    public String getProcessorUrl(Processor oProcessor, String sContainerName) {
+    	
+    	String sUrl = "";
+    	
+    	try {
+            String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+            int iPort = oProcessor.getPort();
+            
+            if (WasdiConfig.Current.shellExecLocally == false) {
+            	if (!Utils.isNullOrEmpty(sContainerName)) {
+            		sIp = sContainerName;
+            		iPort = WasdiConfig.Current.dockers.processorsInternalPort;
+            	}
+            	else {
+            		WasdiLog.warnLog("DockerProcessorEngine.getProcessorUrl: We are dockerized but we do not have a container name, not good..");
+            	}
+            }
+            
+            sUrl = "http://" + sIp + ":" + iPort;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerProcessorEngine.getProcessorUrl: error..", oEx);
+		}
+    	
+    	return sUrl;
+    }	
 
+    
+    /**
+     * Check if a container is started. If not it starts it.
+     * In both cases returns the name of the running container or empyt string in case of problems
+     * By default reconstruct the environment if has to be started
+     * 
+     * @param oDockerUtils Docker Utils
+     * @param oProcessor Processor 
+     * @param oParameter Processor Parameter
+     * @return Name of the started container
+     */
+    public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter) {
+    	return startContainerAndGetName(oDockerUtils, oProcessor, oParameter, true);
+    }
+    
+    /**
+     * Check if a container is started. If not it starts it.
+     * In both cases returns the name of the running container or empyt string in case of problems
+     * @param oDockerUtils Docker Utils
+     * @param oProcessor Processor 
+     * @param oParameter Processor Parameter
+     * @param bReconstructEnvironment True to reconstruct the environment after the start
+     * @return Name of the started container
+     */
+    public String startContainerAndGetName(DockerUtils oDockerUtils, Processor oProcessor, ProcessorParameter oParameter, boolean bReconstructEnvironment) {
+    	try {
+            // Check if the container is started
+            boolean bIsContainerStarted = oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion());
+            
+            String sContainerName = "";
+            
+            if (!bIsContainerStarted) {
+            	WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: the container must be started");
+            	
+            	sContainerName = oDockerUtils.start();
+            	
+                // Try to start Again the docker
+                if (Utils.isNullOrEmpty(sContainerName)) {
+                	WasdiLog.errorLog("DockerProcessorEngine.startContainerAndGetName: Impossible to start the application docker");
+                	return "";
+                }
+                
+                oParameter.setContainerName(sContainerName);
+                
+                WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: waiting for the container to be up");
+                
+                // Wait for it
+                waitForApplicationToStart(oParameter);                
+                
+                if (bReconstructEnvironment) {
+                	WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: Processor just built and started, reconstruct the environment");
+                	reconstructEnvironment(oParameter, oProcessor.getPort());                	
+                }
+            }
+            else {
+            	
+            	WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: container already started, get the name");
+            	
+            	// We need to get the container name
+            	ContainerInfo oContainerInfo =  oDockerUtils.getContainerInfoByImageName(oProcessor.getName(), oProcessor.getVersion());
+            	
+            	if (oContainerInfo != null) {
+            		if (oContainerInfo.Names != null) {
+            			if (oContainerInfo.Names.size()>0) {
+            				sContainerName = oContainerInfo.Names.get(0);
+            				if (sContainerName.startsWith("/")) sContainerName.substring(1);
+            			}
+            		}
+            	}            	
+            } 
+            
+            WasdiLog.debugLog("DockerProcessorEngine.startContainerAndGetName: returning " + sContainerName);
+            
+            return sContainerName;
+    	}
+    	catch (Exception oEx) {
+    		WasdiLog.errorLog("DockerProcessorEngine.startContainerAndGetName: error", oEx);
+		}
+    	return "";
+    }
 }

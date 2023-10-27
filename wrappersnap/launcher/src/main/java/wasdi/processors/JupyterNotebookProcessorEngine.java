@@ -34,7 +34,7 @@ public class JupyterNotebookProcessorEngine extends DockerProcessorEngine {
 	}
 	
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
+	protected IPackageManager getPackageManager(String sUrl) {
 		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
 	}
 

@@ -58,45 +58,76 @@ public class DockerUtils {
     /**
      * User that run the docker
      */
-    protected String m_sWasdiSystemUser = "appwasdi";    
+    protected String m_sWasdiSystemUserName = "appwasdi";
+    
+    /**
+     * User that run the docker
+     */
+    protected String m_sWasdiSystemGroupName = "appwasdi";
+    
+    /**
+     * User that run the docker
+     */
+    protected int m_iWasdiSystemUserId = 2042;
+    
+    /**
+     * User that run the docker
+     */
+    protected int m_iWasdiSystemGroupId = 2042;
 
+    /**
+     * Network mode
+     */
+    protected String m_sDockerNetworkMode = "net-wasdi";
     /**
      * Docker registry in use
      */
     protected String m_sDockerRegistry = "";
     
+    /**
+     * Basic Constructor. Set all the members to default value.
+     */
     public DockerUtils() {
     	m_oProcessor = null;
     	m_sProcessorFolder = "";
     	m_sDockerRegistry = "";
-    	m_sWasdiSystemUser = WasdiConfig.Current.tomcatUser;
+    	m_sWasdiSystemUserName = WasdiConfig.Current.systemUserName;
+    	m_sWasdiSystemGroupName = WasdiConfig.Current.systemGroupName;
+    	m_iWasdiSystemUserId = WasdiConfig.Current.systemUserId;
+    	m_iWasdiSystemGroupId = WasdiConfig.Current.systemGroupId;
+    	if (WasdiConfig.Current != null) {
+    		m_sDockerNetworkMode = WasdiConfig.Current.dockers.dockerNetworkMode;
+    	}
     }
     
-    /**
-     * Create a new instance
-     *
-     * @param oProcessor       Processor
-     * @param sProcessorFolder Processor Folder
-     * @param sWorkingRootPath WASDI Working path
-     * @param sWasdiSystemUser      User
-     */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWasdiSystemUser) {
-    	this(oProcessor, sProcessorFolder, sWasdiSystemUser, "");
-    }
     
     /**
      * Create a new instance
      * 
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
-     * @param sWorkingRootPath WASDI Working path
-     * @param sTomcatUser      User
-     * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
      */
-    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sTomcatUser, String sDockerRegistry) {
+    public DockerUtils(Processor oProcessor, String sProcessorFolder) {
+    	// Initialize the members
+    	this();
+    	// and override with the ones provided
         m_oProcessor = oProcessor;
         m_sProcessorFolder = sProcessorFolder; 
-        m_sWasdiSystemUser = sTomcatUser;
+    }    
+    
+    /**
+     * Create a new instance
+     * 
+     * @param oProcessor       Processor
+     * @param sProcessorFolder Processor Folder
+     * @param sDockerRegistry  Docker Registry to use. By default is "", means local registry
+     */
+    public DockerUtils(Processor oProcessor, String sProcessorFolder, String sDockerRegistry) {
+    	// Initialize the members
+    	this();
+    	// and override with the ones provided
+        m_oProcessor = oProcessor;
+        m_sProcessorFolder = sProcessorFolder;
         m_sDockerRegistry = sDockerRegistry;
     }    
     
@@ -136,21 +167,85 @@ public class DockerUtils {
 	 * Get the name of user to pass to docker. Empty string to avoid.
 	 * @return
 	 */
-	public String getUser() {
-		return m_sWasdiSystemUser;
+	public String getWasdiSystemUserName() {
+		return m_sWasdiSystemUserName;
 	}
 	
 	/**
 	 * Set the name of user to pass to docker. Empty string to avoid.
-	 * @param sUser
+	 * @param sWasdiSystemUserName
 	 */
-	public void setUser(String sUser) {
-		this.m_sWasdiSystemUser = sUser;
+	public void setWasdiSystemUserName(String sWasdiSystemUserName) {
+		this.m_sWasdiSystemUserName = sWasdiSystemUserName;
 	}    
 
 	/**
+	 * get the wasdi system group name
+	 * @return
+	 */
+	public String getWasdiSystemGroupName() {
+		return m_sWasdiSystemGroupName;
+	}
+
+	/**
+	 * set the wasdi system group name
+	 * @param sWasdiSystemGroupName
+	 */
+	public void setWasdiSystemGroupName(String sWasdiSystemGroupName) {
+		this.m_sWasdiSystemGroupName = sWasdiSystemGroupName;
+	}
+
+	/**
+	 * Get the wasdi system user id
+	 * @return
+	 */
+	public int getWasdiSystemUserId() {
+		return m_iWasdiSystemUserId;
+	}
+	
+	/**
+	 * Set the wasdi system user id
+	 * @param iWasdiSystemUserId
+	 */
+	public void setWasdiSystemUserId(int iWasdiSystemUserId) {
+		this.m_iWasdiSystemUserId = iWasdiSystemUserId;
+	}
+
+	/**
+	 * Get the wasdi system group id
+	 * @return
+	 */
+	public int getWasdiSystemGroupId() {
+		return m_iWasdiSystemGroupId;
+	}
+
+	/**
+	 * Get the wasdi system group id
+	 * @param iWasdiSystemGroupId
+	 */
+	public void setWasdiSystemGroupId(int iWasdiSystemGroupId) {
+		this.m_iWasdiSystemGroupId = iWasdiSystemGroupId;
+	}    
+	
+	/**
+	 * Get the network mode
+	 * @return
+	 */
+	public String getDockerNetworkMode() {
+		return m_sDockerNetworkMode;
+	}
+
+	/**
+	 * Set the network node
+	 * @param sDockerNetworkMode
+	 */
+	public void setDockerNetworkMode(String sDockerNetworkMode) {
+		this.m_sDockerNetworkMode = sDockerNetworkMode;
+	} 
+	
+	/**
 	 * Address of the Docker Register in use. 
-	 * @return id of th
+	 * @return id of the registry
 	 */
 	public String getDockerRegistry() {
 		return m_sDockerRegistry;
@@ -211,7 +306,7 @@ public class DockerUtils {
             }
     		            	
         	// If we have user and or pip params, add the buildargs parameter
-        	if (!Utils.isNullOrEmpty(m_sWasdiSystemUser) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
+        	if (!Utils.isNullOrEmpty(m_sWasdiSystemUserName) || !Utils.isNullOrEmpty(WasdiConfig.Current.dockers.pipInstallWasdiAddress)) {
         		
         		WasdiLog.debugLog("DockerUtils.build: adding build args to url");
         		
@@ -219,8 +314,8 @@ public class DockerUtils {
         		
         		boolean bAdded = false;
         		
-                if (!Utils.isNullOrEmpty(m_sWasdiSystemUser)) {
-                	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUser+"\",\"USR_ID\":\"" + WasdiConfig.Current.systemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemUser+"\",\"GRP_ID\":\"" + WasdiConfig.Current.systemUserId+"\"";                    	
+                if (!Utils.isNullOrEmpty(m_sWasdiSystemUserName)) {
+                	sBuildArgs += "\"USR_NAME\":\""+m_sWasdiSystemUserName+"\",\"USR_ID\":\"" + m_iWasdiSystemUserId + "\",\"GRP_NAME\":\""+m_sWasdiSystemGroupName+"\",\"GRP_ID\":\"" + m_iWasdiSystemGroupId +"\"";                    	
                 	bAdded = true;
                 }
                 
@@ -284,13 +379,11 @@ public class DockerUtils {
 
         return sImageName;
     }
-    
-    
 
     /**
      * Run the docker
      */
-    public boolean start() {
+    public String start() {
         return start("");
     }
     
@@ -300,7 +393,7 @@ public class DockerUtils {
      * @param sMountWorkspaceFolder workspace folder to mount
      * 
      */
-    public boolean start(String sMountWorkspaceFolder) {
+    public String start(String sMountWorkspaceFolder) {
         return start(sMountWorkspaceFolder, m_oProcessor.getPort());
     }    
     
@@ -310,14 +403,14 @@ public class DockerUtils {
      * @param sMountWorkspaceFolder workspace folder to mount
      * @param iProcessorPort Port to use
      */
-    public boolean start(String sMountWorkspaceFolder, int iProcessorPort) {
+    public String start(String sMountWorkspaceFolder, int iProcessorPort) {
 
         try {
         	
         	if (Utils.isNullOrEmpty(sMountWorkspaceFolder)) {
         		sMountWorkspaceFolder = WasdiConfig.Current.paths.downloadRootPath;
         		if (!sMountWorkspaceFolder.endsWith(File.separator)) sMountWorkspaceFolder += File.separator;
-        	}        	
+        	}
         	
             // Get the Image name
             String sImageName = "wasdi/" + m_oProcessor.getName() + ":" + m_oProcessor.getVersion();
@@ -362,6 +455,8 @@ public class DockerUtils {
             // Search first of all if the container is already here
         	ContainerInfo oContainerInfo = getContainerInfoByImageName(m_oProcessor.getName(), m_oProcessor.getVersion());
         	
+        	boolean bNameIsDefined = true;
+        	
         	if (oContainerInfo == null) {
         		
         		// No we do not have it
@@ -377,7 +472,7 @@ public class DockerUtils {
         			if (!bPullResult) {
         				// Impossible to pull, is a big problem
         				WasdiLog.errorLog("DockerUtils.start: Error pulling the image, we cannot proceed");
-        				return false;
+        				return "";
         			}
         		}
         		
@@ -396,12 +491,14 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
             		// Set the user
-            		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
+            		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;            		
-            		
+            		// Mount the data folder
             		oContainerCreateParams.HostConfig.Binds.add(sMountWorkspaceFolder+":"+"/data/wasdi");
+            		// Set the network mode
+            		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
             		// Add the volume with the Processor Code
             		MountVolumeParam oProcessorPath = new MountVolumeParam();
@@ -416,8 +513,12 @@ public class DockerUtils {
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
             		
             		// Expose the TCP Port
-            		oContainerCreateParams.ExposedPorts.add("5000/tcp");
-            		oContainerCreateParams.HostConfig.PortBindings.put("5000/tcp", ""+iProcessorPort);
+            		oContainerCreateParams.ExposedPorts.add("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp");
+            		
+            		// If we are dockerized, no need to add the ip and port
+            		if (WasdiConfig.Current.shellExecLocally) {
+            			oContainerCreateParams.HostConfig.PortBindings.put("" + WasdiConfig.Current.dockers.processorsInternalPort + "/tcp", ""+iProcessorPort);
+            		}
             		
                     // Extra hosts mapping, useful for some instances when the server host can't be resolved
                     // The symptoms of such problem is that the POST call from the Docker container timeouts
@@ -431,14 +532,13 @@ public class DockerUtils {
                         	}
                     	}
                     }
-            		
                     
                     // Convert the payload in JSON (NOTE: is hand-made !!)
             		String sContainerCreateParams = oContainerCreateParams.toJson();
             		
             		if (Utils.isNullOrEmpty(sContainerCreateParams)) {
             			WasdiLog.errorLog("DockerUtils.start: impossible to get the payload to create the container. We cannot proceed :(");
-            			return false;
+            			return "";
             		}
             		
             		if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
@@ -457,7 +557,7 @@ public class DockerUtils {
             		if (oResponse.getResponseCode()<200||oResponse.getResponseCode()>299) {
             			// Here is not good
             			WasdiLog.errorLog("DockerUtils.start: impossible to create the container. We cannot proceed :(. ERROR = " + oResponse.getResponseBody());
-            			return false;
+            			return "";
             		}
             		
             		WasdiLog.debugLog("DockerUtils.start: Container created");
@@ -465,16 +565,20 @@ public class DockerUtils {
             	}
             	catch (Exception oEx) {
             		WasdiLog.errorLog("DockerUtils.start exception creating the container: " + oEx.toString());
-                    return false;
+                    return "";
                 }        		
         	}
         	else {        		
         		// If the container exists, we can take the ID
         		WasdiLog.debugLog("DockerUtils.start: Container already found, we will use the id");
+        		
+        		// Now we use the id to be sure, but we need to return the name after.
         		sContainerName = oContainerInfo.Id;
+        		// So here we remember this
+        		bNameIsDefined = false;
         	}
             
-            WasdiLog.debugLog("DockerUtils.start: Starting Container Named" + sContainerName + " created");
+            WasdiLog.debugLog("DockerUtils.start: Starting Container Named " + sContainerName + " created");
             
             // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
@@ -484,25 +588,37 @@ public class DockerUtils {
     		// Make the call
     		HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, "");
     		
+    		// Did we used the real name or the id?
+    		if (!bNameIsDefined) {
+    			// The id: check if we can saefly find the name
+    			if (oContainerInfo!=null) {
+    				if (oContainerInfo.Names != null) {
+    					if (oContainerInfo.Names.size()>0) {
+    						sContainerName = oContainerInfo.Names.get(0);
+    					}
+    				}
+    			}
+    		}
+    		
     		if (oResponse.getResponseCode() == 204) {
     			// Started Well
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " started");
-    			return true;
+    			return sContainerName;
     		}
     		else if (oResponse.getResponseCode() == 304) {
     			// ALready Started (but so why we did not detected this before?!?)
     			WasdiLog.debugLog("DockerUtils.start: Container " + sContainerName + " wasd already started");
-    			return true;
+    			return sContainerName;
     		}
     		else {
     			// Error!
     			WasdiLog.errorLog("DockerUtils.start: Impossible to start Container " + sContainerName);
-    			return false;
+    			return "";
     		}
             
         } catch (Exception oEx) {
         	WasdiLog.errorLog("DockerUtils.start error creating the container: " + oEx.toString());
-            return false;
+            return "";
         }
     }    
 
@@ -1531,13 +1647,16 @@ public class DockerUtils {
             		CreateParams oContainerCreateParams = new CreateParams();
             		
             		// Set the user
-            		oContainerCreateParams.User = m_sWasdiSystemUser+":"+m_sWasdiSystemUser;
+            		oContainerCreateParams.User = m_sWasdiSystemUserName+":"+m_sWasdiSystemGroupName;
             		
             		// Set the image
             		oContainerCreateParams.Image = sImageName;            		
             		
             		// Mount the /data/wasdi/ folder
             		oContainerCreateParams.HostConfig.Binds.add(PathsConfig.getWasdiBasePath()+":"+"/data/wasdi");
+            		
+            		// Set the network mode
+            		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
             		if (asAdditionalMountPoints!=null) {
             			for (String sMountPoint : asAdditionalMountPoints) {
@@ -1677,6 +1796,6 @@ public class DockerUtils {
             WasdiLog.errorLog("DockerUtils.getContainerLogsByContainerName: exception converting API result " + oEx);
             return "";
         }    	
-    }    
-    
+    }
+
 }

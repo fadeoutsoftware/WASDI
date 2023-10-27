@@ -27,17 +27,23 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 	private String m_sTargetIp;
 	private int m_iTargetPort;
+	private String m_sBaseUrl = "";
 
 	public PipPackageManagerImpl(String sTargetIp, int iTargetPort) {
 		m_sTargetIp = sTargetIp;
 		m_iTargetPort = iTargetPort;
+		m_sBaseUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort;
+	}
+	
+	public PipPackageManagerImpl(String sBaseUrl) {
+		m_sBaseUrl = sBaseUrl;
 	}
 
 	@Override
 	public List<PackageViewModel> listPackages(String sFlag) {
 		List<PackageViewModel> aoPackages = new ArrayList<>();
 
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/listPackages/";
+		String sUrl = m_sBaseUrl + "/packageManager/listPackages/";
 
 		if (!Utils.isNullOrEmpty(sFlag)) {
 			sUrl += sFlag + "/";
@@ -83,7 +89,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 
 	@Override
 	public PackageManagerViewModel getManagerVersion() {
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/managerVersion/";
+		String sUrl = m_sBaseUrl + "/packageManager/managerVersion/";
 
 		WasdiLog.debugLog("PipPackageManagerImpl.getManagerVersion | sUrl:" + sUrl);
 
@@ -134,7 +140,7 @@ public class PipPackageManagerImpl implements IPackageManager {
 	@Override
 	public boolean operatePackageChange(String sUpdateCommand) {
 		// Call localhost:port
-		String sUrl = "http://" + m_sTargetIp + ":" + m_iTargetPort + "/packageManager/" + sUpdateCommand;
+		String sUrl = m_sBaseUrl + "/packageManager/" + sUpdateCommand;
 		WasdiLog.debugLog("PipPackageManagerImpl.operatePackageChange: sUrl: " + sUrl);
 
 		Map<String, String> asHeaders = Collections.emptyMap();

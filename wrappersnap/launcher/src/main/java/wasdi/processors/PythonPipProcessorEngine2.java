@@ -143,7 +143,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		WasdiFileUtils.deleteFile(sProcFolder+"runwasdidocker.sh");
 
 		// Create utils
-        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
+        DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
         
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
         	WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: There is the previous version running, stop it");
@@ -213,7 +213,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 		
-		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath, m_sTomcatUser);
+		DockerUtils oDockerUtils = new DockerUtils(oProcessor, m_sDockerTemplatePath);
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
@@ -248,7 +248,7 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
 			
-			DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sTomcatUser, m_sDockerRegistry);
+			DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
 			
 	        WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: wait to let docker start");
 

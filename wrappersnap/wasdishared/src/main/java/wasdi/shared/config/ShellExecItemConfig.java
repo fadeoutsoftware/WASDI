@@ -47,4 +47,36 @@ public class ShellExecItemConfig {
 	 * List of strings that are additional moung points for this specific docker
 	 */
 	public ArrayList<String> additionalMountPoints = new ArrayList<>();
+	
+	/**
+	 * Flag to enable the config of system/docker Config (User and Group Name/Id, network..) using the specific values
+	 * set for this docker 
+	 */
+	public boolean overrideDockerConfig = false;
+	
+	/**
+	 * System name of the wasdi user
+	 */
+	public String systemUserName = "appwasdi";
+	
+	/**
+	 * Id of the system user
+	 */
+	public Integer systemUserId = 2042;
+	
+	/**
+	 * System name of the wasdi group
+	 */
+	public String systemGroupName = "appwasdi";
+	
+	/**
+	 * Id of the system group
+	 */
+	public Integer systemGroupId = 2042;
+	
+	/**
+	 * Docker network mode
+	 */
+	public String dockerNetworkMode = "net-wasdi";
+		
 }

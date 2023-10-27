@@ -75,7 +75,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -641,7 +641,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -698,7 +698,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		WasdiLog.debugLog("EoepcaProcessorEngine.redeploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -790,7 +790,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * Get the related package manager
 	 */
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
+	protected IPackageManager getPackageManager(String sUrl) {
 		return null;
 	}
 
