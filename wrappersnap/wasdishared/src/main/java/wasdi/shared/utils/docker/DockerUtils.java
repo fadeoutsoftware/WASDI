@@ -680,13 +680,21 @@ public class DockerUtils {
                 	WasdiLog.errorLog("DockerUtils.delete: Impossible to remove the container (maybe it was not present!!) for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                 }
                 
-                WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion);
+                WasdiLog.debugLog("DockerUtils.delete: Removing image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sDockerName);
                 
                 boolean bImageRemoved = removeImage(sDockerName, true);
                 
                 if (!bImageRemoved) {
                 	WasdiLog.errorLog("DockerUtils.delete: error removing the image for " + sProcessorName + " Version: " +  sVersion  + " Found Id: " + sId);
                 }
+                
+                if (!sBaseDockerName.equals(sDockerName)) {
+                    WasdiLog.debugLog("DockerUtils.delete: Removing also local image for " + sProcessorName + " version "  + sVersion + " Docker Image: " + sBaseDockerName);
+                    bImageRemoved = removeImage(sBaseDockerName, true);
+                    if (!bImageRemoved) {
+                    	WasdiLog.warnLog("DockerUtils.delete: error removing the local image for " + sProcessorName + " Version: " +  sVersion  + " Docker Image: " + sBaseDockerName);
+                    }                    
+                }                
                 
                 if (WasdiConfig.Current.isMainNode()) {            	
                     if (!Utils.isNullOrEmpty(m_sDockerRegistry)) {
