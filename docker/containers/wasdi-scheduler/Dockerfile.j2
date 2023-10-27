@@ -101,14 +101,14 @@ WORKDIR {{ sWasdiSchedulerRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiSchedulerTargetFileName }} {{ sWasdiSchedulerRootDirectoryPath }}/{{ sWasdiSchedulerTargetFileName }}
+COPY --chown={{ sWasdiSchedulerRootDirectoryOwner }}:{{ sWasdiSchedulerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiSchedulerBuildTargetFileName }} {{ sWasdiSchedulerRootDirectoryPath }}/{{ sWasdiSchedulerBuildTargetFileName }}
 
 
 # Start the container
 CMD [ \
     "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
     "-jar", \
-    "{{ sWasdiSchedulerTargetFileName }}", \
+    "{{ sWasdiSchedulerBuildTargetFileName }}", \
     "--config", \
     "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfigDocker.json" \
 ]
