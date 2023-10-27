@@ -478,8 +478,6 @@
 
         ],
 {% endif %}
-
-
         "internalDockerAPIAddress": "{{ aoWasdiConfiguration['dockers']['internalDockerAPIAddress'] }}",
         "internalDockersBaseAddress": "{{ aoWasdiConfiguration['dockers']['internalDockersBaseAddress'] }}",
         "logDockerAPICallsPayload": {{ aoWasdiConfiguration['dockers']['logDockerAPICallsPayload'] | lower }},
@@ -515,7 +513,7 @@
         "shellExecCommands": {}
 {% else %}
         "shellExecCommands": {
-{% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['shellExecCommands'] %}
+{% for sCurrentDockerRegistry in aoWasdiConfiguration['dockers']['shellExecCommands'] | sort %}
             "{{ sCurrentDockerRegistry }}": {
 {% if aoWasdiConfiguration['dockers']['shellExecCommands'][sCurrentDockerRegistry]['additionalMountPoints'] | length == 0 %}
                 "additionalMountPoints": [],
