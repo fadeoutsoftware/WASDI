@@ -10,6 +10,7 @@ import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.Comment;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CommentRepository extends MongoRepository {
 
@@ -26,7 +27,7 @@ public class CommentRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, Comment.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getComments: error", oEx);
         }
 
         return aoReturnList;
@@ -47,7 +48,7 @@ public class CommentRepository extends MongoRepository {
             	return s_oMapper.readValue(sJSON, Comment.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getComment: error", oEx);
         }
 
         return  null;
@@ -99,7 +100,7 @@ public class CommentRepository extends MongoRepository {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
             fillList(aoReturnList, oWSDocuments, Comment.class);
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.isTheOwnerOfTheComment: error", oEx);
         }
 
         if (aoReturnList.size() > 0) {

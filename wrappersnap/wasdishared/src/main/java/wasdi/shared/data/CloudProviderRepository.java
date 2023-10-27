@@ -8,6 +8,7 @@ import org.bson.Document;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.CloudProvider;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class CloudProviderRepository extends MongoRepository {
 	
@@ -28,7 +29,7 @@ public class CloudProviderRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, CloudProvider.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CloudProviderRepository.getCloudProviderByCode : error", oEx);
         }
 
         return aoReturnList;
@@ -49,7 +50,7 @@ public class CloudProviderRepository extends MongoRepository {
             	return s_oMapper.readValue(sJSON, CloudProvider.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CloudProviderRepository.getCloudProviderByCode : error", oEx);
         }
 
         return  null;
@@ -70,7 +71,7 @@ public class CloudProviderRepository extends MongoRepository {
             	return s_oMapper.readValue(sJSON, CloudProvider.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CloudProviderRepository.getCloudProviderByCode : error", oEx);
         }
 
         return  null;

@@ -36,11 +36,17 @@ public class OpenEOJobRepository extends MongoRepository  {
 	 */
     public int deleteOpenEOJob(String sJobId) {
     	if (Utils.isNullOrEmpty(sJobId)) return 0;
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("jobId", sJobId);
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("jobId", sJobId);
-
-        return delete(oCriteria);
+            return delete(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJob: error ", oEx);
+        	return -1;
+        }
     }
     
     /**
@@ -50,11 +56,17 @@ public class OpenEOJobRepository extends MongoRepository  {
      */
     public int deleteOpenEOJobsByUser(String sUserId) {
     	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("userId", sUserId);
-
-        return deleteMany(oCriteria);
+            return deleteMany(oCriteria);
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJobsByUser: error ", oEx);
+        	return -1;
+        }
     }
     
     /**
@@ -64,11 +76,17 @@ public class OpenEOJobRepository extends MongoRepository  {
      */
     public int deleteOpenEOJobsByWorkspace(String sWorkspaceId) {
     	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("workspaceId", sWorkspaceId);
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("workspaceId", sWorkspaceId);
-
-        return deleteMany(oCriteria);
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OpenEOJobRepository.deleteOpenEOJobsByWorkspace: error ", oEx);
+        	return -1;
+        }
     }
     
     /**
@@ -77,10 +95,16 @@ public class OpenEOJobRepository extends MongoRepository  {
      * @return true if updated, false if not
      */
     public boolean updateOpenEOJob(OpenEOJob oOpenEOJob) {
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("jobId", oOpenEOJob.getJobId());
-
-        return  update(oCriteria, oOpenEOJob, m_sThisCollection);
+    	
+    	try {
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("jobId", oOpenEOJob.getJobId());
+    		return  update(oCriteria, oOpenEOJob, m_sThisCollection);	
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OpenEOJobRepository.updateOpenEOJob: error ", oEx);
+        	return false;
+        }
     }
     
     /**
@@ -118,7 +142,8 @@ public class OpenEOJobRepository extends MongoRepository  {
             
             fillList(aoReturnList, oWSDocuments, OpenEOJob.class);
             
-        } catch (Exception oEx) {
+        } 
+        catch (Exception oEx) {
         	WasdiLog.errorLog("OpenEOJobRepository.getOpenEOJobsByUser: error ", oEx);
         }
 

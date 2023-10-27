@@ -460,13 +460,17 @@ public class ProcessScheduler {
 				}
 				
 				// Get the PID
-				String sPid = "" + oWaitingReadyPws.getPid();
+				String sPidOrContainerId = "" + oWaitingReadyPws.getPid();
+				
+				if (!WasdiConfig.Current.shellExecLocally) {
+					sPidOrContainerId = oWaitingReadyPws.getContainerId();
+				}				
 				
 				// Check if it is alive
-				if (!Utils.isNullOrEmpty(sPid)) {
-					if (!RunTimeUtils.isProcessStillAllive(sPid)) {
+				if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+					if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 						// PID does not exists: recheck and remove
-						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
+						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", is WAITING or READY but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
