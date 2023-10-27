@@ -35,6 +35,7 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorJRC extends QueryExecutor {
 	
+	// TODO: delete this with the new shape file
 	protected final static String s_sESRI54009 = "ESRI:54009";
 	protected final static String s_sEPSG4326 = "EPSG:4326";
 	private String m_sShapeMaskPath;
@@ -74,6 +75,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 			return iCount;
 		}
 		
+		// TODO: remove this call to the translate method, with the new shape file
 		// convert the coordinate system before accessing the shape file 
 		Double oW = oQueryVM.west != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
 		Double oE = oQueryVM.east != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
@@ -108,6 +110,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 			return aoResults;
 		}
 		
+		// TODO: remove this call to the translate method, with the new shape file
 		// convert the coordinate system before accessing the shape file 
 		Double oW = oQueryVM.west != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
 		Double oE = oQueryVM.east != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
@@ -131,9 +134,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 	private Map<String, String> getTilesInArea(Double oWest, Double oNorth, Double oEast, Double oSouth, String sProductName) {
 		
 		Map<String, String> aooTiles = new LinkedHashMap <String, String>(); // we choose an implementation that maintains the insertion order (useful for paginated queries)
-		
-//		String sShapeFileMask = "C:/Users/valentina.leone/Desktop/WORK/GHS/GHSL_data_54009_shapefile/GHSL2_0_MWD_L1_tile_schema_land.shp"; // TODO: questo parametro dovrà essere letto da qualche parte
-		
+				
 		synchronized (m_sShapeMaskPath) {
 			
 			WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Reading shape file: " + m_sShapeMaskPath);
@@ -235,6 +236,8 @@ public class QueryExecutorJRC extends QueryExecutor {
 		return oFilter;
 	}
 	
+	
+	// TODO: delete these support methods, with the new shape file
 	public static double translateLongitude(double dLongitude, String sSourceEncoding, String sTargetEncoding) {
 		return translateCoordinate(dLongitude, 0, sSourceEncoding, sTargetEncoding)[0];
 	}

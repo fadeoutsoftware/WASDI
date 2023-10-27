@@ -84,11 +84,9 @@ public class GHSLTilesReader extends WasdiProductReader {
 	
 	@Override
 	public String getProductBoundingBox() {
-		// to get the bounding box, we use the shape file that we use to read and search bands. There we should be able to access the 
+		// to get the bounding box, we use the same shape file that we use to read and search bands.e 
 		
 		List<String> asBBoxes = new ArrayList<>();
-		
-		
 		
 		String sParserConfigPath = WasdiConfig.Current.getDataProviderConfig("JRC").parserConfig;
 		
@@ -103,6 +101,7 @@ public class GHSLTilesReader extends WasdiProductReader {
 		synchronized (sShapeMaskPath) {
 			
 			FileDataStore oStore = null;
+			FeatureIterator<SimpleFeature> aoFeaturesIterator = null;
 			
 			// Get the Data Store
 			try {
@@ -114,54 +113,17 @@ public class GHSLTilesReader extends WasdiProductReader {
 				
 				FeatureCollection<SimpleFeatureType, SimpleFeature> oCollection = aoSource.getFeatures(oFilter);
 				
-				FeatureIterator<SimpleFeature> aoFeatures = oCollection.features();
+				aoFeaturesIterator = oCollection.features();
 				
 				
-				while (aoFeatures.hasNext()) {
-					SimpleFeature oFeature = aoFeatures.next();
+				while (aoFeaturesIterator.hasNext()) {
+					SimpleFeature oFeature = aoFeaturesIterator.next();
 	                
 	                List<Object> aoAttributes = oFeature.getAttributes();
-	                
-	                String sBoundingBoxESRI = aoAttributes.get(0).toString();
-	                
-	                asBBoxes.add(sBoundingBoxESRI);
+	                	                
+	             // the first attribute in the list represents the bounding box of the product
+	                asBBoxes.add(aoAttributes.get(0).toString()); 
 				}	
-				
-				
-//				"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
-				
-				
-				if (asBBoxes.size() == 1) {
-					String sBBoxESRIFormat = asBBoxes.get(0);
-					
-					String sBBoxWasdiFormat = ResponseTranslatorJRC.getWasdiFormatFootPrint(sBBoxESRIFormat);
-					
-					Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxWasdiFormat.split(", ")).stream
-							().map(sPair -> sPair.split(" "));
-					
-					List<Double> adLongitude = aaCoordinatesStream
-							.map(aCoordinates -> aCoordinates[0].trim())
-							.map(sLongitude -> Double.parseDouble(sLongitude))
-							.collect(Collectors.toList());
-					
-					List<Double> adLatitude = aaCoordinatesStream
-							.map(aCoordinates -> aCoordinates[1].trim())
-							.map(sLatitude -> Double.parseDouble(sLatitude))
-							.collect(Collectors.toList());
-					
-					// y is the latitude, x is the longitude
-					double dMinY = Collections.min(adLatitude);
-					double dMaxY = Collections.max(adLatitude);
-					double dMinX = Collections.min(adLongitude);
-					double dMaxX = Collections.max(adLongitude);
-					
-					sRes = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
-							(float) dMinY, (float) dMinX, (float) dMinY, (float) dMaxX, (float) dMaxY, (float) dMaxX, (float) dMaxY, (float) dMinX, (float) dMinY, (float) dMinX);	
-				} 
-				else {
-					WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. More than one tile was found for the file. Returning empty bounding box. Tile id" + sTileId);
-				}
-				
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error reading the shape file. " + oEx.getMessage() );
@@ -169,12 +131,50 @@ public class GHSLTilesReader extends WasdiProductReader {
 				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error while creating  " + oEx.getMessage() );
 			}
 			finally {
+				if (aoFeaturesIterator != null) {
+					aoFeaturesIterator.close();
+				}
+				
 				if (oStore != null) 
 					oStore.dispose();
 			}
+		} // from here on, we do not access the shape file anymore, so we can release the lock.
+		
+		if (asBBoxes.size() == 1) {
+			String sBBoxESRIFormat = asBBoxes.get(0);
+			
+			// TODO: REMOVE THIS WITH NEW SHAPE FILE
+			String sBBoxWasdiFormat = ResponseTranslatorJRC.getWasdiFormatFootPrint(sBBoxESRIFormat);
+			
+			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxWasdiFormat.split(", ")).stream
+					().map(sPair -> sPair.split(" "));
+			
+			List<Double> adLongitude = aaCoordinatesStream
+					.map(aCoordinates -> aCoordinates[0].trim())
+					.map(sLongitude -> Double.parseDouble(sLongitude))
+					.collect(Collectors.toList());
+			
+			List<Double> adLatitude = aaCoordinatesStream
+					.map(aCoordinates -> aCoordinates[1].trim())
+					.map(sLatitude -> Double.parseDouble(sLatitude))
+					.collect(Collectors.toList());
+			
+			// y is the latitude, x is the longitude
+			double dMinY = Collections.min(adLatitude);
+			double dMaxY = Collections.max(adLatitude);
+			double dMinX = Collections.min(adLongitude);
+			double dMaxX = Collections.max(adLongitude);
+			
+			// expected format: "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
+			sRes = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", 
+					(float) dMinY, (float) dMinX, (float) dMinY, (float) dMaxX, (float) dMaxY, (float) dMaxX, (float) dMaxY, (float) dMinX, (float) dMinY, (float) dMinX);	
+		} 
+		else {
+			WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Zero or more than one tile was found. Returning empty bounding box. Tile id" + sTileId);
+			sRes = "";
 		}
 			
-		return "";
+		return sRes;
 	}
 
 	@Override
@@ -184,8 +184,7 @@ public class GHSLTilesReader extends WasdiProductReader {
 
 	@Override
 	public String adjustFileAfterDownload(String sDownloadedFileFullPath, String sFileNameFromProvider) {
-		String sFileName = sDownloadedFileFullPath;
-		return sFileName;
+		return sDownloadedFileFullPath;
 	}
 
 	@Override
@@ -196,7 +195,7 @@ public class GHSLTilesReader extends WasdiProductReader {
 	
 	@Override
 	protected Product readSnapProduct() {
-    	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: we do not want SNAP to read MODIS products, return null ");
+    	WasdiLog.debugLog("GHSLTilesProductReader.readSnapProduct: we do not want SNAP to read GHS products, return null ");
     	return null;        	
 	}
 

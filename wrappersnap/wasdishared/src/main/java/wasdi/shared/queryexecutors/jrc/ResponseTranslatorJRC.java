@@ -68,7 +68,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 		try {
 			String sTitle = s_sFileNamePrefix + sTileId; 
-			String sFootprint = getWasdiFormatFootPrint(sTileFootprint);
+			String sFootprint = getWasdiFormatFootPrint(sTileFootprint); // TODO: we can directly use the passed footprint, with the new shapefile
 			String sLink = getLink(sTitle, sFootprint);
 			
 			oRes.setTitle(sTitle);
@@ -85,13 +85,16 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 	}
 	
-	public static String getWasdiFormatFootPrint(String sESRI54009Footprint) {
-		String sPrefix = sESRI54009Footprint.substring(0, 16); // this should be the string "MULTYPOLIGON ((("
-		String sSuffix = sESRI54009Footprint.substring(sESRI54009Footprint.length() - 3, sESRI54009Footprint.length());
+	// TODO: we will not use anymore this methid with the new shapefile
+	public static String getWasdiFormatFootPrint(String sFootprint) {
+		String sPrefix = sFootprint.substring(0, 16); // this should be the string "MULTYPOLIGON ((("
+		String sSuffix = sFootprint.substring(sFootprint.length() - 3, sFootprint.length());
 		
-		String sSanitizedESRIFootprint = sESRI54009Footprint.substring(16, sESRI54009Footprint.length() - 3);
+		String sSanitizedESRIFootprint = sFootprint.substring(16, sFootprint.length() - 3);
 		
 		List<String> asPairs = Arrays.asList(sSanitizedESRIFootprint.split(", "));
+		
+		
 		
 		List<Integer> asLong = asPairs.stream()
 				.map(sPair -> sPair.split(" "))
