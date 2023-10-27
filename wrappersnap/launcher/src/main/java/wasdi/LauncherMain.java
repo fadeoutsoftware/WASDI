@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -377,22 +378,39 @@ public class LauncherMain  {
                 try {
 
                     SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+                    
+                    if (WasdiConfig.Current.shellExecLocally) {
+                        FileHandler oFileHandler = new FileHandler(sSnapLogFile, true);
 
-                    FileHandler oFileHandler = new FileHandler(sSnapLogFile, true);
+                        oFileHandler.setLevel(oLogLevel);
+                        oFileHandler.setFormatter(oSimpleFormatter);
 
-                    oFileHandler.setLevel(oLogLevel);
-                    oFileHandler.setFormatter(oSimpleFormatter);
+                        EngineConfig oSnapConfig = Engine.getInstance().getConfig();
+                        oSnapConfig.logLevel(oLogLevel);
+                        java.util.logging.Logger oSnapLogger = oSnapConfig.logger();
 
-                    EngineConfig oSnapConfig = Engine.getInstance().getConfig();
-                    oSnapConfig.logLevel(oLogLevel);
-                    java.util.logging.Logger oSnapLogger = oSnapConfig.logger();
+                        oSnapLogger.addHandler(oFileHandler);                    	
+                    }
+                    else {
+                    	WasdiLog.debugLog("LauncherMain.configureSNAP: dockerized version is on: we set a console handler instead of the file one");
+                    	
+                        ConsoleHandler oConsoleHandler = new ConsoleHandler();
 
-                    oSnapLogger.addHandler(oFileHandler);
+                        oConsoleHandler.setLevel(oLogLevel);
+                        oConsoleHandler.setFormatter(oSimpleFormatter);
 
-                } catch (Exception oEx) {
+                        EngineConfig oSnapConfig = Engine.getInstance().getConfig();
+                        oSnapConfig.logLevel(oLogLevel);
+                        java.util.logging.Logger oSnapLogger = oSnapConfig.logger();
+
+                        oSnapLogger.addHandler(oConsoleHandler);                    	
+                    }
+                } 
+                catch (Exception oEx) {
                 	WasdiLog.errorLog("LauncherMain.configureSNAP: exception configuring SNAP log file " + oEx.toString());
                 }
-            } else {
+            } 
+            else {
                 WasdiLog.debugLog("SNAP Log file not active: clean log handlers");
                 
                 try {

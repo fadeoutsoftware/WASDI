@@ -196,37 +196,6 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.errorLog("Configure Rabbit exception " + oEx.toString());
 		}
 		
-		// Initialize Snap
-		WasdiLog.debugLog("-------initializing snap...");
-
-//		try {
-//			String snapAuxPropPath = WasdiConfig.Current.snap.auxPropertiesFile;
-//			WasdiLog.debugLog("snap aux properties file: " + snapAuxPropPath);
-//			Path propFile = Paths.get(snapAuxPropPath);
-//			Config.instance("snap.auxdata").load(propFile);
-//			Config.instance().load();
-//
-//			SystemUtils.init3rdPartyLibs(null);
-//			SystemUtils.LOG.setLevel(Level.ALL);
-//
-//			if (WasdiConfig.Current.snap.webLogActive) {
-//				String sSnapLogFolder = WasdiConfig.Current.snap.webLogFile;
-//
-//				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-//				oFileHandler.setLevel(Level.ALL);
-//				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-//				oFileHandler.setFormatter(oSimpleFormatter);
-//				SystemUtils.LOG.setLevel(Level.ALL);
-//				SystemUtils.LOG.addHandler(oFileHandler);
-//			}
-//			
-//			Engine.start(false);
-//
-//		} catch (Throwable oEx) {
-//			WasdiLog.errorLog("Configure SNAP " + oEx.toString());
-//		}
-//		
-		
 		// Each node must have a special workspace for depoy operations: here it check if exists: if not it will be created
 		WasdiLog.debugLog("-------initializing node local workspace...");
 		
