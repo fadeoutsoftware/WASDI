@@ -73,19 +73,24 @@ public class WasdiConfig {
 	public int msWaitAfterChmod = 1000;
 	
 	/**
-	 * Mongo db Configuration
+	 * Mongo db Configuration for the main node
 	 */
 	public MongoConfig mongoMain;
 	
 	/**
-	 * Mongo db Configuration
+	 * Mongo db Configuration for the local node 
 	 */
 	public MongoConfig mongoLocal;	
 	
 	/**
-	 * Mongo db Configuration
+	 * Mongo db Configuration for Ecostress Catalogue
 	 */
-	public MongoConfig mongoEcostress;		
+	public MongoConfig mongoEcostress;
+	
+	/**
+	 * Mongo db Configuration for the centralized statistics db
+	 */
+	public MongoConfig mongoStatistics;	
 	
 	/**
 	 * Keycloack auth server Configuration

@@ -30,7 +30,8 @@ public class CMHttpUtils {
 	private CMHttpUtils() {
 	}
 
-	public static String getProductSize(String sService, String sProduct, String sQuery, String sUrl, String sUsername, String sPassword) {
+	public static String getProductSize(String sService, String sProduct, String sQuery, String sUrl, String sUsername,
+			String sPassword) {
 
 		String sUrlGetSize = prepareUrlGetSize(sUrl, sService, sProduct, sQuery);
 
@@ -60,7 +61,8 @@ public class CMHttpUtils {
 		return "0";
 	}
 
-	public static String downloadProduct(String sService, String sProduct, String sQuery, String sUrl, String sUsername, String sPassword, String sSaveDirOnServer) {
+	public static String downloadProduct(String sService, String sProduct, String sQuery, String sUrl, String sUsername,
+			String sPassword, String sSaveDirOnServer) {
 		String sUrlGetSize = prepareUrlGetSize(sUrl, sService, sProduct, sQuery);
 		String sUrlProductDownload = prepareUrlProductDownload(sUrl, sService, sProduct, sQuery);
 		String sUrlGetReqStatus = prepareUrlGetRequestStatus(sUrl, sService, sProduct, sQuery);
@@ -93,7 +95,8 @@ public class CMHttpUtils {
 				WasdiLog.errorLog("CMHttpUtils.downloadProduct: Impossible to parse Request Id URL " + sUrlProductDownload);
 				return null;
 			}
-
+			
+			WasdiLog.debugLog("CMHttpUtils.downloadProduct: got requestId: " + sRequestId);
 
 			String sRemoteUri = null;
 
@@ -114,13 +117,12 @@ public class CMHttpUtils {
 					return null;
 				}
 
-				String sMsg = parseValue(sResponseGetReqStatus, "msg");
-
 				if (!sResponseGetReqStatus.contains("status" + "=")) {
 					WasdiLog.errorLog("CMHttpUtils.downloadProduct: error finding status URL " + sUrlGetReqStatus);
 					return null;
 				}
-
+				
+				String sMsg = parseValue(sResponseGetReqStatus, "msg");
 				String sStatus = parseValue(sResponseGetReqStatus, "status");
 
 				if (sMsg.equalsIgnoreCase("request in progress") || sStatus.equals("0")) {
@@ -139,6 +141,7 @@ public class CMHttpUtils {
 					return null;
 				}
 
+				WasdiLog.debugLog("CMHttpUtils.downloadProduct: found a good response (in theory) extract remoteUri: " + sResponseGetReqStatus);
 				sRemoteUri = parseValue(sResponseGetReqStatus, "remoteUri");
 
 				break;
@@ -148,13 +151,19 @@ public class CMHttpUtils {
 				WasdiLog.errorLog("CMHttpUtils.downloadProduct: impossible to parse remote Uri " + sUrlGetReqStatus);
 				return null;
 			}
-			
+
 			WasdiLog.debugLog("CMHttpUtils.downloadProduct: got sRemoteUri: " + sRemoteUri);
 
 			String sFileName = sRemoteUri.substring(sRemoteUri.lastIndexOf("/") + 1);
+			
+			if (Utils.isNullOrEmpty(sFileName)) {
+				return null;
+			}
 
 			String sDownloadPath = sSaveDirOnServer;
-			if (! (sDownloadPath.endsWith("\\") || sDownloadPath.endsWith("/") || sDownloadPath.endsWith(File.separator)) ) sDownloadPath += File.separator;
+			if (!(sDownloadPath.endsWith("\\") || sDownloadPath.endsWith("/")
+					|| sDownloadPath.endsWith(File.separator)))
+				sDownloadPath += File.separator;
 
 			String sOutputFilePath = sDownloadPath + sFileName;
 
@@ -171,9 +180,8 @@ public class CMHttpUtils {
 			}
 
 			return sActualOutputFilePath;
-		}
-		else {
-			WasdiLog.errorLog("CMHttpUtils.downloadProduct: Impossible to get Cookies for authentication, return null" );
+		} else {
+			WasdiLog.errorLog("CMHttpUtils.downloadProduct: Impossible to get Cookies for authentication, return null");
 		}
 
 		return null;
@@ -184,7 +192,8 @@ public class CMHttpUtils {
 	}
 
 	private static String prepareUrlProductDownload(String sUrl, String sService, String sProduct, String sQuery) {
-		return sUrl + "?action=" + "productdownload" + "&service=" + sService + "&product=" + sProduct + sQuery + "&output=netcdf&mode=status";
+		return sUrl + "?action=" + "productdownload" + "&service=" + sService + "&product=" + sProduct + sQuery
+				+ "&output=netcdf&mode=status";
 	}
 
 	private static String prepareUrlGetRequestStatus(String sUrl, String sService, String sProduct, String sQuery) {
@@ -194,7 +203,6 @@ public class CMHttpUtils {
 	private static Map<String, String> acquireCookies(String sUrl, String sUsername, String sPassword) {
 		Map<String, String> asParams = new HashMap<>();
 		asParams.put("service", sUrl);
-
 
 		CookieManager oCookieManager;
 		if (CookieHandler.getDefault() == null) {
@@ -261,7 +269,8 @@ public class CMHttpUtils {
 		return sResponse;
 	}
 
-	private static Map<String, String> callLoginPostAndObtainCookies(String sCmemsCasUrl, Map<String, String> asPayload, Map<String, String> asParams, String sJsessionid) {
+	private static Map<String, String> callLoginPostAndObtainCookies(String sCmemsCasUrl, Map<String, String> asPayload,
+			Map<String, String> asParams, String sJsessionid) {
 		Map<String, String> asCookies = new HashMap<>();
 
 		try {
@@ -332,7 +341,7 @@ public class CMHttpUtils {
 			oConnection.setRequestMethod("GET");
 
 			for (Map.Entry<String, String> oEntry : asCookies.entrySet()) {
-				oConnection.addRequestProperty("Cookie", oEntry.getKey() + "=" + oEntry.getValue());	
+				oConnection.addRequestProperty("Cookie", oEntry.getKey() + "=" + oEntry.getValue());
 			}
 
 			int iResponseCode = oConnection.getResponseCode();
@@ -341,7 +350,8 @@ public class CMHttpUtils {
 				sResponse = HttpUtils.readHttpResponse(oConnection);
 
 				if (sResponse.contains("You are registered but have forgotten your login/password?")
-						|| sResponse.contains("For security reasons, please Exit your web browser when you quit services requiring authentication!")) {
+						|| sResponse.contains(
+								"For security reasons, please Exit your web browser when you quit services requiring authentication!")) {
 					WasdiLog.debugLog("CMHttpUtils.callGetAndObtainResponse: " + sResponse);
 					resetCookies();
 
@@ -350,10 +360,10 @@ public class CMHttpUtils {
 			}
 
 			oConnection.disconnect();
-		} catch (Exception oException) {
+		} 
+		catch (Exception oException) {
 			resetCookies();
-
-			oException.printStackTrace();
+			WasdiLog.errorLog("CMHttpUtils.callGetAndObtainResponse: error ", oException);
 		}
 
 		return sResponse;
@@ -377,11 +387,11 @@ public class CMHttpUtils {
 				for (Element oFieldset : oForm.select("fieldset")) {
 					for (Element oInput : oFieldset.select("input")) {
 						String sType = oInput.attr("type");
-	
+
 						if ("hidden".equalsIgnoreCase(sType)) {
 							String sName = oInput.attr("name");
 							String sValue = oInput.attr("value");
-	
+
 							asHiddenElementsFromHtml.put(sName, sValue);
 						}
 					}
@@ -416,7 +426,8 @@ public class CMHttpUtils {
 		return sAction.substring(sAction.indexOf("jsessionid=") + "jsessionid=".length(), sAction.indexOf("?"));
 	}
 
-	private static Map<String, String> preparePayloadForLoginPost(Map<String, String> asHiddenElementsFromHtml, String sUsername, String sPassword) {
+	private static Map<String, String> preparePayloadForLoginPost(Map<String, String> asHiddenElementsFromHtml,
+			String sUsername, String sPassword) {
 		Map<String, String> asPayload = new HashMap<>();
 		asPayload.put("username", sUsername);
 		asPayload.put("password", sPassword);

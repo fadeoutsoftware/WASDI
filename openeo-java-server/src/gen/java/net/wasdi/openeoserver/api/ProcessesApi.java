@@ -12,7 +12,11 @@ import javax.ws.rs.core.Response.Status;
 
 import net.wasdi.openeoserver.WasdiOpenEoServer;
 import net.wasdi.openeoserver.viewmodels.Error;
-import wasdi.shared.business.users.*;
+import net.wasdi.openeoserver.viewmodels.Processes;
+import wasdi.shared.business.users.User;
+import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
 @Path("/processes")
@@ -35,13 +39,15 @@ public class ProcessesApi  {
     	} 
     	
     	try {
+    		String sProcessesDescription  = WasdiConfig.Current.openEO.processes_config;
+    		String sProcessesJson = WasdiFileUtils.fileToText(sProcessesDescription);
+    		Processes oProcesses = (Processes) MongoRepository.s_oMapper.readValue(sProcessesJson, Processes.class);
     		
+    		return Response.ok().entity(oProcesses).build();
     	}
     	catch (Exception oEx) {
     		WasdiLog.errorLog("ProcessesApi.method error: " , oEx);    		    		
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(Error.getError("ProcessesApi.method", "InternalServerError", oEx.getMessage())).build();
 		}
-    	
-    	return Response.ok().build();
     }
 }
