@@ -44,7 +44,7 @@ public class QueryExecutorJRC extends QueryExecutor {
 		m_sProvider = "JRC";
 		m_oQueryTranslator = new QueryTranslatorJRC();
 		m_oResponseTranslator = new ResponseTranslatorJRC();
-		m_asSupportedPlatforms.add(Platforms.STATICS_TILES);
+		m_asSupportedPlatforms.add(Platforms.JRC_GHSL);
 	}
 	
 	@Override

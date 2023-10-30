@@ -556,7 +556,7 @@
             ]
         },
 		{
-            "name": "THEMATIC TILES",
+            "name": "JRC GHSL",
             "indexname": "platformname",
             "indexvalue": "StaticTiles",
             "filters": [

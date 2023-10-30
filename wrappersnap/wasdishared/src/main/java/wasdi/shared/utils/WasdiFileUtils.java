@@ -819,7 +819,7 @@ public class WasdiFileUtils {
 				return Platforms.TERRA;
 			}
 			else if (sFileName.toUpperCase().startsWith("GHS_BUILT_S_E2018_GLOBE_R2023A_54009_10_V1_0_")) {
-				return Platforms.STATICS_TILES;
+				return Platforms.JRC_GHSL;
 			}
 			
 			return null;

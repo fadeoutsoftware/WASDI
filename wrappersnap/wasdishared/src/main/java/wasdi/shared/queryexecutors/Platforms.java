@@ -35,7 +35,7 @@ public class Platforms {
 	
 	public static String STATICS = "StaticFiles";
 	
-	public static String STATICS_TILES = "StaticTiles";
+	public static String JRC_GHSL = "StaticTiles";
 
 	public static String IMERG = "IMERG";
 

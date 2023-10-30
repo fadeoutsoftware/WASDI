@@ -119,7 +119,7 @@ public abstract class QueryTranslator {
 	/**
 	 * Token of STATIC TILES platform
 	 */
-	private static final String S_SPLATFORMNAME_STATIC_TILES = "platformname:StaticTiles";
+	private static final String s_SPLATFORMNAME_JRC_GHSL = "platformname:StaticTiles";
 
 	/**
 	 * Token of IMERG platform
@@ -941,10 +941,10 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseStaticTiles(String sQuery, QueryViewModel oResult) {
-		if (sQuery.contains(QueryTranslator.S_SPLATFORMNAME_STATIC_TILES)) {
-			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_STATIC_TILES);
+		if (sQuery.contains(QueryTranslator.s_SPLATFORMNAME_JRC_GHSL)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.s_SPLATFORMNAME_JRC_GHSL);
 
-			oResult.platformName = Platforms.STATICS_TILES;
+			oResult.platformName = Platforms.JRC_GHSL;
 		}
 	}
 
