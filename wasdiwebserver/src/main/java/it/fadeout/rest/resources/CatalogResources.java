@@ -644,7 +644,7 @@ public class CatalogResources {
 			
 			// Check if we have the file in the db
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFile(sFullFilePath);
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullFilePath);
 			
 			if (oDownloadedFile==null) {
 				WasdiLog.warnLog("CatalogResource.getProductProperties: file not found " + sFullFilePath);
