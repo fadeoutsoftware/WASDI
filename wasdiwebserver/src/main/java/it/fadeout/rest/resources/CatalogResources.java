@@ -597,7 +597,7 @@ public class CatalogResources {
 	public Response getProductProperties(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName) {
 		
-		WasdiLog.debugLog("CatalogResource.getProductProperties");
+		WasdiLog.debugLog("CatalogResource.getProductProperties ws="+sWorkspaceId + " file: " + sFileName);
 		
 		User oUser = Wasdi.getUserFromSession(sSessionId);
 		

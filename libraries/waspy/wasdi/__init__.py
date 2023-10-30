@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.0
+Version 0.8.5.1
 
-Last Update: 23/10/2023
+Last Update: 30/10/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -99,8 +99,8 @@ m_aoParamsDictionary = {}
 # Process Workspace Id of this application
 m_sMyProcId = ''
 # Base url: by default the main wasdi server
-m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 # The launcher set this flag true when working on a wasdi node
 m_bIsOnServer = False
 # The launcher set this flag true when working on a cloud that is not a wasdi node
@@ -4403,7 +4403,7 @@ def getProductBandNames(sFileName):
         Gets the list of bands of a file as strings
 
         :param sFileName: name of the file to query for list of bands
-        :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
+        :return: Array of strings containing the names of the bands
         """
 
     sUrl = getBaseUrl()
@@ -4439,6 +4439,41 @@ def getProductBandNames(sFileName):
         return []
 
     return []
+
+def getProductProperties(sFileName):
+    """
+        Gets the properties of a product
+
+        :param sFileName: name of the file to query for properties
+        :return: An object with properties: String fileName; String friendlyName; long lastUpdateTimestampMs; String checksum; String style. None in case of error.
+    """
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/catalog/properties?file="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] waspy.getProductProperties: there was an error contacting the API " + str(oEx))
+        return None
+
+    try:
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get properties for product')
+        elif oResponse.ok is not True:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get product properties, server returned: ' + str(oResponse.status_code) + '  ')
+        else:
+            oJsonResponse = oResponse.json()
+            return oJsonResponse
+    except:
+        return None
+
+    return None
 
 class ChartType(Enum):
     line = "line"

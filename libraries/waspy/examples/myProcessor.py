@@ -4,6 +4,8 @@ import wasdi
 def run():
     wasdi.setVerbose(True)
 
+    aoProperties = wasdi.getProductProperties("saltaURBAN_76_buildings.tif")
+
     wasdi.getFileFromWorkspaceName("Adwaiseo1", "S1A_IW_GRDH_1SDV_20230712T054433_20230712T054458_049386_05F051_C014.zip")
     wasdi.sendFileToWorkspaceId("MainNode", "saltaURBAN_76_buildings.tif")
     wasdi.hello()
