@@ -647,7 +647,7 @@ public class CatalogResources {
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFile(sFullFilePath);
 			
 			if (oDownloadedFile==null) {
-				WasdiLog.warnLog("CatalogResource.getProductProperties: file not found");
+				WasdiLog.warnLog("CatalogResource.getProductProperties: file not found " + sFullFilePath);
 				return Response.status(Status.BAD_REQUEST).build();				
 			}
 			
