@@ -3,6 +3,10 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.5.0] - 2023-10-23
+### Added
+- methods to add charts to payload
+
 
 ## [0.8.1.6] - 2023-10-09
 ### Added
