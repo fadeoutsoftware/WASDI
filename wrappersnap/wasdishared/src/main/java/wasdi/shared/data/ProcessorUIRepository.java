@@ -6,6 +6,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.processors.ProcessorUI;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ProcessorUIRepository extends MongoRepository {
 	
@@ -27,7 +28,7 @@ public class ProcessorUIRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorUIRepository.insertProcessorUI :error ", oEx);
         }
 
         return false;
@@ -53,7 +54,7 @@ public class ProcessorUIRepository extends MongoRepository {
 
             return oProcessorUI;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorUIRepository.getProcessorUI :error ", oEx);
         }
 
         return  null;
@@ -76,7 +77,7 @@ public class ProcessorUIRepository extends MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorUIRepository.updateProcessorUI :error ", oEx);
         }
 
         return  false;

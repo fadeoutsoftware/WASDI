@@ -433,13 +433,13 @@ public class WasdiGraph {
                     
             }
         } catch (Exception e) {
-            e.printStackTrace();
+        	WasdiLog.errorLog("WasdiGraph.addProductToDb: error: ", e);
         }
         
         // This is an error: here I should have found the file
         if (oProductFile == null) {
         	
-        	WasdiLog.errorLog("Product " + oOutputFile.getName() + " FILE NOT FOUND. TRY with .dim");
+        	WasdiLog.errorLog("WasdiGraph.addProductToDb: Product " + oOutputFile.getName() + " FILE NOT FOUND. TRY with .dim");
         	
         	// Try with the standard but probably will fail
         	oProductFile = new File(oOutputFile.getAbsolutePath()+".dim");

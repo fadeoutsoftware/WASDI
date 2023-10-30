@@ -22,6 +22,7 @@ import wasdi.shared.queryexecutors.creodias.QueryExecutorCREODIAS;
 import wasdi.shared.queryexecutors.creodias2.QueryExecutorCreoDias2;
 import wasdi.shared.queryexecutors.eodc.QueryExecutorEODC;
 import wasdi.shared.queryexecutors.gpm.QueryExecutorGPM;
+import wasdi.shared.queryexecutors.jrc.QueryExecutorJRC;
 import wasdi.shared.queryexecutors.lpdaac.QueryExecutorLpDaac;
 import wasdi.shared.queryexecutors.lsa.QueryExecutorLSA;
 import wasdi.shared.queryexecutors.onda.QueryExecutorONDA;
@@ -61,6 +62,7 @@ public class QueryExecutorFactory {
 		aoMap.put("PLANET", QueryExecutorPLANET::new);
 		aoMap.put("TERRASCOPE", QueryExecutorTerrascope::new);
 		aoMap.put("STATICS", QueryExecutorSTATICS::new);
+		aoMap.put("JRC", QueryExecutorJRC::new);
 		aoMap.put("GPM", QueryExecutorGPM::new);
 		aoMap.put("COPERNICUSMARINE", QueryExecutorCM::new);
 		aoMap.put("CLOUDFERRO", QueryExecutorCloudferro::new);

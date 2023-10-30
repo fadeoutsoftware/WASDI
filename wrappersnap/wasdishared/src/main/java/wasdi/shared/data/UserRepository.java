@@ -15,6 +15,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.users.User;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 21/10/2016.
@@ -39,7 +40,7 @@ public class UserRepository extends  MongoRepository{
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("UserRepository.insertUser : error ", oEx);
         }
 
         return false;
@@ -64,7 +65,7 @@ public class UserRepository extends  MongoRepository{
 
             return oUser;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("UserRepository.getUser : error ", oEx);
         }
 
         return  null;
@@ -93,7 +94,7 @@ public class UserRepository extends  MongoRepository{
 
             return null;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("UserRepository.login : error ", oEx);
         }
 
         return  null;
@@ -121,7 +122,7 @@ public class UserRepository extends  MongoRepository{
             }
             return null;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("UserRepository.googleLogin : error ", oEx);
         }
 
         return  null;
@@ -149,7 +150,7 @@ public class UserRepository extends  MongoRepository{
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("UserRepository.deleteUser : error ", oEx);
         }
 
         return  false;
@@ -172,9 +173,9 @@ public class UserRepository extends  MongoRepository{
             if (oResult.getModifiedCount()==1) return  true;
 
 		} 
-		catch (JsonProcessingException e) 
+		catch (Exception oEx) 
 		{
-			e.printStackTrace();
+			WasdiLog.errorLog("UserRepository.updateUser : error ", oEx);
 		}
 		 return  false;
     }
@@ -215,36 +216,14 @@ public class UserRepository extends  MongoRepository{
 
 			fillList(aoReturnList, oWSDocuments, User.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("UserRepository.getAllUsers : error ", oEx);
 		}
 
 		return aoReturnList;
 	}
 
-    /**
-     * Update a list of users
-     * @param aoUsers
-     */
-    public void updateAllUsers(ArrayList<User> aoUsers)
-    {
-    	try
-    	{
-    		for (int i = 0; i < aoUsers.size(); i++) 
-    		{
-    			User oUser = aoUsers.get(i);	
-    			updateUser(oUser);
-    		}
-    	}
-    	catch(Exception oEx)
-    	{
-    		oEx.printStackTrace();
-    	}
- 	
-    }
-
 	public long countUsers() {
 		return getCollection(m_sThisCollection).countDocuments();
-		
 	}
 
 

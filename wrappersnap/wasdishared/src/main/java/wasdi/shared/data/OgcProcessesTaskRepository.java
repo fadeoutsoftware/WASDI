@@ -6,6 +6,7 @@ import com.mongodb.BasicDBObject;
 
 import wasdi.shared.business.OgcProcessesTask;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Ogc Processes Task Repository.
@@ -37,12 +38,18 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
 	 * @return number of elements deleted
 	 */
     public int deleteOgcProcessesTask(String sProcessWorkspaceId) {
-    	if (Utils.isNullOrEmpty(sProcessWorkspaceId)) return 0;
+    	try {
+        	if (Utils.isNullOrEmpty(sProcessWorkspaceId)) return 0;
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("processWorkspaceId", sProcessWorkspaceId);
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("processWorkspaceId", sProcessWorkspaceId);
 
-        return delete(oCriteria);
+            return delete(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTask: error", oEx);
+        	return -1;
+        }        	
     }
     
     /**
@@ -51,12 +58,18 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return number of elements deleted
      */
     public int deleteOgcProcessesTaskByUser(String sUserId) {
-    	if (Utils.isNullOrEmpty(sUserId)) return 0;
+    	try {
+        	if (Utils.isNullOrEmpty(sUserId)) return 0;
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("userId", sUserId);
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("userId", sUserId);
 
-        return deleteMany(oCriteria);
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTaskByUser: error", oEx);
+        	return -1;
+        }       	
     }
     
     /**
@@ -65,12 +78,18 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return number of elements deleted
      */
     public int deleteOgcProcessesTaskByWorkspace(String sWorkspaceId) {
-    	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
+    	try {
+        	if (Utils.isNullOrEmpty(sWorkspaceId)) return 0;
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("workspaceId", sWorkspaceId);
+    		BasicDBObject oCriteria = new BasicDBObject();
+    		oCriteria.append("workspaceId", sWorkspaceId);
 
-        return deleteMany(oCriteria);
+            return deleteMany(oCriteria);    		
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OgcProcessesTaskRepository.deleteOgcProcessesTaskByWorkspace: error", oEx);
+        	return -1;
+        }    	
     }
     
     /**
@@ -79,10 +98,17 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
      * @return true if updated, false if not
      */
     public boolean updateOgcProcessesTask(OgcProcessesTask oOgcProcessesTask) {
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("processWorkspaceId", oOgcProcessesTask.getProcessWorkspaceId());
-
-        return  update(oCriteria, oOgcProcessesTask, m_sThisCollection);
+    	try {
+			BasicDBObject oCriteria = new BasicDBObject();
+			oCriteria.append("processWorkspaceId", oOgcProcessesTask.getProcessWorkspaceId());
+	
+	        return  update(oCriteria, oOgcProcessesTask, m_sThisCollection);
+    	}
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OgcProcessesTaskRepository.updateOgcProcessesTask: error", oEx);
+        	return false;
+        }
+    	
     }
     
     /**
@@ -98,8 +124,9 @@ public class OgcProcessesTaskRepository  extends MongoRepository {
             	String sJSON = oWSDocument.toJson();
             	return s_oMapper.readValue(sJSON, OgcProcessesTask.class);
             }
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("OgcProcessesTaskRepository.getOgcProcessesTask: error", oEx);
         }
 
         return  null;

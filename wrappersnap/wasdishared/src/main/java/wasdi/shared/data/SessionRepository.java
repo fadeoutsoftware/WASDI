@@ -14,6 +14,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.users.UserSession;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 21/10/2016.
@@ -37,7 +38,7 @@ public class SessionRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.insertSession : error ", oEx);
         }
 
         return false;
@@ -59,7 +60,8 @@ public class SessionRepository extends MongoRepository {
 		do {
 			sSessionId = UUID.randomUUID().toString();
 			oSession = getSession(sSessionId);
-		}while(null!=oSession);
+		}
+		while(null!=oSession);
 		
 		oSession = new UserSession();
 		oSession.setSessionId(sSessionId);
@@ -83,7 +85,7 @@ public class SessionRepository extends MongoRepository {
 	    		return oSession;
 	    	}
     	} catch (Exception oE) {
-			oE.printStackTrace();
+    		WasdiLog.errorLog("SessionRepository.insertUniqueSession : error ", oE);
 		}
     	return null;
     }
@@ -106,7 +108,7 @@ public class SessionRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.getSession : error ", oEx);
         }
 
         return  null;
@@ -125,7 +127,7 @@ public class SessionRepository extends MongoRepository {
 
             fillList(aoReturnList, oWSDocuments, UserSession.class);
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.getAllActiveSessions : error ", oEx);
         }
 
         return aoReturnList;
@@ -145,7 +147,7 @@ public class SessionRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, UserSession.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.getAllExpiredSessions : error ", oEx);
         }
 
         return aoReturnList;
@@ -163,7 +165,7 @@ public class SessionRepository extends MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.touchSession : error ", oEx);
         }
 
         return  false;
@@ -185,11 +187,9 @@ public class SessionRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SessionRepository.deleteSession : error ", oEx);
         }
 
         return false;
     }
-    
-    //public String createSession()
 }

@@ -619,7 +619,7 @@ public class WasdiLib {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 			return false;
 		}
 	}
@@ -720,7 +720,7 @@ public class WasdiLib {
 
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return false;
 		}
 	}
@@ -745,7 +745,7 @@ public class WasdiLib {
 
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -771,7 +771,7 @@ public class WasdiLib {
 			return sResult;
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -815,7 +815,7 @@ public class WasdiLib {
 			return aoJSONMap;			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return null;
 		}	    
 	}
@@ -845,7 +845,7 @@ public class WasdiLib {
 			return "";
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -875,7 +875,7 @@ public class WasdiLib {
 			return "";
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -912,7 +912,7 @@ public class WasdiLib {
 			return "";
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -947,7 +947,7 @@ public class WasdiLib {
 			return "";
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -969,7 +969,7 @@ public class WasdiLib {
 			return (String) oJSONMap.get("apiUrl");
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}		
 	}
@@ -1045,7 +1045,7 @@ public class WasdiLib {
 			return asProducts;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return asProducts;
 		}
 	} 
@@ -1071,7 +1071,7 @@ public class WasdiLib {
 			return asProducts;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return asProducts;
 		}
 	}
@@ -1151,7 +1151,7 @@ public class WasdiLib {
 			return sFullPath;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -1197,13 +1197,13 @@ public class WasdiLib {
 			}
 
 		} catch(MalformedURLException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch (ProtocolException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch(Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		//false, because in general no upload is desirable 
 		return false; 
@@ -1265,13 +1265,13 @@ public class WasdiLib {
 			}
 
 		} catch(MalformedURLException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch (ProtocolException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		} catch(Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		//false, because in general no upload is desirable 
 		return false; 
@@ -1295,7 +1295,7 @@ public class WasdiLib {
 			return sFullPath;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -1326,7 +1326,7 @@ public class WasdiLib {
 			return aoJSONMap;			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return null;
 		}	    
 	}
@@ -1384,7 +1384,7 @@ public class WasdiLib {
 			else return waitProcess(sProcessId);		
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}	 		
 	}
@@ -1434,7 +1434,7 @@ public class WasdiLib {
 			}
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}	  
 		return "";
 	}
@@ -1461,7 +1461,7 @@ public class WasdiLib {
 			return sResponse;			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}	  
 	}
@@ -1557,7 +1557,7 @@ public class WasdiLib {
 			return aoJSONMap.get("status").toString();			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -1596,7 +1596,7 @@ public class WasdiLib {
 			return aoJSONMap.get("status").toString();			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -1623,7 +1623,7 @@ public class WasdiLib {
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				System.out.println("WasdiLib error " + e.toString());
 			}
 		}
 
@@ -1712,7 +1712,7 @@ public class WasdiLib {
 						log("waitProcesses: sleep");
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						System.out.println("WasdiLib error " + e.toString());
 					}
 				}
 			}
@@ -1754,7 +1754,7 @@ public class WasdiLib {
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					System.out.println("WasdiLib error " + e.toString());
 				}
 
 				break;
@@ -1816,7 +1816,7 @@ public class WasdiLib {
 			return aoJSONMap.get("status").toString();			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -1899,7 +1899,7 @@ public class WasdiLib {
 			else return waitProcess(sProcessId);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}		
 	}
@@ -2062,7 +2062,7 @@ public class WasdiLib {
 			else return waitProcess(sProcessId);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}		
 	}
@@ -2313,7 +2313,7 @@ public class WasdiLib {
 			return aoJSONMap;		
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}
 
 		return aoReturnList;
@@ -2377,7 +2377,7 @@ public class WasdiLib {
 			return asynchImportProduct(sFileUrl, sName, sBoundingBox, sProvider);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}
 
 		return sReturn;
@@ -2411,7 +2411,7 @@ public class WasdiLib {
 			return importProduct(sFileUrl, sName, sBoundingBox);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}
 
 		return sReturn;
@@ -2494,7 +2494,7 @@ public class WasdiLib {
 			}
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}
 
 		return sReturn;
@@ -2521,7 +2521,7 @@ public class WasdiLib {
 			return sReturn;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 		}
 
 		return sReturn;
@@ -2649,7 +2649,7 @@ public class WasdiLib {
 			return waitProcess(sProcessId);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "ERROR";
 		}		
 	}
@@ -2689,7 +2689,7 @@ public class WasdiLib {
 			return asynchExecuteProcessor(sProcessorName, sParamsJson);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 
@@ -2748,7 +2748,7 @@ public class WasdiLib {
 
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -2771,7 +2771,7 @@ public class WasdiLib {
 			return sResponse;
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "ERROR";
 		}		
 	}
@@ -2805,7 +2805,7 @@ public class WasdiLib {
 				httpPost(sUrl, sLogRow, getStandardHeaders());
 			}
 			catch (Exception oEx) {
-				oEx.printStackTrace();
+				System.out.println("WasdiLib error " + oEx.toString());
 			}					
 		}
 		else {
@@ -2882,7 +2882,7 @@ public class WasdiLib {
 			}			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -2929,7 +2929,7 @@ public class WasdiLib {
 			}
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -2976,7 +2976,7 @@ public class WasdiLib {
 //			bos.close();
 //			System.out.println(((HttpURLConnection) urlconnection).getResponseMessage());
 //		} catch (Exception e) {
-//			e.printStackTrace();
+//			System.out.println("WasdiLib error " + e.toString());
 //		}
 //		try {
 //
@@ -2995,7 +2995,7 @@ public class WasdiLib {
 //			((HttpURLConnection) urlconnection).disconnect();
 //
 //		} catch (IOException e) {
-//			e.printStackTrace();
+//			System.out.println("WasdiLib error " + e.toString());
 //		}
 //		return "";
 
@@ -3045,7 +3045,7 @@ public class WasdiLib {
 			return sResponse.toString();
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}
 	}
@@ -3089,7 +3089,7 @@ public class WasdiLib {
 				return null;
 			}			
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return null;
 	}
@@ -3191,13 +3191,13 @@ public class WasdiLib {
 				}
 
 			} catch (Exception oEx) {
-				oEx.printStackTrace();
+				System.out.println("WasdiLib error " + oEx.toString());
 				return "";
 			}
 
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("WasdiLib error " + oEx.toString());
 			return "";
 		}		
 	}
@@ -3246,14 +3246,14 @@ public class WasdiLib {
 
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		finally {
 			if (oZipFile != null) {
 				try {
 					oZipFile.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					System.out.println("WasdiLib error " + e.toString());
 				}
 			}
 		}
@@ -3365,7 +3365,7 @@ public class WasdiLib {
 			oConnection.disconnect();
 
 		} catch(Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 	}
 
@@ -3393,7 +3393,7 @@ public class WasdiLib {
 		try {
 			return httpGet(getBaseUrl() + "/wasdi/hello",getStandardHeaders());
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return null;
 	}
@@ -3408,7 +3408,7 @@ public class WasdiLib {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return sResult;
 
@@ -3575,7 +3575,7 @@ public class WasdiLib {
 					log("importAndPreprocess: sleep");
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					System.out.println("WasdiLib error " + e.toString());
 				}
 			}
 			return asWorkflowIds;
@@ -3622,7 +3622,7 @@ public class WasdiLib {
 				log("createWorkspace: creation failed.");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return sReturn;
 	}
@@ -3649,7 +3649,7 @@ public class WasdiLib {
 				log("WasdiLib.deleteWorkspace: could not delete workspace (please check the return value, it's going to be null)");
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return sResult;
 	}
@@ -3768,7 +3768,7 @@ public class WasdiLib {
 
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 
 		return null;
@@ -3789,7 +3789,7 @@ public class WasdiLib {
 			String sJsonPayload = getProcessorPayloadAsJSON(sProcessObjId);
 			return s_oMapper.readValue(sJsonPayload, new TypeReference<Map<String,Object>>(){});
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		return null;
 	}
@@ -3834,19 +3834,19 @@ public class WasdiLib {
 					.append("&workspace=").append(getActiveWorkspace());
 			sResponse = httpGet(oUrl.toString(), getStandardHeaders());
 		}catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		Map<String,Object> aoResponse = null;
 		try {
 			aoResponse = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 		try {
 			return (String)aoResponse.get("bbox");
 		}catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WasdiLib error " + e.toString());
 		}
 
 		return null;

@@ -773,12 +773,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			try {
 				oOutputStream.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				WasdiLog.errorLog("ProviderAdapter.copyStream: error", e);
 			}
 			try {
 				oInputStream.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				WasdiLog.errorLog("ProviderAdapter.copyStream: error", e);
 			}			
 			
 		}
@@ -811,7 +811,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				sPassword = oConfig.password;				
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: error", e);
 		}
         
         if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;

@@ -184,7 +184,7 @@ public class App
 		    
 		    
     	} catch (Exception e) {
-			e.printStackTrace();
+    		System.out.println("WasdiLib.uploadFile: error " + e.toString());
 		}
     }
     

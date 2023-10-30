@@ -476,14 +476,16 @@ public class RunTimeUtils {
 			ContainerInfo oContainerInfo = oDockerUtils.getContainerInfoByContainerId(sPidStr);
 			
 			if (oContainerInfo == null) {
+				WasdiLog.warnLog("RunTimeUtils.isProcessStillAllive: docker info not found for " + sPidStr);
 				return false;
 			}
 			else {
 				if (oContainerInfo.Status.equals(ContainerStates.RUNNING)) return true;
-				else return false;
+				else {
+					WasdiLog.warnLog("RunTimeUtils.isProcessStillAllive: docker info status = " + oContainerInfo.Status + " found for " + sPidStr);
+					return false;
+				}
 			}
-			
-			
 		}
 		
 	}

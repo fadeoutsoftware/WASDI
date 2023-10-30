@@ -34,6 +34,8 @@ public class Platforms {
 	public static String WORLD_COVER = "WorldCover";
 	
 	public static String STATICS = "StaticFiles";
+	
+	public static String STATICS_TILES = "StaticTiles";
 
 	public static String IMERG = "IMERG";
 

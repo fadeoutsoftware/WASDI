@@ -153,8 +153,7 @@ public abstract class Operation {
                 // Get folder size
                 lSize = FileUtils.sizeOfDirectory(oDataFolder);
             } catch (Exception oEx) {
-            	WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: Error computing folder size");
-                oEx.printStackTrace();
+            	WasdiLog.errorLog("LauncherMain.SetFileSizeToProcess: Error computing folder size, oEx");
             }
         }
 

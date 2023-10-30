@@ -9,6 +9,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 
 public class MetricsEntryRepository extends MongoRepository {
@@ -24,7 +25,7 @@ public class MetricsEntryRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("MetricsEntryRepository.insertMetricsEntry: error", oEx);
 		}
 
 		return false;
@@ -45,7 +46,7 @@ public class MetricsEntryRepository extends MongoRepository {
 				return insertMetricsEntry(oMetricsEntry);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("MetricsEntryRepository.updateMetricsEntry: error", oEx);
 		}
 
 		return false;
@@ -59,7 +60,7 @@ public class MetricsEntryRepository extends MongoRepository {
 
 			fillList(aoReturnList, oDocuments, MetricsEntry.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("MetricsEntryRepository.getMetricsEntries: error", oEx);
 		}
 
 		return aoReturnList;
@@ -69,12 +70,11 @@ public class MetricsEntryRepository extends MongoRepository {
 		final List<MetricsEntry> aoReturnList = new ArrayList<>();
 
 		try {
-			FindIterable<Document> oDocuments = getCollection(m_sThisCollection)
-					.find(new Document("node", sNode));
+			FindIterable<Document> oDocuments = getCollection(m_sThisCollection).find(new Document("node", sNode));
 
 			fillList(aoReturnList, oDocuments, MetricsEntry.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("MetricsEntryRepository.getMetricsEntryByNode: error", oEx);
 		}
 
 		return aoReturnList;
@@ -94,7 +94,7 @@ public class MetricsEntryRepository extends MongoRepository {
 				oMetricsEntry = s_oMapper.readValue(sJSON, MetricsEntry.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("MetricsEntryRepository.getLatestMetricsEntryByNode: error", oEx);
 		}
 
 		return oMetricsEntry;

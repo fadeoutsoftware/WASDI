@@ -124,7 +124,7 @@ public class ProcessScheduler {
 						}					
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}
 				
 				// Read Timeout of this scheduler 
@@ -137,7 +137,7 @@ public class ProcessScheduler {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}
 				// Read Operation Type supported 
 				try {
@@ -172,7 +172,7 @@ public class ProcessScheduler {
 					}
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}
 				
 				try {
@@ -185,7 +185,7 @@ public class ProcessScheduler {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					WasdiLog.errorLog(m_sLogPrefix + ".init: error ", e);
 				}				
 			}
 			
@@ -290,7 +290,6 @@ public class ProcessScheduler {
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
-			oEx.printStackTrace();
 		} 
 	}
 	
@@ -460,13 +459,17 @@ public class ProcessScheduler {
 				}
 				
 				// Get the PID
-				String sPid = "" + oWaitingReadyPws.getPid();
+				String sPidOrContainerId = "" + oWaitingReadyPws.getPid();
+				
+				if (!WasdiConfig.Current.shellExecLocally) {
+					sPidOrContainerId = oWaitingReadyPws.getContainerId();
+				}				
 				
 				// Check if it is alive
-				if (!Utils.isNullOrEmpty(sPid)) {
-					if (!RunTimeUtils.isProcessStillAllive(sPid)) {
+				if (!Utils.isNullOrEmpty(sPidOrContainerId)) {
+					if (!RunTimeUtils.isProcessStillAllive(sPidOrContainerId)) {
 						// PID does not exists: recheck and remove
-						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPid + ", is WAITING or READY but the process does not exists");
+						WasdiLog.warnLog(m_sLogPrefix + ".run: Process " + oWaitingReadyPws.getProcessObjId() + " has PID " + sPidOrContainerId + ", is WAITING or READY but the process does not exists");
 						
 						// Read Again to be sure
 						ProcessWorkspace oCheckProcessWorkspace = m_oProcessWorkspaceRepository.getProcessByProcessObjId(oWaitingReadyPws.getProcessObjId());
@@ -499,8 +502,7 @@ public class ProcessScheduler {
 			}	
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog(m_sLogPrefix + ".run: " + oEx); 
-			oEx.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".run: ", oEx); 
 		}
 		
 	}
@@ -546,7 +548,7 @@ public class ProcessScheduler {
 			return aoRetList;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".filterOperationTypes: error ", oE);
 			return new ArrayList<ProcessWorkspace>();
 		}
 	}
@@ -561,7 +563,7 @@ public class ProcessScheduler {
 			return getRunningList(aoRunning);
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getRunningList: error ", oE);
 			return null;
 		}
 	}
@@ -577,7 +579,7 @@ public class ProcessScheduler {
 			return aoRunning;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getRunnigList: error ", oE);
 			return null;
 		}
 	}
@@ -589,7 +591,7 @@ public class ProcessScheduler {
 			return getCreatedList(aoCreated);
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getCreatedList: error ", oE);
 			return null;
 		}
 	}
@@ -605,7 +607,7 @@ public class ProcessScheduler {
 			return aoCreated;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getCreatedList: error ", oE);
 			return null;
 		}
 	}
@@ -617,7 +619,7 @@ public class ProcessScheduler {
 			return getReadyList(aoReady);
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getReadyList: error ", oE);
 			return null;
 		}
 	}	
@@ -633,7 +635,7 @@ public class ProcessScheduler {
 			return aoReady;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getReadyList: error ", oE);
 			return null;
 		}
 	}	
@@ -644,7 +646,7 @@ public class ProcessScheduler {
 			return getWaitingList(aoWaiting);
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getWaitingList: error ", oE);
 			return null;
 		}
 	}	
@@ -660,7 +662,7 @@ public class ProcessScheduler {
 			return aoWaiting;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog(m_sLogPrefix + ".getWaitingList: error ", oE);
 			return null;
 		}
 	}	
@@ -715,8 +717,7 @@ public class ProcessScheduler {
 				WasdiLog.errorLog(m_sLogPrefix + "executeProcess: Error status set");
 			}
 			catch (Exception oInnerEx) {
-				WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  INNER Exception" + oInnerEx);
-				oInnerEx.printStackTrace();
+				WasdiLog.errorLog(m_sLogPrefix + "executeProcess:  INNER Exception ", oInnerEx);
 			}
 			
 			return null;
@@ -751,7 +752,6 @@ public class ProcessScheduler {
 		try {
 			Thread.sleep(m_lWaitProcessStartMS);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 			Thread.currentThread().interrupt();
 		}
 	}

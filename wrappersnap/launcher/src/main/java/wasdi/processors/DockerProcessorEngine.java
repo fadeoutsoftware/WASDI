@@ -939,8 +939,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 sStatus = oProcessWorkspace.getStatus();
                 try {
                     Thread.sleep(iThreadSleepMs);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } 
+                catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
 

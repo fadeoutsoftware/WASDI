@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 
 import wasdi.shared.business.Schedule;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class ScheduleRepository extends MongoRepository {
 	
@@ -28,7 +29,7 @@ public class ScheduleRepository extends MongoRepository {
             return oSchedule.getScheduleId();
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ScheduleRepository.insertSchedule: ", oEx);
         }
 
         return "";
@@ -49,7 +50,7 @@ public class ScheduleRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ScheduleRepository.deleteScheduleById: ", oEx);
         }
 
         return false;
@@ -72,7 +73,7 @@ public class ScheduleRepository extends MongoRepository {
 
             return oSchedule;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ScheduleRepository.getSchedule: ", oEx);
         }
 
         return  null;

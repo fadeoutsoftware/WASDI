@@ -46,14 +46,6 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-/**
- * @author c.nattero
- *
- */
-/**
- * @author c.nattero
- *
- */
 public class ProcessWorkspaceRepository extends MongoRepository {
 	
 	public ProcessWorkspaceRepository() {
@@ -223,7 +215,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			}
     		return aoFathers;
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getRoots: " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getRoots: ", oE);
 		}
     	return new ArrayList<ProcessWorkspace>(0);
     }
@@ -259,7 +251,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				asChildrenProcessObjIds.add(oChildProcess.getProcessObjId());
 			}
     	} catch (Exception oE) {
-    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: " + oE);
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: ", oE);
     		return new LinkedList<ProcessWorkspace>();
     	}
 
@@ -287,7 +279,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				)
 			);
     	} catch (Exception oE) {
-    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to " + oE );
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to ", oE );
     		return new LinkedList<ProcessWorkspace>();
 		}
 
@@ -308,13 +300,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	    				oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
 	    				aoFathers.add(oProcessWorkspace);
 	    			} catch (IOException oE) {
-	    				WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
+	    				WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
 	    			}
 	    		}
     		}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to ", oE);
 		}
     	return aoFathers;
     }
@@ -537,7 +529,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			ProcessWorkspace oProcessWorkspace = s_oMapper.readValue(sJson, ProcessWorkspace.class);
 			return oProcessWorkspace.getStatus();
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): ", oE );
 		}
 		return null;
 	}
@@ -1540,7 +1532,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): ", oE);
 		}
 		return false;
 	}
@@ -1563,7 +1555,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sWorkspaceId;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " , oE);
 		}
 		return null;
 	}
@@ -1587,7 +1579,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sPayload;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): ", oE);
 		}
 		return null;
 	}
@@ -1712,7 +1704,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     	return lTotalRunningTime;
     }
 
-    private static Bson prepareFilterForTotalRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
+    private Bson prepareFilterForTotalRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
     	Bson oFilterUserId = Filters.eq("userId", sUserId.toLowerCase());
     	Bson oFilterDateFrom = Filters.gte("operationTimestamp", lDateFrom);
     	Bson oFilterDateTo = Filters.lte("operationTimestamp", lDateTo);

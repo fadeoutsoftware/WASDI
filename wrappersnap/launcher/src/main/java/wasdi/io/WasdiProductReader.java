@@ -184,9 +184,9 @@ public abstract class WasdiProductReader {
             
             return oProduct;
             
-        } catch (Throwable oEx) {
-            oEx.printStackTrace();
-            WasdiLog.debugLog("WasdiProductReader.readSnapProduct: exception: " + oEx);
+        } 
+        catch (Throwable oEx) {
+            WasdiLog.errorLog("WasdiProductReader.readSnapProduct: exception: " + oEx.toString());
         }
 
         return null;

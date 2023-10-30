@@ -38,7 +38,7 @@ public class OrganizationRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.insertOrganization: error ", oEx);
 		}
 
 		return false;
@@ -63,7 +63,7 @@ public class OrganizationRepository extends MongoRepository {
 			if (oResult.getModifiedCount() == 1)
 				return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.updateOrganization: error ", oEx);
 		}
 
 		return false;
@@ -92,7 +92,7 @@ public class OrganizationRepository extends MongoRepository {
 				return oOrganization;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OrganizationRepository.getById( " + sOrganizationId + "): error: " + oE);
+			WasdiLog.errorLog("OrganizationRepository.getById( " + sOrganizationId + "): error: ", oE);
 		}
 
 		return null;
@@ -112,7 +112,7 @@ public class OrganizationRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Organization.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.getOrganizations: error ", oEx);
 		}
 
 		return aoReturnList;
@@ -132,7 +132,7 @@ public class OrganizationRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Organization.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.getOrganizationsOwnedByUser: error ", oEx);
 		}
 
 		return aoReturnList;
@@ -161,7 +161,7 @@ public class OrganizationRepository extends MongoRepository {
 				return oOrganization;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("OrganizationRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.errorLog("OrganizationRepository.getByName( " + sName + "): error: ", oE);
 		}
 
 		return null;
@@ -186,7 +186,7 @@ public class OrganizationRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.deleteOrganization: error ", oEx);
 		}
 
 		return false;
@@ -208,7 +208,7 @@ public class OrganizationRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.deleteByUser: error ", oEx);
 		}
 
 		return 0;
@@ -230,8 +230,7 @@ public class OrganizationRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog(
-					"OrganizationRepository.belongsToUser( " + sUserId + ", " + sOrganizationId + " ): error: " + oE);
+			WasdiLog.errorLog("OrganizationRepository.isOwnedByUser( " + sUserId + ", " + sOrganizationId + " ): error: ", oE);
 		}
 
 		return false;
@@ -249,7 +248,7 @@ public class OrganizationRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Organization.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.getOrganizationsList: error ", oEx);
 		}
 
 		return aoReturnList;
@@ -280,7 +279,7 @@ public class OrganizationRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Organization.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("OrganizationRepository.findOrganizationsByPartialName: error ", oEx);
 		}
 
 		return aoReturnList;

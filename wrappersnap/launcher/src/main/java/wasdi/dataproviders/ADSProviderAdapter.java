@@ -95,13 +95,13 @@ public class ADSProviderAdapter extends ProviderAdapter {
 					try {
 						TimeUnit.SECONDS.sleep(60);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: error", e);
 					}
 				} else if ("running".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(6);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: error", e);
 					}
 				} else if ("completed".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					sUrlDownload = (String) JsonUtils.getProperty(oAdsGetStatusRequestResult, "status.data.0.location");

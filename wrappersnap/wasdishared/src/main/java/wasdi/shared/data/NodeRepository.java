@@ -44,7 +44,7 @@ public class NodeRepository extends MongoRepository {
 			return oDocument.getObjectId("_id").toHexString();
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeRepository.InsertNode: "+oEx);
+			WasdiLog.errorLog("NodeRepository.InsertNode: ", oEx);
 		}
 		return "";
 	}
@@ -61,7 +61,7 @@ public class NodeRepository extends MongoRepository {
 			return true;
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeRepository.deleteNode( "+sId+" )" +oEx);
+			WasdiLog.errorLog("NodeRepository.deleteNode( "+sId+" )", oEx);
 		}
 
 		return false;
@@ -86,7 +86,7 @@ public class NodeRepository extends MongoRepository {
 			}
 
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeRepository.getNodeByCode( "+sCode+" )" +oEx.toString());
+			WasdiLog.errorLog("NodeRepository.getNodeByCode( "+sCode+" )", oEx);
 		}
 
 		return  null;
@@ -110,7 +110,7 @@ public class NodeRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Node.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("NodeRepository.findNodeByPartialName", oEx);
 		}
 
 		return aoReturnList;
@@ -130,7 +130,7 @@ public class NodeRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, Node.class);
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
+			WasdiLog.errorLog("NodeRepository.getNodesList(): ", oEx);
 		}
 
 		return aoReturnList;
@@ -151,7 +151,7 @@ public class NodeRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, Node.class);
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("NodeRepository.getNodesList(): " + oEx.toString());
+			WasdiLog.errorLog("NodeRepository.getNodesList(): ", oEx);
 		}
 
 		return aoReturnList;
