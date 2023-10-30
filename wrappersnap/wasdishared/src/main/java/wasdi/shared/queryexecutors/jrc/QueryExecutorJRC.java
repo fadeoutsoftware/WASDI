@@ -18,11 +18,11 @@ import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-import org.osgeo.proj4j.CRSFactory;
-import org.osgeo.proj4j.CoordinateReferenceSystem;
-import org.osgeo.proj4j.CoordinateTransform;
-import org.osgeo.proj4j.CoordinateTransformFactory;
-import org.osgeo.proj4j.ProjCoordinate;
+//import org.osgeo.proj4j.CRSFactory;
+//import org.osgeo.proj4j.CoordinateReferenceSystem;
+//import org.osgeo.proj4j.CoordinateTransform;
+//import org.osgeo.proj4j.CoordinateTransformFactory;
+//import org.osgeo.proj4j.ProjCoordinate;
 
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;
@@ -77,10 +77,10 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		// TODO: remove this call to the translate method, with the new shape file
 		// convert the coordinate system before accessing the shape file 
-		Double oW = oQueryVM.west != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
-		Double oE = oQueryVM.east != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
-		Double oS = oQueryVM.south != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
-		Double oN = oQueryVM.north != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
+		Double oW = oQueryVM.west; //  != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
+		Double oE = oQueryVM.east; // != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
+		Double oS = oQueryVM.south; // != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
+		Double oN = oQueryVM.north; // != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
 		
 		try {
 			
@@ -112,10 +112,10 @@ public class QueryExecutorJRC extends QueryExecutor {
 		
 		// TODO: remove this call to the translate method, with the new shape file
 		// convert the coordinate system before accessing the shape file 
-		Double oW = oQueryVM.west != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
-		Double oE = oQueryVM.east != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
-		Double oS = oQueryVM.south != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
-		Double oN = oQueryVM.north != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
+		Double oW = oQueryVM.west; // != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
+		Double oE = oQueryVM.east; // != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
+		Double oS = oQueryVM.south; // != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
+		Double oN = oQueryVM.north; // != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
 		
 		
 		try {
@@ -236,8 +236,28 @@ public class QueryExecutorJRC extends QueryExecutor {
 		return oFilter;
 	}
 	
+	@Override
+    public String getUriFromProductName(String sProduct, String sProtocol, String sOriginalUrl) {
+
+        if (Utils.isNullOrEmpty(sOriginalUrl)) {
+            WasdiLog.warnLog("QueryExecutorJRC.getUriFromProductName: sOriginalUrl is null, try to recover with the base implementation");
+            return super.getUriFromProductName(sProduct, sProtocol, sOriginalUrl);
+        }
+        else {
+            String [] asParts = sOriginalUrl.split(";");
+            if (asParts != null) {
+                if (asParts.length>0) {
+                    return asParts[0];
+                }
+            }
+        }
+
+        return "";
+    }
+	
 	
 	// TODO: delete these support methods, with the new shape file
+	/*
 	public static double translateLongitude(double dLongitude, String sSourceEncoding, String sTargetEncoding) {
 		return translateCoordinate(dLongitude, 0, sSourceEncoding, sTargetEncoding)[0];
 	}
@@ -271,6 +291,6 @@ public class QueryExecutorJRC extends QueryExecutor {
         return new double[] {dTargetLong, dTargetLat};
     }
     
-
+*/
 
 }

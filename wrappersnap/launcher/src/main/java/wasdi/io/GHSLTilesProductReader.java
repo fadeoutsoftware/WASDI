@@ -35,9 +35,9 @@ import wasdi.shared.viewmodels.products.MetadataViewModel;
 import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
-public class GHSLTilesReader extends WasdiProductReader {
+public class GHSLTilesProductReader extends WasdiProductReader {
 
-	public GHSLTilesReader(File oProductFile) {
+	public GHSLTilesProductReader(File oProductFile) {
 		super(oProductFile);
 	}
 
@@ -144,9 +144,9 @@ public class GHSLTilesReader extends WasdiProductReader {
 			String sBBoxESRIFormat = asBBoxes.get(0);
 			
 			// TODO: REMOVE THIS WITH NEW SHAPE FILE
-			String sBBoxWasdiFormat = ResponseTranslatorJRC.getWasdiFormatFootPrint(sBBoxESRIFormat);
+//			String sBBoxWasdiFormat = ResponseTranslatorJRC.getWasdiFormatFootPrint(sBBoxESRIFormat);
 			
-			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxWasdiFormat.split(", ")).stream
+			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxESRIFormat.split(", ")).stream
 					().map(sPair -> sPair.split(" "));
 			
 			List<Double> adLongitude = aaCoordinatesStream

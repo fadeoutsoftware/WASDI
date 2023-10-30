@@ -57,7 +57,7 @@ public class WasdiProductReaderFactory {
 		}
 		
 		if (oFile.getName().toUpperCase().startsWith(ResponseTranslatorJRC.s_sFileNamePrefix) && oFile.getName().endsWith(".zip")) {
-			return new GHSLTilesReader(oFile);
+			return new GHSLTilesProductReader(oFile);
 		}
 
 		return new SnapProductReader(oFile);

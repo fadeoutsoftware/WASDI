@@ -24,13 +24,11 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 	
 	@Override
 	public List<QueryResultViewModel> translateBatch(String sResponse, boolean bFullViewModel) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getCountResult(String sQueryResult) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	
@@ -68,7 +66,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 		try {
 			String sTitle = s_sFileNamePrefix + sTileId; 
-			String sFootprint = getWasdiFormatFootPrint(sTileFootprint); // TODO: we can directly use the passed footprint, with the new shapefile
+			String sFootprint = sTileFootprint; // getWasdiFormatFootPrint(sTileFootprint); // TODO: we can directly use the passed footprint, with the new shapefile
 			String sLink = getLink(sTitle, sFootprint);
 			
 			oRes.setTitle(sTitle);
@@ -86,6 +84,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 	}
 	
 	// TODO: we will not use anymore this methid with the new shapefile
+	/*
 	public static String getWasdiFormatFootPrint(String sFootprint) {
 		String sPrefix = sFootprint.substring(0, 16); // this should be the string "MULTYPOLIGON ((("
 		String sSuffix = sFootprint.substring(sFootprint.length() - 3, sFootprint.length());
@@ -127,6 +126,7 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		return sPrefix + sCoord + sSuffix;
 		
 	}
+	*/
 
 	
 	private String getLink(String sTitle, String sBoundingBox) {
