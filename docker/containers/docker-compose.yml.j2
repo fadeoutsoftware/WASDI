@@ -28,7 +28,7 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiContainerKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiContainerRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
@@ -97,10 +97,10 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 {% if sWasdiServerTypeIsMain == True %}
 
-  {{ sWasdiContainerKeycloakServiceName }}:
+  {{ sWasdiKeycloakServiceName }}:
     command:
       - "start"
-{% if bWasdiContainerKeycloakNewInstance | default(False) == True %}
+{% if bWasdiKeycloakContainerNewInstance | default(False) == True %}
       - "--import-realm"
 {% endif %}
     depends_on:
@@ -108,7 +108,7 @@ services:
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
     environment:
-      - JGROUPS_DISCOVERY_EXTERNAL_IP={{ sWasdiContainerKeycloakJgroupDiscoveryExternalIp | default('127.0.0.1') }}
+      - JGROUPS_DISCOVERY_EXTERNAL_IP={{ sWasdiKeycloakContainerJgroupDiscoveryExternalIp | default('127.0.0.1') }}
       - KC_CACHE_CONFIG_FILE=cache-ispn.xml
       - KC_DB_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
       - KC_DB=postgres
@@ -127,25 +127,25 @@ services:
       - KC_TRANSACTION_XA_ENABLED=true
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
-    image: "{{ sWasdiContainerKeycloakImageName }}:latest"
+    image: "{{ sWasdiKeycloakContainerImageName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}`)"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.middlewares=wasdi-secure-keycloak@file"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.middlewares=wasdi-secure-keycloak@file"
 {% endif %}
-      - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.service=s_{{ sWasdiContainerKeycloakServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.service=s_{{ sWasdiKeycloakServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerKeycloakServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiContainerKeycloakInternalPort }}"
-{% if sWasdiContainerKeycloakInternalPort | default("") != ""
-    and sWasdiContainerKeycloakExternalPort | default("") != ""
-    and aWasdiContainerKeycloakExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakContainerInternalPort }}"
+{% if sWasdiKeycloakContainerInternalPort | default("") != ""
+    and sWasdiKeycloakContainerExternalPort | default("") != ""
+    and aWasdiKeycloakContainerExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerKeycloakExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerKeycloakExternalPort }}:{{ sWasdiContainerKeycloakInternalPort }}"
+{% for sCurrentExternalIp in aWasdiKeycloakContainerExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakContainerExternalPort }}:{{ sWasdiKeycloakContainerInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
@@ -154,8 +154,8 @@ services:
         soft: {{ sWasdiKeycloakUlimitNofile }}
         hard: {{ sWasdiKeycloakUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
 
   {{ sWasdiContainerPostgresqlKeycloakServiceName }}:
     environment:
@@ -312,7 +312,7 @@ services:
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiContainerKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
@@ -361,7 +361,7 @@ services:
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiContainerKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
@@ -410,7 +410,7 @@ services:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiContainerKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
 {% if sWasdiServerTypeIsComputational == True %}
@@ -537,7 +537,7 @@ services:
   {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
     # Disable until we are ready to start all containers
     #depends_on:
-    #  - {{ sWasdiContainerKeycloakServiceName }}
+    #  - {{ sWasdiKeycloakServiceName }}
     #  - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
     image: "{{ sWasdiContainerWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"

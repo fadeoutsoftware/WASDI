@@ -74,7 +74,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiLauncher=true sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
+          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
         """,
         label: "Build the WASDI client container"
       }
@@ -103,7 +103,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiScheduler=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=false sDeployWasdiContainerWasdiTomcatOpenEoServer=false sDeployWasdiContainerWasdiTomcatWasdiWebServer=false'
+          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=false sDeployWasdiContainerWasdiTomcatOpenEoServer=false sDeployWasdiContainerWasdiTomcatWasdiWebServer=false'
         """,
         label: "Start or restart the containers"
       }
