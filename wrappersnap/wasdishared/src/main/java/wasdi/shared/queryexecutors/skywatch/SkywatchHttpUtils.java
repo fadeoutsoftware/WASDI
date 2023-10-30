@@ -88,7 +88,6 @@ public class SkywatchHttpUtils {
 			try {
 				Thread.sleep(iAttempts * 1_000);
 			} catch (InterruptedException oInterruptedException) {
-				oInterruptedException.printStackTrace();
 			}
 		}
 
@@ -320,7 +319,6 @@ public class SkywatchHttpUtils {
 			try {
 				Thread.sleep(10_000);
 			} catch (InterruptedException oInterruptedException) {
-				oInterruptedException.printStackTrace();
 			}
 		}
 

@@ -66,7 +66,7 @@ public class EcoStressRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemList: error", oEx);
 		}
 
 		return aoReturnList;
@@ -131,7 +131,7 @@ public class EcoStressRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemList: error", oEx);
 		}
 
 		return aoReturnList;
@@ -156,7 +156,7 @@ public class EcoStressRepository extends MongoRepository {
 			}
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItem: error", oEx);
 		}
 
 		return  null;
@@ -172,7 +172,7 @@ public class EcoStressRepository extends MongoRepository {
 
 			return lCount;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.countItems: error", oEx);
 		}
 
 		return -1;

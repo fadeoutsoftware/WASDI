@@ -43,7 +43,7 @@ public class GdalUtils {
                 }
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("GdalUtils.adjustGdalFolder: error", oEx);
         }
 
 

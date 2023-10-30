@@ -86,7 +86,7 @@ public class OrganizationRepository extends MongoRepository {
 				try {
 					oOrganization = s_oMapper.readValue(sJSON, Organization.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("OrganizationRepository.getById: error", e);
 				}
 
 				return oOrganization;
@@ -155,7 +155,7 @@ public class OrganizationRepository extends MongoRepository {
 				try {
 					oOrganization = s_oMapper.readValue(sJSON, Organization.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("OrganizationRepository.getByName: error", e);
 				}
 
 				return oOrganization;

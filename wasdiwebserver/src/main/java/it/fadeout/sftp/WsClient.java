@@ -54,7 +54,7 @@ public class WsClient extends Semaphore {
 			oContainer.connectToServer(this, new URI(sWsAddress));
 			acquire();
 		} catch (Exception e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("WSClient.WSClient:  error", e);
 			release();
 		}		
 	}

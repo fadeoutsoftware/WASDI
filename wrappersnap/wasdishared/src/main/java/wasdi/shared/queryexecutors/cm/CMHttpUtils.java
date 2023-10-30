@@ -130,7 +130,6 @@ public class CMHttpUtils {
 					try {
 						Thread.sleep(1_000);
 					} catch (InterruptedException oInterruptedException) {
-						oInterruptedException.printStackTrace();
 					}
 
 					continue;
@@ -263,7 +262,7 @@ public class CMHttpUtils {
 
 			oConnection.disconnect();
 		} catch (Exception oException) {
-			oException.printStackTrace();
+			WasdiLog.errorLog("CMHttpUtils.callLoginGetAndObtainResponse: error", oException);
 		}
 
 		return sResponse;
@@ -322,7 +321,7 @@ public class CMHttpUtils {
 
 			oConnection.disconnect();
 		} catch (Exception oException) {
-			oException.printStackTrace();
+			WasdiLog.errorLog("CMHttpUtils.callLoginPostAndObtainCookies: error", oException);
 		}
 
 		return asCookies;

@@ -638,7 +638,7 @@ public final class HttpUtils {
 
 			return sMessage;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("HttpUtils.httpPut: error", oEx);
 			return "";
 		}
 	}	

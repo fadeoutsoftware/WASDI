@@ -62,7 +62,7 @@ public class Publisher {
             try {
                 Files.createDirectory(oTargetPath);
             } catch (IOException e) {
-                e.printStackTrace();
+            	WasdiLog.errorLog("Publisher.launchImagePyramidCreation: error", e);
             }
         }
 
@@ -105,8 +105,7 @@ public class Publisher {
             RunTimeUtils.shellExec(asCmds, true, false, false, false);
             
         } catch (Exception e) {
-            e.printStackTrace();
-            WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+            WasdiLog.errorLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: ",  e);
             return  false;
         }
 

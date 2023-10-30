@@ -5,6 +5,7 @@ import java.io.File;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * WASDI Paths Config
@@ -95,8 +96,9 @@ public class PathsConfig {
     public static String getWorkspacePath(BaseParameter oParameter) {
         try {
             return getWorkspacePath(oParameter, getWasdiBasePath());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } 
+        catch (Exception e) {
+        	WasdiLog.errorLog("PathsConfig.getWorkspacePath: error", e);
             return getWorkspacePath(oParameter, "/data/wasdi");
         }
     }

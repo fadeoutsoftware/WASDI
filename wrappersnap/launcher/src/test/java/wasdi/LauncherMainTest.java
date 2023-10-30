@@ -89,15 +89,15 @@ public abstract class LauncherMainTest {
 			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			System.out.println("ERROR: " + oEx.toString());
 		}
 		finally {
 			if (oOutputStream != null) {
 				try {
 					oOutputStream.close();
 					oOutputStream = null;
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (IOException oEx) {
+					System.out.println("ERROR: " + oEx.toString());
 				}
 			}
 
@@ -105,8 +105,8 @@ public abstract class LauncherMainTest {
 				try {
 					oInputStream.close();
 					oInputStream = null;
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (IOException oEx) {
+					System.out.println("ERROR: " + oEx.toString());
 				}
 			}
 		}
@@ -181,8 +181,8 @@ public abstract class LauncherMainTest {
 				writer.close();
 
 				fileCreated = true;
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (IOException oEx) {
+				System.out.println("ERROR: " + oEx.toString());
 			}
 		}
 

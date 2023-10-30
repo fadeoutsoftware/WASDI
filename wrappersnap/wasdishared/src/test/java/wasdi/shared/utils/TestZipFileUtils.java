@@ -64,7 +64,7 @@ class TestZipFileUtils {
 					}
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("ERROR " + e.toString());
 			}
 
 		}
@@ -81,7 +81,7 @@ class TestZipFileUtils {
 		try {
 			sTempDir = oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
 		} catch (Exception oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		// then check files in temp dir
 		File oHere = new File(sTempDir);
@@ -90,7 +90,7 @@ class TestZipFileUtils {
 			Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
 			.forEach(oFileInStream -> path.add(oFileInStream.toString()));
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		String[] asFileListInTestZip = getFileListInTestZip();
 		// this checks is done on temp dir but at this point the temp dir is deleted
@@ -110,7 +110,7 @@ class TestZipFileUtils {
 		try {
 			sTempDir = oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
 		} catch (Exception oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		// then check files in temp dir
 		File oHere = new File(sTempDir);
@@ -119,7 +119,7 @@ class TestZipFileUtils {
 			Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
 			.forEach(oFileInStream -> path.add(oFileInStream.toString()));
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		String[] asFileListInTestZip = getFileListInTestZip();
 		// this checks is done on temp dir but at this point the temp dir is deleted
@@ -139,7 +139,7 @@ class TestZipFileUtils {
 		try {
 			sTempDir = oZipExtractor.unzip(s_sExtractionPath + s_sExtractionFileName, s_sExtractionPath);
 		} catch (Exception oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		// then check files in temp dir
 		File oHere = new File(sTempDir);
@@ -148,7 +148,7 @@ class TestZipFileUtils {
 			Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
 			.forEach(oFileInStream -> path.add(oFileInStream.toString()));
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		String[] asFileListInTestZip = getFileListInTestZip();
 		// this checks is done on temp dir but at this point the temp dir is deleted
@@ -169,7 +169,7 @@ class TestZipFileUtils {
 			String sPath = new String(s_sExtractionPath.substring(0, s_sExtractionPath.length()-1));
 			sTempDir = oZipExtractor.unzip(sPath + File.separator + s_sExtractionFileName, sPath);
 		} catch (Exception oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		// then check files in temp dir
 		File oHere = new File(sTempDir);
@@ -178,7 +178,7 @@ class TestZipFileUtils {
 			Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
 			.forEach(oFileInStream -> path.add(oFileInStream.toString()));
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		String[] asFileListInTestZip = getFileListInTestZip();
 		// this checks is done on temp dir but at this point the temp dir is deleted
@@ -201,7 +201,7 @@ class TestZipFileUtils {
 			sPath += "\\\\\\\\/////";
 			sTempDir = oZipExtractor.unzip(sPath + s_sExtractionFileName, sPath);
 		} catch (Exception oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		// then check files in temp dir
 		File oHere = new File(sTempDir);
@@ -210,7 +210,7 @@ class TestZipFileUtils {
 			Files.walk(oHere.toPath().getParent()) // get the parent of the temp dir
 			.forEach(oFileInStream -> path.add(oFileInStream.toString()));
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		String[] asFileListInTestZip = getFileListInTestZip();
 		// this checks is done on temp dir but at this point the temp dir is deleted
@@ -293,9 +293,9 @@ class TestZipFileUtils {
 			return asReturnArray.toArray(new String[0]);
 
 		} catch (FileNotFoundException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		} catch (IOException oE) {
-			oE.printStackTrace();
+			System.out.println("ERROR " + e.toString());
 		}
 		return null;
 

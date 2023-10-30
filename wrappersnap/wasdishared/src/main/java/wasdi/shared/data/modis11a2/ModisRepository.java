@@ -140,8 +140,9 @@ public class ModisRepository extends MongoRepository  {
 			fillList(aoReturnList, oWSDocuments, ModisItemForReading.class);
 
 
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ModisRepository.getModisItemList: error", oEx);
 		}
 
 		return aoReturnList;

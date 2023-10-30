@@ -227,7 +227,7 @@ public class SubscriptionRepository extends MongoRepository {
 				try {
 					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("SubscriptionRepository.getByName: error", e);
 				}
 
 				return oSubscription;

@@ -162,8 +162,8 @@ public class Utils {
 			if (Files.isDirectory(path)) {
 				try {
 					fixUpPermissions(path);
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (IOException oEx) {
+					WasdiLog.errorLog("Utils.fixUpPermissions: error", oEx);
 
 				}
 			} else {
@@ -181,8 +181,8 @@ public class Utils {
 					PosixFilePermission.OTHERS_EXECUTE));
 			try {
 				Files.setPosixFilePermissions(executablePathName, permissions);
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("Utils.setExecutablePermissions: error", oEx);
 			}
 		}
 	}
@@ -500,7 +500,7 @@ public class Utils {
 			try {
 				sOutput += asNewBounds[1] + "," + asNewBounds[0];
 			} catch (Exception oEx) {
-				oEx.printStackTrace();
+				WasdiLog.errorLog("Utils.polygonToBounds: error", oEx);
 			}
 
 		}

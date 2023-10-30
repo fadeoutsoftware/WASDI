@@ -201,7 +201,7 @@ public class WorkspaceRepository extends  MongoRepository {
                 try {
                     oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	WasdiLog.errorLog("WorkspaceRepository.getByUserIdAndWorkspaceName: error", e);
                 }
                 
                 return oWorkspace;

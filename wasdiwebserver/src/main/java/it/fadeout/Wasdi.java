@@ -520,8 +520,7 @@ public class Wasdi extends ResourceConfig {
 		            return oPrimitiveResult;
 		        } 
 		        catch (Exception oEx) {
-		            oEx.printStackTrace();
-					WasdiLog.debugLog("Wasdi.runProcess: exception " + oEx);
+					WasdiLog.errorLog("Wasdi.runProcess: exception ", oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;				
@@ -689,7 +688,7 @@ public class Wasdi extends ResourceConfig {
 							// 	opens an output stream to save into file
 							Util.copyStream(oInputStream, oOutputStream);
 					}catch (Exception oEx) {
-						oEx.printStackTrace();
+						WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 					}
 					return sOutputFilePath;
 				} else {
@@ -699,14 +698,14 @@ public class Wasdi extends ResourceConfig {
 				}
  				
 			} catch (Exception oEx) {
-				oEx.printStackTrace();
+				WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 				return "";
 			}
 			
 			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 			return "";
 		}		
 	}	
