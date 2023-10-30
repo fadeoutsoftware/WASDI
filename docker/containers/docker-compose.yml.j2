@@ -100,7 +100,7 @@ services:
   {{ sWasdiKeycloakServiceName }}:
     command:
       - "start"
-{% if bWasdiKeycloakContainerNewInstance | default(False) == True %}
+{% if bWasdiKeycloakNewInstance | default(False) == True %}
       - "--import-realm"
 {% endif %}
     depends_on:
