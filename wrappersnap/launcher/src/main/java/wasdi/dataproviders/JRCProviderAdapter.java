@@ -72,7 +72,7 @@ public class JRCProviderAdapter extends ProviderAdapter {
 	@Override
 	protected int internalGetScoreForFile(String sFileName, String sPlatformType) {
 		
-		if (sPlatformType.equals(Platforms.STATICS_TILES)) {
+		if (sPlatformType.equals(Platforms.JRC_GHSL)) {
 			return DataProviderScores.DOWNLOAD.getValue();
 		}
 		

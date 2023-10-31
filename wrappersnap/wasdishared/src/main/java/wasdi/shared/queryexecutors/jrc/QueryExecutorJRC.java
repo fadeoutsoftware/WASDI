@@ -34,10 +34,7 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
 import wasdi.shared.viewmodels.search.QueryViewModel;
 
 public class QueryExecutorJRC extends QueryExecutor {
-	
-	// TODO: delete this with the new shape file
-	protected final static String s_sESRI54009 = "ESRI:54009";
-	protected final static String s_sEPSG4326 = "EPSG:4326";
+
 	private String m_sShapeMaskPath;
 	
 	public QueryExecutorJRC() {
@@ -75,16 +72,9 @@ public class QueryExecutorJRC extends QueryExecutor {
 			return iCount;
 		}
 		
-		// TODO: remove this call to the translate method, with the new shape file
-		// convert the coordinate system before accessing the shape file 
-		Double oW = oQueryVM.west; //  != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
-		Double oE = oQueryVM.east; // != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
-		Double oS = oQueryVM.south; // != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
-		Double oN = oQueryVM.north; // != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
-		
 		try {
 			
-			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS, oQueryVM.productName);
+			Map<String, String> oTilesMap = getTilesInArea(oQueryVM.west, oQueryVM.north, oQueryVM.east, oQueryVM.south, oQueryVM.productName);
 			iCount = oTilesMap.size();
 			
 		} catch (Exception oEx) {
@@ -109,18 +99,11 @@ public class QueryExecutorJRC extends QueryExecutor {
 			WasdiLog.debugLog("QueryExecutorJRC.executeAndRetrieve. Plaform not supported by the data provider for query: " + oQuery.getQuery());
 			return aoResults;
 		}
-		
-		// TODO: remove this call to the translate method, with the new shape file
-		// convert the coordinate system before accessing the shape file 
-		Double oW = oQueryVM.west; // != null ? translateLongitude(oQueryVM.west, s_sEPSG4326, s_sESRI54009) : null;
-		Double oE = oQueryVM.east; // != null ? translateLongitude(oQueryVM.east, s_sEPSG4326, s_sESRI54009) : null;
-		Double oS = oQueryVM.south; // != null ? translateLatitude(oQueryVM.south, s_sEPSG4326, s_sESRI54009) : null;
-		Double oN = oQueryVM.north; // != null ? translateLatitude(oQueryVM.north, s_sEPSG4326, s_sESRI54009) : null;
-		
+	
 		
 		try {
 			
-			Map<String, String> oTilesMap = getTilesInArea(oW, oN, oE, oS, oQueryVM.productName);
+			Map<String, String> oTilesMap = getTilesInArea(oQueryVM.west, oQueryVM.north, oQueryVM.east, oQueryVM.south, oQueryVM.productName);
 			
 			aoResults = ((ResponseTranslatorJRC) m_oResponseTranslator).translateResults(oTilesMap, oQuery.getLimit(), oQuery.getOffset());
 			
@@ -254,43 +237,5 @@ public class QueryExecutorJRC extends QueryExecutor {
 
         return "";
     }
-	
-	
-	// TODO: delete these support methods, with the new shape file
-	/*
-	public static double translateLongitude(double dLongitude, String sSourceEncoding, String sTargetEncoding) {
-		return translateCoordinate(dLongitude, 0, sSourceEncoding, sTargetEncoding)[0];
-	}
-	
-	
-	public static double translateLatitude(double dLatitude, String sSourceEncoding, String sTargetEncoding) {
-		return translateCoordinate(0, dLatitude, sSourceEncoding, sTargetEncoding)[1];
-	}
-	
-	
-    public static double[] translateCoordinate(double dLongitude, double dLatitude, String sSourceEncoding, String sTargetEncoding) {
-
-        // Create CRS instances
-        CRSFactory oCrsFactory = new CRSFactory();
-        CoordinateReferenceSystem oSourceCRSRS = oCrsFactory.createFromName(sSourceEncoding);
-        CoordinateReferenceSystem oTargetCRSRS = oCrsFactory.createFromName(sTargetEncoding);
-
-        // Create a CoordinateTransform instance
-        CoordinateTransform transform = new CoordinateTransformFactory().createTransform(oSourceCRSRS, oTargetCRSRS);
-
-
-        // Transform the coordinates
-        ProjCoordinate oSourceCoord = new ProjCoordinate(dLongitude, dLatitude);
-        ProjCoordinate oTargetCoord = new ProjCoordinate();
-        transform.transform(oSourceCoord, oTargetCoord);
-
-        // Extract the transformed coordinates
-        double dTargetLong = oTargetCoord.x;
-        double dTargetLat = oTargetCoord.y;
-        
-        return new double[] {dTargetLong, dTargetLat};
-    }
-    
-*/
 
 }

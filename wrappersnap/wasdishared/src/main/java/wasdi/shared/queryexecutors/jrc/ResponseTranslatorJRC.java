@@ -66,14 +66,13 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 		try {
 			String sTitle = s_sFileNamePrefix + sTileId; 
-			String sFootprint = sTileFootprint; // getWasdiFormatFootPrint(sTileFootprint); // TODO: we can directly use the passed footprint, with the new shapefile
-			String sLink = getLink(sTitle, sFootprint);
+			String sLink = getLink(sTitle, sTileFootprint);
 			
 			oRes.setTitle(sTitle);
 			oRes.setSummary("");
 			oRes.setId(sTitle);
 			oRes.setLink(sLink);
-			oRes.setFootprint(sFootprint);
+			oRes.setFootprint(sTileFootprint);
 			oRes.setProvider("JRC");
 			
 		} catch (Exception oEx) {
@@ -83,51 +82,6 @@ public class ResponseTranslatorJRC extends ResponseTranslator {
 		
 	}
 	
-	// TODO: we will not use anymore this methid with the new shapefile
-	/*
-	public static String getWasdiFormatFootPrint(String sFootprint) {
-		String sPrefix = sFootprint.substring(0, 16); // this should be the string "MULTYPOLIGON ((("
-		String sSuffix = sFootprint.substring(sFootprint.length() - 3, sFootprint.length());
-		
-		String sSanitizedESRIFootprint = sFootprint.substring(16, sFootprint.length() - 3);
-		
-		List<String> asPairs = Arrays.asList(sSanitizedESRIFootprint.split(", "));
-		
-		
-		
-		List<Integer> asLong = asPairs.stream()
-				.map(sPair -> sPair.split(" "))
-				.map(asArray -> asArray[0])
-				.map(sLong -> Integer.parseInt(sLong))
-				.collect(Collectors.toList());
-		List<Integer> asLat = asPairs.stream()
-				.map(sPair -> sPair.split(" "))
-				.map(asArray -> asArray[1])
-				.map(sLong -> Integer.parseInt(sLong))
-				.collect(Collectors.toList());
-		
-		int iMaxLong = Collections.max(asLong);
-		int iMinLong = Collections.min(asLong);
-		
-		int iMaxLat = Collections.max(asLat);
-		int iMinLat = Collections.min(asLat);
-		
-		double dMaxLong = QueryExecutorJRC.translateLongitude(iMaxLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		double dMinLong = QueryExecutorJRC.translateLongitude(iMinLong, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		
-		double dMaxLat = QueryExecutorJRC.translateLatitude(iMaxLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-		double dMinLat = QueryExecutorJRC.translateLatitude(iMinLat, QueryExecutorJRC.s_sESRI54009, QueryExecutorJRC.s_sEPSG4326);
-
-		
-		String sCoord = dMinLong + " " + dMaxLat + ", " + dMaxLong + " " + dMaxLat + ", " + dMaxLong + " " + dMinLat + ", " + dMinLong + " " + dMinLat + ", " + dMinLong + " " + dMaxLat;
-		
-		
-		// now we can for the footprint in wasdi format
-		return sPrefix + sCoord + sSuffix;
-		
-	}
-	*/
-
 	
 	private String getLink(String sTitle, String sBoundingBox) {
 		StringBuilder oBuilder = new StringBuilder();

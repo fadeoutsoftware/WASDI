@@ -64,7 +64,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 	
 	/**
 	 * Extract the tile id from the name of the file
-	 * @return
+	 * @return the id of the tile the file refers to
 	 */
 	private String getTileId() {
 		String sFileName = m_oProductFile.getName();
@@ -126,9 +126,9 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 				}	
 				
 			} catch (IOException oEx) {
-				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error reading the shape file. " + oEx.getMessage() );
+				WasdiLog.errorLog("GHSLTilesReader.getProductBoundingBox. Error reading the shape file. " + oEx.getMessage() );
 			} catch (CQLException oEx) {
-				WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Error while creating  " + oEx.getMessage() );
+				WasdiLog.errorLog("GHSLTilesReader.getProductBoundingBox. Error while creating  " + oEx.getMessage() );
 			}
 			finally {
 				if (aoFeaturesIterator != null) {
@@ -141,12 +141,9 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		} // from here on, we do not access the shape file anymore, so we can release the lock.
 		
 		if (asBBoxes.size() == 1) {
-			String sBBoxESRIFormat = asBBoxes.get(0);
+			String sBBoxFormat = asBBoxes.get(0);
 			
-			// TODO: REMOVE THIS WITH NEW SHAPE FILE
-//			String sBBoxWasdiFormat = ResponseTranslatorJRC.getWasdiFormatFootPrint(sBBoxESRIFormat);
-			
-			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxESRIFormat.split(", ")).stream
+			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxFormat.split(", ")).stream
 					().map(sPair -> sPair.split(" "));
 			
 			List<Double> adLongitude = aaCoordinatesStream
@@ -170,7 +167,7 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 					(float) dMinY, (float) dMinX, (float) dMinY, (float) dMaxX, (float) dMaxY, (float) dMaxX, (float) dMaxY, (float) dMinX, (float) dMinY, (float) dMinX);	
 		} 
 		else {
-			WasdiLog.errorLog("QueryExecutorJRC.getProductBoundingBox. Zero or more than one tile was found. Returning empty bounding box. Tile id" + sTileId);
+			WasdiLog.errorLog("GHSLTilesReader.getProductBoundingBox. Zero or more than one tile was found. Returning empty bounding box. Tile id: " + sTileId);
 			sRes = "";
 		}
 			
