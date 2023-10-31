@@ -149,7 +149,6 @@ var HomeController = (function () {
             oUser.role = data.role;
             oUser.type = data.type; 
             oController.m_oConstantsService.setUser(oUser);//set user
-            console.log("We are in the sessionId branch")
             oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
         }
         else {
@@ -170,8 +169,19 @@ var HomeController = (function () {
             oUser.refreshToken = data['refresh_token'];
 
             oController.m_oConstantsService.setUser(oUser);//set user
-            console.log("We are in the Keycloak branch")
-            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+            
+            oController.m_oAuthService.checkSession().then(
+                function (data, status) {
+                    if (data) {
+                        if (!utilsIsObjectNullOrUndefined(data.data.userId)) {
+                            // -> go to marketplace
+                            oController.m_oState.go("root.marketplace");
+                        }
+                    }
+                }, function (data, status) {
+                    //alert('error');
+                    utilsVexDialogAlertTop(sMessage);
+                });
         }
 
     }

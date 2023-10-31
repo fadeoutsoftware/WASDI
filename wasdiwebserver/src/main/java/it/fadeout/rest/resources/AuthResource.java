@@ -671,9 +671,9 @@ public class AuthResource {
 					throw new RuntimeException(sMessage);
 				}
 			}
-		} catch(Exception oE) {
+		} 
+		catch(Exception oE) {
 			WasdiLog.errorLog("AuthResource.userRegistration: " + oE + ", aborting");
-			oE.printStackTrace();
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
