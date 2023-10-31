@@ -33,14 +33,14 @@ services:
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     image: "{{ sWasdiClientServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -60,7 +60,7 @@ services:
 {% endif %}
   {{ sWasdiContainerGeoserverServiceName }}:
     depends_on:
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     environment:
       - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
       - GEOSERVER_DATA_DIR=/mnt/data_{{ sWasdiContainerGeoserverServiceName }}
@@ -73,7 +73,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/geoserver`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.service=s_{{ sWasdiContainerGeoserverServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -133,7 +133,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.middlewares=wasdi-secure-keycloak@file"
+      - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.service=s_{{ sWasdiKeycloakServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -227,7 +227,7 @@ services:
 
   {{ sWasdiContainerRabbitMqServiceName }}:
     depends_on:
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     environment:
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
       - RABBITMQ_DISTRIBUTION_BUFFER_SIZE=128000
@@ -243,7 +243,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.service=s_{{ sWasdiContainerRabbitMqServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -301,7 +301,7 @@ services:
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
       - {{ sWasdiContainerRabbitMqServiceName }}
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
@@ -312,7 +312,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/ogcprocesses`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.service=s_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -345,7 +345,7 @@ services:
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
       - {{ sWasdiContainerRabbitMqServiceName }}
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
@@ -356,7 +356,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdi-openeo-server`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -392,7 +392,7 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerRabbitMqServiceName }}
 {% endif %}
-      - {{ sWasdiContainerTraefikServiceName }}
+      - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
       - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts }}
@@ -403,7 +403,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdiwebserver`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -428,7 +428,7 @@ services:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 
-  {{ sWasdiContainerTraefikServiceName }}:
+  {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"
       - "--api.dashboard=true"
@@ -447,17 +447,15 @@ services:
       - "--providers.docker.endpoint={{ sWasdiContainerTraefikDockerEndpoint }}"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
-{% if bWasdiContainerTraefikSslEnabled == True %}
-      - "--providers.file.filename=/etc/traefik/security.yml"
+      - "--providers.file.directory=/etc/traefik/conf.d"
       - "--providers.file.watch=true"
-{% endif %}
     image: "{{ sWasdiContainerTraefikImageName }}:{{ sWasdiContainerTraefikImageVersion }}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.dashboard.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.dashboard.middlewares=wasdi-secure-all@file"
+      - "traefik.http.routers.dashboard.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
       - "traefik.http.routers.dashboard.service=api@internal"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -494,17 +492,15 @@ services:
         hard: {{ sWasdiTraefikUlimitNofile }}
     volumes:
       - "{{ sWasdiDockerSocketFilePath }}:{{ sWasdiDockerSocketFilePath }}:ro"
-{% if bWasdiContainerTraefikSslEnabled == True %}
-      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik/security.yml:/etc/traefik/security.yml:ro"
 {% if bWasdiContainerTraefikSslSourceType | upper == 'MOUNT_EACH_FILE' %}
 {% for aCurrentTraefikSslCertificate in aoWasdiContainerTraefikSslCertificates %}
       - "{{ aCurrentTraefikSslCertificate['srcCertFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['certFile'] }}:ro"
       - "{{ aCurrentTraefikSslCertificate['srcKeyFile'] }}:/etc/traefik/certs/{{ aCurrentTraefikSslCertificate['keyFile'] }}:ro"
 {% endfor %}
 {% else %}
-      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
+      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
 {% endif %}
-{% endif %}
+      - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_conf.d:/etc/traefik/conf.d:ro"
 {% if bWasdiComponentUpdateMetricEnabled == True %}
 
   {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
