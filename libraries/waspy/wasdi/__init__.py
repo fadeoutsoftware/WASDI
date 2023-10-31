@@ -34,11 +34,11 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.1.1
+Version 0.8.5.1
 
-Last Update: 22/09/2023
+Last Update: 30/10/2023
 
-Tested with: Python 3.7, Python 3.8, Python 3.9
+Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
 Created on 11 Jun 2018
 
@@ -62,6 +62,7 @@ import getpass
 import os.path
 import inspect
 from datetime import datetime
+from enum import Enum
 
 # Initialize "Members"
 
@@ -98,8 +99,8 @@ m_aoParamsDictionary = {}
 # Process Workspace Id of this application
 m_sMyProcId = ''
 # Base url: by default the main wasdi server
-m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
-#m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
+#m_sBaseUrl = 'https://www.wasdi.net/wasdiwebserver/rest'
+m_sBaseUrl = 'https://test.wasdi.net/wasdiwebserver/rest'
 # The launcher set this flag true when working on a wasdi node
 m_bIsOnServer = False
 # The launcher set this flag true when working on a cloud that is not a wasdi node
@@ -110,6 +111,8 @@ m_bOnlyWorkspaceFolderMounted = False
 m_iRequestsTimeout = 2 * 60
 # Specific timeout for the upload http calls
 m_iUploadTimeout = 10 * 60
+# Local copy of the payload of the app
+m_sPayload = ""
 
 def printStatus():
     """Prints status
@@ -1628,6 +1631,12 @@ def setPayload(data):
     :param data: data to save in the payload. Suggestion is to use JSON
     return None
     """
+    global m_sPayload
+
+    try:
+        m_sPayload = json.dumps(data)
+    except:
+        _log('wasdi.setPayload() error saving m_sPayload')
 
     if getIsOnServer() is True or getIsOnExternalServer() is True:
         setProcessPayload(getProcId(), data)
@@ -1644,10 +1653,13 @@ def getProcessorPayload(sProcessObjId, bAsJson=False):
     :param bAsJson: flag to indicate whether the payload is a json object: if True, then a dictionary is returned
     :return: the processor payload if present, None otherwise
     """
+    global m_sPayload
+
     try:
         if sProcessObjId is None:
             wasdiLog('[WARNING] waspy.getProcessorPayload: process obj id is None, aborting')
             return None
+
         sUrl = getWorkspaceBaseUrl() + '/process/payload'
         asParams = {'procws': sProcessObjId}
         asHeaders = _getStandardHeaders()
@@ -1682,6 +1694,79 @@ def getProcessorPayloadAsJson(sProcessObjId):
     :return: the processor payload if present as a dictionary, None otherwise
     """
     return getProcessorPayload(sProcessObjId, True)
+
+def addChartToPayload(aoXValues, aoYValues, sChartType ="line", sChartName ="", sSerieName ="", sXAxisName = False, sYAxisName = False):
+    """
+    Adds a chart to the payload
+
+    param aoXValues Array of X Axis Values
+    param aoYValues Array of Y Axis Values
+    param sChartType Chart Type. The vaid types are enumered in wasdi.ChartType
+    param sChartName Name to assign to the chart
+    param sSerieName Name to assign to the serie
+    param sXAxisName X Axis name. False to hide it.
+    param sYAxisName Y Axis name. False to hide it.
+    """
+    global m_sPayload
+
+    if aoXValues is None:
+        wasdiLog('[ERROR] waspy.addChartToPayload: aoXValues is None, return')
+        return False
+
+    if aoYValues is None:
+        wasdiLog('[ERROR] waspy.addChartToPayload: aoYValues is None, return')
+        return False
+
+    if m_sPayload is None:
+        m_sPayload = ""
+
+    if m_sPayload == "":
+        m_sPayload = "{}"
+
+    try:
+        aoPayload = json.loads(m_sPayload)
+        if not "wasdi_dashboard" in aoPayload:
+            aoPayload["wasdi_dashboard"] = []
+
+        oChart = {}
+
+        if type(sChartType) == str:
+            oChart["chart-type"] = sChartType
+        elif isinstance(sChartType, wasdi.ChartType):
+            oChart["chart-type"] = sChartType.value
+        else:
+            oChart["chart-type"] = str(sChartType)
+
+        oChart["chart-name"] = sChartName
+        oChart["x-axis-name"] = sXAxisName
+        oChart["y-axis-name"] = sYAxisName
+        oChart["chart-data"] = []
+
+        oChartData = {}
+        oChartData["name"] = sSerieName
+        oChartData["series"] = []
+
+        iXValuesLength = len(aoXValues)
+        iYValuesLength = len(aoYValues)
+
+        iMax = iXValuesLength
+        if iYValuesLength<iMax:
+            iMax = iYValuesLength
+
+        for iCount in range(0,iMax):
+            oChartDataValue = {}
+            oChartDataValue["value"] = aoYValues[iCount]
+            oChartDataValue["name"] = aoXValues[iCount]
+            oChartData["series"].append(oChartDataValue)
+
+        oChart["chart-data"].append(oChartData)
+
+        aoPayload["wasdi_dashboard"].append(oChart)
+
+        setPayload(aoPayload)
+    except:
+        wasdiLog('[ERROR] waspy.addChartToPayload: error, return')
+        return False
 
 
 def setSubPid(sProcessId, iSubPid):
@@ -4318,7 +4403,7 @@ def getProductBandNames(sFileName):
         Gets the list of bands of a file as strings
 
         :param sFileName: name of the file to query for list of bands
-        :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
+        :return: Array of strings containing the names of the bands
         """
 
     sUrl = getBaseUrl()
@@ -4354,6 +4439,50 @@ def getProductBandNames(sFileName):
         return []
 
     return []
+
+def getProductProperties(sFileName):
+    """
+        Gets the properties of a product
+
+        :param sFileName: name of the file to query for properties
+        :return: An object with properties: String fileName; String friendlyName; long lastUpdateTimestampMs; String checksum; String style. None in case of error.
+    """
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/catalog/properties?file="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] waspy.getProductProperties: there was an error contacting the API " + str(oEx))
+        return None
+
+    try:
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get properties for product')
+        elif oResponse.ok is not True:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get product properties, server returned: ' + str(oResponse.status_code) + '  ')
+        else:
+            oJsonResponse = oResponse.json()
+            return oJsonResponse
+    except:
+        return None
+
+    return None
+
+class ChartType(Enum):
+    line = "line"
+    lineArea = "line-area"
+    lineStacked = "line-stacked"
+    barHorizontal = "bar-horizontal"
+    barVertical = "bar-vertical"
+    pie = "pie"
+
 
 if __name__ == '__main__':
     _log('WASPY - The WASDI Python Library. Include in your code to develop space processors. Visit www.wasdi.net')

@@ -74,8 +74,8 @@ public class DownloadedFilesRepository extends MongoRepository {
     }
 
     /**
-     * Get Downloaded file by name
-     * @param sFileName
+     * Get Downloaded file by the fulle Path
+     * @param sFileName Full Path of the file
      * @return
      */
     public DownloadedFile getDownloadedFile(String sFileName) {

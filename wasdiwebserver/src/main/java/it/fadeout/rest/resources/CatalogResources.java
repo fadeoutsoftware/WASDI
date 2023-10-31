@@ -2,7 +2,10 @@ package it.fadeout.rest.resources;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -36,6 +39,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.products.FtpTransferViewModel;
+import wasdi.shared.viewmodels.products.ProductPropertiesViewModel;
 
 /**
  * Catalog Resource
@@ -584,6 +588,111 @@ public class CatalogResources {
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
 			oRes.setStringValue(oEx.toString());
 			return oRes;
+		}
+	}
+	
+	@GET
+	@Path("/properties")
+	@Produces({"application/json", "text/xml"})
+	public Response getProductProperties(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName) {
+		
+		WasdiLog.debugLog("CatalogResource.getProductProperties ws="+sWorkspaceId + " file: " + sFileName);
+		
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+		
+		if(oUser==null) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: invalid user or session");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		if (Utils.isNullOrEmpty(sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: invalid workspace");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		// Check if there is no malicius attemp
+		if (sWorkspaceId.contains("/") || sWorkspaceId.contains("\\")) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: Injection attempt from users");
+			return Response.status(Status.BAD_REQUEST).build();
+		}		
+		
+		if (!PermissionsUtils.canUserAccessWorkspace(oUser.getUserId(), sWorkspaceId)) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: user cannot access the workspace");
+			return Response.status(Status.FORBIDDEN).build();
+		}
+		
+		if (Utils.isNullOrEmpty(sFileName)) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: invalid file name");
+			return Response.status(Status.BAD_REQUEST).build();			
+		}
+		
+		// Check if there is no malicius attemp
+		if (sFileName.contains("/") || sFileName.contains("\\")) {
+			WasdiLog.warnLog("CatalogResource.getProductProperties: Injection attempt from users");
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		
+		try {
+			
+			// Get the user Id
+			String sUserId = oUser.getUserId();
+			
+			// Get the workspace path and the full path
+			String sWorkspacePath = PathsConfig.getWorkspacePath(sUserId, sWorkspaceId);
+			String sFullFilePath = sWorkspacePath + sFileName;
+			
+			// Check if we have the file in the db
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.getDownloadedFileByPath(sFullFilePath);
+			
+			if (oDownloadedFile==null) {
+				WasdiLog.warnLog("CatalogResource.getProductProperties: file not found " + sFullFilePath);
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			// Check if the file exists
+			File oFile = new File(sFullFilePath);
+			
+			if (!oFile.exists()) {
+				WasdiLog.warnLog("CatalogResource.getProductProperties: entry is in the db but file not found " + sFullFilePath);
+				return Response.status(Status.BAD_REQUEST).build();			
+			}
+			
+			// Create the return view model
+			ProductPropertiesViewModel oProductPropertiesViewModel = new ProductPropertiesViewModel();
+			
+			// Set file name
+			oProductPropertiesViewModel.setFileName(sFileName);
+			
+			// Set friendly name
+			if (oDownloadedFile.getProductViewModel()!=null) {
+				oProductPropertiesViewModel.setFriendlyName(oDownloadedFile.getProductViewModel().getProductFriendlyName());
+			}
+			if (Utils.isNullOrEmpty(oProductPropertiesViewModel.getFriendlyName())) {
+				oProductPropertiesViewModel.setFriendlyName(sFileName);
+			}
+			
+			// Last update timestamp
+			oProductPropertiesViewModel.setLastUpdateTimestampMs(oFile.lastModified());
+			// Default style
+			oProductPropertiesViewModel.setStyle(oDownloadedFile.getDefaultStyle());
+			
+			// Get the checksum
+			java.nio.file.Path oPath = Paths.get(sFullFilePath);
+			
+			byte [] ayBytes = Files.readAllBytes(oPath);
+			byte [] ayChecksum = MessageDigest.getInstance("MD5").digest(ayBytes);
+			String sChecksum = new BigInteger(1, ayChecksum).toString(16);
+			oProductPropertiesViewModel.setChecksum(sChecksum);
+			
+			WasdiLog.debugLog("CatalogResource.getProductProperties: returning view model with checksum " + sChecksum);
+			
+			return Response.ok(oProductPropertiesViewModel).build();
+
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("CatalogResource.getProductProperties: ", oEx);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 	
