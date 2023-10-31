@@ -150,8 +150,8 @@ var HomeController = (function () {
             oUser.role = data.role;
             oUser.type = data.type; 
             oController.m_oConstantsService.setUser(oUser);//set user
-            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
-
+            console.log("We are in the sessionId branch")
+            //oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
         }
         else {
             window.localStorage.access_token = data['access_token']
@@ -171,7 +171,8 @@ var HomeController = (function () {
             oUser.refreshToken = data['refresh_token'];
 
             oController.m_oConstantsService.setUser(oUser);//set user
-            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+            console.log("We are in the Keycloak branch")
+            //oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
         }
 
     }
