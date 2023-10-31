@@ -1,0 +1,29 @@
+print('[ECOSTRESS] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[ECOSTRESS] OK')
+
+print('[ECOSTRESS] Creating the database user...')
+oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoEcostressDatabaseName'));
+oCurrentDatabase.createUser(
+    {
+        user: _getEnv('sWasdiMongoEcostressUserName'),
+        pwd: _getEnv('sWasdiMongoEcostressUserPassword'),
+        roles: [
+            {
+                role: 'readWrite',
+                db: _getEnv('sWasdiMongoEcostressDatabaseName')
+            }
+        ]
+    }
+);
+print('[ECOSTRESS] OK')
+
+print('[ECOSTRESS] Creating an empty collection to initialize the database...')
+oCurrentDatabase.createCollection('_initialized');
+print('[ECOSTRESS] OK')

@@ -158,12 +158,14 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
 
   {{ sWasdiContainerPostgresqlKeycloakServiceName }}:
+{% if bWasdiPostgresqlKeycloakInitialized == False %}
     environment:
       - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
       - POSTGRES_USER=${sPostgresqlKeycloakDatabaseUsername}
       - POSTGRES_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
       - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
       - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
+{% endif %}
     image: "{{ sWasdiContainerPostgresqlKeycloakImageName }}:{{ sWasdiContainerPostgresqlKeycloakImageVersion }}"
     restart: "unless-stopped"
     ulimits:
@@ -173,65 +175,54 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
 
-  # MongoDB > main node
-  {{ sWasdiContainerMongoMainServiceName }}:
+  # MongoDB
+  {{ sWasdiMongoServiceName }}:
+{% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
+    command: "mongod --port {{ sWasdiMongoInternalPort }}"
+{% endif %}
+{% if bWasdiMongoInitialized == False %}
     environment:
-      - MONGO_INITDB_DATABASE={{ sWasdiContainerMongoMainDatabaseName }}
+      - MONGO_INITDB_DATABASE=${sWasdiMongoWasdiDatabaseName}
       - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorPassword}
       - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUsername}
-      - sWasdiContainerMongoMainDatabasePassword=${sWasdiContainerMongoMainDatabasePassword}
-      - sWasdiContainerMongoMainDatabaseUsername=${sWasdiContainerMongoMainDatabaseUsername}
-      - sWasdiContainerMongoMainDatabaseBackupPassword=${sWasdiContainerMongoMainDatabaseBackupPassword}
-      - sWasdiContainerMongoMainDatabaseBackupUsername=${sWasdiContainerMongoMainDatabaseBackupUsername}
-    image: "mongo:{{ sWasdiContainerMongoMainVersion }}"
-{% if sWasdiContainerMongoMainInternalPort | default("") != ""
-    and sWasdiContainerMongoMainExternalPort | default("") != ""
-    and aWasdiContainerMongoMainExternalIp | default([]) | length > 0 %}
+      - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
+      - sWasdiMongoAdditionalUserBackupUserPassword=${sWasdiMongoAdditionalUserBackupUserPassword}
+{% if sWasdiServerTypeIsMain == True %}
+      - sWasdiMongoEcostressDatabaseName=${sWasdiMongoEcostressDatabaseName}
+      - sWasdiMongoEcostressUserName=${sWasdiMongoEcostressUserName}
+      - sWasdiMongoEcostressUserPassword=${sWasdiMongoEcostressUserPassword}
+      - sWasdiMongoModisDatabaseName=${sWasdiMongoModisDatabaseName}
+      - sWasdiMongoModisUserName=${sWasdiMongoModisUserName}
+      - sWasdiMongoModisUserPassword=${sWasdiMongoModisUserPassword}
+{% endif %}
+      - sWasdiMongoWasdiDatabaseName=${sWasdiMongoWasdiDatabaseName}
+      - sWasdiMongoWasdiUserName=${sWasdiMongoWasdiUserName}
+      - sWasdiMongoWasdiUserPassword=${sWasdiMongoWasdiUserPassword}
+{% if sWasdiServerTypeIsMain == True %}
+      - sWasdiMongoWasdiStatsDatabaseName=${sWasdiMongoWasdiStatsDatabaseName}
+      - sWasdiMongoWasdiStatsUserName=${sWasdiMongoWasdiStatsUserName}
+      - sWasdiMongoWasdiStatsUserPassword=${sWasdiMongoWasdiStatsUserPassword}
+{% endif %}
+{% endif %}
+    image: "mongo:{{ sWasdiMongoVersion }}"
+{% if sWasdiMongoInternalPort | default("") != ""
+    and sWasdiMongoExternalPort | default("") != ""
+    and aWasdiMongoExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerMongoMainExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerMongoMainExternalPort }}:{{ sWasdiContainerMongoMainInternalPort }}"
+{% for sCurrentExternalIp in aWasdiMongoContainerExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
     ulimits:
       nofile:
-        soft: {{ sWasdiMongoMainUlimitNofile }}
-        hard: {{ sWasdiMongoMainUlimitNofile }}
+        soft: {{ sWasdiMongoUlimitNofile }}
+        hard: {{ sWasdiMongoUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoMainServiceName }}/data01:/data/db:rw
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoMainServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-{% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-
-  # MongoDB > computational node
-  {{ sWasdiContainerMongoComputationalServiceName }}:
-    environment:
-      - MONGO_INITDB_DATABASE={{ sWasdiContainerMongoComputationalDatabaseName }}
-      - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorPassword}
-      - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUsername}
-      - sWasdiContainerMongoComputationalDatabasePassword=${sWasdiContainerMongoComputationalDatabasePassword}
-      - sWasdiContainerMongoComputationalDatabaseUsername=${sWasdiContainerMongoComputationalDatabaseUsername}
-      - sWasdiContainerMongoComputationalDatabaseBackupPassword=${sWasdiContainerMongoComputationalDatabaseBackupPassword}
-      - sWasdiContainerMongoComputationalDatabaseBackupUsername=${sWasdiContainerMongoComputationalDatabaseBackupUsername}
-    image: "mongo:{{ sWasdiContainerMongoComputationalVersion }}"
-{% if sWasdiContainerMongoComputationalInternalPort | default("") != ""
-    and sWasdiContainerMongoComputationalExternalPort | default("") != ""
-    and aWasdiContainerMongoComputationalExternalIp | default([]) | length > 0 %}
-    ports:
-{% for sCurrentExternalIp in aWasdiContainerMongoComputationalExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerMongoComputationalExternalPort }}:{{ sWasdiContainerMongoComputationalInternalPort }}"
-{% endfor %}
-{% endif %}
-    restart: "unless-stopped"
-    ulimits:
-      nofile:
-        soft: {{ sWasdiMongoComputationalUlimitNofile }}
-        hard: {{ sWasdiMongoComputationalUlimitNofile }}
-    volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoComputationalServiceName }}/data01:/data/db:rw
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerMongoComputationalServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-{% endif %}
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiContainerRabbitMqServiceName }}:
@@ -290,12 +281,7 @@ services:
   {{ sWasdiSchedulerServiceName }}:
     # Disable until we are ready to start all containers
     #depends_on:
-{% if sWasdiServerTypeIsMain == True %}
-#      - {{ sWasdiContainerMongoMainServiceName }}
-{% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-#      - {{ sWasdiContainerMongoComputationalServiceName }}
-{% endif %}
+#      - {{ sWasdiMongoServiceName }}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
@@ -313,12 +299,7 @@ services:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiContainerMongoMainServiceName }}
-{% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-      - {{ sWasdiContainerMongoComputationalServiceName }}
-{% endif %}
+      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiContainerRabbitMqServiceName }}
       - {{ sWasdiContainerTraefikServiceName }}
     environment:
@@ -362,12 +343,7 @@ services:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiContainerMongoMainServiceName }}
-{% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-      - {{ sWasdiContainerMongoComputationalServiceName }}
-{% endif %}
+      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiContainerRabbitMqServiceName }}
       - {{ sWasdiContainerTraefikServiceName }}
     environment:
@@ -411,11 +387,8 @@ services:
       - {{ sWasdiContainerGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
-      - {{ sWasdiContainerMongoMainServiceName }}
 {% endif %}
-{% if sWasdiServerTypeIsComputational == True %}
-      - {{ sWasdiContainerMongoComputationalServiceName }}
-{% endif %}
+      - {{ sWasdiMongoServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiContainerRabbitMqServiceName }}
 {% endif %}
