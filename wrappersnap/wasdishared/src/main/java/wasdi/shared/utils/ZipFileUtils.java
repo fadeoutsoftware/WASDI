@@ -466,18 +466,20 @@ public class ZipFileUtils {
 		
 		try (ZipOutputStream oZipOutputStream = new ZipOutputStream(Files.newOutputStream(oZipFilePath))) {
 			Path oPath = Paths.get(sSourceDirPath);
-			Files.walk(oPath)
-			.filter(path -> !Files.isDirectory(path))
-			.forEach(path -> {
-				ZipEntry zipEntry = new ZipEntry(oPath.relativize(path).toString());
-				try {
-					oZipOutputStream.putNextEntry(zipEntry);
-					Files.copy(path, oZipOutputStream);
-					oZipOutputStream.closeEntry();
-				} catch (IOException e) {
-					WasdiLog.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
-				}
-			});
+			
+			try (Stream<Path> oPathStream = Files.walk(oPath)) {
+				oPathStream.filter(path -> !Files.isDirectory(path))
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(oPath.relativize(path).toString());
+					try {
+						oZipOutputStream.putNextEntry(zipEntry);
+						Files.copy(path, oZipOutputStream);
+						oZipOutputStream.closeEntry();
+					} catch (IOException e) {
+						WasdiLog.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
+					}
+				});
+			}		
 		}
 	}
 	

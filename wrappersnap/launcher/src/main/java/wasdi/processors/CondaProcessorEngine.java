@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +41,10 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 	protected void onAfterUnzipProcessor(String sProcessorFolder) {
 		super.onAfterUnzipProcessor(sProcessorFolder);
 		
+		InputStreamReader oFileReader = null;
+		FileOutputStream oNewEnvFile = null;
+		BufferedWriter oEnvWriter = null;
+		
 		try {
 			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: adjust env.yml");
 			
@@ -59,7 +64,7 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 				sEnvFileEncoding = StandardCharsets.UTF_8.toString();
 			}			
 			
-			InputStreamReader oFileReader = new InputStreamReader(new FileInputStream(oEnvFile), sEnvFileEncoding);
+			oFileReader = new InputStreamReader(new FileInputStream(oEnvFile), sEnvFileEncoding);
 			
 			// Read all the packages requested by the user
 			ArrayList<String> asEnvRows = new ArrayList<String>(); 
@@ -74,9 +79,9 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 			
 			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: writing new env.yml file");
 			
-			FileOutputStream oNewEnvFile = new FileOutputStream(oEnvFile);
+			oNewEnvFile = new FileOutputStream(oEnvFile);
 			 
-			BufferedWriter oEnvWriter = new BufferedWriter(new OutputStreamWriter(oNewEnvFile, StandardCharsets.UTF_8));
+			oEnvWriter = new BufferedWriter(new OutputStreamWriter(oNewEnvFile, StandardCharsets.UTF_8));
 		 
 			for (int iRows = 0; iRows < asEnvRows.size(); iRows++) {
 				
@@ -95,13 +100,19 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 				oEnvWriter.newLine();
 			}
 		 
-			oEnvWriter.close();	
 			oNewEnvFile.flush();
-			oNewEnvFile.close();			
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
-		}		
+			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception ", oEx);
+		} finally {
+			try {
+				if (oFileReader != null) oFileReader.close();
+				if (oNewEnvFile != null) oNewEnvFile.close();
+				if (oEnvWriter != null) oEnvWriter.close();
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception when closing resources", oEx);
+			}
+		}
 	}
 	
 }

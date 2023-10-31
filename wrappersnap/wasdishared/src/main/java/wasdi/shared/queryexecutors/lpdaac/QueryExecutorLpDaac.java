@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -130,29 +131,32 @@ public class QueryExecutorLpDaac extends QueryExecutor {
 	
 	@Override
 	public void init() {
+		
 		super.init();
+		
 		if (Utils.isNullOrEmpty(this.m_sParserConfigPath)) {
 			WasdiLog.errorLog("QueryExecutorLpDaac.init. Path to parser config is empty. It won't be possible to establish a connection to the db");
 			return;
 		}
+		
+		Stream<String> oLinesStream = null;
     	try {
-    		String sModisConfigJson = Files.lines(Paths.get(this.m_sParserConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+    		
+    		oLinesStream = Files.lines(Paths.get(this.m_sParserConfigPath), StandardCharsets.UTF_8);
+    		String sModisConfigJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
     		ObjectMapper oMapper = new ObjectMapper(); 
             MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
             MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
-        } catch (Exception oEx) {
-        	WasdiLog.errorLog("QueryExecutorLpDaac.init. Error while trying to connect to MODIS db. " + oEx.getMessage());
+            
+        } 
+    	catch (Exception oEx) {
+        	WasdiLog.errorLog("QueryExecutorLpDaac.init. Error while trying to connect to MODIS db. ", oEx);
+        } 
+    	finally {	
+        	if (oLinesStream != null)
+        		oLinesStream.close();
         }
+    	
 	}
-	
 
-	public static void main(String[]args) throws Exception {
-		String sQuey = "( footprint:\"intersects(POLYGON((-172.25988969251213 -78.55484055601048,-172.25988969251213 82.92645164934402,175.6510783044044 82.92645164934402,175.6510783044044 -78.55484055601048,-172.25988969251213 -78.55484055601048)))\" ) AND ( beginPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] AND endPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] ) AND   (platformname:TERRA AND producttype:MOD11A2)";
-		
-		String sQuey1 = "( beginPosition:[2000-02-19T00:00:00.000Z TO 2000-02-20T23:59:59.999Z] AND endPosition:[2000-02-19T00:00:00.000Z TO 2000-02-29T23:59:59.999Z] ) AND   (platformname:TERRA AND producttype:MOD11A2)";
-
-		QueryExecutorLpDaac oExecutor = new QueryExecutorLpDaac();
-		
-		oExecutor.executeCount(sQuey1);
-	}
 }

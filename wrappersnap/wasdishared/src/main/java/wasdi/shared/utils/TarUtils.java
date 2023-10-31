@@ -2,6 +2,7 @@ package wasdi.shared.utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,13 +33,19 @@ public class TarUtils {
 	 * @return True if the file is created
 	 */
 	public static boolean tarFiles(List<String> asInputFilesFullPath, String sInputFilesBaseFolder, String sOutputTarFileFullPath) {
+		boolean bRes = false;
+		
+		OutputStream oOutputStream = null;
+		BufferedOutputStream oBufferedOutputStream = null;
+		TarArchiveOutputStream oTarOutputStream = null;
+		
 		try {
 			// Stream to the output file
-			OutputStream oOutputStream = Files.newOutputStream(Paths.get(sOutputTarFileFullPath));
+			oOutputStream = Files.newOutputStream(Paths.get(sOutputTarFileFullPath));
 			
 			// Lets tar this stream
-			BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
-			TarArchiveOutputStream oTarOutputStream = new TarArchiveOutputStream(oBufferedOutputStream);
+			oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
+			oTarOutputStream = new TarArchiveOutputStream(oBufferedOutputStream);
 			
 			// For all the files to add to the TAR
 			for (String sInputFile : asInputFilesFullPath) {
@@ -63,12 +70,23 @@ public class TarUtils {
 			// Close the tar stream
 			oTarOutputStream.close();
 			
-			return true;
+			bRes = true;
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("TarUtils.tarFiles: exception ", oEx);
-			return false;
 		}
+		finally {
+			try {
+				if (oOutputStream != null) oOutputStream.close();
+				if (oBufferedOutputStream != null) oBufferedOutputStream.close();
+				if (oTarOutputStream != null) oTarOutputStream.close();
+			}
+			catch (IOException oEx) {
+				WasdiLog.errorLog("TarUtils.tarFiles: exception while closing the I/O resources", oEx);
+			}
+		}
+		
+		return bRes;
 	}
 
 }

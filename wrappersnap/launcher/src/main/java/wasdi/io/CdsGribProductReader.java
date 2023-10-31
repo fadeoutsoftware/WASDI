@@ -37,9 +37,9 @@ public class CdsGribProductReader extends WasdiProductReader {
 
 		// Create the return value
 		GeorefProductViewModel oRetViewModel = null;
-
+		NetcdfFile oFile = null;
 		try {
-			NetcdfFile oFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
+			oFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
 
 			// Create the Product View Model
 			oRetViewModel = new GeorefProductViewModel();
@@ -123,6 +123,13 @@ public class CdsGribProductReader extends WasdiProductReader {
 			oRetViewModel.setBandsGroups(oNodeGroupViewModel);
 		} catch (IOException e) {
 			WasdiLog.debugLog("CdsGribProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+		} finally {
+			if (oFile != null)
+				try {
+					oFile.close();
+				} catch (IOException oEx) {
+					WasdiLog.errorLog("CdsGribProductReader.getProductViewModel: exception while closing the shape file", oEx);
+				}
 		}
 
 		return oRetViewModel;
@@ -192,6 +199,8 @@ public class CdsGribProductReader extends WasdiProductReader {
 		float fLatS = 0;
 		float fLonE = 0;
 		String sBBox = fLatN + "," + fLonW + "," + fLatS + "," + fLonE;
+		
+		oFile.close();
 
 		return sBBox;
 	}
