@@ -124,7 +124,6 @@ var HomeController = (function () {
             }, function (data, status) {
                 //alert('error');
                 utilsVexDialogAlertTop(sMessage);
-
             });
     }
 
@@ -151,7 +150,7 @@ var HomeController = (function () {
             oUser.type = data.type; 
             oController.m_oConstantsService.setUser(oUser);//set user
             console.log("We are in the sessionId branch")
-            //oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
         }
         else {
             window.localStorage.access_token = data['access_token']
@@ -172,7 +171,7 @@ var HomeController = (function () {
 
             oController.m_oConstantsService.setUser(oUser);//set user
             console.log("We are in the Keycloak branch")
-            //oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
+            oController.m_oState.go("root.marketplace");// go workspaces -> go to marketplace
         }
 
     }

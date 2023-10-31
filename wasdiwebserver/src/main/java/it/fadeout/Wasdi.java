@@ -27,6 +27,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
 import it.fadeout.providers.JerseyMapperProvider;
+import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -62,6 +63,8 @@ import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
  * Main Class of the WASDI Web Server.
@@ -279,7 +282,6 @@ public class Wasdi extends ResourceConfig {
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
-			
 			try  {
 				//introspect
 				String sPayload = "token=" + sSessionId;
@@ -293,18 +295,42 @@ public class Wasdi extends ResourceConfig {
 				}
 				if(null!=oJSON) {
 					sUserId = oJSON.optString("preferred_username", null);
-				}				
+				}
 			}
 			catch (Exception oKeyEx) {
-				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
-			
-
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
-			} else {
+				
+				if( oUser == null ) {
+					
+					WasdiLog.warnLog("Wasdi.getUserFromSession: the session is valid but the user does not exists, add it");
+					
+					AuthResource oAuthResource = new AuthResource();
+					
+					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
+					oRegistrationInfoViewModel.setUserId(sUserId);
+					PrimitiveResult oRegistrationResult = oAuthResource.userRegistration(oRegistrationInfoViewModel);
+
+					if (oRegistrationResult==null) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+					
+					if (oRegistrationResult.getBoolValue()==null) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+
+					if (oRegistrationResult.getBoolValue()==false) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+					
+					oUser = oUserRepo.getUser(sUserId);
+				}
+			} 
+			else {
 				//check session against DB
 				
 				SessionRepository oSessionRepository = new SessionRepository();
@@ -315,10 +341,12 @@ public class Wasdi extends ResourceConfig {
 				} else {
 					sUserId = oUserSession.getUserId();
 				}
+				
 				if(!Utils.isNullOrEmpty(sUserId)){
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
-				} else {
+				} 
+				else {
 					return null;
 				}
 			}
