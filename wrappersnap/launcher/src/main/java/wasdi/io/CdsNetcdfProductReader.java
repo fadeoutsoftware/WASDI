@@ -40,9 +40,10 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 
 		// Create the return value
 		GeorefProductViewModel oRetViewModel = null;
+		NetcdfFile oFile = null;
 
 		try {
-			NetcdfFile oFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
+			oFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
 
 			// Create the Product View Model
 			oRetViewModel = new GeorefProductViewModel();
@@ -102,8 +103,16 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 
 			oNodeGroupViewModel.setBands(oBands);
 			oRetViewModel.setBandsGroups(oNodeGroupViewModel);
-		} catch (IOException e) {
-			WasdiLog.debugLog("CdsNetcdfProductReader.getProductViewModel: exception reading the shape file: " + e.toString());
+		} catch (IOException oEx) {
+			WasdiLog.debugLog("CdsNetcdfProductReader.getProductViewModel: exception reading the shape file: " + oEx.toString());
+		} finally {
+			if (oFile != null) {
+				try {
+					oFile.close();
+				} catch (IOException oEx) {
+					WasdiLog.errorLog("CdsNetcdfProductReader.getProductViewModel: exception closing the shape file: ", oEx);
+				}
+			}
 		}
 
 		return oRetViewModel;
