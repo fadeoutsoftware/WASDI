@@ -171,6 +171,14 @@ public class AuthResource {
 						return UserViewModel.getInvalid();						
 					}
 				}
+				
+				// Read again the user to proceed
+				oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+				
+				if (oUser==null) {
+					WasdiLog.warnLog("AuthResource.login: we had a problem reading again the user in the db after registration, return invalid");
+					return UserViewModel.getInvalid();						
+				}				
 			}
 
 			if(oUser.getValidAfterFirstAccess() == null) {
