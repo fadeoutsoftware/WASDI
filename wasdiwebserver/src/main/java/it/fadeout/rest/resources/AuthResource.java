@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import it.fadeout.services.AuthProviderService;
+import it.fadeout.services.KeycloakService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
@@ -612,6 +613,11 @@ public class AuthResource {
 
 				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
+				if (m_oKeycloakService==null) {
+					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
+					m_oKeycloakService = new KeycloakService();
+				}
+				
 				User oNewUser = m_oKeycloakService.getUser(sUserId);
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
@@ -667,6 +673,7 @@ public class AuthResource {
 			}
 		} catch(Exception oE) {
 			WasdiLog.errorLog("AuthResource.userRegistration: " + oE + ", aborting");
+			oE.printStackTrace();
 		}
 
 		PrimitiveResult oResult = new PrimitiveResult();
