@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import wasdi.shared.config.openEO.OpenEO;
 import wasdi.shared.data.MongoRepository;
@@ -258,17 +259,24 @@ public class WasdiConfig {
 	 * @return true if ok, false in case of problems
 	 */
 	public static boolean readConfig(String sConfigFilePath) {
+		Stream<String> oLinesStream = null;
+		boolean bRes = false;
+		
         try {
-			String sJson = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
-			
+        	
+        	oLinesStream = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8);
+			String sJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
 			Current = MongoRepository.s_oMapper.readValue(sJson,WasdiConfig.class);
+			bRes = true;
 			
-			return true;
-		} catch (Exception e) {
-			WasdiLog.errorLog("WasdiConfig.readConfig: exception " + e.toString());
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiConfig.readConfig: exception ", oEx);
+		} finally {
+			if (oLinesStream != null) 
+				oLinesStream.close();
 		}
         
-        return false;
+        return bRes;
 	}
 	
 	/**

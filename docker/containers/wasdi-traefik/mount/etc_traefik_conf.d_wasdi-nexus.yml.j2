@@ -1,0 +1,13 @@
+http:
+  routers:
+    r_{{ sWasdiNexusServiceName }}:
+      entrypoints: "websecure"
+      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiNexusDefaultContextPath }}`)"
+      service: "s_{{ sWasdiNexusServiceName }}"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+      tls: true
+  services:
+    s_{{ sWasdiNexusServiceName }}:
+      loadBalancer:
+        servers:
+          - url: "http://{{ sWasdiDockerNetworkGateway }}:{{ iWasdiNexusListenPort }}/{{ sWasdiNexusDefaultContextPath.lstrip('/').rstrip('/') }}"

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -2445,12 +2446,14 @@ public class dbUtils {
             // add connection to ecostress db
             MongoRepository.addMongoConnection("ecostress", WasdiConfig.Current.mongoEcostress.user, WasdiConfig.Current.mongoEcostress.password, WasdiConfig.Current.mongoEcostress.address, WasdiConfig.Current.mongoEcostress.replicaName, WasdiConfig.Current.mongoEcostress.dbName);
             
+            Stream<String> oModisConfigStream = null;
             try {
                 // add connection to modis db
                 String sModisDbConfigPath = WasdiConfig.Current.getDataProviderConfig("LPDAAC").parserConfig;
                 if (!Utils.isNullOrEmpty(sModisDbConfigPath)) {
                 	try {
-                		String sModisConfigJson = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
+                		oModisConfigStream = Files.lines(Paths.get(sModisDbConfigPath), StandardCharsets.UTF_8);
+                		String sModisConfigJson = oModisConfigStream.collect(Collectors.joining(System.lineSeparator()));
                 		ObjectMapper oMapper = new ObjectMapper(); 
     		            MongoConfig oModisConfig = oMapper.readValue(sModisConfigJson, MongoConfig.class);
     		            MongoRepository.addMongoConnection("modis", oModisConfig.user, oModisConfig.password, oModisConfig.address, oModisConfig.replicaName, oModisConfig.dbName);
@@ -2463,6 +2466,9 @@ public class dbUtils {
             }
             catch (Exception oEx1) {
             	System.err.println("Db Utils - Data provider LPDAAC not found. Impossible to retrieve information for MODIS db.");
+			} finally {
+				if (oModisConfigStream != null)
+					oModisConfigStream.close();
 			}
             
             // add connection to statistics db

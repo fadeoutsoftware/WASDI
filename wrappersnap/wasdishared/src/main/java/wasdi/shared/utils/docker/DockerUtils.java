@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -336,9 +337,12 @@ public class DockerUtils {
     		
         	// Get the list of all files in the processor folder
 			Path oPath = Paths.get(m_sProcessorFolder);
-			Files.walk(oPath).filter(oFilteredPath -> !Files.isDirectory(oFilteredPath)).forEach(oFilePath -> {
-				asTarFiles.add(oFilePath.toString());
-			});
+			
+			try (Stream<Path> oPathStream = Files.walk(oPath)) { 
+				oPathStream.filter(oFilteredPath -> !Files.isDirectory(oFilteredPath)).forEach(oFilePath -> {
+					asTarFiles.add(oFilePath.toString());
+				});
+			}
         	
 			// Name of the ouput tar
         	String sTarFileOuput = m_sProcessorFolder + m_oProcessor.getProcessorId() + ".tar";
