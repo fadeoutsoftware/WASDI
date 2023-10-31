@@ -103,15 +103,14 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 			oNewEnvFile.flush();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception ", oEx));
+			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception ", oEx);
 		} finally {
 			try {
 				if (oFileReader != null) oFileReader.close();
 				if (oNewEnvFile != null) oNewEnvFile.close();
 				if (oEnvWriter != null) oEnvWriter.close();
 			} catch (IOException oEx) {
-				WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception when closing resources", oEx));
-
+				WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception when closing resources", oEx);
 			}
 		}
 	}
