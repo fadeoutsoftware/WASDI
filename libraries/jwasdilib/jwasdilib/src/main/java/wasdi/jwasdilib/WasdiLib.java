@@ -1539,10 +1539,12 @@ public class WasdiLib {
 
 			if (sProcessId == null) {
 				System.out.println("sProcessId must not be null");
+				return "";
 			}
 
 			if (sProcessId.equals("")) {
 				System.out.println("sProcessId must not be empty");
+				return "";
 			}
 
 			String sUrl = getWorkspaceBaseUrl() + "/process/updatebyid?procws="+sProcessId+"&status="+sStatus;
@@ -1580,10 +1582,12 @@ public class WasdiLib {
 
 			if (m_sMyProcId == null) {
 				System.out.println("Own process Id net available");
+				return "";
 			}
 
 			if (m_sMyProcId.equals("")) {
 				System.out.println("Progress: " + iPerc);
+				return "";
 			}
 
 			String sStatus = "RUNNING";
@@ -1800,10 +1804,12 @@ public class WasdiLib {
 
 			if (sProcessId == null) {
 				System.out.println("sProcessId must not be null");
+				return "";
 			}
 
 			if (sProcessId.equals("")) {
 				System.out.println("sProcessId must not be empty");
+				return "";
 			}
 
 			if (!m_bIsOnServer) return "RUNNING";
@@ -1854,10 +1860,12 @@ public class WasdiLib {
 
 			if (sFileName == null) {
 				System.out.println("sFileName must not be null");
+				return "";
 			}
 
 			if (sFileName.equals("")) {
 				System.out.println("sFileName must not be empty");
+				return "";
 			}
 
 			String sFilePath = getSavePath() + sFileName;
@@ -3105,10 +3113,12 @@ public class WasdiLib {
 
 			if (sFileName == null) {
 				System.out.println("sFileName must not be null");
+				return "";
 			}
 
 			if (sFileName.equals("")) {
 				System.out.println("sFileName must not be empty");
+				return "";
 			}
 
 			String sUrl = getWorkspaceBaseUrl() + "/catalog/downloadbyname?filename="+sFileName+"&workspace="+m_sActiveWorkspace;
@@ -3844,7 +3854,9 @@ public class WasdiLib {
 			System.out.println("WasdiLib error " + e.toString());
 		}
 		try {
-			return (String)aoResponse.get("bbox");
+			if (aoResponse!=null) {
+				return (String)aoResponse.get("bbox");
+			}
 		}catch (Exception e) {
 			System.out.println("WasdiLib error " + e.toString());
 		}

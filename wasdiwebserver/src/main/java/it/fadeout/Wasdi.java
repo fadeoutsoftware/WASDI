@@ -351,7 +351,7 @@ public class Wasdi extends ResourceConfig {
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: " + oE);
 		}
 
 		return oUser;
@@ -872,7 +872,7 @@ public class Wasdi extends ResourceConfig {
 				}
 
 				long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
-				long lMaximumAllowedAgeOfInformation = WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds * 1000;
+				long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
 
 				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
 
