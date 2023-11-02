@@ -180,7 +180,12 @@ services:
   # MongoDB
   {{ sWasdiMongoServiceName }}:
 {% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
-    command: "mongod --port {{ sWasdiMongoInternalPort }}"
+    command:
+      - "mongod"
+      - "--port"
+      - "{{ sWasdiMongoInternalPort }}"
+    expose:
+      - "{{ sWasdiMongoInternalPort }}"
 {% endif %}
 {% if bWasdiMongoInitialized == False %}
     environment:
