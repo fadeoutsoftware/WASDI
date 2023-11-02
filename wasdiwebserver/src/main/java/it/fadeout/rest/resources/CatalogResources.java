@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.HashMap;
@@ -713,7 +714,8 @@ public class CatalogResources {
 	            oMessageDigest.update(ayBuffer,0,iRead);
 	        }
 	        byte[] ayHashValue = oMessageDigest.digest();
-	        return new String(ayHashValue);
+	        String sChecksum = new BigInteger(1, ayHashValue).toString(16);
+	        return sChecksum;
 	    } 
 	    catch (Exception oEx) {
 	    	WasdiLog.errorLog("CatalogResource.generateMD5: error ", oEx);
