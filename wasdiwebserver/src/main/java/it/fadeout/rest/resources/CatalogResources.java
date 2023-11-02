@@ -681,7 +681,12 @@ public class CatalogResources {
 			// Get the checksum
 			java.nio.file.Path oPath = Paths.get(sFullFilePath);
 			
+			WasdiLog.warnLog("CatalogResource.getProductProperties: start reading all bytes ");
+			
 			byte [] ayBytes = Files.readAllBytes(oPath);
+			
+			WasdiLog.warnLog("CatalogResource.getProductProperties: start computing checksum ");
+			
 			byte [] ayChecksum = MessageDigest.getInstance("MD5").digest(ayBytes);
 			String sChecksum = new BigInteger(1, ayChecksum).toString(16);
 			oProductPropertiesViewModel.setChecksum(sChecksum);
