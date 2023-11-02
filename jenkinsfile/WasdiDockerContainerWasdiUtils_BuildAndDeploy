@@ -62,7 +62,7 @@ pipeline {
       steps {
         sh script: """
           cd ./wrappersnap/wasdishared
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
+          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
         """,
         label: "Build the shared library"
       }
@@ -72,7 +72,7 @@ pipeline {
       steps {
         sh script: """
           cd ./wrappersnap/launcher
-          mvn --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots --file utils_pom.xml clean package
+          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots --file utils_pom.xml clean package
         """,
         label: "Build the utils software"
       }
