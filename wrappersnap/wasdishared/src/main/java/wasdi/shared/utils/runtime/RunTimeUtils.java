@@ -480,9 +480,9 @@ public class RunTimeUtils {
 				return false;
 			}
 			else {
-				if (oContainerInfo.Status.equals(ContainerStates.RUNNING)) return true;
+				if (oContainerInfo.State.equals(ContainerStates.RUNNING)) return true;
 				else {
-					WasdiLog.warnLog("RunTimeUtils.isProcessStillAllive: docker info status = " + oContainerInfo.Status + " found for " + sPidStr);
+					WasdiLog.warnLog("RunTimeUtils.isProcessStillAllive: docker info status = [" + oContainerInfo.Status + "] || State = [" + oContainerInfo.State + "] found for " + sPidStr);
 					return false;
 				}
 			}
