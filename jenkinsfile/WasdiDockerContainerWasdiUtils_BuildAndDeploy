@@ -1,0 +1,81 @@
+def getEnvironmentName(String sAnsibleLimit, boolean bLower) {
+  if ( bLower ) {
+    return sAnsibleLimit.split('-')[0].toLowerCase()
+  }
+
+  return sAnsibleLimit.split('-')[0].toUpperCase()
+}
+
+pipeline {
+  agent any
+
+  environment {
+    sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
+    sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
+    sCurrentRevision         = "${env.BUILD_ID}"
+    sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
+    disableConcurrentBuilds()
+  }
+
+  tools {
+    jdk "WASDI_JDK_8"
+    maven "WASDI_MAVEN"
+  }
+
+  stages {
+    stage('DEBUG') {
+      steps {
+        echo "env.GIT_BRANCH               = " + env.GIT_BRANCH
+        echo "env.sAnsibleLimit            = " + env.sAnsibleLimit
+        echo "env.sCurrentEnvironmentLower = " + env.sCurrentEnvironmentLower
+        echo "env.sCurrentEnvironmentUpper = " + env.sCurrentEnvironmentUpper
+        echo "env.sCurrentRevision         = " + env.sCurrentRevision
+        echo "env.sSourceBranch            = " + env.sSourceBranch
+        echo "env.sWasdiAnsiblePath        = " + env.sWasdiAnsiblePath
+        echo "env.sWasdiMavenSettings      = " + env.sWasdiMavenSettings
+        echo "env.WORKSPACE                = " + env.WORKSPACE
+
+        sh script: "pwd", label: "Current location"
+        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
+
+        sh script: "which mvn", label: "Tool > mvn > path"
+        sh script: "mvn --version", label: "Tool > mvn > current version"
+        sh script: "which java", label: "Tool > java > path"
+        sh script: "java -version", label: "Tool > java > current version"
+      }
+    }
+
+    stage('INITIALIZATION') {
+      steps {
+        script {
+          currentBuild.displayName = "${env.sCurrentRevision}"
+          currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + BUILD THE CONTAINERS + DEPLOY THEM"
+        }
+      }
+    }
+
+    stage('MAVEN - BUILD SHARED') {
+      steps {
+        sh script: """
+          cd ./wrappersnap/wasdishared
+          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
+        """,
+        label: "Build the shared library"
+      }
+    }
+
+    stage('MAVEN - BUILD UTILS') {
+      steps {
+        sh script: """
+          cd ./wrappersnap/launcher
+          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots --file utils_pom.xml clean package
+        """,
+        label: "Build the utils software"
+      }
+    }
+  }
+}

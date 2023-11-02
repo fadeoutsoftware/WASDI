@@ -1,0 +1,13 @@
+http:
+  routers:
+    r_{{ sWasdiJenkinsServiceName }}:
+      entrypoints: "websecure"
+      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiJenkinsDefaultContextPath }}`)"
+      service: "s_{{ sWasdiJenkinsServiceName }}"
+      middlewares: "mw_wasdi-secure-denyFrame@file"
+      tls: true
+  services:
+    s_{{ sWasdiJenkinsServiceName }}:
+      loadBalancer:
+        servers:
+          - url: "http://{{ sWasdiDockerNetworkGateway }}:{{ iWasdiJenkinsListenPort }}/{{ sWasdiJenkinsDefaultContextPath.lstrip('/').rstrip('/') }}"
