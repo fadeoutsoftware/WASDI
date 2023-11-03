@@ -58,24 +58,62 @@ pipeline {
       }
     }
 
-    stage('MAVEN - BUILD SHARED') {
+    stage('MAVEN - BUILD') {
       steps {
         sh script: """
-          cd ./wrappersnap/wasdishared
-          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots clean package
+            mvn --batch-mode \
+                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+                --settings ${env.sWasdiMavenSettings} \
+                --activate-profiles ${env.sMavenProfile} \
+                --define revision=${env.sCurrentRevision} \
+                --define skipTests \
+                --update-snapshots \
+                --projects wrappersnap/launcher/utils_pom.xml \
+                --also-make \
+                clean package
         """,
-        label: "Build the shared library"
+        label: "Create the right package"
       }
     }
 
-    stage('MAVEN - BUILD UTILS') {
+    stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
-          cd ./wrappersnap/launcher
-          mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true --batch-mode --settings ${env.sWasdiMavenSettings} --activate-profiles ${env.sMavenProfile} --define revision=${env.sCurrentRevision} --define skipTests --update-snapshots --file utils_pom.xml clean package
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+                playbooks/buildWasdiDockerContainer.yml \
+                --inventory inventories/wasdi.yml \
+                --limit ${env.sAnsibleLimit} \
+                --diff \
+                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUtils=true'
         """,
-        label: "Build the utils software"
+        label: "Build the right container"
       }
+    }
+
+    stage('DEPLOYMENT') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook playbooks/deployDockerContainerWasdiUtils.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Execute ansible-playbook"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
     }
   }
 }
