@@ -63,6 +63,7 @@ import os.path
 import inspect
 from datetime import datetime
 from enum import Enum
+import hashlib
 
 # Initialize "Members"
 
@@ -1212,38 +1213,49 @@ def getFullProductPath(sProductName):
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
-    sFullPath = getBasePath()
-
     # Normalize the path and extract the name
     sProductName = os.path.basename(os.path.normpath(sProductName))
 
+    # Get the full path
     sFullPath = _internalGetPath(sProductName)
 
-    # If we are on the local PC
-    if getIsOnServer() is False:
-        # If the download is active
-        if m_bDownloadActive is True:
-            # If there is no local file
-            if os.path.isfile(sFullPath) is False:
-                # If the file exists on server
-                if fileExistsOnWasdi(sProductName) is True:
-                    # Download The File from WASDI
-                    print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
-                    _downloadFile(sProductName)
-                    print('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
-    else:
-        try:
-            # We are in the server and there is no local file
-            if os.path.isfile(sFullPath) is False:
-                # If the file exists on server
-                if fileExistsOnWasdi(sProductName) is True:
-                    # Download The File from WASDI
+    # Do we need to download it?
+    bDownloadFileFromServer = False
+
+    if os.path.isfile(sFullPath):
+        # There is a local file
+        aoProperties = getProductProperties(sProductName)
+        if aoProperties is not None:
+            if "checksum" in aoProperties:
+                sLocalChecksum = getMD5Checksum(sFullPath)
+                sRemoteChecksum = aoProperties["checksum"]
+                if sLocalChecksum != sRemoteChecksum:
                     wasdiLog(
-                        '[WARNING] waspy.getFullProductPath: WASDI FILE ON ANOTHER NODE: START DOWNLOAD... PLEASE WAIT')
-                    _downloadFile(sProductName)
-                    wasdiLog('[WARNING] waspy.getFullProductPath: DONWLOAD COMPLETED')
-        except:
-            wasdiLog('[ERROR] waspy.getFullProductPath: error downloading the file from the workspace node')
+                        '[INFO] waspy.getFullProductPath: Local file exists but looks different from the on in the server')
+                    bDownloadFileFromServer = True
+    else:
+        # If we are on the local PC
+        if getIsOnServer() is False:
+            # If the download is active
+            if m_bDownloadActive is True:
+                # If the file exists on server
+                if fileExistsOnWasdi(sProductName) is True:
+                    wasdiLog('[INFO] waspy.getFullProductPath: Local file does not exists')
+                    bDownloadFileFromServer = True
+        else:
+            try:
+                # If the file exists on server
+                if fileExistsOnWasdi(sProductName) is True:
+                    wasdiLog('[WARNING] waspy.getFullProductPath: WASDI FILE ON ANOTHER NODE: START DOWNLOAD... PLEASE WAIT')
+                    bDownloadFileFromServer = True
+            except:
+                wasdiLog('[ERROR] waspy.getFullProductPath: error downloading the file from the workspace node')
+
+    if bDownloadFileFromServer:
+        # Download The File from WASDI
+        wasdiLog('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
+        _downloadFile(sProductName)
+        wasdiLog('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
 
     return sFullPath
 
@@ -4474,6 +4486,19 @@ def getProductProperties(sFileName):
         return None
 
     return None
+
+def getMD5Checksum(sFileName):
+    """
+    Compute the MD5 Checksum of a file
+    """
+    oMd5Hash = hashlib.md5()
+    with open(sFileName, 'rb') as oFile:
+
+        while oChunk := oFile.read(4096):
+            oMd5Hash.update(oChunk)
+
+    return oMd5Hash.hexdigest()
+
 
 class ChartType(Enum):
     line = "line"

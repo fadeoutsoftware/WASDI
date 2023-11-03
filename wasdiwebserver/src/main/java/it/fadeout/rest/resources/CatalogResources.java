@@ -1,10 +1,11 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
@@ -679,16 +680,9 @@ public class CatalogResources {
 			oProductPropertiesViewModel.setStyle(oDownloadedFile.getDefaultStyle());
 			
 			// Get the checksum
-			java.nio.file.Path oPath = Paths.get(sFullFilePath);
 			
-			WasdiLog.warnLog("CatalogResource.getProductProperties: start reading all bytes ");
+			String sChecksum = generateMD5(new File(sFullFilePath));
 			
-			byte [] ayBytes = Files.readAllBytes(oPath);
-			
-			WasdiLog.warnLog("CatalogResource.getProductProperties: start computing checksum ");
-			
-			byte [] ayChecksum = MessageDigest.getInstance("MD5").digest(ayBytes);
-			String sChecksum = new BigInteger(1, ayChecksum).toString(16);
 			oProductPropertiesViewModel.setChecksum(sChecksum);
 			
 			WasdiLog.debugLog("CatalogResource.getProductProperties: returning view model with checksum " + sChecksum);
@@ -699,6 +693,42 @@ public class CatalogResources {
 			WasdiLog.errorLog("CatalogResource.getProductProperties: ", oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+	
+	protected String generateMD5(File oFile){
+		
+	    if(oFile==null){
+	        return "";
+	    }
+	    
+	    MessageDigest oMessageDigest;
+	    
+	    InputStream oInputStream = null;
+	    
+	    try {
+	    	oInputStream = new FileInputStream(oFile);
+	        int iRead =0;
+	        byte[] ayBuffer = new byte[4096];
+	        oMessageDigest = MessageDigest.getInstance("MD5");
+	        while((iRead = oInputStream.read(ayBuffer))>0){
+	            oMessageDigest.update(ayBuffer,0,iRead);
+	        }
+	        byte[] ayHashValue = oMessageDigest.digest();
+	        String sChecksum = new BigInteger(1, ayHashValue).toString(16);
+	        return sChecksum;
+	    } 
+	    catch (Exception oEx) {
+	    	WasdiLog.errorLog("CatalogResource.generateMD5: error ", oEx);
+	        return "";
+	    }
+	    finally{
+	        try {
+	            if(oInputStream!=null)oInputStream.close();
+	        } 
+	        catch (Exception oEx) {
+	        	WasdiLog.errorLog("CatalogResource.generateMD5: error ", oEx);
+	        }
+	    } 
 	}
 	
 	/**
