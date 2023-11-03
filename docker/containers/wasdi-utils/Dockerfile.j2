@@ -98,7 +98,7 @@ WORKDIR {{ sWasdiUtilsRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGroup }} ./dataToCopy/{{ sWasdiUtilsTargetFileName }} {{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsTargetFileName }}
+COPY --chown={{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGroup }} ./dataToCopy/{{ sWasdiUtilsBuildTargetFileName }} {{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsBuildTargetFileName }}
 
 
 # Start the container
