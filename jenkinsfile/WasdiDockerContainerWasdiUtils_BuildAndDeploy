@@ -85,7 +85,7 @@ pipeline {
                 --inventory inventories/wasdi.yml \
                 --limit ${env.sAnsibleLimit} \
                 --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUtils=true'
+                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUtilsContainer=true'
         """,
         label: "Build the right container"
       }

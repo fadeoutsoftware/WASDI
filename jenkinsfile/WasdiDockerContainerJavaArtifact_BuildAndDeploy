@@ -74,7 +74,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true sDeployWasdiContainerWasdiUtils=false'
+          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true'
         """,
         label: "Build the WASDI client container"
       }
