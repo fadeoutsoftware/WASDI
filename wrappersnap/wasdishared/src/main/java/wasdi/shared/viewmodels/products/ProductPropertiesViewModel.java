@@ -10,6 +10,7 @@ public class ProductPropertiesViewModel {
 	private String fileName;
 	private String friendlyName;
 	private long lastUpdateTimestampMs;
+	private long size;
 	private String checksum;
 	private String style;
 	
@@ -42,6 +43,12 @@ public class ProductPropertiesViewModel {
 	}
 	public void setStyle(String style) {
 		this.style = style;
+	}
+	public long getSize() {
+		return size;
+	}
+	public void setSize(long size) {
+		this.size = size;
 	}
 
 }

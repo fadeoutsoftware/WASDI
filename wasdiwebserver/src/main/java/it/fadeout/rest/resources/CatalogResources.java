@@ -596,7 +596,7 @@ public class CatalogResources {
 	@Path("/properties")
 	@Produces({"application/json", "text/xml"})
 	public Response getProductProperties(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName) {
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("file") String sFileName, @QueryParam("getchecksum") Boolean bGetChecksum) {
 		
 		WasdiLog.debugLog("CatalogResource.getProductProperties ws="+sWorkspaceId + " file: " + sFileName);
 		
@@ -678,14 +678,22 @@ public class CatalogResources {
 			oProductPropertiesViewModel.setLastUpdateTimestampMs(oFile.lastModified());
 			// Default style
 			oProductPropertiesViewModel.setStyle(oDownloadedFile.getDefaultStyle());
+			// Get the size
+			oProductPropertiesViewModel.setSize(Files.size(oFile.toPath()));
 			
-			// Get the checksum
+			if (bGetChecksum == null) {
+				bGetChecksum = false;
+			}
 			
-			String sChecksum = generateMD5(new File(sFullFilePath));
-			
-			oProductPropertiesViewModel.setChecksum(sChecksum);
-			
-			WasdiLog.debugLog("CatalogResource.getProductProperties: returning view model with checksum " + sChecksum);
+			if (bGetChecksum) {
+				// Get the checksum
+				String sChecksum = generateMD5(oFile);
+				oProductPropertiesViewModel.setChecksum(sChecksum);
+				WasdiLog.debugLog("CatalogResource.getProductProperties: returning view model with checksum " + sChecksum);
+			}
+			else {
+				WasdiLog.debugLog("CatalogResource.getProductProperties: checksum not requested");
+			}
 			
 			return Response.ok(oProductPropertiesViewModel).build();
 
