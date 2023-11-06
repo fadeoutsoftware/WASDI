@@ -58,10 +58,11 @@ pipeline {
       }
     }
 
-    stage('MAVEN - BUILD') {
+    stage('BUILD THE CODE WITH MAVEN') {
       steps {
         sh script: """
-            mvn --batch-mode \
+            mvn \
+                --batch-mode \
                 -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
                 --settings ${env.sWasdiMavenSettings} \
                 --activate-profiles ${env.sMavenProfile} \
@@ -98,9 +99,14 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiUtils.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook \
+                    playbooks/deployDockerContainerWasdiUtils.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Execute ansible-playbook"
+              label: "Deploy the right container"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

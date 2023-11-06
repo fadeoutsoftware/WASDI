@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [[ "${USER}" != "{{ sWasdiSystemUserName }}" ]]
+then
+    echo "[ERROR] You are '${USER}' when should be '{{ sWasdiSystemUserName }}'"
+    exit 1
+fi
+
+docker \
+    run \
+    --interactive \
+    --mount type=bind,source={{ sWasdiDataConfigurationRootDirectoryPath }},destination={{ sWasdiDataConfigurationRootDirectoryPath }},readonly \
+    --mount type=bind,source={{ sWasdiDataRootDirectoryPath }},destination={{ sWasdiDataRootDirectoryPath }} \
+    --network {{ sWasdiDockerNetworkName }} \
+    --tty \
+    {{ sWasdiTriggerServiceName }}:latest \
+    ${@}
