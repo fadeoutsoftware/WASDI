@@ -28,8 +28,8 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiKeycloakServiceName }}
-      - {{ sWasdiRabbitMqServiceName }}
+#      - {{ sWasdiKeycloakServiceName }}
+#      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
@@ -303,9 +303,9 @@ services:
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiKeycloakServiceName }}
-      - {{ sWasdiMongoServiceName }}
-      - {{ sWasdiRabbitMqServiceName }}
+#      - {{ sWasdiKeycloakServiceName }}
+#      - {{ sWasdiMongoServiceName }}
+#      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
@@ -347,9 +347,9 @@ services:
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-      - {{ sWasdiKeycloakServiceName }}
-      - {{ sWasdiMongoServiceName }}
-      - {{ sWasdiRabbitMqServiceName }}
+#      - {{ sWasdiKeycloakServiceName }}
+#      - {{ sWasdiMongoServiceName }}
+#      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
