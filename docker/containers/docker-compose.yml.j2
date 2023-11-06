@@ -29,7 +29,7 @@ services:
     depends_on:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
-      - {{ sWasdiContainerRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
@@ -230,46 +230,46 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% if sWasdiServerTypeIsMain == True %}
 
-  {{ sWasdiContainerRabbitMqServiceName }}:
+  {{ sWasdiRabbitMqServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
     environment:
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
       - RABBITMQ_DISTRIBUTION_BUFFER_SIZE=128000
       - RABBITMQ_MNESIA_BASE=/var/lib/rabbitmq/mnesia/
-      - RABBITMQ_NODENAME={{ sWasdiContainerRabbitMqServiceName }}
-      - RABBITMQ_NODE_PORT={{ sWasdiContainerRabbitMqPortMainInternal }}
+      - RABBITMQ_NODENAME={{ sWasdiRabbitMqServiceName }}
+      - RABBITMQ_NODE_PORT={{ sWasdiRabbitMqMainInternalPort }}
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
-    image: "{{ sWasdiContainerRabbitMqServiceName }}:latest"
+    image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.mw_{{ sWasdiContainerRabbitMqServiceName }}.stripprefix.prefixes=/rabbit-stomp"
-      - "traefik.http.middlewares.mw_{{ sWasdiContainerRabbitMqServiceName }}.stripprefix.forceSlash=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}.stripprefix.prefixes=/rabbit-stomp"
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}.stripprefix.forceSlash=true"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
 {% endif %}
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.service=s_{{ sWasdiContainerRabbitMqServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.service=s_{{ sWasdiRabbitMqServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.routers.r_{{ sWasdiContainerRabbitMqServiceName }}.middlewares=mw_{{ sWasdiContainerRabbitMqServiceName }}@docker"
-      - "traefik.http.services.s_{{ sWasdiContainerRabbitMqServiceName }}.loadbalancer.server.port={{ sWasdiContainerRabbitMqPortWebStompInternal }}"
-{% if ( sWasdiContainerRabbitMqPortMainInternal | default("") != "" or sWasdiContainerRabbitMqPortWebStompInternal | default("") != "" )
-    and ( sWasdiContainerRabbitMqPortMainExternal | default("") != "" or sWasdiContainerRabbitMqPortWebStompExternal | default("") != "" )
-    and aWasdiContainerRabbitMqExternalIp | default([]) | length > 0 %}
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.middlewares=mw_{{ sWasdiRabbitMqServiceName }}@docker"
+      - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
+{% if ( sWasdiRabbitMqMainInternalPort | default("") != "" or sWasdiRabbitMqWebStompInternalPort | default("") != "" )
+    and ( sWasdiRabbitMqMainExternalPort | default("") != "" or sWasdiRabbitMqWebStompExternalPort | default("") != "" )
+    and aWasdiRabbitMqExternalIp | default([]) | length > 0 %}
     ports:
-{% if sWasdiContainerRabbitMqPortMainInternal | default("") != ""
-    and sWasdiContainerRabbitMqPortMainExternal | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiContainerRabbitMqExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerRabbitMqPortMainExternal }}:{{ sWasdiContainerRabbitMqPortMainInternal }}"
+{% if sWasdiRabbitMqMainInternalPort | default("") != ""
+    and sWasdiRabbitMqMainExternalPort | default("") != "" %}
+{% for sCurrentExternalIp in aWasdiRabbitMqExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqMainExternalPort }}:{{ sWasdiRabbitMqMainInternalPort }}"
 {% endfor %}
 {% endif %}
-{% if sWasdiContainerRabbitMqPortWebStompInternal | default("") != ""
-    and sWasdiContainerRabbitMqPortWebStompExternal | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiContainerRabbitMqExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerRabbitMqPortWebStompExternal }}:{{ sWasdiContainerRabbitMqPortWebStompInternal }}"
+{% if sWasdiRabbitMqWebStompInternalPort | default("") != ""
+    and sWasdiRabbitMqWebStompExternalPort | default("") != "" %}
+{% for sCurrentExternalIp in aWasdiRabbitMqExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqWebStompExternalPort }}:{{ sWasdiRabbitMqWebStompInternalPort }}"
 {% endfor %}
 {% endif %}
 {% endif %}
@@ -279,7 +279,7 @@ services:
         soft: {{ sWasdiRabbitMqUlimitNofile }}
         hard: {{ sWasdiRabbitMqUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
 {% endif %}
 {% if bWasdiSchedulerEnabled == True %}
 
@@ -305,7 +305,7 @@ services:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
-      - {{ sWasdiContainerRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
@@ -349,7 +349,7 @@ services:
       - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
-      - {{ sWasdiContainerRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
@@ -395,7 +395,7 @@ services:
 {% endif %}
       - {{ sWasdiMongoServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiContainerRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
     environment:
