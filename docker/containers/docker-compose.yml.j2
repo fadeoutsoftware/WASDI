@@ -27,7 +27,7 @@ services:
 {% if bWasdiClientEnabled == True %}
   {{ sWasdiClientServiceName }}:
     depends_on:
-      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
@@ -302,7 +302,7 @@ services:
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
-      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -340,13 +340,13 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
-      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiContainerGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -384,13 +384,13 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
     depends_on:
-      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiContainerGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -432,7 +432,7 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
 {% endif %}
 
   {{ sWasdiTraefikServiceName }}:
