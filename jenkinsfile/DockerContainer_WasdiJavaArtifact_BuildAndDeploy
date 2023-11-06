@@ -102,7 +102,15 @@ pipeline {
                 --inventory inventories/wasdi.yml \
                 --limit ${env.sAnsibleLimit} \
                 --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=true sDeployWasdiContainerWasdiTomcatOpenEoServer=true sDeployWasdiContainerWasdiTomcatWasdiWebServer=true sDeployWasdiContainerWasdiTrigger=true'
+                --extra-vars ' \
+                    sCurrentRevision=${env.sCurrentRevision} \
+                    sSourceDirectory=${WORKSPACE} \
+                    sDeployWasdiLauncherContainer=true \
+                    sDeployWasdiSchedulerContainer=true \
+                    sDeployWasdiTomcatOgcProcessesServerContainer=true \
+                    sDeployWasdiTomcatOpenEoServerContainer=true \
+                    sDeployWasdiTomcatWasdiWebServerContainer=true \
+                    sDeployWasdiContainerWasdiTrigger=true'
         """,
         label: "Build the containers"
       }
@@ -140,7 +148,13 @@ pipeline {
                 --inventory inventories/wasdi.yml \
                 --limit ${env.sAnsibleLimit} \
                 --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiSchedulerContainer=true sDeployWasdiContainerWasdiTomcatOgcProcessesServer=false sDeployWasdiContainerWasdiTomcatOpenEoServer=false sDeployWasdiContainerWasdiTomcatWasdiWebServer=false'
+                --extra-vars ' \
+                    sCurrentRevision=${env.sCurrentRevision} \
+                    sSourceDirectory=${WORKSPACE} \
+                    sDeployWasdiSchedulerContainer=true \
+                    sDeployWasdiTomcatOgcProcessesServerContainer=true \
+                    sDeployWasdiTomcatOpenEoServerContainer=true \
+                    sDeployWasdiTomcatWasdiWebServerContainer=true'
         """,
         label: "Start or restart the containers"
       }
