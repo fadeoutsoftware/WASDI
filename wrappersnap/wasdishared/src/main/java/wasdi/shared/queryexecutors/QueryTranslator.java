@@ -115,6 +115,11 @@ public abstract class QueryTranslator {
 	 * Token of STATICS platform
 	 */
 	private static final String s_sPLATFORMNAME_STATICS = "platformname:StaticFiles";
+	
+	/**
+	 * Token of STATIC TILES platform
+	 */
+	private static final String s_SPLATFORMNAME_JRC_GHSL = "platformname:StaticTiles";
 
 	/**
 	 * Token of IMERG platform
@@ -550,6 +555,8 @@ public abstract class QueryTranslator {
 			parseEarthcache(sQuery, oResult);
 			
 			parseTerra(sQuery, oResult);
+			
+			parseStaticTiles(sQuery, oResult);
 		} catch (Exception oEx) {
 			WasdiLog.debugLog("QueryTranslator.parseWasdiClientQuery: exception " + oEx.toString());
 			String sStack = ExceptionUtils.getStackTrace(oEx);
@@ -923,6 +930,20 @@ public abstract class QueryTranslator {
 			sQuery = removePlatformToken(sQuery, QueryTranslator.S_SPLATFORMNAME_TERRA);
 
 			oResult.platformName = Platforms.TERRA;
+		}
+	}
+	
+	/**
+	 * Fills the Query View Model with STATIC TILES info
+	 * 
+	 * @param sQuery the query
+	 * @param oResult the resulting Query View Model
+	 */
+	private void parseStaticTiles(String sQuery, QueryViewModel oResult) {
+		if (sQuery.contains(QueryTranslator.s_SPLATFORMNAME_JRC_GHSL)) {
+			sQuery = removePlatformToken(sQuery, QueryTranslator.s_SPLATFORMNAME_JRC_GHSL);
+
+			oResult.platformName = Platforms.JRC_GHSL;
 		}
 	}
 
