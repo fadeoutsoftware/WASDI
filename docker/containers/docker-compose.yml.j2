@@ -508,7 +508,7 @@ services:
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_certs:/etc/traefik/certs:ro"
 {% endif %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_conf.d:/etc/traefik/conf.d:ro"
-{% if bWasdiComponentUpdateMetricEnabled == True %}
+{% if bWasdiUpdateMetricEnabled == True %}
 
   {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
     # Disable until we are ready to start all containers
