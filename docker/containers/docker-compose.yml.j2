@@ -392,11 +392,11 @@ services:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiKeycloakServiceName }}
+#      - {{ sWasdiKeycloakServiceName }}
 {% endif %}
-      - {{ sWasdiMongoServiceName }}
+#      - {{ sWasdiMongoServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-      - {{ sWasdiRabbitMqServiceName }}
+#      - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
     environment:
