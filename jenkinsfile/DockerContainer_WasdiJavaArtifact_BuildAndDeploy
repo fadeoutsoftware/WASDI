@@ -141,11 +141,11 @@ pipeline {
                 --limit ${env.sAnsibleLimit} \
                 --diff \
                 --extra-vars ' \
-                    sCurrentRevision=${env.sCurrentRevision} \
-                    sSourceDirectory=${WORKSPACE} \
-                    sDeployWasdiSchedulerContainer=true \
-                    sDeployWasdiTomcatOgcProcessesServerContainer=true \
-                    sDeployWasdiTomcatOpenEoServerContainer=true \
+                    sCurrentRevision=${env.sCurrentRevision}
+                    sSourceDirectory=${WORKSPACE}
+                    sDeployWasdiSchedulerContainer=true
+                    sDeployWasdiTomcatOgcProcessesServerContainer=true
+                    sDeployWasdiTomcatOpenEoServerContainer=true
                     sDeployWasdiTomcatWasdiWebServerContainer=true'
         """,
         label: "Start or restart the containers"
