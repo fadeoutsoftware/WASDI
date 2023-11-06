@@ -27,11 +27,12 @@ networks:
 
 services:
   {{ sWasdiUtilsServiceName }}:
-    image: {{ sWasdiUtilsServiceName }}:latest
+    image: "{{ sWasdiUtilsServiceName }}:latest"
     restart: "no"
     ulimits:
       nofile:
-        soft: {{ sWasdiUtilsUlimitNofile }}
-        hard: {{ sWasdiUtilsUlimitNofile }}
+        soft: "{{ sWasdiUtilsUlimitNofile }}"
+        hard: "{{ sWasdiUtilsUlimitNofile }}"
     volumes:
-      - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
+      - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
+      - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"

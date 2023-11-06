@@ -102,14 +102,14 @@ COPY --chown={{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGrou
 
 
 # Start the container
-ENTRYPOINT [ \
-    "/opt/wasdi/jre/jre8/8u382-b05/bin/java", \
+CMD [ \
+    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
     "-Xmx24g", \
     "-Xms1024m", \
     "-XX:+AggressiveOpts", \
     "-Xverify:none", \
     "-jar", \
-    "/opt/wasdi/utils/dbUtils.jar", \
+    "{{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsBuildTargetFileName }}", \
     "--config", \
-    "/etc/wasdi/wasdiConfigDocker.json" \
+    "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfigDocker.json" \
 ]
