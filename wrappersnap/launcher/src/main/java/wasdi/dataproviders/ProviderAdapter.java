@@ -1119,8 +1119,13 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				TimeUnit.SECONDS.sleep(2);
 			}
 
-		} catch (Exception e) {
-			WasdiLog.infoLog("ProviderAdapter.localFileCopy: " + e);
+		} 
+		catch(InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("ProviderAdapter.localFileCopy: current thread interrupted ", oEx);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProviderAdapter.localFileCopy: ", oEx);
 		}
 		finally {
 			try {

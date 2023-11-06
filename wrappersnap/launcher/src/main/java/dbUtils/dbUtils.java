@@ -1690,7 +1690,12 @@ public class dbUtils {
 				}
 
             }             
-        } catch (Exception oEx) {
+        } 
+        catch (InterruptedException oEx) {
+        	Thread.currentThread().interrupt();
+        	System.out.println("Current thread was interrupted: " + oEx);
+        }
+        catch (Exception oEx) {
             System.out.println("Workspace Sharing Exception: " + oEx);
         }
     }

@@ -94,14 +94,16 @@ public class ADSProviderAdapter extends ProviderAdapter {
 				if ("queued".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(60);
-					} catch (InterruptedException e) {
-						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: error", e);
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("running".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(6);
-					} catch (InterruptedException e) {
-						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: error", e);
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: current thread was interrupted", oEx);
 					}
 				} else if ("completed".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					sUrlDownload = (String) JsonUtils.getProperty(oAdsGetStatusRequestResult, "status.data.0.location");

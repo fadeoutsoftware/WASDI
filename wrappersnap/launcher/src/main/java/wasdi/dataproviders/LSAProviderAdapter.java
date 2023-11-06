@@ -177,7 +177,8 @@ public class LSAProviderAdapter extends ProviderAdapter {
 				int iMsSleep = (int) ( (Math.random()*15000.0) + 10000.0 );
 				Thread.sleep(iMsSleep);
 			}
-			catch (Exception oEx) {
+			catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
 				WasdiLog.debugLog("LSAProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}

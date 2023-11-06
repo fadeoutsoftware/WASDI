@@ -98,14 +98,16 @@ public class CDSProviderAdapter extends ProviderAdapter {
 				if ("queued".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(60);
-					} catch (InterruptedException e) {
-						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: error", e);
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("running".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(6);
-					} catch (InterruptedException e) {
-						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: error", e);
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("completed".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					sUrlDownload = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.data.0.location");

@@ -1186,8 +1186,9 @@ public class DockerUtils {
         			try {
         				Thread.sleep(WasdiConfig.Current.dockers.millisBetweenStatusPolling);
         			}
-        			catch (Exception oEx) {
-						
+        			catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("DockerUtils.waitForContainerToFinish. Current thread was interrupted", oEx);
 					}
         		}
         		

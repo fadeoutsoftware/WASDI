@@ -79,7 +79,8 @@ public class CMProviderAdapter extends ProviderAdapter {
 
 			try {
 				Thread.sleep(1_000);
-			} catch (Exception oEx) {
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
 				WasdiLog.debugLog("CMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}

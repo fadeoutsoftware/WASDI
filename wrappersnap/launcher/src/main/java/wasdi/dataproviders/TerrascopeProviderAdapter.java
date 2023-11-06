@@ -210,8 +210,9 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			try {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: ", oEx);
 			}
 		}
 
@@ -240,8 +241,9 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			try {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: " + oEx.toString());
+			} catch (InterruptedException oEx) {
+				Thread.interrupted();
+				WasdiLog.errorLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: ", oEx);
 			}
 		}
 

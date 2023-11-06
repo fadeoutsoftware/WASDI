@@ -130,6 +130,8 @@ public class CMHttpUtils {
 					try {
 						Thread.sleep(1_000);
 					} catch (InterruptedException oInterruptedException) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("CMHttpUtils.downloadProduct. Current thread was interrupted: ", oInterruptedException);
 					}
 
 					continue;

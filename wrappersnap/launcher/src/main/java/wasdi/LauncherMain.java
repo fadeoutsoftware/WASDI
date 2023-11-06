@@ -664,7 +664,12 @@ public class LauncherMain  {
                 Thread.sleep(5000);
                 oProcessWorkspace = oProcessWorkspaceRepository.getProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
             }
-        } catch (Exception oEx) {
+        } 
+        catch (InterruptedException oEx){
+        	Thread.currentThread().interrupt();
+        	WasdiLog.errorLog("LauncherMain.waitForProcessResume: current thread was interrupted", oEx);
+        }
+        catch (Exception oEx) {
             WasdiLog.errorLog("LauncherMain.waitForProcessResume: " + oEx.toString());
         }
 

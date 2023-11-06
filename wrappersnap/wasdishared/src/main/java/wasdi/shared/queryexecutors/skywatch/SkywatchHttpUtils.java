@@ -25,6 +25,7 @@ import wasdi.shared.queryexecutors.skywatch.models.SearchResultsResponse;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.LoggerWrapper;
+import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.viewmodels.HttpCallResponse;
 
 public class SkywatchHttpUtils {
@@ -88,6 +89,8 @@ public class SkywatchHttpUtils {
 			try {
 				Thread.sleep(iAttempts * 1_000);
 			} catch (InterruptedException oInterruptedException) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("SkywatchHttpUtils.makeAttemptsToPerformSearchOperation. Current thread was interrupted: ", oInterruptedException);
 			}
 		}
 
@@ -319,6 +322,8 @@ public class SkywatchHttpUtils {
 			try {
 				Thread.sleep(10_000);
 			} catch (InterruptedException oInterruptedException) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("SkywatchHttpUtils.makeAttemptsToPerformPipelineOperation. Current thread was interrupted: ", oInterruptedException);
 			}
 		}
 

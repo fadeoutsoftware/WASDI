@@ -146,12 +146,18 @@ public class Environmentupdate extends Operation {
 					
 				}							
 
-			} catch (Exception oRabbitException) {
+			} 
+			catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("Environmentupdate.executeOperation: current thread was interrupted", oEx);
+			}
+			catch (Exception oRabbitException) {
 				WasdiLog.errorLog("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
 
 			return bRet;
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("Environmentupdate.executeOperation: exception", oEx);
 		}
 

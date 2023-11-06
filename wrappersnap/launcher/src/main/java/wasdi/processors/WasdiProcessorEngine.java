@@ -370,8 +370,9 @@ public abstract class WasdiProcessorEngine {
 //	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
 //	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
 		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("WasdiProcessorEngine.waitForApplicationToStart: current thread was interrupted ", oEx);
 		}
 	}
 	

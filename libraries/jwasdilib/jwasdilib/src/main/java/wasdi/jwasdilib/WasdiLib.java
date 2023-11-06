@@ -1626,8 +1626,9 @@ public class WasdiLib {
 			}
 			try {
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				System.out.println("WasdiLib error " + e.toString());
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				System.out.println("WasdiLib error " + oEx);
 			}
 		}
 
@@ -1715,8 +1716,9 @@ public class WasdiLib {
 					try {
 						log("waitProcesses: sleep");
 						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						System.out.println("WasdiLib error " + e.toString());
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						System.out.println("WasdiLib error " + oEx);
 					}
 				}
 			}
@@ -1757,8 +1759,9 @@ public class WasdiLib {
 			case "READY":
 				try {
 					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					System.out.println("WasdiLib error " + e.toString());
+				} catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					System.out.println("WasdiLib error " + oEx.toString());
 				}
 
 				break;
@@ -3584,8 +3587,9 @@ public class WasdiLib {
 				try {
 					log("importAndPreprocess: sleep");
 					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					System.out.println("WasdiLib error " + e.toString());
+				} catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					System.out.println("WasdiLib error " + oEx.toString());
 				}
 			}
 			return asWorkflowIds;

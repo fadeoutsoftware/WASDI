@@ -72,7 +72,8 @@ public class GPMProviderAdapter extends ProviderAdapter {
 			try {
 				int iMsSleep = (int) ( (Math.random() * 1500.0) + 1000.0 );
 				Thread.sleep(iMsSleep);
-			} catch (Exception oEx) {
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
 				WasdiLog.debugLog("GPMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}

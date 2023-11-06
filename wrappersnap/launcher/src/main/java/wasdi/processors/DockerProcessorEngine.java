@@ -897,8 +897,12 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	        
 	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
 		}
+    	catch (InterruptedException oEx) {
+    		Thread.currentThread().interrupt();
+    		WasdiLog.errorLog("DockerProcessorEngine.waitForApplicationToStart: current thread was interrupted ", oEx);
+    	}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.errorLog("DockerProcessorEngine.waitForApplicationToStart: exception ", oEx);
 		}
 	}
 	

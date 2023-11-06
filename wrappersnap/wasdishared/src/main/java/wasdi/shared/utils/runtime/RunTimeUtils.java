@@ -308,6 +308,11 @@ public class RunTimeUtils {
 			
 			return true;
 		}
+		catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("RunTimeUtils.addRunPermission current thread was interrupted: ", oEx);
+			return false;
+		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("RunTimeUtils.addRunPermission exception: " + oEx.getMessage());
 			return false;
@@ -438,7 +443,13 @@ public class RunTimeUtils {
 			}
 
 			return bResult;
-		} catch (Exception oEx) {
+		} 
+		catch(InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("RunTimeUtils.runCommand: current thread was interrupted", oEx);
+			return false;
+		}
+		catch (Exception oEx) {
 			WasdiLog.errorLog("RunTimeUtils.runCommand: " + oEx.toString());
 			return false;
 		}

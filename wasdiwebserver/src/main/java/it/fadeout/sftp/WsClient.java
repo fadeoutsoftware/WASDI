@@ -53,8 +53,14 @@ public class WsClient extends Semaphore {
 		try {
 			oContainer.connectToServer(this, new URI(sWsAddress));
 			acquire();
-		} catch (Exception e) {
-			WasdiLog.errorLog("WSClient.WSClient:  error", e);
+		} 
+		catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("WSClient.WSClient:  current thread was interrupted", oEx);
+			release();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("WSClient.WSClient:  error", oEx);
 			release();
 		}		
 	}

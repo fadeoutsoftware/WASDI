@@ -1444,7 +1444,8 @@ public class ProcessesResource {
     				Thread.sleep(WasdiConfig.Current.ogcProcessesApi.waitProcessSleepTimeout);	
     			}
     			catch (InterruptedException oInt) {
-    				WasdiLog.errorLog("sleep exception");
+    				Thread.currentThread().interrupt();
+    				WasdiLog.errorLog("ProcessesResource.waitApplication: sleep exception ", oInt);
     			}
     			
     			// Increment the sleep count

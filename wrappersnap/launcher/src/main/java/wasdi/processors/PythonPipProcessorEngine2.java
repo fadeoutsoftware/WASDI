@@ -264,8 +264,12 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	        	}
 	        }
 		}
+		catch(InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+    		WasdiLog.errorLog("PythonPipProcessorEngine2.waitForApplicationToStart: current thread intrrupted", oEx);
+    	}
 		catch (Exception oEx) {
-			WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: exception " + oEx.toString());
+			WasdiLog.errorLog("PythonPipProcessorEngine2.waitForApplicationToStart: exception ", oEx);
 		}		
 	}
 	
