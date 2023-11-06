@@ -692,7 +692,7 @@ public class CatalogResources {
 				WasdiLog.debugLog("CatalogResource.getProductProperties: returning view model with checksum " + sChecksum);
 			}
 			else {
-				WasdiLog.debugLog("CatalogResource.getProductProperties: checksum not requested");
+				WasdiLog.debugLog("CatalogResource.getProductProperties: checksum not requested	");
 			}
 			
 			return Response.ok(oProductPropertiesViewModel).build();
