@@ -12,7 +12,6 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
     sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sCurrentRevision         = "${env.BUILD_ID}"
     sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
