@@ -12,18 +12,6 @@ http:
 {% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       tls: true
 {% endif %}
-    r_{{ sWasdiNexusServiceName }}_old:
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
-      entrypoints: "websecure"
-{% else %}
-      entrypoints: "webs"
-{% endif %}
-      rule: "Host(`test-nexus.wasdi.net`) && PathPrefix(`/`)"
-      service: "s_{{ sWasdiNexusServiceName }}"
-      middlewares: "mw_wasdi-secure-allowFrame@file"
-{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
-      tls: true
-{% endif %}
     r_{{ sWasdiNexusServiceName }}_docker-registry:
 {% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
       entrypoints: "websecure"

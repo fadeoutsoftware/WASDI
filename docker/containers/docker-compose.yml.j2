@@ -98,12 +98,16 @@ services:
 {% endif %}
     restart: "unless-stopped"
 {% endif %}
+
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
     environment:
-      - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
+{% if ( aWasdiGeoserverCsrfWhitelist | length ) > 0 %}
+      - GEOSERVER_CSRF_WHITELIST={{ aWasdiGeoserverCsrfWhitelist | join(',') }}
+{% endif %}
       - GEOSERVER_DATA_DIR=/mnt/data_{{ sWasdiGeoserverServiceName }}
+      - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
 {% if sWasdiGeoserverEnvironmentJavaOpts | default('') != '' %}
       - JAVA_OPTS={{ sWasdiGeoserverEnvironmentJavaOpts }}
 {% endif %}
