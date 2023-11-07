@@ -51,7 +51,6 @@ services:
       nofile:
         soft: {{ sWasdiToolboxUlimitNofile }}
         hard: {{ sWasdiToolboxUlimitNofile }}
-    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
@@ -72,7 +71,6 @@ services:
       nofile:
         soft: {{ sWasdiToolboxUlimitNofile }}
         hard: {{ sWasdiToolboxUlimitNofile }}
-    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
