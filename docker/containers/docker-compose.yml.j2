@@ -541,7 +541,9 @@ services:
 
   {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
+{% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
+{% endif %}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"
