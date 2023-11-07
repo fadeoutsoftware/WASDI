@@ -51,7 +51,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
+          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUpdateMetricContainer=true'
         """,
         label: "Build the container"
       }
@@ -80,7 +80,7 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
+          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUpdateMetricContainer=true'
         """,
         label: "Start or restart the container"
       }
