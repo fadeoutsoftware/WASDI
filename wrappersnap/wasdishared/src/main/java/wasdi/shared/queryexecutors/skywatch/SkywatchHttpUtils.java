@@ -87,7 +87,7 @@ public class SkywatchHttpUtils {
 			iAttempts++;
 
 			try {
-				Thread.sleep(iAttempts * 1_000);
+				Thread.sleep(iAttempts * 1_000L);
 			} catch (InterruptedException oInterruptedException) {
 				Thread.currentThread().interrupt();
 				WasdiLog.errorLog("SkywatchHttpUtils.makeAttemptsToPerformSearchOperation. Current thread was interrupted: ", oInterruptedException);
@@ -172,7 +172,7 @@ public class SkywatchHttpUtils {
 
 						if (oMetadata != null) {
 							int iSizeInMb = oMetadata.getSize_in_mb();
-							long lSizeInBytes = iSizeInMb * 1024 * 1024;
+							long lSizeInBytes = iSizeInMb * 1024L * 1024L;
 
 							return lSizeInBytes;
 						}

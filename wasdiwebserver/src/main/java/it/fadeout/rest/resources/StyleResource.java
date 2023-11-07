@@ -284,10 +284,12 @@ public class StyleResource {
 					
 					WasdiLog.debugLog("StyleResource.updateFile: style files updated! styleID - " + oStyle.getStyleId());
 				} catch (Exception oEx) {
-					if (oStyleSldFileTemp.exists())
-						oStyleSldFileTemp.delete();
+					if (oStyleSldFileTemp.exists()) {
+						boolean bIsDeleted = oStyleSldFileTemp.delete();
+						WasdiLog.debugLog("StyleResource.updateFile. Result of the deletion of the style file: " + bIsDeleted);
+					}
 
-					WasdiLog.errorLog("StyleResource.updateFile: " + oEx);
+					WasdiLog.errorLog("StyleResource.updateFile: ", oEx);
 					return Response.status(Status.NOT_MODIFIED).build();
 				}
 			}

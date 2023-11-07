@@ -442,7 +442,10 @@ public class WasdiFileUtils {
 		}
 
 		File oNewFile = new File(oSourceFile.getParent(), sNewFileSimpleName);
-		oSourceFile.renameTo(oNewFile);
+		boolean bIsFileRenamed = oSourceFile.renameTo(oNewFile);
+		
+		if (!bIsFileRenamed)
+			WasdiLog.warnLog("WasdiFileUtils.renameFile: the file was not renamed");
 
 		return oNewFile.getAbsolutePath();
 	}

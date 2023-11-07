@@ -109,8 +109,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 				oNewPipFile.flush();
 			}
 			else {
-				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: no more packages after filtering: delete pip file");
-				oPipFile.delete();
+				boolean bIsfileDeleted = oPipFile.delete();
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor. No more packages after filtering, result of the deletion of pip file: " + bIsfileDeleted);
 			}
 
 		}
