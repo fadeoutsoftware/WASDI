@@ -45,57 +45,6 @@ pipeline {
       }
     }
 
-    stage('CLONE THE GIT REPOSITORY') {
-      steps {
-        sh script: """
-          mkdir client_v2
-          cd client_v2
-          git clone https://github.com/wasdi-cloud/wasdiClient2.git .
-        """,
-        label: "Clone the GIT repository"
-      }
-    }
-
-    stage('NPM - INSTALL MODULES') {
-      steps {
-        sh script: """
-          cd client_v2
-          npm install
-        """,
-        label: "Install NodeJS modules from package.json"
-      }
-    }
-
-    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, DELETE TEMPLATES, ETC)') {
-      steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/prepareWasdiClient_v2.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}/client_v2'
-        """,
-        label: "Prepare the WASDI client"
-      }
-    }
-
-    stage('NPM - BUILD') {
-      steps {
-        sh script: """
-          cd client_v2
-          npm run build
-        """,
-        label: "Build WASDI client"
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
-        """,
-        label: "Build the container"
-      }
-    }
-
     stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         sh script: """
