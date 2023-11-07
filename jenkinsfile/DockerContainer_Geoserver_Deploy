@@ -42,23 +42,8 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE KEYCLOAK CONTAINER"
+          currentBuild.description = "WASDI - DEPLOY THE GEOSERVER CONTAINER"
         }
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true'
-        """,
-        label: "Build the container"
       }
     }
 
@@ -70,13 +55,13 @@ pipeline {
               sh script: """
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
-                    playbooks/deployDockerContainerWasdiKeycloak.yml \
+                    playbooks/deployDockerContainerWasdiGeoserver.yml \
                     --inventory inventories/wasdi.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Deploy the container and its run elements"
+              label: "Deploy the container and its run element"
             } catch (oError) {
               echo oError.getMessage()
               throw oError
@@ -91,7 +76,7 @@ pipeline {
         sh script: """
             cd ${env.sWasdiAnsiblePath}
             ansible-playbook \
-                playbooks/runWasdiDockerContainerWasdiKeycloak.yml \
+                playbooks/runWasdiDockerContainerWasdiGeoserver.yml \
                 --inventory inventories/wasdi.yml \
                 --limit ${env.sAnsibleLimit} \
                 --diff \

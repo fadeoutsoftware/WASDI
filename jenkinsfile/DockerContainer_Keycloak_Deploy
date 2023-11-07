@@ -42,23 +42,8 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE KEYCLOAK CONTAINER"
+          currentBuild.description = "WASDI - DEPLOY THE KEYCLOAK CONTAINER"
         }
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiKeycloakContainer=true'
-        """,
-        label: "Build the container"
       }
     }
 

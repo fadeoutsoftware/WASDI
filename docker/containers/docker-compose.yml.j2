@@ -27,7 +27,7 @@ services:
 {% if bWasdiClientEnabled == True %}
   {{ sWasdiClientServiceName }}:
     depends_on:
-#      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
@@ -56,32 +56,32 @@ services:
     restart: "unless-stopped"
 
 {% endif %}
-  {{ sWasdiContainerGeoserverServiceName }}:
+  {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
     environment:
       - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
-      - GEOSERVER_DATA_DIR=/mnt/data_{{ sWasdiContainerGeoserverServiceName }}
-{% if sWasdiContainerGeoserverEnvironmentJavaOpts | default('') != '' %}
-      - JAVA_OPTS={{ sWasdiContainerGeoserverEnvironmentJavaOpts }}
+      - GEOSERVER_DATA_DIR=/mnt/data_{{ sWasdiGeoserverServiceName }}
+{% if sWasdiGeoserverEnvironmentJavaOpts | default('') != '' %}
+      - JAVA_OPTS={{ sWasdiGeoserverEnvironmentJavaOpts }}
 {% endif %}
-    image: "{{ sWasdiContainerGeoserverServiceName }}:latest"
+    image: "{{ sWasdiGeoserverServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/geoserver`)"
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.service=s_{{ sWasdiContainerGeoserverServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/geoserver`)"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.service=s_{{ sWasdiGeoserverServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiGeoserverServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerGeoserverServiceName }}.loadbalancer.server.port={{ sWasdiContainerGeoserverInternalPort }}"
-{% if sWasdiContainerGeoserverInternalPort | default("") != ""
-    and sWasdiContainerGeoserverExternalPort | default("") != ""
-    and aWasdiContainerGeoserverExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiGeoserverServiceName }}.loadbalancer.server.port={{ sWasdiGeoserverInternalPort }}"
+{% if sWasdiGeoserverInternalPort | default("") != ""
+    and sWasdiGeoserverExternalPort | default("") != ""
+    and aWasdiGeoserverExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerGeoserverExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerGeoserverExternalPort }}:{{ sWasdiContainerGeoserverInternalPort }}"
+{% for sCurrentExternalIp in aWasdiGeoserverExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiGeoserverExternalPort }}:{{ sWasdiGeoserverInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
@@ -90,7 +90,7 @@ services:
         soft: {{ sWasdiGeoserverUlimitNofile }}
         hard: {{ sWasdiGeoserverUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiKeycloakServiceName }}:
@@ -237,17 +237,17 @@ services:
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}.stripprefix.prefixes=/rabbit-stomp"
-      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}.stripprefix.forceSlash=true"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.service=s_{{ sWasdiRabbitMqServiceName }}"
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.prefixes=/rabbit-stomp"
+      - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}_stomp.stripprefix.forceSlash=true"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.service=s_{{ sWasdiRabbitMqServiceName }}_stomp"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.tls=true"
 {% endif %}
-      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.middlewares=mw_{{ sWasdiRabbitMqServiceName }}@docker"
-      - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
+      - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_stomp@docker"
+      - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_stomp.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
 {% if ( sWasdiRabbitMqMainInternalPort | default("") != "" or sWasdiRabbitMqWebStompInternalPort | default("") != "" )
     and ( sWasdiRabbitMqMainExternalPort | default("") != "" or sWasdiRabbitMqWebStompExternalPort | default("") != "" )
     and aWasdiRabbitMqExternalIp | default([]) | length > 0 %}
@@ -294,7 +294,7 @@ services:
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
-#      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -330,13 +330,13 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
-#      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -372,13 +372,13 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
 
   {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
     depends_on:
-#      - {{ sWasdiContainerGeoserverServiceName }}
+#      - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -418,7 +418,7 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiContainerGeoserverServiceName }}:rw
+#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 
   {{ sWasdiTraefikServiceName }}:
