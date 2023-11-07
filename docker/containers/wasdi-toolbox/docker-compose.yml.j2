@@ -3,7 +3,7 @@ version: "3"
 
 # Default project name: all containers are
 # prefixed with this value
-name: "wasdi-cli-toolbox"
+name: "wasdi-toolbox"
 
 networks:
   default:
@@ -32,9 +32,52 @@ services:
         soft: {{ sWasdiToolboxUlimitNofile }}
         hard: {{ sWasdiToolboxUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}:/data:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
 
-  wasdi-backup-mongo:
+  maintenance-cleanNexusRepository:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
+      - TOOLBOX_MODULE_NAME=maintenance
+      - TOOLBOX_SUBMODULE_NAME=cleanNexusRepository
+    image: {{ sWasdiContainerToolboxServiceName }}:latest
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+
+  maintenance-cleanNexusRepositoryDynamicRule:
+    command:
+      - --mode-execute
+      - real
+      - --mode-batch
+    environment:
+      - TOOLBOX_LOG_VERBOSE=true
+      - TOOLBOX_LOG_ON_SCREEN=true
+      - TOOLBOX_MODULE_NAME=maintenance
+      - TOOLBOX_SUBMODULE_NAME=cleanNexusRepositoryDynamicRule
+    image: {{ sWasdiContainerToolboxServiceName }}:latest
+    restart: "no"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiToolboxUlimitNofile }}
+        hard: {{ sWasdiToolboxUlimitNofile }}
+    user: "{{ sWasdiBackupSystemUserName }}:{{ sWasdiBackupSystemGroupName }}"
+    volumes:
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
+
+  mongodb-backup:
     command:
       - --mode-execute
       - real
@@ -57,7 +100,7 @@ services:
       - /data/wasdibck/cache/mongodb:/mnt/cache:rw
       - /data/wasdibck/mongodb:/mnt/data:rw
 
-  wasdi-backup-postgresql:
+  postgresql-backup:
     command:
       - --mode-execute
       - real
