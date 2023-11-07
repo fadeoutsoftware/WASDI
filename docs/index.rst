@@ -146,4 +146,5 @@ Please, before start using WASDI, check our terms and condition.
    :caption: Legal
 
    Legal/EULA.rst
+   Legal/PrivacyPolicy.rst
 
