@@ -64,11 +64,11 @@ pipeline {
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerGdal=true sDeployWasdiContainerSen2cor=true sDeployWasdiContainerSnaphu=true'
         """,
-        label: "Build the WASDI client container"
+        label: "Build the containers"
       }
     }
 
-    stage('DEPLOYMENT') {
+    stage('DEPLOY THE CONTAINERS AND THEIR RUN ELEMENTS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
@@ -77,7 +77,7 @@ pipeline {
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook playbooks/deployDockerContainerWasdiCommandLineTool.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Execute ansible-playbook"
+              label: "Deploy the containers and their run elements"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

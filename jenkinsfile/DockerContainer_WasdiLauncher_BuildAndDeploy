@@ -77,7 +77,7 @@ pipeline {
       }
     }
 
-    stage('BUILD THE CONTAINERS') {
+    stage('BUILD THE CONTAINER') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
@@ -88,11 +88,11 @@ pipeline {
                 --diff \
                 --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true'
         """,
-        label: "Build the right container"
+        label: "Build the container"
       }
     }
 
-    stage('DEPLOYMENT') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
@@ -106,7 +106,7 @@ pipeline {
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Deploy the right container"
+              label: "Deploy the container and its run elements"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

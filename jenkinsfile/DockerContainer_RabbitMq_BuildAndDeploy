@@ -62,7 +62,7 @@ pipeline {
       }
     }
 
-    stage('DEPLOYMENT') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           script {
@@ -76,7 +76,7 @@ pipeline {
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Deploy the container"
+              label: "Deploy the container and its run element"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

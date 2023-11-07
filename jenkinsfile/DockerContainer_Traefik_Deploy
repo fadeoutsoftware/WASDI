@@ -47,13 +47,13 @@ pipeline {
       }
     }
 
-    stage('UPDATE THE RUN ELEMENTS OF CONTAINERS') {
+    stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook playbooks/deployWasdiDockerContainerRunElements.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerTraefik=true'
         """,
-        label: "Update the elements needed to run containers"
+        label: "Deploy the container and its run elements"
       }
     }
 
