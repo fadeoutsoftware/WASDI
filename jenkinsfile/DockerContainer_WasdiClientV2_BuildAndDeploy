@@ -61,6 +61,7 @@ pipeline {
         sh script: """
           cd client_v2
           npm install
+          ls -al client_2/dist
         """,
         label: "Install NodeJS modules from package.json"
       }
