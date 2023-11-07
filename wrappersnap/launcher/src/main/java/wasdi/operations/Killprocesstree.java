@@ -33,7 +33,7 @@ public class Killprocesstree extends Operation {
 		WasdiLog.debugLog("Killprocesstree.executeOperation");
 
 		try {
-			Preconditions.checkNotNull(oParam, "process workspace is null");
+			Preconditions.checkNotNull(oProcessWorkspace, "process workspace is null");
 			Preconditions.checkNotNull(oParam, "parameter is null");
 			
 			KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) oParam;
