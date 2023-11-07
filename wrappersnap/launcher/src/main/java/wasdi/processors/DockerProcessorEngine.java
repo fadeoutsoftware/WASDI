@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -297,6 +298,53 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     	return run(oParameter, true);
     }
 
+    
+    @Override
+    public boolean stopApplication(ProcessorParameter oParameter) {
+    	
+    	try {
+    		String sProcessorName = m_oProcessWorkspace.getProductName();
+    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+    		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+    		
+    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, sProcessorName);
+    		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
+    		
+    		if (oContainer == null) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: error retriving the container info for the app "+ sProcessorName);
+    			return false;
+    		}
+    		
+    		if (oContainer.Names == null) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+    		
+    		if (oContainer.Names.size()<=0) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+
+    		// Call localhost:port
+    		String sUrl = getProcessorUrl(oProcessorToKill, oContainer.Names.get(0));
+    		sUrl += "/run/--kill" + "_" + m_oProcessWorkspace.getSubprocessPid();
+    		
+    		Map<String, String> asHeaders = new HashMap<>();
+    		asHeaders.put("Content-Type", "application/json");
+    		
+    		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, "{}", null);    		
+
+    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: " + oHttpCallResponse.getResponseBody());
+    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: stopped " + m_oProcessWorkspace.getProcessObjId() + " SubPid: " + m_oProcessWorkspace.getSubprocessPid());
+    		
+    		return true;
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.stopApplication: error");
+			return false;
+		}
+    }
+    
     /**
      * Run a Docker Processor
      * 

@@ -168,6 +168,13 @@ public abstract class WasdiProcessorEngine {
 	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
 	
 	/**
+	 * Stop a running application
+	 * @param oParameter the processor parameter
+	 * @return true if stopped false in case of problems
+	 */
+	public abstract boolean stopApplication(ProcessorParameter oParameter);	
+	
+	/**
 	 * Check if a processor exists on actual node
 	 * @param oProcessorParameter
 	 * @return True if the processor exists

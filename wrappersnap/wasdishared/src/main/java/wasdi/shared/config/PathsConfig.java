@@ -217,4 +217,24 @@ public class PathsConfig {
         sStylePath += "styles" + File.separator;
         return sStylePath;
 	}
+	
+	/**
+	 * Get the full path of a parameter
+	 * @param sParameterObjId
+	 * @return
+	 */
+	public static String getParameterPath(String sParameterObjId) {
+		
+		if (Utils.isNullOrEmpty(sParameterObjId)) return "";
+		
+		String sParametersPath = WasdiConfig.Current.paths.serializationPath;
+		
+		if (!sParametersPath.endsWith(File.separator)) {
+			sParametersPath = sParametersPath + File.separator;
+		}		
+		
+		sParametersPath = sParametersPath + sParameterObjId;
+		
+		return sParametersPath;
+	}
 }

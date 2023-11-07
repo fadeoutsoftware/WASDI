@@ -26,7 +26,7 @@ public class LauncherOperationsUtils {
 		}
 	}
 	
-	public boolean doesOperationLaunchDocker(String sOperation) {
+	public boolean doesOperationLaunchApplication(String sOperation) {
 		switch(sOperation.toUpperCase()) {
 		case "RUNPROCESSOR":
 		case "RUNIDL":

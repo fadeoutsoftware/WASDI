@@ -78,7 +78,7 @@ public class ProcessWorkspace {
     /**
      * System pid
      */
-    private int pid;
+    private int pid=-1;
     /**
      * Process Payload
      */
