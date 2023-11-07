@@ -12,7 +12,6 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
     sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sCurrentRevision         = "${env.BUILD_ID}"
     sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
@@ -53,18 +52,8 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
+          currentBuild.description = "WASDI - DEPLOY THE CLI TOOLS CONTAINERS (gdal, sen2cor, snaphu, etc)"
         }
-      }
-    }
-
-    stage('BUILD THE CONTAINERS') {
-      steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerGdal=true sDeployWasdiContainerSen2cor=true sDeployWasdiContainerSnaphu=true'
-        """,
-        label: "Build the containers"
       }
     }
 

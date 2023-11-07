@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  environment {
-    sCurrentRevision = "${env.BUILD_ID}"
-  }
-
   options {
     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '30'))
     disableConcurrentBuilds()
@@ -42,46 +38,6 @@ pipeline {
           currentBuild.displayName = "${env.sCurrentRevision}"
           currentBuild.description = "WASDI - DEPLOY THE WASDI CLIENT CONTAINER"
         }
-      }
-    }
-
-    stage('NPM - INSTALL MODULES') {
-      steps {
-        sh script: """
-          cd client
-          npm install
-        """,
-        label: "Install NodeJS modules from package.json"
-      }
-    }
-
-    stage('ANSIBLE - PREPARE THE CLIENT (RENDER TEMPLATES, COMPILE SCSS, DELETE TEMPLATES, ETC)') {
-      steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/prepareWasdiClient.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-        """,
-        label: "Prepare the WASDI client"
-      }
-    }
-
-    stage('NPM - BUILD') {
-      steps {
-        sh script: """
-          cd client
-          npm run build
-        """,
-        label: "Build WASDI client"
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientContainer=true'
-        """,
-        label: "Build the container"
       }
     }
 

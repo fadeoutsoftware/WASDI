@@ -81,7 +81,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`testnew.wasdi.net`) && PathPrefix(`/`)"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
       - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.service=s_{{ sWasdiClientV2ServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}

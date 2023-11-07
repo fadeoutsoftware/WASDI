@@ -53,7 +53,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE JAVA ARTIFACTS CONTAINERS"
+          currentBuild.description = "WASDI - DEPLOY THE JAVA ARTIFACTS CONTAINERS"
         }
       }
     }
