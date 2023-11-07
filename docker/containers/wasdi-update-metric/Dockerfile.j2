@@ -65,29 +65,29 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install all elements related to the service
-RUN mkdir --parents {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
-        {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
-    chmod {{ sWasdiComponentUpdateMetricRootDirectoryMode }} {{ sWasdiComponentUpdateMetricRootDirectoryPath }} \
-        {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
-    python3 -m venv --system-site-packages {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
-    {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \
+RUN mkdir --parents {{ sWasdiUpdateMetricRootDirectoryPath }} \
+        {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    chmod {{ sWasdiUpdateMetricRootDirectoryMode }} {{ sWasdiUpdateMetricRootDirectoryPath }} \
+        {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    python3 -m venv --system-site-packages {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment && \
+    {{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/pip3 install --no-cache-dir --no-compile \
         psutil \
         python-keycloak \
         urllib3
 
 
 # Set the workdir
-WORKDIR {{ sWasdiComponentUpdateMetricRootDirectoryPath }}
+WORKDIR {{ sWasdiUpdateMetricRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/wasdiUpdateMetric.py {{ sWasdiComponentUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py
+COPY --chown={{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} ./dataToCopy/wasdiUpdateMetric.py {{ sWasdiUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py
 
 
 # Start the container
 CMD [ \
-    "{{ sWasdiComponentUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/python3", \
-    "{{ sWasdiComponentUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py", \
+    "{{ sWasdiUpdateMetricRootDirectoryPath }}/pythonVirtualEnvironment/bin/python3", \
+    "{{ sWasdiUpdateMetricRootDirectoryPath }}/wasdiUpdateMetric.py", \
     "--configuration-file", \
     "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json" \
 ]

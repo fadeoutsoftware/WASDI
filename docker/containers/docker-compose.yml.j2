@@ -28,8 +28,8 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-#      - {{ sWasdiKeycloakServiceName }}
-#      - {{ sWasdiRabbitMqServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
@@ -295,9 +295,9 @@ services:
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-#      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
-#      - {{ sWasdiRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
@@ -337,9 +337,9 @@ services:
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
-#      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
-#      - {{ sWasdiRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
 {% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
@@ -380,11 +380,11 @@ services:
     depends_on:
 #      - {{ sWasdiContainerGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-#      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
 {% endif %}
 #      - {{ sWasdiMongoServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
-#      - {{ sWasdiRabbitMqServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
     environment:
@@ -494,10 +494,9 @@ services:
 {% if bWasdiUpdateMetricEnabled == True %}
 
   {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
-    # Disable until we are ready to start all containers
-    #depends_on:
-    #  - {{ sWasdiKeycloakServiceName }}
-    #  - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
+    depends_on:
+      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
     image: "{{ sWasdiContainerWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
