@@ -28,10 +28,16 @@ services:
   {{ sWasdiClientServiceName }}:
     depends_on:
 #      - {{ sWasdiGeoserverServiceName }}
+{% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
+{% endif %}
+{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
       - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
+{% endif %}
+{% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
       - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
+{% endif %}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
       - {{ sWasdiTraefikServiceName }}
     image: "{{ sWasdiClientServiceName }}:latest"
@@ -54,7 +60,43 @@ services:
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
+{% endif %}
+{% if bWasdiClientV2Enabled == True %}
 
+  {{ sWasdiClientV2ServiceName }}:
+    depends_on:
+#      - {{ sWasdiGeoserverServiceName }}
+{% if sWasdiServerTypeIsMain == True %}
+      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiRabbitMqServiceName }}
+{% endif %}
+{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
+      - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
+{% endif %}
+{% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
+      - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
+{% endif %}
+      - {{ sWasdiTraefikServiceName }}
+    image: "{{ sWasdiClientV2ServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.service=s_{{ sWasdiClientV2ServiceName }}"
+{% if bWasdiContainerTraefikSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiClientV2ServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiClientV2ServiceName }}.loadbalancer.server.port={{ sWasdiClientV2InternalPort }}"
+{% if sWasdiClientV2InternalPort | default("") != ""
+    and sWasdiClientV2ExternalPort | default("") != ""
+    and aWasdiClientV2ExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiClientV2ExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiClientV2ExternalPort }}:{{ sWasdiClientV2InternalPort }}"
+{% endfor %}
+{% endif %}
+    restart: "unless-stopped"
 {% endif %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
