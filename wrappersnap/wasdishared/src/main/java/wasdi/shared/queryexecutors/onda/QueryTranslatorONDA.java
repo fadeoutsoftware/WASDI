@@ -27,6 +27,8 @@ public class QueryTranslatorONDA extends QueryTranslator {
 	 * 
 	 * translates from WASDI query (OpenSearch) to OpenData format used by ONDA DIAS
 	 */
+	
+	private static final String s_sAND =  " AND ";
 	@Override
 	protected String translate(String sQueryFromClient) {
 		if(Utils.isNullOrEmpty(sQueryFromClient)) {
@@ -47,32 +49,32 @@ public class QueryTranslatorONDA extends QueryTranslator {
 
 		sTmp = parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseSentinel2(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseSentinel3(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseEnvisat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
@@ -80,16 +82,16 @@ public class QueryTranslatorONDA extends QueryTranslator {
 
 		sTmp = parseLandsat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
 
 		sTmp = parseCopernicusMarine(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
@@ -100,16 +102,16 @@ public class QueryTranslatorONDA extends QueryTranslator {
 
 		String sTimeFrame = parseTimeFrame(sQuery);
 		if(!Utils.isNullOrEmpty(sTimeFrame)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += "( ( " + sTimeFrame +" ) )";
 		}
 
 		sTmp = parseFootPrint(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(" AND ")) {
-				sResult += " AND ";
+			if(!Utils.isNullOrEmpty(sResult) && !sResult.endsWith(s_sAND)) {
+				sResult += s_sAND;
 			}
 			sResult += sTmp;
 		}
@@ -172,7 +174,7 @@ public class QueryTranslatorONDA extends QueryTranslator {
 
 	protected String parseAdditionalQuery(String sQuery) {
 		String sResult = "";
-		int iStop = Math.min( Math.max(sQuery.indexOf(" AND "),0), sQuery.length() );
+		int iStop = Math.min( Math.max(sQuery.indexOf(s_sAND),0), sQuery.length() );
 		String sSubQuery = sQuery.substring(0, iStop);
 		if(
 				!sSubQuery.contains("Sentinel") &&
@@ -357,7 +359,7 @@ public class QueryTranslatorONDA extends QueryTranslator {
 			} else {
 				sSentinel1 += "name:*";
 			}
-			sSentinel1+=" AND ";
+			sSentinel1+=s_sAND;
 			//producttype:[SLC|GRD|OCN] (optional)
 			if(sQuery.matches(".*producttype\\s*\\:\\s*SLC.*")) {
 				sSentinel1+= "name:*SLC*";
@@ -368,7 +370,7 @@ public class QueryTranslatorONDA extends QueryTranslator {
 			} else {
 				sSentinel1+="name:*";
 			}
-			sSentinel1+=" AND ";
+			sSentinel1+=s_sAND;
 			//the next token w/ wildcard is always added by ONDA
 			sSentinel1+="name:*";
 
@@ -446,7 +448,7 @@ public class QueryTranslatorONDA extends QueryTranslator {
 		}	
 		if( sQuery.contains("endPosition")) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
+				sResult += s_sAND;
 			}
 			//start
 			sResult += "endPosition:[";

@@ -326,7 +326,7 @@ public class RunTimeUtils {
 	 */
 	public static boolean killProcess(int iPid) {
 		try {
-			if (iPid > 0) {
+			if (iPid > 1) {
 				// Pid exists, kill the process
 				String sShellExString = WasdiConfig.Current.scheduler.killCommand;
 				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
@@ -339,7 +339,7 @@ public class RunTimeUtils {
 				return true;
 
 			} else {
-				WasdiLog.errorLog("RunTimeUtils.killProcess: Process pid not <= 0");
+				WasdiLog.errorLog("RunTimeUtils.killProcess: Process pid not <= 1");
 				return false;
 			}
 		} catch (Exception oE) {

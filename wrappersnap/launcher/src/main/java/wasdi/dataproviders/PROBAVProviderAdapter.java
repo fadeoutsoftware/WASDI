@@ -19,6 +19,11 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class PROBAVProviderAdapter extends ProviderAdapter {
+	
+	private static final String s_sAccept = "Accept";
+	private static final String s_sAuthorization = "Authorization";
+	private static final String s_sUserAgent = "User-Agent";
+	private static final String s_sMozillaAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0";
 
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 
@@ -48,14 +53,14 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 	    URL oUrl = new URL(sFileURL);
 	    HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	    oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty("Accept", "*/*");
-	    oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		oHttpConn.setRequestProperty(s_sAccept, "*/*");
+	    oHttpConn.setRequestProperty(s_sUserAgent, s_sMozillaAgent);
 	        
 		// Basic HTTP Authentication "by hand"
 		String sBasicAuth = sFinalUser + ":" + sFinalPassword;
 		String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
 		sBasicAuth = "Basic " + sEncoded;
-		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
+		oHttpConn.setRequestProperty(s_sAuthorization,sBasicAuth);
 
 	    int responseCode = oHttpConn.getResponseCode();
 
@@ -114,14 +119,14 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 		URL oUrl = new URL(sFileURL);
 		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 		oHttpConn.setRequestMethod("GET");
-		oHttpConn.setRequestProperty("Accept", "*/*");
-		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		oHttpConn.setRequestProperty(s_sAccept, "*/*");
+		oHttpConn.setRequestProperty(s_sUserAgent, s_sMozillaAgent);
 		
 		// Basic HTTP Authentication "by hand"
 		String sBasicAuth = sDownloadUser + ":" + sDownloadPassword;
 		String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
 		sBasicAuth = "Basic " + sEncoded;
-		oHttpConn.setRequestProperty("Authorization",sBasicAuth);
+		oHttpConn.setRequestProperty(s_sAuthorization, sBasicAuth);
 		
 		int responseCode = oHttpConn.getResponseCode();
 
@@ -351,15 +356,15 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 			
 			//NOTE: the DhUS version did not set GET and Accept. ONDA did. TEST 
 			oHttpConn.setRequestMethod("GET");
-			oHttpConn.setRequestProperty("Accept", "*/*");
-			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+			oHttpConn.setRequestProperty(s_sAccept, "*/*");
+			oHttpConn.setRequestProperty(s_sUserAgent, s_sMozillaAgent);
 			
 			// Basic HTTP Authentication "by hand"
 			String sBasicAuth = sFinalUser + ":" + sFinalPassword;
 			String sEncoded = Base64.getEncoder().encodeToString(sBasicAuth.getBytes());
 			sBasicAuth = "Basic " + sEncoded;
 			
-			oHttpConn.setRequestProperty("Authorization",sBasicAuth);
+			oHttpConn.setRequestProperty(s_sAuthorization, sBasicAuth);
 			oHttpConn.setConnectTimeout(iConnectionTimeOut);
 			oHttpConn.setReadTimeout(iReadTimeOut);
 			WasdiLog.debugLog("PROBAVProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");

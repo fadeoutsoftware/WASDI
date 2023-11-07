@@ -16,6 +16,9 @@ import wasdi.shared.utils.log.WasdiLog;
 
 public class SkywatchProviderAdapter extends ProviderAdapter {
 
+	private static final String s_sSearchIdParam = "&search_id=";
+	private static final String s_sProductIdParam = "&product_id=";
+	private static final String s_sProductName = "product_name";
 	/**
 	 * Basic constructor
 	 */
@@ -80,7 +83,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 
 	private static CreatePipelineRequest convertUrlToCreatePipelineRequest(String sFileURL) {
 
-		if (!sFileURL.contains("&search_id=") || !sFileURL.contains("&product_id=")) {
+		if (!sFileURL.contains(s_sSearchIdParam) || !sFileURL.contains(s_sProductIdParam)) {
 			return null;
 		}
 
@@ -89,7 +92,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 			return null;
 		}
 
-		String sProductName = aoWasdiPayload.get("product_name");
+		String sProductName = aoWasdiPayload.get(s_sProductName);
 		String sSearchId = aoWasdiPayload.get("search_id");
 		String sProductId = aoWasdiPayload.get("product_id");
 
@@ -109,16 +112,16 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 		if (sDecodedUrl != null) {
 			if (sDecodedUrl.contains("?product_name=")) {
 				String sProductName = sDecodedUrl.substring(sDecodedUrl.indexOf("?product_name=") + 14, sDecodedUrl.indexOf("&", sDecodedUrl.indexOf("product_name=")));
-				asPayload.put("product_name", sProductName);
+				asPayload.put(s_sProductName, sProductName);
 			}
 
-			if (sDecodedUrl.contains("&search_id=")) {
-				String sSearchId = sDecodedUrl.substring(sDecodedUrl.indexOf("&search_id=") + 11, sDecodedUrl.indexOf("&", sDecodedUrl.indexOf("search_id=")));
+			if (sDecodedUrl.contains(s_sSearchIdParam)) {
+				String sSearchId = sDecodedUrl.substring(sDecodedUrl.indexOf(s_sSearchIdParam) + 11, sDecodedUrl.indexOf("&", sDecodedUrl.indexOf("search_id=")));
 				asPayload.put("search_id", sSearchId);
 			}
 
-			if (sDecodedUrl.contains("&product_id=")) {
-				String sId = sDecodedUrl.substring(sDecodedUrl.indexOf("&product_id=") + 12);
+			if (sDecodedUrl.contains(s_sProductIdParam)) {
+				String sId = sDecodedUrl.substring(sDecodedUrl.indexOf(s_sProductIdParam) + 12);
 				asPayload.put("product_id", sId);
 			}
 		}
@@ -145,7 +148,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 			return null;
 		}
 
-		String sProductName = aoWasdiPayload.get("product_name");
+		String sProductName = aoWasdiPayload.get(s_sProductName);
 
 		String sFileName = sProductName + ".tif";
 
