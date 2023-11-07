@@ -38,7 +38,10 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 				
 				File oOriginalFile = new File(sResult);
 				File oRenamedFile = new File(sResult.replace(".part", "_part"));
-				oOriginalFile.renameTo(oRenamedFile);
+				boolean bIsFileRenamed = oOriginalFile.renameTo(oRenamedFile);
+				
+				if (!bIsFileRenamed)
+					WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile. File was not renamed.");
 				
 				sResult = sResult.replace(".part", "_part");
 				

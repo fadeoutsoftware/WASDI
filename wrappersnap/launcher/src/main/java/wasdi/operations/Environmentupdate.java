@@ -98,7 +98,9 @@ public class Environmentupdate extends Operation {
 					File oActionsLogFile = new File(sProcessorFolder);
 					
 					if (!oActionsLogFile.exists()) {
-						oActionsLogFile.createNewFile();
+						boolean bIsFileCreated = oActionsLogFile.createNewFile();
+						if (!bIsFileCreated)
+							WasdiLog.errorLog("Environmentupdate.executeOperation: the action file was not created");
 					}
 					
 					// Extract the command we just executed

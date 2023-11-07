@@ -29,16 +29,17 @@ public class QueryTranslatorCreoDias2 extends QueryTranslator {
 	private static final String sODataTopOption = "$top=";
 	private static final String sODataOrderBy = "$orderby=";
 	
-	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<String, String>() {{
-			put(Platforms.ENVISAT, "phaseNumber");
-			put(Platforms.SENTINEL1, "polarisationChannels");
-	}};
+	private static final HashMap<String, String> asODATA_POLARISATION_MODE_MAP =  new HashMap<>();
 	
-	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<String, String>() {{
-			put(Platforms.SENTINEL5P, "orbitNumber");
-			put(Platforms.ENVISAT, "cycleNumber");
-	}};
-
+	private static final HashMap<String, String> asODATA_ABSOLUTE_ORBIT_MAP = new HashMap<>();
+	
+	static {
+		asODATA_POLARISATION_MODE_MAP.put(Platforms.ENVISAT, "phaseNumber");
+		asODATA_POLARISATION_MODE_MAP.put(Platforms.SENTINEL1, "polarisationChannels");
+		
+		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.SENTINEL5P, "orbitNumber");
+		asODATA_ABSOLUTE_ORBIT_MAP.put(Platforms.ENVISAT, "cycleNumber");
+	}
  
 	@Override
 	protected String translate(String sQueryFromClient) {

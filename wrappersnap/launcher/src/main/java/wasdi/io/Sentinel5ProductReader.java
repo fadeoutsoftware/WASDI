@@ -298,8 +298,8 @@ public class Sentinel5ProductReader extends WasdiProductReader {
 				File oCdlFile = new File(sCdlFileName);
 				
 				if (oCdlFile.exists()) {
-					oCdlFile.delete();
-					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: deleted cdl file " + sCdlFileName);
+					boolean bIsFileDeleted = oCdlFile.delete();
+					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload. Result of the deletion of the cdl file " + sCdlFileName + ": " + bIsFileDeleted);
 				}
 				else {
 					WasdiLog.debugLog("Sentinel5ProductReader.adjustFileAfterDownload: impossible to find cdl file " + oCdlFile.getPath());

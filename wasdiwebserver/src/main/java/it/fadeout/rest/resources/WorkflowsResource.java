@@ -250,8 +250,11 @@ public class WorkflowsResource {
 
             } 
             catch (Exception oEx) {
-                if (oWorkflowXmlFileTemp.exists()) oWorkflowXmlFileTemp.delete();
-                WasdiLog.errorLog("WorkflowsResource.updateFile error: " + oEx);
+                if (oWorkflowXmlFileTemp.exists()) {
+                	boolean bIsFileDeleted = oWorkflowXmlFileTemp.delete();
+                	WasdiLog.debugLog("WorkflowsResource.updateFile. Result of the deletion of the xml temporary file: " + bIsFileDeleted);
+                }
+                WasdiLog.errorLog("WorkflowsResource.updateFile error: ", oEx);
                 return Response.status(Status.NOT_MODIFIED).build();
             }
         } 

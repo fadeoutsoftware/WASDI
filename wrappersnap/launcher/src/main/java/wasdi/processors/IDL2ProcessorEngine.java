@@ -181,15 +181,26 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	@Override
 	protected void onAfterDeploy(String sProcessorFolder) {
 		try {
-			File oFile = new File(sProcessorFolder+"envi552-linux.tar");
-			oFile.delete();
-			oFile = new File(sProcessorFolder+"o_licenseserverurl.txt");
-			oFile.delete();
-			oFile = new File(sProcessorFolder+"install.sh");
-			oFile.delete();
+			String sFileName = sProcessorFolder+"envi552-linux.tar";
+			File oFile = new File(sFileName);
+			boolean bIsFileDeleted = oFile.delete();
+			if (!bIsFileDeleted) 
+				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName); 
+			
+			sFileName = sProcessorFolder+"o_licenseserverurl.txt";
+			oFile = new File(sFileName);
+			bIsFileDeleted = oFile.delete();
+			if (!bIsFileDeleted) 
+				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);
+			
+			sFileName = sProcessorFolder + "install.sh";
+			oFile = new File(sFileName);
+			bIsFileDeleted = oFile.delete();
+			if (!bIsFileDeleted) 
+				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);
 		}
-		catch (Exception e) {
-			WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: "+e.toString());
+		catch (Exception oEx) {
+			WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: ", oEx);
 		}
 	}
 

@@ -494,7 +494,9 @@ public class ZipFileUtils {
 		File oCheckExists = new File(sZipFilePath);
 		
 		if (oCheckExists.exists()) {
-			oCheckExists.delete();
+			boolean bIsFileDeleted = oCheckExists.delete();
+			if (!bIsFileDeleted)
+				WasdiLog.warnLog("ZipFileUtils.zipFiles: " + sZipFilePath + " already existed and it was not deleted");
 		}
 		
 		Path oZipFilePath = Files.createFile(Paths.get(sZipFilePath));
