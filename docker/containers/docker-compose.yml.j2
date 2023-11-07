@@ -39,9 +39,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.service=s_{{ sWasdiClientServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiClientServiceName }}.tls=true"
@@ -72,9 +70,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/geoserver`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.service=s_{{ sWasdiContainerGeoserverServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerGeoserverServiceName }}.tls=true"
@@ -132,9 +128,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.middlewares=mw_wasdi-secure-allowFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.service=s_{{ sWasdiKeycloakServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
@@ -247,9 +241,7 @@ services:
       - "traefik.http.middlewares.mw_{{ sWasdiRabbitMqServiceName }}.stripprefix.forceSlash=true"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/rabbit-stomp`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.service=s_{{ sWasdiRabbitMqServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}.tls=true"
@@ -316,9 +308,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/ogcprocesses`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.service=s_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.tls=true"
@@ -360,9 +350,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdi-openeo-server`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.tls=true"
@@ -408,9 +396,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdiwebserver`)"
-{% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.tls=true"
@@ -439,7 +425,6 @@ services:
     command:
       - "--global.sendanonymoususage=false"
       - "--api.dashboard=true"
-#      - "--api.insecure=true"
       - "--entryPoints.web.address=:{{ sWasdiContainerTraefikHttpInternalPort }}"
       - "--entryPoints.web.forwardedHeaders.insecure"
 {% if bWasdiContainerTraefikSslEnabled == True %}
@@ -461,9 +446,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
       - "traefik.http.routers.dashboard.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-{% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.dashboard.middlewares=mw_wasdi-secure-denyFrame@file"
-{% endif %}
+      - "traefik.http.routers.dashboard.middlewares=mw_wasdi-secure-denyFrame@file,mw_auth-dashboard@file"
       - "traefik.http.routers.dashboard.service=api@internal"
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.dashboard.tls=true"
