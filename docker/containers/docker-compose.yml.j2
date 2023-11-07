@@ -493,11 +493,11 @@ services:
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_conf.d:/etc/traefik/conf.d:ro"
 {% if bWasdiUpdateMetricEnabled == True %}
 
-  {{ sWasdiContainerWasdiUpdateMetricServiceName }}:
+  {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
-    image: "{{ sWasdiContainerWasdiUpdateMetricServiceName }}:latest"
+    image: "{{ sWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
       nofile:
