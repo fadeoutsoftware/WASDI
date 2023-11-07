@@ -15,6 +15,8 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 
 import ucar.ma2.Array;
+import ucar.nc2.Attribute;
+import ucar.nc2.AttributeContainer;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
@@ -42,6 +44,9 @@ public class CmNcProductReader extends WasdiProductReader {
 		GeorefProductViewModel oRetViewModel = null;
 
 		try {
+			
+			boolean bTimeInHours = true;
+			
 			NetcdfFile oFile = NetcdfFiles.open(m_oProductFile.getAbsolutePath());
 
 			// Create the Product View Model
@@ -69,15 +74,36 @@ public class CmNcProductReader extends WasdiProductReader {
 
 				if (sVariableShortName.equalsIgnoreCase("lon") || sVariableShortName.equalsIgnoreCase("longitude")) {
 					iLongitudeLength = extractValueFromShape(oVariable);
+					continue;
 				}
 
 				if (sVariableShortName.equalsIgnoreCase("lat") || sVariableShortName.equalsIgnoreCase("latitude")) {
 					iLatitudeLength = extractValueFromShape(oVariable);
+					continue;
 				}
 
 				if (sVariableShortName.equalsIgnoreCase("time")) {
 					Object aoHours = (oVariable.read().getStorage());
 					int[] aiIntHours = new int[0];
+					
+					AttributeContainer aoAttributes = oVariable.attributes();
+					
+					if (aoAttributes!=null) {
+						for (Attribute oAttribute : aoAttributes) {
+							String sName = oAttribute.getName();
+							String sValue = oAttribute.getStringValue();
+							
+							if (Utils.isNullOrEmpty(sName)) continue;
+							if (Utils.isNullOrEmpty(sValue)) continue;
+							
+							if (sName.equals("units")) {
+								if (sValue.startsWith("day")) {
+									bTimeInHours = false;
+									WasdiLog.debugLog("CmNcProductReader.getProductViewModel: found units attribute with day: change the band name suffix from hh to d");
+								}
+							}
+						}
+					}
 
 					if (aoHours instanceof int[]) {
 						aiIntHours = (int[]) aoHours;
@@ -97,7 +123,15 @@ public class CmNcProductReader extends WasdiProductReader {
 						}
 					}
 
-					aiTimeHours = IntStream.of(aiIntHours).map(i -> i % 24).boxed().collect(Collectors.toList());
+					if (bTimeInHours) {
+						aiTimeHours = IntStream.of(aiIntHours).map(i -> i % 24).boxed().collect(Collectors.toList());
+					}
+					else {
+						aiTimeHours = new ArrayList<Integer>();
+						for (int iValue : aiIntHours) {
+							aiTimeHours.add(iValue);
+						}
+					}
 				}
 			}
 
@@ -112,11 +146,17 @@ public class CmNcProductReader extends WasdiProductReader {
 						oBandViewModel.setHeight(iLatitudeLength);
 						oBandViewModel.setWidth(iLongitudeLength);
 						oBandViewModel.setPublished(false);
+						
+						String sBandTimeSuffix = "hh";
+						
+						if (!bTimeInHours) {
+							sBandTimeSuffix = "d";							
+						}
 
 						if (aiTimeHours.size() == 1) {
 							oBandViewModel.setName(sVariableShortName);
 						} else {
-							oBandViewModel.setName(sVariableShortName + "_" + String.format("%02d" , iTimeHour) + "hh");
+							oBandViewModel.setName(sVariableShortName + "_" + String.format("%02d" , iTimeHour) + sBandTimeSuffix);
 						}
 
 						oBands.add(oBandViewModel);
