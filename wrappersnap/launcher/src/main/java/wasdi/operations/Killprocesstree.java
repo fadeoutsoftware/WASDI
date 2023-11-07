@@ -40,9 +40,9 @@ public class Killprocesstree extends Operation {
 
 			//now get the processWorkspaces from DB using their processObjId 
 			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
 			for (String sProcessObjId: oKillProcessTreeParameter.getProcessesToBeKilledObjId()) {
-				ProcessWorkspace oProcessToKill = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+				ProcessWorkspace oProcessToKill = m_oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
 				if (null != oProcessToKill) {
 					WasdiLog.infoLog("Killprocesstree.executeOperation: collecting and killing processes for " + oProcessToKill.getProcessObjId());
 					aoProcessesToBeKilled.add(oProcessToKill);
@@ -62,31 +62,38 @@ public class Killprocesstree extends Operation {
 					continue;
 				}
 				
-				WasdiLog.infoLog("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
-
-				terminate(oProcess);
-				
-				//save processObjId for later DB cleanub
-				asKilledProcessObjIds.add(oProcess.getProcessObjId());
-				
-				//from here on collect children
-				if (!oKillProcessTreeParameter.getKillTree()) {
-					continue;
-				}
-
-				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
-				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
-				if (!bCanSpawnChildren) {
-					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
-					continue;
-				}
-
 				//a dead process cannot spawn any more children, add the remaining ones to the set of processes to be killed
 				if (Utils.isNullOrEmpty(oProcess.getProcessObjId())) {
 					WasdiLog.errorLog("Killprocesstree.executeOperation: process has null or empty ObjId, skipping");
 					continue;
+				}				
+				
+				WasdiLog.infoLog("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
+				
+				// Terminate the process
+				terminate(oProcess);
+				
+				// Save processObjId for later DB cleanub
+				asKilledProcessObjIds.add(oProcess.getProcessObjId());
+				
+				// Should we kill all the tree?
+				if (!oKillProcessTreeParameter.getKillTree()) {
+					continue;
 				}
-				List<ProcessWorkspace> aoChildren = oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
+				
+				//from here on collect children
+				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+				
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
+				
+				if (!bCanSpawnChildren) {
+					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					continue;
+				}
+				
+				List<ProcessWorkspace> aoChildren = m_oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
+				
+				// Add the children
 				if (null != aoChildren && aoChildren.size() > 0) {
 					//append at the end
 					for (ProcessWorkspace oChildren : aoChildren) {
