@@ -27,6 +27,9 @@ import wasdi.shared.viewmodels.search.QueryResultViewModel;
  */
 public class ResponseTranslatorEODC extends ResponseTranslator {
 	
+	private static final String s_sGetRecordResponse = "csw:GetRecordsResponse";
+	private static final String s_sSearchResults = "csw:SearchResults";
+	
 	static ObjectMapper s_oMapper = new ObjectMapper();
 
 	/* (non-Javadoc)
@@ -43,10 +46,10 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 			Map<String, Object> aoJsonResults = s_oMapper.readValue(sJson, new TypeReference<Map<String, Object>>() {});
 			
 			// Get the childs
-			Map<String, Object> aoChilds = (Map<String, Object>) aoJsonResults.get("csw:GetRecordsResponse");
+			Map<String, Object> aoChilds = (Map<String, Object>) aoJsonResults.get(s_sGetRecordResponse);
 			
 			// Access the SearchResults child
-			Map<String, Object> aoSearchResults = (Map<String, Object>) aoChilds.get("csw:SearchResults");
+			Map<String, Object> aoSearchResults = (Map<String, Object>) aoChilds.get(s_sSearchResults);
 			
 			int iResultCount = 0;
 			try {
@@ -191,23 +194,23 @@ public class ResponseTranslatorEODC extends ResponseTranslator {
 			return -1;
 		}
 
-		if(!oJson.has("csw:GetRecordsResponse")) {
+		if(!oJson.has(s_sGetRecordResponse)) {
 			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:GetRecordsResponse\" not found in JSON, aborting");
 			return -1;
 		}
 
-		JSONObject oCswGetRecordsResponse = oJson.optJSONObject("csw:GetRecordsResponse");
+		JSONObject oCswGetRecordsResponse = oJson.optJSONObject(s_sGetRecordResponse);
 		if(null==oCswGetRecordsResponse) {
 			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:GetRecordsResponse\", aborting");
 			return -1;
 		}
 
-		if(!oCswGetRecordsResponse.has("csw:SearchResults")) {
+		if(!oCswGetRecordsResponse.has(s_sSearchResults)) {
 			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: \"csw:SearchResults\" not found in \"csw:GetRecordsResponse\", aborting");
 			return -1;
 		}
 
-		JSONObject oSearchResults = oCswGetRecordsResponse.optJSONObject("csw:SearchResults");
+		JSONObject oSearchResults = oCswGetRecordsResponse.optJSONObject(s_sSearchResults);
 		if(null==oSearchResults) {
 			WasdiLog.debugLog("ResponseTranslatorEODC.getCountResult: could not access JSONObject at \"csw:SearchResults\", aborting");
 			return -1;

@@ -28,6 +28,9 @@ import wasdi.shared.viewmodels.search.QueryViewModel;
  */
 public class QueryExecutorEODC extends QueryExecutor {
 	
+	private static final String s_sOffsetParam = "offset=";
+	private static final String s_sLimitParam = "limit=";
+	
 	public QueryExecutorEODC() {
 		m_oQueryTranslator = new QueryTranslatorEODC();
 		m_oResponseTranslator = new ResponseTranslatorEODC();
@@ -93,7 +96,7 @@ public class QueryExecutorEODC extends QueryExecutor {
 						WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse offset, defaulting");
 					}
 				}
-				if(!sQuery.contains("offset=")) {
+				if(!sQuery.contains(s_sOffsetParam)) {
 					sQuery += "&offset="+iOffset;
 				} else {
 					WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: offset already specified: " + sQuery);
@@ -108,21 +111,21 @@ public class QueryExecutorEODC extends QueryExecutor {
 						WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: could not parse limit, defaulting");
 					}
 				}
-				if(!sQuery.contains("limit=")) {
+				if(!sQuery.contains(s_sLimitParam)) {
 					sQuery += "&limit="+iLimit;
 				} else {
 					WasdiLog.debugLog("QueryExecutorEODC.executeAndRetrieve: limit already specified: " + sQuery);
 				}
 				
 			} else {
-				if(sQuery.contains("limit=")) {
-					sQuery = sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
+				if(sQuery.contains(s_sLimitParam)) {
+					sQuery = sQuery.replace(s_sLimitParam, "LIMITAUTOMATICALLYREMOVED=");
 				}
 				
 				sQuery += "&limit="+sLimit;
 				
-				if(sQuery.contains("offset=")) {
-					sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
+				if(sQuery.contains(s_sOffsetParam)) {
+					sQuery = sQuery.replace(s_sOffsetParam, "OFFSETAUTOMATICALLYREMOVED=");
 				}
 				
 				sQuery += "&offset="+sOffset;

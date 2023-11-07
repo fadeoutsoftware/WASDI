@@ -28,6 +28,10 @@ import wasdi.shared.viewmodels.products.NodeGroupViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
 
 public class CdsNetcdfProductReader extends WasdiProductReader {
+	
+	private static final String s_sLongitude = "longitude";
+	private static final String s_sLatitude = "latitude";
+	
 
 	public CdsNetcdfProductReader(File oProductFile) {
 		super(oProductFile);
@@ -56,7 +60,7 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
 			oNodeGroupViewModel.setNodeName("Bands");
 
-			Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList("longitude", "latitude", "time"));
+			Set<String> asExcludedVariableSet = new HashSet<>(Arrays.asList(s_sLongitude, s_sLatitude, "time"));
 
 			List<Variable> asVariablesList = oFile.getVariables();
 
@@ -68,11 +72,11 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 			for (Variable oVariable : asVariablesList) {
 				String sVariableShortName = oVariable.getShortName();
 
-				if (sVariableShortName.equalsIgnoreCase("longitude")) {
+				if (sVariableShortName.equalsIgnoreCase(s_sLongitude)) {
 					iLongitudeLength = extractValueFromShape(oVariable);
 				}
 
-				if (sVariableShortName.equalsIgnoreCase("latitude")) {
+				if (sVariableShortName.equalsIgnoreCase(s_sLatitude)) {
 					iLatitudeLength = extractValueFromShape(oVariable);
 				}
 
@@ -152,8 +156,8 @@ public class CdsNetcdfProductReader extends WasdiProductReader {
 	private static String extractBboxFromFile(String sFileName) throws IOException {
 		NetcdfFile oFile = NetcdfFiles.open(sFileName);
 
-		Variable oLatitudeVariable = getVariableByName(oFile, "latitude");
-		Variable oLongitudeVariable = getVariableByName(oFile, "longitude");
+		Variable oLatitudeVariable = getVariableByName(oFile, s_sLatitude);
+		Variable oLongitudeVariable = getVariableByName(oFile, s_sLongitude);
 
 		Array oLatArray = getArrayFromVariable(oLatitudeVariable);
 		Object oLatStorage = getStorageFromArray(oLatArray);

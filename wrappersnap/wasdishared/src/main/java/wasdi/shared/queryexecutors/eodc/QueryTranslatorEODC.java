@@ -29,6 +29,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 	private static final String s_sQuerySuffix = "</ogc:And></ogc:Filter></csw:Constraint><ogc:SortBy><ogc:SortProperty><ogc:PropertyName>dc:title</ogc:PropertyName><ogc:SortOrder>ASC</ogc:SortOrder></ogc:SortProperty></ogc:SortBy></csw:Query></csw:GetRecords>";
 	private static final String s_sPLATFORMNAME_SENTINEL_1 = "platformname:Sentinel-1";
 	private static final String s_sRELATIVEORBITNUMBER = "relativeorbitnumber:";
+	private static final String s_sErrorMessage = "ERROR";
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
@@ -368,7 +369,7 @@ public class QueryTranslatorEODC extends QueryTranslator {
 							dEast = Double.max(dEast, dMeridian);
 							dWest = Double.min(dWest, dMeridian);
 						} catch (Exception oE) {
-							WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
+							WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: issue with current coordinate pair: " + sPair + ": " + oE);
 						}
 					}
 					//todo check coordinates are within bounds
@@ -386,11 +387,11 @@ public class QueryTranslatorEODC extends QueryTranslator {
 					}
 
 				} catch (Exception oE) {
-					WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not complete: " + oE);
+					WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: could not complete: " + oE);
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.log("ERROR", "QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: " + oE);
+			WasdiLog.log(s_sErrorMessage, "QueryTranslatorEODC.parseFootprint: could not identify footprint substring limits: " + oE);
 		}
 		return sResult;
 	}
@@ -414,11 +415,11 @@ public class QueryTranslatorEODC extends QueryTranslator {
 	@Override
 	public String getCountUrl(String sQuery) {
 		
-		if(sQuery.contains("offset=")) {
-			sQuery = sQuery.replace("offset=", "OFFSETAUTOMATICALLYREMOVED=");
+		if(sQuery.contains(s_sOFFSET)) {
+			sQuery = sQuery.replace(s_sOFFSET, "OFFSETAUTOMATICALLYREMOVED=");
 		}
-		if(sQuery.contains("limit=")) {
-			sQuery = sQuery.replace("limit=", "LIMITAUTOMATICALLYREMOVED=");
+		if(sQuery.contains(s_sLIMIT)) {
+			sQuery = sQuery.replace(s_sLIMIT, "LIMITAUTOMATICALLYREMOVED=");
 		}
 		//we do not need results now, just the count
 		sQuery += "&limit=0";

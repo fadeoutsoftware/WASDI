@@ -17,6 +17,8 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Multisubset extends Operation {
+	
+	private static final String s_sLogMessage = "Invalid coordinates, jump";
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
@@ -68,25 +70,25 @@ public class Multisubset extends Operation {
 
                 // Check th bbox
                 if (oSettings.getLatNList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLatSList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonEList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonWList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
                     continue;
                 }

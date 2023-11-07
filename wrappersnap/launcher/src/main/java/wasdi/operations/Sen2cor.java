@@ -17,6 +17,8 @@ import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Sen2cor extends Operation {
+	
+	private static final String s_sSAFEExtension = ".SAFE";
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
@@ -59,7 +61,7 @@ public class Sen2cor extends Operation {
                     
                     ArrayList<String> asArgs = new ArrayList<>();
                     asArgs.add(sSen2CorPath);
-                    asArgs.add(sDestinationPath + sL1ProductName + ".SAFE");
+                    asArgs.add(sDestinationPath + sL1ProductName + s_sSAFEExtension);
                     
                     // Run the tool
                     RunTimeUtils.shellExec(asArgs, true);
@@ -67,7 +69,7 @@ public class Sen2cor extends Operation {
                     // 5 - ZipIt -> L2A.zip
                     WasdiLog.debugLog("Sen2core.executeOperation: Conversion done, begin compression of L2 archive");
                     updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 75);
-                    oZipExtractor.zipFolder(sDestinationPath + sL2ProductName + ".SAFE", sDestinationPath + sL2ProductName + ".zip");
+                    oZipExtractor.zipFolder(sDestinationPath + sL2ProductName + s_sSAFEExtension, sDestinationPath + sL2ProductName + ".zip");
 
 
                     WasdiLog.debugLog("Sen2core.executeOperation: Done");
@@ -76,8 +78,8 @@ public class Sen2cor extends Operation {
                 catch (Exception oe){
                     // if something went wrong delete the zip file and SAFE directories to return to original WorkSpace state
                     FileUtils.deleteQuietly(new File(sDestinationPath + sL2ProductName + ".zip")); // level2 zip, if exists
-                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE")); // Level1 .Safe, if exists
-                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE")); // Level2 .Safe, if exists
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + s_sSAFEExtension)); // Level1 .Safe, if exists
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + s_sSAFEExtension)); // Level2 .Safe, if exists
                     
                     WasdiLog.errorLog("Sen2core.executeOperation: exception " + oe.toString());
                     
@@ -86,8 +88,8 @@ public class Sen2cor extends Operation {
 
                 if (oSen2CorParameter.isDeleteIntermediateFile()) {
                     // deletes .SAFE directories and keeps the zip files
-                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + ".SAFE"));
-                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + ".SAFE"));
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL1ProductName + s_sSAFEExtension));
+                    FileUtils.deleteDirectory(new File(sDestinationPath + sL2ProductName + s_sSAFEExtension));
                 }
 
 
