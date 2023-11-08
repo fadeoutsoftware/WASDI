@@ -28,7 +28,7 @@ RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupNa
       {{ sWasdiSoftwareRootDirectoryPath }} \
       /data && \
     chmod {{ sWasdiSoftwareRootDirectoryMode }} \
-      {{ sWasdiSoftwareRootDirectoryPath }}
+      {{ sWasdiSoftwareRootDirectoryPath }} \
       /data
 
 
