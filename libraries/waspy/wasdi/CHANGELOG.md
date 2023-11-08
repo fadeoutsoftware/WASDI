@@ -3,10 +3,14 @@
 WASDI python programming library CHANGELOG.md, according to the 
 [standard proposed by keepchangelog](https://keepachangelog.com/)
 
+## [0.8.5.2] - 2023-10-30
+### Added
+- methods to get file properties
+- added configuration flag to enable or disable the checksum test
+
 ## [0.8.5.0] - 2023-10-23
 ### Added
 - methods to add charts to payload
-
 
 ## [0.8.1.6] - 2023-10-09
 ### Added

@@ -118,7 +118,7 @@ public class Copytosftp extends Operation {
 
             updateProcessStatus(oProcessWorkspace, ProcessStatus.RUNNING, 50);
 
-            // copy file to workspace directory
+            // copy file to ftp directory
             if (!oFileToMovePath.getParent().equals(oDstDir.getAbsolutePath())) {
                 WasdiLog.debugLog("Copytosftp.executeOperation: File in another folder make a copy");
                 FileUtils.copyFileToDirectory(oFileToMovePath, oDstDir);

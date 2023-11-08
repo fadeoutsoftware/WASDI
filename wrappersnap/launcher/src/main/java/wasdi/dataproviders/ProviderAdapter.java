@@ -773,12 +773,12 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			try {
 				oOutputStream.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				WasdiLog.errorLog("ProviderAdapter.copyStream: error", e);
 			}
 			try {
 				oInputStream.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				WasdiLog.errorLog("ProviderAdapter.copyStream: error", e);
 			}			
 			
 		}
@@ -811,7 +811,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				sPassword = oConfig.password;				
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ProviderAdapter.getDownloadFileSizeViaHttp: error", e);
 		}
         
         if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
@@ -1119,8 +1119,13 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				TimeUnit.SECONDS.sleep(2);
 			}
 
-		} catch (Exception e) {
-			WasdiLog.infoLog("ProviderAdapter.localFileCopy: " + e);
+		} 
+		catch(InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("ProviderAdapter.localFileCopy: current thread interrupted ", oEx);
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProviderAdapter.localFileCopy: ", oEx);
 		}
 		finally {
 			try {

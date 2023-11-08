@@ -13,6 +13,7 @@ import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class SnapWorkflowRepository extends MongoRepository {
 
@@ -35,7 +36,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.insertSnapWorkflow : error ", oEx);
         }
 
         return false;
@@ -58,7 +59,7 @@ public class SnapWorkflowRepository extends MongoRepository {
 
             return oWorkflow;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.getSnapWorkflow : error ", oEx);
         }
 
         return null;
@@ -84,7 +85,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, SnapWorkflow.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.getSnapWorkflowPublicAndByUser : error ", oEx);
         }
 
         return new ArrayList<SnapWorkflow>(aoReturnList);
@@ -106,7 +107,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, SnapWorkflow.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.getList : error ", oEx);
         }
 
         return aoReturnList;
@@ -129,7 +130,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.updateSnapWorkflow : error ", oEx);
         }
 
         return false;
@@ -153,7 +154,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.deleteSnapWorkflow : error ", oEx);
         }
 
         return false;
@@ -178,7 +179,7 @@ public class SnapWorkflowRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("SnapWorkflowRepository.deleteSnapWorkflowByUser : error ", oEx);
         }
 
         return 0;

@@ -1,29 +1,28 @@
 package wasdi.operations;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
 
+import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
-import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.KillProcessTreeParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.LauncherOperationsUtils;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Killprocesstree extends Operation {
 
@@ -32,7 +31,7 @@ public class Killprocesstree extends Operation {
 		WasdiLog.debugLog("Killprocesstree.executeOperation");
 
 		try {
-			Preconditions.checkNotNull(oParam, "process workspace is null");
+			Preconditions.checkNotNull(oProcessWorkspace, "process workspace is null");
 			Preconditions.checkNotNull(oParam, "parameter is null");
 			
 			KillProcessTreeParameter oKillProcessTreeParameter = (KillProcessTreeParameter) oParam;
@@ -41,9 +40,9 @@ public class Killprocesstree extends Operation {
 
 			//now get the processWorkspaces from DB using their processObjId 
 			LinkedList<ProcessWorkspace> aoProcessesToBeKilled = new LinkedList<>();
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
 			for (String sProcessObjId: oKillProcessTreeParameter.getProcessesToBeKilledObjId()) {
-				ProcessWorkspace oProcessToKill = oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
+				ProcessWorkspace oProcessToKill = m_oProcessWorkspaceRepository.getProcessByProcessObjId(sProcessObjId);
 				if (null != oProcessToKill) {
 					WasdiLog.infoLog("Killprocesstree.executeOperation: collecting and killing processes for " + oProcessToKill.getProcessObjId());
 					aoProcessesToBeKilled.add(oProcessToKill);
@@ -53,6 +52,7 @@ public class Killprocesstree extends Operation {
 			}
 
 			List<String> asKilledProcessObjIds = new ArrayList<String>(aoProcessesToBeKilled.size());
+			
 			while (aoProcessesToBeKilled.size() > 0) {
 				//breadth first
 				ProcessWorkspace oProcess = aoProcessesToBeKilled.removeFirst();
@@ -62,31 +62,38 @@ public class Killprocesstree extends Operation {
 					continue;
 				}
 				
-				WasdiLog.infoLog("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
-
-				terminate(oProcess);
-				
-				//save processObjId for later DB cleanub
-				asKilledProcessObjIds.add(oProcess.getProcessObjId());
-				
-				//from here on collect children
-				if (!oKillProcessTreeParameter.getKillTree()) {
-					continue;
-				}
-
-				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
-				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
-				if (!bCanSpawnChildren) {
-					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
-					continue;
-				}
-
 				//a dead process cannot spawn any more children, add the remaining ones to the set of processes to be killed
 				if (Utils.isNullOrEmpty(oProcess.getProcessObjId())) {
 					WasdiLog.errorLog("Killprocesstree.executeOperation: process has null or empty ObjId, skipping");
 					continue;
+				}				
+				
+				WasdiLog.infoLog("Killprocesstree.executeOperation: killing " + oProcess.getProcessObjId());
+				
+				// Terminate the process
+				terminate(oProcess);
+				
+				// Save processObjId for later DB cleanub
+				asKilledProcessObjIds.add(oProcess.getProcessObjId());
+				
+				// Should we kill all the tree?
+				if (!oKillProcessTreeParameter.getKillTree()) {
+					continue;
 				}
-				List<ProcessWorkspace> aoChildren = oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
+				
+				//from here on collect children
+				LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
+				
+				boolean bCanSpawnChildren = oLauncherOperationsUtils.canOperationSpawnChildren(oProcess.getOperationType());
+				
+				if (!bCanSpawnChildren) {
+					WasdiLog.debugLog("Killprocesstree.executeOperation: process " + oProcess.getProcessObjId() + " cannot spawn children, skipping");
+					continue;
+				}
+				
+				List<ProcessWorkspace> aoChildren = m_oProcessWorkspaceRepository.getProcessByParentId(oProcess.getProcessObjId());
+				
+				// Add the children
 				if (null != aoChildren && aoChildren.size() > 0) {
 					//append at the end
 					for (ProcessWorkspace oChildren : aoChildren) {
@@ -104,8 +111,8 @@ public class Killprocesstree extends Operation {
 			}
 
 			//mark complete and return
-			ProcessWorkspace oMyProcess = oProcessWorkspaceRepository.getProcessByProcessObjId(oKillProcessTreeParameter.getProcessObjId());			
-			updateProcessStatus(oMyProcess, ProcessStatus.DONE, 100);
+			updateProcessStatus(oProcessWorkspace, ProcessStatus.DONE, 100);
+			
 			return true;
 
 		} catch (Exception oE) {
@@ -142,9 +149,9 @@ public class Killprocesstree extends Operation {
 		try {
 			LauncherOperationsUtils oLauncherOperationsUtils = new LauncherOperationsUtils();
 
-			if (oLauncherOperationsUtils.doesOperationLaunchDocker(oProcessToKill.getOperationType())) {
+			if (oLauncherOperationsUtils.doesOperationLaunchApplication(oProcessToKill.getOperationType())) {
 				WasdiLog.infoLog("Killprocesstree.killProcessAndDocker: about to kill docker instance of process " + oProcessToKill.getProcessObjId());
-				killDocker(oProcessToKill);
+				killApplication(oProcessToKill);
 			}
 
 			killProcess(oProcessToKill);
@@ -155,29 +162,36 @@ public class Killprocesstree extends Operation {
 	}
 
 	/**
+	 * kill the process
+	 * 
 	 * @param oProcessToKill the process to be killed
 	 */
 	private void killProcess(ProcessWorkspace oProcessToKill) {
-		//kill the process
-		//(code ported from webserver)
-
+		
 		try {
-			int iPid = oProcessToKill.getPid();
-
-			if (iPid > 0) {
-				// Pid exists, kill the process
-				String sShellExString = WasdiConfig.Current.scheduler.killCommand;
-				if (Utils.isNullOrEmpty(sShellExString)) sShellExString = "kill -9";
-				sShellExString += " " + iPid;
-
-				WasdiLog.infoLog("Killprocesstree.killProcess: shell exec " + sShellExString);
-				Process oProc = Runtime.getRuntime().exec(sShellExString);
-				WasdiLog.infoLog("Killprocesstree.killProcess: kill result: " + oProc.waitFor());
-
-			} else {
-				WasdiLog.errorLog("Killprocesstree.killProcess: Process pid not in data");
+			
+			if (WasdiConfig.Current.shellExecLocally) {
+				int iPid = oProcessToKill.getPid();
+				
+				if (iPid>1) {
+					RunTimeUtils.killProcess(iPid);
+				}				
 			}
-		} catch (Exception oE) {
+			else { 
+				String sContainerId = oProcessToKill.getContainerId();
+				
+				if (Utils.isNullOrEmpty(sContainerId)) {
+					WasdiLog.warnLog("Killprocesstree.killProcess: we are dockerized but we cannot find the continer id for operation id " + oProcessToKill.getProcessObjId());
+				}
+				
+				DockerUtils oDockerUtils = new DockerUtils();
+				
+				if (!oDockerUtils.stop(sContainerId)) {
+					WasdiLog.warnLog("Killprocesstree.killProcess: dockerutils.stop returned false for process workspace " + oProcessToKill.getProcessObjId() + " ContainerId " + sContainerId);					
+				}
+			}
+		} 
+		catch (Exception oE) {
 			WasdiLog.errorLog("Killprocesstree.killProcess( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}
 	}
@@ -215,39 +229,21 @@ public class Killprocesstree extends Operation {
 	/**
 	 * @param oProcessToKill the process for which the corresponding docker must be killed
 	 */
-	private void killDocker(ProcessWorkspace oProcessToKill) {
+	private void killApplication(ProcessWorkspace oProcessToKill) {
 		try {
-			String sProcessorName = oProcessToKill.getProductName();
-			ProcessorRepository oProcessorRepository = new ProcessorRepository();
-			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
-
-			// Call localhost:port
-			String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessorToKill.getPort() + "/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
-
-			URL oProcessorUrl = new URL(sUrl);
-			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
-			oConnection.setDoOutput(true);
-			oConnection.setRequestMethod("POST");
-			oConnection.setRequestProperty("Content-Type", "application/json");
-			OutputStream oOutputStream = oConnection.getOutputStream();
-			oOutputStream.write("{}".getBytes());
-			oOutputStream.flush();
-
-			if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
-			}
-			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
-			String sOutputResult;
-			String sOutputCumulativeResult = "";
-
-			while ((sOutputResult = oBufferedReader.readLine()) != null) {
-				WasdiLog.debugLog("killDocker: " + sOutputResult);
-				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
-			}
-			oConnection.disconnect();
-
-			WasdiLog.infoLog("Killprocesstree.killDocker: " + sOutputCumulativeResult);
-			WasdiLog.infoLog("Killprocesstree.killDocker: Kill docker done for " + oProcessToKill.getProcessObjId() + " SubPid: " + oProcessToKill.getSubprocessPid());
+			String sParameterPath = PathsConfig.getParameterPath(oProcessToKill.getProcessObjId());
+			
+            // Deserialize the parameter
+			ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameterPath);
+			
+	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        oEngine.setSendToRabbit(m_oSendToRabbit);
+	        oEngine.setParameter(oParameter);
+	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
+	        oEngine.setProcessWorkspace(oProcessToKill);
+	        
+	        oEngine.stopApplication(oParameter);	        	
+	        
 		} catch (Exception oE) {
 			WasdiLog.errorLog("Killprocesstree.killDocker( " + oProcessToKill.getProcessObjId() + " ): " + oE);
 		}

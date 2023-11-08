@@ -32,6 +32,8 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 	private String m_sProviderUrlDomain = "";
 
 	private static final String TERRASCOPE_URL_ZIPPER = "https://services.terrascope.be/package/zip";
+	private static final String s_sSizeParam = "&size=";
+	private static final String s_sCompressedPayload = "?compressed_payload=";
 
 
 	/**
@@ -54,8 +56,8 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 		if (isHttpsProtocol(sFileURL)) {
 			String sResult = "";
 
-			if (sFileURL.contains("&size=")) {
-				return Long.valueOf(sFileURL.substring(sFileURL.indexOf("&size=") + 6, sFileURL.indexOf(",", sFileURL.indexOf("&size="))));
+			if (sFileURL.contains(s_sSizeParam)) {
+				return Long.valueOf(sFileURL.substring(sFileURL.indexOf(s_sSizeParam) + 6, sFileURL.indexOf(",", sFileURL.indexOf(s_sSizeParam))));
 			}
 
 			try {
@@ -160,8 +162,8 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 
 		String sCompressedPayload = null;
 		String sPayload = null;
-		if (sDecodedUrl != null && sDecodedUrl.startsWith(TERRASCOPE_URL_ZIPPER) && sDecodedUrl.contains("?compressed_payload=")) {
-			sCompressedPayload = sDecodedUrl.substring(sDecodedUrl.indexOf("?compressed_payload=") + "?compressed_payload=".length(), sDecodedUrl.indexOf("&size="));
+		if (sDecodedUrl != null && sDecodedUrl.startsWith(TERRASCOPE_URL_ZIPPER) && sDecodedUrl.contains(s_sCompressedPayload)) {
+			sCompressedPayload = sDecodedUrl.substring(sDecodedUrl.indexOf(s_sCompressedPayload) + s_sCompressedPayload.length(), sDecodedUrl.indexOf(s_sSizeParam));
 			sPayload = uncompressPayload(sCompressedPayload);
 			if (sPayload == null) {
 				return null;
@@ -210,8 +212,9 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			try {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("TerrascopeProviderAdapter.executeDownloadFile: exception in sleep for retry: ", oEx);
 			}
 		}
 
@@ -240,8 +243,9 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 			try {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
-			} catch (Exception oEx) {
-				WasdiLog.debugLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: " + oEx.toString());
+			} catch (InterruptedException oEx) {
+				Thread.interrupted();
+				WasdiLog.errorLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: ", oEx);
 			}
 		}
 

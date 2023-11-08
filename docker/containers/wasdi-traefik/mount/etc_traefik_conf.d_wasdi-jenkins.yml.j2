@@ -1,0 +1,31 @@
+http:
+  routers:
+    r_{{ sWasdiJenkinsServiceName }}:
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      entrypoints: "websecure"
+{% else %}
+      entrypoints: "webs"
+{% endif %}
+      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiJenkinsDefaultContextPath }}`)"
+      service: "s_{{ sWasdiJenkinsServiceName }}"
+      middlewares: "mw_wasdi-secure-denyFrame@file"
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      tls: true
+{% endif %}
+    r_{{ sWasdiJenkinsServiceName }}_old:
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      entrypoints: "websecure"
+{% else %}
+      entrypoints: "webs"
+{% endif %}
+      rule: "Host(`test-jenkins.wasdi.net`) && PathPrefix(`/`)"
+      service: "s_{{ sWasdiJenkinsServiceName }}"
+      middlewares: "mw_wasdi-secure-denyFrame@file"
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      tls: true
+{% endif %}
+  services:
+    s_{{ sWasdiJenkinsServiceName }}:
+      loadBalancer:
+        servers:
+          - url: "http://{{ sWasdiDockerNetworkGateway }}:{{ iWasdiJenkinsListenPort }}/{{ sWasdiJenkinsDefaultContextPath.lstrip('/').rstrip('/') }}"

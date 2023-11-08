@@ -1,6 +1,8 @@
 package it.fadeout.rest.resources;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
@@ -19,6 +21,7 @@ import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import it.fadeout.services.AuthProviderService;
+import it.fadeout.services.KeycloakService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.Project;
@@ -32,6 +35,7 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SubscriptionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.PermissionsUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
@@ -88,15 +92,15 @@ public class AuthResource {
 		try {
 			// Validate inputs
 			if (oLoginInfo == null) {
-				WasdiLog.debugLog("AuthResource.login: login info null, user not authenticated");
+				WasdiLog.warnLog("AuthResource.login: login info null, user not authenticated");
 				return UserViewModel.getInvalid();
 			}
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserId())){
-				WasdiLog.debugLog("AuthResource.login: userId null or empty, user not authenticated");
+				WasdiLog.warnLog("AuthResource.login: userId null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
 			if(Utils.isNullOrEmpty(oLoginInfo.getUserPassword())){
-				WasdiLog.debugLog("AuthResource.login: password null or empty, user not authenticated");
+				WasdiLog.warnLog("AuthResource.login: password null or empty, user not authenticated");
 				return UserViewModel.getInvalid();	
 			}
 
@@ -107,9 +111,75 @@ public class AuthResource {
 			User oUser = oUserRepository.getUser(oLoginInfo.getUserId());
 			
 			if( oUser == null ) {
-				// User not in the db
-				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", aborting");
-				return UserViewModel.getInvalid();
+				// User not in the db wasdi db
+				WasdiLog.debugLog("AuthResource.login: user not found: " + oLoginInfo.getUserId() + ", check if this is the first access");
+				
+				// Try to retrive info about this user 
+				String sUserInfo = m_oKeycloakService.getUserData(m_oKeycloakService.getToken(), oLoginInfo.getUserId());
+				
+				if (Utils.isNullOrEmpty(sUserInfo)) {
+					// No, something did not work well
+					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+					return UserViewModel.getInvalid();
+				}
+				
+				// Convert the json to a map: here we have a list
+				List<Map<String, Object>> aoKeyCloakUsers = JsonUtils.jsonToListOfMapOfObjects(sUserInfo);
+				
+				if (aoKeyCloakUsers == null) {
+					// No, something did not work well
+					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+					return UserViewModel.getInvalid();					
+				}
+				
+				if (aoKeyCloakUsers.size()<=0) {
+					// No, something did not work well
+					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+					return UserViewModel.getInvalid();					
+				}
+				
+				Boolean bMailVerified = (Boolean) JsonUtils.getProperty(aoKeyCloakUsers.get(0), "emailVerified");
+				
+				if (bMailVerified == null) {
+					// No, something did not work well
+					WasdiLog.warnLog("AuthResource.login: user not found in keycloak, return invalid");
+					return UserViewModel.getInvalid();
+				}
+				
+				if (!bMailVerified) {
+					// The user exists but did not verify the mail yet
+					WasdiLog.warnLog("AuthResource.login: user found in keycloak, but the mail is still not verified, return invalid");
+					return UserViewModel.getInvalid();
+				}
+				else {
+					WasdiLog.debugLog("AuthResource.login: user found in keycloak and mail verified: we can register the new user!!");
+					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
+					oRegistrationInfoViewModel.setUserId(oLoginInfo.getUserId());
+					PrimitiveResult oRegistrationResult = this.userRegistration(oRegistrationInfoViewModel);
+
+					if (oRegistrationResult==null) {
+						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+						return UserViewModel.getInvalid();						
+					}
+					
+					if (oRegistrationResult.getBoolValue()==null) {
+						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+						return UserViewModel.getInvalid();						
+					}
+
+					if (oRegistrationResult.getBoolValue()==false) {
+						WasdiLog.warnLog("AuthResource.login: we had a problem registering the user, return invalid");
+						return UserViewModel.getInvalid();						
+					}
+				}
+				
+				// Read again the user to proceed
+				oUser = oUserRepository.getUser(oLoginInfo.getUserId());
+				
+				if (oUser==null) {
+					WasdiLog.warnLog("AuthResource.login: we had a problem reading again the user in the db after registration, return invalid");
+					return UserViewModel.getInvalid();						
+				}				
 			}
 
 			if(oUser.getValidAfterFirstAccess() == null) {
@@ -122,32 +192,22 @@ public class AuthResource {
 			String sAuthResult = m_oKeycloakService.login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			
 			boolean bLoginSuccess = false;
+			
+			String sRefreshToken = getRefreshTokenFromLoginResponse(sAuthResult);
 
-			if(!Utils.isNullOrEmpty(sAuthResult)) { 
+			if(!Utils.isNullOrEmpty(sRefreshToken)) { 
 				bLoginSuccess = true;
-				
-				try {
-					JSONObject oAuthResponse = new JSONObject(sAuthResult);
-					
-					String sRefreshToken = oAuthResponse.optString("refresh_token", null);
-					
-					m_oKeycloakService.logout(sRefreshToken);
-				} catch (Exception oE) {
-					WasdiLog.errorLog("AuthResource.login: could not parse response due to " + oE + ", aborting");
-				}
-				
-				
-			} else {
+				m_oKeycloakService.logout(sRefreshToken);
+			} 
+			else {
 				// Try to log in with the WASDI old password
 				bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oUser.getPassword() );
 			}
-			
 			
 			if(bLoginSuccess) {
 				// If the user is logged, update last login
 				oUser.setLastLogin((new Date()).toString());
 				oUserRepository.updateUser(oUser);
-
 				
 				//Clear all old, expired sessions
 				Wasdi.clearUserExpiredSessions(oUser);
@@ -189,6 +249,29 @@ public class AuthResource {
 		}
 
 		return UserViewModel.getInvalid();
+	}
+	
+	/**
+	 * Extracts the Refresh Token from the login response of keyCloak
+	 * @param sAuthResult
+	 * @return
+	 */
+	protected String getRefreshTokenFromLoginResponse(String sAuthResult) {
+		
+		if(Utils.isNullOrEmpty(sAuthResult)) {
+			return "";
+		}
+
+		try {
+			JSONObject oAuthResponse = new JSONObject(sAuthResult);
+			
+			String sRefreshToken = oAuthResponse.optString("refresh_token", null);
+			return sRefreshToken;
+			
+		} catch (Exception oE) {
+			WasdiLog.errorLog("AuthResource.getRefreshTokenFromLoginResponse: could not parse response due to " + oE + ", aborting");
+		}
+		return "";
 	}
 
 	/**
@@ -530,6 +613,11 @@ public class AuthResource {
 
 				String sUserId = oRegistrationInfoViewModel.getUserId();
 				
+				if (m_oKeycloakService==null) {
+					WasdiLog.debugLog("AuthResource.userRegistration: m_oKeycloakService is NULL!! Creating it...");
+					m_oKeycloakService = new KeycloakService();
+				}
+				
 				User oNewUser = m_oKeycloakService.getUser(sUserId);
 				if(null==oNewUser) {
 					PrimitiveResult oResult = new PrimitiveResult();
@@ -583,7 +671,8 @@ public class AuthResource {
 					throw new RuntimeException(sMessage);
 				}
 			}
-		} catch(Exception oE) {
+		} 
+		catch(Exception oE) {
 			WasdiLog.errorLog("AuthResource.userRegistration: " + oE + ", aborting");
 		}
 

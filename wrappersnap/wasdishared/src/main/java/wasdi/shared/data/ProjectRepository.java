@@ -38,7 +38,7 @@ public class ProjectRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.insertProject: exception ", oEx);
 		}
 
 		return false;
@@ -63,7 +63,7 @@ public class ProjectRepository extends MongoRepository {
 			if (oResult.getMatchedCount() == 1)
 				return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.updateProject: exception ", oEx);
 		}
 
 		return false;
@@ -86,7 +86,7 @@ public class ProjectRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, Project.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.getProjectById: exception ", oEx);
 		}
 
 		return null;
@@ -106,7 +106,7 @@ public class ProjectRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Project.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.getProjectsBySubscription: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -126,7 +126,7 @@ public class ProjectRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Project.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.getProjectsBySubscriptions: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -180,13 +180,13 @@ public class ProjectRepository extends MongoRepository {
 				try {
 					oProject = s_oMapper.readValue(sJSON, Project.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("ProjectRepository.getByName: exception ", e);
 				}
 
 				return oProject;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProjectRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.errorLog("ProjectRepository.getByName( " + sName + "): error: ", oE);
 		}
 
 		return null;
@@ -211,7 +211,7 @@ public class ProjectRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.deleteProject: exception ", oEx);
 		}
 
 		return false;
@@ -233,7 +233,7 @@ public class ProjectRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.deleteBySubscription: exception ", oEx);
 		}
 
 		return 0;
@@ -251,7 +251,7 @@ public class ProjectRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Project.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.getProjectsList: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -282,7 +282,7 @@ public class ProjectRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Project.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProjectRepository.findProjectsByPartialName: exception ", oEx);
 		}
 
 		return aoReturnList;

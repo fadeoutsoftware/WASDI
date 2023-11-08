@@ -31,7 +31,7 @@ public class StreamGobbler extends Thread {
 				    
 		} catch (IOException oIOEx)
 		{
-			oIOEx.printStackTrace();  
+			WasdiLog.errorLog("StreamGobbler.run: error", oIOEx);
 		}
 	}	
 }

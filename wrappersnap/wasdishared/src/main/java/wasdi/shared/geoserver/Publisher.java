@@ -16,6 +16,7 @@ import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 
 /**
@@ -61,7 +62,7 @@ public class Publisher {
             try {
                 Files.createDirectory(oTargetPath);
             } catch (IOException e) {
-                e.printStackTrace();
+            	WasdiLog.errorLog("Publisher.launchImagePyramidCreation: error", e);
             }
         }
 
@@ -69,81 +70,42 @@ public class Publisher {
             //fix permission
             Utils.fixUpPermissions(oTargetPath);
             
+            ArrayList<String> asCmds = new ArrayList<>();
+            
             String sGdalRetile = "gdal_retile.py";
             sGdalRetile = GdalUtils.adjustGdalFolder(sGdalRetile);
+            
             String sConfigString = WasdiConfig.Current.geoserver.gdalRetileCommand;
             if (sConfigString.startsWith("gdal_retile.py ")) {
             	sConfigString = sConfigString.substring("gdal_retile.py ".length());
             }
-            sGdalRetile = sGdalRetile + " " + WasdiConfig.Current.geoserver.gdalRetileCommand;
-                            
-            String sCmd = String.format("%s -targetDir %s %s", sGdalRetile, sTargetDir, sInputFile);
+            
+            sGdalRetile = sGdalRetile + " " + sConfigString;
+            
+            String [] asGdalRetilePart = sGdalRetile.split(" ");
+            if (asGdalRetilePart != null) {
+            	for (String sPart : asGdalRetilePart) {
+					asCmds.add(sPart);
+				}
+            }
+            
+            asCmds.add("-targetDir");
+            asCmds.add(sTargetDir);
+            asCmds.add(sInputFile);
+            //String sCmd = String.format("%s -targetDir %s %s", sGdalRetile, sTargetDir, sInputFile);
+            
+            String sCmd = "";
+            
+            for (String sPart : asCmds) {
+				sCmd += sPart + " ";
+			}
 
             WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
-
-            Process oProcess = null;
-            try {
-
-                Runtime oRunTime = Runtime.getRuntime();
-                oProcess = oRunTime.exec(sCmd);
-
-                // any error?
-                StreamProcessWriter oErrorWriter = new StreamProcessWriter(oProcess.getErrorStream(), "ERROR");
-
-                // any output?
-                StreamProcessWriter oOutputWriter = new StreamProcessWriter(oProcess.getInputStream(), "OUTPUT");
-
-                oErrorWriter.start();
-                oOutputWriter.start();
-
-                int iValue = oProcess.waitFor();
-
-                try {
-                    if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().flush();
-                    if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().close();
-                    if (oProcess.getInputStream() !=null) oProcess.getInputStream().close();
-                    if (oProcess.getErrorStream() !=null) oProcess.getErrorStream().close();
-                }
-                catch (Exception oEx) {
-                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception closing Streams " + oEx.toString());
-                }
-
-
-                try  {
-                    oOutputWriter.interrupt();
-                }
-                catch (Exception oEx) {
-                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception interrupting Output Writer thread " + oEx.toString());
-                }
-                try  {
-                    oErrorWriter.interrupt();
-                }
-                catch (Exception oEx) {
-                    WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exception interrupting Error Writer Thread " + oEx.toString());
-                }
-
-
-                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
-
-            } catch (IOException e) {
-                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
-                return  false;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
-                Thread.currentThread().interrupt();
-
-                return  false;
-            }
-            finally {
-                if (oProcess != null) {
-                    oProcess.destroy();
-                }
-            }
-
+            
+            RunTimeUtils.shellExec(asCmds, true, false, false, false);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            WasdiLog.debugLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
+            WasdiLog.errorLog("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: ",  e);
             return  false;
         }
 

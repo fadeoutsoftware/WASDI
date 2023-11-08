@@ -36,7 +36,7 @@ public class StyleRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.insertStyle : error ", oEx);
 		}
 
 		return false;
@@ -65,7 +65,7 @@ public class StyleRepository extends MongoRepository {
 
 			return oStyle;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.getStyle : error ", oEx);
 		}
 
 		return null;
@@ -94,7 +94,7 @@ public class StyleRepository extends MongoRepository {
 
 			return oStyle;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.getStyleByName : error ", oEx);
 		}
 
 		return null;
@@ -113,7 +113,7 @@ public class StyleRepository extends MongoRepository {
 
 			return (lCounter > 0);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.isStyleNameTaken : error ", oEx);
 		}
 
 		return true;
@@ -139,7 +139,7 @@ public class StyleRepository extends MongoRepository {
 
 			fillList(aoReturnSet, oWSDocuments, Style.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.getStylePublicAndByUser : error ", oEx);
 		}
 
 		return new ArrayList<>(aoReturnSet);
@@ -158,7 +158,7 @@ public class StyleRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Style.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.getList : error ", oEx);
 		}
 
 		return aoReturnList;
@@ -180,7 +180,7 @@ public class StyleRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.updateStyle : error ", oEx);
 		}
 
 		return false;
@@ -202,7 +202,7 @@ public class StyleRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.deleteStyle : error ", oEx);
 		}
 
 		return false;
@@ -225,7 +225,7 @@ public class StyleRepository extends MongoRepository {
 				return (int) oDeleteResult.getDeletedCount();
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("StyleRepository.deleteStyleByUser : error ", oEx);
 		}
 
 		return 0;
@@ -248,7 +248,7 @@ public class StyleRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): " + oE);
+			WasdiLog.errorLog("StyleWorkspaceRepository.isStyleOwnedByUser( " + sUserId + ", " + sStyleId + " ): ", oE);
 		}
 
 		return false;

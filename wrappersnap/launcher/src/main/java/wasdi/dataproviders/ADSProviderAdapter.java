@@ -24,6 +24,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 
 	private static final String ADS_URL_SEARCH = "https://ads.atmosphere.copernicus.eu/api/v2/resources";
 	private static final String ADS_URL_GET_STATUS = "https://ads.atmosphere.copernicus.eu/broker/api/v1/0/requests";
+	private static final String s_sQueuedStatus = "queued";
 	
 	/**
 	 * Basic constructor
@@ -55,7 +56,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
 
-		String sAdsSearchRequestState = "queued";
+		String sAdsSearchRequestState = s_sQueuedStatus;
 		String sUrl = ADS_URL_SEARCH + "/" + sDataset;
 		
 		String sAdsSearchRequestResult = performAdsSearchRequest(sUrl, sDownloadUser, sDownloadPassword, sPayload, iMaxRetry);
@@ -68,7 +69,7 @@ public class ADSProviderAdapter extends ProviderAdapter {
 
 		if ("completed".equalsIgnoreCase(sAdsSearchRequestState)) {
 			sUrlDownload = (String) JsonUtils.getProperty(oAdsSearchRequestResult, "location");
-		} else if ("queued".equalsIgnoreCase(sAdsSearchRequestState)) {
+		} else if (s_sQueuedStatus.equalsIgnoreCase(sAdsSearchRequestState)) {
 			String sAdsGetStatusRequestResult;
 			Map<String, Object> oAdsGetStatusRequestResult = new HashMap<>();
 			String sAdsGetStatusRequestId;
@@ -91,17 +92,19 @@ public class ADSProviderAdapter extends ProviderAdapter {
 
 				sAdsGetStatusRequestState = (String) JsonUtils.getProperty(oAdsGetStatusRequestResult, "status.state");
 
-				if ("queued".equalsIgnoreCase(sAdsGetStatusRequestState)) {
+				if (s_sQueuedStatus.equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(60);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("running".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(6);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("ADSProviderAdapter.executeDownloadFile: current thread was interrupted", oEx);
 					}
 				} else if ("completed".equalsIgnoreCase(sAdsGetStatusRequestState)) {
 					sUrlDownload = (String) JsonUtils.getProperty(oAdsGetStatusRequestResult, "status.data.0.location");

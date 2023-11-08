@@ -42,7 +42,7 @@ public class WorkspaceRepository extends  MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.insertWorkspace: error: ", oEx);
         }
 
         return false;
@@ -61,7 +61,7 @@ public class WorkspaceRepository extends  MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.updateWorkspaceName: error: ", oEx);
         }
 
         return false;
@@ -81,7 +81,7 @@ public class WorkspaceRepository extends  MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.updateWorkspacePublicFlag: error: ", oEx);
         }
 
         return false;
@@ -101,7 +101,7 @@ public class WorkspaceRepository extends  MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.updateWorkspaceNodeCode: error: ", oEx);
         }
 
         return false;
@@ -127,7 +127,7 @@ public class WorkspaceRepository extends  MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;        	
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.updateWorkspace: error: ", oEx);
         }
 
         return false;
@@ -152,7 +152,7 @@ public class WorkspaceRepository extends  MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspace: error: ", oEx);
         }
 
         return  null;
@@ -173,7 +173,7 @@ public class WorkspaceRepository extends  MongoRepository {
             fillList(aoReturnList, oWSDocuments, Workspace.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspaceByUser: error: ", oEx);
         }
 
         return aoReturnList;
@@ -201,14 +201,14 @@ public class WorkspaceRepository extends  MongoRepository {
                 try {
                     oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	WasdiLog.errorLog("WorkspaceRepository.getByUserIdAndWorkspaceName: error", e);
                 }
                 
                 return oWorkspace;
     		}
     		
     	} catch (Exception oE) {
-			WasdiLog.debugLog("WorkspaceRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.errorLog("WorkspaceRepository.getByUserIdAndWorkspaceName error: ", oE);
 		}
     	
     	return null;
@@ -236,14 +236,14 @@ public class WorkspaceRepository extends  MongoRepository {
                 try {
                     oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	WasdiLog.errorLog("WorkspaceRepository.getByNameAndNode: error: ", e);
                 }
                 
                 return oWorkspace;
     		}
     		
     	} catch (Exception oE) {
-			WasdiLog.debugLog("WorkspaceRepository.getByNameAndNode( " + sName + ", " + sNode + "): error: " + oE);
+			WasdiLog.errorLog("WorkspaceRepository.getByNameAndNode error: ", oE);
 		}
     	
     	return null;
@@ -271,7 +271,7 @@ public class WorkspaceRepository extends  MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.deleteWorkspace: error: ", oEx);
         }
 
         return  false;
@@ -292,11 +292,11 @@ public class WorkspaceRepository extends  MongoRepository {
 
             if (oDeleteResult != null)
             {
-                return  (int) oDeleteResult.getDeletedCount();
+                return (int) oDeleteResult.getDeletedCount();
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.deleteByUser: error: ", oEx);
         }
 
         return 0;
@@ -320,7 +320,7 @@ public class WorkspaceRepository extends  MongoRepository {
 	    		return true;
 	    	}
     	}catch (Exception oE) {
-			WasdiLog.debugLog("WorkspaceRepository.belongsToUser( " + sUserId + ", " + sWorkspaceId + " ): error: " + oE);
+			WasdiLog.errorLog("WorkspaceRepository.isOwnedByUser error: " + oE);
 		}
     	return false;
     }
@@ -340,7 +340,7 @@ public class WorkspaceRepository extends  MongoRepository {
             fillList(aoReturnList, oWSDocuments, Workspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("WorkspaceRepository.getWorkspacesList: error: ", oEx);
         }
 
         return aoReturnList;
@@ -367,7 +367,7 @@ public class WorkspaceRepository extends  MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Workspace.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("WorkspaceRepository.findWorkspacesByPartialName: error: ", oEx);
 		}
 
 		return aoReturnList;

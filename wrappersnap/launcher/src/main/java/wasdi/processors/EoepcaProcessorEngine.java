@@ -1,6 +1,5 @@
 package wasdi.processors;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -101,7 +100,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Here we save the address of the image
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
-		//String sPushedImageAddress = "ImageAddress";
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to push the image.");
@@ -117,7 +115,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		// Render the template for CWL
-		
 		boolean bTemplates = renderCWLTemplates(oProcessor, aoProcessorParameters);
 		
 		if (!bTemplates) {
@@ -127,7 +124,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		
 		// Now we need to post: start from reading the appDeployBody.json file
 		String sDeployBodyFilePath = PathsConfig.getProcessorFolder(oProcessor) + "appDeployBody.json";
-
 		
 		String sDeployBody = WasdiFileUtils.fileToText(sDeployBodyFilePath);
 		
@@ -274,7 +270,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
 			return null;
 		}
-				
 		
 		try {
 			// Translate it in a Map
@@ -315,129 +310,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 		
 		return aoCWLParameters;
-	}	
-	
-	/**
-	 * Translates the WASDI JSON Parameters of this application in
-	 * the equivalent text for the CSW Yaml template.
-	 * The output can be used to fill the csw j2 template 
-	 * @param oProcessor Processor that takes the inputs
-	 * @return String with yaml representation of these inputs
-	 */
-	protected String getParametersInputDescription3(Processor oProcessor) {
-		// Prepare the args for the j2 template
-		String sAppParametersDeclaration = "";
-		
-		// Get the parameters json sample
-		String sEncodedJson= oProcessor.getParameterSample();
-		String sJsonSample = sEncodedJson;
-		
-		try {
-			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
-			return sAppParametersDeclaration;
-		}
-				
-		
-		try {
-			// Translate it in a Map
-			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
-			
-			sAppParametersDeclaration = "[\n";
-			
-			// For each parameter
-			for (String sKey : aoProcessorParams.keySet()) {
-				// Declare the parameter
-				sAppParametersDeclaration += "\t{\n";
-				sAppParametersDeclaration += "\t\t\"key\": \"" + sKey + "\",\n";
-				sAppParametersDeclaration += "\t\t\"type\": \"";
-				
-				// Set the type
-				Object oValue = aoProcessorParams.get(sKey);
-				
-				if (oValue instanceof String) {
-					sAppParametersDeclaration += "string";
-				}
-				else if (oValue instanceof Integer) {
-					sAppParametersDeclaration += "int";
-				}
-				else if (oValue instanceof Float) {
-					sAppParametersDeclaration += "float";
-				}
-				else if (oValue instanceof Double) {
-					sAppParametersDeclaration += "double";
-				}
-				
-				sAppParametersDeclaration += "\"\n},\n";
-			}
-			
-			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-2);
-			sAppParametersDeclaration += "\n]";
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
-			return "";
-		}
-		
-		return sAppParametersDeclaration;
-	}
-	
-	protected String getParametersInputDescription2(Processor oProcessor) {
-		// Prepare the args for the j2 template
-		String sAppParametersDeclaration = "";
-		
-		// Get the parameters json sample
-		String sEncodedJson= oProcessor.getParameterSample();
-		String sJsonSample = sEncodedJson;
-		
-		try {
-			sJsonSample = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Impossible to decode the params sample.");
-			return sAppParametersDeclaration;
-		}
-				
-		
-		try {
-			// Translate it in a Map
-			Map<String,Object> aoProcessorParams = MongoRepository.s_oMapper.readValue(sJsonSample, Map.class);
-			
-			// For each parameter
-			for (String sKey : aoProcessorParams.keySet()) {
-				// Declare the parameter
-				sAppParametersDeclaration += "  " + sKey + ":\n";
-				sAppParametersDeclaration += "    type: ";
-				
-				// Set the type
-				Object oValue = aoProcessorParams.get(sKey);
-				
-				if (oValue instanceof String) {
-					sAppParametersDeclaration += "string";
-				}
-				else if (oValue instanceof Integer) {
-					sAppParametersDeclaration += "int";
-				}
-				else if (oValue instanceof Float) {
-					sAppParametersDeclaration += "float";
-				}
-				else if (oValue instanceof Double) {
-					sAppParametersDeclaration += "double";
-				}
-				
-				sAppParametersDeclaration += "\n";
-			}
-			
-			sAppParametersDeclaration = sAppParametersDeclaration.substring(0, sAppParametersDeclaration.length()-1);
-		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: Exception generating the parameters args " + oEx.toString());
-			return "";
-		}
-		
-		return sAppParametersDeclaration;
 	}
 	
 	/**
@@ -642,7 +514,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		}
 
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -699,7 +571,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		WasdiLog.debugLog("EoepcaProcessorEngine.redeploy: call base class deploy");
 		
 		// For EOPCA we are going to run the app not on our server, so we do not need the tomcat user
-		m_sTomcatUser = "";
+		//m_sTomcatUser = "";
 		// And we do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
@@ -774,7 +646,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	@Override
 	public boolean environmentUpdate(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
@@ -783,7 +654,6 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	@Override
 	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
@@ -791,7 +661,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * Get the related package manager
 	 */
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
+	protected IPackageManager getPackageManager(String sUrl) {
 		return null;
 	}
 

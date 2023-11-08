@@ -466,18 +466,20 @@ public class ZipFileUtils {
 		
 		try (ZipOutputStream oZipOutputStream = new ZipOutputStream(Files.newOutputStream(oZipFilePath))) {
 			Path oPath = Paths.get(sSourceDirPath);
-			Files.walk(oPath)
-			.filter(path -> !Files.isDirectory(path))
-			.forEach(path -> {
-				ZipEntry zipEntry = new ZipEntry(oPath.relativize(path).toString());
-				try {
-					oZipOutputStream.putNextEntry(zipEntry);
-					Files.copy(path, oZipOutputStream);
-					oZipOutputStream.closeEntry();
-				} catch (IOException e) {
-					WasdiLog.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
-				}
-			});
+			
+			try (Stream<Path> oPathStream = Files.walk(oPath)) {
+				oPathStream.filter(path -> !Files.isDirectory(path))
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(oPath.relativize(path).toString());
+					try {
+						oZipOutputStream.putNextEntry(zipEntry);
+						Files.copy(path, oZipOutputStream);
+						oZipOutputStream.closeEntry();
+					} catch (IOException e) {
+						WasdiLog.errorLog(m_sLoggerPrefix + "zip: Error during creation of zip archive " );
+					}
+				});
+			}		
 		}
 	}
 	
@@ -492,7 +494,9 @@ public class ZipFileUtils {
 		File oCheckExists = new File(sZipFilePath);
 		
 		if (oCheckExists.exists()) {
-			oCheckExists.delete();
+			boolean bIsFileDeleted = oCheckExists.delete();
+			if (!bIsFileDeleted)
+				WasdiLog.warnLog("ZipFileUtils.zipFiles: " + sZipFilePath + " already existed and it was not deleted");
 		}
 		
 		Path oZipFilePath = Files.createFile(Paths.get(sZipFilePath));
@@ -548,7 +552,7 @@ public class ZipFileUtils {
 				//				oFis.close();				
 			}
 		} catch (Exception oE) {
-			System.out.println("ZipFileUtils.zipFile: " + oE);
+			WasdiLog.errorLog("ZipFileUtils.zipFile: ", oE);
 		}
 	}
 

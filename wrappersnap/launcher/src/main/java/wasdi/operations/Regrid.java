@@ -15,6 +15,7 @@ import wasdi.shared.parameters.settings.RegridSetting;
 import wasdi.shared.utils.gis.GdalInfoResult;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Regrid extends Operation {
 
@@ -102,20 +103,8 @@ public class Regrid extends Operation {
             asArgs.add("COMPRESS=LZW");
 
             // Execute the process
-            ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-            Process oProcess;
-
-            String sCommand = "";
-            for (String sArg : asArgs) {
-                sCommand += sArg + " ";
-            }
-
-            WasdiLog.debugLog("Regrid.executeOperation: Command Line " + sCommand);
-
-            oProcess = oProcessBuidler.start();
-
-            oProcess.waitFor();
-            
+            RunTimeUtils.shellExec(asArgs, true);
+                        
             String sBBox = oReferenceFileReader.getProductBoundingBox();
 
             addProductToDbAndWorkspaceAndSendToRabbit(null, PathsConfig.getWorkspacePath(oParameter) + sDestinationProduct,

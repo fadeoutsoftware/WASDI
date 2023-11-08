@@ -18,6 +18,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Downloaded File Repo
@@ -42,7 +43,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.insertDownloadedFile: error", oEx);
         }
 
         return false;
@@ -66,15 +67,15 @@ public class DownloadedFilesRepository extends MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.updateDownloadedFile: error", oEx);
         }
 
         return  false;
     }
 
     /**
-     * Get Downloaded file by name
-     * @param sFileName
+     * Get Downloaded file by the fulle Path
+     * @param sFileName Full Path of the file
      * @return
      */
     public DownloadedFile getDownloadedFile(String sFileName) {
@@ -89,7 +90,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
             return oFile;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getDownloadedFile: error", oEx);
         }
 
         return  null;
@@ -114,7 +115,7 @@ public class DownloadedFilesRepository extends MongoRepository {
 
             return oFile;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getDownloadedFileByPath: error", oEx);
         }
 
         return  null;
@@ -134,7 +135,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getDownloadedFileListByName: error", oEx);
         }
 
         return aoReturnList;    	
@@ -158,7 +159,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getDownloadedFileListByPath: error", oEx);
         }
 
         return aoReturnList;    	
@@ -224,7 +225,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.deleteByFilePath: error", oEx);
         }
 
         return 0;
@@ -243,7 +244,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             fillList(aoReturnList, oDFDocuments, DownloadedFile.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("CommentRepository.getList: error", oEx);
         }
 
         return aoReturnList;    	

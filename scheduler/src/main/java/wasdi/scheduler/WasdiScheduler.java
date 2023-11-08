@@ -94,17 +94,23 @@ public class WasdiScheduler
   		{
   			//no log4j configuration
   			System.err.println("WasdiScheduler.main: Error Configuring log.  Reason: " + oEx );
-  			oEx.printStackTrace();
   		}
         
-	
-		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
-		WasdiLog.setLoggerWrapper(oLoggerWrapper);
+  		LoggerWrapper oLoggerWrapper = new LoggerWrapper(s_oLogger);
+  		
+        if (WasdiConfig.Current.useLog4J) {
+            // Set the logger for the shared lib
+            WasdiLog.setLoggerWrapper(oLoggerWrapper);
+            WasdiLog.debugLog("Logger added");
+        }
+        else { 
+        	WasdiLog.debugLog("WADSI Configured to log on console");
+        }
 		
 		WasdiLog.infoLog("main: Logger configured :-)\n");
 				
 		WasdiLog.infoLog("main: lastChangeDateOrderByParameter = " + WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy);
-		
+
 		
 		//mongo config
 		try {
@@ -114,7 +120,6 @@ public class WasdiScheduler
 		} 
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
-			oEx.printStackTrace();
 			System.exit(-1);
 		}
 		WasdiLog.infoLog("main: Mongo configured :-)\n");
@@ -131,7 +136,6 @@ public class WasdiScheduler
 		}
 		catch (Throwable oEx) {
 			WasdiLog.errorLog("main: Mongo configuration failed. Reason: " + oEx);
-			oEx.printStackTrace();
 		}		
 		
 		// Read the list of configured schedulers
@@ -152,12 +156,11 @@ public class WasdiScheduler
 					WasdiLog.infoLog("main: CatNap Ms: " + s_lSleepingTimeMS);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				WasdiLog.errorLog("Could not read schedulers configurations. Reason: " + e);
 			}			
 		} 
 		catch (Exception oEx) {
 			WasdiLog.errorLog("Could not read schedulers configurations. Reason: " + oEx);
-			oEx.printStackTrace();
 			System.exit(-1);
 		}
 		
@@ -255,7 +258,6 @@ public class WasdiScheduler
 		}
 		catch( Exception oEx ) {
 			WasdiLog.errorLog("Could not complete operations preparations. Reason: " + oEx);
-			oEx.printStackTrace();
 		}
 		WasdiLog.infoLog("main: operations prepared, lets start \n");
 		
@@ -312,7 +314,6 @@ public class WasdiScheduler
 			} 
 			catch (Exception oEx) {
 				WasdiLog.errorLog("WasdiScheduler.run: exception with finally: " + oEx);
-				oEx.printStackTrace();
 			}
 		}
 		
@@ -325,7 +326,6 @@ public class WasdiScheduler
 		try {
 			Thread.sleep(s_lSleepingTimeMS);
 		} catch (Exception e) {
-			e.printStackTrace();
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -345,7 +345,7 @@ public class WasdiScheduler
 			return aoRunning;
 		}
 		catch (Exception oE) {
-			oE.printStackTrace();
+			WasdiLog.errorLog("WasdiScheduler.getStateList: ", oE);
 			return null;
 		}
 	}

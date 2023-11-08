@@ -14,8 +14,11 @@ import wasdi.shared.payloads.MultiSubsetPayload;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.gis.GdalUtils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
 
 public class Multisubset extends Operation {
+	
+	private static final String s_sLogMessage = "Invalid coordinates, jump";
 
 	@Override
 	public boolean executeOperation(BaseParameter oParam, ProcessWorkspace oProcessWorkspace) {
@@ -67,25 +70,25 @@ public class Multisubset extends Operation {
 
                 // Check th bbox
                 if (oSettings.getLatNList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lat N List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLatSList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lat S List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonEList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lon E List does not have " + iTiles + " element. continue");
                     continue;
                 }
 
                 if (oSettings.getLonWList().size() <= iTiles) {
-                    m_oProcessWorkspaceLogger.log("Invalid coordinates, jump");
+                    m_oProcessWorkspaceLogger.log(s_sLogMessage);
                     WasdiLog.debugLog("Multisubset.executeOperation: Lon W List does not have " + iTiles + " element. continue");
                     continue;
                 }
@@ -125,20 +128,7 @@ public class Multisubset extends Operation {
                 asArgs.add(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 
                 // Execute the process
-                ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-                Process oProcess;
-
-                String sCommand = "";
-                for (String sArg : asArgs) {
-                    sCommand += sArg + " ";
-                }
-
-                WasdiLog.debugLog("Multisubset.executeOperation Command Line " + sCommand);
-
-                // oProcessBuidler.redirectErrorStream(true);
-                oProcess = oProcessBuidler.start();
-
-                oProcess.waitFor();
+                RunTimeUtils.shellExec(asArgs, true);
 
                 File oTileFile = new File(PathsConfig.getWorkspacePath(oParameter) + sOutputProduct);
 

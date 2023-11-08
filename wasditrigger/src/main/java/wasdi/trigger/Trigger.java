@@ -39,7 +39,7 @@ public class Trigger {
 			MongoRepository.readConfig();
 		} 
 		catch (Throwable oEx) {
-			oEx.printStackTrace();
+			System.out.println("TRIGGER ERROR " + oEx.toString());
 		} 
 	}
 

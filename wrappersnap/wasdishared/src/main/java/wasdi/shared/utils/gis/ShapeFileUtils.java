@@ -58,7 +58,7 @@ public class ShapeFileUtils {
 			}			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ShapeFilelUtils.isShapeFileZipped: error", e);
 		}
 		
 		return false;
@@ -94,7 +94,7 @@ public class ShapeFileUtils {
 			}			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ShapeFilelUtils.getShpFileNameFromZipFile: error", e);
 		}
 		
 		return "";

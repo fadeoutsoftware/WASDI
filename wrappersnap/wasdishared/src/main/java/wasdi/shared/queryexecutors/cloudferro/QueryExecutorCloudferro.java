@@ -71,12 +71,6 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 
-		System.out.println("sProtocol: " + sProtocol);
-		System.out.println("sService: " + sService);
-		System.out.println("sProduct: " + sProduct);
-		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
-		System.out.println("sDayNightFlag: " + sDayNightFlag);
-
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
 		Double dWest = oQueryViewModel.west;
@@ -88,14 +82,8 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sDateFrom = oQueryViewModel.startFromDate;
 		String sDateTo = oQueryViewModel.endToDate;
 
-		System.out.println("sDateFrom: " + sDateFrom);
-		System.out.println("sDateTo: " + sDateTo);
-
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
-
-		System.out.println("lDateFrom: " + lDateFrom.toString());
-		System.out.println("lDateTo: " + lDateTo.toString());
 
 		long lCount = oEcoStressRepository.countItems(dWest,dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
 
@@ -142,12 +130,6 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		int iRelativeOrbit = oQueryViewModel.relativeOrbit;
 		String sDayNightFlag = oQueryViewModel.timeliness;
 
-		System.out.println("sProtocol: " + sProtocol);
-		System.out.println("sService: " + sService);
-		System.out.println("sProduct: " + sProduct);
-		System.out.println("iRelativeOrbit: " + iRelativeOrbit);
-		System.out.println("sDayNightFlag: " + sDayNightFlag);
-
 		EcoStressRepository oEcoStressRepository = new EcoStressRepository();
 
 		Double dWest = oQueryViewModel.west;
@@ -159,14 +141,9 @@ public class QueryExecutorCloudferro extends QueryExecutor {
 		String sDateFrom = oQueryViewModel.startFromDate;
 		String sDateTo = oQueryViewModel.endToDate;
 
-		System.out.println("sDateFrom: " + sDateFrom);
-		System.out.println("sDateTo: " + sDateTo);
-
 		Long lDateFrom = TimeEpochUtils.fromDateStringToEpoch(sDateFrom);
 		Long lDateTo = TimeEpochUtils.fromDateStringToEpoch(sDateTo);
 
-		System.out.println("lDateFrom: " + lDateFrom.toString());
-		System.out.println("lDateTo: " + lDateTo.toString());
 
 		List<EcoStressItemForReading> aoItemList = oEcoStressRepository
 				.getEcoStressItemList(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag, iOffset, iLimit);

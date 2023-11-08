@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import wasdi.shared.config.openEO.OpenEO;
 import wasdi.shared.data.MongoRepository;
@@ -43,14 +44,24 @@ public class WasdiConfig {
 	public String usersDefaultNode;
 	
 	/**
-	 * System name of the tomcat user
+	 * System name of the wasdi user
 	 */
-	public String tomcatUser = "appwasdi";
+	public String systemUserName = "appwasdi";
 	
 	/**
-	 * Fixed Id of the system user
+	 * Id of the system user
 	 */
 	public Integer systemUserId = 2042;
+	
+	/**
+	 * System name of the wasdi group
+	 */
+	public String systemGroupName = "appwasdi";
+	
+	/**
+	 * Id of the system group
+	 */
+	public Integer systemGroupId = 2042;
 	
 	/**
 	 * Base url of WASDI API
@@ -72,6 +83,30 @@ public class WasdiConfig {
 	 */
 	public int msWaitAfterChmod = 1000;
 	
+	/**
+	 * Set it WASDI should shell exec external components using the local system or using corresponding docker images.
+	 * External components are for example gdal, sen2core, snaphu..
+	 * Set this flag false to use the fully dockerized wasdi 
+	 */
+	public boolean shellExecLocally=true;
+	
+	/**
+	 * Set to true to use the log4j configuration to configure the loggers.
+	 * If it is false, the app will just log on the standard output
+	 */
+	public boolean useLog4J = true;
+	
+	/**
+	 * Set true to activate the logs of the http calls
+	 */
+	public boolean logHttpCalls=true;
+	
+	
+	/**
+	 * Set true to NOT filter the internal http calls (keycloak, docker..).
+	 * If the general logHttpCalls is False, this does not change
+	 */
+	public boolean filterInternalHttpCalls=true;
 	/**
 	 * Mongo db Configuration for the main node
 	 */
@@ -224,17 +259,24 @@ public class WasdiConfig {
 	 * @return true if ok, false in case of problems
 	 */
 	public static boolean readConfig(String sConfigFilePath) {
+		Stream<String> oLinesStream = null;
+		boolean bRes = false;
+		
         try {
-			String sJson = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8).collect(Collectors.joining(System.lineSeparator()));
-			
+        	
+        	oLinesStream = Files.lines(Paths.get(sConfigFilePath), StandardCharsets.UTF_8);
+			String sJson = oLinesStream.collect(Collectors.joining(System.lineSeparator()));
 			Current = MongoRepository.s_oMapper.readValue(sJson,WasdiConfig.class);
+			bRes = true;
 			
-			return true;
-		} catch (Exception e) {
-			WasdiLog.errorLog("WasdiConfig.readConfig: exception " + e.toString());
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("WasdiConfig.readConfig: exception ", oEx);
+		} finally {
+			if (oLinesStream != null) 
+				oLinesStream.close();
 		}
         
-        return false;
+        return bRes;
 	}
 	
 	/**

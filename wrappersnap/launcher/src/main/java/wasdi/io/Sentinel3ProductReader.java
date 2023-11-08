@@ -19,6 +19,8 @@ import wasdi.shared.utils.log.WasdiLog;
  *
  */
 public class Sentinel3ProductReader extends SnapProductReader {
+	
+	private static final String s_sSen3Extention = ".SEN3";
 
 	/**
 	 * @param oProductFile the Sentinel-3 (zip) file to be read
@@ -53,15 +55,15 @@ public class Sentinel3ProductReader extends SnapProductReader {
 			ZipFileUtils oZipExtractor = new ZipFileUtils();
 
 			//remove .SEN3 from the file name -> required for CREODIAS
-			String sNewFileName = sFileNameFromProvider.replaceAll(".SEN3", "");
+			String sNewFileName = sFileNameFromProvider.replaceAll(s_sSen3Extention, "");
 
 			oZipExtractor.unzip(sDownloadPath + File.separator + sNewFileName, sDownloadPath);
 			deleteDownloadedZipFile(sDownloadedFileFullPath);
 
 			//remove .zip and add .SEN3 if required
 			sNewFileName = sFileNameFromProvider.substring(0, sFileNameFromProvider.toLowerCase().lastIndexOf(".zip"));
-			if(!sNewFileName.endsWith(".SEN3")) {
-				sNewFileName = sNewFileName + ".SEN3";
+			if(!sNewFileName.endsWith(s_sSen3Extention)) {
+				sNewFileName = sNewFileName + s_sSen3Extention;
 			}
 
 			String sFolderName = sDownloadPath + File.separator + sNewFileName;
@@ -112,7 +114,7 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		try {
 			sBase = m_oProductFile.getAbsolutePath();
 			if(sBase.endsWith(".zip")) {
-				sBase = sBase.replaceAll(".zip", ".SEN3");
+				sBase = sBase.replaceAll(".zip", s_sSen3Extention);
 			}
 			sBase += File.separator;
 		} catch (Exception oE) {

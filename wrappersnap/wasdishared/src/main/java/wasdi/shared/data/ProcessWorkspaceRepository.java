@@ -46,14 +46,6 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-/**
- * @author c.nattero
- *
- */
-/**
- * @author c.nattero
- *
- */
 public class ProcessWorkspaceRepository extends MongoRepository {
 	
 	public ProcessWorkspaceRepository() {
@@ -81,7 +73,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             return oDocument.getObjectId("_id").toHexString();
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.insertProcessWorkspace: exception ", oEx);
         }
 
         return "";
@@ -108,7 +100,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	getCollection(m_sThisCollection).insertMany(aoDocs);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.insertProcessListWorkspace: exception ", oEx);
         }
     }
 
@@ -127,7 +119,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.deleteProcessWorkspace: exception ", oEx);
         }
 
         return false;
@@ -146,7 +138,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.deleteProcessWorkspaceByPid: exception ", oEx);
         }
 
         return false;
@@ -166,7 +158,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
                 return true;
 
             } catch (Exception oEx) {
-                oEx.printStackTrace();
+            	WasdiLog.errorLog("ProcessWorkspaceRepository.deleteProcessWorkspaceByProcessObjId: exception ", oEx);
             }    		
     	}
 
@@ -185,7 +177,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
                 getCollection(m_sThisCollection).deleteMany(new Document("workspaceId", sWorkspaceId));
                 return true;
             } catch (Exception oEx) {
-                oEx.printStackTrace();
+            	WasdiLog.errorLog("ProcessWorkspaceRepository.deleteProcessWorkspaceByWorkspaceId: exception ", oEx);
             }
     	}
         return false;
@@ -223,7 +215,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			}
     		return aoFathers;
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getRoots: " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getRoots: ", oE);
 		}
     	return new ArrayList<ProcessWorkspace>(0);
     }
@@ -259,7 +251,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				asChildrenProcessObjIds.add(oChildProcess.getProcessObjId());
 			}
     	} catch (Exception oE) {
-    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: " + oE);
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: extracting processObjIds failed due to: ", oE);
     		return new LinkedList<ProcessWorkspace>();
     	}
 
@@ -287,7 +279,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				)
 			);
     	} catch (Exception oE) {
-    		WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to " + oE );
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: aggregation failed due to ", oE );
     		return new LinkedList<ProcessWorkspace>();
 		}
 
@@ -308,13 +300,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 	    				oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
 	    				aoFathers.add(oProcessWorkspace);
 	    			} catch (IOException oE) {
-	    				WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
+	    				WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: error parsing one of fathers: " + oE + ", skipping");
 	    			}
 	    		}
     		}
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getFathers: could not parse query results due to ", oE);
 		}
     	return aoFathers;
     }
@@ -353,7 +345,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			return fillList(oWSDocuments);
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByWorkspace: exception ", oEx);
         }
 
 		return new ArrayList<>();
@@ -395,7 +387,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			}
     		return asProcessObjIds;
     	} catch (Exception oEx) {
-    		oEx.printStackTrace();
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessObjIdsFromWorkspaceId: exception ", oEx);
     	}
 
     	return new ArrayList<String>(0);
@@ -432,7 +424,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByWorkspace: exception ", oEx);
         }
 
         return aoReturnList;
@@ -477,7 +469,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         	
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByWorkspace: exception ", oEx);
         }
 
         return aoReturnList;
@@ -537,7 +529,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			ProcessWorkspace oProcessWorkspace = s_oMapper.readValue(sJson, ProcessWorkspace.class);
 			return oProcessWorkspace.getStatus();
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): " + oE );
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessStatusFromId( " + sProcessId + " ): ", oE );
 		}
 		return null;
 	}
@@ -553,7 +545,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     		return lCount;
     	}
     	catch (Exception oEx) {
-    		oEx.printStackTrace();
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.countByWorkspace: exception ", oEx);
 		}
     	
     	return -1;
@@ -570,7 +562,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     		return lCount;
     	}
     	catch (Exception oEx) {
-    		oEx.printStackTrace();
+    		WasdiLog.errorLog("ProcessWorkspaceRepository.countByProcessor: exception ", oEx);
 		}
     	
     	return 0;
@@ -591,7 +583,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByUser: exception ", oEx);
         }
 
         return aoReturnList;
@@ -611,7 +603,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getOGCProcessByUser: exception ", oEx);
         }
 
         return aoReturnList;
@@ -638,7 +630,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedProcesses: exception ", oEx);
         }
 
         return aoReturnList;
@@ -666,7 +658,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedProcessesByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -694,7 +686,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getReadyProcessesByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -719,8 +711,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningProcesses: exception ", oEx);
         }
 
         return aoReturnList;
@@ -747,8 +740,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningProcessesByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -772,8 +766,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedDownloads: exception ", oEx);
         }
 
         return aoReturnList;
@@ -799,8 +794,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedDownloadsByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -824,8 +820,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		.sort(new BasicDBObject("operationTimestamp", -1).append("operationDate", -1));
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        } 
+        catch (Exception oEx) {
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedIDL: exception ", oEx);
         }
 
         return aoReturnList;
@@ -852,7 +849,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedIDLByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -877,7 +874,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningDownloads: exception ", oEx);
         }
 
         return aoReturnList;
@@ -904,7 +901,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningDownloadsByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -929,7 +926,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getReadyDownloads: exception ", oEx);
         }
 
         return aoReturnList;
@@ -956,7 +953,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getReadyDownloadsByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -982,7 +979,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningIDL: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1009,7 +1006,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningIDLByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1034,7 +1031,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getReadyIDL: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1061,7 +1058,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getReadyIDLByNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1108,7 +1105,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessesByStateNode: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1138,7 +1135,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessesForSchedulerNode: exception ", oEx);
         }
         
         if (WasdiConfig.Current.scheduler.lastStateChangeDateOrderBy==1) {
@@ -1163,7 +1160,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 					oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
 					aoReturnList.add(oProcessWorkspace);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("ProcessWorkspaceRepository.fillList: exception ", e);
 			}
 		});
 		return aoReturnList;
@@ -1182,7 +1179,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getLastProcessByWorkspace: exception ", oEx);
         }
         
         // The client expects the most recent last
@@ -1205,7 +1202,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getLastProcessByUser: exception ", oEx);
         }
         
         // The client expects the most recent last
@@ -1230,7 +1227,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessOlderThan: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1250,7 +1247,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByProductName: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1277,7 +1274,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByProductNameAndWorkspace: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1304,7 +1301,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByProductNameAndUserId: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1329,10 +1326,10 @@ public class ProcessWorkspaceRepository extends MongoRepository {
                 oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
 
             } catch (IOException e) {
-                e.printStackTrace();
+            	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByProcessObjId: exception ", e);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByProcessObjId: exception ", oEx);
         }
 
         return oProcessWorkspace;
@@ -1362,7 +1359,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             }
         } 
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessesStatusByProcessObjId: exception ", oEx);
         }
 
         return asReturnStatus;
@@ -1391,8 +1388,6 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             	}
         	}
         	
-        	//WasdiLog.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
-        	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());
 			Document update = new Document("$set", new Document(Document.parse(sJSON)));
@@ -1401,7 +1396,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+            WasdiLog.errorLog("ProcessWorkspaceRepository.updateProcess: exception ", oEx);
         }
 
         return false;
@@ -1424,7 +1419,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.cleanQueue: exception ", oEx);
         }
 
         return false;
@@ -1446,7 +1441,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.existsPidProcessWorkspace: exception ", oEx);
         }
 
         if (aoReturnList.size() > 0)
@@ -1475,7 +1470,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningSummary: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1497,7 +1492,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getCreatedSummary: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1515,7 +1510,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getList: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1537,7 +1532,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.isProcessOwnedByUser( " + sUserId + ", " + sProcessObjId + " ): ", oE);
 		}
 		return false;
 	}
@@ -1560,7 +1555,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sWorkspaceId;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getWorkspaceByProcessObjId( " + sProcessObjId + " ): " , oE);
 		}
 		return null;
 	}
@@ -1584,7 +1579,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 				return sPayload;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): " + oE);
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getPayload( " + sProcessObjId + " ): ", oE);
 		}
 		return null;
 	}
@@ -1607,7 +1602,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getByNode: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -1626,7 +1621,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			fillList(aoReturnList, oDocuments, ProcessWorkspace.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getUnfinishedByNode: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -1649,7 +1644,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			fillList(aoReturnList, oDocuments, ProcessWorkspaceAggregatorByOperationTypeAndOperationSubtypeResult.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getQueuesByNodeAndStatuses: exception ", oEx);
 		}
 
 		return aoReturnList;
@@ -1676,7 +1671,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, ProcessWorkspace.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessWorkspaceRepository.getProcessByParentId: exception ", oEx);
         }
 
         return aoReturnList;
@@ -1703,13 +1698,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 			}
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningTime: exception ", oEx);
 		}
 
     	return lTotalRunningTime;
     }
 
-    private static Bson prepareFilterForTotalRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
+    private Bson prepareFilterForTotalRunningTime(String sUserId, Long lDateFrom, Long lDateTo) {
     	Bson oFilterUserId = Filters.eq("userId", sUserId.toLowerCase());
     	Bson oFilterDateFrom = Filters.gte("operationTimestamp", lDateFrom);
     	Bson oFilterDateTo = Filters.lte("operationTimestamp", lDateTo);
@@ -1741,7 +1736,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
 			fillList(aoResultList, oDocuments, ProcessWorkspaceAggregatorBySubscriptionAndProjectResult.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessWorkspaceRepository.getRunningTimeInfo: exception ", oEx);
 		}
 
 		return aoResultList;

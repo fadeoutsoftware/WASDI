@@ -31,11 +31,11 @@ public class ProcessWorkspaceService {
 
 	public boolean killProcesses(List<ProcessWorkspace> aoProcesses, Boolean bKillProcessTree, Boolean bCleanDB, String sSessionId) {
 		if (null == aoProcesses) {
-			WasdiLog.debugLog("ProcessWorkspaceService.killFathers: list of processes is null, aborting");
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: list of processes is null, aborting");
 			return false;
 		}
 		if (aoProcesses.size() <= 0) {
-			WasdiLog.debugLog("ProcessWorkspaceService.killFathers: list of processes is empty, aborting");
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: list of processes is empty, aborting");
 			return true;
 		}
 		
@@ -56,7 +56,7 @@ public class ProcessWorkspaceService {
 			asProcesses = new LinkedList<String>();
 			for (ProcessWorkspace oProcessWorkspace : aoProcesses) {
 				if (null == oProcessWorkspace) {
-					WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: found a null process, skipping");
+					WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: found a null process, skipping");
 					continue;
 				}
 				asProcesses.add(oProcessWorkspace.getProcessObjId());
@@ -83,14 +83,16 @@ public class ProcessWorkspaceService {
 			
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			oKillProcessParameter.setUserId(oUser.getUserId());
+			
 			PrimitiveResult oResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.KILLPROCESSTREE.name(),
 					asProcesses.get(0), WasdiConfig.Current.paths.serializationPath, oKillProcessParameter, null);
-			WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: kill scheduled with result: "
-					+ oResult.getBoolValue() + ", " + oResult.getIntValue() + ", " + oResult.getStringValue());
+			
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: kill scheduled with result: " + oResult.getBoolValue() );
+			
 			return oResult.getBoolValue();
 
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessWorkspaceResource.DeleteProcess: " + oE);
+			WasdiLog.debugLog("ProcessWorkspaceService.killProcesses: " + oE);
 		}
 		return false;
 	}

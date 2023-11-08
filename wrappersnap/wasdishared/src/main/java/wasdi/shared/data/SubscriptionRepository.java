@@ -227,13 +227,13 @@ public class SubscriptionRepository extends MongoRepository {
 				try {
 					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("SubscriptionRepository.getByName: error", e);
 				}
 
 				return oSubscription;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("SubscriptionRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.errorLog("SubscriptionRepository.getByName( " + sName + "): error: ", oE);
 		}
 
 		return null;
@@ -256,13 +256,13 @@ public class SubscriptionRepository extends MongoRepository {
 				try {
 					oSubscription = s_oMapper.readValue(sJSON, Subscription.class);
 				} catch (IOException e) {
-					e.printStackTrace();
+					WasdiLog.errorLog("SubscriptionRepository.getByNameAndUserId: error: ", e);
 				}
 
 				return oSubscription;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("SubscriptionRepository.getByName( " + sName + "): error: " + oE);
+			WasdiLog.errorLog("SubscriptionRepository.getByName: error: ", oE);
 		}
 
 		return null;
@@ -331,7 +331,7 @@ public class SubscriptionRepository extends MongoRepository {
 				return true;
 			}
 		} catch (Exception oE) {
-			WasdiLog.debugLog("SubscriptionRepository.isOwnedByUser( " + sUserId + ", " + sSubscriptionId + " ): error: " + oE);
+			WasdiLog.errorLog("SubscriptionRepository.isOwnedByUser( " + sUserId + ", " + sSubscriptionId + " ): error: ", oE);
 		}
 
 		return false;
@@ -404,7 +404,7 @@ public class SubscriptionRepository extends MongoRepository {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId));
 			fillList(aoReturnList, oWSDocuments, Subscription.class);
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error " + oEx.toString());
+			WasdiLog.errorLog("SubscriptionRepository.getAllSubscriptionsOfUser : error ", oEx);
 		}
 		
 		try {

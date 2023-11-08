@@ -49,7 +49,7 @@ public class SFTPManager {
 			if (oClient.isOk()) return oClient.getData();		
 			WasdiLog.debugLog("ERROR: " + oClient.getData());		
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("SFTPManager.sendCommand:  error", e);
 			Thread.currentThread().interrupt();
 		}				
 		return null;

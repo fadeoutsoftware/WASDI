@@ -19,8 +19,8 @@ ENV PYTHONUNBUFFERED="True"
 
 
 # RUN generic to create user, group, directories, etc
-RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiContainerRabbitMqInstanceGroupName }} && \
-    useradd --create-home --home-dir /home/{{ sWasdiContainerRabbitMqInstanceUserName }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiContainerRabbitMqInstanceUserName }}
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiRabbitMqSystemGroupName }} && \
+    useradd --create-home --home-dir /home/{{ sWasdiRabbitMqSystemUserName }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiRabbitMqSystemUserName }}
 
 
 # RUN generic to update the system and install common packages
@@ -51,22 +51,22 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 RUN apt-get update && \
     apt-get install \
         rabbitmq-server && \
-    echo "{{ sWasdiContainerRabbitMqInstanceErlangCookie }}" > /root/.erlang.cookie && \
-    echo "{{ sWasdiContainerRabbitMqInstanceErlangCookie }}" > /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie && \
+    echo "{{ sWasdiRabbitMqErlangCookie }}" > /root/.erlang.cookie && \
+    echo "{{ sWasdiRabbitMqErlangCookie }}" > /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie && \
     mkdir --parents \
         /var/log/rabbitmq \
         /var/run/rabbitmq && \
     chmod 400 \
         /root/.erlang.cookie \
-        /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie && \
+        /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie && \
     chmod 770 \
         /etc/rabbitmq \
         /var/log/rabbitmq \
         /var/run/rabbitmq && \
-    chown --recursive {{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} \
-        /home/{{ sWasdiContainerRabbitMqInstanceUserName }}/.erlang.cookie \
+    chown --recursive {{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} \
+        /home/{{ sWasdiRabbitMqSystemUserName }}/.erlang.cookie \
         /etc/rabbitmq \
-        {{ sWasdiContainerRabbitMqInstanceBaseDirectoryPath }} \
+        {{ sWasdiRabbitMqBaseDirectoryPath }} \
         /var/log/rabbitmq/ \
         /var/run/rabbitmq/ && \
     rm --force /etc/rabbitmq/rabbitmq-env.conf && \
@@ -74,18 +74,18 @@ RUN apt-get update && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user '{{ sWasdiContainerRabbitMqInstanceUserName }}'
-USER {{ sWasdiContainerRabbitMqInstanceUserName }}
+# From now, all commands executed are executed with the user '{{ sWasdiRabbitMqSystemUserName }}'
+USER {{ sWasdiRabbitMqSystemUserName }}
 
 
 # Set the workdir
-WORKDIR /home/{{ sWasdiContainerRabbitMqInstanceUserName }}
+WORKDIR /home/{{ sWasdiRabbitMqSystemUserName }}
 
 
 # Copy data
-COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_definitions.json /etc/rabbitmq/definitions.json
-COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_enabled_plugins /etc/rabbitmq/enabled_plugins
-COPY --chown={{ sWasdiContainerRabbitMqInstanceUserName }}:{{ sWasdiContainerRabbitMqInstanceGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_definitions.json /etc/rabbitmq/definitions.json
+COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_enabled_plugins /etc/rabbitmq/enabled_plugins
+COPY --chown={{ sWasdiRabbitMqSystemUserName }}:{{ sWasdiRabbitMqSystemGroupName }} ./dataToCopy/etc_rabbitmq_rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 
 
 # Start the container

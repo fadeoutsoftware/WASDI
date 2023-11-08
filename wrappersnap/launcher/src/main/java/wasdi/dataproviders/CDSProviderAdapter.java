@@ -28,6 +28,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 	private static final String CDS_URL_SEARCH = "https://cds.climate.copernicus.eu/api/v2/resources";
 	private static final String CDS_URL_GET_STATUS = "https://cds.climate.copernicus.eu/broker/api/v1/0/requests";
+	private static final String s_sQueuedStatus = "queued";
 	
 	/**
 	 * Basic constructor
@@ -59,7 +60,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		String sDataset = JsonUtils.getProperty(aoWasdiPayload, "dataset");
 
-		String sCdsSearchRequestState = "queued";
+		String sCdsSearchRequestState = s_sQueuedStatus;
 		String sUrl = CDS_URL_SEARCH + "/" + sDataset;
 		
 		String sCdsSearchRequestResult = performCdsSearchRequest(sUrl, sDownloadUser, sDownloadPassword, sPayload, iMaxRetry);
@@ -72,7 +73,7 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 		if ("completed".equalsIgnoreCase(sCdsSearchRequestState)) {
 			sUrlDownload = (String) JsonUtils.getProperty(oCdsSearchRequestResult, "location");
-		} else if ("queued".equalsIgnoreCase(sCdsSearchRequestState)) {
+		} else if (s_sQueuedStatus.equalsIgnoreCase(sCdsSearchRequestState)) {
 			String sCdsGetStatusRequestResult;
 			Map<String, Object> oCdsGetStatusRequestResult = new HashMap<>();
 			String sCdsGetStatusRequestId;
@@ -95,17 +96,19 @@ public class CDSProviderAdapter extends ProviderAdapter {
 
 				sCdsGetStatusRequestState = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.state");
 
-				if ("queued".equalsIgnoreCase(sCdsGetStatusRequestState)) {
+				if (s_sQueuedStatus.equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(60);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("running".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					try {
 						TimeUnit.SECONDS.sleep(6);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					} catch (InterruptedException oEx) {
+						Thread.currentThread().interrupt();
+						WasdiLog.errorLog("CDSProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
 					}
 				} else if ("completed".equalsIgnoreCase(sCdsGetStatusRequestState)) {
 					sUrlDownload = (String) JsonUtils.getProperty(oCdsGetStatusRequestResult, "status.data.0.location");

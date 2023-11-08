@@ -151,8 +151,7 @@ public class Ftpupload extends Operation {
                 oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             } 
         } catch (Throwable oEx) {
-            WasdiLog.errorLog("Ftpupload.executeOperation: " + oEx);
-            oEx.printStackTrace();
+            WasdiLog.errorLog("Ftpupload.executeOperation: " + oEx.toString());
         }		
 		return false;
 	}

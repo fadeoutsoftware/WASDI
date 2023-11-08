@@ -62,19 +62,18 @@ public class Launchjupyternotebook extends Operation {
 							// Notify the user
 							String sName = oParameter.getName();
 
-							if (Utils.isNullOrEmpty(sName))
+							if (Utils.isNullOrEmpty(sName)) {
 								sName = "Your Jupyter Notebook";
+							}
 
 							String sInfo = "JUPYTER NOTEBOOK STARTED<br>" + sName + " IS NOW AVAILABLE";
 
-							if (!bRet)
+							if (!bRet) {
 								sInfo = "GURU MEDITATION<br>ERROR STARTING JUPYTER NOTEBOOK " + sName + " :(";
+							}
 
-							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(),
-									oParam.getExchange(), sInfo, oParam.getExchange());
-
+							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());
 							m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), oParam.getExchange(), "", oParam.getExchange());
-							
 						}
 
 					}
@@ -82,8 +81,7 @@ public class Launchjupyternotebook extends Operation {
 				}
 
 			} catch (Exception oRabbitException) {
-				WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception sending Rabbit Message",
-						oRabbitException);
+				WasdiLog.errorLog("Launchjupyternotebook.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
 
 		} catch (Exception oEx) {

@@ -40,11 +40,6 @@ public abstract class WasdiProcessorEngine {
 	protected ProcessWorkspaceLogger m_oProcessWorkspaceLogger = null;
 	
 	/**
-	 * User to mount on Docker. If "" will not be added
-	 */
-	protected String m_sTomcatUser;
-	
-	/**
 	 * Processor Parameter of this operation
 	 */
 	ProcessorParameter m_oParameter;
@@ -121,7 +116,6 @@ public abstract class WasdiProcessorEngine {
 	 */
 	public WasdiProcessorEngine() {
 		m_sDockerTemplatePath = WasdiConfig.Current.paths.dockerTemplatePath;
-		m_sTomcatUser = WasdiConfig.Current.tomcatUser;
 	}
 			
 	/**
@@ -172,6 +166,13 @@ public abstract class WasdiProcessorEngine {
 	 * * @return
 	 */
 	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
+	
+	/**
+	 * Stop a running application
+	 * @param oParameter the processor parameter
+	 * @return true if stopped false in case of problems
+	 */
+	public abstract boolean stopApplication(ProcessorParameter oParameter);	
 	
 	/**
 	 * Check if a processor exists on actual node
@@ -235,7 +236,7 @@ public abstract class WasdiProcessorEngine {
 			return HttpUtils.downloadFile(sUrl, asHeaders, sOutputFilePath);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("WasdiProcessorEngine.downloadProcessor: error", oEx);
 			return "";
 		}		
 	}
@@ -376,8 +377,9 @@ public abstract class WasdiProcessorEngine {
 //	        WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
 //	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
 		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("WasdiProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		catch (InterruptedException oEx) {
+			Thread.currentThread().interrupt();
+			WasdiLog.errorLog("WasdiProcessorEngine.waitForApplicationToStart: current thread was interrupted ", oEx);
 		}
 	}
 	
@@ -483,22 +485,6 @@ public abstract class WasdiProcessorEngine {
         }
         return true;
     }
-
-    /**
-     * Get the user to mount of the docker
-     * @return
-     */
-	public String getTomcatUser() {
-		return m_sTomcatUser;
-	}
-
-	/**
-	 * Set the user to mount of the docker
-	 * @param sTomcatUser
-	 */
-	public void setTomcatUser(String sTomcatUser) {
-		this.m_sTomcatUser = sTomcatUser;
-	}
 
 	/**
 	 * Flag to know if this application type needs to be ran after the deploy or not

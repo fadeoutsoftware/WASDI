@@ -1,0 +1,29 @@
+print('[MODIS] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[MODIS] OK')
+
+print('[MODIS] Creating the database user...')
+oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoModisDatabaseName'));
+oCurrentDatabase.createUser(
+    {
+        user: _getEnv('sWasdiMongoModisUserName'),
+        pwd: _getEnv('sWasdiMongoModisUserPassword'),
+        roles: [
+            {
+                role: 'readWrite',
+                db: _getEnv('sWasdiMongoModisDatabaseName')
+            }
+        ]
+    }
+);
+print('[MODIS] OK')
+
+print('[MODIS] Creating an empty collection to initialize the database...')
+oCurrentDatabase.createCollection('_initialized');
+print('[MODIS] OK')

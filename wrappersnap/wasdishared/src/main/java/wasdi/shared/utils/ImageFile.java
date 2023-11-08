@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 
+import wasdi.shared.utils.log.WasdiLog;
+
 public class ImageFile extends File {
 
 	/**
@@ -46,10 +48,10 @@ public class ImageFile extends File {
 			oOutStream.flush();
 			oOutStream.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ImageFile.save: error", e);
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ImageFile.save: error", e);
 			return false;
 		}
 		return true;
@@ -77,10 +79,10 @@ public class ImageFile extends File {
 		        ImageIO.write(oResized, sExt.toLowerCase(), this);	        	
 	        }
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ImageFile.resizeImage: error", e);
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ImageFile.resizeImage: error", e);
 			return false;
 		}
 		return true;
@@ -96,7 +98,7 @@ public class ImageFile extends File {
 			abLogo = oBaos.toByteArray();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			WasdiLog.errorLog("ImageFile.getByteArrayImage: error", e);
 			return null;
 		}
 		return new ByteArrayInputStream(abLogo);

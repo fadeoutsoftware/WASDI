@@ -60,8 +60,7 @@ public class WasdiProductWriter  {
         }
         catch (Exception oEx)
         {
-        	oEx.printStackTrace();
-            WasdiLog.errorLog("WriteProduct: Error writing product. " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            WasdiLog.errorLog("WriteProduct: Error writing product. ", oEx);
         }
 
         return null;

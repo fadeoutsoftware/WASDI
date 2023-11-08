@@ -9,6 +9,9 @@ import wasdi.shared.utils.log.WasdiLog;
 
 public class VIIRSProviderAdapter extends ProviderAdapter {
 	
+	private static final String s_sNewSubstring = ".part";
+	private static final String s_sOldSubstring = "_part";
+	
 	public VIIRSProviderAdapter() {
 		super();
 		m_sDataProviderCode = "VIIRS";
@@ -16,7 +19,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 
 	@Override
 	public long getDownloadFileSize(String sFileURL) throws Exception {
-		return getDownloadFileSizeViaHttp(sFileURL.replace("_part", ".part"));
+		return getDownloadFileSizeViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring));
 	}
 
 	@Override
@@ -34,13 +37,16 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 			WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile: attemp #" + iAttemp);
 			
 			try {
-				sResult = downloadViaHttp(sFileURL.replace("_part", ".part"), "", "", sSaveDirOnServer);
+				sResult = downloadViaHttp(sFileURL.replace(s_sOldSubstring, s_sNewSubstring), "", "", sSaveDirOnServer);
 				
 				File oOriginalFile = new File(sResult);
-				File oRenamedFile = new File(sResult.replace(".part", "_part"));
-				oOriginalFile.renameTo(oRenamedFile);
+				File oRenamedFile = new File(sResult.replace(s_sNewSubstring, s_sOldSubstring));
+				boolean bIsFileRenamed = oOriginalFile.renameTo(oRenamedFile);
 				
-				sResult = sResult.replace(".part", "_part");
+				if (!bIsFileRenamed)
+					WasdiLog.debugLog("VIIRSProviderAdapter.executeDownloadFile. File was not renamed.");
+				
+				sResult = sResult.replace(s_sNewSubstring, s_sOldSubstring);
 				
 			}
 			catch (Exception oEx) {
@@ -64,7 +70,7 @@ public class VIIRSProviderAdapter extends ProviderAdapter {
 		if (asParts != null) {
 			sFileName = asParts[asParts.length-1];
 			
-			sFileName = sFileName.replace(".part", "_part");
+			sFileName = sFileName.replace(s_sNewSubstring, s_sOldSubstring);
 		}
 		
 		return sFileName;

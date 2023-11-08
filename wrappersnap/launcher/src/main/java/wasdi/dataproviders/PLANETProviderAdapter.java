@@ -139,6 +139,10 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 								break;
 							}
 						}
+						catch(InterruptedException oEx) {
+							Thread.currentThread().interrupt();
+							WasdiLog.errorLog("PLANETProviderAdapter.executeDownloadFile: current thread was interrupted ", oEx);
+						}
 						catch (Exception oEx) {
 						}
 						
@@ -171,7 +175,9 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					WasdiLog.debugLog("PLANETProviderAdapter.executeDownloadFile: retry cycle, going to sleep for " + m_lRetrySleepSeconds + " [s]");
 					Thread.sleep(m_lRetrySleepSeconds*1000);	
 				}
-				catch (Exception oSleepEx) {
+				catch (InterruptedException oSleepEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("PLANETProviderAdapter.executeDownloadFile: current thread was interrupted", oSleepEx);
 				}
 				
 			}
@@ -271,7 +277,7 @@ public class PLANETProviderAdapter extends ProviderAdapter {
 					String sActivateLink = oLinks.get("activate").toString();
 					
 					// Post the request
-					HttpUtils.httpPost(sActivateLink, null, getPlanetHeaders());
+					HttpUtils.httpPost(sActivateLink, "", getPlanetHeaders());
 					
 					WasdiLog.debugLog("PLANETProviderAdapter.activateAsset: activation request sent");
 					

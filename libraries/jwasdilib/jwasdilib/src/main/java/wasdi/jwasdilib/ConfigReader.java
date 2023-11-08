@@ -71,7 +71,7 @@ public class ConfigReader {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+        	System.out.println("ConfigReader.loadPropValues: error " + e.toString());
         } finally {
         	if (oInputStream != null) oInputStream.close();
         }

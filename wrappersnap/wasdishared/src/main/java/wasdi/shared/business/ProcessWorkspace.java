@@ -78,7 +78,7 @@ public class ProcessWorkspace {
     /**
      * System pid
      */
-    private int pid;
+    private int pid=-1;
     /**
      * Process Payload
      */
@@ -107,6 +107,12 @@ public class ProcessWorkspace {
 	 * Subscription Id
 	 */
 	private String subscriptionId;
+	
+	/**
+	 * If the system id Dockerized (shellExecLocally==false) the launcher is 
+	 * identified not by the pid but by this container name
+	 */
+	private String containerId;
 
 
 	public String getProductName() {
@@ -291,6 +297,14 @@ public class ProcessWorkspace {
 		}
 		
 		return super.equals(obj);
+	}
+
+	public String getContainerId() {
+		return containerId;
+	}
+
+	public void setContainerId(String containerId) {
+		this.containerId = containerId;
 	}
 	
 }

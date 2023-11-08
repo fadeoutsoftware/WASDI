@@ -80,11 +80,11 @@ USER root
 RUN apt-get update && \
     mkdir --parents \
         {{ sWasdiDataConfigurationRootDirectoryPath }} \
-        {{ sWasdiComponentUtilsRootDirectoryPath }} && \
+        {{ sWasdiUtilsRootDirectoryPath }} && \
     chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
     chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiComponentUtilsRootDirectoryOwner }}:{{ sWasdiComponentUtilsRootDirectoryGroup }} {{ sWasdiComponentUtilsRootDirectoryPath }} && \
-    chmod {{ sWasdiComponentUtilsRootDirectoryMode }} {{ sWasdiComponentUtilsRootDirectoryPath }} && \
+    chown {{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGroup }} {{ sWasdiUtilsRootDirectoryPath }} && \
+    chmod {{ sWasdiUtilsRootDirectoryMode }} {{ sWasdiUtilsRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -94,22 +94,22 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Set the workdir
-WORKDIR {{ sWasdiComponentUtilsRootDirectoryPath }}
+WORKDIR {{ sWasdiUtilsRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiComponentUtilsRootDirectoryOwner }}:{{ sWasdiComponentUtilsRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentUtilsTargetFileName }} {{ sWasdiComponentUtilsRootDirectoryPath }}/{{ sWasdiComponentUtilsTargetFileName }}
+COPY --chown={{ sWasdiUtilsRootDirectoryOwner }}:{{ sWasdiUtilsRootDirectoryGroup }} ./dataToCopy/{{ sWasdiUtilsBuildTargetFileName }} {{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsBuildTargetFileName }}
 
 
 # Start the container
-ENTRYPOINT [ \
-    "/opt/wasdi/jre/jre8/8u382-b05/bin/java", \
+CMD [ \
+    "{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin/java", \
     "-Xmx24g", \
     "-Xms1024m", \
     "-XX:+AggressiveOpts", \
     "-Xverify:none", \
     "-jar", \
-    "/opt/wasdi/utils/dbUtils.jar", \
+    "{{ sWasdiUtilsRootDirectoryPath }}/{{ sWasdiUtilsBuildTargetFileName }}", \
     "--config", \
-    "/etc/wasdi/wasdiConfigDocker.json" \
+    "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json" \
 ]

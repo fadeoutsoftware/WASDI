@@ -98,7 +98,9 @@ public class Environmentupdate extends Operation {
 					File oActionsLogFile = new File(sProcessorFolder);
 					
 					if (!oActionsLogFile.exists()) {
-						oActionsLogFile.createNewFile();
+						boolean bIsFileCreated = oActionsLogFile.createNewFile();
+						if (!bIsFileCreated)
+							WasdiLog.errorLog("Environmentupdate.executeOperation: the action file was not created");
 					}
 					
 					// Extract the command we just executed
@@ -146,12 +148,18 @@ public class Environmentupdate extends Operation {
 					
 				}							
 
-			} catch (Exception oRabbitException) {
+			} 
+			catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("Environmentupdate.executeOperation: current thread was interrupted", oEx);
+			}
+			catch (Exception oRabbitException) {
 				WasdiLog.errorLog("Environmentupdate.executeOperation: exception sending Rabbit Message", oRabbitException);
 			}
 
 			return bRet;
-		} catch (Exception oEx) {
+		} 
+		catch (Exception oEx) {
 			WasdiLog.errorLog("Environmentupdate.executeOperation: exception", oEx);
 		}
 

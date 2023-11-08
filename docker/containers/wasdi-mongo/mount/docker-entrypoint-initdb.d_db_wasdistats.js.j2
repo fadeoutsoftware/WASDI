@@ -1,0 +1,29 @@
+print('[WASDI STATS] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
+    {
+        user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
+        pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
+    }
+);
+print('[WASDI STATS] OK')
+
+print('[WASDI STATS] Creating the database user...')
+oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoWasdiStatsDatabaseName'));
+oCurrentDatabase.createUser(
+    {
+        user: _getEnv('sWasdiMongoWasdiStatsUserName'),
+        pwd: _getEnv('sWasdiMongoWasdiStatsUserPassword'),
+        roles: [
+            {
+                role: 'readWrite',
+                db: _getEnv('sWasdiMongoWasdiStatsDatabaseName')
+            }
+        ]
+    }
+);
+print('[WASDI STATS] OK')
+
+print('[WASDI STATS] Creating an empty collection to initialize the database...')
+oCurrentDatabase.createCollection('_initialized');
+print('[WASDI STATS] OK')

@@ -34,6 +34,7 @@ import wasdi.shared.business.ecostress.EcoStressItemForWriting;
 //import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.ecostress.EcoStressRepository;
+import wasdi.shared.utils.log.WasdiLog;
 
 public final class S3BucketUtils {
 
@@ -189,8 +190,7 @@ public final class S3BucketUtils {
 
 			return sLocationJson;
 		} catch (Exception oEx) {
-			System.out.println("asProperties: " + asProperties);
-			oEx.printStackTrace();
+			WasdiLog.errorLog("S3BucketUtils.extractFootprint: error", oEx);
 		}
 
 		return null;
@@ -239,8 +239,6 @@ public final class S3BucketUtils {
 //
 //			return oEcoStressLocation;
 //		} catch (Exception oEx) {
-//			System.out.println("asProperties: " + asProperties);
-//			oEx.printStackTrace();
 //		}
 //
 //		return null;
@@ -282,8 +280,8 @@ public final class S3BucketUtils {
 			String xml = inputStreamToString(s3ObjectInputStream);
 
 			return xml;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oEx) {
+			WasdiLog.errorLog("S3BucketUtils.s3ObjectInputStreamToString: error", oEx);
 		}
 
 		return null;
@@ -332,7 +330,7 @@ public final class S3BucketUtils {
 
 			return sXml;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("S3BucketUtils.fileToString: error", oEx);
 		}
 
 		return null;
@@ -375,8 +373,8 @@ public final class S3BucketUtils {
 				//EcoStressItem oItem = buildEcoStressItem(asProperties, sFileName, sH5FilePath, sUrl);
 			}
 		} 
-		catch (Exception e) {
-	          e.printStackTrace();
+		catch (Exception oEx) {
+			WasdiLog.errorLog("S3BucketUtils.fileToString: error", oEx);
 	    }		
 	}
 	

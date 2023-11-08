@@ -132,9 +132,9 @@ public class InstanceFinder {
 			try {
 				oSatellite=SatFactory.buildSat(s_asOrbitSatsMap.get(sSatelliteName));
 				WasdiLog.debugLog("costruito");
-			} catch (Throwable oEx) {
-				oEx.printStackTrace();
-				WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_asOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
+			} 
+			catch (Throwable oEx) {
+				WasdiLog.errorLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_asOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
 				return null;
 			}
 
@@ -240,8 +240,8 @@ public class InstanceFinder {
 			oDateTime = oFormat.parse(sDateTime);
 			SimpleDateFormat oFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
 			sDateTime = oFormat2.format(oDateTime);
-		} catch (ParseException e) {
-			e.printStackTrace();
+		} catch (ParseException oEx) {
+			WasdiLog.errorLog("InstanceFinder.convertDateFormatsFromClientToPlanEngine:  error", oEx);
 		}
 		
 		return sDateTime;

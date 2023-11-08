@@ -35,11 +35,11 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 
 		try {
 
-			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId))
-					.sort(new Document("name", 1));
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(new Document("userId", sUserId)).sort(new Document("name", 1));
 			fillList(aoReturnList, oWSDocuments, ProcessorParametersTemplate.class);
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
+		} 
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.getProcessorParametersTemplatesByUser :error ", oEx);
 		}
 
 		return aoReturnList;
@@ -63,7 +63,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, ProcessorParametersTemplate.class);
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.getProcessorParametersTemplatesByUserAndProcessor :error ", oEx);
 		}
 
 		return aoReturnList;
@@ -85,7 +85,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 			fillList(aoReturnList, oWSDocuments, ProcessorParametersTemplate.class);
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.getProcessorParametersTemplatesByProcessor :error ", oEx);
 		}
 
 		return aoReturnList;
@@ -107,7 +107,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, ProcessorParametersTemplate.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId :error ", oEx);
 		}
 
 		return null;
@@ -133,7 +133,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, ProcessorParametersTemplate.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.getProcessorParametersTemplatesByUserAndProcessorAndName :error ", oEx);
 		}
 
 		return null;
@@ -159,7 +159,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 			getCollection(m_sThisCollection).insertOne(oDocument);
 			return oDocument.getObjectId("_id").toHexString();
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("ProcessorParametersTemplateRepository.InsertProcessorParametersTemplate: " + oEx);
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.InsertProcessorParametersTemplate: ", oEx);
 		}
 
 		return "";
@@ -176,10 +176,17 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 			return 0;
 		}
 
-		BasicDBObject oCriteria = new BasicDBObject();
-		oCriteria.append("templateId", sTemplateId);
+		try {
+			
+			BasicDBObject oCriteria = new BasicDBObject();
+			oCriteria.append("templateId", sTemplateId);
 
-		return delete(oCriteria, m_sThisCollection);
+			return delete(oCriteria, m_sThisCollection);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.deleteByTemplateId:error ", oEx);
+			return -1;
+		}
 	}
 
 	/**
@@ -189,11 +196,19 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
 	 * @return true if the record was updated, false otherwise
 	 */
 	public boolean updateProcessorParametersTemplate(ProcessorParametersTemplate oProcessorParametersTemplate) {
-		BasicDBObject oCriteria = new BasicDBObject();
+		
+		try {
+			BasicDBObject oCriteria = new BasicDBObject();
 
-		oCriteria.append("templateId", oProcessorParametersTemplate.getTemplateId());
+			oCriteria.append("templateId", oProcessorParametersTemplate.getTemplateId());
 
-		return update(oCriteria, oProcessorParametersTemplate, m_sThisCollection);
+			return update(oCriteria, oProcessorParametersTemplate, m_sThisCollection);			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorParametersTemplateRepository.updateProcessorParametersTemplate:error ", oEx);
+			return false;
+		}
+
 	}
 
 	/**
@@ -215,7 +230,7 @@ public class ProcessorParametersTemplateRepository extends MongoRepository {
             FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(oCriteria);
             fillList(aoReturnList, oWSDocuments, ProcessorParametersTemplate.class);
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorParametersTemplateRepository.isTheOwnerOfTheTemplate :error ", oEx);
         }
 
         if (aoReturnList.size() > 0) {

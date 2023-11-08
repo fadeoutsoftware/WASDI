@@ -214,4 +214,9 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
         return this.m_oHttp.get(this.APIURL + '/auth/lostPassword?userId=' + sEmail );
     }
 
+    this.checkSession = function()
+    {
+        return this.m_oHttp.get(this.APIURL + '/auth/checksession');
+    }
+
 }]);

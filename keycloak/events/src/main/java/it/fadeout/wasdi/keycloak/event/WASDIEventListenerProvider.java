@@ -51,7 +51,7 @@ class WASDIEventListenerProvider implements EventListenerProvider {
                 if (!oResponse.isSuccessful()) throw new IOException("Response isn't successfull ! ");
                 System.out.println(" WASDI response from POST " + oResponse.body().string());
             } catch (IOException e) {
-                e.printStackTrace();
+            	System.out.println("ERROR: " + e.toString());
             }
         }
 

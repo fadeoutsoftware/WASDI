@@ -1,11 +1,8 @@
 import wasdi
 
-
 def run():
     wasdi.setVerbose(True)
 
-    wasdi.getFileFromWorkspaceName("Adwaiseo1", "S1A_IW_GRDH_1SDV_20230712T054433_20230712T054458_049386_05F051_C014.zip")
-    wasdi.sendFileToWorkspaceId("MainNode", "saltaURBAN_76_buildings.tif")
     wasdi.hello()
     
     aoImage = wasdi.searchEOImages("S1", sFileName="S1A_IW_SLC__1SDV_20221021T054200_20221021T054228_045536_057197_35F8")

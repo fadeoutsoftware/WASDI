@@ -105,16 +105,12 @@ COPY --chown=$USR_NAME:$GRP_NAME ./envi552-linux.tar $USR_HOME/
 RUN tar --directory $USR_HOME/ -xf $USR_HOME/envi552-linux.tar
 
 
-# Overwrite install script with the one which is close to the Dockerfile
-COPY --chown=$USR_NAME:$GRP_NAME ./install.sh $USR_HOME/
-
-
 # From now, all commands executed are executed as root
 USER root
 
 
 # Make it executable and run the installation
-RUN bash $USR_HOME/install.sh s
+RUN bash $USR_HOME/install-wasdi.sh s
 
 
 # Set the license server url
@@ -122,11 +118,12 @@ COPY ./o_licenseserverurl.txt /usr/local/harris/license/o_licenseserverurl.txt
 
 
 # Clean envi installation files
-CMD rm -rf ./install \
-    ./silent \
+CMD rm -rf $USR_HOME/install \
+    $USR_HOME/silent \
     $USR_HOME/envi552-linux.tar \
     $USR_HOME/o_licenseserverurl.txt \
-    $USR_HOME/install.sh
+    $USR_HOME/install.sh \
+    $USR_HOME/install-wasdi.sh
 
 
 # From now, all commands executed are executed with the user $USR_NAME who must not be root

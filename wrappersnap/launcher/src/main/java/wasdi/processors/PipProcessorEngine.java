@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,8 +30,8 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 	}
 
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
-		IPackageManager oPackageManager = new PipPackageManagerImpl(sIp, iPort);
+	protected IPackageManager getPackageManager(String sUrl) {
+		IPackageManager oPackageManager = new PipPackageManagerImpl(sUrl);
 
 		return oPackageManager;
 	}
@@ -38,6 +39,10 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 	@Override
 	protected void onAfterUnzipProcessor(String sProcessorFolder) {
 		super.onAfterUnzipProcessor(sProcessorFolder);
+		
+		FileOutputStream oNewPipFile = null;
+
+		BufferedWriter oPipWriter = null;
 
 		try {
 			WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: sanitize pip.txt");
@@ -81,9 +86,9 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 			if (asUserPackages.size() > 0) {
 				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: writing new pip.txt file");
 
-				FileOutputStream oNewPipFile = new FileOutputStream(oPipFile);
+				oNewPipFile = new FileOutputStream(oPipFile);
 
-				BufferedWriter oPipWriter = new BufferedWriter(new OutputStreamWriter(oNewPipFile));
+				oPipWriter = new BufferedWriter(new OutputStreamWriter(oNewPipFile));
 
 				for (int iPackages = 0; iPackages < asUserPackages.size(); iPackages++) {
 
@@ -101,18 +106,23 @@ public class PipProcessorEngine extends DockerProcessorEngine {
 					}
 				}
 
-				oPipWriter.close();	
 				oNewPipFile.flush();
-				oNewPipFile.close();
 			}
 			else {
-				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor: no more packages after filtering: delete pip file");
-				oPipFile.delete();
+				boolean bIsfileDeleted = oPipFile.delete();
+				WasdiLog.infoLog("PipProcessorEngine.onAfterUnzipProcessor. No more packages after filtering, result of the deletion of pip file: " + bIsfileDeleted);
 			}
 
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("PipProcessorEngine.onAfterUnzipProcessor: exception " + oEx.toString());
+			WasdiLog.errorLog("PipProcessorEngine.onAfterUnzipProcessor: exception ", oEx);
+		} finally {
+			try {
+				if (oPipWriter != null) oPipWriter.close();
+				if (oNewPipFile != null) oNewPipFile.close();
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("PipProcessorEngine.onAfterUnzipProcessor: exception when closing the I/O resources", oEx);
+			}
 		}
 		
 	}

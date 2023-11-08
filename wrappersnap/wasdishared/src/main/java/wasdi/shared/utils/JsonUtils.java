@@ -181,31 +181,36 @@ public final class JsonUtils {
 		if (oObject == null || sPath == null) {
 			return oObject;
 		}
+		
+		try {
+			String[] aoTokens = sPath.split("\\.");
 
-		String[] aoTokens = sPath.split("\\.");
+			if (oObject instanceof Map<?, ?>) {
+				Map<String, Object> aoMap = (Map<String, Object>) oObject;
 
-		if (oObject instanceof Map<?, ?>) {
-			Map<String, Object> aoMap = (Map<String, Object>) oObject;
+				if (aoTokens.length == 1) {
+					return aoMap.get(sPath);
+				}
 
-			if (aoTokens.length == 1) {
-				return aoMap.get(sPath);
-			}
+				return getProperty(aoMap.get(aoTokens[0]), sPath.substring(sPath.indexOf(".") + 1));
+			} else if (oObject instanceof List<?>) {
+				List<?> aoList = (List<?>) oObject;
 
-			return getProperty(aoMap.get(aoTokens[0]), sPath.substring(sPath.indexOf(".") + 1));
-		} else if (oObject instanceof List<?>) {
-			List<?> aoList = (List<?>) oObject;
+				int iOrdinal = Integer.parseInt(aoTokens[0]);
 
-			int iOrdinal = Integer.parseInt(aoTokens[0]);
+				if (aoList.size() <= iOrdinal) {
+					return null;
+				}
 
-			if (aoList.size() <= iOrdinal) {
-				return null;
-			}
+				if (aoTokens.length == 1) {
+					return aoList.get(iOrdinal);
+				}
 
-			if (aoTokens.length == 1) {
-				return aoList.get(iOrdinal);
-			}
-
-			return getProperty(aoList.get(iOrdinal), sPath.substring(sPath.indexOf(".") + 1));
+				return getProperty(aoList.get(iOrdinal), sPath.substring(sPath.indexOf(".") + 1));
+			}			
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("JsonUtils.getProperty: ",  oEx);
 		}
 
 		return null;

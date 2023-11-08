@@ -8,6 +8,7 @@ import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.JupyterNotebook;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 public class JupyterNotebookRepository extends MongoRepository {
 
@@ -27,7 +28,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 
 			return true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("JupyterNotebookRepository.insertJupyterNotebook: error", oEx);
 		}
 
 		return false;
@@ -47,7 +48,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, JupyterNotebook.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("JupyterNotebookRepository.getJupyterNotebook: error", oEx);
 		}
 
 		return  null;
@@ -67,7 +68,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 				return s_oMapper.readValue(sJSON, JupyterNotebook.class);
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("JupyterNotebookRepository.getJupyterNotebookByCode: error", oEx);
 		}
 
 		return  null;
@@ -89,7 +90,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 
 			if (oResult.getModifiedCount() == 1) return  true;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("JupyterNotebookRepository.updateJupyterNotebook: error", oEx);
 		}
 
 		return  false;
@@ -112,7 +113,7 @@ public class JupyterNotebookRepository extends MongoRepository {
 				}
 			}
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("JupyterNotebookRepository.deleteJupyterNotebook: error", oEx);
 		}
 
 		return  false;

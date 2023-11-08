@@ -66,7 +66,7 @@ public class EcoStressRepository extends MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemList: error", oEx);
 		}
 
 		return aoReturnList;
@@ -75,8 +75,6 @@ public class EcoStressRepository extends MongoRepository {
 	private String wasdiQueryToMongo(Double dWest, Double dNorth, Double dEast, Double dSouth, String sService,
 			Long lDateFrom, Long lDateTo, int iRelativeOrbit, String sDayNightFlag) {
 		String sCoordinates = "[ [" +dWest + ", " + dNorth + "], [" + dWest +", " + dSouth + "], [" + dEast + ", " + dSouth + "] , [" +  dEast + ", " + dNorth + "], [" +dWest + ", " + dNorth + "] ]";
-
-		System.out.println(sCoordinates);
 
 		String sQuery = 
 				"   {\r\n" + 
@@ -128,14 +126,12 @@ public class EcoStressRepository extends MongoRepository {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
 
-		System.out.println(sQuery);
-
 		try {
 			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection).find(Document.parse(sQuery)).skip(iOffset).limit(iLimit);
 
 			fillList(aoReturnList, oWSDocuments, EcoStressItemForReading.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItemList: error", oEx);
 		}
 
 		return aoReturnList;
@@ -160,7 +156,7 @@ public class EcoStressRepository extends MongoRepository {
 			}
 
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.getEcoStressItem: error", oEx);
 		}
 
 		return  null;
@@ -171,14 +167,12 @@ public class EcoStressRepository extends MongoRepository {
 		
 		String sQuery = wasdiQueryToMongo(dWest, dNorth, dEast, dSouth, sService, lDateFrom, lDateTo, iRelativeOrbit, sDayNightFlag);
 
-		System.out.println(sQuery);
-
 		try {
 			long lCount = getCollection(m_sThisCollection).countDocuments(Document.parse(sQuery));
 
 			return lCount;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("EcoStressRepository.countItems: error", oEx);
 		}
 
 		return -1;

@@ -92,10 +92,9 @@ public class ZipStreamingOutput implements StreamingOutput {
 			//oZipOutputStream.flush();
 			oZipOutputStream.close();
 			WasdiLog.debugLog("ZipStreamingOutput.write: ZipOutputStream closed");
-		} catch (Exception e) {
-			WasdiLog.debugLog("ZipStreamingOutput.write: exception caught:");
-			WasdiLog.debugLog("ZipStreamingOutput.write: "+e.getMessage() );
-			e.printStackTrace();
+		} 
+		catch (Exception e) {
+			WasdiLog.errorLog("ZipStreamingOutput.write:  error ", e);
 		} finally {
 			// Flush output
 			if( oOutputStream!=null ) {

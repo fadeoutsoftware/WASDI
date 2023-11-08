@@ -5,6 +5,7 @@ import java.io.File;
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * WASDI Paths Config
@@ -48,10 +49,6 @@ public class PathsConfig {
 	 * Geoserver data dir
 	 */
 	public String geoserverDataDir;
-	/**
-	 * Matlab runtime path
-	 */
-	public String matlabRuntimePath;
 	/**
 	 * Sen 2 Core bin path
 	 */
@@ -99,8 +96,9 @@ public class PathsConfig {
     public static String getWorkspacePath(BaseParameter oParameter) {
         try {
             return getWorkspacePath(oParameter, getWasdiBasePath());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } 
+        catch (Exception e) {
+        	WasdiLog.errorLog("PathsConfig.getWorkspacePath: error", e);
             return getWorkspacePath(oParameter, "/data/wasdi");
         }
     }
@@ -218,5 +216,25 @@ public class PathsConfig {
         String sStylePath =getWasdiBasePath();
         sStylePath += "styles" + File.separator;
         return sStylePath;
+	}
+	
+	/**
+	 * Get the full path of a parameter
+	 * @param sParameterObjId
+	 * @return
+	 */
+	public static String getParameterPath(String sParameterObjId) {
+		
+		if (Utils.isNullOrEmpty(sParameterObjId)) return "";
+		
+		String sParametersPath = WasdiConfig.Current.paths.serializationPath;
+		
+		if (!sParametersPath.endsWith(File.separator)) {
+			sParametersPath = sParametersPath + File.separator;
+		}		
+		
+		sParametersPath = sParametersPath + sParameterObjId;
+		
+		return sParametersPath;
 	}
 }

@@ -268,9 +268,14 @@ public class ProcessorParametersTemplateResource {
 			ProcessorParametersTemplate oTemplate = oProcessorParametersTemplateRepository.getProcessorParametersTemplateByTemplateId(sTemplateId);
 
 			ProcessorParametersTemplateDetailViewModel oDetailViewModel = getDetailViewModel(oTemplate);
-			oDetailViewModel.setReadOnly(!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, sTemplateId));
-
-			return Response.ok(oDetailViewModel).build();			
+			
+			if (oDetailViewModel!=null) {
+				oDetailViewModel.setReadOnly(!PermissionsUtils.canUserWriteProcessorParametersTemplate(sUserId, sTemplateId));
+				return Response.ok(oDetailViewModel).build();
+			}
+			else {
+				return Response.serverError().build();
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("ProcessorParametersTemplateResource.getProcessorParameterTemplateById: error ", oEx);

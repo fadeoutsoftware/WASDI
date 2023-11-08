@@ -12,6 +12,7 @@ import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * Created by p.campanella on 17/11/2016.
@@ -35,7 +36,7 @@ public class PublishedBandsRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.insertPublishedBand: exception ", oEx);
         }
 
         return false;
@@ -65,7 +66,7 @@ public class PublishedBandsRepository extends MongoRepository {
 
             return oPublishedBand;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.getPublishedBand: exception ", oEx);
         }
 
         return  null;
@@ -86,7 +87,7 @@ public class PublishedBandsRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, PublishedBand.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.getPublishedBandsByProductName: exception ", oEx);
         }
 
         return  aoReturnList;
@@ -106,7 +107,7 @@ public class PublishedBandsRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, PublishedBand.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.getList: exception ", oEx);
         }
 
         return  aoReturnList;
@@ -131,7 +132,7 @@ public class PublishedBandsRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.deleteByProductName: exception ", oEx);
         }
 
         return 0;
@@ -159,7 +160,7 @@ public class PublishedBandsRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("PublishedBandsRepository.deleteByProductNameLayerId: exception ", oEx);
         }
 
         return 0;

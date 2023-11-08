@@ -9,6 +9,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 
 import wasdi.shared.business.AppCategory;
+import wasdi.shared.utils.log.WasdiLog;
 
 /**
  * AppCategory Repository
@@ -36,7 +37,7 @@ public class AppsCategoriesRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments, AppCategory.class);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+            WasdiLog.errorLog("AppsCategoriesRepository.getCategories: error", oEx);
         }
 
         return aoReturnList;
@@ -53,7 +54,7 @@ public class AppsCategoriesRepository extends MongoRepository {
         	
         	return oAppCategory;
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("AppsCategoriesRepository.getCategoryById: error", oEx);
         }
 
         return null;
@@ -68,7 +69,7 @@ public class AppsCategoriesRepository extends MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("AppsCategoriesRepository.insertCategory: error", oEx);
         }
 
         return false;
@@ -89,7 +90,7 @@ public class AppsCategoriesRepository extends MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("AppsCategoriesRepository.deleteCategory: error", oEx);
         }
 
         return  false;

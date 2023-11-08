@@ -462,8 +462,7 @@ public class QueryExecutorGPM extends QueryExecutor {
 
 			return aoResults;
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			WasdiLog.debugLog("QueryExecutorGPM.executeAndRetrieve: error " + oEx.toString());
+			WasdiLog.errorLog("QueryExecutorGPM.executeAndRetrieve: error ", oEx);
 		}
 
 		return null;

@@ -15,6 +15,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.processors.Processor;
+import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
@@ -38,7 +39,7 @@ public class ProcessorRepository extends  MongoRepository {
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.insertProcessor :error ", oEx);
         }
 
         return false;
@@ -59,7 +60,7 @@ public class ProcessorRepository extends  MongoRepository {
             	return s_oMapper.readValue(sJSON,Processor.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.getProcessor :error ", oEx);
         }
 
         return  null;
@@ -79,7 +80,7 @@ public class ProcessorRepository extends  MongoRepository {
             	return s_oMapper.readValue(sJSON,Processor.class);
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.getProcessorByName :error ", oEx);
         }
 
         return  null;
@@ -102,7 +103,7 @@ public class ProcessorRepository extends  MongoRepository {
             if (oResult.getModifiedCount()==1) return  true;
         }
         catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.updateProcessor :error ", oEx);
         }
 
         return  false;
@@ -123,7 +124,7 @@ public class ProcessorRepository extends  MongoRepository {
             fillList(aoReturnList, oWSDocuments, Processor.class);
             
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.getProcessorByUser :error ", oEx);
         }
 
         return aoReturnList;
@@ -152,7 +153,7 @@ public class ProcessorRepository extends  MongoRepository {
 
 			fillList(aoReturnList, oWSDocuments, Processor.class);
 		} catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("ProcessorRepository.findProcessorsByPartialName :error ", oEx);
 		}
 
 		return aoReturnList;
@@ -172,10 +173,10 @@ public class ProcessorRepository extends  MongoRepository {
             Processor oProcessor = s_oMapper.readValue(sJSON,Processor.class);
             iPort = oProcessor.getPort();
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.getNextProcessorPort :error ", oEx);
         }
 
-        if (iPort == -1) iPort = 5000;
+        if (iPort == -1) iPort = WasdiConfig.Current.dockers.processorsInternalPort;
         else iPort++;
         
         return iPort;
@@ -203,7 +204,7 @@ public class ProcessorRepository extends  MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.deleteProcessor :error ", oEx);
         }
 
         return  false;
@@ -228,7 +229,7 @@ public class ProcessorRepository extends  MongoRepository {
             }
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.deleteProcessorByUser :error ", oEx);
         }
 
         return 0;
@@ -256,7 +257,7 @@ public class ProcessorRepository extends  MongoRepository {
         	fillList(aoReturnList, oWSDocuments, Processor.class);
         	
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("ProcessorRepository.getDeployedProcessors :error ", oEx);
         }
 
         return aoReturnList;
@@ -312,7 +313,7 @@ public class ProcessorRepository extends  MongoRepository {
 			}
 	
 		} catch (Exception oE) {
-			WasdiLog.debugLog("ProcessorRepository.countProcessors( " + bInAppStoreOnly + ", " + bPublicOnly + " ): " + oE);
+			WasdiLog.errorLog("ProcessorRepository.countProcessors( " + bInAppStoreOnly + ", " + bPublicOnly + " ): ", oE);
 		}
 		return -1l;
 	}

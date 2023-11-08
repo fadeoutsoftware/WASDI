@@ -43,6 +43,12 @@ public class ProcessorParameter extends BaseParameter {
 	 */
 	private boolean isOGCProcess = false;
 	
+	/**
+	 * Container name of the processor.
+	 * This property is used by the engine, and is NOT filled by the web-server
+	 */
+	private String containerName = "";
+	
 	public String getProcessorType() {
 		return processorType;
 	}
@@ -98,6 +104,12 @@ public class ProcessorParameter extends BaseParameter {
 		}
 		
 		return LauncherOperations.RUNPROCESSOR.name();
+	}
+	public String getContainerName() {
+		return containerName;
+	}
+	public void setContainerName(String containerName) {
+		this.containerName = containerName;
 	}
 	
 }

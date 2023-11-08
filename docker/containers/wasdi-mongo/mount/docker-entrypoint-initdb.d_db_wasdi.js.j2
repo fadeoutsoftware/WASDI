@@ -1,15 +1,35 @@
-dbAdmin = db.getSiblingDB('admin');
-
-dbAdmin.auth(
+print('[WASDI] Authenticating as administrator...')
+oCurrentDatabase = db.getSiblingDB('admin');
+oCurrentDatabase.auth(
     {
         user: _getEnv('MONGO_INITDB_ROOT_USERNAME'),
         pwd: _getEnv('MONGO_INITDB_ROOT_PASSWORD')
     }
 );
+print('[WASDI] OK')
 
-dbWasdi = db.getSiblingDB('wasdi');
+print('[WASDI] Creating the database user...')
+oCurrentDatabase = db.getSiblingDB(_getEnv('sWasdiMongoWasdiDatabaseName'));
+oCurrentDatabase.createUser(
+    {
+        user: _getEnv('sWasdiMongoWasdiUserName'),
+        pwd: _getEnv('sWasdiMongoWasdiUserPassword'),
+        roles: [
+            {
+                role: 'readWrite',
+                db: _getEnv('sWasdiMongoWasdiDatabaseName')
+            }
+        ]
+    }
+);
+print('[WASDI] OK')
 
-dbWasdi.counter.createIndex(
+print('[WASDI] Creating an empty collection to initialize the database...')
+oCurrentDatabase.createCollection('_initialized');
+print('[WASDI] OK')
+
+print('[WASDI] Creating the indexes...')
+oCurrentDatabase.counter.createIndex(
     {
         'sequence': 1
     },
@@ -17,8 +37,7 @@ dbWasdi.counter.createIndex(
         name: 'idx_sequence_001'
     }
 );
-
-dbWasdi.processorlog.createIndex(
+oCurrentDatabase.processorlog.createIndex(
     {
         'processWorkspaceId': 1
     },
@@ -26,8 +45,7 @@ dbWasdi.processorlog.createIndex(
         name: 'idx_processWorkspaceId_001'
     }
 );
-
-dbWasdi.processorsharing.createIndex(
+oCurrentDatabase.processorsharing.createIndex(
     {
         'userId': 1,
         'processorId': 1
@@ -36,8 +54,7 @@ dbWasdi.processorsharing.createIndex(
         name: 'idx_userId_processorId_001'
     }
 );
-
-dbWasdi.processworkpsace.createIndex(
+oCurrentDatabase.processworkpsace.createIndex(
     {
         'productName': 1
     },
@@ -45,8 +62,7 @@ dbWasdi.processworkpsace.createIndex(
         name: 'idx_productName_001'
     }
 );
-
-dbWasdi.processworkpsace.createIndex(
+oCurrentDatabase.processworkpsace.createIndex(
     {
         'processObjId': 1
     },
@@ -54,8 +70,7 @@ dbWasdi.processworkpsace.createIndex(
         name: 'idx_processObjId_001'
     }
 );
-
-dbWasdi.processworkpsace.createIndex(
+oCurrentDatabase.processworkpsace.createIndex(
     {
         'status': 1
     },
@@ -63,8 +78,7 @@ dbWasdi.processworkpsace.createIndex(
         name: 'idx_status_001'
     }
 );
-
-dbWasdi.processworkpsace.createIndex(
+oCurrentDatabase.processworkpsace.createIndex(
     {
         'workspaceId': 1
     },
@@ -72,8 +86,7 @@ dbWasdi.processworkpsace.createIndex(
         name: 'idx_workspaceId_001'
     }
 );
-
-dbWasdi.reviews.createIndex(
+oCurrentDatabase.reviews.createIndex(
     {
         'processorId': 1
     },
@@ -81,8 +94,7 @@ dbWasdi.reviews.createIndex(
         name: 'idx_processorId_001'
     }
 );
-
-dbWasdi.sessions.createIndex(
+oCurrentDatabase.sessions.createIndex(
     {
         'sessionId': 1
     },
@@ -90,8 +102,7 @@ dbWasdi.sessions.createIndex(
         name: 'idx_sessionId_001'
     }
 );
-
-dbWasdi.sessions.createIndex(
+oCurrentDatabase.sessions.createIndex(
     {
         'lastTouch': 1,
         'userId': 1
@@ -100,8 +111,7 @@ dbWasdi.sessions.createIndex(
         name: 'idx_lastTouch_userId_001'
     }
 );
-
-dbWasdi.users.createIndex(
+oCurrentDatabase.users.createIndex(
     {
         'userId': 1
     },
@@ -109,8 +119,7 @@ dbWasdi.users.createIndex(
         name: 'idx_userId_001'
     }
 );
-
-dbWasdi.workspaces.createIndex(
+oCurrentDatabase.workspaces.createIndex(
     {
         'workspaceId': 1
     },
@@ -118,8 +127,7 @@ dbWasdi.workspaces.createIndex(
         name: 'idx_workspaceId_001'
     }
 );
-
-dbWasdi.workspacessharing.createIndex(
+oCurrentDatabase.workspacessharing.createIndex(
     {
         'workspaceId': 1
     },
@@ -127,31 +135,4 @@ dbWasdi.workspacessharing.createIndex(
         name: 'idx_workspaceId_001'
     }
 );
-
-dbWasdi.createUser(
-    {
-        user: _getEnv('sWasdiContainerMongoMainDatabaseUsername'),
-        pwd: _getEnv('sWasdiContainerMongoMainDatabasePassword'),
-        roles: [
-            {
-                role: 'readWrite',
-                db: 'wasdi'
-            }
-        ]
-    }
-);
-{% if sWasdiContainerMongoMainDatabaseBackupUsername != "" and sWasdiContainerMongoMainDatabaseBackupPassword != "" %}
-
-dbAdmin.createUser(
-    {
-        user: _getEnv('sWasdiContainerMongoMainDatabaseBackupUsername'),
-        pwd: _getEnv('sWasdiContainerMongoMainDatabaseBackupPassword'),
-        roles: [
-            {
-                role: 'backup',
-                db: 'admin'
-            }
-        ]
-    }
-);
-{% endif %}
+print('[WASDI] OK')

@@ -19,8 +19,8 @@ public class CSharpProcessorEngine extends DockerProcessorEngine {
 	}
 
 	@Override
-	protected IPackageManager getPackageManager(String sIp, int iPort) {
-		throw new UnsupportedOperationException("The functionality is not yet implemented for this processor engine!");
+	protected IPackageManager getPackageManager(String sUrl) {
+		return null;
 	}
 
 }

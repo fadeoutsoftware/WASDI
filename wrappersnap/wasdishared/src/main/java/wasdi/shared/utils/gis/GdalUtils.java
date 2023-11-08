@@ -1,15 +1,18 @@
 package wasdi.shared.utils.gis;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 
+import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.settings.MosaicSetting;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
+import wasdi.shared.utils.runtime.RunTimeUtils;
+import wasdi.shared.utils.runtime.ShellExecReturn;
 
 /**
  * Wrapper of GDAL utils
@@ -40,12 +43,11 @@ public class GdalUtils {
                 }
             }
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	WasdiLog.errorLog("GdalUtils.adjustGdalFolder: error", oEx);
         }
 
 
         return sGdalCommand;
-
     }
     
     /**
@@ -89,22 +91,8 @@ public class GdalUtils {
 			asArgs.add("-wkt_format");
 			asArgs.add("WKT1");
 			
-			// Execute the process
-			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess;
-			
-			oProcessBuidler.redirectErrorStream(true);
-			oProcess = oProcessBuidler.start();
-			
-			// Get the result
-			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-			String sOutput = "";
-			String sLine;
-			while ((sLine = oReader.readLine()) != null)
-				sOutput += sLine + "\n";
-			
-			// Wait for the process to finish
-			oProcess.waitFor();
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			String sOutput = oShellExecReturn.getOperationLogs();
 			
 			try {
 				// Create the return object
@@ -254,14 +242,19 @@ public class GdalUtils {
     	return null;
     }
     
+    /**
+     * Converts an input file in the output file with WGS84 Projection
+     * @param sInputFile File to convert
+     * @param sOutputFile Converted file
+     */
     public static void convertToWGS84(String sInputFile, String sOutputFile) {
     	convertToWGS84(sInputFile, sOutputFile, null);
     }
     
     /**
      * Converts an input file in the output file with WGS84 Projection
-     * @param sInputFile
-     * @param sOutputFile
+     * @param sInputFile File to convert
+     * @param sOutputFile Converted file
      * @param sInputSrs Input source spatial reference. If not specified the SRS found in the input dataset will be used
      */
     public static void convertToWGS84(String sInputFile, String sOutputFile, String sInputSrs) {
@@ -285,25 +278,201 @@ public class GdalUtils {
     		asArgs.add(sInputFile);
     		asArgs.add(sOutputFile);
     		
-    		ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
-    		Process oProcess;
-    		
-    		oProcessBuidler.redirectErrorStream(true);
-    		oProcess = oProcessBuidler.start();
-    		String sLine = "";
-    		
-    		BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
-    		while ((sLine = oReader.readLine()) != null)
-    			WasdiLog.debugLog("GdalUtils.convertToWGS84 [gdal]: " + sLine);
-    		
-    		oProcess.waitFor();    	    		
+    		ShellExecReturn oReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+
+    		WasdiLog.debugLog("GdalUtils.convertToWGS84 [gdal]: " + oReturn.getOperationLogs());
     	}
     	catch (Exception oEx) {
     		WasdiLog.debugLog("GdalUtils.convertToWGS84: exception " + oEx.toString());
 		}
     }
     
+    /**
+     * Get the (here static) WKT description of the Molleweide projection
+     * @return
+     */
     public static String getMollweideProjectionDescription() {
     	return "PROJCS[\"World_Mollweide\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"WGS_1984\",SPHEROID[\"WGS_1984\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],PROJECTION[\"Mollweide\"],PARAMETER[\"False_Easting\",0],PARAMETER[\"False_Northing\",0],PARAMETER[\"Central_Meridian\",0],UNIT[\"Meter\",1],AUTHORITY[\"EPSG\",\"54009\"]]";
     }
+    
+    /**
+     * Run a GDAL Parameter
+     * @param oMosaicParameter
+     * @return
+     */
+	public static Boolean runGDALMosaic(MosaicParameter oMosaicParameter) {
+		
+		MosaicSetting oMosaicSetting = (MosaicSetting) oMosaicParameter.getSettings();
+		
+		// Check parameter
+		if (oMosaicSetting == null) {
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: parameter is null, return false");
+			return false;
+		}
+		
+		if (oMosaicSetting.getSources() == null) {
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: sources are null, return false");
+			return false;
+		}
+		
+		if (oMosaicSetting.getSources().size() <= 0) {
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: sources are empty, return false");
+			return false;
+		}
+		
+		String sOuptutFile = oMosaicParameter.getDestinationProductName();
+		String sOutputFileFormat = "GeoTIFF";
+		
+		if (!Utils.isNullOrEmpty(oMosaicSetting.getOutputFormat())) {
+			sOutputFileFormat = oMosaicSetting.getOutputFormat();
+		}
+		
+		try {
+			String sGdalCommand = "gdal_merge.py";
+			
+			String sOutputFormat = snapFormat2GDALFormat(sOutputFileFormat);
+			Boolean bVrt = false;
+			
+			if (sOutputFormat.equals("VRT")) {
+				sGdalCommand = "gdalbuildvrt";
+				bVrt = true;
+			}
+			
+			sGdalCommand = GdalUtils.adjustGdalFolder(sGdalCommand);
+			
+			ArrayList<String> asArgs = new ArrayList<String>();
+			asArgs.add(sGdalCommand);
+			
+			if (!bVrt) {
+				
+				WasdiLog.debugLog("Virtual mosaic - set params for gdal_merge.py");
+				
+				// Output file
+				asArgs.add("-o");
+				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
+				
+				// Output format
+				asArgs.add("-of");
+				asArgs.add(sOutputFormat);
+				
+				if (sOutputFormat.equals("GTiff")) {
+					asArgs.add("-co");
+					asArgs.add("COMPRESS=LZW");
+					
+					asArgs.add("-co");
+					asArgs.add("BIGTIFF=YES");
+				}
+				
+				// Set No Data for input 
+				if (oMosaicSetting.getInputIgnoreValue()!= null) {
+					asArgs.add("-n");
+					asArgs.add(""+oMosaicSetting.getInputIgnoreValue());				
+				}
+
+				if (oMosaicSetting.getNoDataValue() != null) {
+					asArgs.add("-a_nodata");
+					asArgs.add(""+oMosaicSetting.getNoDataValue());				
+
+					asArgs.add("-init");
+					asArgs.add(""+oMosaicSetting.getNoDataValue());				
+
+				}
+				
+				// Pixel Size
+				if (oMosaicSetting.getPixelSizeX()>0.0 && oMosaicSetting.getPixelSizeY()>0.0) {
+					asArgs.add("-ps");
+					asArgs.add(""+ oMosaicSetting.getPixelSizeX());
+					asArgs.add("" + oMosaicSetting.getPixelSizeY());
+				}				
+			}
+			else {
+				
+				WasdiLog.debugLog("Virtual mosaic - set params for gdalbuildvrt");
+				
+				// Set No Data for input 
+				if (oMosaicSetting.getInputIgnoreValue()!= null) {
+					asArgs.add("-srcnodata");
+					asArgs.add(""+oMosaicSetting.getInputIgnoreValue());				
+				}
+				
+				// Set no data for mosaics 
+				if (oMosaicSetting.getNoDataValue() != null) {
+					asArgs.add("-vrtnodata");
+					asArgs.add(""+oMosaicSetting.getNoDataValue());				
+					
+					// Could not find this param for vrt..
+					//asArgs.add("-init");
+					//asArgs.add(""+m_oMosaicSetting.getNoDataValue());
+				}
+				
+			
+				asArgs.add(PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
+			}
+						
+			// Get Base Path
+			String sWorkspacePath = PathsConfig.getWorkspacePath(oMosaicParameter);
+			
+			// for each product
+			for (int iProducts = 0; iProducts<oMosaicSetting.getSources().size(); iProducts ++) {
+				
+				// Get full path
+				String sProductFile = sWorkspacePath+oMosaicSetting.getSources().get(iProducts);
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: Adding input Product [" + iProducts +"] = " + sProductFile);
+				
+				asArgs.add(sProductFile);
+			}
+			
+			// Run the command
+			ShellExecReturn oShellExecReturn = RunTimeUtils.shellExec(asArgs, true, true, true, true);
+			
+			// Is there an output to log?
+			if (!Utils.isNullOrEmpty(oShellExecReturn.getOperationLogs())) {
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: logs = " + oShellExecReturn.getOperationLogs());
+			}
+			
+			File oOutputFile = new File(sWorkspacePath+sOuptutFile); 
+			
+			if (oOutputFile.exists()) {
+				// Done
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: created GDAL file = " + sOuptutFile);				
+			}
+			else {
+				// Error
+				WasdiLog.debugLog("Mosaic.runGDALMosaic: error creating mosaic = " + sOuptutFile);
+				return false;
+			}
+			
+		} 
+        catch (Throwable e) {
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: Exception generating output Product " + PathsConfig.getWorkspacePath(oMosaicParameter) + sOuptutFile);
+			WasdiLog.errorLog("Mosaic.runGDALMosaic: " + e.toString());
+			return false;
+		}
+
+		return true;		
+	}
+	
+	/**
+	 * Converts the names used by SNAP to define a file format to the 
+	 * equivalent name in GDAL
+	 * @param sFormatName Snap Format Name
+	 * @return GDAL Format Name
+	 */
+    public static String snapFormat2GDALFormat(String sFormatName) {
+
+        if (Utils.isNullOrEmpty(sFormatName)) {
+            return "";
+        }
+
+        switch (sFormatName) {
+            case "GeoTIFF":
+                return "GTiff";
+            case "BEAM-DIMAP":
+                return "DIMAP";
+            case "VRT":
+                return "VRT";
+            default:
+                return "GTiff";
+        }
+    }	
 }

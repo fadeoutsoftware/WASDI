@@ -34,9 +34,9 @@ the philosophy of safe programming is adopted as widely as possible, the lib wil
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
 the return statues
 
-Version 0.8.5.0
+Version 0.8.5.2
 
-Last Update: 23/10/2023
+Last Update: 03/11/2023
 
 Tested with: Python 3.7, Python 3.8, Python 3.9, Python 3.10
 
@@ -63,6 +63,7 @@ import os.path
 import inspect
 from datetime import datetime
 from enum import Enum
+import hashlib
 
 # Initialize "Members"
 
@@ -113,6 +114,8 @@ m_iRequestsTimeout = 2 * 60
 m_iUploadTimeout = 10 * 60
 # Local copy of the payload of the app
 m_sPayload = ""
+# True to enable the test of the checksum when determining when a file should be downloaded locally or not
+m_bEnableChecksumTest = False
 
 def printStatus():
     """Prints status
@@ -129,6 +132,7 @@ def printStatus():
     _log('[INFO] waspy.printStatus: base path: ' + str(getBasePath()))
     _log('[INFO] waspy.printStatus: download active: ' + str(getDownloadActive()))
     _log('[INFO] waspy.printStatus: upload active: ' + str(getUploadActive()))
+    _log('[INFO] waspy.printStatus: enable checksum: ' + str(getEnableChecksum()))
     _log('[INFO] waspy.printStatus: verbose: ' + str(getVerbose()))
     _log('[INFO] waspy.printStatus: param dict: ' + str(getParametersDict()))
     _log('[INFO] waspy.printStatus: proc id: ' + str(getProcId()))
@@ -136,6 +140,7 @@ def printStatus():
     _log('[INFO] waspy.printStatus: is on server: ' + str(getIsOnServer()))
     _log('[INFO] waspy.printStatus: is on external server: ' + str(getIsOnExternalServer()))
     _log('[INFO] waspy.printStatus: workspace base url: ' + str(getWorkspaceBaseUrl()))
+
     if m_bValidSession:
         _log('[INFO] waspy.printStatus: session is valid :-)')
     else:
@@ -543,6 +548,19 @@ def setUploadTimeout(iTimeout):
     global m_iUploadTimeout
     m_iUploadTimeout = iTimeout
 
+def setEnableChecksum(bEnableChecksum):
+    """
+    :param bEnableChecksum: true to enable the checksum verification to align remote files
+    """
+    global m_bEnableChecksumTest
+    m_bEnableChecksumTest = bEnableChecksum
+
+def getEnableChecksum():
+    """
+    Get the value of the Enable Checksum flag
+    """
+    global m_bEnableChecksumTest
+    return m_bEnableChecksumTest
 
 def refreshParameters():
     """
@@ -1212,38 +1230,51 @@ def getFullProductPath(sProductName):
     global m_bDownloadActive
     global m_sWorkspaceOwner
 
-    sFullPath = getBasePath()
-
     # Normalize the path and extract the name
     sProductName = os.path.basename(os.path.normpath(sProductName))
 
+    # Get the full path
     sFullPath = _internalGetPath(sProductName)
 
-    # If we are on the local PC
-    if getIsOnServer() is False:
-        # If the download is active
-        if m_bDownloadActive is True:
-            # If there is no local file
-            if os.path.isfile(sFullPath) is False:
-                # If the file exists on server
-                if fileExistsOnWasdi(sProductName) is True:
-                    # Download The File from WASDI
-                    print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
-                    _downloadFile(sProductName)
-                    print('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
+    # Do we need to download it?
+    bDownloadFileFromServer = False
+
+    if os.path.isfile(sFullPath):
+        # There is a local file: do we need to look the checksum?
+        if getEnableChecksum():
+            # Yes
+            aoProperties = getProductProperties(sProductName)
+            if aoProperties is not None:
+                if "checksum" in aoProperties:
+                    sLocalChecksum = getMD5Checksum(sFullPath)
+                    sRemoteChecksum = aoProperties["checksum"]
+                    if sLocalChecksum != sRemoteChecksum:
+                        wasdiLog(
+                            '[INFO] waspy.getFullProductPath: Local file exists but looks different from the on in the server')
+                        bDownloadFileFromServer = True
     else:
-        try:
-            # We are in the server and there is no local file
-            if os.path.isfile(sFullPath) is False:
+        # If we are on the local PC
+        if getIsOnServer() is False:
+            # If the download is active
+            if m_bDownloadActive is True:
                 # If the file exists on server
                 if fileExistsOnWasdi(sProductName) is True:
-                    # Download The File from WASDI
-                    wasdiLog(
-                        '[WARNING] waspy.getFullProductPath: WASDI FILE ON ANOTHER NODE: START DOWNLOAD... PLEASE WAIT')
-                    _downloadFile(sProductName)
-                    wasdiLog('[WARNING] waspy.getFullProductPath: DONWLOAD COMPLETED')
-        except:
-            wasdiLog('[ERROR] waspy.getFullProductPath: error downloading the file from the workspace node')
+                    wasdiLog('[INFO] waspy.getFullProductPath: Local file does not exists')
+                    bDownloadFileFromServer = True
+        else:
+            try:
+                # If the file exists on server
+                if fileExistsOnWasdi(sProductName) is True:
+                    wasdiLog('[WARNING] waspy.getFullProductPath: WASDI FILE ON ANOTHER NODE: START DOWNLOAD... PLEASE WAIT')
+                    bDownloadFileFromServer = True
+            except:
+                wasdiLog('[ERROR] waspy.getFullProductPath: error downloading the file from the workspace node')
+
+    if bDownloadFileFromServer:
+        # Download The File from WASDI
+        wasdiLog('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
+        _downloadFile(sProductName)
+        wasdiLog('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
 
     return sFullPath
 
@@ -3662,7 +3693,9 @@ def _loadConfig(sConfigFilePath):
             if 'SESSIONID' in oJson:
                 setSessionId(oJson['SESSIONID'])               
             if 'MYPROCID' in oJson:
-                setProcId(oJson['MYPROCID']) 
+                setProcId(oJson['MYPROCID'])
+            if 'ENABLECHECKSUM' in oJson:
+                setEnableChecksum(bool(oJson["ENABLECHECKSUM"]))
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -4403,7 +4436,7 @@ def getProductBandNames(sFileName):
         Gets the list of bands of a file as strings
 
         :param sFileName: name of the file to query for list of bands
-        :return: Bounding Box if available as a String comma separated in form SOUTH,WEST,EST,NORTH
+        :return: Array of strings containing the names of the bands
         """
 
     sUrl = getBaseUrl()
@@ -4439,6 +4472,57 @@ def getProductBandNames(sFileName):
         return []
 
     return []
+
+def getProductProperties(sFileName):
+    """
+        Gets the properties of a product
+
+        :param sFileName: name of the file to query for properties
+        :return: An object with properties: String fileName; String friendlyName; long lastUpdateTimestampMs; String checksum; String style. None in case of error.
+    """
+
+    sUrl = getWorkspaceBaseUrl()
+    sUrl += "/catalog/properties?file="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
+
+    if getEnableChecksum():
+        sUrl += "&getchecksum=true"
+
+    asHeaders = _getStandardHeaders()
+
+    try:
+        oResponse = requests.get(sUrl, headers=asHeaders, timeout=m_iRequestsTimeout)
+    except Exception as oEx:
+        wasdiLog("[ERROR] waspy.getProductProperties: there was an error contacting the API " + str(oEx))
+        return None
+
+    try:
+        if oResponse is None:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get properties for product')
+        elif oResponse.ok is not True:
+            wasdiLog('[ERROR] waspy.getProductProperties: cannot get product properties, server returned: ' + str(oResponse.status_code) + '  ')
+        else:
+            oJsonResponse = oResponse.json()
+            return oJsonResponse
+    except:
+        return None
+
+    return None
+
+def getMD5Checksum(sFileName):
+    """
+    Compute the MD5 Checksum of a file
+    """
+    oMd5Hash = hashlib.md5()
+    with open(sFileName, 'rb') as oFile:
+
+        while oChunk := oFile.read(4096):
+            oMd5Hash.update(oChunk)
+
+    return oMd5Hash.hexdigest()
+
 
 class ChartType(Enum):
     line = "line"

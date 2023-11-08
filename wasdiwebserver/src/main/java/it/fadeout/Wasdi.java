@@ -22,14 +22,12 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 
 import org.apache.commons.net.io.Util;
-//import org.esa.snap.core.util.SystemUtils;
-//import org.esa.snap.runtime.Config;
-//import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
 
 import it.fadeout.providers.JerseyMapperProvider;
+import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
@@ -65,6 +63,8 @@ import wasdi.shared.viewmodels.monitoring.MetricsEntry;
 import wasdi.shared.viewmodels.monitoring.Timestamp;
 import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
+import wasdi.shared.viewmodels.users.RegistrationInfoViewModel;
+import wasdi.shared.viewmodels.users.UserViewModel;
 
 /**
  * Main Class of the WASDI Web Server.
@@ -199,37 +199,6 @@ public class Wasdi extends ResourceConfig {
 			WasdiLog.errorLog("Configure Rabbit exception " + oEx.toString());
 		}
 		
-		// Initialize Snap
-		WasdiLog.debugLog("-------initializing snap...");
-
-//		try {
-//			String snapAuxPropPath = WasdiConfig.Current.snap.auxPropertiesFile;
-//			WasdiLog.debugLog("snap aux properties file: " + snapAuxPropPath);
-//			Path propFile = Paths.get(snapAuxPropPath);
-//			Config.instance("snap.auxdata").load(propFile);
-//			Config.instance().load();
-//
-//			SystemUtils.init3rdPartyLibs(null);
-//			SystemUtils.LOG.setLevel(Level.ALL);
-//
-//			if (WasdiConfig.Current.snap.webLogActive) {
-//				String sSnapLogFolder = WasdiConfig.Current.snap.webLogFile;
-//
-//				FileHandler oFileHandler = new FileHandler(sSnapLogFolder, true);
-//				oFileHandler.setLevel(Level.ALL);
-//				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-//				oFileHandler.setFormatter(oSimpleFormatter);
-//				SystemUtils.LOG.setLevel(Level.ALL);
-//				SystemUtils.LOG.addHandler(oFileHandler);
-//			}
-//			
-//			Engine.start(false);
-//
-//		} catch (Throwable oEx) {
-//			WasdiLog.errorLog("Configure SNAP " + oEx.toString());
-//		}
-//		
-		
 		// Each node must have a special workspace for depoy operations: here it check if exists: if not it will be created
 		WasdiLog.debugLog("-------initializing node local workspace...");
 		
@@ -313,7 +282,6 @@ public class Wasdi extends ResourceConfig {
 			// Check The Session with Keycloak
 			String sUserId = null;
 			
-			
 			try  {
 				//introspect
 				String sPayload = "token=" + sSessionId;
@@ -327,18 +295,42 @@ public class Wasdi extends ResourceConfig {
 				}
 				if(null!=oJSON) {
 					sUserId = oJSON.optString("preferred_username", null);
-				}				
+				}
 			}
 			catch (Exception oKeyEx) {
-				WasdiLog.errorLog("WAsdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
+				WasdiLog.errorLog("Wasdi.getUserFromSession: exception contacting keycloak: " + oKeyEx.toString());
 			}
-			
-
 
 			if(!Utils.isNullOrEmpty(sUserId)) {
 				UserRepository oUserRepo = new UserRepository();
 				oUser = oUserRepo.getUser(sUserId);
-			} else {
+				
+				if( oUser == null ) {
+					
+					WasdiLog.warnLog("Wasdi.getUserFromSession: the session is valid but the user does not exists, add it");
+					
+					AuthResource oAuthResource = new AuthResource();
+					
+					RegistrationInfoViewModel oRegistrationInfoViewModel = new RegistrationInfoViewModel();
+					oRegistrationInfoViewModel.setUserId(sUserId);
+					PrimitiveResult oRegistrationResult = oAuthResource.userRegistration(oRegistrationInfoViewModel);
+
+					if (oRegistrationResult==null) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+					
+					if (oRegistrationResult.getBoolValue()==null) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+
+					if (oRegistrationResult.getBoolValue()==false) {
+						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+					}
+					
+					oUser = oUserRepo.getUser(sUserId);
+				}
+			} 
+			else {
 				//check session against DB
 				
 				SessionRepository oSessionRepository = new SessionRepository();
@@ -349,15 +341,17 @@ public class Wasdi extends ResourceConfig {
 				} else {
 					sUserId = oUserSession.getUserId();
 				}
+				
 				if(!Utils.isNullOrEmpty(sUserId)){
 					UserRepository oUserRepository = new UserRepository();
 					oUser = oUserRepository.getUser(sUserId);
-				} else {
+				} 
+				else {
 					return null;
 				}
 			}
 		} catch (Exception oE) {
-			WasdiLog.errorLog("WAsdi.getUserFromSession: something bad happened: " + oE);
+			WasdiLog.errorLog("Wasdi.getUserFromSession: something bad happened: " + oE);
 		}
 
 		return oUser;
@@ -554,8 +548,7 @@ public class Wasdi extends ResourceConfig {
 		            return oPrimitiveResult;
 		        } 
 		        catch (Exception oEx) {
-		            oEx.printStackTrace();
-					WasdiLog.debugLog("Wasdi.runProcess: exception " + oEx);
+					WasdiLog.errorLog("Wasdi.runProcess: exception ", oEx);
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;				
@@ -723,7 +716,7 @@ public class Wasdi extends ResourceConfig {
 							// 	opens an output stream to save into file
 							Util.copyStream(oInputStream, oOutputStream);
 					}catch (Exception oEx) {
-						oEx.printStackTrace();
+						WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 					}
 					return sOutputFilePath;
 				} else {
@@ -733,14 +726,14 @@ public class Wasdi extends ResourceConfig {
 				}
  				
 			} catch (Exception oEx) {
-				oEx.printStackTrace();
+				WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 				return "";
 			}
 			
 			
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			WasdiLog.errorLog("Wasdi.downloadWorkflow: exception ", oEx);
 			return "";
 		}		
 	}	
@@ -879,7 +872,7 @@ public class Wasdi extends ResourceConfig {
 				}
 
 				long lMillisPassesSinceTheLastMetricsEntry = BigDecimal.valueOf(Utils.nowInMillis()).subtract(BigDecimal.valueOf(oTimestampInMillis)).longValue();
-				long lMaximumAllowedAgeOfInformation = WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds * 1000;
+				long lMaximumAllowedAgeOfInformation = ((long)WasdiConfig.Current.loadBalancer.metricsMaxAgeSeconds) * 1000L;
 
 				boolean bMetricsEntryTooOld = lMillisPassesSinceTheLastMetricsEntry > lMaximumAllowedAgeOfInformation;
 

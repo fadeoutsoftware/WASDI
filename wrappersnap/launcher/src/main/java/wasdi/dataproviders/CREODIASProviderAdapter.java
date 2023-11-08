@@ -237,7 +237,12 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 					}
 				}
 
-			} catch (Exception oE) {
+			} 
+			catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
+				WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: current thread was interrupted " , oEx);
+			}
+			catch (Exception oE) {
 				WasdiLog.errorLog("CREODIASProviderAdapter.ExecuteDownloadFile: could not check order status due to: " + oE);
 				return null;
 			}

@@ -7,6 +7,9 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.log.WasdiLog;
 
 public class CMProviderAdapter extends ProviderAdapter {
+	
+	private static final String s_sSizeParam = "&size=";
+	private static final String s_sProductParam = "&product=";
 
 	public CMProviderAdapter() {
 		m_sDataProviderCode = "COPERNICUSMARINE";
@@ -31,8 +34,8 @@ public class CMProviderAdapter extends ProviderAdapter {
 			return 0l;
 		}
 
-		if (sFileURL.contains("&size=")) {
-			String sSize = sFileURL.substring(sFileURL.indexOf("&size=") + 6);
+		if (sFileURL.contains(s_sSizeParam)) {
+			String sSize = sFileURL.substring(sFileURL.indexOf(s_sSizeParam) + 6);
 
 			return Long.valueOf(sSize);
 		}
@@ -55,12 +58,12 @@ public class CMProviderAdapter extends ProviderAdapter {
 			return null;
 		}
 
-		if (!sFileURL.contains("&size=") || !sFileURL.contains("&size=") || !sFileURL.contains("&size=")) {
+		if (!sFileURL.contains(s_sSizeParam)) {
 			return null;
 		}
 
 		String sService = sFileURL.substring(sFileURL.indexOf("&service=") + 9, sFileURL.indexOf("&product", sFileURL.indexOf("&service=")));
-		String sProduct = sFileURL.substring(sFileURL.indexOf("&product=") + 9, sFileURL.indexOf("&query", sFileURL.indexOf("&product=")));
+		String sProduct = sFileURL.substring(sFileURL.indexOf(s_sProductParam) + 9, sFileURL.indexOf("&query", sFileURL.indexOf(s_sProductParam)));
 		String sQuery = sFileURL.substring(sFileURL.indexOf("&query=") + 7, sFileURL.indexOf("&size", sFileURL.indexOf("&query=")));
 
 		String sLinks = m_oDataProviderConfig.link;
@@ -79,7 +82,8 @@ public class CMProviderAdapter extends ProviderAdapter {
 
 			try {
 				Thread.sleep(1_000);
-			} catch (Exception oEx) {
+			} catch (InterruptedException oEx) {
+				Thread.currentThread().interrupt();
 				WasdiLog.debugLog("CMProviderAdapter.executeDownloadFile: exception in sleep for retry: " + oEx.toString());
 			}
 		}
@@ -91,8 +95,8 @@ public class CMProviderAdapter extends ProviderAdapter {
 	public String getFileName(String sFileURL) throws Exception {
 		WasdiLog.debugLog("CMProviderAdapter.getFileName | sFileURL: " + sFileURL);
 
-		if (sFileURL.contains("&product=")) {
-			String sProduct = sFileURL.substring(sFileURL.indexOf("&product=") + 9, sFileURL.indexOf("&", sFileURL.indexOf("&product=") + 9));
+		if (sFileURL.contains(s_sProductParam)) {
+			String sProduct = sFileURL.substring(sFileURL.indexOf(s_sProductParam) + 9, sFileURL.indexOf("&", sFileURL.indexOf(s_sProductParam) + 9));
 
 			return sProduct + "_" + Utils.nowInMillis().longValue() + ".nc";
 		}
