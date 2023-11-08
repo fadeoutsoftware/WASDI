@@ -2205,13 +2205,8 @@ public class ProcessorsResource  {
 				UserResourcePermission oProcShare = oUserResourcePermissionRepository.getProcessorSharingByUserIdAndProcessorId(sUserId, sProcessorId);
 
 				if (oProcShare!= null) {
-					if (oProcShare.getUserId().equals(oRequestingUser.getUserId()) || oProcShare.getOwnerId().equals(oRequestingUser.getUserId())) {
-						oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorId(sUserId, sProcessorId);
-					}
-					else {
-						oResult.setStringValue("Unauthorized");
-						return oResult;					
-					}
+					// We already verified the write permission, so I can saefly delete
+					oUserResourcePermissionRepository.deletePermissionsByUserIdAndProcessorId(sUserId, sProcessorId);
 				}
 				else {
 					oResult.setStringValue("Sharing not found");
