@@ -53,66 +53,23 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE DB UTILS CONTAINER"
+          currentBuild.description = "WASDI - DEPLOY THE DB UTILS CONTAINER"
         }
-      }
-    }
-
-    stage('BUILD THE CODE WITH MAVEN') {
-      steps {
-        sh script: """
-            mvn \
-                --batch-mode \
-                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                --settings ${env.sWasdiMavenSettings} \
-                --activate-profiles ${env.sMavenProfile} \
-                --define revision=${env.sCurrentRevision} \
-                --define skipTests \
-                --update-snapshots \
-                --projects wrappersnap/launcher/utils_pom.xml \
-                --also-make \
-                clean package
-        """,
-        label: "Create the right package"
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiUtilsContainer=true'
-        """,
-        label: "Build the container"
       }
     }
 
     stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                    playbooks/deployDockerContainerWasdiUtils.yml \
-                    --inventory inventories/wasdi.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-              """,
-              label: "Deploy the container and its run elements"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiUtils.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the container and its run elements"
       }
     }
   }
