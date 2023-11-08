@@ -327,6 +327,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
     		String sContainerName = oContainer.Names.get(0);
     		
+    		if (sContainerName.startsWith("/")) {
+    			sContainerName=sContainerName.substring(1);
+    		}
+    		
     		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Found Container named: " + sContainerName);
     		
     		// Call localhost:port
