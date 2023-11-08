@@ -136,7 +136,7 @@ services:
         soft: {{ sWasdiGeoserverUlimitNofile }}
         hard: {{ sWasdiGeoserverUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:rw
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiKeycloakServiceName }}:

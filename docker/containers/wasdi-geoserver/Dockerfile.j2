@@ -93,6 +93,7 @@ USER {{ sWasdiSystemUserName }}
 RUN mkdir --parents {{ sWasdiGeoserverRootDirectoryPath }} \
         {{ sWasdiGeoserverRootDirectoryPath }} \
         {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} \
+        {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01 \
         /tmp/geoserverPlugin && \
     chown {{ sWasdiGeoserverRootDirectoryOwner }}:{{ sWasdiGeoserverRootDirectoryGroup }} {{ sWasdiGeoserverRootDirectoryPath }} && \
     chmod {{ sWasdiGeoserverRootDirectoryMode }} {{ sWasdiGeoserverRootDirectoryPath }} && \
