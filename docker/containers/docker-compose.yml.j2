@@ -27,7 +27,7 @@ services:
 {% if bWasdiClientEnabled == True %}
   {{ sWasdiClientServiceName }}:
     depends_on:
-#      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -65,7 +65,7 @@ services:
 
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
-#      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -340,7 +340,7 @@ services:
 
   {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
     depends_on:
-#      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -382,7 +382,7 @@ services:
 
   {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
-#      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
 #      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
@@ -424,7 +424,7 @@ services:
 
   {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
     depends_on:
-#      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
