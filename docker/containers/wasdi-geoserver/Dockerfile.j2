@@ -21,9 +21,15 @@ ENV PYTHONUNBUFFERED="True"
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+      {{ sWasdiSoftwareRootDirectoryPath }} \
+      /data && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+      {{ sWasdiSoftwareRootDirectoryPath }} \
+      /data && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+      {{ sWasdiSoftwareRootDirectoryPath }} \
+      /data
 
 
 # RUN generic to update the system and install common packages
@@ -93,6 +99,7 @@ USER {{ sWasdiSystemUserName }}
 RUN mkdir --parents {{ sWasdiGeoserverRootDirectoryPath }} \
         {{ sWasdiGeoserverRootDirectoryPath }} \
         {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} \
+        {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01 \
         /tmp/geoserverPlugin && \
     chown {{ sWasdiGeoserverRootDirectoryOwner }}:{{ sWasdiGeoserverRootDirectoryGroup }} {{ sWasdiGeoserverRootDirectoryPath }} && \
     chmod {{ sWasdiGeoserverRootDirectoryMode }} {{ sWasdiGeoserverRootDirectoryPath }} && \
@@ -104,6 +111,7 @@ RUN mkdir --parents {{ sWasdiGeoserverRootDirectoryPath }} \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiGeoserverPluginImagePyramidSourceUrl }} --output-document /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
     unzip /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} -d /tmp/geoserverPlugin && \
     mv /tmp/geoserverPlugin/*.jar {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/. && \
+    rm --force {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/marlin-0.9.3.jar && \
     rm --force /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
     rm --recursive --force /tmp/geoserverPlugin
 

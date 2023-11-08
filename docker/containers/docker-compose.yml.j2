@@ -97,8 +97,8 @@ services:
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
-{% endif %}
 
+{% endif %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
@@ -106,7 +106,7 @@ services:
 {% if ( aWasdiGeoserverCsrfWhitelist | length ) > 0 %}
       - GEOSERVER_CSRF_WHITELIST={{ aWasdiGeoserverCsrfWhitelist | join(',') }}
 {% endif %}
-      - GEOSERVER_DATA_DIR=/mnt/data_{{ sWasdiGeoserverServiceName }}
+      - GEOSERVER_DATA_DIR={{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01
       - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
 {% if sWasdiGeoserverEnvironmentJavaOpts | default('') != '' %}
       - JAVA_OPTS={{ sWasdiGeoserverEnvironmentJavaOpts }}
@@ -136,7 +136,7 @@ services:
         soft: {{ sWasdiGeoserverUlimitNofile }}
         hard: {{ sWasdiGeoserverUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:rw
 {% if sWasdiServerTypeIsMain == True %}
 
   {{ sWasdiKeycloakServiceName }}:
