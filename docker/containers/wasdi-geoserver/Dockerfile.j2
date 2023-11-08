@@ -21,9 +21,15 @@ ENV PYTHONUNBUFFERED="True"
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+      {{ sWasdiSoftwareRootDirectoryPath }} \
+      /data && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+      {{ sWasdiSoftwareRootDirectoryPath }} \
+      /data && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+      {{ sWasdiSoftwareRootDirectoryPath }}
+      /data
 
 
 # RUN generic to update the system and install common packages
