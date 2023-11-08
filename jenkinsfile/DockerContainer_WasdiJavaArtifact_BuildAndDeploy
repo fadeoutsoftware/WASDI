@@ -61,17 +61,17 @@ pipeline {
     stage('BUILD THE CODE WITH MAVEN') {
       steps {
         sh script: """
-            mvn \
-                --batch-mode \
-                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                --settings ${env.sWasdiMavenSettings} \
-                --activate-profiles ${env.sMavenProfile} \
-                --define revision=${env.sCurrentRevision} \
-                --define skipTests \
-                --update-snapshots \
-                --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
-                --also-make \
-                clean package
+          mvn \
+            --batch-mode \
+            -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+            --settings ${env.sWasdiMavenSettings} \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --define skipTests \
+            --update-snapshots \
+            --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
+            --also-make \
+            clean package
         """,
         label: "Create the right packages"
       }
@@ -80,14 +80,14 @@ pipeline {
     stage('MAVEN - EXECUTE TEST') {
       steps {
         sh script: """
-            mvn \
-                --batch-mode \
-                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                --settings ${env.sWasdiMavenSettings} \
-                --activate-profiles ${env.sMavenProfile} \
-                --define revision=${env.sCurrentRevision} \
-                --update-snapshots \
-                test
+          mvn \
+            --batch-mode \
+            -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+            --settings ${env.sWasdiMavenSettings} \
+            --activate-profiles ${env.sMavenProfile} \
+            --define revision=${env.sCurrentRevision} \
+            --update-snapshots \
+            test
         """,
         label: "Execute unit tests"
       }
@@ -96,13 +96,13 @@ pipeline {
     stage('BUILD THE CONTAINERS') {
       steps {
         sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiContainerWasdiTrigger=true'
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true sDeployWasdiContainerWasdiTrigger=true'
         """,
         label: "Build the containers"
       }
@@ -116,11 +116,11 @@ pipeline {
               sh script: """
                   cd ${env.sWasdiAnsiblePath}
                   ansible-playbook \
-                  playbooks/deployDockerContainerWasdiJavaArtifact.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                    playbooks/deployDockerContainerWasdiJavaArtifact.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Deploy the containers and their run elements"
             } catch (oError) {
@@ -140,11 +140,11 @@ pipeline {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
-                    playbooks/runWasdiDockerContainerWasdiJavaArtifact.yml \
-                    --inventory inventories/wasdi.yml \
-                    --limit ${env.sAnsibleLimit} \
-                    --diff \
-                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                  playbooks/runWasdiDockerContainerWasdiJavaArtifact.yml \
+                  --inventory inventories/wasdi.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Start or restart the containers"
             } catch (oError) {
@@ -167,17 +167,19 @@ pipeline {
                 string(credentialsId: 'SONARQUBE_URL', variable: 'SONARQUBE_URL')
             ]) {
                 sh script: """
-                    mvn \
-                        --batch-mode \
-                        -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                        --settings ${env.sWasdiMavenSettings} \
-                        --activate-profiles ${env.sMavenProfile} \
-                        sonar:sonar \
-                        --define revision=${env.sCurrentRevision} \
-                        --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                        --define sonar.host.url=${SONARQUBE_URL} \
-                        --define sonar.login=${SONARQUBE_TOKEN} \
-                        --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}
+                  mvn \
+                    --batch-mode \
+                    -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+                    --settings ${env.sWasdiMavenSettings} \
+                    --activate-profiles ${env.sMavenProfile} \
+                    --projects wrappersnap/wasdishared,wrappersnap/launcher,scheduler,wasdiwebserver,libraries/jwasdilib/jwasdilib,wasditrigger,ogcprocesses/processes,openeo-java-server \
+                    --also-make \
+                    sonar:sonar \
+                    --define revision=${env.sCurrentRevision} \
+                    --define sonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                    --define sonar.host.url=${SONARQUBE_URL} \
+                    --define sonar.login=${SONARQUBE_TOKEN} \
+                    --define sonar.java.jdkHome=${SONARQUBE_JDK_HOME}
                 """,
                 label: "Execute the Sonarqube scanner"
             }
