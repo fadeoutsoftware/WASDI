@@ -88,16 +88,25 @@ pipeline {
 
     stage('START OR RESTART THE CONTAINER') {
       steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook \
-                playbooks/runWasdiDockerContainerWasdiGeoserver.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-        """,
-        label: "Start or restart the container"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                    playbooks/runWasdiDockerContainerWasdiGeoserver.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Start or restart the container"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
   }

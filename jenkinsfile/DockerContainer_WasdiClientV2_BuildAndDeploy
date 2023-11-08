@@ -98,25 +98,49 @@ pipeline {
 
     stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/deployDockerContainerWasdiClientV2.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-        """,
-        label: "Deploy the container and its run elements"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                  cd ${env.sWasdiAnsiblePath}
+                  ansible-playbook \
+                    playbooks/deployDockerContainerWasdiClientV2.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Deploy the container and its run elements"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
 
-    stage('START OR RESTART THE CONTAINERS') {
+    stage('START OR RESTART THE CONTAINER') {
       steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/runWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
-        """,
-        label: "Start or restart the container"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                    playbooks/runWasdiDockerContainer.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+              """,
+              label: "Start or restart the container"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
   }

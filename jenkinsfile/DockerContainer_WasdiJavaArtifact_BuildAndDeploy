@@ -134,15 +134,25 @@ pipeline {
 
     stage('START OR RESTART THE CONTAINERS') {
       steps {
-        sh script: """
-            cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/runWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiSchedulerContainer=true sDeployWasdiTomcatOgcProcessesServerContainer=true sDeployWasdiTomcatOpenEoServerContainer=true sDeployWasdiTomcatWasdiWebServerContainer=true'
-        """,
-        label: "Start or restart the containers"
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                    playbooks/runWasdiDockerContainerWasdiJavaArtifact.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Start or restart the containers"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
       }
     }
 

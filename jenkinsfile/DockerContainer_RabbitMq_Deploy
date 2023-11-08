@@ -41,7 +41,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE GEOSERVER CONTAINER"
+          currentBuild.description = "WASDI - UPDATE TRAEFIK VERSION AND RESTART IT"
         }
       }
     }
@@ -51,7 +51,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/deployDockerContainerWasdiGeoserver.yml \
+            playbooks/deployDockerContainerWasdiRabbitMq.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
@@ -66,7 +66,7 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-            playbooks/runWasdiDockerContainerWasdiGeoserver.yml \
+            playbooks/runWasdiDockerContainerWasdiRabbitMq.yml \
             --inventory inventories/wasdi.yml \
             --limit ${env.sAnsibleLimit} \
             --diff \
