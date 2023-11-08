@@ -111,6 +111,7 @@ RUN mkdir --parents {{ sWasdiGeoserverRootDirectoryPath }} \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiGeoserverPluginImagePyramidSourceUrl }} --output-document /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
     unzip /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} -d /tmp/geoserverPlugin && \
     mv /tmp/geoserverPlugin/*.jar {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/. && \
+    rm --force {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/marlin-0.9.3.jar && \
     rm --force /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
     rm --recursive --force /tmp/geoserverPlugin
 
