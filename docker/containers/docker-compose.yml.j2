@@ -234,6 +234,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUsername}
       - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
       - sWasdiMongoAdditionalUserBackupUserPassword=${sWasdiMongoAdditionalUserBackupUserPassword}
+      - sWasdiMongoAdditionalUserMetrologyUserName=${sWasdiMongoAdditionalUserMetrologyUserName}
+      - sWasdiMongoAdditionalUserMetrologyUserPassword=${sWasdiMongoAdditionalUserMetrologyUserPassword}
 {% if sWasdiServerTypeIsMain == True %}
       - sWasdiMongoEcostressDatabaseName=${sWasdiMongoEcostressDatabaseName}
       - sWasdiMongoEcostressUserName=${sWasdiMongoEcostressUserName}
