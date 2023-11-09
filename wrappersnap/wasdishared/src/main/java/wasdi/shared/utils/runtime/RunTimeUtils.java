@@ -224,6 +224,11 @@ public class RunTimeUtils {
 			}
 		}
 		
+		if (oShellExecItem.forceLocal) {
+			WasdiLog.warnLog("RunTimeUtils.dockerShellExec: command " + asArgs.get(0)+ " has force Local flag true: run locally");
+			return localShellExec(asArgs, bWait, bReadOutput, bRedirectError, bLogCommandLine);			
+		}
+		
 		if (oShellExecItem.overrideDockerConfig) {
 			oDockerUtils.setWasdiSystemGroupId(oShellExecItem.systemGroupId);
 			oDockerUtils.setWasdiSystemGroupName(oShellExecItem.systemGroupName);

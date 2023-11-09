@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.Objects;
+
 import wasdi.shared.utils.log.WasdiLog;
 
 /**
@@ -283,6 +285,14 @@ public class ProcessWorkspace {
 		this.subscriptionId = subscriptionId;
 	}
 	
+	@Override
+	public int hashCode() {
+		return Objects.hash(containerId, fileSize, lastStateChangeTimestamp, nodeCode, operationEndTimestamp,
+				operationStartTimestamp, operationSubType, operationTimestamp, operationType, parentId, payload, pid,
+				processObjId, productName, progressPerc, projectId, runningTime, status, subprocessPid, subscriptionId,
+				userId, workspaceId);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		try {

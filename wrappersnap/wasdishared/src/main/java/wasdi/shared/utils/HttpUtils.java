@@ -859,7 +859,9 @@ public final class HttpUtils {
 				if (oTargetDir != null) {
 					// If the targetDir exists but it is not a directory, delete it as it prevents the creation of the actual directory
 					if (oTargetDir.exists() && !oTargetDir.isDirectory()) {
-						oTargetDir.delete();
+						boolean bIsFileDeleted = oTargetDir.delete();
+						if (!bIsFileDeleted)
+							WasdiLog.warnLog("HttpUtils.downloadFile: the file has not been deleted, path: " + oTargetDir.getAbsolutePath());
 					}
 					oTargetDir.mkdirs();
 				} else {
