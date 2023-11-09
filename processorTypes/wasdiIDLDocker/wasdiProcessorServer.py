@@ -31,7 +31,7 @@ def run(processId):
 		# It looks impossible to move a file from host to container. So ENVI installation files 
 		# are in the processor folder and copied to the docker. After the first run, delete it
 		# The launcher will delete the ones in the host folder
-		# But in the first run files are still dear: here to save space we delete it
+		# But in the first run files are still there: here to save space we delete it
 		if os.path.exists(sLocalPath + "/envi552-linux.tar"):
 			os.remove(sLocalPath + "/envi552-linux.tar")
 		if os.path.exists(sLocalPath + "/install.sh"):
@@ -194,13 +194,8 @@ def run(processId):
 	sWorkspaceId = ""
 	try:
 		sWorkspaceId = parameters['workspaceid']
+		wasdi.setActiveWorkspaceId(sWorkspaceId)
 		print("[" + processId + "] wasdiProcessorServer got Workspace Id " + sWorkspaceId, flush=True)
-		wasdi.openWorkspaceById(sWorkspaceId)
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
-	except Exception as oEx:
-		print("[" + processId + "] wasdi.executeProcessor get workspace ID EXCEPTION", flush=True)
-		print("[" + processId + "] " + repr(oEx), flush=True)
-		print("[" + processId + "] " + traceback.format_exc(), flush=True)
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
 
@@ -234,9 +229,7 @@ def run(processId):
 		oConfigFile.write('VERBOSE=0\r\n')
 		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n')
 		oConfigFile.write('MYPROCID=' + processId + '\r\n')
-		if sBaseUrl is not None:
-			if sBaseUrl != "":
-				oConfigFile.write('BASEURL=' + sBaseUrl + '\r\n')
+		oConfigFile.write('BASEURL=' + wasdi.getBaseUrl() + '\r\n')
 		oConfigFile.close()
 
 		#Write Params:
