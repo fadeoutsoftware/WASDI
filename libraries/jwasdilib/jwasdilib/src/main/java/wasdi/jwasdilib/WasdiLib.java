@@ -3178,17 +3178,9 @@ public class WasdiLib {
 					oTargetDir.mkdirs();
 
 					// opens an output stream to save into file
-					FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
-
-					InputStream oInputStream = oConnection.getInputStream();
-
-					Util.copyStream(oInputStream, oOutputStream);
-
-					if(null!=oOutputStream) {
-						oOutputStream.close();
-					}
-					if(null!=oInputStream) {
-						oInputStream.close();
+					try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
+							InputStream oInputStream = oConnection.getInputStream();) {
+						Util.copyStream(oInputStream, oOutputStream);
 					}
 
 					if(null!=sAttachmentName && !sFileName.equals(sAttachmentName) && sAttachmentName.toLowerCase().endsWith(".zip")) {
@@ -3244,16 +3236,14 @@ public class WasdiLib {
 			while(aoEntries.hasMoreElements()) {
 				ZipEntry oZipeEntry = aoEntries.nextElement();
 				if(!oZipeEntry.isDirectory()) {
-					InputStream oInputStream = oZipFile.getInputStream(oZipeEntry);
-					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
 					String sFileName = sPath+oZipeEntry.getName();
 					File oFile = new File(sFileName);
-					//oFile.createNewFile();
-					FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
-					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
+					try (InputStream oInputStream = oZipFile.getInputStream(oZipeEntry);
+							BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
+							FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
+							BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);) {
 					Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
-					oBufferedOutputStream.close();
-					oBufferedInputStream.close();
+					}
 				}
 			}
 
@@ -3309,6 +3299,9 @@ public class WasdiLib {
 		if(sFileName==null || sFileName.isEmpty()){
 			throw new NullPointerException("WasdiLib.uploadFile: file name is null");
 		}
+		InputStream oInputStream = null;
+		DataOutputStream oOutputStream = null;
+		
 		try {
 			//local file
 			String sFullPath = getSavePath() + sFileName;
@@ -3316,7 +3309,7 @@ public class WasdiLib {
 			if(!oFile.exists()) {
 				throw new IOException("WasdiLib.uploadFile: file not found");
 			}
-			InputStream oInputStream = new FileInputStream(oFile);
+			oInputStream = new FileInputStream(oFile);
 
 			//request
 			String sUrl = getWorkspaceBaseUrl() + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
@@ -3338,7 +3331,7 @@ public class WasdiLib {
 
 
 			oConnection.connect();
-			DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
+			oOutputStream = new DataOutputStream(oConnection.getOutputStream());
 
 			oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
 			oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
@@ -3349,12 +3342,10 @@ public class WasdiLib {
 			Util.copyStream(oInputStream, oOutputStream);
 
 			oOutputStream.flush();
-			oInputStream.close();
 			oOutputStream.writeBytes("\r\n");
 			oOutputStream.flush();
 			oOutputStream.writeBytes("\r\n");
 			oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-			oOutputStream.close();
 
 			// response
 			int iResponse = oConnection.getResponseCode();
@@ -3374,11 +3365,17 @@ public class WasdiLib {
 				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
 			}
 
-			oOutputStream.close();
 			oConnection.disconnect();
 
-		} catch(Exception e) {
-			System.out.println("WasdiLib error " + e.toString());
+		} catch(Exception oEx) {
+			System.out.println("WasdiLib error " + oEx.toString());
+		} finally {
+			try {
+				if (oInputStream != null) oInputStream.close();
+				if (oOutputStream != null) oOutputStream.close();
+			} catch(IOException oEx) {
+				log("WasdiLib.uploadFile: exception when closing I/O resources");
+			}
 		}
 	}
 

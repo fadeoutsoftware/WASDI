@@ -230,12 +230,12 @@ public class SocketUtils {
 			}
 		
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SocketUtils.httpGet: Exception " + oEx.getMessage());
+			WasdiLog.errorLog("SocketUtils.httpGet: Exception ", oEx);
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.errorLog("SocketUtils.httpGet: Impossible to close the connection " + oEx.getMessage());
+				WasdiLog.errorLog("SocketUtils.httpGet: Impossible to close the connection ", oEx);
 			}
 		}
 		
@@ -335,7 +335,7 @@ public class SocketUtils {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpPost: Impossible to close the connection " + oEx.getMessage());
+				WasdiLog.errorLog("SocketUtils.httpPost: Impossible to close the connection ", oEx);
 			}
 		}
 		return oHttpCallResponse;
@@ -406,7 +406,7 @@ public class SocketUtils {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpDelete: Impossible to close the connection " + oEx.getMessage());
+				WasdiLog.errorLog("SocketUtils.httpDelete: Impossible to close the connection " + oEx);
 			}
 		}
 
@@ -462,12 +462,12 @@ public class SocketUtils {
 
 			
 		} catch (Exception oEx) {
-			WasdiLog.debugLog("SocketUtils.httpPut: Exception " + oEx.getMessage());
+			WasdiLog.errorLog("SocketUtils.httpPut: Exception ", oEx);
 		} finally {
 			try {
 				oHttpClient.close();
 			} catch (IOException oEx) {
-				WasdiLog.debugLog("SocketUtils.httpPut: Impossible to close the connection " + oEx.getMessage());
+				WasdiLog.errorLog("SocketUtils.httpPut: Impossible to close the connection ", oEx);
 			}
 		}
 
@@ -492,10 +492,11 @@ public class SocketUtils {
 		}
 
 		InputStream oFileInStream = null;
+		DockerHttpClient oHttpClient = null;
 		
 		try {
 			
-			DockerHttpClient oHttpClient = initializeDockerClient();
+			 oHttpClient = initializeDockerClient();
 			
 			if (oHttpClient == null) {
 				WasdiLog.errorLog("SocketUtils.httpPostFile. Docker HTTP client is null. Returning an empty response.");
@@ -519,79 +520,37 @@ public class SocketUtils {
 				
 				
 				// here we are not making a difference between a successful code or an error code. 
-				InputStream oInputStreamBodu = oResponse.getBody();
+				InputStream oInputStreamBody = oResponse.getBody();
 				
 				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 				
 				String sResult = "";
-				if (oInputStreamBodu != null) {
-					Util.copyStream(oInputStreamBodu, oBytearrayOutputStream);
+				if (oInputStreamBody != null) {
+					Util.copyStream(oInputStreamBody, oBytearrayOutputStream);
 					sResult = oBytearrayOutputStream.toString();
 					oHttpResponse.setResponseBody(sResult);
-					oInputStreamBodu.close();
+					oInputStreamBody.close();
 				}
 
 				
 			} catch (Exception oEx) {
-				WasdiLog.debugLog("SocketUtils.httpPostFile: Exception when trying to execute the request" + oEx.getMessage());
-			} finally {
-				try {
-					oHttpClient.close();
-					if (oFileInStream != null) oFileInStream.close();
-				} catch (IOException oEx) {
-					WasdiLog.debugLog("SocketUtils.httpPut: Impossible to close the connection " + oEx.getMessage());
-				}
-			}		
+				WasdiLog.errorLog("SocketUtils.httpPostFile: Exception when trying to execute the request", oEx);
+			} 	
 			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("SocketUtils.httpPostFile: could not open file due to: " + oE.getMessage() + ", aborting");
-		}
+		} finally {
+			try {
+				if (oHttpClient != null) oHttpClient.close();
+				if (oFileInStream != null) oFileInStream.close();
+			} catch (IOException oEx) {
+				WasdiLog.errorLog("SocketUtils.httpPut: Impossible to close the connection ", oEx);
+			}
+		}	
 		
 		return oHttpResponse;
 		
 	}
 	
-	
-	
-	
-	public static void main (String [] args) throws Exception {
-		
-		// TRY GET
-		
-		// get the list of running container
-//		HttpCallResponse oRes = httpGet("/containers/json", null, null, null, null);
-//		System.out.println(oRes.getResponseCode());
-//		System.out.println(oRes.getResponseBody());
-		
-		// get the list of all container, not only the running ones (test for query parameters)
-//		Map<String, String> asQueryParams = new HashMap<String, String>();
-//		asQueryParams.put("all", "true");
-//		asQueryParams.put("filters", "{\"name\":\"hello\"}");
-//		HttpCallResponse oResAllCintainers = httpGet("/containers/json", null, null, asQueryParams);
-//		System.out.println(oResAllCintainers.getResponseCode());
-//		System.out.println(oResAllCintainers.getResponseBody());
-		
-//		// get details about a specific container
-//		String sContainerId = "container_id";	
-//		HttpCallResponse oResInspect = httpGet("/containers/" + sContainerId + "/json", null, null, null);
-//		System.out.println(oResInspect.getResponseCode());
-//		System.out.println(oResInspect.getResponseBody());
-		
-		
-		// TRY POST
-		
-		// we try to modify the value of the CPU quota for the container...
-		Map<String, String> asHeaders = getStandardHeaderForRequestWithPayload();
-//		String sJsonBody = "{ \"CpuQuota\": 40000 }";
-//		byte[] oyBodyBytes = sJsonBody.getBytes();
-//		HttpCallResponse oResUpdate = httpPost("/containers/" + sContainerId + "/update", oyBodyBytes, asHeaders, null, null);
-//		System.out.println(oResUpdate.getResponseCode());
-//		System.out.println(oResUpdate.getResponseBody());
-		
-		
-//		oRes = httpPost("/containers/container_id/start", null, "".getBytes(), null, null);
-//		System.out.println(oRes.getResponseCode());
-//		System.out.println(oRes.getResponseBody());
-	}
 
 }

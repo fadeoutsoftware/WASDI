@@ -484,7 +484,7 @@ public class PermissionsUtils {
 
 			ProcessorParametersTemplateRepository oSubscriptionRepository = new ProcessorParametersTemplateRepository();
 			
-			if (oSubscriptionRepository.isTheOwnerOfTheTemplate(sUserId, sProcessorParametersTemplateId)) {
+			if (oSubscriptionRepository.isTheOwnerOfTheTemplate(sProcessorParametersTemplateId, sUserId)) {
 				return true;
 			}
 
