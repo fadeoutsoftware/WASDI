@@ -1,143 +1,140 @@
-FROM ubuntu:18.04
-
-MAINTAINER WASDI <info@wasdi.cloud>
+FROM ubuntu:22.04
 
 
-# Define argument used to create a user and a group in the container
-# Values are provided with the docker build command
-ARG USR_NAME
-ARG USR_ID
-ARG GRP_NAME
-ARG GRP_ID
-ARG USR_HOME="/home/wasdi"
-ARG PIP_INSTALL_WASDI_ARGUMENTS
+MAINTAINER "WASDI SARL"
 
 
-# Create environment variables:
-#   - DEBIAN_FRONTEND: to avoid packages to ask a confirmation
-#   - VIRTUAL_ENV: to define the path to the venv we will use
-ENV DEBIAN_FRONTEND="noninteractive"
-ENV VIRTUAL_ENV=$USR_HOME/venv
-
-
-# Create a user, create a group and change rights on /home
-RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
-    useradd --create-home --home-dir $USR_HOME --uid $USR_ID --gid $GRP_ID --non-unique --shell /bin/bash $USR_NAME && \
-    chmod 755 /home
-
-
-# Set the workdir to $USR_HOME
-WORKDIR "$USR_HOME"
-
-
-# Update the system and install packages
-RUN apt-get update && \
-    apt-get install --assume-yes software-properties-common && \
-    add-apt-repository ppa:nextgis/ppa && \
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
-        build-essential \
-        curl \
-        gdal-bin \
-        libffi-dev \
-        libgdal-dev \
-        libpq-dev \
-        libssl-dev \
-        libxml2-dev \
-        libxslt1-dev \
-        locate \
-        nano \
-        openjdk-8-jre \
-        python3 \
-        python3-dev \
-        python3-gdal \
-        python3-pip \
-        python3-venv \
-        wget \
-        zlib1g-dev
-
-
-# Make the folder for idl and let others write
-RUN mkdir /.idl && \
-     chmod 777 /.idl && \
-     chown $USR_NAME:$GRP_NAME /.idl
-
-
-# From now, all commands executed are executed with the user $USR_NAME who must not be root
-USER $USR_NAME
-
-
-# Create a virtual environment
-RUN python3 -m venv $VIRTUAL_ENV
-
-
-# Override the environment PATH variable to be able to use binaries provided by our virtual environment
-# From here, all pip3 commands are executed in our virtual environment because of this setting
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-
-# [IN OUR VENV] Install needed Python libraries
-RUN pip3 install flask \
-    gunicorn \
-    requests \
-    numpy \
-    pandas \
-    rasterio \
-    wheel
-
-
-# [IN OUR VENV] Install the wasdi library: can come from TEST according to the value of $PIP_INSTALL_WASDI_ARGUMENTS
-RUN pip3 install $PIP_INSTALL_WASDI_ARGUMENTS wasdi
-
-
-# [IN OUR VENV] Install needed Python GDAL library
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal && \
-    pip3 install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
-
-
-# Copy the envi archive
-COPY --chown=$USR_NAME:$GRP_NAME ./envi552-linux.tar $USR_HOME/
-
-
-# Unpack the tar in the $USR_HOME directory
-RUN tar --directory $USR_HOME/ -xf $USR_HOME/envi552-linux.tar
-
-
-# From now, all commands executed are executed as root
+# From now, all commands executed are executed with the user 'root'
 USER root
 
 
-# Make it executable and run the installation
-RUN bash $USR_HOME/install-wasdi.sh s
+# This environment variable is setted to avoid packages to ask a confirmation
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# This variable is setted to make Python stop creating files '.pyc'
+ENV PYTHONDONTWRITEBYTECODE="False"
+
+# This variable is setted to force the 'print' method of Python to flush message directly
+ENV PYTHONUNBUFFERED="True"
+
+# This variable is setted to use binaries from our virtual environment
+ENV PATH="{{ sWasdiSystemUserHome }}/venv/bin:${PATH}"
 
 
-# Set the license server url
-COPY ./o_licenseserverurl.txt /usr/local/harris/license/o_licenseserverurl.txt
+# RUN generic to create user, group, directories, etc
+RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
+    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
 
 
-# Clean envi installation files
-CMD rm -rf $USR_HOME/install \
-    $USR_HOME/silent \
-    $USR_HOME/envi552-linux.tar \
-    $USR_HOME/o_licenseserverurl.txt \
-    $USR_HOME/install.sh \
-    $USR_HOME/install-wasdi.sh
+# RUN generic to update the system and install common packages
+RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
+    echo "APT::Install-Recommends \"0\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Get::Assume-Yes \"true\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "APT::Keep-Downloaded-Packages \"false\";" >> /etc/apt/apt.conf.d/99local && \
+    echo "Dpkg::Options::--force-confold;" >> /etc/apt/apt.conf.d/99local && \
+    apt-get update && \
+    apt-get install \
+        ca-certificates && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy main restricted universe multiverse"          > /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-updates main restricted universe multiverse"  >> /etc/apt/sources.list && \
+    echo "deb https://mirror.ubuntu.ikoula.com/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get dist-upgrade && \
+    apt-get install \
+        gdal-bin \
+        git \
+        gunicorn \
+        libxpm4 \
+        libxmu6 \
+        nano \
+        python3 \
+        python3-flask \
+        python3-gdal \
+        python3-requests \
+        python3-pip \
+        python3-venv \
+        python3-wheel && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user $USR_NAME who must not be root
-USER $USR_NAME
+# RUN specific for IDL
+RUN mkdir --parents \
+        /.idl \
+        /usr/local/harris && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
+        /.idl \
+        /usr/local/harris && \
+    chmod 750 \
+        /.idl \
+        /usr/local/harris
 
 
-# Copy our files
-COPY --chown=$USR_NAME:$GRP_NAME ./ $USR_HOME/
+# Set the workdir to {{ sWasdiSystemUserHome }}/application
+WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
-# Change rights
-RUN chmod -R 755 $USR_HOME/
+# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+USER {{ sWasdiSystemUserName }}
 
 
-# Start our webserver
-RUN chmod 777 ./runServer.sh
-CMD ./runServer.sh
+# RUN specific for IDL:
+# - create needed directories
+# - create our Python virtual environment
+# Please note:
+#   - 'wasdi' is installed independently to be able to set the repository
+#   - there is no cache: I suppose because it is too much dynamic
+RUN mkdir --parents \
+        {{ sWasdiSystemUserHome }}/application \
+        {{ sWasdiSystemUserHome }}/install \
+        {{ sWasdiSystemUserHome }}/tool \
+        {{ sWasdiSystemUserHome }}/venv && \
+    chmod 750 \
+        {{ sWasdiSystemUserHome }}/application \
+        {{ sWasdiSystemUserHome }}/install \
+        {{ sWasdiSystemUserHome }}/tool \
+        {{ sWasdiSystemUserHome }}/venv && \
+    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
+    pip3 install --no-cache-dir --no-compile {{ sWasdiSystemUserHome }} wasdi
+
+
+# Extract the envi archive
+ADD envi552-linux.tar {{ sWasdiSystemUserHome }}/install/
+
+
+# Install ENVI
+# Remove two directories not needed
+# Remove the installation directory no longer used
+# Install the license file
+RUN bash {{ sWasdiSystemUserHome }}/install/install-wasdi.sh s && \
+    rm --recursive --force \
+        /usr/local/harris/envi55/idl/examples \
+        /usr/local/harris/envi55/idl/help \
+        {{ sWasdiSystemUserHome }}/installinstall
+
+
+# Overwrite install script with the one which is close to the Dockerfile
+COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
+
+
+# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
+#RUN bash {{ sWasdiSystemUserHome }}/tool/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
+
+
+# From now, all commands executed are executed with the user 'root'
+USER root
+
+
+# Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
+RUN bash {{ sWasdiSystemUserHome }}/tool/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-apt
+
+
+# From now, all commands executed are executed as {{ sWasdiSystemUserName }}
+USER {{ sWasdiSystemUserName }}
+
+
+# Start the container
+CMD ["/bin/bash", "sContainerUserHomeDirectory/application/docker-entrypoint.sh"]
