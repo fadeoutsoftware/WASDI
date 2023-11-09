@@ -145,6 +145,7 @@ def run(processId):
 
 	if (request.args.get('workspaceid') is not None):
 		parameters['workspaceid'] = request.args.get('workspaceid')
+		print("[" + processId + "] WORKSPACE arg " + request.args.get('workspaceid') , flush=True)
 	else:
 		print("[" + processId+ "] WORKSPACE arg not available", flush=True)
 
@@ -179,14 +180,6 @@ def run(processId):
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Proc Id not available", flush=True)
 
-	#Try to get the workspace id
-	try:
-		sWorkspaceId = parameters['workspaceid']
-		wasdi.openWorkspaceById(sWorkspaceId)
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
-	except:
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
-
 	#Try to get the base url
 	try:
 		sBaseUrl = parameters['baseurl']
@@ -194,6 +187,15 @@ def run(processId):
 		print("[" + processId+ "] wasdiProcessorServer Base Url in params " + sBaseUrl, flush=True)
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Using default base url", flush=True)
+
+	#Try to get the workspace id
+	try:
+		sWorkspaceId = parameters['workspaceid']
+		print("[" + processId + "] wasdiProcessorServer got Workspace Id " + sWorkspaceId, flush=True)
+		wasdi.openWorkspaceById(sWorkspaceId)
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
+	except:
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
 
 	#Init Wasdi
 	print("[" + processId+ "] wasdiProcessorServer: init waspy lib", flush=True)
