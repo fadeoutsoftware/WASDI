@@ -189,23 +189,30 @@ def run(processId):
 		print("[" + processId+ "] wasdiProcessorServer Using default base url", flush=True)
 
 	#Try to get the workspace id
+	sWorkspaceId = ""
 	try:
 		sWorkspaceId = parameters['workspaceid']
 		print("[" + processId + "] wasdiProcessorServer got Workspace Id " + sWorkspaceId, flush=True)
 		wasdi.openWorkspaceById(sWorkspaceId)
 		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
+	except Exception as oEx:
+		print("[" + processId + "] wasdi.executeProcessor get workspace ID EXCEPTION", flush=True)
+		print("[" + processId + "] " + repr(oEx), flush=True)
+		print("[" + processId + "] " + traceback.format_exc(), flush=True)
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
+
 
 	#Init Wasdi
 	print("[" + processId+ "] wasdiProcessorServer: init waspy lib", flush=True)
 	wasdi.setIsOnServer(True)
 	wasdi.setDownloadActive(False)
 
-	if wasdi.init() == False:
+	if not wasdi.init():
 		print("[" + processId+ "] wasdiProcessorServer: init FAILED", flush=True)
 		return jsonify({'processId': 'ERROR', 'processorEngineVersion':'2'})
 
+	wasdi.openWorkspaceById(sWorkspaceId)
 	#Run the processor
 	try:
 		sLocalPath = '/home/wasdi/'
