@@ -503,6 +503,10 @@ public class MODISUtils {
 	 */
 	private static String readBoundingBox(String sXMLString) {
 		String sBoundingBoxProperty =  readProperty(sXMLString, s_sBoundary);
+		
+		if (sBoundingBoxProperty == null) 
+			sBoundingBoxProperty = "";
+		
 		String[] asLines = sBoundingBoxProperty.split("\n");
 		String sLongitudeOpenTag = "<" + s_sLongitude + ">";
 		String sLongitueCloseTag = sLongitudeOpenTag.replace("<", "</");

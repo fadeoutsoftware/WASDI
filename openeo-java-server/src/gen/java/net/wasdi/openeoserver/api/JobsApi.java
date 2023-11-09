@@ -431,8 +431,8 @@ public class JobsApi  {
 									Double oValue2 = Double.parseDouble(asParts[iPoints+1]);
 									
 									List<BigDecimal> aoPointList = new ArrayList<BigDecimal>();
-									aoPointList.add(new BigDecimal(oValue1));
-									aoPointList.add(new BigDecimal(oValue2));
+									aoPointList.add(BigDecimal.valueOf(oValue1));
+									aoPointList.add(BigDecimal.valueOf(oValue2));
 									aoPoints.add(aoPointList);
 								}
 								catch (Exception oParseError) {

@@ -317,14 +317,15 @@ public class Wasdi extends ResourceConfig {
 
 					if (oRegistrationResult==null) {
 						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
-					}
+					} else {
 					
-					if (oRegistrationResult.getBoolValue()==null) {
-						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
-					}
-
-					if (oRegistrationResult.getBoolValue()==false) {
-						WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+						if (oRegistrationResult.getBoolValue()==null) {
+							WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+						}
+	
+						if (oRegistrationResult.getBoolValue()==false) {
+							WasdiLog.warnLog("Wasdi.getUserFromSession: we had a problem registering the user, return invalid");
+						}
 					}
 					
 					oUser = oUserRepo.getUser(sUserId);

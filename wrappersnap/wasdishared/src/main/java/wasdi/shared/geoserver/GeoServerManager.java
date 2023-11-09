@@ -482,9 +482,6 @@ public class GeoServerManager {
 
         String layerXml = layer.toString();
         String sendResult = HTTPUtils.putXml(url, layerXml, m_sRestUser, m_sRestPassword);
-        if (sendResult != null) {
-        } else {
-        }
 
         return sendResult != null;
     }    

@@ -126,9 +126,10 @@ public class QueryExecutorJRC extends QueryExecutor {
 				SimpleFeatureSource aoSource = oStore.getFeatureSource();
 				Filter oFilter = getFilter(oWest, oNorth, oEast, oSouth, sProductName);
 				
-				WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Generated filter: " + oFilter.toString());
 				
 				if (oFilter != null) {
+					
+					WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. Generated filter: " + oFilter.toString());
 				
 					SimpleFeatureCollection oFilteredFeatures = aoSource.getFeatures(oFilter);
 				
@@ -150,7 +151,9 @@ public class QueryExecutorJRC extends QueryExecutor {
 			                
 						}	
 					}
-				} 
+				} else {
+					WasdiLog.debugLog("QueryExecutorJRC.getTilesInArea. The filter is null. No tiles retrieved.");
+				}
 				
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("QueryExecutorJRC.getTilesInArea. Error reading the shape file. " + oEx.getMessage() );
