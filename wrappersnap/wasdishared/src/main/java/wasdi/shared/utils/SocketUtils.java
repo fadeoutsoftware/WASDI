@@ -230,7 +230,7 @@ public class SocketUtils {
 			}
 		
 		} catch (Exception oEx) {
-			WasdiLog.errorLog("SocketUtils.httpGet: Exception ", oEx));
+			WasdiLog.errorLog("SocketUtils.httpGet: Exception ", oEx);
 		} finally {
 			try {
 				oHttpClient.close();
