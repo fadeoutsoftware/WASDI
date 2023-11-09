@@ -325,9 +325,19 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     			return false;    			
     		}
 
+    		String sContainerName = oContainer.Names.get(0);
+    		
+    		if (sContainerName.startsWith("/")) {
+    			sContainerName=sContainerName.substring(1);
+    		}
+    		
+    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Found Container named: " + sContainerName);
+    		
     		// Call localhost:port
-    		String sUrl = getProcessorUrl(oProcessorToKill, oContainer.Names.get(0));
+    		String sUrl = getProcessorUrl(oProcessorToKill, sContainerName);
     		sUrl += "/run/--kill" + "_" + m_oProcessWorkspace.getSubprocessPid();
+    		
+    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Going to call " + sUrl);
     		
     		Map<String, String> asHeaders = new HashMap<>();
     		asHeaders.put("Content-Type", "application/json");
