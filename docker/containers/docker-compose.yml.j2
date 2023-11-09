@@ -280,7 +280,9 @@ services:
       - RABBITMQ_DISTRIBUTION_BUFFER_SIZE=128000
       - RABBITMQ_MNESIA_BASE=/var/lib/rabbitmq/mnesia/
       - RABBITMQ_NODENAME={{ sWasdiRabbitMqServiceName }}
+{% if sWasdiRabbitMqMainInternalPort != '' %}
       - RABBITMQ_NODE_PORT={{ sWasdiRabbitMqMainInternalPort }}
+{% endif %}
       - RABBITMQ_PID_FILE=/var/run/rabbitmq/rabbitmq.pid
     image: "{{ sWasdiRabbitMqServiceName }}:latest"
     labels:
@@ -296,19 +298,25 @@ services:
 {% endif %}
       - "traefik.http.routers.r_{{ sWasdiRabbitMqServiceName }}_stomp.middlewares=mw_{{ sWasdiRabbitMqServiceName }}_stomp@docker"
       - "traefik.http.services.s_{{ sWasdiRabbitMqServiceName }}_stomp.loadbalancer.server.port={{ sWasdiRabbitMqWebStompInternalPort }}"
-{% if ( sWasdiRabbitMqMainInternalPort | default("") != "" or sWasdiRabbitMqWebStompInternalPort | default("") != "" )
-    and ( sWasdiRabbitMqMainExternalPort | default("") != "" or sWasdiRabbitMqWebStompExternalPort | default("") != "" )
-    and aWasdiRabbitMqExternalIp | default([]) | length > 0 %}
+{% if (( sWasdiRabbitMqMainInternalPort | default("") ) != ""
+        and ( sWasdiRabbitMqMainExternalPort | default("") ) != ""
+        and (( aWasdiRabbitMqMainExternalIp | default([]) ) | length ) > 0
+    ) or (
+        ( sWasdiRabbitMqWebStompInternalPort | default("") ) != ""
+        and ( sWasdiRabbitMqWebStompExternalPort | default("") ) != ""
+        and (( aWasdiRabbitMqWebStompExternalIp | default([]) ) | length ) > 0
+    )
+%}
     ports:
 {% if sWasdiRabbitMqMainInternalPort | default("") != ""
     and sWasdiRabbitMqMainExternalPort | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiRabbitMqExternalIp | sort %}
+{% for sCurrentExternalIp in aWasdiRabbitMqMainExternalIp | sort %}
       - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqMainExternalPort }}:{{ sWasdiRabbitMqMainInternalPort }}"
 {% endfor %}
 {% endif %}
 {% if sWasdiRabbitMqWebStompInternalPort | default("") != ""
     and sWasdiRabbitMqWebStompExternalPort | default("") != "" %}
-{% for sCurrentExternalIp in aWasdiRabbitMqExternalIp | sort %}
+{% for sCurrentExternalIp in aWasdiRabbitMqWebStompExternalIp | sort %}
       - "{{ sCurrentExternalIp }}:{{ sWasdiRabbitMqWebStompExternalPort }}:{{ sWasdiRabbitMqWebStompInternalPort }}"
 {% endfor %}
 {% endif %}
