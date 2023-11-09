@@ -324,9 +324,8 @@ services:
 {% if bWasdiSchedulerEnabled == True %}
 
   {{ sWasdiSchedulerServiceName }}:
-    # Disable until we are ready to start all containers
-    #depends_on:
-#      - {{ sWasdiMongoServiceName }}
+    depends_on:
+      - {{ sWasdiMongoServiceName }}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
@@ -344,7 +343,7 @@ services:
     depends_on:
       - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
-#      - {{ sWasdiMongoServiceName }}
+      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
@@ -386,7 +385,7 @@ services:
     depends_on:
       - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
-#      - {{ sWasdiMongoServiceName }}
+      - {{ sWasdiMongoServiceName }}
       - {{ sWasdiRabbitMqServiceName }}
       - {{ sWasdiTraefikServiceName }}
     environment:
@@ -430,7 +429,7 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
-#      - {{ sWasdiMongoServiceName }}
+      - {{ sWasdiMongoServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
