@@ -172,7 +172,7 @@ public class PackageManagerResource {
 
 			if (Utils.isNullOrEmpty(sContent)) {
 				WasdiLog.warnLog("PackageManagerResource.getEnvironmentActionsList: " + "the envActionsList.txt is null or empty");
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+				return Response.ok(new ArrayList<String>()).build();
 			}
 
 			asEnvActions = parseEnvironmentActionsContent(sContent);
@@ -429,11 +429,11 @@ public class PackageManagerResource {
 	 */
 	protected String readEnvironmentActionsFile(String sProcessorName) throws Exception {
 
-		String sOutput = "warning: the envActionsList.txt file for the processor " + sProcessorName + " was not found}";
+		String sOutput = "";
 
 		try {
 
-			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read Processor " + sProcessorName);
+			WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: read actions for Processor " + sProcessorName);
 
 			// Take path of the processor
 			String sProcessorPath = PathsConfig.getProcessorFolder(sProcessorName);
@@ -442,9 +442,7 @@ public class PackageManagerResource {
 
 			if (!WasdiFileUtils.fileExists(oDirFile) || !oDirFile.isDirectory()) {
 				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " not found");
-				return "error: directory " + oDirPath.toString() + " not found";
-			} else {
-				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: directory " + oDirPath.toString() + " found");
+				return "";
 			}
 			
 			// Read the file
@@ -452,6 +450,9 @@ public class PackageManagerResource {
 			if (WasdiFileUtils.fileExists(sAbsoluteFilePath)) {
 				sOutput = WasdiFileUtils.fileToText(sAbsoluteFilePath);
 				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: file " + sAbsoluteFilePath + " found:\n" + sOutput);
+			}
+			else {
+				WasdiLog.debugLog("PackageManagerResource.readEnvActionsFile: no actions for this processor ");
 			}
 
 		} catch (Exception oEx) {

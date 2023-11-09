@@ -297,111 +297,6 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     public boolean run(ProcessorParameter oParameter) {
     	return run(oParameter, true);
     }
-
-    
-    @Override
-    public boolean stopApplication(ProcessorParameter oParameter) {
-    	
-    	try {
-    		String sProcessorName = m_oProcessWorkspace.getProductName();
-    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
-    		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
-    		
-    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, sProcessorName);
-    		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
-    		
-    		if (oContainer == null) {
-    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: error retriving the container info for the app "+ sProcessorName);
-    			return false;
-    		}
-    		
-    		if (oContainer.Names == null) {
-    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
-    			return false;    			
-    		}
-    		
-    		if (oContainer.Names.size()<=0) {
-    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
-    			return false;    			
-    		}
-
-    		String sContainerName = oContainer.Names.get(0);
-    		
-    		if (sContainerName.startsWith("/")) {
-    			sContainerName=sContainerName.substring(1);
-    		}
-    		
-    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Found Container named: " + sContainerName);
-    		
-    		// Call localhost:port
-    		String sUrl = getProcessorUrl(oProcessorToKill, sContainerName);
-    		sUrl += "/run/--kill" + "_" + m_oProcessWorkspace.getSubprocessPid();
-    		
-    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Going to call " + sUrl);
-    		
-    		Map<String, String> asHeaders = new HashMap<>();
-    		asHeaders.put("Content-Type", "application/json");
-    		
-    		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, "{}", null);    		
-
-    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: " + oHttpCallResponse.getResponseBody());
-    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: stopped " + m_oProcessWorkspace.getProcessObjId() + " SubPid: " + m_oProcessWorkspace.getSubprocessPid());
-    		
-    		return true;
-    	}
-    	catch (Exception oEx) {
-			WasdiLog.errorLog("DockerProcessorEngine.stopApplication: error");
-			return false;
-		}
-    }
-    
-    /**
-     * Check if the workspace folder exists otherwise it creates it
-     * @param oParameter
-     */
-    protected void checkAndCreateWorkspaceFolder(ProcessorParameter oParameter) {
-    	
-        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-
-        File oWorkspacePath = new File(sWorkspacePath);
-
-        if (!oWorkspacePath.exists()) {
-            try {
-                oWorkspacePath.mkdirs();
-            } catch (Exception oWorkspaceFolderException) {
-                WasdiLog.errorLog("DockerProcessorEngine.checkAndCreateWorkspaceFolder: exception creating ws folder: " + oWorkspaceFolderException);
-            }
-        }    	
-    }
-    
-    /**
-     * Get the address of the docker register. 
-     * @return Address or empty string in case of problems
-     */
-    protected String getDockerRegisterAddress() {
-    	try {
-			// We read  the registers from the config
-			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-			
-			if (aoRegisters == null) {
-				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is null, return empty string.");
-				return "";
-			}
-			
-			if (aoRegisters.size() == 0) {
-				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is empty, return empty string.");
-				return "";			
-			}
-			
-			// And we work with our main register
-			return aoRegisters.get(0).address;
-    	}
-    	catch (Exception oEx) {
-            WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: exception creating ws folder: " + oEx);
-        }
-    	
-    	return "";
-    }
     
     /**
      * Run a Docker Processor
@@ -652,6 +547,111 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         }
 
         return true;
+    }    
+
+    
+    @Override
+    public boolean stopApplication(ProcessorParameter oParameter) {
+    	
+    	try {
+    		String sProcessorName = m_oProcessWorkspace.getProductName();
+    		ProcessorRepository oProcessorRepository = new ProcessorRepository();
+    		Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
+    		
+    		DockerUtils oDockerUtils = new DockerUtils(oProcessorToKill, sProcessorName);
+    		ContainerInfo oContainer = oDockerUtils.getContainerInfoByImageName(sProcessorName, oProcessorToKill.getVersion());
+    		
+    		if (oContainer == null) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: error retriving the container info for the app "+ sProcessorName);
+    			return false;
+    		}
+    		
+    		if (oContainer.Names == null) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+    		
+    		if (oContainer.Names.size()<=0) {
+    			WasdiLog.warnLog("DockerProcessorEngine.stopApplication: cannot find names for container of app "+ sProcessorName);
+    			return false;    			
+    		}
+
+    		String sContainerName = oContainer.Names.get(0);
+    		
+    		if (sContainerName.startsWith("/")) {
+    			sContainerName=sContainerName.substring(1);
+    		}
+    		
+    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Found Container named: " + sContainerName);
+    		
+    		// Call localhost:port
+    		String sUrl = getProcessorUrl(oProcessorToKill, sContainerName);
+    		sUrl += "/run/--kill" + "_" + m_oProcessWorkspace.getSubprocessPid();
+    		
+    		WasdiLog.debugLog("DockerProcessorEngine.stopApplication: Going to call " + sUrl);
+    		
+    		Map<String, String> asHeaders = new HashMap<>();
+    		asHeaders.put("Content-Type", "application/json");
+    		
+    		HttpCallResponse oHttpCallResponse = HttpUtils.httpPost(sUrl, "{}", null);    		
+
+    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: " + oHttpCallResponse.getResponseBody());
+    		WasdiLog.infoLog("DockerProcessorEngine.stopApplication: stopped " + m_oProcessWorkspace.getProcessObjId() + " SubPid: " + m_oProcessWorkspace.getSubprocessPid());
+    		
+    		return true;
+    	}
+    	catch (Exception oEx) {
+			WasdiLog.errorLog("DockerProcessorEngine.stopApplication: error");
+			return false;
+		}
+    }
+    
+    /**
+     * Check if the workspace folder exists otherwise it creates it
+     * @param oParameter
+     */
+    protected void checkAndCreateWorkspaceFolder(ProcessorParameter oParameter) {
+    	
+        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+
+        File oWorkspacePath = new File(sWorkspacePath);
+
+        if (!oWorkspacePath.exists()) {
+            try {
+                oWorkspacePath.mkdirs();
+            } catch (Exception oWorkspaceFolderException) {
+                WasdiLog.errorLog("DockerProcessorEngine.checkAndCreateWorkspaceFolder: exception creating ws folder: " + oWorkspaceFolderException);
+            }
+        }    	
+    }
+    
+    /**
+     * Get the address of the docker register. 
+     * @return Address or empty string in case of problems
+     */
+    protected String getDockerRegisterAddress() {
+    	try {
+			// We read  the registers from the config
+			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+			
+			if (aoRegisters == null) {
+				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is null, return empty string.");
+				return "";
+			}
+			
+			if (aoRegisters.size() == 0) {
+				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is empty, return empty string.");
+				return "";			
+			}
+			
+			// And we work with our main register
+			return aoRegisters.get(0).address;
+    	}
+    	catch (Exception oEx) {
+            WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: exception creating ws folder: " + oEx);
+        }
+    	
+    	return "";
     }
 
     /**
@@ -1362,7 +1362,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 	            DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor.getName()), m_sDockerRegistry);
 	            
 	            // Check if is started otherwise start it
-	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter);
+	            String sContainerName = startContainerAndGetName(oDockerUtils,oProcessor, oParameter, false);
 	            String sProcessorUrl = getProcessorUrl(oProcessor, sContainerName);
 				
 				// Create package manager info

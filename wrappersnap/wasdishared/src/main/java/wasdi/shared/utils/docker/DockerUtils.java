@@ -612,7 +612,7 @@ public class DockerUtils {
         		bNameIsDefined = false;
         	}
             
-            WasdiLog.debugLog("DockerUtils.start: Starting Container Named " + sContainerName + " created");
+            WasdiLog.debugLog("DockerUtils.start: Starting Container Named " + sContainerName);
             
             // Prepare the url to start it
     		String sUrl = WasdiConfig.Current.dockers.internalDockerAPIAddress;
