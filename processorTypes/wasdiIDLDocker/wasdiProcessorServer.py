@@ -21,21 +21,23 @@ def run(processId):
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	os.chdir(dir_path)
 
+	sLocalPath = '/home/appwasdi/application'
+
 	try:
 		# Copy updated files from processor folder to the docker
-		copy_tree("/wasdi", "/home/wasdi", update=1)
+		copy_tree("/wasdi", sLocalPath, update=1)
 		print("[" + processId+ "] wasdiProcessorServer: processors files updated", flush=True)
 
 		# It looks impossible to move a file from host to container. So ENVI installation files 
 		# are in the processor folder and copied to the docker. After the first run, delete it
 		# The launcher will delete the ones in the host folder
 		# But in the first run files are still dear: here to save space we delete it
-		if os.path.exists("/home/wasdi/envi552-linux.tar"):
-			os.remove("/home/wasdi/envi552-linux.tar")
-		if os.path.exists("/home/wasdi/install.sh"):
-			os.remove("/home/wasdi/install.sh")
-		if os.path.exists("/home/wasdi/o_licenseserverurl.txt"):
-			os.remove("/home/wasdi/o_licenseserverurl.txt")
+		if os.path.exists(sLocalPath + "/envi552-linux.tar"):
+			os.remove(sLocalPath + "/envi552-linux.tar")
+		if os.path.exists(sLocalPath + "/install.sh"):
+			os.remove(sLocalPath + "/install.sh")
+		if os.path.exists(sLocalPath + "/o_licenseserverurl.txt"):
+			os.remove(sLocalPath + "/o_licenseserverurl.txt")
 	except:
 		print("[" + processId+ "] wasdiProcessorServer: Unexpected error ", repr(sys.exc_info()[0]), flush=True)
 
@@ -215,7 +217,6 @@ def run(processId):
 	wasdi.openWorkspaceById(sWorkspaceId)
 	#Run the processor
 	try:
-		sLocalPath = '/home/wasdi/'
 		sConfigFilePath = sLocalPath + processId + '.config'
 		sParamFilePath = sLocalPath +  processId + '.params'
 
