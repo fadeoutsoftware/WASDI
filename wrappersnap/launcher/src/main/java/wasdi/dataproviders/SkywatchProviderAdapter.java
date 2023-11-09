@@ -88,7 +88,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 		}
 
 		Map<String, String> aoWasdiPayload = extractWasdiPayloadFromUrl(sFileURL);
-		if (aoWasdiPayload == null) {
+		if (aoWasdiPayload.isEmpty()) {
 			return null;
 		}
 
@@ -144,7 +144,7 @@ public class SkywatchProviderAdapter extends ProviderAdapter {
 		if (Utils.isNullOrEmpty(sFileURL)) return "";
 
 		Map<String, String> aoWasdiPayload = extractWasdiPayloadFromUrl(sFileURL);
-		if (aoWasdiPayload == null) {
+		if (aoWasdiPayload.isEmpty()) {
 			return null;
 		}
 

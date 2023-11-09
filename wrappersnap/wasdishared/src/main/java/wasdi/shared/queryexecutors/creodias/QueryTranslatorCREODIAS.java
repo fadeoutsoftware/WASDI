@@ -56,7 +56,7 @@ public class QueryTranslatorCREODIAS extends QueryTranslator {
 			QueryViewModel oQueryViewModel = parseWasdiClientQuery(sQueryFromClient);
 			
 			// P.Campanella: add support to Sentinel5P, using the new Query View Model
-			if (oQueryViewModel.platformName==Platforms.SENTINEL5P) {
+			if (oQueryViewModel.platformName.equals(Platforms.SENTINEL5P)) {
 				
 				// Set start and end date
 				String sTimeStart = oQueryViewModel.startFromDate.substring(0, 10);

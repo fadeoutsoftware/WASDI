@@ -167,7 +167,7 @@ public class Collections   {
 					List<BigDecimal> aoBboxValues = new ArrayList<BigDecimal>();
 
 					for (Double dValue : oConfigCollection.extent.spatial.bbox.get(0)) {
-						aoBboxValues.add(new BigDecimal(dValue));
+						aoBboxValues.add(BigDecimal.valueOf(dValue));
 					}
 
 					List<List<BigDecimal>> aoBbox = new ArrayList<List<BigDecimal>>();

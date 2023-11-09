@@ -69,7 +69,7 @@ public class CMHttpUtils {
 
 		Map<String, String> asCookies = acquireCookies(sUrlGetSize, sUsername, sPassword);
 
-		if (asCookies != null) {
+		if (!asCookies.isEmpty()) {
 			String sRequestId = null;
 
 			String sResponseProductDownload = callGetAndObtainResponse(sUrlProductDownload, asCookies);

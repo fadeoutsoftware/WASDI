@@ -256,6 +256,11 @@ public class SkywatchHttpUtils {
 		String sPipelineId = null;
 
 		GetListPipelinesResponse oGetListPipelinesResponse = getPipelines();
+		
+		if (oGetListPipelinesResponse == null) {
+			s_oLogger.debug("SkywatchHttpUtils.downloadProduct: no pipelines found. Returning null.");
+			return null;
+		}
 
 		List<GetListPipelinesResponse.Datum> oData = oGetListPipelinesResponse.getData();
 

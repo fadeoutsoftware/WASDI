@@ -855,12 +855,16 @@ public final class HttpUtils {
 				File oTargetFile = new File(sOutputFilePath);
 				File oTargetDir = oTargetFile.getParentFile();
 
-				// If the targetDir exists but it is not a directory, delete it as it prevents the creation of the actual directory
-				if (oTargetDir != null && oTargetDir.exists() && !oTargetDir.isDirectory()) {
-					oTargetDir.delete();
+				
+				if (oTargetDir != null) {
+					// If the targetDir exists but it is not a directory, delete it as it prevents the creation of the actual directory
+					if (oTargetDir.exists() && !oTargetDir.isDirectory()) {
+						oTargetDir.delete();
+					}
+					oTargetDir.mkdirs();
+				} else {
+					WasdiLog.warnLog("HttpUtils.downloadFile: the target directory was not created, because it is null");
 				}
-
-				oTargetDir.mkdirs();
 
 				try (FileOutputStream oOutputStream = new FileOutputStream(sOutputFilePath);
 						InputStream oInputStream = oConnection.getInputStream()) {

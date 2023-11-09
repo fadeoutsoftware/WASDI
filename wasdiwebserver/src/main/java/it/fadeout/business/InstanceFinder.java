@@ -142,11 +142,11 @@ public class InstanceFinder {
 			m_aoSatellites.add(oSatellite);
 		}
 
-		if (m_aoSatellites != null) {
+		if (!m_aoSatellites.isEmpty()) {
 			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: Satellites Available: " + m_aoSatellites.size());
 		}
 		else {
-			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
+			WasdiLog.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites EMPTY ");
 		}
 		
 		// Check selected sensors: for each satellite 

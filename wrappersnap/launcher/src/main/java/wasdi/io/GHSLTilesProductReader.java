@@ -143,15 +143,16 @@ public class GHSLTilesProductReader extends WasdiProductReader {
 		if (asBBoxes.size() == 1) {
 			String sBBoxFormat = asBBoxes.get(0);
 			
-			Stream<String[]> aaCoordinatesStream = Arrays.asList(sBBoxFormat.split(", ")).stream
-					().map(sPair -> sPair.split(" "));
+			List<String> asCoordinates = Arrays.asList(sBBoxFormat.split(", "));
 			
-			List<Double> adLongitude = aaCoordinatesStream
+			List<Double> adLongitude = asCoordinates.stream()
+					.map(sPair -> sPair.split(" "))
 					.map(aCoordinates -> aCoordinates[0].trim())
 					.map(sLongitude -> Double.parseDouble(sLongitude))
 					.collect(Collectors.toList());
 			
-			List<Double> adLatitude = aaCoordinatesStream
+			List<Double> adLatitude = asCoordinates.stream()
+					.map(sPair -> sPair.split(" "))
 					.map(aCoordinates -> aCoordinates[1].trim())
 					.map(sLatitude -> Double.parseDouble(sLatitude))
 					.collect(Collectors.toList());
