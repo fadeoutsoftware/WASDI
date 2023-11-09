@@ -148,7 +148,7 @@ public final class S3BucketUtils {
 
 		Long endingDate = parseDate(asProperties.get("RangeEndingDate"), asProperties.get("RangeEndingTime"));
 		if (endingDate != null) {
-			oItem.setEndingDate(beginningDate.doubleValue());
+			oItem.setEndingDate(endingDate.doubleValue());
 		}
 
 		String sImageFootPrint = extractFootprint(asProperties);

@@ -244,7 +244,7 @@ public class TerrascopeProviderAdapter extends ProviderAdapter {
 				int iMsSleep = (int) ((Math.random() * 15_000) + 10_000);
 				Thread.sleep(iMsSleep);
 			} catch (InterruptedException oEx) {
-				Thread.interrupted();
+				Thread.currentThread().interrupt();
 				WasdiLog.errorLog("TerrascopeProviderAdapter.downloadHttpsPost: exception in sleep for retry: ", oEx);
 			}
 		}

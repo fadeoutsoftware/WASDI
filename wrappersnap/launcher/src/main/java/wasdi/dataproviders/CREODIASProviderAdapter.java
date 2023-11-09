@@ -277,8 +277,13 @@ public class CREODIASProviderAdapter extends ProviderAdapter {
 						WasdiLog.debugLog("CREODIASProviderAdapter.executeDownloadFile: download completed: " + sResult);
 						break;
 					}
-				} catch (Exception oE) {
-					WasdiLog.errorLog("CREODIASProviderAdapter.executeDownloadFile: " + oE);
+				} 
+				catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("CREODIASProviderAdapter.executeDownloadFile. Current thread was interrupted");
+				}
+				catch (Exception oE) {
+					WasdiLog.errorLog("CREODIASProviderAdapter.executeDownloadFile: ", oE);
 				}
 			}
 		}

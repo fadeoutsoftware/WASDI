@@ -491,58 +491,56 @@ public class SocketUtils {
 			return oHttpResponse;
 		}
 
-		InputStream oFileInStream = null;
 		DockerHttpClient oHttpClient = null;
 		
 		try {
 			
-			 oHttpClient = initializeDockerClient();
+			oHttpClient = initializeDockerClient();
 			
 			if (oHttpClient == null) {
 				WasdiLog.errorLog("SocketUtils.httpPostFile. Docker HTTP client is null. Returning an empty response.");
 				return oHttpResponse;
 			}	
 			
-			oFileInStream = new FileInputStream(oFile);
+			try (InputStream oFileInStream = new FileInputStream(oFile)) {
 			
-			String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
-			if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
-			sPath = sPath.substring(sBaseAddress.length());			
+				String sBaseAddress = WasdiConfig.Current.dockers.internalDockerAPIAddress;
+				if (sBaseAddress.endsWith("/")) sBaseAddress = sBaseAddress.substring(0, sBaseAddress.length()-1);
+				sPath = sPath.substring(sBaseAddress.length());			
+				
+				Request oRequest = createRequest(Request.Method.POST, sPath, null, oFileInStream);
 			
-			Request oRequest = createRequest(Request.Method.POST, sPath, null, oFileInStream);
-			
-			
-			try (Response oResponse = oHttpClient.execute(oRequest)) {
-				
-				int iResponseCode = oResponse.getStatusCode();
-				
-				oHttpResponse.setResponseCode(Integer.valueOf(iResponseCode));
-				
-				
-				// here we are not making a difference between a successful code or an error code. 
-				InputStream oInputStreamBody = oResponse.getBody();
-				
-				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-				
-				String sResult = "";
-				if (oInputStreamBody != null) {
-					Util.copyStream(oInputStreamBody, oBytearrayOutputStream);
-					sResult = oBytearrayOutputStream.toString();
-					oHttpResponse.setResponseBody(sResult);
-					oInputStreamBody.close();
-				}
-
-				
-			} catch (Exception oEx) {
-				WasdiLog.errorLog("SocketUtils.httpPostFile: Exception when trying to execute the request", oEx);
-			} 	
+				try (Response oResponse = oHttpClient.execute(oRequest)) {
+					
+					int iResponseCode = oResponse.getStatusCode();
+					
+					oHttpResponse.setResponseCode(Integer.valueOf(iResponseCode));
+					
+					
+					// here we are not making a difference between a successful code or an error code. 
+					InputStream oInputStreamBody = oResponse.getBody();
+					
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					
+					String sResult = "";
+					if (oInputStreamBody != null) {
+						Util.copyStream(oInputStreamBody, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+						oHttpResponse.setResponseBody(sResult);
+						oInputStreamBody.close();
+					}
+	
+					
+				} catch (Exception oEx) {
+					WasdiLog.errorLog("SocketUtils.httpPostFile: Exception when trying to execute the request", oEx);
+				} 	
+			}
 			
 		} catch (Exception oE) {
 			WasdiLog.debugLog("SocketUtils.httpPostFile: could not open file due to: " + oE.getMessage() + ", aborting");
 		} finally {
 			try {
 				if (oHttpClient != null) oHttpClient.close();
-				if (oFileInStream != null) oFileInStream.close();
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("SocketUtils.httpPut: Impossible to close the connection ", oEx);
 			}
@@ -552,5 +550,19 @@ public class SocketUtils {
 		
 	}
 	
-
+	
+	public static void main(String[]args) throws Exception {
+		
+		try {
+			try {
+				Thread.sleep(2000);
+				throw new InterruptedException();
+			} catch (InterruptedException o) {
+				System.out.print("inner exception");
+			}
+			
+		} catch (Exception o) {
+			System.out.println("genera exception");
+		}
+	}
 }

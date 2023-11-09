@@ -321,7 +321,12 @@ public class Publishband extends Operation {
                 oVM.setGeoserverUrl(oPublishedBand.getGeoserverUrl());
 
                 // P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the process
-                Thread.sleep(1000);
+                try {
+                	Thread.sleep(1000);
+                } catch (InterruptedException oEx) {
+                	Thread.currentThread().interrupt();
+                	WasdiLog.errorLog("PunlishBand.executeOperation: thread was interrupted");
+                }
 
                 m_oSendToRabbit.SendRabbitMessage(bResultPublishBand, LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(), oVM, oParameter.getExchange());
                 

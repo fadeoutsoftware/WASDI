@@ -149,24 +149,31 @@ public class RunTimeUtils {
 			Process oProcess = oProcessBuilder.start();
 			
 			if (bWait) {
-				int iProcOuptut = oProcess.waitFor();
-				oReturn.setOperationReturn(iProcOuptut);
+				try {
+					int iProcOuptut = oProcess.waitFor();
+					oReturn.setOperationReturn(iProcOuptut);
+					WasdiLog.debugLog("RunTimeUtils.localShellExec CommandLine RETURNED: " + iProcOuptut);
+				} 
+				catch (InterruptedException oEx) {
+					Thread.currentThread().interrupt();
+					WasdiLog.errorLog("RunTimeUtils.localShellExec: process was interrupted");
+					return oReturn;
+				}
 				
 				if (bReadOutput) {
 					String sOutputFileContent = readLogFile(oLogFile);
 					oReturn.setOperationLogs(sOutputFileContent);
 					deleteLogFile(oLogFile);					
-				}
+				}	
 				
-				WasdiLog.debugLog("RunTimeUtils.localShellExec CommandLine RETURNED: " + iProcOuptut);
 			}
 			
 			oReturn.setOperationOk(true);
 			
 			return oReturn;
 		}
-		catch (Exception e) {
-			WasdiLog.errorLog("RunTimeUtils.localShellExec exception: " + e.getMessage());
+		catch (Exception oEx) {
+			WasdiLog.errorLog("RunTimeUtils.localShellExec exception: ", oEx);
 			return oReturn;
 		}		
 	}
