@@ -35,18 +35,12 @@ public class TarUtils {
 	public static boolean tarFiles(List<String> asInputFilesFullPath, String sInputFilesBaseFolder, String sOutputTarFileFullPath) {
 		boolean bRes = false;
 		
-		OutputStream oOutputStream = null;
-		BufferedOutputStream oBufferedOutputStream = null;
-		TarArchiveOutputStream oTarOutputStream = null;
 		
-		try {
-			// Stream to the output file
-			oOutputStream = Files.newOutputStream(Paths.get(sOutputTarFileFullPath));
-			
-			// Lets tar this stream
-			oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
-			oTarOutputStream = new TarArchiveOutputStream(oBufferedOutputStream);
-			
+		try (OutputStream oOutputStream = Files.newOutputStream(Paths.get(sOutputTarFileFullPath)); // Stream to the output file
+				// Lets tar this stream
+				BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
+				TarArchiveOutputStream oTarOutputStream = new TarArchiveOutputStream(oBufferedOutputStream);) {
+						
 			// For all the files to add to the TAR
 			for (String sInputFile : asInputFilesFullPath) {
 				
@@ -67,24 +61,12 @@ public class TarUtils {
 				oTarOutputStream.closeArchiveEntry();
 			}
 			
-			// Close the tar stream
-			oTarOutputStream.close();
-			
 			bRes = true;
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("TarUtils.tarFiles: exception ", oEx);
 		}
-		finally {
-			try {
-				if (oOutputStream != null) oOutputStream.close();
-				if (oBufferedOutputStream != null) oBufferedOutputStream.close();
-				if (oTarOutputStream != null) oTarOutputStream.close();
-			}
-			catch (IOException oEx) {
-				WasdiLog.errorLog("TarUtils.tarFiles: exception while closing the I/O resources", oEx);
-			}
-		}
+		
 		
 		return bRes;
 	}

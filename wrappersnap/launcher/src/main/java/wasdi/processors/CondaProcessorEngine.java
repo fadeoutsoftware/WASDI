@@ -42,8 +42,7 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 		super.onAfterUnzipProcessor(sProcessorFolder);
 		
 		InputStreamReader oFileReader = null;
-		FileOutputStream oNewEnvFile = null;
-		BufferedWriter oEnvWriter = null;
+		
 		
 		try {
 			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: adjust env.yml");
@@ -79,36 +78,35 @@ public class CondaProcessorEngine extends DockerProcessorEngine {
 			
 			WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: writing new env.yml file");
 			
-			oNewEnvFile = new FileOutputStream(oEnvFile);
+			try (FileOutputStream oNewEnvFile = new FileOutputStream(oEnvFile);
+					BufferedWriter oEnvWriter = new BufferedWriter(new OutputStreamWriter(oNewEnvFile, StandardCharsets.UTF_8)); ) {
 			 
-			oEnvWriter = new BufferedWriter(new OutputStreamWriter(oNewEnvFile, StandardCharsets.UTF_8));
-		 
-			for (int iRows = 0; iRows < asEnvRows.size(); iRows++) {
-				
-				String sRow = asEnvRows.get(iRows);
-								
-				if (sRow.contains("name: ")) {
-					WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing name");
-					sRow = "name: base";
+				for (int iRows = 0; iRows < asEnvRows.size(); iRows++) {
+					
+					String sRow = asEnvRows.get(iRows);
+									
+					if (sRow.contains("name: ")) {
+						WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing name");
+						sRow = "name: base";
+					}
+					else if (sRow.startsWith("prefix:")) {
+						WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
+						sRow = "prefix: /home/tomcat/miniconda";
+					}
+									
+					oEnvWriter.write(sRow);
+					oEnvWriter.newLine();
 				}
-				else if (sRow.startsWith("prefix:")) {
-					WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
-					sRow = "prefix: /home/tomcat/miniconda";
-				}
-								
-				oEnvWriter.write(sRow);
-				oEnvWriter.newLine();
+			 
+				oNewEnvFile.flush();
 			}
-		 
-			oNewEnvFile.flush();
+			
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception ", oEx);
 		} finally {
 			try {
 				if (oFileReader != null) oFileReader.close();
-				if (oNewEnvFile != null) oNewEnvFile.close();
-				if (oEnvWriter != null) oEnvWriter.close();
 			} catch (IOException oEx) {
 				WasdiLog.errorLog("CondaProcessorEngine.onAfterUnzipProcessor: exception when closing resources", oEx);
 			}
