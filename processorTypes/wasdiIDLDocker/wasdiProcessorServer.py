@@ -216,16 +216,19 @@ def run(processId):
 		oConfigFile = open(sConfigFilePath, 'w+')
 		oConfigFile.write('')
 
-		oConfigFile.write('BASEPATH=' + wasdi.getBasePath() + '\r\n');
-		oConfigFile.write('USER=' + sUser + '\r\n');
-		oConfigFile.write('WORKSPACEID=' + sWorkspaceId + '\r\n');
-		oConfigFile.write('SESSIONID=' + sSessionId + '\r\n');
-		oConfigFile.write('ISONSERVER=1' + '\r\n');
-		oConfigFile.write('DOWNLOADACTIVE=0\r\n');
-		oConfigFile.write('UPLOADACTIVE=0\r\n');
-		oConfigFile.write('VERBOSE=0\r\n');
-		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n');
-		oConfigFile.write('MYPROCID=' + processId + '\r\n');
+		oConfigFile.write('BASEPATH=' + wasdi.getBasePath() + '\r\n')
+		oConfigFile.write('USER=' + sUser + '\r\n')
+		oConfigFile.write('WORKSPACEID=' + sWorkspaceId + '\r\n')
+		oConfigFile.write('SESSIONID=' + sSessionId + '\r\n')
+		oConfigFile.write('ISONSERVER=1' + '\r\n')
+		oConfigFile.write('DOWNLOADACTIVE=0\r\n')
+		oConfigFile.write('UPLOADACTIVE=0\r\n')
+		oConfigFile.write('VERBOSE=0\r\n')
+		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n')
+		oConfigFile.write('MYPROCID=' + processId + '\r\n')
+		if sBaseUrl is not None:
+			if sBaseUrl != "":
+				oConfigFile.write('BASEURL=' + sBaseUrl + '\r\n')
 		oConfigFile.close()
 
 		#Write Params:
