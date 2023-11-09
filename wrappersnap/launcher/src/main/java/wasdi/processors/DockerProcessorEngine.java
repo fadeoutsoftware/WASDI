@@ -356,6 +356,54 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
     }
     
     /**
+     * Check if the workspace folder exists otherwise it creates it
+     * @param oParameter
+     */
+    protected void checkAndCreateWorkspaceFolder(ProcessorParameter oParameter) {
+    	
+        String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
+
+        File oWorkspacePath = new File(sWorkspacePath);
+
+        if (!oWorkspacePath.exists()) {
+            try {
+                oWorkspacePath.mkdirs();
+            } catch (Exception oWorkspaceFolderException) {
+                WasdiLog.errorLog("DockerProcessorEngine.checkAndCreateWorkspaceFolder: exception creating ws folder: " + oWorkspaceFolderException);
+            }
+        }    	
+    }
+    
+    /**
+     * Get the address of the docker register. 
+     * @return Address or empty string in case of problems
+     */
+    protected String getDockerRegisterAddress() {
+    	try {
+			// We read  the registers from the config
+			List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+			
+			if (aoRegisters == null) {
+				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is null, return empty string.");
+				return "";
+			}
+			
+			if (aoRegisters.size() == 0) {
+				WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: registers list is empty, return empty string.");
+				return "";			
+			}
+			
+			// And we work with our main register
+			return aoRegisters.get(0).address;
+    	}
+    	catch (Exception oEx) {
+            WasdiLog.errorLog("DockerProcessorEngine.getDockerRegisterAddress: exception creating ws folder: " + oEx);
+        }
+    	
+    	return "";
+    }
+    
+    /**
      * Run a Docker Processor
      * 
      * @param oParameter Processo Parameter
@@ -379,17 +427,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
         try {
 
             // Check workspace folder
-            String sWorkspacePath = PathsConfig.getWorkspacePath(oParameter);
-
-            File oWorkspacePath = new File(sWorkspacePath);
-
-            if (!oWorkspacePath.exists()) {
-                try {
-                    oWorkspacePath.mkdirs();
-                } catch (Exception oWorkspaceFolderException) {
-                    WasdiLog.errorLog("DockerProcessorEngine.run: exception creating ws: " + oWorkspaceFolderException);
-                }
-            }
+        	checkAndCreateWorkspaceFolder(oParameter);
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 

@@ -52,24 +52,16 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	 */
 	@Override
 	public boolean deploy(ProcessorParameter oParameter, boolean bFirstDeploy) {
-				
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: registers list is empty, return false.");
-			return false;			
-		}
 		
 		// We do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;
+		m_sDockerRegistry = getDockerRegisterAddress();
+		
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: register address not found, return false.");
+			return false;			
+		}
 		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry = " + m_sDockerRegistry);
 		
@@ -113,23 +105,15 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 			return true;			
 		}
 		
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: registers list is empty, return false.");
-			return false;			
-		}		
-		
 		// We do not need to start after the build
 		m_bRunAfterDeploy = false;
 		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;
+		m_sDockerRegistry = getDockerRegisterAddress();
+		
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: register address not found, return false.");
+			return false;			
+		}
 		
 		// Get Processor Name and Id
 		String sProcessorId = oParameter.getProcessorID();		
@@ -191,22 +175,14 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
             WasdiLog.errorLog("PythonPipProcessorEngine2.run: parameter is null");
             return false;
         }
-        
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.run: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.run: registers list is empty, return false.");
-			return false;			
-		}
 		
 		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;
+		m_sDockerRegistry = getDockerRegisterAddress();
+		
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.run: register address not found, return false.");
+			return false;			
+		}
 		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.run: Docker Registry " + m_sDockerRegistry);
 		
@@ -289,21 +265,13 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	@Override
 	public boolean environmentUpdate(ProcessorParameter oParameter) {
 		
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		// And we work with our main register
+		m_sDockerRegistry = getDockerRegisterAddress();
 		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: registers list is empty, return false.");
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: register address not found, return false.");
 			return false;			
 		}
-		
-		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;
 		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: Docker Registry = " + m_sDockerRegistry);
 		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: call base class environmentUpdate");
@@ -313,21 +281,14 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	
 	@Override
 	public boolean refreshPackagesInfo(ProcessorParameter oParameter) {
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
-		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.refreshPackagesInfo: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.refreshPackagesInfo: registers list is empty, return false.");
-			return false;			
-		}
 		
 		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;
+		m_sDockerRegistry = getDockerRegisterAddress();
+		
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: register address not found, return false.");
+			return false;			
+		}
 		
 		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: Docker Registry = " + m_sDockerRegistry);
 		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: call base class refreshPackagesInfo");
@@ -338,24 +299,13 @@ public class PythonPipProcessorEngine2 extends PipProcessorEngine {
 	@Override
 	public boolean delete(ProcessorParameter oParameter) {
 		
-		// We read  the registers from the config
-		List<DockerRegistryConfig> aoRegisters = WasdiConfig.Current.dockers.getRegisters();
+		// And we work with our main register
+		m_sDockerRegistry = getDockerRegisterAddress();
 		
-		if (aoRegisters == null) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is null, return false.");
-			return false;
-		}
-		
-		if (aoRegisters.size() == 0) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: registers list is empty, return false.");
+		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
+			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: register address not found, return false.");
 			return false;			
 		}
-		
-		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.delete: Registry set, call base class delete.");
-		
-		// And we work with our main register
-		m_sDockerRegistry = aoRegisters.get(0).address;	
 		
 		return super.delete(oParameter);
 	}
