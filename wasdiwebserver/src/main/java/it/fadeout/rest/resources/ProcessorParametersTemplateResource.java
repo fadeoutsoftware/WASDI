@@ -360,11 +360,10 @@ public class ProcessorParametersTemplateResource {
 	public PrimitiveResult shareProcessorParametersTemplate(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processorParametersTemplate") String sProcessorParametersTemplateId, @QueryParam("userId") String sDestinationUserId, @QueryParam("rights") String sRights) {
 
-		WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate( WS: " + sProcessorParametersTemplateId + ", User: " + sDestinationUserId + " )");
+		WasdiLog.debugLog("ProcessorParametersTemplateResource.shareProcessorParametersTemplate( Template Id: " + sProcessorParametersTemplateId + ", User: " + sDestinationUserId + " )");
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		
 
 		// Validate Session
 		User oRequesterUser = Wasdi.getUserFromSession(sSessionId);
