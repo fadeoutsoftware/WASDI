@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import wasdi.shared.utils.Utils;
@@ -120,6 +121,11 @@ public class DockersConfig {
 	public int processorsInternalPort = 5000;
 	
 	/**
+	 * Configuration of the processor types
+	 */
+	public List<ProcessorTypeConfig> processorTypes = new ArrayList<>();
+	
+	/**
 	 * Get the list of registers ordered by priority
 	 * @return Ordered list of registers
 	 */
@@ -182,7 +188,38 @@ public class DockersConfig {
 			WasdiLog.errorLog("DockersConfig.getShellExecItem: Exception getting the command " + sCommand, oEx);
 			return null;
 		}
-
+	}
+	
+	/**
+	 * Utility method to quickly get a Processor Type Config
+	 * @param sProcessorType
+	 * @return
+	 */
+	public ProcessorTypeConfig getProcessorTypeConfig(String sProcessorType) {
+		
+		if (Utils.isNullOrEmpty(sProcessorType)) {
+			WasdiLog.warnLog("DockersConfig.getProcessorTypeConfig: sProcessorType is null");
+			return null;			
+		}
+		
+		if (this.processorTypes == null) {
+			WasdiLog.warnLog("DockersConfig.getProcessorTypeConfig: there are no processor Types configured");
+			return null;						
+		}
+		
+		try {
+			
+			for (ProcessorTypeConfig oProcessorTypeConfig : processorTypes) {
+				if (Utils.isNullOrEmpty(oProcessorTypeConfig.processorType)) continue;
+				if (oProcessorTypeConfig.processorType.equals(sProcessorType)) return oProcessorTypeConfig;
+			}
+		}
+		catch (Exception oEx) {
+			// What happened?
+			WasdiLog.errorLog("DockersConfig.getShellExecItem: Exception getting the processor Type config " + sProcessorType, oEx);
+		}	
+		
+		return null;
 	}
 	
 }

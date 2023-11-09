@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.shared.business.processors.Processor;
 import wasdi.shared.config.DockerRegistryConfig;
+import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
+import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
@@ -534,6 +536,34 @@ public class DockerUtils {
                         		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
                         		oContainerCreateParams.HostConfig.ExtraHosts.add(sExtraHost);
                         	}
+                    	}
+                    }
+                    
+                    
+                    String sProcessorType = m_oProcessor.getType();
+                    ProcessorTypeConfig oProcessorTypeConfig = WasdiConfig.Current.dockers.getProcessorTypeConfig(sProcessorType);
+                    
+                    if (oProcessorTypeConfig != null) {
+                    	if (oProcessorTypeConfig.environmentVariables != null) {
+                    		
+                    		for (EnvironmentVariableConfig oEnvironmentVariable : oProcessorTypeConfig.environmentVariables) {
+                    			
+                    			String sKey = oEnvironmentVariable.key;
+                    			String sValue = oEnvironmentVariable.value;
+                    			
+                    			if (Utils.isNullOrEmpty(sKey)) {
+                    				WasdiLog.warnLog("DockerUtils.start: found the ProcessorTypeConfig but there is an env variable with key null. Jump it");
+                    				continue;
+                    			}
+                    			
+                    			if (sValue == null) sValue="";
+                    			
+                    			String sVariable = sKey + "=" + sValue;
+                    			
+                    			WasdiLog.warnLog("DockerUtils.start: adding env variable: " + sVariable);
+                    			
+                    			oContainerCreateParams.Env.add(sVariable);
+							}
                     	}
                     }
                     
