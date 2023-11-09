@@ -15,8 +15,7 @@ networks:
       com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
       com.docker.network.bridge.name: "br-{{ sWasdiDockerNetworkName }}"
       com.docker.network.driver.mtu: "1500"
-    external: {% if bWasdiDockerNetworkMustBeCreated %}false{% else %}true{% endif %}
-
+    external: true
     ipam:
       driver: "default"
       config:
@@ -75,7 +74,7 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_configuration:{{ sWasdiToolboxRootDirectoryPath }}/configuration:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiToolboxServiceName }}/opt_wasdi_toolbox_output:{{ sWasdiToolboxRootDirectoryPath }}/output:rw
 
-  mongodb-backup:
+  mongodb-backupDatabaseLogicalDump:
     command:
       - --mode-execute
       - real
@@ -98,7 +97,7 @@ services:
       - /data/wasdibck/cache/mongodb:/mnt/cache:rw
       - /data/wasdibck/mongodb:/mnt/data:rw
 
-  postgresql-backup:
+  postgresql-backupDatabaseLogicalDump:
     command:
       - --mode-execute
       - real
@@ -106,8 +105,8 @@ services:
     environment:
       - TOOLBOX_LOG_VERBOSE=true
       - TOOLBOX_LOG_ON_SCREEN=true
-      - TOOLBOX_MODULE=postgresql
-      - TOOLBOX_SUBMODULE=backupDatabaseLogicalDump
+      - TOOLBOX_MODULE_NAME=postgresql
+      - TOOLBOX_SUBMODULE_NAME=backupDatabaseLogicalDump
     image: {{ sWasdiToolboxServiceName }}:latest
     restart: "no"
     ulimits:
