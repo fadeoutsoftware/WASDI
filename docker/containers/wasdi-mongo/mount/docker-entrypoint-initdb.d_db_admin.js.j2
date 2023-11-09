@@ -19,3 +19,16 @@ dbAdmin.createUser(
         ]
     }
 );
+
+dbAdmin.createUser(
+    {
+        user: _getEnv('sWasdiMongoAdditionalUserMetrologyUserName'),
+        pwd: _getEnv('sWasdiMongoAdditionalUserMetrologyUserPassword'),
+        roles: [
+            {
+                role: 'clusterMonitor',
+                db: 'admin'
+            }
+        ]
+    }
+);
