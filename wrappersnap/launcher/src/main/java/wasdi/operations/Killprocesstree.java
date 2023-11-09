@@ -169,13 +169,12 @@ public class Killprocesstree extends Operation {
 	private void killProcess(ProcessWorkspace oProcessToKill) {
 		
 		try {
-			
 			if (WasdiConfig.Current.shellExecLocally) {
 				int iPid = oProcessToKill.getPid();
 				
 				if (iPid>1) {
 					RunTimeUtils.killProcess(iPid);
-				}				
+				}
 			}
 			else { 
 				String sContainerId = oProcessToKill.getContainerId();
