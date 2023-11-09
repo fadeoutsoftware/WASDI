@@ -2,7 +2,7 @@
 
 #### PARAMETER ####
 sCommandIdl="/usr/local/bin/idl"
-sWasdiHome="/home/wasdi"
+sWasdiHome="/home/appwasdi/application"
 sScriptFile="${sWasdiHome}/call_idl.pro"
 sStatus="RUNNING"
 iDuration=-1
