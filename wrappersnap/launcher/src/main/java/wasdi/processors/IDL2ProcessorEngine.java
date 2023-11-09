@@ -183,21 +183,30 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 		try {
 			String sFileName = sProcessorFolder+"envi552-linux.tar";
 			File oFile = new File(sFileName);
-			boolean bIsFileDeleted = oFile.delete();
-			if (!bIsFileDeleted) 
-				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName); 
+			boolean bIsFileDeleted = false;
+			if (oFile.exists()) {
+				bIsFileDeleted = oFile.delete();
+				if (!bIsFileDeleted) 
+					WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName); 				
+			}
+			
 			
 			sFileName = sProcessorFolder+"o_licenseserverurl.txt";
 			oFile = new File(sFileName);
-			bIsFileDeleted = oFile.delete();
-			if (!bIsFileDeleted) 
-				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);
+			if (oFile.exists()) {
+				bIsFileDeleted = oFile.delete();
+				if (!bIsFileDeleted) 
+					WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);				
+			}
+			
 			
 			sFileName = sProcessorFolder + "install.sh";
-			oFile = new File(sFileName);
-			bIsFileDeleted = oFile.delete();
-			if (!bIsFileDeleted) 
-				WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);
+			oFile = new File(sFileName);			
+			if (oFile.exists()) {
+				bIsFileDeleted = oFile.delete();
+				if (!bIsFileDeleted) 
+					WasdiLog.debugLog("IDL2ProcessorEngine.onAfterDeploy: error deleting file " + sFileName);
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: ", oEx);

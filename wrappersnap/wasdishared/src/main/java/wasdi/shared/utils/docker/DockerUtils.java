@@ -361,7 +361,7 @@ public class DockerUtils {
         		WasdiLog.debugLog("DOCKER URL DUMP");
         		WasdiLog.debugLog(sUrl);
         		WasdiLog.debugLog("------------------");            			
-    		}        	
+    		}
         	
         	// Finally make the call
         	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
