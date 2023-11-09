@@ -145,6 +145,7 @@ def run(processId):
 
 	if (request.args.get('workspaceid') is not None):
 		parameters['workspaceid'] = request.args.get('workspaceid')
+		print("[" + processId + "] WORKSPACE arg " + request.args.get('workspaceid') , flush=True)
 	else:
 		print("[" + processId+ "] WORKSPACE arg not available", flush=True)
 
@@ -179,14 +180,6 @@ def run(processId):
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Proc Id not available", flush=True)
 
-	#Try to get the workspace id
-	try:
-		sWorkspaceId = parameters['workspaceid']
-		wasdi.openWorkspaceById(sWorkspaceId)
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
-	except:
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
-
 	#Try to get the base url
 	try:
 		sBaseUrl = parameters['baseurl']
@@ -194,6 +187,15 @@ def run(processId):
 		print("[" + processId+ "] wasdiProcessorServer Base Url in params " + sBaseUrl, flush=True)
 	except:
 		print("[" + processId+ "] wasdiProcessorServer Using default base url", flush=True)
+
+	#Try to get the workspace id
+	try:
+		sWorkspaceId = parameters['workspaceid']
+		print("[" + processId + "] wasdiProcessorServer got Workspace Id " + sWorkspaceId, flush=True)
+		wasdi.openWorkspaceById(sWorkspaceId)
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id available in params " + sWorkspaceId, flush=True)
+	except:
+		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
 
 	#Init Wasdi
 	print("[" + processId+ "] wasdiProcessorServer: init waspy lib", flush=True)
@@ -214,16 +216,19 @@ def run(processId):
 		oConfigFile = open(sConfigFilePath, 'w+')
 		oConfigFile.write('')
 
-		oConfigFile.write('BASEPATH=' + wasdi.getBasePath() + '\r\n');
-		oConfigFile.write('USER=' + sUser + '\r\n');
-		oConfigFile.write('WORKSPACEID=' + sWorkspaceId + '\r\n');
-		oConfigFile.write('SESSIONID=' + sSessionId + '\r\n');
-		oConfigFile.write('ISONSERVER=1' + '\r\n');
-		oConfigFile.write('DOWNLOADACTIVE=0\r\n');
-		oConfigFile.write('UPLOADACTIVE=0\r\n');
-		oConfigFile.write('VERBOSE=0\r\n');
-		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n');
-		oConfigFile.write('MYPROCID=' + processId + '\r\n');
+		oConfigFile.write('BASEPATH=' + wasdi.getBasePath() + '\r\n')
+		oConfigFile.write('USER=' + sUser + '\r\n')
+		oConfigFile.write('WORKSPACEID=' + sWorkspaceId + '\r\n')
+		oConfigFile.write('SESSIONID=' + sSessionId + '\r\n')
+		oConfigFile.write('ISONSERVER=1' + '\r\n')
+		oConfigFile.write('DOWNLOADACTIVE=0\r\n')
+		oConfigFile.write('UPLOADACTIVE=0\r\n')
+		oConfigFile.write('VERBOSE=0\r\n')
+		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n')
+		oConfigFile.write('MYPROCID=' + processId + '\r\n')
+		if sBaseUrl is not None:
+			if sBaseUrl != "":
+				oConfigFile.write('BASEURL=' + sBaseUrl + '\r\n')
 		oConfigFile.close()
 
 		#Write Params:
