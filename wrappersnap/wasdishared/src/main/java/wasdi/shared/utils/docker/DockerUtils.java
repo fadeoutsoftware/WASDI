@@ -374,6 +374,10 @@ public class DockerUtils {
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	
+        	//if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
+        	WasdiLog.debugLog("DockerUtils.build: build output = " + oResponse.getResponseBody());
+        	//}
+        	
         	// Delete the tar
         	WasdiFileUtils.deleteFile(sTarFileOuput);
         	

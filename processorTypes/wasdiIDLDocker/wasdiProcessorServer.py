@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
-	print("wasdiProcessorServer Started v.2.1 - ProcId = " + processId, flush=True)
+	print("wasdiProcessorServer Started v.2.1.1 - ProcId = " + processId, flush=True)
 
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -147,7 +147,6 @@ def run(processId):
 
 	if (request.args.get('workspaceid') is not None):
 		parameters['workspaceid'] = request.args.get('workspaceid')
-		print("[" + processId + "] WORKSPACE arg " + request.args.get('workspaceid') , flush=True)
 	else:
 		print("[" + processId+ "] WORKSPACE arg not available", flush=True)
 
