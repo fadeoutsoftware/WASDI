@@ -41,6 +41,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     apt-get update && \
     apt-get dist-upgrade && \
     apt-get install \
+        curl \
         gdal-bin \
         git \
         gunicorn \
