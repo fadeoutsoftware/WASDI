@@ -6,6 +6,7 @@ import java.io.FileWriter;
 
 import wasdi.shared.business.processors.ProcessorTypes;
 import wasdi.shared.packagemanagers.IPackageManager;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 
@@ -207,5 +208,11 @@ public class IDL2ProcessorEngine extends DockerBuildOnceEngine {
 		catch (Exception oEx) {
 			WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: ", oEx);
 		}
-	}	
+	}
+	
+	@Override
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
+		WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: there is environment in IDL apps");
+		return true;
+	}
 }
