@@ -27,18 +27,18 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.deploy: register address not found, return false.");
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: Docker Registry = " + m_sDockerRegistry);
+		WasdiLog.debugLog("DockerBuildOnceEngine.deploy: Docker Registry = " + m_sDockerRegistry);
 		
 		// Build the image of the docker
 		boolean bResult = super.deploy(oParameter, bFirstDeploy);
 		
 		if (!bResult) {
 			// This is not good
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: super class deploy returned false. So we stop here.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.deploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
 		
@@ -53,11 +53,11 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.deploy: Impossible to push the image.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.deploy: Impossible to push the image.");
 			return false;
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.deploy: deploy done, image pushed");
+		WasdiLog.debugLog("DockerBuildOnceEngine.deploy: deploy done, image pushed");
 		
         return true;
 	}	
@@ -69,7 +69,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 	public boolean redeploy(ProcessorParameter oParameter) {
 		
 		if (!WasdiConfig.Current.isMainNode()) {
-			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: redeploy for this processor is done only on the main node");
+			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: redeploy for this processor is done only on the main node");
 			return true;			
 		}
 		
@@ -79,7 +79,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: register address not found, return false.");
 			return false;			
 		}
 		
@@ -90,19 +90,15 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
 		
-//		WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: delete run script. It will be recreated at the right moment");
-//		String sProcFolder = PathsConfig.getProcessorFolder(oProcessor);
-//		WasdiFileUtils.deleteFile(sProcFolder+"runwasdidocker.sh");
-
 		// Create utils
         DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
         
         if (oDockerUtils.isContainerStarted(oProcessor.getName(), oProcessor.getVersion())) {
-        	WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: There is the previous version running, stop it");
+        	WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: There is the previous version running, stop it");
         	boolean bStop = oDockerUtils.stop(oProcessor);
         	
         	if (!bStop) {
-        		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: stop returned false, we try to proceed anyhow");
+        		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: stop returned false, we try to proceed anyhow");
         	}
         }
         
@@ -115,13 +111,13 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		// Save it
 		oProcessorRepository.updateProcessor(oProcessor);
         
-		WasdiLog.debugLog("PythonPipProcessorEngine2.redeploy: call base class deploy. New Version " + sNewVersion);
+		WasdiLog.debugLog("DockerBuildOnceEngine.redeploy: call base class deploy. New Version " + sNewVersion);
 		
 		boolean bResult = super.redeploy(oParameter, false);
 		
 		if (!bResult) {
 			// This is not good
-			WasdiLog.errorLog("PythonPipProcessorEngine2.redeploy: super class deploy returned false. So we stop here.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.redeploy: super class deploy returned false. So we stop here.");
 			return false;
 		}
 						
@@ -129,7 +125,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		String sPushedImageAddress = pushImageInRegisters(oProcessor);
 		
 		if (Utils.isNullOrEmpty(sPushedImageAddress)) {
-			WasdiLog.infoLog("PythonPipProcessorEngine2.redeploy: we got an empty address of the pushed image");
+			WasdiLog.infoLog("DockerBuildOnceEngine.redeploy: we got an empty address of the pushed image");
 		}
 		
         return true;
@@ -137,10 +133,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 	
 	@Override
 	public boolean run(ProcessorParameter oParameter) {
-        WasdiLog.debugLog("PythonPipProcessorEngine2.run: start");
+        WasdiLog.debugLog("DockerBuildOnceEngine.run: start");
 
         if (oParameter == null) {
-            WasdiLog.errorLog("PythonPipProcessorEngine2.run: parameter is null");
+            WasdiLog.errorLog("DockerBuildOnceEngine.run: parameter is null");
             return false;
         }
 		
@@ -148,11 +144,11 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.run: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.run: register address not found, return false.");
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.run: Docker Registry " + m_sDockerRegistry);
+		WasdiLog.debugLog("DockerBuildOnceEngine.run: Docker Registry " + m_sDockerRegistry);
 		
 		ProcessorRepository oProcessorRepository = new ProcessorRepository();
 		Processor oProcessor = oProcessorRepository.getProcessor(oParameter.getProcessorID());
@@ -161,7 +157,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		
 		if (!oDockerUtils.isContainerStarted(oProcessor)) {
 			
-			WasdiLog.debugLog("PythonPipProcessorEngine2.run: the processor is not started. Check if there are old versions up [Actual Version = " + oProcessor.getVersion() + "]");
+			WasdiLog.debugLog("DockerBuildOnceEngine.run: the processor is not started. Check if there are old versions up [Actual Version = " + oProcessor.getVersion() + "]");
 			
 			try {
 				String sVersion = oProcessor.getVersion();
@@ -171,14 +167,14 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 					iVersion = iVersion - 1;
 					
 					if (oDockerUtils.isContainerStarted(oProcessor.getName(), "" + iVersion)) {
-						WasdiLog.debugLog("PythonPipProcessorEngine2.run: found version " + iVersion + " running, stop it");
+						WasdiLog.debugLog("DockerBuildOnceEngine.run: found version " + iVersion + " running, stop it");
 						oDockerUtils.stop(oProcessor.getName(), "" + iVersion);
 						break;
 					}
 				}
 			}
 			catch (Exception oEx) {
-				WasdiLog.errorLog("PythonPipProcessorEngine2.run error searching old versions: ", oEx);
+				WasdiLog.errorLog("DockerBuildOnceEngine.run error searching old versions: ", oEx);
 			}
 		}
 
@@ -194,7 +190,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 			
 			DockerUtils oDockerUtils = new DockerUtils(oProcessor, PathsConfig.getProcessorFolder(oProcessor), m_sDockerRegistry);
 			
-	        WasdiLog.debugLog("PythonPipProcessorEngine2.waitForApplicationToStart: wait to let docker start");
+	        WasdiLog.debugLog("DockerBuildOnceEngine.waitForApplicationToStart: wait to let docker start");
 
 	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
 	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
@@ -210,10 +206,10 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		}
 		catch(InterruptedException oEx) {
 			Thread.currentThread().interrupt();
-    		WasdiLog.errorLog("PythonPipProcessorEngine2.waitForApplicationToStart: current thread intrrupted", oEx);
+    		WasdiLog.errorLog("DockerBuildOnceEngine.waitForApplicationToStart: current thread intrrupted", oEx);
     	}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.waitForApplicationToStart: exception ", oEx);
+			WasdiLog.errorLog("DockerBuildOnceEngine.waitForApplicationToStart: exception ", oEx);
 		}		
 	}
 	
@@ -221,11 +217,11 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 	public boolean libraryUpdate(ProcessorParameter oParameter) {
 		
 		if (WasdiConfig.Current.isMainNode()) {
-			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  for this processor we force a redeploy for lib update");
+			WasdiLog.debugLog("DockerBuildOnceEngine.libraryUpdate:  for this processor we force a redeploy for lib update");
 			return redeploy(oParameter);			
 		}
 		else {
-			WasdiLog.debugLog("PythonPipProcessorEngine2.libraryUpdate:  we are not the main node, nothing to do");
+			WasdiLog.debugLog("DockerBuildOnceEngine.libraryUpdate:  we are not the main node, nothing to do");
 			return true;			
 		}		
 	}
@@ -237,12 +233,12 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.environmentUpdate: register address not found, return false.");
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: Docker Registry = " + m_sDockerRegistry);
-		WasdiLog.debugLog("PythonPipProcessorEngine2.environmentUpdate: call base class environmentUpdate");
+		WasdiLog.debugLog("DockerBuildOnceEngine.environmentUpdate: Docker Registry = " + m_sDockerRegistry);
+		WasdiLog.debugLog("DockerBuildOnceEngine.environmentUpdate: call base class environmentUpdate");
 
 		return super.environmentUpdate(oParameter);
 	}
@@ -254,12 +250,12 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.environmentUpdate: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.environmentUpdate: register address not found, return false.");
 			return false;			
 		}
 		
-		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: Docker Registry = " + m_sDockerRegistry);
-		WasdiLog.debugLog("PythonPipProcessorEngine2.refreshPackagesInfo: call base class refreshPackagesInfo");
+		WasdiLog.debugLog("DockerBuildOnceEngine.refreshPackagesInfo: Docker Registry = " + m_sDockerRegistry);
+		WasdiLog.debugLog("DockerBuildOnceEngine.refreshPackagesInfo: call base class refreshPackagesInfo");
 		
 		return super.refreshPackagesInfo(oParameter);
 	}
@@ -271,7 +267,7 @@ public class DockerBuildOnceEngine extends PipProcessorEngine {
 		m_sDockerRegistry = getDockerRegisterAddress();
 		
 		if (Utils.isNullOrEmpty(m_sDockerRegistry)) {
-			WasdiLog.errorLog("PythonPipProcessorEngine2.delete: register address not found, return false.");
+			WasdiLog.errorLog("DockerBuildOnceEngine.delete: register address not found, return false.");
 			return false;			
 		}
 		
