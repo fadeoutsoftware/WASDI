@@ -57,7 +57,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	protected void onAfterCopyTemplate(String sProcessorFolder) {
 		
 		// Docker local processor folder
-		String sLocalProcessorFolder = "/home/wasdi/application/";
+		String sLocalProcessorFolder = "/home/appwasdi/application/";
 		
 		String sProcessorName = m_oParameter.getName();
 		
