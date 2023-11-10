@@ -230,7 +230,15 @@ def run(processId):
 		oConfigFile.write('VERBOSE=0\r\n')
 		oConfigFile.write('PARAMETERSFILEPATH=' + sParamFilePath + '\r\n')
 		oConfigFile.write('MYPROCID=' + processId + '\r\n')
-		oConfigFile.write('BASEURL=' + wasdi.getBaseUrl() + '\r\n')
+		sBaseUrl = wasdi.getBaseUrl()
+
+		# To idl we need to pass only the name of the server
+		asUrlParts = sBaseUrl.split("/")
+		if asUrlParts is not None:
+			if len(asUrlParts)>=3:
+				sBaseUrl = asUrlParts[2]
+
+		oConfigFile.write('BASEURL=' + sBaseUrl + '\r\n')
 		oConfigFile.close()
 
 		print("[" + processId + "] wasdiProcessorServer: creating the paramas file "+ sParamFilePath, flush=True)
