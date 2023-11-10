@@ -12,7 +12,6 @@ pipeline {
   environment {
     sCurrentEnvironmentLower = getEnvironmentName(env.sAnsibleLimit, true)
     sCurrentEnvironmentUpper = getEnvironmentName(env.sAnsibleLimit, false)
-    sCurrentRevision         = "${env.BUILD_ID}"
     sMavenProfile            = "wasdi-${env.sCurrentEnvironmentLower}"
   }
 
@@ -42,47 +41,38 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD AND DEPLOY THE TOOLBOX CONTAINER"
+          currentBuild.description = "WASDI - DEPLOY THE MONGO CONTAINER"
         }
-      }
-    }
-
-    stage('BUILD THE CONTAINER') {
-      steps {
-        sh script: """
-          cd ${env.sWasdiAnsiblePath}
-          ansible-playbook \
-            playbooks/buildWasdiDockerContainer.yml \
-            --inventory inventories/wasdi.yml \
-            --limit ${env.sAnsibleLimit} \
-            --diff \
-            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerToolbox=true'
-        """,
-        label: "Build the container"
       }
     }
 
     stage('DEPLOY THE CONTAINER AND ITS RUN ELEMENTS') {
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          script {
-            try {
-              sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                  playbooks/deployDockerContainerToolbox.yml \
-                  --inventory inventories/wasdi.yml \
-                  --limit ${env.sAnsibleLimit} \
-                  --diff \
-                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
-              """,
-              label: "Deploy the container and its run elements"
-            } catch (oError) {
-              echo oError.getMessage()
-              throw oError
-            }
-          }
-        }
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/deployDockerContainerWasdiMongo.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Deploy the container and its run element"
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINER') {
+      steps {
+        sh script: """
+          cd ${env.sWasdiAnsiblePath}
+          ansible-playbook \
+            playbooks/runWasdiDockerContainerWasdiMongo.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+        """,
+        label: "Start or restart the container"
       }
     }
   }

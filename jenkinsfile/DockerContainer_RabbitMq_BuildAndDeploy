@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - UPDATE TRAEFIK VERSION AND RESTART IT"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE RABBITMQ CONTAINER"
         }
       }
     }

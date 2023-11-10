@@ -40,7 +40,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - DEPLOY THE WASDI CLIENT CONTAINER"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE WASDI CLIENT CONTAINER"
         }
       }
     }
