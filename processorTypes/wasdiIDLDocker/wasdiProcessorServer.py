@@ -212,8 +212,8 @@ def run(processId):
 	wasdi.openWorkspaceById(sWorkspaceId)
 	#Run the processor
 	try:
-		sConfigFilePath = sLocalPath + processId + '.config'
-		sParamFilePath = sLocalPath +  processId + '.params'
+		sConfigFilePath = sLocalPath + '/' + processId + '.config'
+		sParamFilePath = sLocalPath +  '/' + processId + '.params'
 
 		print("[" + processId + "] wasdiProcessorServer: creating the config file " + sConfigFilePath, flush=True)
 		# Write Config file:
