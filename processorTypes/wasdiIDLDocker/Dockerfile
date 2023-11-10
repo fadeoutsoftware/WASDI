@@ -88,15 +88,17 @@ RUN bash /tmp/install/install-wasdi.sh && \
 USER {{ sWasdiSystemUserName }}
 
 
-# Set the workdir to {{ sWasdiSystemUserHome }}/application
-WORKDIR {{ sWasdiSystemUserHome }}/application
-
-
+# Create the application directory
+# Create the virtual environment
 RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application \
         {{ sWasdiSystemUserHome }}/venv && \
     python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
     pip3 install --no-cache-dir --no-compile wasdi
+
+
+# Set the workdir to {{ sWasdiSystemUserHome }}/application
+WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
 # Overwrite install script with the one which is close to the Dockerfile
