@@ -70,7 +70,11 @@ pipeline {
       steps {
         sh script: """
             cd ${env.sWasdiAnsiblePath}
-            ansible-playbook playbooks/prepareWasdiClient_v2.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}/client_v2'
+            ansible-playbook playbooks/prepareWasdiClient_v2.yml \
+              --inventory inventories/wasdi.yml \
+              --limit ${env.sAnsibleLimit} \
+              --diff \
+              --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}/client_v2'
         """,
         label: "Prepare the WASDI client"
       }
@@ -90,7 +94,12 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/buildWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
+          ansible-playbook \
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiClientV2Container=true'
         """,
         label: "Build the container"
       }
@@ -128,7 +137,7 @@ pipeline {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
-                    playbooks/runWasdiDockerContainer.yml \
+                    playbooks/runDockerContainer.yml \
                     --inventory inventories/wasdi.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \

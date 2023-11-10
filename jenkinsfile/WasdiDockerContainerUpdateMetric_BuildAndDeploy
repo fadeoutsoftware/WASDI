@@ -64,7 +64,12 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiUpdateMetric.yml  --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+                ansible-playbook \
+                  playbooks/deployDockerContainerWasdiUpdateMetric.yml \
+                  --inventory inventories/wasdi.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
@@ -80,7 +85,12 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/runWasdiDockerContainer.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
+          ansible-playbook \
+            playbooks/runDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiContainerWasdiUpdateMetric=true'
         """,
         label: "Start or restart the container"
       }

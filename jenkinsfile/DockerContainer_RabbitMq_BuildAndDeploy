@@ -94,7 +94,7 @@ pipeline {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
-                    playbooks/runWasdiDockerContainerWasdiRabbitMq.yml \
+                    playbooks/runDockerContainerWasdiRabbitMq.yml \
                     --inventory inventories/wasdi.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \

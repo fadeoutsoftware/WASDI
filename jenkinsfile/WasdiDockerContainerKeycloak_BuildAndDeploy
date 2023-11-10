@@ -64,7 +64,12 @@ pipeline {
             try {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
-                ansible-playbook playbooks/deployDockerContainerWasdiKeycloak.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
+                ansible-playbook \
+                  playbooks/deployDockerContainerWasdiKeycloak.yml \
+                  --inventory inventories/wasdi.yml \
+                  --limit ${env.sAnsibleLimit} \
+                  --diff \
+                  --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sWasdiKeycloakThemeVersion=${env.sWasdiKeycloakThemeVersion}'
               """,
               label: "Execute ansible-playbook"
             } catch (oError) {
@@ -80,7 +85,12 @@ pipeline {
       steps {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
-          ansible-playbook playbooks/runWasdiDockerContainerWasdiKeycloak.yml --inventory inventories/wasdi.yml --limit ${env.sAnsibleLimit} --diff --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+          ansible-playbook \
+            playbooks/runDockerContainerWasdiKeycloak.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
         """,
         label: "Start or restart the container"
       }
