@@ -57,7 +57,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 	protected void onAfterCopyTemplate(String sProcessorFolder) {
 		
 		// Docker local processor folder
-		String sLocalProcessorFolder = "/home/wasdi/";
+		String sLocalProcessorFolder = "/home/wasdi/application/";
 		
 		String sProcessorName = m_oParameter.getName();
 		
@@ -105,7 +105,7 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 					oCallIdlWriter.write("IF (iArgs GT 0) THEN sConfigFile=aoArgs[0]");
 					oCallIdlWriter.newLine();
 
-					oCallIdlWriter.write("sConfigFile = '/home/wasdi/'+sConfigFile");
+					oCallIdlWriter.write("sConfigFile = '"+sLocalProcessorFolder+"'+sConfigFile");
 					oCallIdlWriter.newLine();
 
 					oCallIdlWriter.write("print, 'Config File ', sConfigFile");
