@@ -345,6 +345,8 @@ public class DockerUtils {
 					asTarFiles.add(oFilePath.toString());
 				});
 			}
+			
+			WasdiLog.debugLog("DockerUtils.build: creating tar file");
         	
 			// Name of the ouput tar
         	String sTarFileOuput = m_sProcessorFolder + m_oProcessor.getProcessorId() + ".tar";
@@ -365,8 +367,12 @@ public class DockerUtils {
         		WasdiLog.debugLog("------------------");            			
     		}
         	
+    		WasdiLog.debugLog("DockerUtils.build: start build");
+    		
         	// Finally make the call
         	HttpCallResponse oResponse = HttpUtils.httpPost(sUrl, FileUtils.readFileToByteArray(new File(sTarFileOuput)), asHeaders);
+        	
+        	WasdiLog.debugLog("DockerUtils.build: build done");
         	
         	// Delete the tar
         	WasdiFileUtils.deleteFile(sTarFileOuput);

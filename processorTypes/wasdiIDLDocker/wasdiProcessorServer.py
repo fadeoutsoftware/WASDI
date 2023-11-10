@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
-	print("wasdiProcessorServer Started - ProcId = " + processId, flush=True)
+	print("wasdiProcessorServer Started v.2.1 - ProcId = " + processId, flush=True)
 
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -242,12 +242,12 @@ def run(processId):
 			oParamsFile.write(sKey + '=' + str(parameters[sKey]) + '\r\n')
 		oParamsFile.close()
 
-		oProcess = subprocess.Popen([os.path.join(sLocalPath, 'runProcessor.sh'), '--session-id', sSessionId, '--process-object-id', processId, '--pid-file', '/tmp/pid_idl_' + processId])
+		oProcess = subprocess.Popen(['bash', os.path.join(sLocalPath, 'runProcessor.sh'), '--session-id', sSessionId, '--process-object-id', processId, '--pid-file', '/tmp/pid_idl_' + processId])
 		wasdi.wasdiLog('wasdiProcessorServer Process Started with local pid %(runProcessorProcessPid)s' %{'runProcessorProcessPid': str(oProcess.pid)})
 
 		idlProcessPid = None
 		wasdi.wasdiLog('Get the PID of the real IDL process')
-		getPidOutput = subprocess.run([os.path.join(sLocalPath, 'getPid.sh'), '--pid-file', '/tmp/pid_idl_' + processId, '--wait-pid-file', '--wait-timeout', '300'], stdout=subprocess.PIPE)
+		getPidOutput = subprocess.run(['bash', os.path.join(sLocalPath, 'getPid.sh'), '--pid-file', '/tmp/pid_idl_' + processId, '--wait-pid-file', '--wait-timeout', '300'], stdout=subprocess.PIPE)
 		idlProcessPid = getPidOutput.stdout.decode('UTF-8')
 		wasdi.wasdiLog('PID: %(idlProcessPid)s' %{'idlProcessPid': idlProcessPid})
 
