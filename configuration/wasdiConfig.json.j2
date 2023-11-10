@@ -490,6 +490,33 @@
         "numberOfPollStatusPollingCycleForLog": {{ aoWasdiConfiguration['dockers']['numberOfPollStatusPollingCycleForLog'] }},
         "pipInstallWasdiAddress": "{{ aoWasdiConfiguration['dockers']['pipInstallWasdiAddress'] }}",
         "processorsInternalPort": {{ aoWasdiConfiguration['dockers']['processorsInternalPort'] }},
+{% if aoWasdiConfiguration['dockers']['processorTypes'] == [] %}
+        "processorTypes": [],
+{% else %}
+        "processorTypes": [
+{% for aoCurrentProcessorType in aoWasdiConfiguration['dockers']['processorTypes'] %}
+            {
+                "processorType": "{{ aoCurrentProcessorType['processorType'] }}",
+{% if aoCurrentProcessorType['environmentVariables'] == [] %}
+                "environmentVariables": []
+{% else %}
+                "environmentVariables": [
+{% for aoCurrentEnvironmentVariable in aoCurrentProcessorType['environmentVariables'] %}
+                    {
+                        "key": "{{ aoCurrentEnvironmentVariable['key'] }}",
+                        "value": "{{ aoCurrentEnvironmentVariable['value'] }}"
+                    }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                ]
+{% endif %}
+            }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        ],
+{% endif %}
 {% if aoWasdiConfiguration['dockers']['registers'] | length == 0 %}
         "registers": [],
 {% else %}
