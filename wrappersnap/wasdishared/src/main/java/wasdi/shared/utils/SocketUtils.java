@@ -551,18 +551,4 @@ public class SocketUtils {
 	}
 	
 	
-	public static void main(String[]args) throws Exception {
-		
-		try {
-			try {
-				Thread.sleep(2000);
-				throw new InterruptedException();
-			} catch (InterruptedException o) {
-				System.out.print("inner exception");
-			}
-			
-		} catch (Exception o) {
-			System.out.println("genera exception");
-		}
-	}
 }
