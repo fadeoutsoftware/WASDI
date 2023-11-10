@@ -21,11 +21,6 @@ pipeline {
     disableConcurrentBuilds()
   }
 
-  tools {
-    jdk "WASDI_JDK_8"
-    maven "WASDI_MAVEN"
-  }
-
   stages {
     stage('DEBUG') {
       steps {
@@ -40,12 +35,6 @@ pipeline {
         echo "env.WORKSPACE                = " + env.WORKSPACE
 
         sh script: "pwd", label: "Current location"
-        sh script: "cat pom.xml", label: "Content of the main pom.xml file"
-
-        sh script: "which mvn", label: "Tool > mvn > path"
-        sh script: "mvn --version", label: "Tool > mvn > current version"
-        sh script: "which java", label: "Tool > java > path"
-        sh script: "java -version", label: "Tool > java > current version"
       }
     }
 
@@ -53,27 +42,8 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF JAVA PACKAGES (.jar, .war, etc) + BUILD THE CONTAINERS + DEPLOY THEM"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE MONGO CONTAINER"
         }
-      }
-    }
-
-    stage('BUILD THE CODE WITH MAVEN') {
-      steps {
-        sh script: """
-            mvn \
-                --batch-mode \
-                -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-                --settings ${env.sWasdiMavenSettings} \
-                --activate-profiles ${env.sMavenProfile} \
-                --define revision=${env.sCurrentRevision} \
-                --define skipTests \
-                --update-snapshots \
-                --projects wrappersnap/launcher \
-                --also-make \
-                clean package
-        """,
-        label: "Create the right package"
       }
     }
 
@@ -82,11 +52,11 @@ pipeline {
         sh script: """
           cd ${env.sWasdiAnsiblePath}
           ansible-playbook \
-                playbooks/buildWasdiDockerContainer.yml \
-                --inventory inventories/wasdi.yml \
-                --limit ${env.sAnsibleLimit} \
-                --diff \
-                --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiLauncherContainer=true'
+            playbooks/buildWasdiDockerContainer.yml \
+            --inventory inventories/wasdi.yml \
+            --limit ${env.sAnsibleLimit} \
+            --diff \
+            --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE} sDeployWasdiMongoContainer=true'
         """,
         label: "Build the container"
       }
@@ -98,15 +68,39 @@ pipeline {
           script {
             try {
               sh script: """
-                cd ${env.sWasdiAnsiblePath}
-                ansible-playbook \
-                    playbooks/deployDockerContainerWasdiLauncher.yml \
+                  cd ${env.sWasdiAnsiblePath}
+                  ansible-playbook \
+                    playbooks/deployDockerContainerWasdiMongo.yml \
                     --inventory inventories/wasdi.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
                     --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
               """,
-              label: "Deploy the container and its run elements"
+              label: "Deploy the container and its run element"
+            } catch (oError) {
+              echo oError.getMessage()
+              throw oError
+            }
+          }
+        }
+      }
+    }
+
+    stage('START OR RESTART THE CONTAINER') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh script: """
+                cd ${env.sWasdiAnsiblePath}
+                ansible-playbook \
+                    playbooks/runDockerContainerWasdiMongo.yml \
+                    --inventory inventories/wasdi.yml \
+                    --limit ${env.sAnsibleLimit} \
+                    --diff \
+                    --extra-vars 'sCurrentRevision=${env.sCurrentRevision} sSourceDirectory=${WORKSPACE}'
+              """,
+              label: "Start or restart the container"
             } catch (oError) {
               echo oError.getMessage()
               throw oError

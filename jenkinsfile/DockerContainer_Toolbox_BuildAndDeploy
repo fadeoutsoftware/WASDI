@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - BUILD OF TOOLBOX CONTAINER + DEPLOY IT"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE TOOLBOX CONTAINER"
         }
       }
     }

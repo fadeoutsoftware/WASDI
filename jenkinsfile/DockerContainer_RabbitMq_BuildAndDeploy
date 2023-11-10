@@ -42,7 +42,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "${env.sCurrentRevision}"
-          currentBuild.description = "WASDI - UPDATE TRAEFIK VERSION AND RESTART IT"
+          currentBuild.description = "WASDI - BUILD AND DEPLOY THE RABBITMQ CONTAINER"
         }
       }
     }
@@ -94,7 +94,7 @@ pipeline {
               sh script: """
                 cd ${env.sWasdiAnsiblePath}
                 ansible-playbook \
-                    playbooks/runWasdiDockerContainerWasdiRabbitMq.yml \
+                    playbooks/runDockerContainerWasdiRabbitMq.yml \
                     --inventory inventories/wasdi.yml \
                     --limit ${env.sAnsibleLimit} \
                     --diff \
