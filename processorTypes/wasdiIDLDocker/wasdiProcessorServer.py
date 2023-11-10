@@ -209,12 +209,14 @@ def run(processId):
 		print("[" + processId+ "] wasdiProcessorServer: init FAILED", flush=True)
 		return jsonify({'processId': 'ERROR', 'processorEngineVersion':'2'})
 
+	print("[" + processId + "] wasdiProcessorServer: opening workspace", flush=True)
 	wasdi.openWorkspaceById(sWorkspaceId)
 	#Run the processor
 	try:
 		sConfigFilePath = sLocalPath + processId + '.config'
 		sParamFilePath = sLocalPath +  processId + '.params'
 
+		print("[" + processId + "] wasdiProcessorServer: creating the config file " + sConfigFilePath, flush=True)
 		# Write Config file:
 		oConfigFile = open(sConfigFilePath, 'w+')
 		oConfigFile.write('')
@@ -231,6 +233,8 @@ def run(processId):
 		oConfigFile.write('MYPROCID=' + processId + '\r\n')
 		oConfigFile.write('BASEURL=' + wasdi.getBaseUrl() + '\r\n')
 		oConfigFile.close()
+
+		print("[" + processId + "] wasdiProcessorServer: creating the paramas file "+ sParamFilePath, flush=True)
 
 		#Write Params:
 		oParamsFile = open(sParamFilePath, 'w+')
