@@ -4,39 +4,42 @@
     "global_parameters": [],
     "parameters": [],
     "permissions": [
+{% for aoCurrentWasdiRabbitMqUser in aoWasdiRabbitMqUsers %}
         {
-            "configure": ".*",
-            "read": ".*",
-            "user": "{{ sWasdiAdministratorUsername }}",
-            "vhost": "/",
-            "write": ".*"
-        },
-        {
-            "configure": ".*",
-            "read": ".*",
-            "user": "{{ sWasdiRabbitMqApplicationUserName }}",
-            "vhost": "/",
-            "write": ".*"
-        }
+            "configure": "{{ aoCurrentWasdiRabbitMqUser['permissions']['configure'] }}",
+            "read": "{{ aoCurrentWasdiRabbitMqUser['permissions']['read'] }}",
+            "user": "{{ aoCurrentWasdiRabbitMqUser['name'] }}",
+            "vhost": "{{ aoCurrentWasdiRabbitMqUser['permissions']['vhost'] }}",
+            "write": "{{ aoCurrentWasdiRabbitMqUser['permissions']['write'] }}"
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
     ],
     "policies": [],
     "queues": [],
     "topic_permissions": [],
     "users": [
+{% for aoCurrentWasdiRabbitMqUser in aoWasdiRabbitMqUsers %}
         {
-            "limits": {},
-            "name": "{{ sWasdiAdministratorUsername }}",
-            "password": "{{ sWasdiAdministratorPassword }}",
-            "tags": [
-                "administrator"
-            ]
-        },
-        {
-            "limits": {},
-            "name": "{{ sWasdiRabbitMqApplicationUserName }}",
-            "password": "{{ sWasdiRabbitMqApplicationUserPassword }}",
+            "limits": {{ aoCurrentWasdiRabbitMqUser['limits'] }},
+            "name": "{{ aoCurrentWasdiRabbitMqUser['name'] }}",
+            "password": "{{ aoCurrentWasdiRabbitMqUser['password'] }}",
+{% if ( aoCurrentWasdiRabbitMqUser['tags'] | default([]) | length ) == 0 %}
             "tags": []
-        }
+{% else %}
+            "tags": [
+{% for sCurrentTag in aoCurrentWasdiRabbitMqUser['tags'] %}
+                "{{ sCurrentTag }}"{% if not loop.last %},
+{% endif %}
+
+            ]
+{% endfor %}
+{% endif %}
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
     ],
     "vhosts": [
         {
