@@ -258,7 +258,7 @@ services:
     and sWasdiMongoExternalPort | default("") != ""
     and aWasdiMongoExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiMongoContainerExternalIp | sort %}
+{% for sCurrentExternalIp in aWasdiMongoExternalIp | sort %}
       - "{{ sCurrentExternalIp }}:{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
 {% endfor %}
 {% endif %}
