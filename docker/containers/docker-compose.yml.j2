@@ -155,7 +155,7 @@ services:
       - "--import-realm"
 {% endif %}
     depends_on:
-      - {{ sWasdiContainerPostgresqlKeycloakServiceName }}
+      - {{ sWasdiPostgresqlKeycloakServiceName }}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
     environment:
@@ -206,7 +206,7 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
 
-  {{ sWasdiContainerPostgresqlKeycloakServiceName }}:
+  {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if bWasdiPostgresqlKeycloakInitialized == False %}
     environment:
       - POSTGRES_DB=${sPostgresqlKeycloakDatabaseName}
@@ -222,8 +222,8 @@ services:
         soft: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
         hard: {{ sWasdiPostgresqlKeycloakUlimitNofile }}
     volumes:
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
-      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiContainerPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
+      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 
   # MongoDB
