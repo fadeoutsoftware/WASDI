@@ -1,5 +1,9 @@
 package wasdi.shared.viewmodels.users;
 
+import java.util.Collections;
+import java.util.Set;
+
+import wasdi.shared.business.UserType;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -17,6 +21,11 @@ public class UserViewModel {
 	private String description;
 	private String sessionId;
 	
+	private String type;
+
+	private String role;
+	private Set<String> grantedAuthorities;
+	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
 	
@@ -27,6 +36,11 @@ public class UserViewModel {
     	oViewModel.surname = null;
     	oViewModel.sessionId = null;
     	oViewModel.authProvider = null;
+    	oViewModel.type = UserType.FREE.name();
+
+    	oViewModel.role = null;
+    	oViewModel.grantedAuthorities = Collections.emptySet();
+
     	s_oInvalid = oViewModel;
     }
     
@@ -126,4 +140,27 @@ public class UserViewModel {
 		this.description = description;
 	}
 
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public Set<String> getGrantedAuthorities() {
+		return grantedAuthorities;
+	}
+
+	public void setGrantedAuthorities(Set<String> grantedAuthorities) {
+		this.grantedAuthorities = grantedAuthorities;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.config.DataProviderConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.queryexecutors.ads.QueryExecutorADS;
@@ -29,7 +30,6 @@ import wasdi.shared.queryexecutors.sobloo.QueryExecutorSOBLOO;
 import wasdi.shared.queryexecutors.statics.QueryExecutorSTATICS;
 import wasdi.shared.queryexecutors.terrascope.QueryExecutorTerrascope;
 import wasdi.shared.queryexecutors.viirs.QueryExecutorVIIRS;
-import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
 /**

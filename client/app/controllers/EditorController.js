@@ -1,12 +1,13 @@
 /**
  * Created by p.campanella on 24/10/2016.
  */
-var EditorController = (function () {
+ var EditorController = (function () {
     function EditorController($rootScope, $scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
         oProductService, $state, oWorkspaceService, oNodeService, oGlobeService, oProcessWorkspaceService, oRabbitStompService,
-        oModalService, oTranslate, oCatalogService,
+        oModalService, oTranslate, oCatalogService, oProcessorService, oConsoleService, 
         $window) {
         // Reference to the needed Services
+        this.m_oWindow = $window;
         this.m_oRootScope = $rootScope;
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -31,6 +32,17 @@ var EditorController = (function () {
         
         this.m_oTranslate = oTranslate;
         this.m_oCatalogService = oCatalogService;
+        
+        /**
+         * Processors Service
+         */
+        this.m_oProcessorService = oProcessorService;
+
+        /**
+         * Console Service
+         */
+        this.m_oConsoleService = oConsoleService;
+
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
         // Flag to know if the first zoom on band has been done
@@ -87,12 +99,23 @@ var EditorController = (function () {
         this.m_oUser = this.m_oConstantsService.getUser();
         //{}
         this.m_aoProductsLayersIn3DMapArentGeoreferenced = [];
+        //default sort by value
+        this.sSortType = 'default'; 
 
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
         // add the GeoSearch plugin bar
         oMapService.initGeoSearchPluginForOpenStreetMap({ "position": 'bottomRight' });
         oMapService.removeLayersFromMap();
+
+        //RabbitStomp Service Call
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "LAUNCHJUPYTERNOTEBOOK",
+            this,
+            this.rabbitMessageHook
+        )
+        
+        
 
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -137,9 +160,9 @@ var EditorController = (function () {
         // Hook to Rabbit WebStomp Service
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
-
-        //set default navbar menu
-        this.generateDefaultNavBarMenu();
+        
+        this.m_bNotebookIsReady = false;
+       
 
         // Go in geographic mode
         this.switchToGeographicMode();
@@ -156,18 +179,43 @@ var EditorController = (function () {
             $scope.$digest();
         });
 
-        this.m_oWorkspaceViewModel = null;
+
+        if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
+           
+            this.m_oConsoleService.isConsoleReady(this.m_oActiveWorkspace.workspaceId).then(function (data, status) {
+               
+                if (utilsIsObjectNullOrUndefined(data.data) == false) {
+                    oThat.m_bNotebookIsReady = data.data.boolValue;
+                }
+                 
+                oThat.generateDefaultNavBarMenu();
+            }, (function (data, status) {
+                var sMessage = this.m_oTranslate.instant("MSG_PRODUCT_LIST_ERROR")
+                utilsVexDialogAlertBottomRightCorner(sMessage);
+            }));        
+        }
+        //set default navbar menu
+        this.generateDefaultNavBarMenu();
+        
     }
 
     /********************************************************* TRANSLATE SERVICE ********************************************************/
     EditorController.prototype.generateDefaultNavBarMenu = function () {
         this.m_aoNavBarMenu = [
             {
-                name: "",//WAPPS
+                name: "", //WAPPS
                 caption_i18n: "EDITOR_OPERATION_TITLE_WAPPS",
                 subMenu: [],
                 onClick: this.openWappsDialog,
-                icon: "fa fa-lg fa-rocket"
+                icon: "fa fa-lg fa-rocket",
+            },
+            // --- Processor ---
+            {
+                name: "", // New Processor
+                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                subMenu: [],
+                onClick: this.openProcessorDialog,
+                icon: "fa fa-lg fa-plus-square",
             },
             // --- Workflow ---
             {
@@ -175,7 +223,7 @@ var EditorController = (function () {
                 icon: "fa fa-cogs",
                 caption_i18n: "EDITOR_OPERATION_TITLE_WORKFLOW",
                 subMenu: [],
-                onClick: this.openWorkflowManagerDialog
+                onClick: this.openWorkflowManagerDialog,
             },
             // --- Import ---
             {
@@ -183,15 +231,16 @@ var EditorController = (function () {
                 icon: "fa fa-cloud-upload-alt",
                 caption_i18n: "EDITOR_OPERATION_TITLE_IMPORT",
                 subMenu: [],
-                onClick: this.openImportsDialog
+                onClick: this.openImportsDialog,
             },
-            // --- Processor ---
+
+            // --- Jupyter Notebook ---
             {
-                name: "",// New Processor
-                caption_i18n: "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                name: "", // Jupyter Notebook
+                caption_i18n: "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE",
                 subMenu: [],
-                onClick: this.openProcessorDialog,
-                icon: "fa fa-lg fa-plus-square"
+                onClick: this.openJupyterNotebookPage,
+                icon: "fa fa-laptop",
             },
             // --- Style ---
             {
@@ -199,30 +248,32 @@ var EditorController = (function () {
                 icon: "fa fa-paint-brush",
                 caption_i18n: "EDITOR_OPERATION_TITLE_STYLE",
                 subMenu: [],
-                onClick: this.openStyleManagerDialog
+                onClick: this.openStyleManagerDialog,
             },
             {
-                name: "",//Share
+                name: "", //Share
                 caption_i18n: "EDITOR_OPERATION_TITLE_SHARE",
                 subMenu: [],
                 onClick: this.openShareDialog,
-                icon: "fa fa-share-alt fa-lg"
-            }
-
-        ]
-
-        this.translateToolbarMenuList(this.m_aoNavBarMenu);
+                icon: "fa fa-share-alt fa-lg",
+            },
+        ];
+        
+        let oJupyterButton =  this.m_aoNavBarMenu.find(iIndex => iIndex.caption_i18n ==="EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE")
+        this.filterNotebookButtons(oJupyterButton);
+        this.translateToolbarMenuList(this.m_aoNavBarMenu)
+      
     };
 
     EditorController.prototype.isToolbarBtnDropdown = function (btn) {
         return btn.subMenu.length != 0;
-    }
+    };
 
     EditorController.prototype.translateToolbarMenu = function (menuItem) {
         this.m_oTranslate(menuItem.caption_i18n).then(function (text) {
             menuItem.name = text;
-        })
-    }
+        });
+    };
 
     EditorController.prototype.translateToolbarMenuList = function (menuList) {
         for (var i = 0; i < menuList.length; i++) {
@@ -232,7 +283,7 @@ var EditorController = (function () {
                 this.translateToolbarMenuList(menuItem.subMenu);
             }
         }
-    }
+    };
 
     /*********************************************************** VIEW METHODS**********************************************************/
 
@@ -243,7 +294,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.moveTo = function (sPath) {
         this.m_oLocation.path(sPath);
-    }
+    };
 
     /**
      * Set the active tab between Navigation, Colour manipulation, Preview
@@ -268,7 +319,7 @@ var EditorController = (function () {
 
         if (this.m_b2DMapModeOn == false) {
 
-            this.setActiveTab(0);
+            //this.setActiveTab(0);
 
             // We are going in 3D MAP
             this.m_oMapService.clearMap();
@@ -660,6 +711,7 @@ var EditorController = (function () {
         if (this.m_aoVisibleBands.length == 1) {
 
             if (!this.m_bFirstZoomOnBandDone) {
+                this.m_iActiveMapPanelTab = 1; 
                 // Make auto zoom only once
                 this.m_bFirstZoomOnBandDone = true;
 
@@ -885,8 +937,12 @@ var EditorController = (function () {
 
             if (!bAlreadyPublished) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                utilsVexCloseDialogAfter(4000, oDialog);
+                utilsVexCloseDialogAfter(4000, oDialog);  
             }
+
+            if (oController.m_aoVisibleBands.length === 0) {
+                    oController.setActiveTab(1);
+            } 
 
             if (!utilsIsObjectNullOrUndefined(data.data) && data.data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.data.messageResult)) {
                 /*if the band was published*/
@@ -1221,6 +1277,57 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
+    EditorController.prototype.openJupyterNotebookPage = function (oWindow) {
+        var oController;
+        if (utilsIsObjectNullOrUndefined(oWindow) === true) {
+            oController = this;
+        } else {
+            oController = oWindow;
+        }
+
+        oController.m_oConsoleService.createConsole(oController.m_oActiveWorkspace.workspaceId)
+        .then(
+            function (data) {
+                if (utilsIsObjectNullOrUndefined(data.data) === false && data.data.boolValue === true) {
+                    // Request accepted
+                    if (data.data.stringValue.includes("http")) {
+                        oController.m_oWindow.open(data.data.stringValue, '_blank');
+                    } else {
+                        sMessage = "WASDI IS PREPARING YOUR NOTEBOOK"
+        
+                        if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                            if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                                sMessage = sMessage + "<BR>" + data.data.stringValue;
+                            }
+                        }
+                        oController.m_bNotebookIsReady = true;
+                        utilsVexDialogAlertTop(sMessage);
+                    }
+                } else {
+                    sMessage = "GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK"
+
+                    if (utilsIsObjectNullOrUndefined(data.data) === false) {
+                        if (utilsIsObjectNullOrUndefined(data.data.stringValue) === false) {
+                            sMessage = sMessage + ": " + data.data.stringValue;
+                        }
+                    }
+
+                    utilsVexDialogAlertTop(sMessage);
+                }
+
+            },
+            function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR OPENING THE JUPYTER NOTEBOOK");
+            }
+        );
+
+        return true;
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
     EditorController.prototype.openWorkflowManagerDialog = function (oWindow) {
         var oController;
         if (utilsIsObjectNullOrUndefined(oWindow) === true) {
@@ -1385,7 +1492,10 @@ var EditorController = (function () {
                 extras: {}
             }
         }).then(function (modal) {
-            modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+            });
             modal.close.then(function (oResult) {
 
             });
@@ -1423,6 +1533,8 @@ var EditorController = (function () {
      */
     EditorController.prototype.openProductInfoDialog = function (oProductInput) {
 
+        var oController = this;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
             controller: "ProductEditorInfoController",
@@ -1434,8 +1546,13 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
-                if (utilsIsObjectNullOrUndefined(result) === true)
+                if (utilsIsObjectNullOrUndefined(result) === true) {
                     return false;
+                }
+                //Only fetch list if Product was changed
+                if (result === true) {
+                    oController.getProductListByWorkspace();
+                }
             });
         });
 
@@ -1758,230 +1875,412 @@ var EditorController = (function () {
      */
     EditorController.prototype.generateTree = function () {
         var oController = this;
-        var oTree =
-        {
-            'core': { 'data': [], "check_callback": true },
-            "state": { "key": "state_tree" },
-            "plugins": ["checkbox", "contextmenu", "search"], // plugins in use
-            "search": {
-                "show_only_matches": true,
-                "show_only_matches_children": true
+        var oTree = {
+            core: { data: [], check_callback: true },
+            state: { key: "state_tree" },
+            plugins: ["checkbox", "contextmenu", "search", "sort"], // plugins in use
+            search: {
+                show_only_matches: true,
+                show_only_matches_children: true,
             },
-            "contextmenu": { // my right click menu
-                // this method deselect all the other nodes so the node selection will be triggered by open menu 
-                "select_node": false, 
-                "items": function ($node) {
-                    // select the current node 
-                  //  $node.state.selected = trues
-                    oController.selectClickedNode($node)
+            contextmenu: {
+                // my right click menu
+                // this method deselect all the other nodes so the node selection will be triggered by open menu
+                select_node: false,
+                items: function ($node) {
+                    // select the current node
+                    //  $node.state.selected = trues
+                    oController.selectClickedNode($node);
                     //only the band has property $node.original.band
                     // menu showed when a band is selecte
                     var oReturnValue = null;
 
-                    var sZoom2D = oController.m_oTranslate.instant("MENU_ZOOM_2D");
-                    var sZoom3D = oController.m_oTranslate.instant("MENU_ZOOM_3D");
-                    var sDownload = oController.m_oTranslate.instant("MENU_DOWNLOAD");
-                    var sSendToFtp = oController.m_oTranslate.instant("MENU_SEND_FTP");
-                    var sDelete = oController.m_oTranslate.instant("MENU_DELETE");
-                    var sProperties = oController.m_oTranslate.instant("MENU_PROPERTIES");
+                    var sZoom2D =
+                        oController.m_oTranslate.instant("MENU_ZOOM_2D");
+                    var sZoom3D =
+                        oController.m_oTranslate.instant("MENU_ZOOM_3D");
+                    var sDownload =
+                        oController.m_oTranslate.instant("MENU_DOWNLOAD");
+                    var sSendToFtp =
+                        oController.m_oTranslate.instant("MENU_SEND_FTP");
+                    var sDelete =
+                        oController.m_oTranslate.instant("MENU_DELETE");
+                    var sProperties =
+                        oController.m_oTranslate.instant("MENU_PROPERTIES");
                     var sShare = oController.m_oTranslate.instant("MENU_SHARE");
-                    var sDeleteConfirm = oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
-                    var sDeleteError = oController.m_oTranslate.instant("MSG_DELETE_ERROR");
-                    var sDeleteManyConfirm1 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_1");
-                    var sDeleteManyConfirm2 = oController.m_oTranslate.instant("MSG_DELETE_MANY_CONFIRM_2");
+                    var sDeleteConfirm =
+                        oController.m_oTranslate.instant("MSG_DELETE_CONFIRM");
+                    var sDeleteError =
+                        oController.m_oTranslate.instant("MSG_DELETE_ERROR");
+                    var sDeleteManyConfirm1 = oController.m_oTranslate.instant(
+                        "MSG_DELETE_MANY_CONFIRM_1"
+                    );
+                    var sDeleteManyConfirm2 = oController.m_oTranslate.instant(
+                        "MSG_DELETE_MANY_CONFIRM_2"
+                    );
 
-                    if (utilsIsObjectNullOrUndefined($node.original.band) == false) { 
+                    if (
+                        utilsIsObjectNullOrUndefined($node.original.band) ==
+                        false
+                    ) {
                         //******************************** BAND *************************************
                         var oBand = $node.original.band;
 
-                        oReturnValue =
-                        {
-                            "Zoom2D": {
-                                "label": sZoom2D,
-                                "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                        oReturnValue = {
+                            Zoom2D: {
+                                label: sZoom2D,
+                                icon: "fa fa-globe",
+                                action: function (obj) {
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oBand) ==
+                                        false
+                                    ) {
+                                        oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(
+                                            oBand.geoserverBoundingBox
+                                        );
                                     }
                                 },
-                                "_disabled": false
+                                _disabled: false,
                             },
-                            "Zoom3D": {
-                                "label": sZoom3D,
-                                "action": function (obj) {
-                                    if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                        oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                            Zoom3D: {
+                                label: sZoom3D,
+                                icon: "fa fa-globe",
+                                action: function (obj) {
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oBand) ==
+                                        false
+                                    ) {
+                                        oController.m_oGlobeService.zoomBandImageOnBBOX(
+                                            oBand.bbox
+                                        );
                                     }
                                 },
-                                "_disabled": false
+                                _disabled: false,
                             },
-                            "Download": {
-                                "label": sDownload,
-                                "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
-                                    //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                        oController.findProductByName($node.original.fileName);
+                            SendToFtp: {
+                                label: sSendToFtp,
+                                icon: "fa fa-upload",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
+                                    var sSourceFileName =
+                                        $node.original.fileName;
+                                    var oFound =
+                                        oController.findProductByFileName(
+                                            sSourceFileName
+                                        );
 
-                                        oController.downloadProductByName($node.original.fileName);
-                                    }
-                                }
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oFound) ==
+                                        false
+                                    )
+                                        oController.openTransferToFtpDialog(
+                                            oFound
+                                        );
+                                },
                             },
-                            "SendToFtp": {
-                                "label": sSendToFtp,
-                                "icon": "fa fa-upload",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
-                                    var sSourceFileName = $node.original.fileName;
-                                    var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
-                                }
-                            },
+                            DeleteProduct: {
+                                label: sDelete,
+                                icon: "fa fa-trash",
 
-                            "DeleteProduct": {
-                                "label": sDelete,
-                                "icon": "delete-icon-context-menu-jstree",
+                                action: function (obj) {
+                                    utilsVexDialogConfirm(
+                                        sDeleteConfirm,
+                                        function (value) {
+                                            if (value) {
+                                                bDeleteFile = true;
+                                                bDeleteLayer = true;
+                                                this.temp = $node.parents[1];
+                                                var that = this;
 
-                                "action": function (obj) {
+                                                var oFoundProduct =
+                                                    oController.m_aoProducts[
+                                                        $node.original.band
+                                                            .productIndex
+                                                    ];
 
-                                    utilsVexDialogConfirm(sDeleteConfirm, function (value) {
-                                        if (value) {
-                                            bDeleteFile = true;
-                                            bDeleteLayer = true;
-                                            this.temp = $node.parents[1];
-                                            var that = this;
-
-                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-
-                                            oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                            }, (function (error) {
-                                                utilsVexDialogAlertTop(sDeleteError);
-                                            }));
+                                                oController.m_oProductService
+                                                    .deleteProductFromWorkspace(
+                                                        oFoundProduct.fileName,
+                                                        oController
+                                                            .m_oActiveWorkspace
+                                                            .workspaceId,
+                                                        bDeleteFile,
+                                                        bDeleteLayer
+                                                    )
+                                                    .then(
+                                                        function (data) {
+                                                            oController.deleteProductInNavigation(
+                                                                oController.m_aoVisibleBands,
+                                                                that.temp
+                                                                    .children_d
+                                                            );
+                                                        },
+                                                        function (error) {
+                                                            utilsVexDialogAlertTop(
+                                                                sDeleteError
+                                                            );
+                                                        }
+                                                    );
+                                            }
                                         }
-                                    });
-                                }
+                                    );
+                                },
                             },
-                            "Properties": {
-                                "label": sProperties,
-                                "icon": "info-icon-context-menu-jstree",
-                                "separator_before": true,
-                                "action": function (obj) {
-                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                    if (utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openProductInfoDialog(oFoundProduct);
-                                }
-                            }
+                            Properties: {
+                                label: sProperties,
+                                icon: "fa fa-info-circle",
+                                separator_before: true,
+                                action: function (obj) {
+                                    var oFoundProduct =
+                                        oController.m_aoProducts[
+                                            $node.original.band.productIndex
+                                        ];
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            oFoundProduct
+                                        ) == false
+                                    )
+                                        oController.openProductInfoDialog(
+                                            oFoundProduct
+                                        );
+                                },
+                            },
                         }; // menu entries
                     }
 
                     // only products has $node.original.fileName
                     // menu showed when a product is selected
-                    if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
+                    if (
+                        utilsIsObjectNullOrUndefined($node.original.fileName) ==
+                        false
+                    ) {
                         //***************************** PRODUCT ********************************************
-                        oReturnValue =
-                        {
-                            "Download": {
-                                "label": sDownload,
-                                "icon": "fa fa-download",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
+                        oReturnValue = {
+                            Download: {
+                                label: sDownload,
+                                icon: "fa fa-download",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 100,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false)) {
-                                        oController.findProductByName($node.original.fileName);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) == false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) == false
+                                    ) {
+                                        oController.findProductByName(
+                                            $node.original.fileName
+                                        );
 
-                                        oController.downloadProductByName($node.original.fileName);
+                                        let selectedNodesFromTree = oController.getSelectedNodesFromTree(
+                                            $node.original.fileName
+                                        );
+
+                                        selectedNodesFromTree.forEach(element => oController.downloadProductByName(element));
                                     }
-                                }
+                                },
                             },
-                            "Share": {
-                                "label": sShare,
-                                "icon": "share-icon-context-menu-jstree",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "separator_before": true,
-                                "action": function (obj) {
+                            Share: {
+                                label: sShare,
+                                icon: "fa fa-share-alt",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                separator_before: true,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                oController.openProductShareDialog(oController.m_aoProducts[iIndexProducts]);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) === false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) === false
+                                    ) {
+                                        var iNumberOfProdcuts =
+                                            oController.m_aoProducts.length;
+                                        for (
+                                            var iIndexProducts = 0;
+                                            iIndexProducts < iNumberOfProdcuts;
+                                            iIndexProducts++
+                                        ) {
+                                            if (
+                                                oController.m_aoProducts[
+                                                    iIndexProducts
+                                                ].fileName ===
+                                                $node.original.fileName
+                                            ) {
+                                                oController.openProductShareDialog(
+                                                    oController.m_aoProducts[
+                                                        iIndexProducts
+                                                    ]
+                                                );
                                                 break;
                                             }
-
                                         }
-
                                     }
-                                }
+                                },
                             },
-                            "SendToFtp": {
-                                "label": sSendToFtp,
-                                "icon": "fa fa-upload",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "action": function (obj) {
-                                    var sSourceFileName = $node.original.fileName;
-                                    var oFound = oController.findProductByFileName(sSourceFileName);
+                            SendToFtp: {
+                                label: sSendToFtp,
+                                icon: "fa fa-upload",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                action: function (obj) {
+                                    var sSourceFileName =
+                                        $node.original.fileName;
+                                    var oFound =
+                                        oController.findProductByFileName(
+                                            sSourceFileName
+                                        );
 
-                                    if (utilsIsObjectNullOrUndefined(oFound) == false) oController.openTransferToFtpDialog(oFound);
-                                }
+                                    if (
+                                        utilsIsObjectNullOrUndefined(oFound) ==
+                                        false
+                                    )
+                                        oController.openTransferToFtpDialog(
+                                            oFound
+                                        );
+                                },
                             }, //openTransferToFtpDialog
-                            "DeleteSelectedProduct": {
-                                "label": oController.getDeleteLabel(),
-                                "icon": "delete-icon-context-menu-jstree",
+                            DeleteSelectedProduct: {
+                                label: oController.getDeleteLabel(),
+                                icon: "fa fa-trash",
 
-                                "action": function (obj) {
-
-                                    let asSelectedProducts = oController.getSelectedNodesFromTree($node.original.fileName);
+                                action: function (obj) {
+                                    let asSelectedProducts =
+                                        oController.getSelectedNodesFromTree(
+                                            $node.original.fileName
+                                        );
                                     // first, check that something were selected
                                     if (asSelectedProducts.length > 0) {
-                                        utilsVexDialogConfirm(sDeleteManyConfirm1 + asSelectedProducts.length + sDeleteManyConfirm2, function (value) {
-                                            if (value) {
-                                                bDeleteFile = true;
-                                                bDeleteLayer = true;
-                                                this.temp = $node;
-                                                var that = this;
-                                                oController.m_oProductService.deleteProductListFromWorkspace(asSelectedProducts, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).then(function (data) {
-                                                    // for each in asSelectedProduct
-                                                    $.each(asSelectedProducts, function (i, val) {
-                                                        oController.deleteProductInNavigation(oController.m_aoVisibleBands, that.temp.children_d);
-                                                    });
-                                                    /// deselect all 
-                                                    $("#jstree").jstree().deselect_all(true);
-
-                                                }, (function (error) {
-                                                    utilsVexDialogAlertTop(sDeleteError);
-                                                }));
+                                        utilsVexDialogConfirm(
+                                            sDeleteManyConfirm1 +
+                                                asSelectedProducts.length +
+                                                sDeleteManyConfirm2,
+                                            function (value) {
+                                                if (value) {
+                                                    bDeleteFile = true;
+                                                    bDeleteLayer = true;
+                                                    this.temp = $node;
+                                                    var that = this;
+                                                    oController.m_oProductService
+                                                        .deleteProductListFromWorkspace(
+                                                            asSelectedProducts,
+                                                            oController
+                                                                .m_oActiveWorkspace
+                                                                .workspaceId,
+                                                            bDeleteFile,
+                                                            bDeleteLayer
+                                                        )
+                                                        .then(
+                                                            function (data) {
+                                                                // for each in asSelectedProduct
+                                                                $.each(
+                                                                    asSelectedProducts,
+                                                                    function (
+                                                                        i,
+                                                                        val
+                                                                    ) {
+                                                                        oController.deleteProductInNavigation(
+                                                                            oController.m_aoVisibleBands,
+                                                                            that
+                                                                                .temp
+                                                                                .children_d
+                                                                        );
+                                                                    }
+                                                                );
+                                                                /// deselect all
+                                                                $("#jstree")
+                                                                    .jstree()
+                                                                    .deselect_all(
+                                                                        true
+                                                                    );
+                                                            },
+                                                            function (error) {
+                                                                utilsVexDialogAlertTop(
+                                                                    sDeleteError
+                                                                );
+                                                            }
+                                                        );
+                                                }
                                             }
-                                        });
+                                        );
                                     }
-
-                                }
+                                },
                             },
-                            "Properties": {
-                                "label": sProperties,
-                                "icon": "info-icon-context-menu-jstree",
-                                "_disabled": (oController.getSelectedNodesFromTree($node.original.fileName).length > 1),
-                                "separator_before": true,
-                                "action": function (obj) {
+                            Properties: {
+                                label: sProperties,
+                                icon: "fa fa-info-circle",
+                                _disabled:
+                                    oController.getSelectedNodesFromTree(
+                                        $node.original.fileName
+                                    ).length > 1,
+                                separator_before: true,
+                                action: function (obj) {
                                     //$node.original.fileName;
-                                    if ((utilsIsObjectNullOrUndefined($node.original.fileName) === false) && (utilsIsStrNullOrEmpty($node.original.fileName) === false)) {
-                                        var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                        for (var iIndexProducts = 0; iIndexProducts < iNumberOfProdcuts; iIndexProducts++) {
-                                            if (oController.m_aoProducts[iIndexProducts].fileName === $node.original.fileName) {
-                                                oController.openProductInfoDialog(oController.m_aoProducts[iIndexProducts]);
+                                    if (
+                                        utilsIsObjectNullOrUndefined(
+                                            $node.original.fileName
+                                        ) === false &&
+                                        utilsIsStrNullOrEmpty(
+                                            $node.original.fileName
+                                        ) === false
+                                    ) {
+                                        var iNumberOfProdcuts =
+                                            oController.m_aoProducts.length;
+                                        for (
+                                            var iIndexProducts = 0;
+                                            iIndexProducts < iNumberOfProdcuts;
+                                            iIndexProducts++
+                                        ) {
+                                            if (
+                                                oController.m_aoProducts[
+                                                    iIndexProducts
+                                                ].fileName ===
+                                                $node.original.fileName
+                                            ) {
+                                                oController.openProductInfoDialog(
+                                                    oController.m_aoProducts[
+                                                        iIndexProducts
+                                                    ]
+                                                );
                                                 break;
                                             }
-
                                         }
-
                                     }
-                                }
-                            }
+                                },
+                            },
                         };
                     }
+
                     return oReturnValue;
+                },
+            },
+            sort: function (a, b) {
+
+                let a1 = this.get_node(a);
+                let b1 = this.get_node(b);
+                if (oController.sSortType === 'asc') {
+                    return a1.text.toUpperCase() > b1.text.toUpperCase() ? 1 : -1;
+                } else if (oController.sSortType === 'desc') {
+                    return a1.text.toUpperCase() > b1.text.toUpperCase() ? -1 : 1;
+                } else {
+                    return null
                 }
-            }
+            },
         };
 
 
@@ -1995,13 +2294,30 @@ var EditorController = (function () {
             oNode.fileName = this.m_aoProducts[iIndexProduct].fileName;
             oNode.id = this.m_aoProducts[iIndexProduct].fileName;
 
-            //oNode.product = this.m_aoProducts[iIndexProduct];
+            oNode.description = this.m_aoProducts[iIndexProduct].description;
+
+            if (
+                utilsIsStrNullOrEmpty(
+                    this.m_aoProducts[iIndexProduct].description
+                ) === true
+            ) {
+                oNode.description = "";
+            } else {
+                oNode.description =
+                    this.m_aoProducts[iIndexProduct].description;
+            }
+
+            oNode.a_attr = {
+                title: oNode.description,
+            };
+
+
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
             oNode.productIndex = iIndexProduct;
 
             // var oThat = this;
-            var sMetadata = oController.m_oTranslate.instant("");
-            var sBands = oController.m_oTranslate.instant("");
+            var sMetadata = oController.m_oTranslate.instant("MENU_METADATA");
+            var sBands = oController.m_oTranslate.instant("MENU_BANDS");
 
             oNode.children = [
                 {
@@ -2138,7 +2454,7 @@ var EditorController = (function () {
      * all or nothing only of visible nodes
      * @param {*} sTextQuery
      */
-     EditorController.prototype.selectClickedNode = function (oNodeIn) {
+    EditorController.prototype.selectClickedNode = function (oNodeIn) {
         if (oNodeIn == null) return;
         // gather all nodes from tree
         var jsonNodes = $('#jstree').jstree(true).get_json('#', { flat: true });
@@ -2161,6 +2477,7 @@ var EditorController = (function () {
     }
 
     EditorController.prototype.downloadProductByName = function (sFileName) {
+
         if (utilsIsStrNullOrEmpty(sFileName) === true) {
             return false;
         }
@@ -2171,9 +2488,41 @@ var EditorController = (function () {
             sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
         }
 
-        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl);
+        var oController = this;
 
-        return true;
+        this.m_oCatalogService.newDownloadByName(sFileName, this.m_oActiveWorkspace.workspaceId, sUrl)
+            .then(
+                function (response) {
+                    var _contentType = response.headers('Content-Type');
+
+                    var sHeaderContentDisposition = response.headers('Content-Disposition');
+
+                    let sDownloadedFilename = sFileName;
+
+                    if (!utilsIsStrNullOrEmpty(sHeaderContentDisposition)) {
+                        sDownloadedFilename = sHeaderContentDisposition.split(';')[1].split('=')[1].replace(/\"/g, '');
+                    }
+
+                    var blob = new Blob([ response.data ], { type : _contentType });
+                    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+                    var anchor = angular.element('<a/>');
+                    anchor.attr({
+                        href : url,
+                        target : '_blank',
+                        download : sDownloadedFilename
+                    })[0].click();
+                },
+                function (error) {
+                    console.log("EditorController.downloadProductByName | error.data.message: ", error.data.message);
+
+                    let errorMessage = oController.m_oTranslate.instant(
+                        error.data.message
+                    );
+
+                    utilsVexDialogAlertTop(errorMessage);
+                }
+            );
+
     };
 
     /**
@@ -2305,6 +2654,38 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
     };
 
+    EditorController.prototype.setSortType = function () {
+        let oController = this;
+        if (oController.sSortType === 'default') {
+            oController.sSortType = 'asc';
+        } else if (oController.sSortType === 'asc') {
+            oController.sSortType = 'desc';
+        } else {
+            oController.sSortType = 'default'
+        }
+
+        oController.getProductListByWorkspace();
+    }
+
+    EditorController.prototype.filterNotebookButtons = function (oNotebookBtn) {
+        let oController = this; 
+        
+        if(oController.m_bNotebookIsReady === false) {
+            oNotebookBtn.caption_i18n = "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_CREATE"
+            
+        } else {
+            oNotebookBtn.caption_i18n = "EDITOR_OPERATION_TITLE_JUPYTER_NOTEBOOK_OPEN"
+        }
+    
+    }
+  
+    EditorController.prototype.rabbitMessageHook = function (
+        oRabbitMessage, 
+        oController
+    ) {
+        oController.generateDefaultNavBarMenu(); 
+    }
+
     EditorController.$inject = [
         '$rootScope',
         '$scope',
@@ -2324,8 +2705,9 @@ var EditorController = (function () {
         'ModalService',
         '$translate',
         'CatalogService',
+        'ProcessorService',
+        'ConsoleService',
         '$window'
-
     ];
 
     return EditorController;

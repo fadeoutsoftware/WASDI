@@ -41,9 +41,9 @@ var WorkspaceController = (function () {
         this.m_bOpeningWorkspace = false;
         this.m_oReturnValue = {};
 
-        this.sort = {
-            column: '',
-            descending: false
+        this.m_oSort = {
+            sColumn: '',
+            bDescending: false
         };        
 
         if(utilsIsObjectNullOrUndefined(oConstantsService.getUser())){
@@ -59,7 +59,6 @@ var WorkspaceController = (function () {
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
-            console.log("Update Sat Position");
             $scope.m_oController.updatePositionsSatellites();
         }, 15000);
 
@@ -146,6 +145,8 @@ var WorkspaceController = (function () {
                     // oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", {workSpace: sWorkspaceId});//use workSpace when reload editor page
                     oController.m_oConstantsService.setActiveWorkspace(data.data);
+                   
+                    
                 }
             }
         },(function (data, status) {
@@ -172,12 +173,21 @@ var WorkspaceController = (function () {
             if (this.m_oConstantsService.getUser() != undefined) {
 
                 var oController = this;
+                let sDate = ""
 
                 this.m_oWorkspaceService.getWorkspacesInfoListByUser().then(function (data, status) {
                     if (data.data != null) {
                         if (data.data != undefined) {
                             //data.data = []; // DEBUG
                             oController.m_aoWorkspaceList = data.data;
+                            oController.m_aoWorkspaceList.forEach(oWorkspace => {
+                                if(utilsIsObjectNullOrUndefined(oWorkspace.creationDate)) {
+                                  oWorkspace.creationDate = "N/A"
+                               } else {
+                                   sDate = new Date(oWorkspace.creationDate)
+                                   oWorkspace.creationDate = sDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(0, 10)
+                               }
+                               })
                             oController.m_bIsLoading = false;
                         }
                     }
@@ -429,6 +439,7 @@ var WorkspaceController = (function () {
 
         var oController = this;
         let oWorkspaceViewModel = undefined;
+        let oActiveWorkspace = undefined; 
 
         var sConfirmMsg1 = this.m_oTranslate.instant("MSG_DELETE_WS_1");
         var sConfirmMsg2 = this.m_oTranslate.instant("MSG_DELETE_WS_2");
@@ -440,10 +451,20 @@ var WorkspaceController = (function () {
                     bDeleteFile = true;
                     bDeleteLayer = true;
     
-            
+                        
     
                         oController.m_oWorkspaceService.DeleteWorkspace(oWorkspaceViewModel , bDeleteFile, bDeleteLayer)
                             .then(function () {
+                                oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                                
+                                if (_.isEqual(oActiveWorkspace, oWorkspaceViewModel)) {
+                                //clear workspace data from View Model
+                                oWorkspaceViewModel = null;
+                                //set active workspace to null
+                                oController.m_oConstantsService.setActiveWorkspace(
+                                    oWorkspaceViewModel
+                                );
+                                }
                                 oController.deselectWorskpace();
                                 oController.fetchWorkspaceInfoList();
                             },(function () {
@@ -600,30 +621,29 @@ var WorkspaceController = (function () {
 
     };
     
-    WorkspaceController.prototype.changeSorting = function(column) {
+    WorkspaceController.prototype.changeSorting = function(sColumn, sSortCmd) {
 
-        var sort = this.sort;
-
-        if (sort.column == column) {
-            sort.descending = !sort.descending;
+        if (this.m_oSort.sColumn === sColumn && sSortCmd === 'asc') {
+            this.m_oSort.bDescending = false;
+        } else if (this.m_oSort.sColumn === sColumn && sSortCmd === 'desc') {
+            this.m_oSort.bDescending = true;
         } else {
-            sort.column = column;
+            this.m_oSort.sColumn = sColumn
+             if (this.m_oSort.sColumn === sColumn && sSortCmd === 'asc') {
+            this.m_oSort.bDescending = false;
+            } else if (this.m_oSort.sColumn === sColumn && sSortCmd === 'desc') {
+                this.m_oSort.bDescending = true;
+            }
         }
     };
-        
-    WorkspaceController.prototype.selectedCls = function(column) {
-        return column == this.sort.column && 'sort-' + this.sort.descending;
-    };    
-
-
+    
     WorkspaceController.prototype.showArrow = function(sColumn, bDescending) {
         
-        if (sColumn == this.sort.column) {
-            if (bDescending == this.sort.descending) {
+        if (sColumn == this.m_oSort.sColumn) {
+            if (bDescending == this.m_oSort.bDescending) {
                 return true;
             }
         }
-        
         return false;
     };    
 

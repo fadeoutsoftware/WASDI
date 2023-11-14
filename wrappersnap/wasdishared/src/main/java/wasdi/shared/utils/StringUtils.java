@@ -4,7 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -71,6 +74,38 @@ public final class StringUtils {
 		}
 
 		return sUrl;
+	}
+
+	public static String generateSha224(String input) {
+		try {
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-224");
+			byte[] bytes = messageDigest.digest(input.getBytes());
+			String digest = bytesToHexadecimal(bytes);
+
+			return digest;
+		} catch (NoSuchAlgorithmException oEx) {
+			Utils.debugLog("StringUtils.generateSha224: invalid digest algorithm SHA-224: " + oEx + ".");
+		} catch (Exception oEx) {
+			Utils.debugLog("StringUtils.generateSha224: could not generate Sha224 due to " + oEx + ".");
+		}
+
+		return input;
+	}
+
+	private static String bytesToHexadecimal(byte[] bytes) {
+		// Convert byte array into signum representation
+		BigInteger bigInteger = new BigInteger(1, bytes);
+
+		// Convert message digest into hex value
+		String hashtext = bigInteger.toString(16);
+
+		// Add preceding 0s to make it 32 bit
+		while (hashtext.length() < 32) {
+			hashtext = "0" + hashtext;
+		}
+
+		// return the HashText
+		return hashtext;
 	}
 
 }

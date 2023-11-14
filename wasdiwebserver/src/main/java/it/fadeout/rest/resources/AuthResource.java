@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
@@ -33,6 +32,7 @@ import it.fadeout.services.AuthProviderService;
 import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.SessionRepository;
@@ -187,6 +187,13 @@ public class AuthResource {
 				oUserVM.setUserId(oUser.getUserId());
 				oUserVM.setAuthProvider(oUser.getAuthServiceProvider());
 				oUserVM.setSessionId(oSession.getSessionId());
+				oUserVM.setType(oUser.getType());
+
+				if (oUser.getRole() != null) {
+					oUserVM.setRole(oUser.getRole());
+					UserApplicationRole oUserApplicationRole = UserApplicationRole.get(oUser.getRole());
+					oUserVM.setGrantedAuthorities(oUserApplicationRole.getGrantedAuthorities());
+				}
 
 				Utils.debugLog("AuthService.Login: access succeeded, sSessionId: "+oSession.getSessionId());
 				
@@ -232,6 +239,7 @@ public class AuthResource {
 			oUserVM.setName(oUser.getName());
 			oUserVM.setSurname(oUser.getSurname());
 			oUserVM.setUserId(oUser.getUserId());
+			oUserVM.setType(oUser.getType());
 			return oUserVM;
 		} catch (Exception oE) {
 			Utils.debugLog("AuthResource.CheckSession: " + oE);
@@ -791,6 +799,11 @@ public class AuthResource {
 			oUserId.setSurname(oInputUserVM.getSurname());
 			oUserId.setLink(oInputUserVM.getLink());
 			oUserId.setDescription(oInputUserVM.getDescription());
+
+			if (oInputUserVM.getRole() != null) {
+				oUserId.setRole(oInputUserVM.getRole());
+			}
+
 			UserRepository oUR = new UserRepository();
 			oUR.updateUser(oUserId);
 
@@ -800,6 +813,7 @@ public class AuthResource {
 			oOutputUserVM.setName(oUserId.getName());
 			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
+			oOutputUserVM.setType(oUserId.getType());
 			return oOutputUserVM;
 
 		} catch(Exception e) {
@@ -854,8 +868,6 @@ public class AuthResource {
 				//todo create new user in keycloak
 				//todo set the user without need for email confirmation
 				//todo set new password for newly created user in keycloak
-				
-				
 				
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChangePasswordViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();

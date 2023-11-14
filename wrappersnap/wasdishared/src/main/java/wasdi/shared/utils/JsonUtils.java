@@ -1,5 +1,6 @@
 package wasdi.shared.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public final class JsonUtils {
 			Utils.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
-		return null;
+		return "";
 	}
 
 	public static String stringify(Object object) {
@@ -38,7 +39,7 @@ public final class JsonUtils {
 			Utils.debugLog("JsonUtils.stringify: could not stringify the object due to " + oE + ".");
 		}
 
-		return null;
+		return "";
 	}
 
 	public static Map<String, Object> jsonToMapOfObjects(String sJson) {
@@ -71,7 +72,7 @@ public final class JsonUtils {
 
 	public static List<String> jsonToListOfStrings(String sJson) {
 
-		List<String> aoJSONList;
+		List<String> aoJSONList = new ArrayList<>();
 		try {
 			aoJSONList = s_oMapper.readValue(sJson, new TypeReference<List<String>>(){});
 
@@ -80,7 +81,7 @@ public final class JsonUtils {
 			Utils.debugLog("JsonUtils.jsonToListOfStrings: could not parse the JSON payload due to " + oE + ".");
 		}
 
-		return null;
+		return aoJSONList;
 	}
 
 	public static List<Map<String, Object>> jsonToListOfMapOfObjects(String sJson) {

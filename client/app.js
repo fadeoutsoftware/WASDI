@@ -26,6 +26,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.ProcessorService', 
+    'wasdi.ConsoleService', 
     'wasdi.WorkflowService', 
     'wasdi.StyleService', 
     'wasdi.FeedbackService', 
@@ -35,6 +36,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.LightSearchService',
     'wasdi.ProcessorMediaService',
     'wasdi.NodeService',
+    'wasdi.AdminDashboardService',
+    'wasdi.PackageManagerService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -61,6 +64,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.wapCheckBox',
     'wasdi.wapSlider',
     'wasdi.wapListBox',
+    'wasdi.wapTable',
     'wasdi.angularLightSlider',
     'wasdi.insertableTextArea',
     /*'wasdi.ChipsListDirective',*/
@@ -130,6 +134,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function ($stateProvide
         url: '/workspaces',
         views: {
             'maincontent': {templateUrl: 'partials/workspaces.html', controller: 'WorkspaceController'}
+        }
+    });
+
+    //AdminDashboard
+    $stateProvider.state('root.adminDashboard', {
+        url: '/adminDashboard',
+        views: {
+            'maincontent': {templateUrl: 'partials/adminDashboard.html', controller: 'AdminDashboardController'}
         }
     });
 
@@ -205,6 +217,7 @@ wasdiApp.controller("HomeController", window.HomeController);
 wasdiApp.controller("MarketPlaceController", window.MarketPlaceController);
 //wasdiApp.controller("CatalogController", window.CatalogController);
 wasdiApp.controller("WorkspaceController", window.WorkspaceController);
+wasdiApp.controller("AdminDashboardController", window.AdminDashboardController);
 wasdiApp.controller("EditorController", window.EditorController);
 wasdiApp.controller("RootController", window.RootController);
 wasdiApp.controller("ImportController", window.ImportController);
@@ -250,11 +263,14 @@ wasdiApp.controller("ManualInsertBboxController", window.ManualInsertBboxControl
 wasdiApp.controller("PayloadDialogController", window.PayloadDialogController);
 
 wasdiApp.controller("ProcessorParametersTemplateController", window.ProcessorParametersTemplateController);
+wasdiApp.controller("ProcessParamsShareController", window.ProcessParamsShareController);
 
 wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
 
 //wasdiApp.controller("UploadFileController", window.UploadFileController);
 //wasdiApp.controller("ImageEditorController", window.ImageEditorController);
+
+wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function ($rootScope, $state, AuthService) {

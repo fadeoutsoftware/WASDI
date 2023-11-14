@@ -54,6 +54,7 @@ RUN groupadd --gid $GRP_ID --non-unique $USR_NAME && \
         libxslt1-dev \
         locate \
         nano \
+        nodejs \
         openjdk-8-jre \
         python3 \
         python3-dev \
@@ -94,10 +95,6 @@ RUN python3 -m venv $VIRTUAL_ENV && \
         requests && \
     pip3 install --no-cache-dir $PIP_INSTALL_WASDI_ARGUMENTS wasdi && \
     pip3 install --no-cache-dir GDAL==`gdal-config --version`
-
-
-# Copy our files
-COPY --chown=$USR_NAME:$GRP_NAME ./processor/ $USR_HOME/.
 
 
 # From now, all commands executed are executed as root

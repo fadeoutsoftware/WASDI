@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
@@ -386,7 +385,7 @@ public class WasdiGraph {
 		        //update the process
 				m_oProcess.setProgressPerc(100);
 				m_oProcess.setStatus(ProcessStatus.DONE.name());
-				m_oProcess.setOperationEndDate(Utils.getFormatDate(new Date()));
+				m_oProcess.setOperationEndTimestamp(Utils.nowInMillis());
 		        if (!m_oProcessRepository.updateProcess(m_oProcess)) {
 		        	m_oLogger.error("WasdiGraph: Error during process update (terminated)");
 		        }
@@ -470,7 +469,9 @@ public class WasdiGraph {
             oOutputProduct.setProductViewModel(oVM);
             oOutputProduct.setBoundingBox(sBBox);
             oOutputProduct.getProductViewModel().setMetadataFileReference(null);
-                        
+
+            oOutputProduct.setDescription(oProduct.getDescription());
+
             if (!oDownloadedRepo.insertDownloadedFile(oOutputProduct)) {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }

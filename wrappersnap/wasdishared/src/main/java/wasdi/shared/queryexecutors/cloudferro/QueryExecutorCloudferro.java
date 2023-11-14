@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.google.common.base.Preconditions;
-
 import wasdi.shared.business.ecostress.EcoStressItemForReading;
-import wasdi.shared.business.ecostress.EcoStressLocation;
 import wasdi.shared.data.ecostress.EcoStressRepository;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.Platforms;

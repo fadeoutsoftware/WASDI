@@ -1,0 +1,35 @@
+<div class="modal fade">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <button
+                    type="button"
+                    class="close"
+                    ng-click="close(null)"
+                    data-dismiss="modal"
+                    aria-hidden="true"
+                >
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                    {{"DIALOG_PACKAGE_MANAGER_HEADER" | translate}}
+                </h4>
+            </div>
+            <ng-include
+                src="'dialogs/package_manager/PackageManagerPackagesInfo.html'"
+            ></ng-include>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    ng-click="close(null)"
+                    class="my-button"
+                    data-dismiss="modal"
+                >
+                    {{"DIALOG_CLOSE_BUTTON" | translate}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

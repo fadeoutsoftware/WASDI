@@ -16,6 +16,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -229,7 +230,7 @@ public class MongoRepository {
      * @param sCollectionName
      * @param oClass
      */
-    public <T> void fillList(List<T> aoReturnList, FindIterable<Document> oMongoDocuments, Class<T> oClass) {
+    public <T> void fillList(List<T> aoReturnList, MongoIterable<Document> oMongoDocuments, Class<T> oClass) {
     	
         MongoCursor<Document> oCursor = oMongoDocuments.iterator();
         

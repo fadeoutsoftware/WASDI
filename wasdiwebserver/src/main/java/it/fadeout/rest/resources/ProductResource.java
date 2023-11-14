@@ -359,6 +359,7 @@ public class ProductResource {
                         oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
                         
                         oGeoRefProductViewModel.setStyle(oDownloaded.getDefaultStyle());
+                        oGeoRefProductViewModel.setDescription(oDownloaded.getDescription());
 
                         oGeoRefProductViewModel.setMetadata(null);
                         aoProductList.add(oGeoRefProductViewModel);
@@ -480,7 +481,6 @@ public class ProductResource {
 
             // Create repo
             ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
             // Get Product List
             List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.getProductsByWorkspace(sWorkspaceId);
@@ -565,6 +565,10 @@ public class ProductResource {
             DownloadedFile oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
 
             if (oDownloaded == null) {
+            	oDownloaded = oDownloadedFilesRepository.getDownloadedFileByPath(WasdiFileUtils.fixPathSeparator(sFullPath + oProductViewModel.getFileName()));
+            }
+
+            if (oDownloaded == null) {
                 Utils.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
                 return Response.status(500).build();
             }
@@ -581,12 +585,19 @@ public class ProductResource {
             
             String sNewName = oProductViewModel.getProductFriendlyName();
             if (sNewName == null) sNewName = "";
-            
-            
-            if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle))) {
+
+            String sOriginalDescription = oDownloaded.getDescription();
+            if (sOriginalDescription == null) sOriginalDescription = "";
+
+            String sNewDescription = oProductViewModel.getDescription();
+            if (sNewDescription == null) sNewDescription = "";
+
+
+            if ((!sOriginalName.equals(sNewName)) || (!sOriginalStyle.equals(sNewStyle)) || (!sOriginalDescription.equals(sNewDescription))) {
                 // Update the 2 fields that can be updated
                 oDownloaded.getProductViewModel().setProductFriendlyName(oProductViewModel.getProductFriendlyName());
                 oDownloaded.setDefaultStyle(oProductViewModel.getStyle());
+                oDownloaded.setDescription(oProductViewModel.getDescription());
                 
                 try {
                     if (!sOriginalStyle.equals(sNewStyle)) {

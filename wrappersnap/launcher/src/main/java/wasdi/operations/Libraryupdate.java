@@ -1,5 +1,6 @@
 package wasdi.operations;
 
+import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.parameters.BaseParameter;
@@ -28,6 +29,13 @@ public class Libraryupdate extends Operation {
 	        ProcessorParameter oParameter = (ProcessorParameter) oParam;
 	        
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        
+	        
+	        if (!oEngine.isProcessorOnNode(oParameter)) {
+                LauncherMain.s_oLogger.error("Libraryupdate.executeOperation: Processor [" + oParameter.getName() + "] not installed in this node, return");
+                return true;	        	
+	        }
+	        	        
 	        oEngine.setParameter(oParameter);
 	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);

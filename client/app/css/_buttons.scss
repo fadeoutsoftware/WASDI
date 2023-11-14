@@ -61,6 +61,31 @@
             }
         }
 
+        &.btn-danger {
+            border-color: $color-btn-danger-bg;
+            background-color: $color-btn-danger-bg;
+            color: $color-btn-danger-text;
+    
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-danger-bg-hover;
+                    background-color: $color-btn-danger-bg-hover;
+                }
+            }
+        }
+        &.btn-outline-danger{
+            border-color: $color-btn-danger-bg;
+            background: transparent;
+            color: $color-btn-danger-bg;
+    
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-danger-bg;
+                    background-color: $color-btn-danger-bg;
+                    color: $color-btn-danger-text;
+                }
+            }
+        }
 
 
         &:disabled, &.disabled{

@@ -14,7 +14,7 @@
                 <div class="right-side d-flex">
                     <!--SEARCH-->
                     <div class="search-wrapper mr-2 d-flex">
-                        <input type="text" name="search" placeholder='{{"MARKET_SEARCH_APP"|translate}}' class="search-field" ng-model="m_oController.m_sNameFilter">
+                        <input type="text" name="search" placeholder='{{"MARKET_SEARCH_APP"|translate}}' class="search-field" ng-model="m_oController.m_sNameFilter" ng-keyup="$event.keyCode == 13 && m_oController.refreshAppList()">
                         <div class="search-icon-wrapper px-4 d-flex align-items-center" ng-click="m_oController.refreshAppList()">
                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                         </div>
@@ -216,7 +216,7 @@
                                 <span class="fa fa-check mr-1"></span>{{"MARKET_BUYED"|translate}}
                             </div>
                             <!--APP DETAILS-->
-                            <h5 class="application_title mt-4">{{processor.friendlyName}}</h5>
+                            <a ng-click="m_oController.openApplicationPage(processor.processorName)" ng-href="#!/{{processor.processorName}}/appdetails"><h5 class="application_title mt-4">{{processor.friendlyName}}</h5></a>
                             <p class="application_description" title="{{processor.processorDescription}}">{{processor.processorDescription}}</p>
                             <div class="publisher mb-1">
                                 <span ng-if="!m_oController.isMine(processor)">{{"MARKET_PUBLISHED_BY"|translate}}<span class="pub-name">{{processor.publisher}}</span></span>

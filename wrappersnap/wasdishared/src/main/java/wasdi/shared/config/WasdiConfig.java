@@ -62,6 +62,11 @@ public class WasdiConfig {
 	public int readTimeout = 10000;
 	
 	/**
+	 * Number of Milliseconds to sleep after a chmod command to let it be applied
+	 */
+	public int msWaitAfterChmod = 1000;
+	
+	/**
 	 * Mongo db Configuration
 	 */
 	public MongoConfig mongoMain;
@@ -140,6 +145,16 @@ public class WasdiConfig {
 	 * Schedulers config
 	 */
 	public SchedulerConfig scheduler;
+	
+	/**
+	 * Multi Cloud Balancer Config
+	 */
+	public LoadBalancerConfig loadBalancer = new LoadBalancerConfig();
+	
+	/**
+	 * Configuration of the traefik proxy to reach notebooks inside the workspaces
+	 */
+	public TraefikConfig traefik = new TraefikConfig();
 	
 	/**
 	 * Get the Catalogue Config for the specified Platform Type

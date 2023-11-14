@@ -95,19 +95,19 @@ angular.module('wasdi.TreeDirective', [])
                 return true;
             };
 
-            this.openCloseNode = function(sId)
-            {
-                //open node
-                var isOpen = $("#jstree").jstree("is_open", sId);
-                if(!isOpen)
-                {
-                    $("#jstree").jstree("open_node", sId);
-                }
-                else
-                {
-                    $("#jstree").jstree("close_node", sId);
-                }
-            };
+            // this.openCloseNode = function(sId)
+            // {
+            //     //open node
+            //     var isOpen = $("#jstree").jstree("is_open", sId);
+            //     if(!isOpen)
+            //     {
+            //         $("#jstree").jstree("open_node", sId);
+            //     }
+            //     else
+            //     {
+            //         $("#jstree").jstree("close_node", sId);
+            //     }
+            // };
 
             var oController = this;
             /*
@@ -145,7 +145,7 @@ angular.module('wasdi.TreeDirective', [])
                             //exclude click event context menu
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
-                                oController.openCloseNode(data.node.id);
+                                //  oController.openCloseNode(data.node.id);
 
                                 //is it a band?
                                 if( data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))

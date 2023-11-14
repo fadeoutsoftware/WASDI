@@ -1,7 +1,5 @@
 package wasdi.operations;
 
-import java.io.File;
-
 import wasdi.LauncherMain;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -49,20 +47,13 @@ public class Redeployprocessor extends Operation {
                 return false;
             }
 
-            // Set the processor path
-            String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-            if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-
-            String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
-            File oProcessorFolder = new File(sProcessorFolder);
-            
-            // Is the processor installed in this node?
-            if (!oProcessorFolder.exists()) {
-                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
-                return true;            	
-            }
-
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
+	        
+	        if (!oEngine.isProcessorOnNode(oParameter)) {
+                LauncherMain.s_oLogger.error("Redeployprocessor.executeOperation: Processor [" + sProcessorName + "] not installed in this node, return");
+                return true;	        	
+	        }
+	        
 	        oEngine.setSendToRabbit(m_oSendToRabbit);
 	        oEngine.setParameter(oParameter);
 	        oEngine.setProcessWorkspaceLogger(m_oProcessWorkspaceLogger);
@@ -101,13 +92,6 @@ public class Redeployprocessor extends Operation {
 				            
 				            if (!bRet) {
 				            	sInfo = "GURU MEDITATION<br>There was an error re-deploying " + sName + " :(";
-				            } else {
-
-				            	if (sNodeCode.equals("wasdi")) {
-				            		Thread.sleep(2000);
-
-				            		oEngine.refreshPackagesInfo(oParameter);
-				            	}
 				            }
 				            
 				            m_oSendToRabbit.SendRabbitMessage(bRet, LauncherOperations.INFO.name(), oParam.getExchange(), sInfo, oParam.getExchange());	        				

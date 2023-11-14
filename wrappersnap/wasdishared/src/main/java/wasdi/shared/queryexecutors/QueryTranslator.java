@@ -905,7 +905,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseIMERG(String sQuery, QueryViewModel oResult) {
-		Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
+		//Utils.debugLog("QueryTranslator.parseIMERG | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_IMERG)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_IMERG);
@@ -925,7 +925,7 @@ public abstract class QueryTranslator {
 	 * @param oResult the resulting Query View Model
 	 */
 	private void parseCM(String sQuery, QueryViewModel oResult) {
-		Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
+		//Utils.debugLog("QueryTranslator.parseCM | sQuery: " + sQuery);
 
 		if (sQuery.contains(QueryTranslator.s_sPLATFORMNAME_CM)) {
 			sQuery = removePlatformToken(sQuery, s_sPLATFORMNAME_CM);
@@ -936,6 +936,24 @@ public abstract class QueryTranslator {
 			oResult.productLevel = extractValue(sQuery, "protocol");
 			oResult.productName = extractValue(sQuery, "dataset");
 			oResult.sensorMode = extractValue(sQuery, "variables");
+
+			if (sQuery.contains("startDepth")) {
+				String sStartDepth = extractValue(sQuery, "startDepth");
+				try {
+					oResult.cloudCoverageFrom = Double.parseDouble(sStartDepth);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing startDepth: " + sStartDepth);
+				}
+			}
+
+			if (sQuery.contains("endDepth")) {
+				String sEndDepth = extractValue(sQuery, "endDepth");
+				try {
+					oResult.cloudCoverageTo = Double.parseDouble(sEndDepth);
+				} catch (Exception oE) {
+					Utils.debugLog("QueryTranslator.parseCM( " + sQuery  + " ): error while parsing endDepth: " + sEndDepth);
+				}
+			}
 		}
 	}
 

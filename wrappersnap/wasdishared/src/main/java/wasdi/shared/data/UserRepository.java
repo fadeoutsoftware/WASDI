@@ -1,12 +1,15 @@
 package wasdi.shared.data;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -189,7 +192,35 @@ public class UserRepository extends  MongoRepository{
     	
     	return aoReturnList;
     }
-    
+
+	public List<User> findUsersByPartialName(String sPartialName) {
+		List<User> aoReturnList = new ArrayList<>();
+
+		if (Utils.isNullOrEmpty(sPartialName) || sPartialName.length() < 3) {
+			return aoReturnList;
+		}
+
+		Pattern regex = Pattern.compile(Pattern.quote(sPartialName), Pattern.CASE_INSENSITIVE);
+
+		Bson oFilterLikeUserId = Filters.eq("userId", regex);
+		Bson oFilterLikeName = Filters.eq("name", regex);
+		Bson oFilterLikeSurname = Filters.eq("surname", regex);
+
+		Bson oFilter = Filters.or(oFilterLikeUserId, oFilterLikeName, oFilterLikeSurname);
+
+		try {
+			FindIterable<Document> oWSDocuments = getCollection(m_sThisCollection)
+					.find(oFilter)
+					.sort(new Document("userId", 1));
+
+			fillList(aoReturnList, oWSDocuments, User.class);
+		} catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+
+		return aoReturnList;
+	}
+
     /**
      * Update a list of users
      * @param aoUsers

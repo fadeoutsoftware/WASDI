@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import java.util.UUID;
 
 import org.junit.BeforeClass;
 
+import wasdi.shared.business.AuthenticationCredentials;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.config.DataProviderConfig;
@@ -30,7 +30,6 @@ import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.queryexecutors.PaginatedQuery;
 import wasdi.shared.queryexecutors.QueryExecutor;
 import wasdi.shared.queryexecutors.QueryExecutorFactory;
-import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.search.QueryResultViewModel;
@@ -306,8 +305,8 @@ public abstract class LauncherMainTest {
 		oSession.setUserId(sUserId);
 		String sSessionId = UUID.randomUUID().toString();
 		oSession.setSessionId(sSessionId);
-		oSession.setLoginDate((double) new Date().getTime());
-		oSession.setLastTouch((double) new Date().getTime());
+		oSession.setLoginDate(Utils.nowInMillis());
+		oSession.setLastTouch(Utils.nowInMillis());
 
 		SessionRepository oSessionRepo = new SessionRepository();
 		oSessionRepo.insertSession(oSession);

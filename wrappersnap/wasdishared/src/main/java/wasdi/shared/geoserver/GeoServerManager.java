@@ -3,7 +3,6 @@ package wasdi.shared.geoserver;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -33,7 +32,6 @@ import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 import wasdi.shared.config.WasdiConfig;
-import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 
@@ -415,6 +413,10 @@ public class GeoServerManager {
     	// We use anyhow publishShp for convenience creating the datastore (first step)
     	boolean bRes = m_oGsPublisher.publishShp(m_sWorkspace, sStoreName, sStoreName, oShpFile, sEpsg, sStyle);
     	
+    	if (!bRes) {
+    		bRes = createResource(oShpFile.getPath(), sStoreName, sEpsg);
+    	}
+
 		return bRes;
 	}
     

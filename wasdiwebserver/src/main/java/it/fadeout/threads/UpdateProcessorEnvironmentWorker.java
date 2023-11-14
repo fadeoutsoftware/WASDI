@@ -83,8 +83,11 @@ public class UpdateProcessorEnvironmentWorker extends Thread {
 				if (!sUrl.endsWith("/")) sUrl += "/";
 
 				// Compose the API string
-				sUrl += "processors/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId
-						+"&updateCommand=" + m_sUpdateCommand;
+				sUrl += "packageManager/environmentupdate?processorId=" + m_sProcessorId + "&workspace=" + m_sWorkspaceId;
+
+				if (m_sUpdateCommand != null) {
+					sUrl += "&updateCommand=" + m_sUpdateCommand;
+				}
 
 				// Add the auth header
 				Map<String, String> asHeaders = new HashMap<>();

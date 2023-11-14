@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import wasdi.LauncherMain;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.utils.RunTimeUtils;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -48,6 +49,7 @@ public class DockerUtils {
      * @param oProcessor       Processor
      * @param sProcessorFolder Processor Folder
      * @param sWorkingRootPath WASDI Working path
+     * @param sTomcatUser      User
      */
     public DockerUtils(Processor oProcessor, String sProcessorFolder, String sWorkingRootPath, String sTomcatUser) {
         m_oProcessor = oProcessor;
@@ -105,13 +107,10 @@ public class DockerUtils {
             Thread.sleep(2000);
 
             // Make it executable
-            Runtime.getRuntime().exec("chmod u+x " + sBuildScriptFile);
-
-            // And wait a little bit to make the chmod done
-            Thread.sleep(2000);
+            RunTimeUtils.addRunPermission(sBuildScriptFile);
 
             // Run the script
-            WasdiProcessorEngine.shellExec(sBuildScriptFile, asArgs);
+            RunTimeUtils.shellExec(sBuildScriptFile, asArgs);
 
             LauncherMain.s_oLogger.debug("DockerUtils.deploy: created image " + sDockerName);
         } catch (Exception oEx) {
@@ -171,15 +170,21 @@ public class DockerUtils {
                 // Port
                 asArgs.add("-p127.0.0.1:" + iProcessorPort + ":5000");
 
-                // Extra host mapping, useful for some instances when the server host can't be resolved
+                // Extra hosts mapping, useful for some instances when the server host can't be resolved
                 // The symptoms of such problem is that the POST call from the Docker container timeouts
-                String sExtra_Host = WasdiConfig.Current.dockers.extraHosts;
-                if (!Utils.isNullOrEmpty(sExtra_Host)) {
-                    LauncherMain.s_oLogger.debug("DockerUtils.run Found extra host in configuration file");
-                    LauncherMain.s_oLogger.debug("DockerUtils.run adding host mapping to the run arguments");
-                    asArgs.add("--add-host=" + sExtra_Host);
-                }
-
+                if (WasdiConfig.Current.dockers.extraHosts != null) {
+                	
+                	if (WasdiConfig.Current.dockers.extraHosts.size()>0) {
+                		LauncherMain.s_oLogger.debug("DockerUtils.run adding configured extra host mapping to the run arguments");
+                    	for (int iExtraHost = 0; iExtraHost<WasdiConfig.Current.dockers.extraHosts.size(); iExtraHost ++) {
+                    		
+                    		String sExtraHost = WasdiConfig.Current.dockers.extraHosts.get(iExtraHost);
+                    		
+                    		asArgs.add("--add-host=" + sExtraHost);
+                    	}
+                		
+                	}
+                }                
 
                 // Docker name
                 asArgs.add(sDockerName);
@@ -200,31 +205,31 @@ public class DockerUtils {
 
                         oRunWriter.write("#!/bin/bash");
                         oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Started >> " + m_sDockerLogFile);
+                        oRunWriter.write("echo Run Docker Started ");
                         oRunWriter.newLine();
-                        oRunWriter.write(sCommandLine + " $1 >> " + m_sDockerLogFile + " 2>&1");
+                        oRunWriter.write(sCommandLine);
                         oRunWriter.newLine();
-                        oRunWriter.write("echo Run Docker Done >> " + m_sDockerLogFile);
+                        oRunWriter.write("echo Run Docker Done");
                         oRunWriter.flush();
                         oRunWriter.close();
                     }
                 }
 
-                Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+                RunTimeUtils.addRunPermission(sRunFile);
 
                 asArgs.clear();
             }
 
             try {
                 if (!oRunFile.canExecute()) {
-                    Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+                	RunTimeUtils.addRunPermission(sRunFile);
                 }
             } catch (Exception oInnerEx) {
-                Runtime.getRuntime().exec("chmod u+x " + sRunFile);
+            	RunTimeUtils.addRunPermission(sRunFile);
             }
 
             // Execute the command to start the docker
-            WasdiProcessorEngine.shellExec(sRunFile, asArgs, false);
+            RunTimeUtils.shellExec(sRunFile, asArgs, false);
 
             LauncherMain.s_oLogger.debug("DockerUtils.run " + sDockerName + " started");
         } catch (Exception oEx) {
@@ -289,14 +294,12 @@ public class DockerUtils {
                     }
                 }
 
-                Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                RunTimeUtils.addRunPermission(sDeleteScriptFile);
                 
                 
             } else {
-                Runtime.getRuntime().exec("chmod u+x " + sDeleteScriptFile);
+                RunTimeUtils.addRunPermission(sDeleteScriptFile);
             }
-
-            Thread.sleep(1000);
 
             Runtime.getRuntime().exec(sDeleteScriptFile);
 
@@ -312,7 +315,7 @@ public class DockerUtils {
 
             String sCommand = "docker";
 
-            WasdiProcessorEngine.shellExec(sCommand, asArgs, false);
+            RunTimeUtils.shellExec(sCommand, asArgs, false);
 
             // Wait for docker to finish
             Thread.sleep(15000);

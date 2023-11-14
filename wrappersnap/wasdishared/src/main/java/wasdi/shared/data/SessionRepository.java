@@ -64,8 +64,8 @@ public class SessionRepository extends MongoRepository {
 		oSession = new UserSession();
 		oSession.setSessionId(sSessionId);
 		oSession.setUserId(sUserId);
-		oSession.setLoginDate((double) new Date().getTime());
-		oSession.setLastTouch((double) new Date().getTime());
+		oSession.setLoginDate(Utils.nowInMillis());
+		oSession.setLastTouch(Utils.nowInMillis());
     	
     	return oSession;
     }

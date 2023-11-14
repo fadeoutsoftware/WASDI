@@ -1,7 +1,9 @@
 require('./app/lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js');
 require('./app/lib/leafletbetterWMS/L.TileLayer.BetterWMS.js');
 require('./app/lib/leafletControlCustomMaster/Leaflet.Control.Custom.js');
-require('./app/lib/stringUtils/removeSpaces.js');
+require('./app/filters/stringUtils/removeSpaces.js');
+require('./app/filters/stringUtils/formatFileSize.js');
+require('./app/filters/stringUtils/formatTime.js');
 
 require('./app/lib/enum/ProductsProviders.js'); // also unused?
 
@@ -29,9 +31,11 @@ import showdow from './node_modules/showdown/dist/showdown.js';
 
 global.showdown = showdow;
 
+/*
+Removed due to ununsed old version generating errors on npm automation
 import Plotly from './node_modules/plotly.js/dist/plotly.min.js';
 
-global.Plotly = Plotly;
+global.Plotly = Plotly;*/
 
 import moment from './node_modules/moment/moment.js';
 

@@ -1,6 +1,7 @@
 package wasdi.shared.viewmodels.workspaces;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,8 +16,17 @@ public class WorkspaceListInfoViewModel {
     private List<String> sharedUsers = new ArrayList<>();
     private boolean activeNode;
     private String nodeCode;
+    private Date creationDate;
 
-    public String getWorkspaceId() {
+    public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public String getWorkspaceId() {
         return workspaceId;
     }
 

@@ -1,8 +1,6 @@
 package wasdi.processors;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import wasdi.LauncherMain;
@@ -17,6 +15,8 @@ import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 
 public abstract class WasdiProcessorEngine {
+
+	protected static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	protected String m_sWorkingRootPath = "";
 	protected String m_sDockerTemplatePath = "";
@@ -26,11 +26,24 @@ public abstract class WasdiProcessorEngine {
 	protected ProcessWorkspace m_oProcessWorkspace= null;
 	protected Send m_oSendToRabbit = new Send(null);
 
+	/**
+	 * Create an instance of a Processor Engine
+	 * @param sType Type of Processor
+	 * @return
+	 */
 	public static WasdiProcessorEngine getProcessorEngine(String sType) { 
 		return getProcessorEngine(sType, WasdiConfig.Current.paths.downloadRootPath, WasdiConfig.Current.paths.dockerTemplatePath, WasdiConfig.Current.tomcatUser);
 	}
 	
 	
+	/**
+	 * Create an instance of a Processor Engine
+	 * @param sType Type of Processor
+	 * @param sWorkingRootPath WASDI Working Path
+	 * @param sDockerTemplatePath Docker Template Path
+	 * @param sTomcatUser Tomcat user to impersonate
+	 * @return
+	 */
 	public static WasdiProcessorEngine getProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath, String sTomcatUser) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
@@ -48,6 +61,9 @@ public abstract class WasdiProcessorEngine {
 		}
 		else if (sType.equals(ProcessorTypes.CONDA)) {
 			return new CondaProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
+		}
+		else if (sType.equals(ProcessorTypes.JUPYTER_NOTEBOOK)) {
+			return new JupyterNotebookProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
 		}
 		else if (sType.equals(ProcessorTypes.CSHARP)) {
 			return new CSharpProcessorEngine(sWorkingRootPath, sDockerTemplatePath, sTomcatUser);
@@ -122,57 +138,17 @@ public abstract class WasdiProcessorEngine {
 	/**
 	 * Force the refresh of the packagesInfo.json file. Ideally, the file should be refreshed after every update operation.
 	 * @param oParameter the processor parameter
+	 * @param iPort port of the processor server
 	 * * @return
 	 */
 	public abstract boolean refreshPackagesInfo(ProcessorParameter oParameter);
-
-	/**
-	 * Execute a system task
-	 * @param sCommand
-	 * @param asArgs
-	 */
-	public static void shellExec(String sCommand, List<String> asArgs) {
-		shellExec(sCommand,asArgs,true);
-	}
-	
-	/**
-	 * Execute a system task
-	 * @param sCommand
-	 * @param asArgs
-	 * @param bWait
-	 */	
-	public static void shellExec(String sCommand, List<String> asArgs, boolean bWait) {
-		try {
-			if (asArgs==null) asArgs = new ArrayList<String>();
-			asArgs.add(0, sCommand);
-			
-			String sCommandLine = "";
-			
-			for (String sArg : asArgs) {
-				sCommandLine += sArg + " ";
-			}
-			
-			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
-			
-			ProcessBuilder oProcessBuilder = new ProcessBuilder(asArgs.toArray(new String[0]));
-			Process oProcess = oProcessBuilder.start();
-			
-			if (bWait) {
-				int iProcOuptut = oProcess.waitFor();				
-				LauncherMain.s_oLogger.debug("ShellExec CommandLine RETURNED: " + iProcOuptut);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	/**
 	 * Check if a processor exists on actual node
 	 * @param oProcessorParameter
 	 * @return True if the processor exists
 	 */
-	protected boolean isProcessorOnNode(ProcessorParameter oProcessorParameter) {
+	public boolean isProcessorOnNode(ProcessorParameter oProcessorParameter) {
 		
 		if (oProcessorParameter == null) return false;
 		
@@ -316,4 +292,69 @@ public abstract class WasdiProcessorEngine {
 		return sProcessorFolder;
 	}
 
+	/**
+	 * Get the template folder of the processor by processor name
+	 * @param sProcessorName the name of the processor
+	 * @return the folder of the template of the processor
+	 */
+	public String getProcessorTemplateFolder(String sProcessorName) {
+		// Set the processor template path
+		String sDockerTemplatePath = m_sDockerTemplatePath;
+
+		if (!sDockerTemplatePath.endsWith(File.separator)) sDockerTemplatePath = sDockerTemplatePath + File.separator;
+
+		String sProcessorTemplateFolder = sDockerTemplatePath + sProcessorName + File.separator;
+
+		return sProcessorTemplateFolder;
+	}
+
+	/**
+	 * Get the path of the general common environment file path of the processor
+	 * @param sProcessorName
+	 * @return
+	 */
+	public String getProcessorGeneralCommonEnvFilePath(String sProcessorName) {
+		return getProcessorFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
+	}
+
+	/**
+	 * 
+	 * @param sProcessorName
+	 * @return
+	 */
+	public String getProcessorTemplateGeneralCommonEnvFilePath(String sProcessorName) {
+		return getProcessorTemplateFolder(sProcessorName) + "var" + FILE_SEPARATOR + "general_common.env";
+	}
+	
+	/**
+	 * Re-executes all the actions that the user made in the environment of an application 
+	 * after the initial deploy. This is used when an application is deployed on a node or forced to 
+	 * be redeployed.
+	 * 
+	 * @param oParameter Processor Parameter with the command (run or redeploy)
+	 * @param iPort port of the processor
+	 * @return true if every thing is ok, false otherwise
+	 */
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
+		return true;
+	}
+
+	/**
+	 * Waits some time to let application start
+	 */
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
+		try {
+	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+	        Thread.sleep(5000);
+
+//	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+//	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+//
+//	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait " + (iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts) + " sec to let docker start");
+//	        Thread.sleep(iNumberOfAttemptsToPingTheServer * iMillisBetweenAttmpts);
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		}
+	}
 }

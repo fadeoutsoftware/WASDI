@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -168,9 +169,60 @@ public class WasdiFileUtils {
 			return false;
 		}
 
-		File file = new File(sFileFullPath);
+		File oFile = new File(sFileFullPath);
 
-		return fileExists(file);
+		return fileExists(oFile);
+	}
+
+	/**
+	 * Compare two files to see if they are the same.
+	 * @param oFile1 the first file
+	 * @param oFile2 the second file
+	 * @return true if the files are the same, false otherwise
+	 */
+	public static boolean filesAreTheSame(File oFile1, File oFile2) {
+		if (!fileExists(oFile1)) {
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file1 does not exist");
+			return false;
+		}
+
+		if (!fileExists(oFile2)) {
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.filesAreTheSame: file2 does not exist");
+			return false;
+		}
+
+		try {
+			long lFile1Checksum = FileUtils.checksumCRC32(oFile1);
+			long lFile2Checksum = FileUtils.checksumCRC32(oFile2);
+			return lFile1Checksum == lFile2Checksum;
+			
+		} catch (IOException e) {
+			s_oLogger.error("s_oLogger.error | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
+			Utils.debugLog("Utils.debugLog | WasdiFileUtils.fileToText: cannot compare files: " + e.getMessage());
+
+			return false;
+		}
+	}
+
+	/**
+	 * Compare two files to see if they are the same.
+	 * @param sFile1FullPath the path of the first file
+	 * @param sFile2FullPath the path of the second file
+	 * @return true if the files are the same, false otherwise
+	 */
+	public static boolean filesAreTheSame(String sFile1FullPath, String sFile2FullPath) {
+		if (Utils.isNullOrEmpty(sFile1FullPath)) {
+			return false;
+		}
+
+		if (Utils.isNullOrEmpty(sFile2FullPath)) {
+			return false;
+		}
+
+		File oFile1 = new File(sFile1FullPath);
+		File oFile2 = new File(sFile2FullPath);
+
+		return filesAreTheSame(oFile1, oFile2);
 	}
 
 	/**
@@ -203,46 +255,40 @@ public class WasdiFileUtils {
 			oOutStream.flush();
 		}
 	}
-
+	
 	public static boolean writeFile(String sContent, File oFile) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeFile");
+		return writeFile(sContent, oFile, false);
+	}
+
+	public static boolean writeFile(String sContent, File oFile, boolean bAppend) throws FileNotFoundException, IOException {
 
 		if (sContent == null) {
 			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
-
 			return false;
 		}
 
 		File oParentDirectory = oFile.getParentFile();
 
 		if (fileExists(oFile)) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file already exists. deleting it.");
-
 			deleteFile(oFile.getAbsolutePath());
 		} else if (!oParentDirectory.exists()) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file and parent directory do not exists.");
-
 			oParentDirectory.mkdirs();
 		}
 
-		try (OutputStream oOutStream = new FileOutputStream(oFile)) {
+		try (OutputStream oOutStream = new FileOutputStream(oFile, bAppend)) {
 			byte[] ayBytes = sContent.getBytes();
 			oOutStream.write(ayBytes);
 		}
 
 		if (fileExists(oFile)) {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file succesfully created: " + oFile.getAbsolutePath());
-
 			return true;
-		} else {
-			s_oLogger.debug("WasdiFileUtils.writeFile | file was not created: " + oFile.getAbsolutePath());
-
+		} 
+		else {
 			return false;
 		}
 	}
 
 	public static boolean writeFile(String sContent, String sFileFullPath) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeFile | sFileFullPath: " + sFileFullPath);
 
 		if (sContent == null) {
 			s_oLogger.error("WasdiFileUtils.writeFile: sContent is null");
@@ -262,7 +308,6 @@ public class WasdiFileUtils {
 	}
 
 	public static boolean writeMapAsJsonFile(Map<String, Object> aoJSONMap, String sFileFullPath) throws FileNotFoundException, IOException {
-		s_oLogger.debug("WasdiFileUtils.writeMapAsJsonFile | sFileFullPath: " + sFileFullPath);
 
 		if (aoJSONMap == null) {
 			s_oLogger.error("WasdiFileUtils.writeMapAsJsonFile: aoJSONMap is null");

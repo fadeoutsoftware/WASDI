@@ -188,6 +188,8 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage, oTranslate) {
             sUserMessage = oTranslate.instant("MSG_DELETEPROCESSOR");
             break;
         case "INFO":
+        case "ENVIRONMENTUPDATE":
+        case "DELETEPROCESSOR":
             sUserMessage =  oMessage.payload;
             break;
         case "REDEPLOYPROCESSOR":
@@ -202,6 +204,9 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage, oTranslate) {
         case "READMETADATA":
             sUserMessage = oTranslate.instant("MSG_READMETADATA");
             break;
+        case "TERMINATEJUPYTERNOTEBOOK":
+        case "LAUNCHJUPYTERNOTEBOOK":
+            sUserMessage = "";
         default:
             console.log("ERROR: GOT EMPTY MESSAGE<br>READY");
     }

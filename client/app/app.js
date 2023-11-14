@@ -28,6 +28,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.ProcessorService',
+    'wasdi.ConsoleService',
     'wasdi.ProcessorParametersTemplateService',
     'wasdi.TreeService',
     'wasdi.LightSearchService',
@@ -36,6 +37,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.WorkflowService',
     'wasdi.StyleService',
     'wasdi.FeedbackService',
+    'wasdi.AdminDashboardService',
+    'wasdi.PackageManagerService',
 
     //DIRECTIVES
     'wasdi.SnakeDirective',
@@ -133,6 +136,14 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         }
     });
 
+    //AdminDashboard
+    $stateProvider.state('root.adminDashboard', {
+        url: '/adminDashboard',
+        views: {
+            'maincontent': {templateUrl: 'partials/adminDashboard.html', controller: 'AdminDashboardController'}
+        }
+    });    
+
     //EDITOR
     $stateProvider.state('root.editor', {
         url: '/{workSpace}/editor',
@@ -191,6 +202,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
 wasdiApp.controller("HomeController", HomeController);
 wasdiApp.controller("WorkspaceController", WorkspaceController);
+wasdiApp.controller("AdminDashboardController", AdminDashboardController);
 wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
@@ -230,6 +242,14 @@ wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 wasdiApp.controller("SendFeedbackController", SendFeedbackController);
 wasdiApp.controller("ManualInsertBboxController", ManualInsertBboxController);
 wasdiApp.controller("PayloadDialogController", PayloadDialogController);
+wasdiApp.controller("ProcessParamsShareController", ProcessParamsShareController)
+
+wasdiApp.controller("SendFeedbackController", window.SendFeedbackController);
+
+//wasdiApp.controller("UploadFileController", window.UploadFileController);
+//wasdiApp.controller("ImageEditorController", window.ImageEditorController);
+
+wasdiApp.controller("PackageManagerController", window.PackageManagerController); 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 

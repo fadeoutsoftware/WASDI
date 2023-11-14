@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -218,7 +217,7 @@ public class LauncherMain  {
 
             // Set the ProcessWorkspace STATUS as running
             s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-            s_oProcessWorkspace.setOperationStartDate(Utils.getFormatDate(new Date()));
+            s_oProcessWorkspace.setOperationStartTimestamp(Utils.nowInMillis());
             s_oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
             s_oProcessWorkspace.setProgressPerc(0);
             s_oProcessWorkspace.setPid(getProcessId());
@@ -247,7 +246,7 @@ public class LauncherMain  {
                 if (s_oProcessWorkspace != null) {
 
                     s_oProcessWorkspace.setProgressPerc(100);
-                    s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    s_oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     s_oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
                     ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -548,10 +547,10 @@ public class LauncherMain  {
     }
 
     /**
-     * Get the full workspace path for this parameter
+     * Get the full workspace path for this parameter (with last / included)
      *
-     * @param oParameter
-     * @param sRootPath
+     * @param oParameter Base Parameter of the launcher operation
+     * @param sRootPath Root path of WASDI node
      * @return full workspace path
      */
     public static String getWorkspacePath(BaseParameter oParameter, String sRootPath) {
@@ -628,7 +627,7 @@ public class LauncherMain  {
 
                 // Set Progress Perc and Operation End Date
             	s_oProcessWorkspace.setProgressPerc(100);
-            	s_oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            	s_oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 
                 ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 

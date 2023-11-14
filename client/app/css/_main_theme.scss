@@ -20,6 +20,7 @@ $wasdi-blue-logo-complementary-1:#848E9F;
 $wasdi-blue-logo-complementary-2:#5F6C82;
 $wasdi-blue-logo-complementary-3:#2D394F;
 $wasdi-blue-logo-complementary-4:#1B2B46;
+$wasdi-blue-logo-complementary-5:#ff5f5f;
 
 
 
@@ -29,7 +30,7 @@ $wasdi-blue-logo-complementary-4:#1B2B46;
     src:url(../fonts/hero/Hero.eot);
     src:url(../fonts/hero/Hero.ttf);
     src:url(../fonts/hero/Hero.woff);
-    src:url(../fonts/hero/Hero.svg);
+    src:url(../fonts/hero/Hero.svg) format('svg');
 }
 
 $wasdi-font-web: 'Hero' ,Helvetica, sans-serif;//arial
@@ -173,6 +174,10 @@ $color-btn-primary-text: white;
 $color-btn-secondary-bg: $wasdi-blue-logo-complementary-1;
 $color-btn-secondary-bg-hover: $wasdi-green-logo;
 $color-btn-secondary-text: white;
+
+$color-btn-danger-bg: $wasdi-blue-logo-complementary-5;
+$color-btn-danger-bg-hover: $wasdi-green-logo;
+$color-btn-danger-text: white;
 
 
 $color-connection-status-connected: #7cad56;

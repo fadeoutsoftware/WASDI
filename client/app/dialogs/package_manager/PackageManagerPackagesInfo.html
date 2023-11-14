@@ -1,0 +1,180 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>
+                {{m_oController.sWorkspaceName}} Packages -
+                <span class="text-success"
+                    >{{m_oController.m_sPackageManagerName}}
+                    {{m_oController.m_sPackageManagerVersion}}</span
+                >
+            </h3>
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <form class="form-inline" action="">
+                    <div class="form-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder='{{"DIALOG_PACKAGE_MANAGER_NAME" | translate }}'
+                            ng-model="m_oController.sPackageName"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-wasdi"
+                            ng-click="m_oController.addLibrary(m_oController.sProcessorId, m_oController.sPackageName)"
+                            ng-if="!m_oController.bIsEditing"
+                        >
+                            {{"DIALOG_PACKAGE_MANAGER_ADD" | translate }}
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-wasdi"
+                            ng-click="m_oController.updateLibraryList(m_oController.sProcessorId)"
+                            ng-if="!m_oController.bIsEditing"
+                        >
+                            {{"DIALOG_PACKAGE_MANAGER_REFRESH_LIST" | translate }}
+                        </button>
+                    </div>
+                </form>
+                <div class="col-xs-3 my-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Search Packages"
+                        ng-model="searchPackages"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="loadIcon" ng-hide="!m_oController.m_bIsLoading">
+        <h3>Please wait... Your package list is being updated.</h3>
+        <p><em>If you re-open your package manager before the process is complete, it may not reflect your change!</em></p>
+        <invader></invader>
+    </div>
+    <div class="row">
+        <div class="col-xs-12" style="max-height: 400px; overflow-y: auto">
+            <table
+                class="table table-hover table-condensed"
+                ng-hide="m_oController.m_bIsLoading"
+            >
+                <thead
+                    style="
+                        background-color: white;
+                        position: sticky;
+                        top: 0;
+                        z-index: 1;
+                    "
+                >
+                    <tr>
+                        <th
+                            style="cursor: pointer"
+                            scope="col"
+                            ng-click="m_oController.changeSorting('packageName')"
+                        >
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'packageName' && m_oController.sort.descending"
+                            ></i>
+
+                            {{"DIALOG_PACKAGE_MANAGER_NAME" | translate}}
+                            <span class="badge badge-secondary"
+                                >{{m_oController.m_aoPackages.length}}
+                            </span>
+                        </th>
+                        <th
+                            style="cursor: pointer"
+                            scope="col"
+                            ng-click="m_oController.changeSorting('currentVersion')"
+                        >
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'currentVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_CURRENT_VERSION" |
+                            translate }}
+                        </th>
+                        <th
+                            style="cursor: pointer"
+                            scope="col"
+                            ng-click="m_oController.changeSorting('latestVersion')"
+                        >
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && !m_oController.sort.descending"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.sort.column === 'latestVersion' && m_oController.sort.descending"
+                            ></i>
+                            {{"DIALOG_PACKAGE_MANAGER_LATEST_VERSION" |
+                            translate}}
+                        </th>
+                        <th>
+                            {{"DIALOG_PACKAGE_MANAGER_ACTIONS" | translate}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        ng-repeat="package in m_oController.m_aoPackages | filter:searchPackages | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                    >
+                        <td class="">{{package.packageName}}</td>
+                        <td class="">{{package.currentVersion}}</td>
+                        <td class="">
+                            <span
+                                ng-class="{'text-success' : package.latestVersion == null, 'text-danger': package.latestVersion !== null}"
+                            >
+                                {{package.latestVersion !== null ?
+                                package.latestVersion : package.currentVersion}}
+                            </span>
+                        </td>
+                        <td class="over-icon">
+                            <button
+                                class="btn btn-success btn-wasdi btn-xs"
+                                ng-disabled="package.latestVersion == null"
+                                ng-click="m_oController.upgradeLibrary(m_oController.sProcessorId, package.packageName, package.latestVersion)" title="Update"
+                            >
+                            
+                                <i
+                                    class="fa fa-arrow-up"
+                                    aria-hidden="true"
+                                    style="margin-right: 0px"  
+                                ></i>
+                            </button>
+                            <button
+                                class="btn btn-primary btn-wasdi btn-xs"
+                                ng-click="m_oController.removeLibrary(m_oController.sProcessorId, package.packageName)"
+                                title="Remove"
+                            >
+                                <i
+                                    class="fa fa-trash"
+                                    aria-hidden="true"
+                                    style="margin-right: 0px"
+                                    
+                                ></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

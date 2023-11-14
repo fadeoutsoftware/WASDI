@@ -20,7 +20,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import wasdi.dbutils.helpers.S3BucketHelper;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.AppCategory;
@@ -36,9 +35,9 @@ import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
-import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.business.comparators.ProcessWorkspaceStartDateComparator;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.AppsCategoriesRepository;
@@ -54,14 +53,13 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.data.WorkspaceSharingRepository;
-
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.S3BucketUtils;
 import wasdi.shared.utils.SerializationUtils;
-
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.products.BandViewModel;
 import wasdi.shared.viewmodels.products.ProductViewModel;
@@ -1039,8 +1037,8 @@ public class dbUtils {
                 oProductWorkspaceRepository.deleteByWorkspaceId(sWorkspaceId);
 
                 // Delete also the sharings, it is deleted by the owner..
-                WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-                oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
             } else {
                 Utils.debugLog("Error deleting workspace on data base");
@@ -1148,18 +1146,18 @@ public class dbUtils {
                 System.out.println("Getting workspace sharings");
 
                 WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-                WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+                UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-                List<WorkspaceSharing> aoWorkspacesSharings = oWorkspaceSharingRepository.getWorkspaceSharings();
+                List<UserResourcePermission> aoUserResourcePermissions = oUserResourcePermissionRepository.getWorkspaceSharings();
 
-                for (WorkspaceSharing oWorkspaceSharing : aoWorkspacesSharings) {
+                for (UserResourcePermission oUserResourcePermission : aoUserResourcePermissions) {
 
-                    Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oWorkspaceSharing.getWorkspaceId());
+                    Workspace oWorkspace = oWorkspaceRepository.getWorkspace(oUserResourcePermission.getResourceId());
 
                     if (oWorkspace == null) {
-                        Utils.debugLog("WorkspaceSharings: DELETE WS Shared not available " + oWorkspaceSharing.getWorkspaceId());
+                        Utils.debugLog("UserResourcePermissions: DELETE WS Shared not available " + oUserResourcePermission.getResourceId());
 
-                        oWorkspaceSharingRepository.deleteByUserIdWorkspaceId(oWorkspaceSharing.getUserId(), oWorkspaceSharing.getWorkspaceId());
+                        oUserResourcePermissionRepository.deletePermissionsByUserIdAndWorkspaceId(oUserResourcePermission.getUserId(), oUserResourcePermission.getResourceId());
                         continue;
                     }
                 }
@@ -1356,8 +1354,8 @@ public class dbUtils {
 
                     // Delete also the sharings, it is deleted by the owner..
                     System.out.println("Delete Workspace sharings");
-                    WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-                    oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+                    UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+                    oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
                     System.out.println("Workspace Deleted");
                 } else {
@@ -1492,8 +1490,8 @@ public class dbUtils {
                             UserSession oNewSession = new UserSession();
                             oNewSession.setSessionId(sSessionId);
                             oNewSession.setUserId(sUser);
-                            oNewSession.setLoginDate((double) new Date().getTime());
-                            oNewSession.setLastTouch((double) new Date().getTime());
+                            oNewSession.setLoginDate(Utils.nowInMillis());
+                            oNewSession.setLastTouch(Utils.nowInMillis());
 
                             oSessionRepository.insertSession(oNewSession);
                         }
@@ -1692,8 +1690,8 @@ public class dbUtils {
 
 			                    // Delete also the sharings, it is deleted by the owner..
 			                    System.out.println("Delete Workspace sharings");
-			                    WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
-			                    oWorkspaceSharingRepository.deleteByWorkspaceId(sWorkspaceId);
+			                    UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			                    oUserResourcePermissionRepository.deletePermissionsByWorkspaceId(sWorkspaceId);
 
 			                    System.out.println("Workspace Deleted");
 			                } else {
@@ -2062,7 +2060,7 @@ public class dbUtils {
 
         try {
         	System.out.println("Wasdi DB Utils");
-        	
+        	        	
             // create the parser
             CommandLineParser oParser = new DefaultParser();
 
@@ -2192,7 +2190,7 @@ public class dbUtils {
 	private static void ecoStress() {
 
 		try {
-			S3BucketHelper.parseS3Bucket();
+			S3BucketUtils.parseS3Bucket();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

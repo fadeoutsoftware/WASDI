@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * WASDI User
  * Created by p.campanella on 21/10/2016.
@@ -62,7 +64,7 @@ public class User {
      */
     private String m_sLastLogin = null;
     
-    /*
+    /**
      * User default node
      */
     private String m_sDefaultNode = "wasdi";
@@ -81,8 +83,18 @@ public class User {
 	 * Description
 	 */
 	private String description;
+
+	/**
+	 * User role
+	 */
+	private String role = UserApplicationRole.USER.name();
 	
-    static {
+	/**
+	 * User type: is it free, standard or professional?!?
+	 */
+	private String type = UserType.FREE.name();
+
+	static {
     	s_oInvalid = new User();
     	s_oInvalid.id = -1;
     	s_oInvalid.userId = null;
@@ -225,4 +237,28 @@ public class User {
 		this.m_sDefaultNode = defaultNode;
 	}
 
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+    public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	/**
+	 * Return true if the user is professional
+	 * False if is Free or Standard
+	 * @return
+	 */
+	@JsonIgnore
+	public boolean isProfessionalUser() {
+		return type.equals(UserType.PROFESSIONAL.name());
+	}
 }

@@ -2,7 +2,6 @@ package wasdi.scheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -356,8 +355,8 @@ public class ProcessScheduler {
 								// Force to error
 								oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 								// Set the operation end date
-								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-									oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndTimestamp())) {
+									oCheckProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 								}
 								// Update the process
 								m_oProcessWorkspaceRepository.updateProcess(oCheckProcessWorkspace);
@@ -373,11 +372,11 @@ public class ProcessScheduler {
 				// Is there a timeout?
 				if (m_lTimeOutMs != -1) {
 					// Check the last state change
-					if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeDate())) {
+					if (!Utils.isNullOrEmpty(oRunningPws.getLastStateChangeTimestamp())) {
 						
-						Date oLastChange = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(oRunningPws.getLastStateChangeDate());
+						Double oLastChange = oRunningPws.getLastStateChangeTimestamp();
 						Date oNow = new Date();
-						long lTimeSpan = oNow.getTime() - oLastChange.getTime();
+						long lTimeSpan = oNow.getTime() - oLastChange.longValue();
 						
 						// We ran over?
 						if (lTimeSpan > m_lTimeOutMs) {
@@ -390,8 +389,8 @@ public class ProcessScheduler {
 							// Update the state
 							oRunningPws.setStatus(ProcessStatus.STOPPED.name());
 							
-							if (Utils.isNullOrEmpty(oRunningPws.getOperationEndDate())) {
-								oRunningPws.setOperationEndDate(Utils.getFormatDate(new Date()));
+							if (Utils.isNullOrEmpty(oRunningPws.getOperationEndTimestamp())) {
+								oRunningPws.setOperationEndTimestamp(Utils.nowInMillis());
 							}
 
 							m_oProcessWorkspaceRepository.updateProcess(oRunningPws);
@@ -476,8 +475,8 @@ public class ProcessScheduler {
 								// Force to error
 								oCheckProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 								// Set the operation end date
-								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndDate())) {
-									oCheckProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+								if (Utils.isNullOrEmpty(oCheckProcessWorkspace.getOperationEndTimestamp())) {
+									oCheckProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 								}
 								
 								// Update the process
@@ -607,7 +606,7 @@ public class ProcessScheduler {
 	
 	protected List<ProcessWorkspace> getReadyList() {
 		try {
-			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoReady = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.READY.name(), m_sWasdiNode, "lastStateChangeTimestamp", "lastStateChangeDate");
 			return getReadyList(aoReady);
 		}
 		catch (Exception oE) {
@@ -634,7 +633,7 @@ public class ProcessScheduler {
 	
 	protected List<ProcessWorkspace> getWaitingList() {
 		try {
-			List<ProcessWorkspace> aoWaiting = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeDate");
+			List<ProcessWorkspace> aoWaiting = m_oProcessWorkspaceRepository.getProcessesByStateNode(ProcessStatus.WAITING.name(), m_sWasdiNode, "lastStateChangeTimestamp", "lastStateChangeDate");
 			return getWaitingList(aoWaiting);
 		}
 		catch (Exception oE) {

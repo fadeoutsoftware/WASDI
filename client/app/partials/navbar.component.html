@@ -90,7 +90,7 @@
                     <!------------------------------ LANGUAGE ------------------------------>
                     <div class="nav navbar-nav navbar-right user-container">
                         <div class="dropdown">
-                            <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown"
+                            <div class="dropdown-toggle ml-4 pt-2" type="button" id="dropdownMenuUser" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="true">
                                 <i class="far fa-flag fa-lg" aria-hidden="true"></i>
                             </div>
@@ -241,6 +241,15 @@
                                 <!---->
                                 <i class="fa fa-comment fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_FEEDBACK"|translate}}
+                            </a>
+                        </li>
+
+                        <!-- ADMIN DASHBOARD BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.adminDashboard')}"
+                                ng-show="m_oController.m_oUser.grantedAuthorities != null && m_oController.m_oUser.grantedAuthorities.indexOf('admin:dashboard') > 0">
+                            <a ng-click="m_oController.openAdminDashboard();" href="">
+                                <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_ADMIN"|translate}}
                             </a>
                         </li>
 

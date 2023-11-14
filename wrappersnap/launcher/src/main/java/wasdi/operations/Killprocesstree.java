@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -199,7 +198,7 @@ public class Killprocesstree extends Operation {
 				!sPrevSatus.equalsIgnoreCase(ProcessStatus.STOPPED.name())
 		){
 			oKilledProcessWorkspace.setStatus(ProcessStatus.STOPPED.name());
-			oKilledProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+			oKilledProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 
 			if (!oRepository.updateProcess(oKilledProcessWorkspace)) {
 				m_oLocalLogger.error("Killprocesstree.setStatusAsStopped: Unable to update process status of process " +
@@ -222,7 +221,7 @@ public class Killprocesstree extends Operation {
 			Processor oProcessorToKill = oProcessorRepository.getProcessorByName(sProcessorName);
 
 			// Call localhost:port
-			String sUrl = "http://localhost:" + oProcessorToKill.getPort() + "/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
+			String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessorToKill.getPort() + "/run/--kill" + "_" + oProcessToKill.getSubprocessPid();
 
 			URL oProcessorUrl = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();

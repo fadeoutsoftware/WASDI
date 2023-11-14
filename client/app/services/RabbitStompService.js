@@ -40,6 +40,33 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.m_fMessageCallBack = null;
 
+            /**
+             * Array of one-shots message hooks
+             * Each hook is represented by an object that has
+             * .A string representing the message type
+             * .A callback to be executed once the message is received.
+             * 
+             * The hooks are "one-shot": once executed they are deleted from the list
+             */
+            this.m_afMessageHooks = [];
+
+            /**
+             * Key of the Code Member of a Message Hook
+             */
+            this.m_sHookMessageCode = "CODE";
+            /**
+             * Key of the Callback Member of a Message Hook
+             */
+            this.m_sHookFunction = "HOOK";
+            /**
+             * Key of the Controller Member of a Message Hook
+             */
+            this.m_sHookController = "CONTROLLER";
+            /**
+             * Key of the call once flag of a Message Hook
+             */
+             this.m_sCallOnce = "CALL_ONCE";
+
             this.m_oActiveController = null;
 
             this.m_sWorkspaceId = "";
@@ -64,6 +91,37 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.setActiveController = function (oController) {
                 this.m_oActiveController = oController;
+            }
+
+            this.addMessageHook = function (sMessageType, oController, fCallback) {
+                return this.addMessageHook(sMessageType,oConstantsService,fCallback,false);
+            }
+
+            /**
+             * Adds a Message Hook to a message type.
+             * The hook will be executed once when a message of the specified type is received.
+             */
+            this.addMessageHook = function (sMessageType, oController, fCallback, bCallOnce) {
+                oHook = {};
+                oHook[this.m_sHookMessageCode] = sMessageType;
+                oHook[this.m_sHookController] = oController;
+                oHook[this.m_sHookFunction] = fCallback;
+                oHook[this.m_sCallOnce] = bCallOnce;
+
+                this.m_afMessageHooks.push(oHook);
+
+                // Return the index in the array where our hook has been stored
+                return this.m_afMessageHooks.length -1;
+            }
+
+            /**
+             * Removes a Message Hook from the service list
+             * @param {Integer} iHookIndex 
+             */
+            this.removeMessageHook = function(iHookIndex) {
+                if (iHookIndex<this.m_afMessageHooks.length) {
+                    this.m_afMessageHooks.splice(iHookIndex, 1);
+                }
             }
 
             this.isSubscrbed = function () {
@@ -119,6 +177,22 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                             else
                             {
                                 console.log("RabbitStompService: Active Workspace is null.")
+                            }
+
+                            if (!utilsIsObjectNullOrUndefined(oThisService.m_afMessageHooks)) {
+                                if (oThisService.m_afMessageHooks.length>0) {
+                                    for (var iHooks = oThisService.m_afMessageHooks.length-1; iHooks>=0; iHooks--) {
+
+                                        if (oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookMessageCode]===oMessageResult.messageCode) {
+                                            var fCallbackFunction = oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookFunction]
+                                            fCallbackFunction(oMessageResult, oThisService.m_afMessageHooks[iHooks][oThisService.m_sHookController]);
+
+                                            if (oThisService.m_afMessageHook[iHooks][oThisService.m_sCallOnce]) {
+                                                oThisService.m_afMessageHooks.splice(iHooks, 1);
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             //Reject the message if it is for another workspace

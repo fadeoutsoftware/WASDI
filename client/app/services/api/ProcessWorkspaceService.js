@@ -301,4 +301,39 @@ service('ProcessWorkspaceService', ['ConstantsService','$rootScope','$http', 'Mo
             let sUrl = this.APIURL;
             return this.m_oHttp.get(sUrl + '/process/appstats?processorName='+sProcessorName);
         };
+
+        this.getProcessWorkspaceTotalRunningTimeByUserAndInterval = function(sUserId, sDateFrom, sDateTo) {
+            let sUrl = this.APIURL + '/process/runningTime?userId=' + sUserId;
+
+            if (utilsIsStrNullOrEmpty(sDateFrom) === false) {
+                sUrl += '&dateFrom=' + sDateFrom;
+            }
+
+            if (utilsIsStrNullOrEmpty(sDateTo) === false) {
+                sUrl += '&dateTo=' + sDateTo;
+            }
+
+            return this.m_oHttp.get(sUrl);
+        };
+
+        this.getQueuesStatus = function(sNodeCode, sStatuses) {
+            let sUrl = this.APIURL + '/process/queuesStatus?';
+
+            if (utilsIsStrNullOrEmpty(sNodeCode) === false) {
+                sUrl += '&nodeCode=' + sNodeCode;
+            }
+
+            if (utilsIsStrNullOrEmpty(sStatuses) === false) {
+                sUrl += '&statuses=' + sStatuses;
+            }
+
+            return this.m_oHttp.get(sUrl);
+        };
+
+        this.getAvailableNodesSortedByScore = function() {
+            let sUrl = this.APIURL + '/process/nodesByScore?';
+
+            return this.m_oHttp.get(sUrl);
+        };
+
 }]);

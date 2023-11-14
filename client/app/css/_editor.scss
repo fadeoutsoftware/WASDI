@@ -453,6 +453,8 @@
                     cursor: not-allowed;
                 }
 
+                
+
                 ////RADAR ICON
                 //.icon-radar {
                 //    content: $wasdi-radar-icon;
@@ -758,3 +760,10 @@ input[type="range"]::-webkit-slider-thumb:active {
 }
 
 
+.lg-screen {
+    display: none;
+
+    @media only screen and (min-width: 1400px) {
+        display: inline;
+    }
+}

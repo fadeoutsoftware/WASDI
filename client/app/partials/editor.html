@@ -1,12 +1,11 @@
 <div class="editor-view">
 
     <!--Operation bar-->
-    <div class="row-v4 justify-content-end toolbar">
-
-        <div class="col-v4-auto mr-auto filter-search-wrapper">
+    <div class="row-v4 d-flex flex-row justify-content-end toolbar">
+        <div class="col-v4-auto mr-auto mr-0 filter-search-wrapper">
             <!--mr-auto-->
-            <div class="row-v4">
-                <div class="col-v4-auto" style="padding-right: 0px">
+            <div class="row-v4 d-flex flex-nowrap">
+                <div class="col-v4-auto pr-0">
                     <input type="text" name="name" class="wasdi-input" value="" title=""
                         ng-model="m_oController.m_sTextQueryFilterInTree" required="required"
                         placeholder="{{'EDITOR_PRODUCTS_FILTER'|translate}}">
@@ -45,16 +44,18 @@
 
         </div>
 
-        <div class="col-v4-auto button-menu-with-icons pl-1" ng-repeat="button in m_oController.m_aoNavBarMenu"
-            ng-class="{'ml-auto' : $index === 0}" ng-hide="m_oController.isHiddenOperationMainBar();">
+        <div class="col-v4-auto button-menu-with-icons pl-1" ng-repeat="button in m_oController.m_aoNavBarMenu"  ng-hide="m_oController.isHiddenOperationMainBar();">
 
 
             <div class="button-container">
                 <button class="btn btn-outline-primary no-border btn-wasdi"
                     ng-if="m_oController.isToolbarBtnDropdown(button) == false"
-                    ng-click="button.onClick(m_oController)">
+                    ng-click="button.onClick(m_oController)"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="{{button.name}}">
                     <em class="custom-icon" ng-class="button.icon"></em>
-                    <span>{{button.name}}</span>
+                    <span class="lg-screen">{{button.name}}</span>
                 </button>
 
                 <div class="dropdown" ng-if="m_oController.isToolbarBtnDropdown(button) == true">
@@ -86,10 +87,12 @@
 
             <!--**************** TREE PANEL *****************-->
             <div class="card flex-grow-1 mb-4">
-                <div class="card-header">
-                    {{"EDITOR_TITLE_PANEL_PRODUCTS" | translate}}
-                    <span class="badge">{{m_oController.m_aoProducts.length}}</span>
-
+                <div class="card-header d-flex flex-row align-items-center">
+                   
+                    <p class="mb-0 mr-1" style="cursor: pointer;" ng-click="m_oController.setSortType()">{{"EDITOR_TITLE_PANEL_PRODUCTS" | translate}}</p>
+                    <span class="badge mr-1">{{m_oController.m_aoProducts.length}}</span>
+                    <i class="fa fa-arrow-up" aria-hidden="true" ng-show="m_oController.sSortType === 'asc'"></i>
+                    <i class="fa fa-arrow-down" aria-hidden="true" ng-show="m_oController.sSortType === 'desc'"></i>
                     <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip"
                         data-placement="top" title="{{'EDITOR_TOOLTIP_OPEN_BAND'|translate}}">
                         <em class="fa fa-folder-open-o" aria-hidden="true"></em>
@@ -137,7 +140,7 @@
                         </li>
                         <li role="presentation" ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
                             ng-click="m_oController.setActiveTab(1)"
-                            ng-show="m_oController.m_b2DMapModeOn">
+                           >
                             <a href=""><i class="fa fa-list"></i>&nbsp;Layers</a>
                         </li>
                     </ul>
@@ -190,17 +193,18 @@
                                     <br>
                                 </div>
                                 <div class="col-xs-1">
-                                    <button class="btn btn-wasdi fa btn-outline-primary" title="Navigate to"
+                                    <button class="btn btn-wasdi btn-outline-primary" title="Navigate to"
                                         ng-click="m_oController.navigateTo($index)"
-                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
-                                        <em class="fa fa-expand" aria-hidden="true"></em>
+                                       style="padding-top: 7px;padding-left: 10px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                    
+                                        <i class="fa fa-expand mr-0" aria-hidden="true"></i>
                                     </button>
                                 </div>
 
                                 <div class="col-xs-1">
                                     <button class="btn btn-wasdi fa btn-outline-primary" title="Remove layer from map"
                                         ng-click="m_oController.removeBandImage(oBand)"
-                                        style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
+                                        style="padding-left: 10px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
                                         <em class="fa fa-times" aria-hidden="true"></em>
                                     </button>
 
@@ -208,17 +212,21 @@
                                 <div class="col-xs-1">
                                     <button class="btn btn-wasdi fa btn-outline-primary" title="Legend"
                                         ng-click="m_oController.showLayerLegend($index)"
+
+                                      
+                                        ng-style="m_oController.m_aoVisibleBands[$index].showLegend === true ? {'background-color': '#43516A', 'color': 'white' } : {'background-color' : 'white', color: '#43516A'}"
+                                        
                                         style="padding-left: 9px;border-radius: 250px;font-weight: 600;width: 33px;letter-spacing: 0.6px;">
                                         <em class="fa fa-image" aria-hidden="true"></em>
                                     </button>
 
                                 </div>                                
-                                <div class="col-xs-4">
+                                <div class="col-xs-4" ng-show="m_oController.m_b2DMapModeOn">
                                     <label class="color-value">
                                         {{oBand.opacity}} %
                                     </label>
                                     <!-- Index is zero based and the [0] layer is the map-->
-                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class=""
+                                    <input type="range" value="100" min="0" max="100" ng-model="oBand.opacity" class="opacitySlider"
                                         ng-change="m_oController.setLayerOpacity(oBand.opacity,oBand.layerId)">
                                 </div>
                             </div>
@@ -296,13 +304,13 @@
                 </div>
 
                 <!-- 2D map -->
-                <div class="map" id="wasdiMap"
+                <div class="map h-100" id="wasdiMap"
                     ng-show="m_oController.m_b2DMapModeOn == true">
                 </div>
                 <!---->
 
                 <!-- 3D map -->
-                <div id="cesiumContainer" class="map"
+                <div id="cesiumContainer" class="map h-100"
                     ng-show="m_oController.m_b2DMapModeOn == false">
                 </div>
                 <!--cesium layers map dropdown menu  https://cesiumjs.org/Cesium/Build/Documentation/BaseLayerPicker.html -->

@@ -9,12 +9,14 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 
@@ -24,6 +26,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.managers.IPackageManager;
@@ -31,9 +34,11 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.payloads.DeleteProcessorPayload;
 import wasdi.shared.payloads.DeployProcessorPayload;
 import wasdi.shared.utils.EndMessageProvider;
+import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.ZipFileUtils;
+import wasdi.shared.viewmodels.HttpCallResponse;
 
 public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
@@ -160,7 +165,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             if (bFirstDeploy)
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 70);
 
-            // Run the container: find the port
+            // Run the container: find the port and reconstruct the environment
             int iProcessorPort = oProcessorRepository.getNextProcessorPort();
             if (!bFirstDeploy) {
                 iProcessorPort = oProcessor.getPort();
@@ -174,6 +179,10 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
                 oProcessor.setPort(iProcessorPort);
                 oProcessorRepository.updateProcessor(oProcessor);
+            }
+            else {
+            	waitForApplicationToStart(oParameter);
+            	reconstructEnvironment(oParameter, iProcessorPort);
             }
 
             try {
@@ -397,7 +406,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: Decoded JSON Parameter " + sJson);
 
             // Call localhost:port
-            String sUrl = "http://localhost:" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
+            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/" + oParameter.getProcessObjId();
 
             sUrl += "?user=" + oParameter.getUserId();
             sUrl += "&sessionid=" + oParameter.getSessionID();
@@ -436,15 +445,14 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed due to: " + oE + ", try to start container again");
 
                 // Try to start Again the docker
-
                 String sProcessorFolder = getProcessorFolder(sProcessorName);
 
+                // Start it
                 DockerUtils oDockerUtils = new DockerUtils(oProcessor, sProcessorFolder, m_sWorkingRootPath, m_sTomcatUser);
-
                 oDockerUtils.run();
-
-                LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: wait 5 sec to let docker start");
-                Thread.sleep(5000);
+                
+                // Wait a little bit
+                waitForApplicationToStart(oParameter);
 
                 // Try again the connection
                 LauncherMain.s_oLogger.debug("DockerProcessorEngine.run: connection failed: try to connect again");
@@ -599,8 +607,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Check and set the operation end-date
-            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                 // P.Campanella 20200115: I think this is to add, but I cannot test it now :( ...
                 //LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.valueOf(oProcessWorkspace.getStatus()), oProcessWorkspace.getProgressPerc());
             }
@@ -697,8 +705,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
 
             // Check and set the operation end-date
-            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+            if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
             }
 
             try {
@@ -726,8 +734,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -803,11 +811,20 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oDockerUtils.deploy();
 
             onAfterDeploy(sProcessorFolder);
-
+            
             // Run
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
             LauncherMain.s_oLogger.info("DockerProcessorEngine.redeploy: run the container");
             oDockerUtils.run();
+            
+            
+            // Recreate the user environment
+            waitForApplicationToStart(oParameter);
+            reconstructEnvironment(oParameter, oProcessor.getPort());
+            
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				refreshPackagesInfo(oParameter);
+			}            
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -818,8 +835,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             try {
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -866,9 +883,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: update lib for " + sProcessorName);
 
             // Call localhost:port
-            String sUrl = "http://localhost:" + oProcessor.getPort() + "/run/--wasdiupdate";
+            String sUrl = "http://" + WasdiConfig.Current.dockers.internalDockersBaseAddress + ":" + oProcessor.getPort() + "/run/--wasdiupdate";
 
-            // CREI CONNESSIONE AL
+            // Connect to the docker
             URL oProcessorUrl = new URL(sUrl);
             HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
             oConnection.setDoOutput(true);
@@ -879,8 +896,9 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             oOutputStream.flush();
 
             if (!(oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+                return false;
             }
+            
             BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
             String sOutputResult;
             String sOutputCumulativeResult = "";
@@ -892,6 +910,13 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             }
             oConnection.disconnect();
 
+
+            waitForApplicationToStart(oParameter);
+
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				refreshPackagesInfo(oParameter);
+			}
+
             LauncherMain.s_oLogger.info("DockerProcessorEngine.libraryUpdate: lib updated");
 
             LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
@@ -899,12 +924,16 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             return true;
         } catch (Exception oEx) {
             LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", oEx);
+
+            return false;
+        }
+        finally {
             try {
 
                 if (oProcessWorkspace != null) {
                     // Check and set the operation end-date
-                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-                        oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+                    if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+                        oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
                     }
 
                     LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -912,8 +941,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
             } catch (Exception e) {
                 LauncherMain.s_oLogger.error("DockerProcessorEngine.libraryUpdate Exception", e);
             }
-
-            return false;
+        	
         }
     }
 
@@ -960,14 +988,20 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sJson: " + sJson);
 			JSONObject oJsonItem = new JSONObject(sJson);
 
-			String sUpdateCommand = (String) oJsonItem.get("updateCommand");
-			LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
+			Object oUpdateCommand = oJsonItem.get("updateCommand");
 
-			String sIp = "127.0.0.1";
-			int iPort = oProcessor.getPort();
+			if (oUpdateCommand == null || oUpdateCommand.equals(org.json.JSONObject.NULL)) {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: refresh of the list of libraries.");
+			} else {
+				String sUpdateCommand = (String) oUpdateCommand;
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.environmentUpdate: sUpdateCommand: " + sUpdateCommand);
 
-			IPackageManager oPackageManager = getPackageManager(sIp, iPort);
-			oPackageManager.operatePackageChange(sUpdateCommand);
+				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+				int iPort = oProcessor.getPort();
+
+				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+				oPackageManager.operatePackageChange(sUpdateCommand);
+			}
 
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -978,8 +1012,8 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 				if (oProcessWorkspace != null) {
 					// Check and set the operation end-date
-					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
-						oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
+						oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 					}
 
 					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
@@ -1006,11 +1040,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 
 		// Set the processor path
-		String sDownloadRootPath = WasdiConfig.Current.paths.downloadRootPath;
-		if (!sDownloadRootPath.endsWith("/"))
-			sDownloadRootPath = sDownloadRootPath + "/";
-
-		String sProcessorFolder = sDownloadRootPath + "processors/" + sProcessorName + "/";
+		String sProcessorFolder = this.getProcessorFolder(sProcessorName);
 		File oProcessorFolder = new File(sProcessorFolder);
 
 		// Is the processor installed in this node?
@@ -1020,7 +1050,7 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 			return true;
 		}
 
-		String sIp = "127.0.0.1";
+		String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
 		int iPort = oProcessor.getPort();
 
 		try {
@@ -1047,4 +1077,117 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 		return false;
 	}
 
+	/**
+	 * Waits some time to let application start
+	 */
+	public void waitForApplicationToStart(ProcessorParameter oParameter) {
+		try {
+	        LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: wait 5 sec to let docker start");
+
+	        Integer iNumberOfAttemptsToPingTheServer = WasdiConfig.Current.dockers.numberOfAttemptsToPingTheServer;
+	        Integer iMillisBetweenAttmpts = WasdiConfig.Current.dockers.millisBetweenAttmpts;
+
+	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
+	        	
+	        	if (isDockerServerUp(oParameter)) {
+	        		return;
+	        	}
+	        }
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.waitForApplicationToStart: exception " + oEx.toString());
+		}
+	}
+
+	public boolean isDockerServerUp(ProcessorParameter oParameter) {
+		try {
+			String sProcessorId = oParameter.getProcessorID();
+
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+
+			String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+			int iPort = oProcessor.getPort();
+
+
+			String sUrl = "http://" + sIp + ":" + iPort + "/hello";
+			LauncherMain.s_oLogger.debug("CondaPackageManagerImpl.isDockerServerUp: sUrl: " + sUrl);
+
+			Map<String, String> asHeaders = Collections.emptyMap();
+
+			HttpCallResponse oHttpCallResponse = HttpUtils.newStandardHttpGETQuery(sUrl, asHeaders);
+			Integer iResult = oHttpCallResponse.getResponseCode();
+
+			LauncherMain.s_oLogger.debug("CondaPackageManagerImpl.isDockerServerUp: iResult: " + iResult);
+
+			return (iResult != null && iResult.intValue() == 200);
+		} catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.isDockerServerUp: exception " + oEx.toString());
+		}
+
+		return false;
+	}
+
+	@Override
+	protected boolean reconstructEnvironment(ProcessorParameter oParameter, int iPort) {
+		
+		boolean bRet = true;
+		
+		try {
+			
+			// We need to reach the main server
+			String sBaseUrl = WasdiConfig.Current.baseUrl;
+			String sUrl = sBaseUrl + "/packageManager/environmentActions?name=" + oParameter.getName();
+			
+			// Create the headers
+			Map<String, String> asHeaders = HttpUtils.getStandardHeaders(oParameter.getSessionID());
+			
+			LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: calling url " + sUrl);
+			// Call the API to get the lastest action list
+			String sResult = HttpUtils.httpGet(sUrl, asHeaders);
+			
+			// Convert to an array of strings
+			ArrayList<String> asActions = MongoRepository.s_oMapper.readValue(sResult, new TypeReference<ArrayList<String>>(){});
+			
+			// Do we have actions?
+			if (asActions.size()>0) {
+				
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: got " + asActions.size() + " actions");
+				
+				// Yes! Lets re-do all
+				
+				// Take the ip
+				String sIp = WasdiConfig.Current.dockers.internalDockersBaseAddress;
+				
+				// Create package manager info
+				IPackageManager oPackageManager = getPackageManager(sIp, iPort);
+				
+				// For each command
+				for (String sUpdateCommand : asActions) {
+					
+					LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: executing " + sUpdateCommand);
+					bRet &= oPackageManager.operatePackageChange(sUpdateCommand);
+					
+					if (!bRet) {
+						LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: error executing " + sUpdateCommand);
+						break;
+					}
+				}
+				
+			}
+			else {
+				LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: no actions to do");
+			}
+		} 
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("DockerProcessorEngine.reconstructEnvironment: exception " + oEx.toString());
+		}
+		
+		// execute all the ops with the binded Package Manager for the app
+		LauncherMain.s_oLogger.debug("DockerProcessorEngine.reconstructEnvironment: done");
+		
+		return bRet;
+	}
 }

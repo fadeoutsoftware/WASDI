@@ -1,11 +1,15 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
+
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,6 +19,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import it.fadeout.Wasdi;
@@ -23,13 +29,17 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationRole;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.config.SchedulerQueueConfig;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
+import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.HttpUtils;
@@ -38,6 +48,8 @@ import wasdi.shared.utils.TimeEpochUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.processors.AppStatsViewModel;
 import wasdi.shared.viewmodels.processors.ProcessHistoryViewModel;
+import wasdi.shared.viewmodels.processworkspace.NodeScoreByProcessWorkspaceViewModel;
+import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceAggregatedViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 
@@ -66,6 +78,7 @@ import wasdi.shared.viewmodels.processworkspace.ProcessWorkspaceViewModel;
 @Path("/process")
 public class ProcessWorkspaceResource {
 	
+	protected static String s_sNoneSubtype = "none";
 
 	/**
 	 * Get a filtered paginated list of processworkspaces.
@@ -107,10 +120,6 @@ public class ProcessWorkspaceResource {
 			User oUser = Wasdi.getUserFromSession(sSessionId);
 			if (oUser == null) {
 				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: invalid session");
-				return aoProcessList;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user id from session is null, aborting");
 				return aoProcessList;
 			}
 			
@@ -277,18 +286,18 @@ public class ProcessWorkspaceResource {
 				ProcessHistoryViewModel oRun = new ProcessHistoryViewModel();
 				
 				try {
-					oRun.setOperationDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					oRun.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 					
 					// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
-					if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-						oRun.setOperationStartDate(oProcess.getOperationStartDate() + Utils.getLocalDateOffsetFromUTCForJS());
+					if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
+						oRun.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
 					}
 					else {
-						oRun.setOperationStartDate(oProcess.getOperationDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+						oRun.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 					}
 					
 					
-					oRun.setOperationEndDate(oProcess.getOperationEndDate() + " " + Utils.getLocalDateOffsetFromUTCForJS());
+					oRun.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
 					
 					oRun.setProcessorName(sProcessorName);
 					oRun.setStatus(oProcess.getStatus());
@@ -532,19 +541,19 @@ public class ProcessWorkspaceResource {
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
-			if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
-				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationStartDate()));
+			if (!Utils.isNullOrEmpty(oProcess.getOperationStartTimestamp())) {
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationStartTimestamp()));
 			}
 			else {
-				oViewModel.setOperationStartDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
+				oViewModel.setOperationStartDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
 			}
 			
-			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeDate())) {
-				oViewModel.setLastChangeDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getLastStateChangeDate()));
+			if (!Utils.isNullOrEmpty(oProcess.getLastStateChangeTimestamp())) {
+				oViewModel.setLastChangeDate(Utils.getFormatDate(oProcess.getLastStateChangeTimestamp()));
 			}
 			
-			oViewModel.setOperationDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationDate()));
-			oViewModel.setOperationEndDate(Utils.getDateWithLocalDateOffsetFromUTCForJS(oProcess.getOperationEndDate()));
+			oViewModel.setOperationDate(Utils.getFormatDate(oProcess.getOperationTimestamp()));
+			oViewModel.setOperationEndDate(Utils.getFormatDate(oProcess.getOperationEndTimestamp()));
 			oViewModel.setOperationType(oProcess.getOperationType());
 			if (!Utils.isNullOrEmpty(oProcess.getOperationSubType())) {
 				oViewModel.setOperationSubType(oProcess.getOperationSubType());
@@ -958,10 +967,10 @@ public class ProcessWorkspaceResource {
 					&& 
 					(sNewStatus.equals(ProcessStatus.DONE.name()) || sNewStatus.equals(ProcessStatus.ERROR.name()) || sNewStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
 				// The process finished
-				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndTimestamp())) {
 					Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( ProcWsId: " + sProcessObjId + ", update process end date" );
 					// No end-date set: put it here
-					oProcessWorkspace.setOperationEndDate(Utils.getFormatDate(new Date()));
+					oProcessWorkspace.setOperationEndTimestamp(Utils.nowInMillis());
 				}
 			}
 			
@@ -1166,4 +1175,377 @@ public class ProcessWorkspaceResource {
 		
 		return null;
 	}
+
+	@GET
+	@Path("/runningTime")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Long getRunningTime(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("userId") String sTargetUserId,
+			@QueryParam("dateFrom") String sDateFrom, @QueryParam("dateTo") String sDateTo) {
+
+		Utils.debugLog("ProcessWorkspaceResource.getRunningTime");
+
+		Long lRunningTime = null;
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: invalid session");
+			return lRunningTime;
+		}
+
+		try {
+			if (Utils.isNullOrEmpty(sTargetUserId)) {
+				return lRunningTime;
+			} else {
+				UserRepository oUserRepository = new UserRepository();
+				User oTargetUser = oUserRepository.getUser(sTargetUserId);
+
+				if (oTargetUser == null) {
+					return lRunningTime;
+				}
+			}
+
+			// if the requesting-user is not super-user and if the requesting-user is not the target-user, then return null
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)
+					&& !sTargetUserId.equalsIgnoreCase(oUser.getUserId())) {
+				return lRunningTime;
+			}
+
+
+
+			if (Utils.isNullOrEmpty(sDateFrom)) {
+				sDateFrom = "2020-01-01T00:00:00.000Z";
+			}
+
+			Date oDateFrom = Utils.getYyyyMMddTZDate(sDateFrom);
+
+			if (oDateFrom == null) {
+				return lRunningTime;
+			}
+
+			long lDateFrom = oDateFrom.getTime();
+
+
+
+			if (Utils.isNullOrEmpty(sDateTo)) {
+				sDateTo = "2099-12-31T23:59:59.999Z";
+			}
+
+			Date oDateTo = Utils.getYyyyMMddTZDate(sDateTo);
+
+			if (oDateTo == null) {
+				return lRunningTime;
+			}
+
+			long lDateTo = oDateTo.getTime();
+
+
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			lRunningTime = oProcessWorkspaceRepository.getRunningTime(sTargetUserId, lDateFrom, lDateTo);
+
+			// The main node needs to query also the others
+			if (Wasdi.s_sMyNodeCode.equals("wasdi")) {
+				NodeRepository oNodeRepo = new NodeRepository();
+				List<Node> aoNodes = oNodeRepo.getNodesList();
+
+				for (Node oNode : aoNodes) {
+					if (oNode.getNodeCode().equals("wasdi")) continue;
+					if (oNode.getActive() == false) continue;
+
+					try {
+						String sUrl = oNode.getNodeBaseAddress();
+						if (!sUrl.endsWith("/")) sUrl += "/";
+						sUrl += "process/runningTime?userId=" + sTargetUserId +"&dateFrom=" + sDateFrom + "&dateTo=" + sDateTo;
+
+						Map<String, String> asHeaders = new HashMap<String, String>();
+						asHeaders.put("x-session-token", sSessionId);
+
+						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: calling url: " + sUrl);
+
+						String sResponse = HttpUtils.httpGet(sUrl, asHeaders);
+
+						if (!Utils.isNullOrEmpty(sResponse)) {
+							Long lRunningTimeOnNode = Long.valueOf(sResponse);
+
+							lRunningTime += lRunningTimeOnNode;
+						}
+					} catch (Exception e) {
+						Utils.debugLog("ProcessWorkspaceResource.getRunningTime: exception contacting computing node: " + e.toString());
+					}
+				}
+			}
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getRunningTime: " + oEx);
+		}
+
+		return lRunningTime;
+	}
+	
+	/**
+	 * Get a list of 
+	 * @param sSessionId
+	 * @param sNodeCode
+	 * @param sStatuses
+	 * @return
+	 */
+	public static List<ProcessWorkspaceAggregatedViewModel> getNodeQueuesStatus(String sSessionId, String sNodeCode, String sStatuses) {
+		
+		List<ProcessWorkspaceAggregatedViewModel> aoViewModel = new ArrayList<>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: invalid session");
+			return aoViewModel;
+		}
+
+		try {
+			
+			if (WasdiConfig.Current.nodeCode.equals("wasdi")) {
+				if (Utils.isNullOrEmpty(sNodeCode)) {
+					sNodeCode = "wasdi";
+				}				
+			}
+			else {
+				if (WasdiConfig.Current.nodeCode.equals(sNodeCode) == false) {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: distributed node answer only for itself");
+					return aoViewModel;					
+				}
+			}
+
+
+			NodeRepository oNodeRepo = new NodeRepository();
+			Node oNode = oNodeRepo.getNodeByCode(sNodeCode);
+
+			if (!sNodeCode.equals("wasdi")) {
+				if (oNode == null) {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Impossible to find node " + sNodeCode);
+					return aoViewModel;
+				}
+
+				if (!oNode.getActive())  {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: node " + sNodeCode + " is not active");
+					return aoViewModel;				
+				}
+			}
+			
+			if (Utils.isNullOrEmpty(sStatuses)) {
+				sStatuses = "" + ProcessStatus.WAITING.name() + "," + ProcessStatus.READY.name() + "," + ProcessStatus.CREATED + "," + ProcessStatus.RUNNING; 
+			}			
+			
+			if (WasdiConfig.Current.nodeCode.equals(sNodeCode)) {
+				
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on my node, read proc status from db");
+				
+				// Split the states
+				String[] asStatuses = sStatuses.split(",");
+
+				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+
+				// Retrive operations from the Database
+				List<ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult> aoResultsList =
+						oProcessWorkspaceRepository.getQueuesByNodeAndStatuses(sNodeCode, asStatuses);
+
+				// Create an aggregated map: Map<OperationType, Map<OperationSubType, Map<Status, Count>>>
+				// For each operation type, for each subtype, map state - number of processes
+				Map<String, Map<String, Map<String, Integer>>> aoPWAggregatedMap = new HashMap<>();
+
+				for (ProcessWorkspaceAgregatorByOperationTypeAndOperationSubtypeResult oResult : aoResultsList) {
+					
+					// Get the operation type
+					String sOperationType = oResult.getOperationType();
+					
+					// Check if we already have a map for this op-type, otherwise create it
+					Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(sOperationType);
+
+					if (aoOperationTypeMap == null) {
+						aoOperationTypeMap = new HashMap<>();
+						aoPWAggregatedMap.put(sOperationType, aoOperationTypeMap);
+					}
+
+					// Get the operation subtype
+					String sOperationSubType = oResult.getOperationSubType();
+					if (Utils.isNullOrEmpty(sOperationSubType)) {
+						sOperationSubType = s_sNoneSubtype;
+					}
+
+					// Check if we already have a map for this op-Sub-type, otherwise create it
+					Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get(sOperationSubType);
+
+					if (aoOperationSubTypeMap == null) {
+						aoOperationSubTypeMap = new HashMap<>();
+						aoOperationTypeMap.put(sOperationSubType, aoOperationSubTypeMap);
+					}
+					
+					// Add the count for this status
+					String sStatus = oResult.getStatus();
+					Integer iCount = oResult.getCount();
+					aoOperationSubTypeMap.put(sStatus, iCount);
+				}
+				
+				// Take the scheduler config to re-create queues structure
+				List<SchedulerQueueConfig> aoQueueConfigs = WasdiConfig.Current.scheduler.schedulers;
+
+
+				LauncherOperations [] aoOperations = LauncherOperations.class.getEnumConstants();
+				List<String> asWasdiOperationTypes = Arrays.stream(aoOperations)
+						.map(LauncherOperations::name)
+						.collect(Collectors.toList());
+
+
+				for (SchedulerQueueConfig oQueueConfig: aoQueueConfigs) {
+					ProcessWorkspaceAggregatedViewModel oViewModel = new ProcessWorkspaceAggregatedViewModel();
+
+					asWasdiOperationTypes.remove(oQueueConfig.opTypes);
+
+					oViewModel.setSchedulerName(oQueueConfig.name);
+					oViewModel.setOperationType(oQueueConfig.opTypes);
+					oViewModel.setOperationSubType(oQueueConfig.opSubType);
+
+					Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(oQueueConfig.opTypes);
+					if (aoOperationTypeMap != null) {
+						
+						String sSubType = oQueueConfig.opSubType;
+						if (Utils.isNullOrEmpty(sSubType)) {
+							sSubType = s_sNoneSubtype;
+						}
+						
+						Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get(sSubType);
+						
+						Integer iCreated = 0;
+						Integer iRunning = 0;
+						Integer iWaiting = 0;
+						Integer iReady = 0;
+						
+						if (aoOperationSubTypeMap != null) {
+							iCreated = aoOperationSubTypeMap.get(ProcessStatus.CREATED.name());
+							iRunning = aoOperationSubTypeMap.get(ProcessStatus.RUNNING.name());
+							iWaiting = aoOperationSubTypeMap.get(ProcessStatus.WAITING.name());
+							iReady = aoOperationSubTypeMap.get(ProcessStatus.READY.name());
+						}
+						
+						oViewModel.setProcCreated(iCreated);
+						oViewModel.setProcRunning(iRunning);
+						oViewModel.setProcWaiting(iWaiting);
+						oViewModel.setProcReady(iReady);
+						
+					}
+
+					aoViewModel.add(oViewModel);
+				}
+
+
+				// create the Default case
+				ProcessWorkspaceAggregatedViewModel oViewModelDefaultCase = new ProcessWorkspaceAggregatedViewModel();
+				
+				// Initialize the sceheduler name and ops
+				oViewModelDefaultCase.setSchedulerName("DEFAULT");
+				oViewModelDefaultCase.setOperationType("OTHERS");
+				oViewModelDefaultCase.setOperationSubType("");
+				
+				
+				// For all the ops not present in other schedulers
+				for (String sDefaultOperation : asWasdiOperationTypes) {
+					// Take the summary of this operation
+					Map<String, Map<String, Integer>> aoOperationTypeMap = aoPWAggregatedMap.get(sDefaultOperation);
+					
+					if (aoOperationTypeMap != null) {
+						// Get the generic subtype
+						Map<String, Integer> aoOperationSubTypeMap = aoOperationTypeMap.get(s_sNoneSubtype);
+						if (aoOperationSubTypeMap != null) {
+							
+							Integer iCreated = aoOperationSubTypeMap.get(ProcessStatus.CREATED.name());
+							Integer iRunning = aoOperationSubTypeMap.get(ProcessStatus.RUNNING.name());
+							Integer iWaiting = aoOperationSubTypeMap.get(ProcessStatus.WAITING.name());
+							Integer iReady = aoOperationSubTypeMap.get(ProcessStatus.READY.name());
+							
+							oViewModelDefaultCase.setProcCreated(oViewModelDefaultCase.getProcCreated()+iCreated);
+							oViewModelDefaultCase.setProcRunning(oViewModelDefaultCase.getProcRunning()+iRunning);
+							oViewModelDefaultCase.setProcWaiting(oViewModelDefaultCase.getProcWaiting() + iWaiting);
+							oViewModelDefaultCase.setProcReady(oViewModelDefaultCase.getProcReady() + iReady);
+						}
+					}				
+				}
+				
+				aoViewModel.add(oViewModelDefaultCase);				
+			}
+			else {
+				
+				Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: working on remote node, call API to " + sNodeCode);
+				
+				// Ask to the node!!
+				try {
+					String sUrl = oNode.getNodeBaseAddress();
+					if (sUrl.endsWith("/") == false) sUrl += "/";
+					sUrl += "process/queuesStatus?nodeCode=" + sNodeCode + "&statuses=" + sStatuses;
+					
+					String sNodeResponse = Wasdi.httpGet(sUrl, Wasdi.getStandardHeaders(sSessionId));
+					
+					// Create an array of answers
+					JSONArray oResults = new JSONArray(sNodeResponse);
+					
+					// Convert the View Models
+					for (int iViewModels = 0; iViewModels<oResults.length(); iViewModels++) {
+						Object oNodeQueueStatus = oResults.get(iViewModels);
+						
+						ProcessWorkspaceAggregatedViewModel oVM = (ProcessWorkspaceAggregatedViewModel) MongoRepository.s_oMapper.readValue(oNodeQueueStatus.toString(), ProcessWorkspaceAggregatedViewModel.class);
+						aoViewModel.add(oVM);
+					}
+					
+				}
+				catch (Exception oNodeEx) {
+					Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: Exception contacting the remote node: " + oNodeEx);
+				}
+			}
+
+
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus: " + oEx);
+		}
+
+		return aoViewModel;		
+	}
+
+	@GET
+	@Path("/queuesStatus")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public List<ProcessWorkspaceAggregatedViewModel> getQueuesStatus(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("nodeCode") String sNodeCode,
+			@QueryParam("statuses") String sStatuses) {
+		Utils.debugLog("ProcessWorkspaceResource.getQueuesStatus");
+		
+		return ProcessWorkspaceResource.getNodeQueuesStatus(sSessionId, sNodeCode, sStatuses);
+	}
+
+	@GET
+	@Path("/nodesByScore")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public List<NodeScoreByProcessWorkspaceViewModel> getNodesSortedByScore(@HeaderParam("x-session-token") String sSessionId) {
+		Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore");
+
+		List<NodeScoreByProcessWorkspaceViewModel> aoViewModels = new ArrayList<>();
+
+		User oUser = Wasdi.getUserFromSession(sSessionId);
+
+		if (oUser == null) {
+			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: invalid session");
+			return aoViewModels;
+		}
+
+		try {
+			if (!UserApplicationRole.userHasRightsToAccessApplicationResource(oUser.getRole(), ADMIN_DASHBOARD)) {
+				return aoViewModels;
+			}
+			
+			return Wasdi.getNodesSortedByScore(sSessionId, null);
+			
+
+		} catch (Exception oEx) {
+			Utils.debugLog("ProcessWorkspaceResource.getNodesSortedByScore: " + oEx);
+		}
+
+		return aoViewModels;
+	}
+
 }

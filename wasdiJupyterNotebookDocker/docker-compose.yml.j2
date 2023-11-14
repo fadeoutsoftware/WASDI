@@ -19,7 +19,13 @@ services:
     user: "tomcat:tomcat"
     stdin_open: true
     tty: true
+{%- if extraHosts | default([]) != [] %}
+    extra_hosts:
+{%- for sCurrentHost in extraHosts %}
+      - "{{ sCurrentHost }}"
+{%- endfor %}
+{%- endif %}
     volumes:
-      - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}:/data/wasdi"
+      - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}:/home/wasdi/.wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}"
       - "/data/wasdi/{{ wasdiUserName }}/{{ wasdiWorkspaceId }}/notebook:/home/wasdi/notebook"
       - "./sysadmin/etc_supervisor_supervisord.conf:/etc/supervisor/supervisord.conf:ro"

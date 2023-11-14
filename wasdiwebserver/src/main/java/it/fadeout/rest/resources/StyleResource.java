@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import static wasdi.shared.business.UserApplicationPermission.ADMIN_DASHBOARD;
 import static wasdi.shared.utils.WasdiFileUtils.createDirectoryIfDoesNotExist;
 import static wasdi.shared.utils.WasdiFileUtils.writeFile;
 
@@ -12,7 +13,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -43,13 +43,15 @@ import it.fadeout.threads.styles.StyleDeleteFileWorker;
 import it.fadeout.threads.styles.StyleUpdateFileWorker;
 import wasdi.shared.business.Node;
 import wasdi.shared.business.Style;
-import wasdi.shared.business.StyleSharing;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserApplicationPermission;
+import wasdi.shared.business.UserApplicationRole;
+import wasdi.shared.business.UserResourcePermission;
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.StyleRepository;
-import wasdi.shared.data.StyleSharingRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.UserResourcePermissionRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.ZipFileUtils;
@@ -210,9 +212,9 @@ public class StyleResource {
 			}
 
 			// Checks that user can modify the style
-			StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-			if (!oUser.getUserId().equals(oStyle.getUserId()) && !oStyleSharingRepository.isSharedWithUser(oUser.getUserId(), oStyle.getStyleId())) {
+			if (!oUser.getUserId().equals(oStyle.getUserId()) && !oUserResourcePermissionRepository.isStyleSharedWithUser(oUser.getUserId(), oStyle.getStyleId())) {
 				Utils.debugLog("StyleResource.updateFile: User " + oUser.getUserId() + " doesn't have rights on style " + oStyle.getName());
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
@@ -428,13 +430,13 @@ public class StyleResource {
 			}
 
 			// find sharings by userId
-			StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
-			List<StyleSharing> aoStyleSharing = oStyleSharingRepository.getStyleSharingByUser(sUserId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			List<UserResourcePermission> aoStyleSharing = oUserResourcePermissionRepository.getStyleSharingsByUserId(sUserId);
 
 			// For all the shared styles
-			for (StyleSharing oSharing : aoStyleSharing) {
+			for (UserResourcePermission oSharing : aoStyleSharing) {
 				// Create the VM
-				Style oSharedWithMe = oStyleRepository.getStyle(oSharing.getStyleId());
+				Style oSharedWithMe = oStyleRepository.getStyle(oSharing.getResourceId());
 				StyleViewModel oVM = StyleViewModel.getFromStyle(oSharedWithMe);
 
 				if (!oVM.isPublic()) {
@@ -505,11 +507,11 @@ public class StyleResource {
 
 			if (!oStyle.getUserId().equals(sUserId)) {
 				Utils.debugLog("StyleResource.deleteStyle: style not of user " + oUser.getUserId());
-				StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-				if (oStyleSharingRepository.isSharedWithUser(sUserId, sStyleId)) {
+				if (oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId)) {
 					Utils.debugLog("StyleResource.deleteStyle: the style wasd shared with " + oUser.getUserId() + ", delete the sharing");
-					oStyleSharingRepository.deleteByUserIdStyleId(oUser.getUserId(), sStyleId);
+					oUserResourcePermissionRepository.deletePermissionsByUserIdAndStyleId(oUser.getUserId(), sStyleId);
 
 					return Response.ok().build();
 				}
@@ -518,8 +520,8 @@ public class StyleResource {
 			}
 
 			// Delete sharings
-			StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
-			oStyleSharingRepository.deleteByStyleId(sStyleId);
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			oUserResourcePermissionRepository.deletePermissionsByStyleId(sStyleId);
 
 			oStyleRepository.deleteStyle(sStyleId);
 
@@ -704,7 +706,7 @@ public class StyleResource {
 		Utils.debugLog("StyleResource.shareStyle(  Style : " + sStyleId + ", User: " + sUserId + " )");
 
 		//init repositories
-		StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
+		UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 		StyleRepository oStyleRepository = new StyleRepository();
 
 		// Validate Session
@@ -728,9 +730,13 @@ public class StyleResource {
 			}
 
 			if (oRequesterUser.getUserId().equals(sUserId)) {
-				Utils.debugLog("StyleResource.ShareStyle: auto sharing not so smart");
-				oResult.setStringValue("Impossible to autoshare.");
-				return oResult;
+				if (UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
+					// A user that has Admin rights should be able to auto-share the resource.
+				} else {
+					Utils.debugLog("StyleResource.ShareStyle: auto sharing not so smart");
+					oResult.setStringValue("Impossible to autoshare.");
+					return oResult;
+				}
 			}
 
 			// Check the destination user
@@ -751,26 +757,24 @@ public class StyleResource {
 				}
 
 				// the requester has the share?
-				if (!oStyleSharingRepository.isSharedWithUser(oRequesterUser.getUserId(), sStyleId)) {
+				if (!oUserResourcePermissionRepository.isStyleSharedWithUser(oRequesterUser.getUserId(), sStyleId)
+						&& !UserApplicationRole.userHasRightsToAccessApplicationResource(oRequesterUser.getRole(), ADMIN_DASHBOARD)) {
 					oResult.setStringValue("Unauthorized");
 					return oResult;
 				}
 			}
 
 			// Check if has been already shared
-			if (oStyleSharingRepository.isSharedWithUser(sUserId, sStyleId)) {
+			if (oUserResourcePermissionRepository.isStyleSharedWithUser(sUserId, sStyleId)) {
 				oResult.setStringValue("Already shared");
 				return oResult;
 			}
 
 			// Create and insert the sharing
-			StyleSharing oStyleSharing = new StyleSharing();
-			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
-			oStyleSharing.setOwnerId(oStyle.getUserId());
-			oStyleSharing.setUserId(sUserId);
-			oStyleSharing.setStyleId(sStyleId);
-			oStyleSharing.setShareDate((double) oTimestamp.getTime());
-			oStyleSharingRepository.insertStyleSharing(oStyleSharing);
+			UserResourcePermission oStyleSharing =
+					new UserResourcePermission("style", sStyleId, sUserId, oStyle.getUserId(), oRequesterUser.getUserId(), "write");
+
+			oUserResourcePermissionRepository.insertPermission(oStyleSharing);
 
 			Utils.debugLog("StyleResource.shareStyle: Style" + sStyleId + " Shared from " + oRequesterUser.getUserId() + " to " + sUserId);
 
@@ -843,17 +847,19 @@ public class StyleResource {
 			}
 
 			try {
-				StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
+				UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
 
-				StyleSharing oStyleShare = oStyleSharingRepository.getStyleSharingByUserIdStyleId(sUserId, sStyleId);
+				UserResourcePermission oStyleShare = oUserResourcePermissionRepository.getStyleSharingByUserIdAndStyleId(sUserId, sStyleId);
 
 				if (oStyleShare != null) {
 					// if the user making the call is the one on the sharing OR
 					if (oStyleShare.getUserId().equals(oOwnerUser.getUserId()) ||
 							// if the user making the call is the owner of the style
-							oStyleShare.getOwnerId().equals(oOwnerUser.getUserId())) {
+							oStyleShare.getOwnerId().equals(oOwnerUser.getUserId())
+							// if the user has ADMIN rights
+							|| UserApplicationRole.userHasRightsToAccessApplicationResource(oOwnerUser.getRole(), UserApplicationPermission.ADMIN_DASHBOARD)) {
 						// Delete the sharing
-						oStyleSharingRepository.deleteByUserIdStyleId(sUserId, sStyleId);
+						oUserResourcePermissionRepository.deletePermissionsByUserIdAndStyleId(sUserId, sStyleId);
 					} else {
 						oResult.setStringValue("Unauthorized");
 						return oResult;
@@ -907,8 +913,8 @@ public class StyleResource {
 			}
 
 			//Retrieve and returns the sharings
-			StyleSharingRepository oStyleSharingRepository = new StyleSharingRepository();
-			oStyleSharingRepository.getStyleSharingByStyle(sStyleId).forEach(element -> {
+			UserResourcePermissionRepository oUserResourcePermissionRepository = new UserResourcePermissionRepository();
+			oUserResourcePermissionRepository.getStyleSharingsByStyleId(sStyleId).forEach(element -> {
 				oResult.add(new StyleSharingViewModel(element));
 			});
 

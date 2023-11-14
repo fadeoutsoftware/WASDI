@@ -1,0 +1,232 @@
+{
+    "nodeCode": "{{ dictWasdiConfiguration.nodeCode }}",
+    "mainNodeCloud": "{{ dictWasdiConfiguration.mainNodeCloud }}",
+    "usersDefaultNode": "{{ dictWasdiConfiguration.usersDefaultNode }}",
+    "tomcatUser": "{{ dictWasdiConfiguration.tomcatUser }}",
+    "baseUrl": "{{ dictWasdiConfiguration.baseUrl }}",
+    "connectionTimeout": {{ dictWasdiConfiguration.connectionTimeout }},
+    "readTimeout": {{ dictWasdiConfiguration.readTimeout }},
+    "mongoMain": {
+        "address": "{{ dictWasdiConfiguration.mongoMain.address }}",
+        "dbName": "{{ dictWasdiConfiguration.mongoMain.dbName }}",
+        "replicaName": "{{ dictWasdiConfiguration.mongoMain.replicaName }}",
+        "user": "{{ dictWasdiConfiguration.mongoMain.user }}",
+        "password": "{{ dictWasdiConfiguration.mongoMain.password }}"
+    },
+    "mongoLocal": {
+        "address": "{{ dictWasdiConfiguration.mongoLocal.address }}",
+        "dbName": "{{ dictWasdiConfiguration.mongoLocal.dbName }}",
+        "replicaName": "{{ dictWasdiConfiguration.mongoLocal.replicaName }}",
+        "user": "{{ dictWasdiConfiguration.mongoLocal.user }}",
+        "password": "{{ dictWasdiConfiguration.mongoLocal.password }}"
+    },
+    "mongoEcostress": {
+        "address": "{{ dictWasdiConfiguration.mongoEcostress.address }}",
+        "dbName": "{{ dictWasdiConfiguration.mongoEcostress.dbName }}",
+        "replicaName": "{{ dictWasdiConfiguration.mongoEcostress.replicaName }}",
+        "user": "{{ dictWasdiConfiguration.mongoEcostress.user }}",
+        "password": "{{ dictWasdiConfiguration.mongoEcostress.password }}"
+    },
+    "keycloack": {
+        "address": "{{ dictWasdiConfiguration.keycloak.baseUrl }}{{ dictWasdiConfiguration.keycloak.address }}",
+        "cliSecret": "{{ dictWasdiConfiguration.keycloak.cliSecret }}",
+        "authTokenAddress": "{{ dictWasdiConfiguration.keycloak.baseUrl }}{{ dictWasdiConfiguration.keycloak.authTokenAddress }}",
+        "introspectAddress": "{{ dictWasdiConfiguration.keycloak.baseUrl }}{{ dictWasdiConfiguration.keycloak.introspectAddress }}",
+        "confidentialClient": "{{ dictWasdiConfiguration.keycloak.confidentialClient }}",
+        "client": "{{ dictWasdiConfiguration.keycloak.client }}",
+        "clientSecret": "{{ dictWasdiConfiguration.keycloak.clientSecret }}",
+        "realm": "{{ dictWasdiConfiguration.keycloak.realm }}"
+    },
+    "metrics": {
+        "api": {
+            "authentication": {
+                "authenticationSystem": "{{ dictWasdiConfiguration.metrics.api.authentication.authenticationSystem }}",
+                "username": "{{ dictWasdiConfiguration.metrics.api.authentication.username }}",
+                "password": "{{ dictWasdiConfiguration.metrics.api.authentication.password }}",
+                "path": "{{ dictWasdiConfiguration.metrics.api.authentication.path }}",
+                "method": "{{ dictWasdiConfiguration.metrics.api.authentication.method }}",
+                "timeout": {{ dictWasdiConfiguration.metrics.api.authentication.timeout }}
+            },
+            "endpoint": {
+                "path": "{{ dictWasdiConfiguration.metrics.api.endpoint.path }}",
+                "method": "{{ dictWasdiConfiguration.metrics.api.endpoint.method }}",
+                "timeout": {{ dictWasdiConfiguration.metrics.api.endpoint.timeout }}
+            }
+        },
+        "debug": {{ dictWasdiConfiguration.metrics.debug | lower }},
+        "metric": {
+            "license": {
+{% for sCurrentLicense in dictWasdiConfiguration.metrics.metric.license %}
+                "{{ sCurrentLicense }}": {
+                    "fileToRead": "{{ dictWasdiConfiguration.metrics.metric.license[sCurrentLicense].fileToRead }}",
+                    "valuesToConsiderTrue": [
+{% for sCurrentValueToConsiderTrue in dictWasdiConfiguration.metrics.metric.license[sCurrentLicense].valuesToConsiderTrue %}
+                        "{{ sCurrentValueToConsiderTrue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+                    ]
+                }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+            },
+            "partition": [
+{% for sCurrentPartition in dictWasdiConfiguration.metrics.metric.partition %}
+                "{{ sCurrentPartition }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+            ]
+        },
+        "waitingTime": {{ dictWasdiConfiguration.metrics.waitingTime }}
+    },
+    "paths": {
+        "tomcatWebAppPath": "{{ dictWasdiConfiguration.paths.tomcatWebAppPath }}",
+        "downloadRootPath": "{{ dictWasdiConfiguration.paths.downloadRootPath }}",
+        "serializationPath": "{{ dictWasdiConfiguration.paths.serializationPath }}",
+        "metadataPath": "{{ dictWasdiConfiguration.paths.metadataPath }}",
+        "dockerTemplatePath": "{{ dictWasdiConfiguration.paths.dockerTemplatePath }}",
+        "sftpRootPath": "{{ dictWasdiConfiguration.paths.sftpRootPath }}",
+        "geoserverDataDir": "{{ dictWasdiConfiguration.paths.geoserverDataDir }}",
+        "matlabRuntimePath": "{{ dictWasdiConfiguration.paths.matlabRuntimePath }}",
+        "sen2CorePath": "{{ dictWasdiConfiguration.paths.sen2CorePath }}",
+        "userHomePath": "{{ dictWasdiConfiguration.paths.userHomePath }}",
+        "missionsConfigFilePath": "{{ dictWasdiConfiguration.paths.missionsConfigFilePath }}",
+        "gdalPath": "{{ dictWasdiConfiguration.paths.gdalPath }}"
+    },
+    "rabbit": {
+        "user": "{{ dictWasdiConfiguration.rabbit.user }}",
+        "password": "{{ dictWasdiConfiguration.rabbit.password }}",
+        "host": "{{ dictWasdiConfiguration.rabbit.host }}",
+        "port": {{ dictWasdiConfiguration.rabbit.port }},
+        "exchange": "{{ dictWasdiConfiguration.rabbit.exchange }}"
+    },
+    "s3Bucket": {
+        "accessKey": "{{ dictWasdiConfiguration.s3Bucket.accessKey }}",
+        "secretKey": "{{ dictWasdiConfiguration.s3Bucket.secretKey }}",
+        "endpoint": "{{ dictWasdiConfiguration.s3Bucket.endpoint }}",
+        "bucketName": "{{ dictWasdiConfiguration.s3Bucket.bucketName }}",
+        "folders": "{{ dictWasdiConfiguration.s3Bucket.folders }}"
+    },
+    "snap": {
+        "auxPropertiesFile": "{{ dictWasdiConfiguration.snap.auxPropertiesFile }}",
+        "launcherLogActive": {{ dictWasdiConfiguration.snap.launcherLogActive | lower }},
+        "webLogActive": {{ dictWasdiConfiguration.snap.webLogActive | lower }},
+        "launcherLogFile": "{{ dictWasdiConfiguration.snap.launcherLogFile }}",
+        "webLogFile": "{{ dictWasdiConfiguration.snap.webLogFile }}",
+        "launcherLogLevel": "{{ dictWasdiConfiguration.snap.launcherLogLevel }}",
+        "webLogLevel": "{{ dictWasdiConfiguration.snap.webLogLevel }}"
+    },
+    "sftp": {
+        "sftpManagementWSServiceAddress": "{{ dictWasdiConfiguration.sftp.sftpManagementWSServiceAddress }}"
+    },
+    "notifications": {
+        "mercuriusAPIAddress": "{{ dictWasdiConfiguration.notifications.mercuriusAPIAddress }}",
+        "pwRecoveryMailTitle": "{{ dictWasdiConfiguration.notifications.pwRecoveryMailTitle }}",
+        "pwRecoveryMailSender": "{{ dictWasdiConfiguration.notifications.pwRecoveryMailSender }}",
+        "pwRecoveryMailText": "{{ dictWasdiConfiguration.notifications.pwRecoveryMailText }}",
+        "sftpMailTitle": "{{ dictWasdiConfiguration.notifications.sftpMailTitle }}",
+        "sftpManagementMailSender": "{{ dictWasdiConfiguration.notifications.sftpManagementMailSender }}",
+        "sftpMailText": "{{ dictWasdiConfiguration.notifications.sftpMailText }}",
+        "wasdiAdminMail": "{{ dictWasdiConfiguration.notifications.wasdiAdminMail }}"
+    },
+    "loadBalancer": {
+        "includeMainClusterAsNode": {{ dictWasdiConfiguration.loadBalancer.includeMainClusterAsNode | lower }},
+        "diskOccupiedSpaceMaxPercentage": {{ dictWasdiConfiguration.loadBalancer.diskOccupiedSpaceMaxPercentage }},
+        "metricsMaxAgeSeconds": {{ dictWasdiConfiguration.loadBalancer.metricsMaxAgeSeconds }}
+    },
+    "catalogues": [
+{% for sCurrentCatalogue in dictWasdiConfiguration.catalogues | default({}) %}
+        {
+            "platform": "{{ sCurrentCatalogue }}",
+            "catalogues": [
+{% for sCurrentCatalogue in dictWasdiConfiguration.catalogues[sCurrentCatalogue].catalogues %}
+                "{{ sCurrentCatalogue }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+            ]
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+    ],
+    "dataProviders": [
+{% for sCurrentDataProvider in dictWasdiConfiguration.dataProviders %}
+        {
+            "name": "{{ sCurrentDataProvider }}",
+            "description": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].description }}",
+            "link": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].link }}",
+            "searchListPageSize": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].searchListPageSize }}",
+            "defaultProtocol": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].defaultProtocol }}",
+            "parserConfig": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].parserConfig }}",
+            "user": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].user }}",
+            "password": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].password }}",
+            "localFilesBasePath": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].localFilesBasePath }}",
+            "urlDomain": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].urlDomain }}",
+            "connectionTimeout": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].connectionTimeout }}",
+            "readTimeout": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].readTimeout }}",
+            "adapterConfig": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].adapterConfig }}",
+            "cloudProvider": "{{ dictWasdiConfiguration.dataProviders[sCurrentDataProvider].cloudProvider }}",
+            "supportedPlatforms": [
+{% for sCurrentSupportedPlatform in dictWasdiConfiguration.dataProviders[sCurrentDataProvider].supportedPlatforms %}
+                "{{ sCurrentSupportedPlatform }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+            ]
+        }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+    ],
+    "plan": {
+        "listOfSatellites": "{{ dictWasdiConfiguration.plan.listOfSatellites }}"
+    },
+    "geoserver": {
+        "address": "{{ dictWasdiConfiguration.geoserver.address }}",
+        "user": "{{ dictWasdiConfiguration.geoserver.user }}",
+        "password": "{{ dictWasdiConfiguration.geoserver.password }}",
+        "maxGeotiffDimensionPyramid": "{{ dictWasdiConfiguration.geoserver.maxGeotiffDimensionPyramid }}",
+        "gdalRetileCommand": "{{ dictWasdiConfiguration.geoserver.gdalRetileCommand }}"
+    },
+    "dockers": {
+{% if dictWasdiConfiguration.dockers.extraHosts == [] %}
+        "extraHosts": [],
+{% else %}
+        "extraHosts": [
+{% for sCurrentExtraHost in dictWasdiConfiguration.dockers.extraHosts %}
+            "{{ sCurrentExtraHost }}"{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        ],
+{% endif %}
+        "pipInstallWasdiAddress": "{{ dictWasdiConfiguration.dockers.pipInstallWasdiAddress }}",
+        "internalDockersBaseAddress": "{{ dictWasdiConfiguration.dockers.internalDockersBaseAddress }}"
+    },
+    "scheduler": {
+        "processingThreadWaitStartMS": "{{ dictWasdiConfiguration.scheduler.processingThreadWaitStartMS }}",
+        "processingThreadSleepingTimeMS": "{{ dictWasdiConfiguration.scheduler.processingThreadSleepingTimeMS }}",
+        "launcherPath": "{{ dictWasdiConfiguration.scheduler.launcherPath }}",
+        "javaExe": "{{ dictWasdiConfiguration.scheduler.javaExe }}",
+        "killCommand": "{{ dictWasdiConfiguration.scheduler.killCommand }}",
+        "maxQueue": "{{ dictWasdiConfiguration.scheduler.maxQueue }}",
+        "timeoutMs": "{{ dictWasdiConfiguration.scheduler.timeoutMs }}",
+        "schedulers": [
+{% for sCurrentScheduler in dictWasdiConfiguration.scheduler.schedulers %}
+            {
+                "name": "{{ sCurrentScheduler }}",
+                "maxQueue": "{{ dictWasdiConfiguration.scheduler.schedulers[sCurrentScheduler].maxQueue }}",
+                "timeoutMs": "{{ dictWasdiConfiguration.scheduler.schedulers[sCurrentScheduler].timeoutMs }}",
+                "opTypes": "{{ dictWasdiConfiguration.scheduler.schedulers[sCurrentScheduler].opTypes }}",
+                "opSubType": "{{ dictWasdiConfiguration.scheduler.schedulers[sCurrentScheduler].opSubType }}",
+                "enabled": "{{ dictWasdiConfiguration.scheduler.schedulers[sCurrentScheduler].enabled }}"
+            }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+        ]
+    }
+}

@@ -22,8 +22,6 @@
         var oKeycloak = new Keycloak();
         var bKeyCloakInitialized = false;
 
-        console.log('INDEX: start oKeycloak.init');
-
         oKeycloak.init({
                 checkLoginIframe: false,
                 enableLogging: true
@@ -31,9 +29,6 @@
         ).then(function () {
             bKeyCloakInitialized = true;
             console.log('Keycloak initialized');
-
-            console.log('Subject after init: ' + oKeycloak.subject);
-            console.log('Token  after init: ' + oKeycloak.token);
         }).catch(function () {
             bKeyCloakInitialized = true;
             console.log('Keycloak init error');
@@ -107,8 +102,9 @@
     <script src="lib/enum/ProductsProviders.js"></script>
 
     <!--Geocoder-->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css"/>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+    
 
     <!-- Leaflet Draw -->
     <script src="bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
@@ -150,7 +146,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
 
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.min.js"></script>-->
-<script src="//unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
+<!--script src="//unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.30/angular-ui-router.min.js"></script>
 <script src="bower_components/angular-translate/angular-translate.min.js"></script>
 <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
@@ -207,11 +204,14 @@
 <script src="services/api/ProcessingService.js"></script>
 <script src="services/api/CatalogService.js"></script>
 <script src="services/api/ProcessorService.js"></script>
+<script src="services/api/ConsoleService.js"></script>
 <script src="services/api/ProcessorParametersTemplateService.js"></script>
 <script src="services/api/ProcessorMediaService.js"></script>
 <script src="services/api/WorkflowService.js"></script>
 <script src="services/api/StyleService.js"></script>
 <script src="services/api/FeedbackService.js"></script>
+<script src="services/api/AdminDashboardService.js"></script>
+<script src="services/api/PackageManagerService.js"></script>
 
 <!-- Wasdi Directives -->
 <script src="directives/SnakeDirective.js"></script>
@@ -237,6 +237,7 @@
 <script src="directives/wasdiApps/wapCheckBox/wapCheckBox.js"></script>
 <script src="directives/wasdiApps/wapSlider/wapSlider.js"></script>
 <script src="directives/wasdiApps/wapListBox/wapListBox.js"></script>
+<script src="directives/wasdiApps/wapTable/wapTable.js"></script>
 <script src="directives/chips-list/chips-list.directive.js"></script>
 <script src="directives/AngularLightSlider.js"></script>
 <script src="directives/insertableTextArea.js"></script>
@@ -244,10 +245,13 @@
 
 <!-- Wasdi Filters-->
 <script src="filters/stringUtils/removeSpaces.js"></script>
+<script src="filters/stringUtils/formatFileSize.js"></script>
+<script src="filters/stringUtils/formatTime.js"></script>
 
 <!-- Wadsi Controllers -->
 <script src="controllers/HomeController.js"></script>
 <script src="controllers/WorkspaceController.js"></script>
+<script src="controllers/AdminDashboardController.js"></script>
 <script src="controllers/EditorController.js"></script>
 <script src="controllers/RootController.js"></script>
 <script src="controllers/ImportController.js"></script>
@@ -287,6 +291,8 @@
 <script src="dialogs/send_feedback/SendFeedbackController.js"></script>
 <script src="dialogs/manual_insert_bbox/ManualInsertBboxController.js"></script>
 <script src="dialogs/payload_dialog/PayloadDialogController.js"></script>
+<script src="dialogs/package_manager/PackageManagerController.js"></script>
+<script src="dialogs/processor_parameters_share/ProcessParamsShareController.js"></script>
 <!--APP JS-->
 <script src="app.js"></script>
 

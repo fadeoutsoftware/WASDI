@@ -61,4 +61,25 @@ public class PathsConfig {
 	 * Gdal bin Path
 	 */
 	public String gdalPath;
+	
+	/**
+	 * Folder used by WASDI to write temporary files
+	 */
+	public String wasdiTempFolder;
+	
+	/**
+	 * Path the python tool used to render jinja templates by java code.
+	 * We use external script because there was an incompatibility with the most know jar implementing it
+	 */
+	public String jinjaTemplateRenderTool;
+	
+	/**
+	 * Full path to execute python commands (ie /usr/bin/python3)
+	 */
+	public String pythonExecPath;
+	
+	/**
+	 * Local node path of the folder that is mounted on the traefik docker to share configurations
+	 */
+	public String traefikMountedVolume;
 }

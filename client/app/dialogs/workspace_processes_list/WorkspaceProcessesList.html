@@ -261,7 +261,7 @@
                                              ng-click="m_oController.deleteProcess(oProcess)"
                                              ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'|| oProcess.status === 'WAITING' || oProcess.status === 'READY'">
                                             <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip"
-                                               title='{{"DIALOG_PROCESSES_LOGS_STOP_PROCESSES"|translate}}' data-placement="bottom"></i>
+                                               title='{{"DIALOG_PROCESSES_LOGS_STOP_PROCESSES"|translate}}' data-placement="bottom" ng-hide="m_oController.getOperationDescription(oProcess) === 'KILLPROCESSTREE'"></i>
                                         </div>
                                     </td>
                                     <td>

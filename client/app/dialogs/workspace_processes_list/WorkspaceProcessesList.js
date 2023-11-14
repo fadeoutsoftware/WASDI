@@ -198,12 +198,22 @@ var WorkspaceProcessesList = (function () {
      * @returns {string} String of duration in HH:MM:SS format
      */
     WorkspaceProcessesList.prototype.getProcessDuration = function (oProcess) {
+
+        if (!oProcess.operationStartDate.endsWith("Z"))   {
+            oProcess.operationStartDate += "Z";
+        }
+
         // start time by server
         let oStartTime = new Date(oProcess.operationStartDate);
         // still running -> assign "now"
         let oEndTime = new Date();
         // reassign in case the process is already ended
-        if(oProcess.operationEndDate != "null Z"){
+        if(utilsIsObjectNullOrUndefined(oProcess.operationEndDate)==false){
+
+            if (!oProcess.operationEndDate.endsWith("Z"))   {
+                oProcess.operationEndDate += "Z";
+            }
+
             oEndTime = new Date(oProcess.operationEndDate);
         }
 
@@ -217,6 +227,7 @@ var WorkspaceProcessesList = (function () {
 
         //pick time
         let iMilliseconds = Math.abs(oEndTime - oStartTime);
+        
         //approximate result
         let iSecondsTimeSpan = Math.ceil(iMilliseconds / 1000);
 

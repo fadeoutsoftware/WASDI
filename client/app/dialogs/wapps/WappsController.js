@@ -5,7 +5,7 @@
 
 var WappsController = (function() {
 
-    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService) {
+    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService, $timeout, oRabbitStompService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -24,12 +24,29 @@ var WappsController = (function() {
         this.m_sMyJsonString = "";
         this.m_oModalService = oModalService;
         this.m_oConstantsService = oConstantsService;
+        this.m_oTimeout = $timeout; 
+        this.m_oRabbitStompService = oRabbitStompService; 
+
         // this.m_sSearchTextApp = "";
 
+        /* 
+        RabbitStomp Service call
+        */
+        this.m_iHookIndex = this.m_oRabbitStompService.addMessageHook(
+            "DELETEPROCESSOR",
+            this,
+            this.rabbitMessageHook
+        );
+
+        let oController = this; 
+
         $scope.close = function(result) {
+
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
         $scope.add = function(result) {
+            oController.m_oRabbitStompService.removeMessageHook(oController.m_iHookIndex);
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
@@ -43,7 +60,6 @@ var WappsController = (function() {
         var oController = this;
         // swap to true after loading icon is properly rendered
         oController.m_bIsLoadingProcessorList = true;
-
         this.m_oProcessorService.getProcessorsList().then(function (data) {
             if(utilsIsObjectNullOrUndefined(data.data) == false)
             {
@@ -154,8 +170,6 @@ var WappsController = (function() {
                     var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
                     utilsVexCloseDialogAfter(4000,oDialog);
 
-                    console.log('Run ' + data.data);
-
                     let rootscope = oController.m_oScope.$parent;
                     while(rootscope.$parent != null || rootscope.$parent != undefined)
                     {
@@ -190,17 +204,24 @@ var WappsController = (function() {
     };
 
     WappsController.prototype.deleteClick= function(oProcessor) {
+        
         if(utilsIsObjectNullOrUndefined(oProcessor) === true)
         {
             return false;
         }
-        var oController = this;
+        var oController = this
         var oReturnFunctionValue = function(oValue){
+            this.m_bIsLoadingProcessorList = true
             if (oValue === true)
             {
-                oController.m_oProcessorService.deleteProcessor(oProcessor.processorId);
-                oController.getProcessorsList();
+                oController.m_oProcessorService.deleteProcessor(oProcessor.processorId).then(function (data) {
+                    oController.m_bIsLoadingProcessorList = true;
+                
+                }
+                    
+                ); 
             }
+            oController.m_bIsLoadingProcessorList = false;
         }
 
         utilsVexDialogConfirm("Are you SURE you want to delete the Processor: " + oProcessor.processorName + " ?", oReturnFunctionValue);
@@ -319,14 +340,20 @@ var WappsController = (function() {
 
     };
 
-
     WappsController.prototype.collapsePanels = function()
     {
         this.m_sJson = {};
         this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };
+    WappsController.prototype.formatJson = function() {
 
+        this.m_sMyJsonString = JSON.stringify(JSON.parse(this.m_sMyJsonString.replaceAll("'", '"')), null, 2);
+    }
+    WappsController.prototype.rabbitMessageHook = function (oRabbitMessage, oController) {
+        oController.getProcessorsList();
+        oController.m_bIsLoadingProcessorList = false;
+    }
 
 
     WappsController.$inject = [
@@ -337,7 +364,9 @@ var WappsController = (function() {
         'ProductService',
         'ProcessorService',
         'ConstantsService',
-        'ModalService'
+        'ModalService',
+        '$timeout',
+        'RabbitStompService'
     ];
     return WappsController;
 })();

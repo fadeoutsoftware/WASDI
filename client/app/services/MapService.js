@@ -365,14 +365,22 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
      */
     this.initGeoSearchPluginForOpenStreetMap = function(opt)
     {
-        var geocoder = L.Control.Geocoder.nominatim();
-        let sPosition = 'topleft';
-
-        if (opt){sPosition='bottomright'}
-        L.Control.geocoder({
+       
+    //     
+        if(utilsIsObjectNullOrUndefined(L.Control.Geocoder) === true) {
+            console.log("Problem Loading Geocoder")
+        } else {
+            var geocoder = L.Control.Geocoder.nominatim();
+             let sPosition = 'topleft';
+            if (opt){sPosition='bottomright'}
+               L.Control.geocoder({
             geocoder: geocoder,
             position: sPosition
-        }).addTo(this.m_oWasdiMap);
+        }).addTo(this.m_oWasdiMap); 
+        }
+       
+    //        
+       
     };
 
     /**
@@ -765,7 +773,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', 'ModalService',
                 corner2 = L.latLng(oBounds.miny, oBounds.minx),
                 bounds = L.latLngBounds(corner1, corner2);
 
-            this.m_oWasdiMap.flyToBounds(bounds);
+            this.m_oWasdiMap.flyToBounds(bounds, {maxZoom: 5});
         }
         catch (e) {
             console.log(e);

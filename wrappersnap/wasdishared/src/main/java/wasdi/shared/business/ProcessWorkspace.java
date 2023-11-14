@@ -41,19 +41,25 @@ public class ProcessWorkspace {
 	/**
      * Creation date of the operation
      */
-    private String operationDate;
+    private Double operationTimestamp;
     /**
      * Start date of the operation
      */
-    private String operationStartDate;    
+    private Double operationStartTimestamp;    
     /**
      * End date of the operation
      */
-    private String operationEndDate;
+    private Double operationEndTimestamp;
     /**
      * Date and time when the process status was modified
      */
-    private String lastStateChangeDate;
+    private Double lastStateChangeTimestamp;
+
+    /**
+     * Running time of the process (in milliseconds)
+     */
+    private Long runningTime = 0L;
+
     /**
      * Unique identifier of the job
      */
@@ -117,12 +123,12 @@ public class ProcessWorkspace {
         this.operationType = operationType;
     }
 
-    public String getOperationDate() {
-        return operationDate;
+    public Double getOperationTimestamp() {
+        return operationTimestamp;
     }
 
-    public void setOperationDate(String operationDate) {
-        this.operationDate = operationDate;
+    public void setOperationTimestamp(Double operationTimestamp) {
+        this.operationTimestamp = operationTimestamp;
     }
 
     public String getProcessObjId() {
@@ -173,20 +179,20 @@ public class ProcessWorkspace {
 		this.progressPerc = progressPerc;
 	}
 
-	public String getOperationEndDate() {
-		return operationEndDate;
+	public Double getOperationEndTimestamp() {
+		return operationEndTimestamp;
 	}
 
-	public void setOperationEndDate(String operationEndDate) {
-		this.operationEndDate = operationEndDate;
+	public void setOperationEndTimestamp(Double operationEndTimestamp) {
+		this.operationEndTimestamp = operationEndTimestamp;
 	}
 
-	public String getOperationStartDate() {
-		return operationStartDate;
+	public Double getOperationStartTimestamp() {
+		return operationStartTimestamp;
 	}
 
-	public void setOperationStartDate(String operationStartDate) {
-		this.operationStartDate = operationStartDate;
+	public void setOperationStartTimestamp(Double operationStartTimestamp) {
+		this.operationStartTimestamp = operationStartTimestamp;
 	}
 
     public String getNodeCode() {
@@ -205,12 +211,20 @@ public class ProcessWorkspace {
 		this.payload = payload;
 	}
 
-	public String getLastStateChangeDate() {
-		return lastStateChangeDate;
+	public Double getLastStateChangeTimestamp() {
+		return lastStateChangeTimestamp;
 	}
 
-	public void setLastStateChangeDate(String lastStateChangeDate) {
-		this.lastStateChangeDate = lastStateChangeDate;
+	public void setLastStateChangeTimestamp(Double lastStateChangeTimestamp) {
+		this.lastStateChangeTimestamp = lastStateChangeTimestamp;
+	}
+
+	public Long getRunningTime() {
+		return runningTime;
+	}
+
+	public void setRunningTime(Long runningTime) {
+		this.runningTime = runningTime;
 	}
 	
    public String getParentId() {

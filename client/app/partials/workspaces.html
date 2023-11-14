@@ -1,194 +1,400 @@
 <div class="workspaces-view">
-
     <div class="row-v4 justify-content-end toolbar">
         <div class="col-v4-auto mr-auto filter-search-wrapper">
-            <input type="text" class="my-input-text" placeholder="{{'WORKSPACES_PLACEHOLDER_SEARCH'|translate}}"
-                   ng-model="searchWorkSpace">
+            <input
+                type="text"
+                class="my-input-text"
+                placeholder="{{'WORKSPACES_PLACEHOLDER_SEARCH'|translate}}"
+                ng-model="searchWorkSpace"
+            />
         </div>
         <div class="col-v4-auto pr-2">
-            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.createWorkspace()">
-                <i class="fa fa-plus" aria-hidden="true"></i>{{"WORKSPACES_BUTTON_NEW_WORKSPACE" | translate}}
+            <button
+                class="btn btn-primary btn-wasdi"
+                ng-click="m_oController.createWorkspace()"
+            >
+                <i class="fa fa-plus" aria-hidden="true"></i
+                >{{"WORKSPACES_BUTTON_NEW_WORKSPACE" | translate}}
             </button>
         </div>
-
     </div>
     <div class="spacer"></div>
 
     <div class="row-v4 full-width-content">
-        <div class="col-v4-lg-4 col-v4-md-4 col-v4-sm-4 col-v4-xs-12 d-flex flex-column workspace-list">
+        <div
+            class="col-v4-lg-4 col-v4-md-4 col-v4-sm-4 col-v4-xs-12 d-flex flex-column workspace-list"
+        >
             <!----------------------WORKSPACES LIST---------------------->
             <div class="table-workspaces flex-grow-1">
-                <div class="wizards"
-                     ng-show="(m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false)">
-                    <h4>
-                        {{"WORKSPACES_NO_WORKSPACE" | translate}}.
-                    </h4>
+                <div
+                    class="wizards"
+                    ng-show="(m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false)"
+                >
+                    <h4>{{"WORKSPACES_NO_WORKSPACE" | translate}}.</h4>
                     <div class="w-100 text-center mt-5">
-                        <button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.createWorkspace()">
-                            <i class="fa fa-plus" aria-hidden="true"></i>{{"BTN_CREATE_FIRST_WORKSPACE" | translate}}
+                        <button
+                            class="btn btn-primary btn-wasdi btn-mdlg"
+                            ng-click="m_oController.createWorkspace()"
+                        >
+                            <i class="fa fa-plus" aria-hidden="true"></i
+                            >{{"BTN_CREATE_FIRST_WORKSPACE" | translate}}
                         </button>
                     </div>
                 </div>
 
-                <div class="loadIcon" ng-hide="( (m_oController.getWorkspaceInfoList().length) > 0 && (m_oController.m_bIsLoading === false) )||
-                                                ( (m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false) )">
+                <div
+                    class="loadIcon"
+                    ng-hide="( (m_oController.getWorkspaceInfoList().length) > 0 && (m_oController.m_bIsLoading === false) )||
+                                                ( (m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false) )"
+                >
                     <invader></invader>
                 </div>
-
-                <table class="table table-hover" id="TableWorkspacesList" aria-label="WS List table"
-                       ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)">
+                
+                <table
+                    class="table table-hover"
+                    id="TableWorkspacesList"
+                    aria-label="WS List table"
+                    ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)"
+                    style="table-layout:fixed"
+                >
                     <thead>
-                    <th >&nbsp;</th>
-                    <th ng-click="m_oController.changeSorting('workspaceName')">{{"WORKSPACES_THEAD_WORKSPACES" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('workspaceName', true)"></i></th>
-                    <th ng-click="m_oController.changeSorting('ownerUserId')">{{"WORKSPACES_THEAD_OWNER" | translate}}&nbsp;<i class="fa fa-sort-asc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', false)"></i><i class="fa fa-sort-desc" aria-hidden="true" ng-show="m_oController.showArrow('ownerUserId', true)"></th>
-                    <th></th>
-                    <th></th>
+                        <th style="width:2.5%">&nbsp;</th>
+                        <th
+                            style="cursor: pointer; width: 70%;"
+                        >
+                            <i
+                                class="fa fa-arrow-up"
+                                aria-hidden="true"
+                                ng-show="m_oController.showArrow('workspaceName', false)"
+                            ></i>
+                            <i
+                                class="fa fa-arrow-down"
+                                aria-hidden="true"
+                                ng-show="m_oController.showArrow('workspaceName', true)"
+                            ></i>
+                            {{"WORKSPACES_THEAD_WORKSPACES" | translate}}&nbsp;
+                            <span class="badge badge-pill badge-secondary"
+                                >{{m_oController.getWorkspaceInfoList().length}}</span
+                            >
+                        </th>
+                        <th class="text-right" colspan="2">
+                            <div class="dropdown">
+                                <p
+                                    class="mb-0 dropdown-toggle"
+                                    style="cursor: pointer;"
+                                    type="button"
+                                    data-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fa fa-sort" aria-hidden="true"></i>
+                                    Sorting
+                                </p>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <button class="dropdown-list-item dropdown-item"
+                                    ng-click="m_oController.changeSorting('workspaceName', 'asc')">
+                                       <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        Workspace Asc
+                                    </button>
+                                    <button class="dropdown-list-item dropdown-item"
+                                    ng-click="m_oController.changeSorting('workspaceName', 'desc')">
+                                        <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        Workspace Desc
+                                    </button>
+                                    <hr class="my-1">
+                                    <button class="dropdown-list-item dropdown-item" 
+                                    ng-click="m_oController.changeSorting('ownerUserId', 'asc')">
+                                       <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        Owner Asc
+                                    </button>
+                                    <br>
+                                    <button class="dropdown-list-item dropdown-item"
+                                     ng-click="m_oController.changeSorting('ownerUserId', 'desc')">
+                                        <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        Owner Desc
+                                    </button>
+                                    <hr class="my-1">
+                                    <button class="dropdown-list-item dropdown-item text-left" 
+                                    ng-click="m_oController.changeSorting('creationDate', 'desc')">
+                                       <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        Date Created Newest
+                                    </button>
+                                    <br>
+                                    <button class="dropdown-list-item dropdown-item text-left"
+                                     ng-click="m_oController.changeSorting('creationDate', 'asc')">
+                                        <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        Date Created Oldest
+                                    </button>
+                                </div>
+                            </div>
+                        </th>
                     </thead>
-                    <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace | orderBy:m_oController.sort.column:m_oController.sort.descending"
+                    <tr
+                        ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace | orderBy:m_oController.m_oSort.sColumn:m_oController.m_oSort.bDescending"
                         class="workspaces-list-item"
-                        ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
-                        <td ng-click="m_oController.loadProductList(oWSListItem)">
+                        ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}"
+                        title="{{oWSListItem.workspaceName}} Owned by: {{oWSListItem.ownerUserId}}"
+                    >
+                        <td
+                            ng-click="m_oController.loadProductList(oWSListItem)"
+                        >
                             &nbsp;
                         </td>
-                        <td ng-click="m_oController.loadProductList(oWSListItem)">
+                        <td
+                            ng-click="m_oController.loadProductList(oWSListItem)"
+                           
+                        >
                             <span class="ellipsis">
                                 {{oWSListItem.workspaceName}}
                             </span>
-                        </td>
-                        <td ng-click="m_oController.loadProductList(oWSListItem)">
-                            <span class="ellipsis">
-                                {{oWSListItem.ownerUserId}}
+                            <br>
+                             <span class="ellipsis" style="font-size: 12px;">
+                                {{oWSListItem.ownerUserId}}  - {{oWSListItem.creationDate}}
+
                             </span>
                         </td>
 
-                        <td class="over-color" data-toggle="tooltip" data-placement="top"
+                        <td>
+                            
+                            <div
+                            class="over-color d-flex flex-row align-items-center"
+                            style="padding-right: 10px"
+                            data-toggle="tooltip"
+                            data-placement="top"
                             title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
-                            ng-class="{'disabled': oWSListItem.activeNode === false}" ng-disabled="oWSListItem.activeNode === false"
-                            ng-click="m_oController.openWorkspace(oWSListItem.workspaceId, oWSListItem.activeNode)">
-                            <div>
+                            ng-class="{'disabled': oWSListItem.activeNode === false}"
+                            ng-disabled="oWSListItem.activeNode === false"
+                            ng-click="m_oController.openWorkspace(oWSListItem.workspaceId, oWSListItem.activeNode)"
+                            >
                                 <!--OLD VERSION COMMENTED-->
-                                <i>
-                                    open
-                                    <i class="fa fa-sign-in-alt fa-lg" style="margin-left: 10px;" aria-hidden="true"></i>
-                                </i>
+                                <p class="m-0" style="font-size: 12px">Open</p>
+                                <i
+                                    class="fa fa-sign-in-alt fa-lg"
+                                    style="margin-left: 8px"
+                                    aria-hidden="true"
+                                ></i>
                             </div>
-
+                        </td>
+                        <td>
+                            <div
+                            class="over-color"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="{{'WORKSPACES_TOOLTIP_DELETE'|translate}}"
+                            ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)"
+                            style="margin-left: 8px"
+                            >
+                                <i class="fa fa-trash fa-lg" aria-hidden="true"></i>
+                            </div>
+                            
                         </td>
                         <!--OLD VERSION COMMENTED-->
-                        <td class="over-color" data-toggle="tooltip" data-placement="top"
-                            title="{{'WORKSPACES_TOOLTIP_DELETE'|translate}}"
-                            ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)">
-                            <i class="fa fa-trash fa-lg" aria-hidden="true"></i>
-                        </td>
                     </tr>
-
                 </table>
+          
             </div>
-
 
             <!---------------------- LIST OF FILES & WORKSPACE DETAILS---------------------->
             <div class="files-list-wrapper flex-grow-1">
                 <form>
                     <fieldset class="my-input-text fieldset-list-files">
-                        <legend><h3>&nbsp;<i class="fa fa-save fa-lg text-blu-wasdi" aria-hidden="true" style="font-size: 1em;"></i>&nbsp;{{"WORKSPACE_DETAILS_BOX" | translate}}&nbsp;</h3></legend>
+                        <legend>
+                            <h3>
+                                &nbsp;<i
+                                    class="fa fa-save fa-lg text-blu-wasdi"
+                                    aria-hidden="true"
+                                    style="font-size: 1em"
+                                ></i
+                                >&nbsp;{{"WORKSPACE_DETAILS_BOX" |
+                                translate}}&nbsp;
+                            </h3>
+                        </legend>
                         <!-- LOADING ICON -->
-                        <div class="loading-files"
-                             ng-show="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">
-
+                        <div
+                            class="loading-files"
+                            ng-show="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true"
+                        >
                             <invader></invader>
                         </div>
 
                         <!--LIST OF FILES-->
-                        <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true"
-                             ng-show="m_oController.m_bIsOpenInfo">
-                             <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"><i class="fa fa-cloud text-blu-wasdi" st></i>&nbsp;{{"WORKSPACES_CLOUD" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.cloudProvider}} &nbsp;-&nbsp;<span class="workspace-details-heading"><img src="assets/img/placeholder/user-placeholder-blu.png" style="width: 16px">&nbsp;{{"WORKSPACES_OWNER" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.userId}}</div>
+                        <div
+                            class="panel-group list-files"
+                            id="accordion"
+                            role="tablist"
+                            aria-multiselectable="true"
+                            ng-show="m_oController.m_bIsOpenInfo"
+                        >
+                            <!--ng-hide="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true">-->
+                            <div>
+                                <span
+                                    class="workspace-details-heading"
+                                    ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null"
+                                    ><i
+                                        class="fa fa-cloud text-blu-wasdi"
+                                        st
+                                    ></i
+                                    >&nbsp;{{"WORKSPACES_CLOUD" |
+                                    translate}}</span
+                                >
+                                {{m_oController.m_oWorkspaceViewModel.cloudProvider}}
+                                &nbsp;-&nbsp;<span
+                                    class="workspace-details-heading"
+                                    ><img
+                                        src="assets/img/placeholder/user-placeholder-blu.png"
+                                        style="width: 16px"
+                                    />&nbsp;{{"WORKSPACES_OWNER" |
+                                    translate}}</span
+                                >
+                                {{m_oController.m_oWorkspaceViewModel.userId}}
+                            </div>
+                            <div ng-hide="m_oController.m_oWorkspaceViewModel.nodeCode == null">
+                                <span class="workspace-details-heading"
+                                ><i class="fa fa-tag text-blu-wasdi" aria-hidden="true"></i>&nbsp;{{"WORKSPACES_NODE_CODE" | translate}}</span>
+                                {{m_oController.m_oWorkspaceViewModel.nodeCode}}
+                            </div>
                             <!--div><span class="workspace-details-heading"> Last Update :</span> {{m_oController.getLastTouchDate()}}</b></div-->
-                            <div><span class="workspace-details-heading"><i class="fa fa-globe text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_PRODUCTS" | translate}}</span> {{m_oController.getProductList().length}}</div>
-                            <div><span class="workspace-details-heading" ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null"><i class="fa fa-rocket text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_PROC_COUNT" | translate}}</span> {{m_oController.m_oWorkspaceViewModel.processesCount}}</div>
-                            <div ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)">
-                                <span class="workspace-details-heading"><i class="fa fa-share-alt text-blu-wasdi" ></i>&nbsp;{{"WORKSPACES_SHARED_WITH" | translate}}</span>
-                                <div ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers">
-                                    <li> {{shared}}</li>
+                            <div>
+                                <span class="workspace-details-heading"
+                                    ><i class="fa fa-globe text-blu-wasdi"></i>&nbsp;{{"WORKSPACES_PRODUCTS" | translate}}</span>
+                                {{m_oController.getProductList().length}}
+                            </div>
+                            <div>
+                                <span class="workspace-details-heading">
+                                    <i class="fa fa-id-badge text-blu-wasdi" aria-hidden="true"></i>&nbsp;{{"WORKSPACES_ID" | translate}}</span>
+                                    {{m_oController.m_oWorkspaceViewModel.workspaceId}}
+                            </div>
+                            <div>
+                                <span
+                                    class="workspace-details-heading"
+                                    ng-hide="m_oController.m_oWorkspaceViewModel.processesCount == null"
+                                    ><i class="fa fa-rocket text-blu-wasdi"></i
+                                    >&nbsp;{{"WORKSPACES_PROC_COUNT" |
+                                    translate}}</span
+                                >
+                                {{m_oController.m_oWorkspaceViewModel.processesCount}}
+                            </div>
+                            <div
+                                ng-hide="(m_oController.m_oWorkspaceViewModel.sharedUsers.length==0)"
+                            >
+                                <span class="workspace-details-heading"
+                                    ><i
+                                        class="fa fa-share-alt text-blu-wasdi"
+                                    ></i
+                                    >&nbsp;{{"WORKSPACES_SHARED_WITH" |
+                                    translate}}</span
+                                >
+                                <div
+                                    ng-repeat="shared in m_oController.m_oWorkspaceViewModel.sharedUsers"
+                                >
+                                    <li>{{shared}}</li>
                                 </div>
                             </div>
 
                             <!--div><b><h4></h4></b></div-->
-                            <br>
+                            <br />
 
-
-                            <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()">
-                                <div class="panel-heading" role="tab" id="headingOne">
-                                <span class="panel-title">
-                                    <i class="fa fa-file " aria-hidden="true"></i>
-                                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
-                                       data-target="{{'#product' + $index}}"
-                                       aria-expanded="false" aria-controls="collapseThree"
-                                       ng-click="m_oController.clickOnProduct(product)">
-                                        <strong>{{product.name}}</strong>
-                                    </a>
-                                </span>
+                            <div
+                                class="panel panel-default"
+                                ng-repeat="product in m_oController.getProductList()"
+                            >
+                                <div
+                                    class="panel-heading"
+                                    role="tab"
+                                    id="headingOne"
+                                >
+                                    <span class="panel-title">
+                                        <i
+                                            class="fa fa-file"
+                                            aria-hidden="true"
+                                        ></i>
+                                        <a
+                                            class="collapsed"
+                                            role="button"
+                                            data-toggle="collapse"
+                                            data-parent="#accordion"
+                                            data-target="{{'#product' + $index}}"
+                                            aria-expanded="false"
+                                            aria-controls="collapseThree"
+                                            ng-click="m_oController.clickOnProduct(product)"
+                                        >
+                                            <strong>{{product.name}}</strong>
+                                        </a>
+                                    </span>
                                 </div>
-                                <div id="{{'product'+$index}}" class="panel-collapse collapse" role="tabpanel"
-                                     aria-labelledby="headingThree">
+                                <div
+                                    id="{{'product'+$index}}"
+                                    class="panel-collapse collapse"
+                                    role="tabpanel"
+                                    aria-labelledby="headingThree"
+                                >
                                     <div class="list-group">
                                         <li class="list-group-item">
                                             <h4>Name:</h4>
                                             {{product.name}}
                                         </li>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </fieldset>
                 </form>
             </div>
         </div>
 
         <!------------------------ GLOBE ----------------------->
-        <div class="col-v4-xs-12 col-v4-sm-8 col-v4-md-8 col-v4-lg-8 h-100 globe-container">
+        <div
+            class="col-v4-xs-12 col-v4-sm-8 col-v4-md-8 col-v4-lg-8 h-100 globe-container"
+        >
             <!-- Graphic trick with form+fieldset+legend -->
 
             <div class="globe-style h-100" id="cesiumContainer3"></div>
             <div class="toolbar-right-bottom">
-                <div class="checkbox" style="background: white;padding:5px">
+                <div class="checkbox" style="background: white; padding: 5px">
                     <label>
-                        <input type="checkbox" ng-model="value" ng-init="value = true"
-                               ng-click="m_oController.deleteSentinel1a(value)">
-                               {{"WORKSPACES_SHOW_SATS" | translate}}
+                        <input
+                            type="checkbox"
+                            ng-model="value"
+                            ng-init="value = true"
+                            ng-click="m_oController.deleteSentinel1a(value)"
+                        />
+                        {{"WORKSPACES_SHOW_SATS" | translate}}
                     </label>
                 </div>
                 <div class="btn-group" role="group" aria-label="...">
-
-                    <button type="button" class="btn btn-default"
-                            ng-click="m_oController.m_oGlobeService.stopRotationGlobe()"><i class="fa fa-stop"
-                                                                                            aria-hidden="true"
-                                                                                            title="stop rotation"></i>
+                    <button
+                        type="button"
+                        class="btn btn-default"
+                        ng-click="m_oController.m_oGlobeService.stopRotationGlobe()"
+                    >
+                        <i
+                            class="fa fa-stop"
+                            aria-hidden="true"
+                            title="stop rotation"
+                        ></i>
                     </button>
-                    <button type="button" class="btn btn-default"
-                            ng-click="m_oController.m_oGlobeService.startRotationGlobe(3)"><i class="fa fa-play"
-                                                                                              aria-hidden="true"
-                                                                                              title="start rotation"></i>
+                    <button
+                        type="button"
+                        class="btn btn-default"
+                        ng-click="m_oController.m_oGlobeService.startRotationGlobe(3)"
+                    >
+                        <i
+                            class="fa fa-play"
+                            aria-hidden="true"
+                            title="start rotation"
+                        ></i>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-
 </div>
-
 
 <script>
     $(function () {
-        $('#TableWorkspacesList').on('post-body.bs.table', function () {
+        $("#TableWorkspacesList").on("post-body.bs.table", function () {
             $('[data-tooltip="true"]').tooltip({
-                container: 'body'
+                container: "body",
             });
         });
     });
-
 </script>
-

@@ -466,7 +466,6 @@ var ImportController = (function() {
 
 
     ImportController.prototype.updateAdvancedSearch = function(){
-        //console.log('called updatefilter advancedFilter');
 
         var oAdvancedSensingFrom = null;
         if (!utilsIsObjectNullOrUndefined(this.m_oModel.sensingPeriodFrom) && this.m_oModel.sensingPeriodFrom!=="") {
@@ -508,7 +507,6 @@ var ImportController = (function() {
             }
         }
         this.setFilter();
-        //console.log("filter",AdvancedFilterService.getAdvancedFilter());
 
     };
 
@@ -520,7 +518,6 @@ var ImportController = (function() {
     };
 
     ImportController.prototype.clearInput = function(parentIndex, index){
-        //console.log("parentIndex    clearFilter",parentIndex);
         if(this.m_aoMissions[parentIndex] && this.m_aoMissions[parentIndex].filters[index]) {
 
             let visibleFilters = [];
@@ -1207,7 +1204,6 @@ var ImportController = (function() {
         // sContent="POLYGON ((-180.0 -64.991,-120.001495 -64.991,-60.003 -64.991,-0.004501343 -64.991,59.994003 -64.991,119.99249 -64.991,179.991 -64.991,179.991 -32.490498,179.991 0.010002136,119.99249 0.01,59.993996 0.01,-0.004501343 0.01,-60.003006 0.01,-120.001495 0.01,-180.0 0.01,-180.0 -32.4905,-180.0 -64.991,-180.0 -0.01,-120.001495 -0.01,-60.003 -0.01,-0.004501343 -0.01,59.994003 -0.01,119.99249 -0.01,179.991 -0.01,179.991 37.495003,179.991 75.0,119.99249 75.0,59.993996 75.0,-0.004501343 75.0,-60.003006 75.0,-120.001495 75.0,-180.0 75.0,-180.0 37.495,-180.0 -0.010002136))";
         // sContent = "POLYGON ((-180.0 -64.991,-120.001495 -64.991,-60.003 -64.991,-0.004501343 -64.991,59.994003 -64.991,119.99249 -64.991,179.991 -64.991,179.991 -32.490498,179.991 0.010002136,119.99249 0.01,59.993996 0.01,-0.004501343 0.01,-60.003006 0.01,-120.001495 0.01,-180.0 0.01,-180.0 -32.4905,-180.0 -64.991,-180.0 -0.01,-120.001495 -0.01,-60.003 -0.01,-0.004501343 -0.01,59.994003 -0.01,119.99249 -0.01,179.991 -0.01,179.991 37.495003,179.991 75.0,119.99249 75.0,59.993996 75.0,-0.004501343 75.0,-60.003006 75.0,-120.001495 75.0,-180.0 75.0,-180.0 37.495,-180.0 -0.010002136))";
         // sContent = "POLYGON ((-180.0 -54.991,-120.001495 -54.991,-60.003 -54.991,-0.004501343 -54.991,59.994003 -54.991,119.99249 -54.991,179.991 -54.991,179.991 -0.0099983215,119.99249 -0.01,59.993996 -0.01,-0.004501343 -0.01,-60.003006 -0.01,-120.001495 -0.01,-180.0 -0.01,-180.0 -54.991,-180.0 0.01,-120.001495 0.01,-60.003 0.01,-0.004501343 0.01,59.994003 0.01,119.99249 0.01,179.991 0.01,179.991 37.504997,179.991 75.0,119.99249 75.0,59.993996 75.0,-0.004501343 75.0,-60.003006 75.0,-120.001495 75.0,-180.0 75.0,-180.0 37.505,-180.0 0.010002136))";
-        // console.log("Footprint: " + sContent);
         sContent = sContent.replace("MULTIPOLYGON ","");
         sContent = sContent.replace("MULTIPOLYGON","");
         sContent = sContent.replace("POLYGON ","");
@@ -1298,7 +1294,6 @@ var ImportController = (function() {
             return false;
         }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
-        console.log("changeStyleRectangleMouseOver");
     };
 
     /*
@@ -1316,7 +1311,6 @@ var ImportController = (function() {
             return false;
         }
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
-        console.log("changeStyleRectangleMouseLeave");
     };
 
     /************************************************************/
