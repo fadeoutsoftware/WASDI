@@ -30,15 +30,19 @@ services:
       - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
+{% endif %}
+{% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
+      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
+      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
 {% endif %}
-      - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
+{% if bWasdiTomcatWasdiWebServerEnabled == True %}
+      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+{% endif %}
       - {{ sWasdiTraefikServiceName }}
     image: "{{ sWasdiClientServiceName }}:latest"
     labels:
@@ -68,13 +72,18 @@ services:
       - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
+{% endif %}
+{% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-      - {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}
+      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-      - {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}
+      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+{% endif %}
+{% if bWasdiTomcatWasdiWebServerEnabled == True %}
+      - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
     image: "{{ sWasdiClientV2ServiceName }}:latest"
@@ -150,7 +159,7 @@ services:
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
     environment:
-      - JGROUPS_DISCOVERY_EXTERNAL_IP={{ sWasdiKeycloakContainerJgroupDiscoveryExternalIp | default('127.0.0.1') }}
+      - JGROUPS_DISCOVERY_EXTERNAL_IP={{ sWasdiKeycloakJgroupDiscoveryExternalIp | default('127.0.0.1') }}
       - KC_CACHE_CONFIG_FILE=cache-ispn.xml
       - KC_DB_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
       - KC_DB=postgres
@@ -169,7 +178,7 @@ services:
       - KC_TRANSACTION_XA_ENABLED=true
       - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
       - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
-    image: "{{ sWasdiKeycloakContainerImageName }}:latest"
+    image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -179,13 +188,13 @@ services:
 {% if bWasdiContainerTraefikSslEnabled == True %}
       - "traefik.http.routers.r_{{ sWasdiKeycloakServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakContainerInternalPort }}"
-{% if sWasdiKeycloakContainerInternalPort | default("") != ""
-    and sWasdiKeycloakContainerExternalPort | default("") != ""
-    and aWasdiKeycloakContainerExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiKeycloakServiceName }}.loadbalancer.server.port={{ sWasdiKeycloakInternalPort }}"
+{% if sWasdiKeycloakInternalPort | default("") != ""
+    and sWasdiKeycloakExternalPort | default("") != ""
+    and aWasdiKeycloakExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiKeycloakContainerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakContainerExternalPort }}:{{ sWasdiKeycloakContainerInternalPort }}"
+{% for sCurrentExternalIp in aWasdiKeycloakExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
@@ -345,43 +354,89 @@ services:
       - "{{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw"
       - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
 {% endif %}
-{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
+{% if bWasdiTelegrafEnabled == True %}
 
-  {{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:
+  {{ sWasdiTelegrafServiceName }}:
     depends_on:
-      - {{ sWasdiGeoserverServiceName }}
-      - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
+{% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
-      - {{ sWasdiTraefikServiceName }}
+{% endif %}
+{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
+      - {{ sWasdiTomcatOgcProcessesServerServiceName }}
+{% endif %}
+{% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
+      - {{ sWasdiTomcatWasdiOpenEoServerServiceName }}
+{% endif %}
+{% if bWasdiTomcatWasdiWebServerEnabled == True %}
+      - {{ sWasdiTomcatWasdiWebServerServiceName }}
+{% endif %}
+{% if ( aoWasdiTelegrafEnvironmentVariable | length ) > 0 %}
     environment:
-{% if sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiContainerTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
+{% for aoWasdiTelegrafCurrentEnvironmentVariable in aoWasdiTelegrafEnvironmentVariable %}
+      - {{ aoWasdiTelegrafCurrentEnvironmentVariable['key'] }}={{ aoWasdiTelegrafCurrentEnvironmentVariable['value'] }}
+{% endfor %}
 {% endif %}
-    image: "{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}:latest"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/ogcprocesses`)"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.service=s_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}"
-{% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.tls=true"
-{% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerTomcatOgcProcessesServerServiceName }}.loadbalancer.server.port={{ sWasdiContainerTomcatOgcProcessesServerInternalPort }}"
-{% if sWasdiContainerTomcatOgcProcessesServerInternalPort | default("") != ""
-    and sWasdiContainerTomcatOgcProcessesServerExternalPort | default("") != ""
-    and aWasdiContainerTomcatOgcProcessesServerExternalIp | default([]) | length > 0 %}
+    image: "{{ sWasdiTelegrafServiceName }}:latest"
+{% if sWasdiTelegrafInternalPort | default("") != ""
+    and sWasdiTelegrafExternalPort | default("") != ""
+    and aWasdiTelegrafExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerTomcatOgcProcessesServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerTomcatOgcProcessesServerExternalPort }}:{{ sWasdiContainerTomcatOgcProcessesServerInternalPort }}"
+{% for sCurrentExternalIp in aWasdiTelegrafExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTelegrafExternalPort }}:{{ sWasdiTelegrafInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
     ulimits:
       nofile:
-        soft: {{ sWasdiTomcatUlimitNofile }}
-        hard: {{ sWasdiTomcatUlimitNofile }}
+        soft: {{ sWasdiTelegrafUlimitNofile }}
+        hard: {{ sWasdiTelegrafUlimitNofile }}
+{% if ( aWasdiTelegrafVolume | length ) > 0 %}
+    volumes:
+{% for sWasdiTelegrafCurrentVolume in aWasdiTelegrafVolume %}
+      - "{{ sWasdiTelegrafCurrentVolume }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if bWasdiTomcatOgcProcessesServerEnabled == True %}
+
+  {{ sWasdiTomcatOgcProcessesServerServiceName }}:
+    depends_on:
+      - {{ sWasdiGeoserverServiceName }}
+      - {{ sWasdiKeycloakServiceName }}
+      - {{ sWasdiMongoServiceName }}
+{% if bWasdiRabbitMqEnabled == True %}
+      - {{ sWasdiRabbitMqServiceName }}
+{% endif %}
+      - {{ sWasdiTraefikServiceName }}
+    environment:
+{% if sWasdiTomcatOgcProcessesServerEnvironmentCatalinaOpts | default('') != '' %}
+      - CATALINA_OPTS={{ sWasdiTomcatOgcProcessesServerEnvironmentCatalinaOpts }}
+{% endif %}
+    image: "{{ sWasdiTomcatOgcProcessesServerServiceName }}:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/ogcprocesses`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.service=s_{{ sWasdiTomcatOgcProcessesServerServiceName }}"
+{% if bWasdiContainerTraefikSslEnabled == True %}
+      - "traefik.http.routers.r_{{ sWasdiTomcatOgcProcessesServerServiceName }}.tls=true"
+{% endif %}
+      - "traefik.http.services.s_{{ sWasdiTomcatOgcProcessesServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatOgcProcessesServerInternalPort }}"
+{% if sWasdiTomcatOgcProcessesServerInternalPort | default("") != ""
+    and sWasdiTomcatOgcProcessesServerExternalPort | default("") != ""
+    and aWasdiTomcatOgcProcessesServerExternalIp | default([]) | length > 0 %}
+    ports:
+{% for sCurrentExternalIp in aWasdiTomcatOgcProcessesServerExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatOgcProcessesServerExternalPort }}:{{ sWasdiTomcatOgcProcessesServerInternalPort }}"
+{% endfor %}
+{% endif %}
+    restart: "unless-stopped"
+    ulimits:
+      nofile:
+        soft: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
+        hard: {{ sWasdiTomcatOgcProcessesServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
@@ -389,41 +444,43 @@ services:
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
 
-  {{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:
+  {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
       - {{ sWasdiGeoserverServiceName }}
       - {{ sWasdiKeycloakServiceName }}
       - {{ sWasdiMongoServiceName }}
+{% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
+{% endif %}
       - {{ sWasdiTraefikServiceName }}
     environment:
-{% if sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
+{% if sWasdiTomcatWasdiOpenEoServerEnvironmentCatalinaOpts | default('') != '' %}
+      - CATALINA_OPTS={{ sWasdiTomcatWasdiOpenEoServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: "{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}:latest"
+    image: "{{ sWasdiTomcatWasdiOpenEoServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdi-openeo-server`)"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdi-openeo-server`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.service=s_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerTomcatWasdiOpenEoServerServiceName }}.loadbalancer.server.port={{ sWasdiContainerTomcatWasdiOpenEoServerInternalPort }}"
-{% if sWasdiContainerTomcatWasdiOpenEoServerInternalPort | default("") != ""
-    and sWasdiContainerTomcatWasdiOpenEoServerExternalPort | default("") != ""
-    and aWasdiContainerTomcatWasdiOpenEoServerExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiTomcatWasdiOpenEoServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
+{% if sWasdiTomcatWasdiOpenEoServerInternalPort | default("") != ""
+    and sWasdiTomcatWasdiOpenEoServerExternalPort | default("") != ""
+    and aWasdiTomcatWasdiOpenEoServerExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerTomcatWasdiOpenEoServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiContainerTomcatWasdiOpenEoServerInternalPort }}"
+{% for sCurrentExternalIp in aWasdiTomcatWasdiOpenEoServerExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiOpenEoServerExternalPort }}:{{ sWasdiTomcatWasdiOpenEoServerInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
     ulimits:
       nofile:
-        soft: {{ sWasdiTomcatUlimitNofile }}
-        hard: {{ sWasdiTomcatUlimitNofile }}
+        soft: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
+        hard: {{ sWasdiTomcatWasdiOpenEoServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
@@ -431,45 +488,45 @@ services:
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
 
-  {{ sWasdiContainerTomcatWasdiWebServerServiceName }}:
+  {{ sWasdiTomcatWasdiWebServerServiceName }}:
     depends_on:
       - {{ sWasdiGeoserverServiceName }}
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
       - {{ sWasdiMongoServiceName }}
-{% if sWasdiServerTypeIsMain == True %}
+{% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
     environment:
-{% if sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
-      - CATALINA_OPTS={{ sWasdiContainerTomcatWasdiWebServerEnvironmentCatalinaOpts }}
+{% if sWasdiTomcatWasdiWebServerEnvironmentCatalinaOpts | default('') != '' %}
+      - CATALINA_OPTS={{ sWasdiTomcatWasdiWebServerEnvironmentCatalinaOpts }}
 {% endif %}
-    image: "{{ sWasdiContainerTomcatWasdiWebServerServiceName }}:latest"
+    image: "{{ sWasdiTomcatWasdiWebServerServiceName }}:latest"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdiwebserver`)"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.service=s_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.rule=Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`/wasdiwebserver`)"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.middlewares=mw_wasdi-secure-denyFrame@file"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.service=s_{{ sWasdiTomcatWasdiWebServerServiceName }}"
 {% if bWasdiContainerTraefikSslEnabled == True %}
-      - "traefik.http.routers.r_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.tls=true"
+      - "traefik.http.routers.r_{{ sWasdiTomcatWasdiWebServerServiceName }}.tls=true"
 {% endif %}
-      - "traefik.http.services.s_{{ sWasdiContainerTomcatWasdiWebServerServiceName }}.loadbalancer.server.port={{ sWasdiContainerTomcatWasdiWebServerInternalPort }}"
-{% if sWasdiContainerTomcatWasdiWebServerInternalPort | default("") != ""
-    and sWasdiContainerTomcatWasdiWebServerExternalPort | default("") != ""
-    and aWasdiContainerTomcatWasdiWebServerExternalIp | default([]) | length > 0 %}
+      - "traefik.http.services.s_{{ sWasdiTomcatWasdiWebServerServiceName }}.loadbalancer.server.port={{ sWasdiTomcatWasdiWebServerInternalPort }}"
+{% if sWasdiTomcatWasdiWebServerInternalPort | default("") != ""
+    and sWasdiTomcatWasdiWebServerExternalPort | default("") != ""
+    and aWasdiTomcatWasdiWebServerExternalIp | default([]) | length > 0 %}
     ports:
-{% for sCurrentExternalIp in aWasdiContainerTomcatWasdiWebServerExternalIp | sort %}
-      - "{{ sCurrentExternalIp }}:{{ sWasdiContainerTomcatWasdiWebServerExternalPort }}:{{ sWasdiContainerTomcatWasdiWebServerInternalPort }}"
+{% for sCurrentExternalIp in aWasdiTomcatWasdiWebServerExternalIp | sort %}
+      - "{{ sCurrentExternalIp }}:{{ sWasdiTomcatWasdiWebServerExternalPort }}:{{ sWasdiTomcatWasdiWebServerInternalPort }}"
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
     ulimits:
       nofile:
-        soft: {{ sWasdiTomcatUlimitNofile }}
-        hard: {{ sWasdiTomcatUlimitNofile }}
+        soft: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
+        hard: {{ sWasdiTomcatWasdiWebServerUlimitNofile }}
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
@@ -553,7 +610,7 @@ services:
 {% if sWasdiServerTypeIsMain == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
-      - {{ sWasdiContainerTomcatWasdiWebServerServiceName }}
+      - {{ sWasdiTomcatWasdiWebServerServiceName }}
     image: "{{ sWasdiUpdateMetricServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:

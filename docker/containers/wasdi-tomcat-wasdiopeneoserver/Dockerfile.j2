@@ -55,7 +55,8 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+RUN mkdir --parents \
+        {{ sWasdiJreRootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
     chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
@@ -90,26 +91,30 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install Tomcat
-RUN mkdir --parents {{ sWasdiTomcatRootDirectoryPath }} \
-        {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatSourceUrl }} --output-document /tmp/{{ sWasdiTomcatSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatSourceUrl | basename }} --directory {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatSourceUrl | basename }}
+RUN mkdir --parents \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    chown {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} && \
+    chmod {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} && \
+    chown {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    chmod {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatWasdiOpenEoServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} && \
+    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} --directory {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    rm --force /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }}
 
-ENV PATH="{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin:${PATH}"
+ENV PATH="{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/bin:${PATH}"
 
 
 # Set the workdir
-WORKDIR {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}
+WORKDIR {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}
 
 
 # Copy data
-COPY --chown={{ sWasdiTomcatWebappsWasdiOpenEoServerTargetFileOwner }}:{{ sWasdiTomcatWebappsWasdiOpenEoServerTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWebappsWasdiOpenEoServerTargetFileName }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/webapps/{{ sWasdiTomcatWebappsWasdiOpenEoServerTargetFileName }}
+COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }}
 
 
 # Start the container
-CMD ["{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin/catalina.sh", "run"]
+CMD [ \
+    "{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/bin/catalina.sh", \
+    "run" \
+]

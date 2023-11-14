@@ -83,11 +83,11 @@ RUN apt-get update && \
         libjhdf5-jni && \
     mkdir --parents \
         {{ sWasdiDataConfigurationRootDirectoryPath }} \
-        {{ sWasdiComponentTriggerRootDirectoryPath }} && \
+        {{ sWasdiTriggerRootDirectoryPath }} && \
     chown {{ sWasdiDataConfigurationRootDirectoryOwner }}:{{ sWasdiDataConfigurationRootDirectoryGroup }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
     chmod {{ sWasdiDataConfigurationRootDirectoryMode }} {{ sWasdiDataConfigurationRootDirectoryPath }} && \
-    chown {{ sWasdiComponentTriggerRootDirectoryOwner }}:{{ sWasdiComponentTriggerRootDirectoryGroup }} {{ sWasdiComponentTriggerRootDirectoryPath }} && \
-    chmod {{ sWasdiComponentTriggerRootDirectoryMode }} {{ sWasdiComponentTriggerRootDirectoryPath }} && \
+    chown {{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectoryGroup }} {{ sWasdiTriggerRootDirectoryPath }} && \
+    chmod {{ sWasdiTriggerRootDirectoryMode }} {{ sWasdiTriggerRootDirectoryPath }} && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -97,11 +97,11 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Set the workdir
-WORKDIR {{ sWasdiComponentTriggerRootDirectoryPath }}
+WORKDIR {{ sWasdiTriggerRootDirectoryPath }}
 
 
 # Copy data
-COPY --chown={{ sWasdiComponentTriggerRootDirectoryOwner }}:{{ sWasdiComponentTriggerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiComponentTriggerTargetFileName }} {{ sWasdiComponentTriggerRootDirectoryPath }}/{{ sWasdiComponentTriggerTargetFileName }}
+COPY --chown={{ sWasdiTriggerRootDirectoryOwner }}:{{ sWasdiTriggerRootDirectoryGroup }} ./dataToCopy/{{ sWasdiTriggerBuildTargetFileName }} {{ sWasdiTriggerRootDirectoryPath }}/{{ sWasdiTriggerBuildTargetFileName }}
 
 
 # Start the container
@@ -112,7 +112,7 @@ ENTRYPOINT [ \
     "-XX:+AggressiveOpts", \
     "-Xverify:none", \
     "-jar", \
-    "{{ sWasdiComponentTriggerRootDirectoryPath }}/{{ sWasdiComponentTriggerTargetFileName }}", \
+    "{{ sWasdiTriggerRootDirectoryPath }}/{{ sWasdiTriggerBuildTargetFileName }}", \
     "--config", \
     "{{ sWasdiDataConfigurationRootDirectoryPath }}/wasdiConfig.json", \
     "-scheduleid" \

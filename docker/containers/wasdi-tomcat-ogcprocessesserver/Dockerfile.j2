@@ -55,7 +55,8 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+RUN mkdir --parents \
+        {{ sWasdiJreRootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
     chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
@@ -90,26 +91,30 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install Tomcat
-RUN mkdir --parents {{ sWasdiTomcatRootDirectoryPath }} \
-        {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatSourceUrl }} --output-document /tmp/{{ sWasdiTomcatSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatSourceUrl | basename }} --directory {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatSourceUrl | basename }}
+RUN mkdir --parents \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    chown {{ sWasdiTomcatOgcProcessesServerRootDirectoryOwner }}:{{ sWasdiTomcatOgcProcessesServerRootDirectoryGroup }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} && \
+    chmod {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} && \
+    chown {{ sWasdiTomcatOgcProcessesServerRootDirectoryOwner }}:{{ sWasdiTomcatOgcProcessesServerRootDirectoryGroup }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    chmod {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatOgcProcessesServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} && \
+    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} --directory {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    rm --force /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }}
 
-ENV PATH="{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin:${PATH}"
+ENV PATH="{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin:${PATH}"
 
 
 # Set the workdir
-WORKDIR {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}
+WORKDIR {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}
 
 
 # Copy data
-COPY --chown={{ sWasdiTomcatWebappsOgcProcessesServerTargetFileOwner }}:{{ sWasdiTomcatWebappsOgcProcessesServerTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWebappsOgcProcessesServerTargetFileName }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/webapps/{{ sWasdiTomcatWebappsOgcProcessesServerTargetFileName }}
+COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatOgcProcessesServerBuildTargetFileName }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/{{ sWasdiTomcatOgcProcessesServerBuildTargetFileName }}
 
 
 # Start the container
-CMD ["{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin/catalina.sh", "run"]
+CMD [ \
+    "{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin/catalina.sh", \
+    "run" \
+]

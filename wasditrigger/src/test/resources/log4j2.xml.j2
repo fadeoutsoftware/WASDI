@@ -2,12 +2,12 @@
 <Configuration status="WARN">
     <Appenders>
 {% if bWasdiSyslogEnabled == true %}
-        <Syslog name="{{ sWasdiComponentTriggerServiceName }}-syslog" appName="{{ sWasdiComponentTriggerServiceName }}"
-            host="{{ sWasdiComponentTriggerLogSyslogServerAddress }}" port="{{ sWasdiComponentTriggerLogSyslogServerPort }}" protocol="{{ sWasdiComponentTriggerLogSyslogProtocol }}"
+        <Syslog name="{{ sWasdiTriggerServiceName }}-syslog" appName="{{ sWasdiTriggerServiceName }}"
+            host="{{ sWasdiTriggerLogSyslogServerAddress }}" port="{{ sWasdiTriggerLogSyslogServerPort }}" protocol="{{ sWasdiTriggerLogSyslogProtocol }}"
             connectTimeoutMillis="30000" reconnectionDelayMillis="2000"
-            facility="{{ sWasdiComponentTriggerLogSyslogFacility }}" format="RFC5424" />
+            facility="{{ sWasdiTriggerLogSyslogFacility }}" format="RFC5424" />
 {% else %}
-        <RollingFile name="{{ sWasdiComponentTriggerServiceName }}-native" append="true" fileName="{{ sWasdiComponentTriggerLogNativeFilePath }}" filePattern="{{ sWasdiComponentTriggerLogNativeFilePath }}-%d{yyyy-MM-dd}">
+        <RollingFile name="{{ sWasdiTriggerServiceName }}-native" append="true" fileName="{{ sWasdiTriggerLogNativeFilePath }}" filePattern="{{ sWasdiTriggerLogNativeFilePath }}-%d{yyyy-MM-dd}">
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" />
             </Policies>
@@ -20,9 +20,9 @@
     <Loggers>
         <Root level="debug">
 {% if bWasdiSyslogEnabled == true %}
-            <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-syslog" />
+            <AppenderRef ref="{{ sWasdiTriggerServiceName }}-syslog" />
 {% else %}
-            <AppenderRef ref="{{ sWasdiComponentTriggerServiceName }}-native" />
+            <AppenderRef ref="{{ sWasdiTriggerServiceName }}-native" />
 {% endif %}
         </Root>
     </Loggers>

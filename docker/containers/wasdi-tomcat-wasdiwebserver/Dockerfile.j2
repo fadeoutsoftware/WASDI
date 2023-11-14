@@ -55,7 +55,8 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+RUN mkdir --parents \
+        {{ sWasdiJreRootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
     chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
@@ -90,26 +91,30 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install Tomcat
-RUN mkdir --parents {{ sWasdiTomcatRootDirectoryPath }} \
-        {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatRootDirectoryOwner }}:{{ sWasdiTomcatRootDirectoryGroup }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    chmod {{ sWasdiTomcatRootDirectoryMode }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatSourceUrl }} --output-document /tmp/{{ sWasdiTomcatSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatSourceUrl | basename }} --directory {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatSourceUrl | basename }}
+RUN mkdir --parents \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    chown {{ sWasdiTomcatWasdiWebServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiWebServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} && \
+    chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} && \
+    chown {{ sWasdiTomcatWasdiWebServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiWebServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatWasdiWebServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} && \
+    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} --directory {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    rm --force /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }}
 
-ENV PATH="{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin:${PATH}"
+ENV PATH="{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/bin:${PATH}"
 
 
 # Set the workdir
-WORKDIR {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}
+WORKDIR {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}
 
 
 # Copy data
-COPY --chown={{ sWasdiTomcatWebappsWasdiWebServerTargetFileOwner }}:{{ sWasdiTomcatWebappsWasdiWebServerTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWebappsWasdiWebServerTargetFileName }} {{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/webapps/{{ sWasdiTomcatWebappsWasdiWebServerTargetFileName }}
+COPY --chown={{ sWasdiTomcatWasdiWebServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiWebServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }}
 
 
 # Start the container
-CMD ["{{ sWasdiTomcatRootDirectoryPath }}/{{ sWasdiTomcatVersion }}/bin/catalina.sh", "run"]
+CMD [ \
+    "{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/bin/catalina.sh", \
+    "run" \
+]
