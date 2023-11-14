@@ -4,16 +4,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
-import com.google.common.io.Files;
-
 import wasdi.shared.business.processors.ProcessorTypes;
-import wasdi.shared.config.PathsConfig;
 import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 import wasdi.shared.utils.runtime.RunTimeUtils;
 
-public class IDL2ProcessorEngine extends DockerProcessorEngine {
+public class IDL2ProcessorEngine extends DockerBuildOnceEngine {
 	
 	public IDL2ProcessorEngine() {
 		super();
@@ -212,37 +209,10 @@ public class IDL2ProcessorEngine extends DockerProcessorEngine {
 			WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: Exception Deleting install files: ", oEx);
 		}
 	}
-
 	
 	@Override
-	public boolean libraryUpdate(ProcessorParameter oParameter) {
-		
-		try {
-			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: move lib in the processor folder");
-			
-			// Get the lib path
-			String sLibFilePath = m_sDockerTemplatePath;
-			
-			if (!sLibFilePath.endsWith(File.separator)) {
-				sLibFilePath += File.separator;
-			}
-			
-			// Get the processor Path
-			String sDestinationFilePath = PathsConfig.getProcessorFolder(m_oParameter.getName());;
-			
-			File oLibFile = new File(sLibFilePath+"idlwasdilib.pro");
-			File oDestinationFile = new File(sDestinationFilePath+"idlwasdilib.pro");
-			
-			// Copy the lib
-			Files.copy(oLibFile, oDestinationFile);
-			
-			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: call super implementation to update the docker");
-			
-			return super.libraryUpdate(oParameter);
-		}
-		catch (Exception oEx) {
-			WasdiLog.debugLog("IDL2ProcessorEngine.libraryUpdate: Exception in lib update: " + oEx.toString());
-			return false;
-		}
+	public boolean environmentUpdate(ProcessorParameter oParameter) {
+		WasdiLog.errorLog("IDL2ProcessorEngine.onAfterDeploy: there is environment in IDL apps");
+		return true;
 	}
 }
