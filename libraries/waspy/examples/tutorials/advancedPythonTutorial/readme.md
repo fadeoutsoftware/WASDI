@@ -12,7 +12,7 @@ Parameters are in this form:
   "MAXCLOUD": "50",
   "DATE": "2020-10-25",
   "SEARCHDAYS": "20",
-  "PROVIDER": "ONDA"
+  "PROVIDER": "AUTO"
 }
 ```
 
@@ -22,4 +22,4 @@ where:
 - DATE is a date for the search
 - SEARCHDAYS is the maximum number of days to search in the past
 So the search will be performed on the BBOX and in the period [DATE - SEARCHDAYS, DATE], and for images with at most MAXCLOUD% cloud coverage
-- PROVIDER is the data provider, one in {"ONDA", "CREODIAS", "EODC"}
+- PROVIDER is the data provider, use "AUTO"

@@ -112,18 +112,22 @@ KEY=VALUE.
 Parameters are your own inputs. Since WASDI is desinged to make your application running in the cloud, we ask you to make "pure code" that does not care how to get inputs from the user, but just USE the inputs given by the user. This is done in the parameters file: there you decide the inputs you need and there you can put and change your inputs. WASDI will let you read your inputs using a simple line of code:
 
 .. code-block::
+
 	#python
 	myParam = wasdi.getParamter("StartDate", new Date())
 	
 .. code-block::
+
 	;IDL
 	myParam = WASDIGETPARAMETER("StartDate")
 	
 .. code-block:: java
+
 	//Java: we created an object WasdiLib oWasdiLib = new WasdiLib();
 	String sMyParam = oWasdiLib.getParameter("StartDate");
 	
 .. code-block:: matlab
+
 	% We obtained a lib object calling Wasdi = startWasdi(config_path)
 	myParam = wGetParameter("StartDate")
 
@@ -142,12 +146,14 @@ For python and C# it is a JSON file.
 The basic configuration, that can be used in almost all cases, is:
 
 .. code-block::
+
 	USER=your.email@domain.sample
 	PASSWORD=yourpassword
 	WORKSPACE=NameOfYourWorkspace
 	PARAMETERSFILEPATH=./params.txt
 	
 .. code-block::
+	
 	{
 		"USER": "your.email@domain.sample",
 		"PASSWORD": "yourpassword",

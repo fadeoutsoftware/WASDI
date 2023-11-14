@@ -170,7 +170,7 @@ Then, clicking on the elements on the left of the screen, you can add one or mor
 
 
 Controls Shared Properties
-----------------
+----------------------------
 
 Each control is defined by one or more properties. All controls have at least 2 properties:
 
@@ -308,6 +308,7 @@ To add to “Tab Name 1” a control in the form of a drop down menu with severa
 	Careful: in case you have only one control in this specific tab, or this is the last control of the tab, make sure to remove the trailing  comma!
 
 .. code-block:: json
+
 	{
 		"param": "PARAM_NAME",
 		"type": "dropdown",
@@ -360,6 +361,7 @@ To add to “Tab Name 1” a control in the form of a bounding box, that the use
 	Careful: in case you have only one control in this specific tab, or this is the last control of the tab, make sure to remove the trailing  comma!
 
 .. code-block:: json
+
 	{
 		"param": "PARAM_NAME",
 		"type": "bbox",

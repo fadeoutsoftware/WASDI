@@ -101,7 +101,7 @@ def run():
     sMaxCloud = wasdi.getParameter("MAXCLOUD", "20")
     sSearchDays = wasdi.getParameter("SEARCHDAYS", "10")
 
-    sProvider = wasdi.getParameter("PROVIDER", "ONDA")
+    sProvider = wasdi.getParameter("PROVIDER", "AUTO")
 
     # L1
     sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI1C")
