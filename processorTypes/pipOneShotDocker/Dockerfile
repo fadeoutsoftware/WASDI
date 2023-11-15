@@ -115,4 +115,4 @@ USER $sContainerUserName
 
 
 # Execute the processor
-CMD ["python3", "eoepcaProcessorExecutor.py"]
+CMD ["python3", "wasdiProcessorExecutor.py"]
