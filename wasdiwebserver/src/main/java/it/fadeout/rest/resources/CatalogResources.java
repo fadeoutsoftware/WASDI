@@ -293,8 +293,7 @@ public class CatalogResources {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), oParameter, sParentProcessWorkspaceId);
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -399,8 +398,7 @@ public class CatalogResources {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), oParameter, sParentProcessWorkspaceId);
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogueResource.ingestFileInWorkspace: " + oEx);
@@ -502,9 +500,8 @@ public class CatalogResources {
 			}
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), sPath, oParameter, sParentProcessWorkspaceId);
+			
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.COPYTOSFTP.name(), oFilePath.getName(), oParameter, sParentProcessWorkspaceId);
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogueResource.copyFileToSftp: " + oEx);
@@ -579,10 +576,8 @@ public class CatalogResources {
 			oParam.setWorkspace(sWorkspaceId);
 			oParam.setProcessObjId(sProcessObjId);
 			oParam.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 						
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParam, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, oParam, sParentProcessWorkspaceId);
 
 		} catch (Exception oEx) {
 			WasdiLog.errorLog("CatalogueResource.ftpTransferFile: " + oEx);

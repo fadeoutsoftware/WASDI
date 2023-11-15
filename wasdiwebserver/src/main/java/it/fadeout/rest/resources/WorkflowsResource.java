@@ -925,10 +925,7 @@ public class WorkflowsResource {
                     // Set Graph Settings
                     oParameter.setSettings(oGraphSettings);
 
-                    // Serialization Path
-                    String sPath = WasdiConfig.Current.paths.serializationPath;
-
-                    return Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.GRAPH.toString(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
+                    return Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.GRAPH.toString(), sSourceProductName, oParameter, sParentProcessWorkspaceId);
 
                 } catch (IOException oEx) {
                     WasdiLog.errorLog("WorkflowsResource.run: " + oEx);

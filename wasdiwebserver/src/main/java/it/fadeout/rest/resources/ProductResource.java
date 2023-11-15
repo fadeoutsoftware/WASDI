@@ -270,10 +270,8 @@ public class ProductResource {
                             oParameter.setProductName(sProductName);
                             oParameter.setUserId(sUserId);
 
-                            String sPath = WasdiConfig.Current.paths.serializationPath;
-
                             // Trigger the Launcher Operation
-                            Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, sPath, oParameter, null);
+                            Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.READMETADATA.name(), sProductName, oParameter, null);
 
                             oMetadataViewModel = new MetadataViewModel();
                             oMetadataViewModel.setName("Generating Metadata, try later");

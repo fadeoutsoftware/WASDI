@@ -187,9 +187,8 @@ public class ProcessingResources {
             oParameter.setExchange(sWorkspaceId);
 
             WasdiLog.debugLog("ProcessingResources.sen2CorConversion, About to start operation");
-            String sPath = WasdiConfig.Current.paths.serializationPath;
 
-            PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, sPath, oParameter, sParentId);
+            PrimitiveResult oPrimitiveResult = Wasdi.runProcess(oUser.getUserId(), sSessionId, String.valueOf(LauncherOperations.SEN2COR), sProductName, oParameter, sParentId);
             WasdiLog.debugLog("ProcessingResources.sen2CorConversion, Operation added About to return");
             return Response.ok(oPrimitiveResult).build();
         } 
@@ -284,12 +283,9 @@ public class ProcessingResources {
 
             // Do we have settings?
             if (oSetting != null) oParameter.setSettings(oSetting);
-
-            // Serialization Path
-            String sPath = WasdiConfig.Current.paths.serializationPath;
             
             // Run the process
-            return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter, sParentProcessWorkspaceId);
+            return Wasdi.runProcess(oUser.getUserId(), sSessionId, oOperation.name(), sSourceProductName, oParameter, sParentProcessWorkspaceId);
 
         } 
         catch (IOException oEx) {

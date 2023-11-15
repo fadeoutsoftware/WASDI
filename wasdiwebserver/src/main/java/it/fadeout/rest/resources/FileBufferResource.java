@@ -243,14 +243,12 @@ public class FileBufferResource {
 			oParameter.setSessionID(sSessionId);
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			oResult.setStringValue(sProcessObjId);
 			oResult.setBoolValue(true);
 			oResult.setIntValue(Status.OK.getStatusCode());
 
-			oResult = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+			oResult = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.SHARE.name(), sProductName, oParameter, sParentProcessWorkspaceId);
 			
 			return Response.status(Status.fromStatusCode(oResult.getIntValue())).entity(oResult).build();
 		} catch (Exception oEx) {
@@ -511,10 +509,8 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
-			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter, sParentProcessWorkspaceId);
+			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, oParameter, sParentProcessWorkspaceId);
 			oReturnValue.setPayload(sProcessObjId);
 		}catch (IOException oEx) {
 			WasdiLog.errorLog("DownloadResource.publishBand: " + oEx);
