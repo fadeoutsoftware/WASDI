@@ -52,7 +52,7 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 # RUN specific to install Telegraf
 RUN mkdir /etc/telegraf && \
-    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} /etc/telegraf
+    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} /etc/telegraf && \
     chmod {{ sWasdiTelegrafRootDirectoryMode }} /etc/telegraf
 
 
