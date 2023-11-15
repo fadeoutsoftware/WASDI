@@ -1180,7 +1180,7 @@ public abstract class QueryTranslator {
 
 				// check for product type
 				try {
-					if (sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
+					if (Utils.isNullOrEmpty(oResult.productType) && sQuery.contains(QueryTranslator.s_sPRODUCTTYPE)) {
 						int iStart = sQuery.indexOf(s_sPRODUCTTYPE);
 						if (iStart < 0) {
 							throw new IllegalArgumentException("Could not find product type");
