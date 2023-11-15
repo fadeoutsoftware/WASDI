@@ -910,8 +910,6 @@ public class ProcessorsResource  {
 
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
-			
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(sName);
@@ -925,7 +923,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter, sParentProcessWorkspaceId);
+			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, oProcessorParameter, sParentProcessWorkspaceId);
 			
 			try{
 				WasdiLog.debugLog("ProcessorsResource.internalRun: create task");
