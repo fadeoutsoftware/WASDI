@@ -44,6 +44,12 @@ services:
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiClientEnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiClientCurrentEnvironmentVariable in aoWasdiClientEnvironmentVariable %}
+      - {{ aoWasdiClientCurrentEnvironmentVariable['key'] }}={{ aoWasdiClientCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
     image: "{{ sWasdiClientServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -86,6 +92,12 @@ services:
       - {{ sWasdiTomcatWasdiWebServerServiceName }}
 {% endif %}
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiClientV2EnvironmentVariable | length ) > 0 %}
+    environment:
+{% for aoWasdiClientV2CurrentEnvironmentVariable in aoWasdiClientV2EnvironmentVariable %}
+      - {{ aoWasdiClientV2CurrentEnvironmentVariable['key'] }}={{ aoWasdiClientV2CurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
     image: "{{ sWasdiClientV2ServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -111,14 +123,11 @@ services:
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
+{% if ( aoWasdiGeoserverEnvironmentVariable | length ) > 0 %}
     environment:
-{% if ( aWasdiGeoserverCsrfWhitelist | length ) > 0 %}
-      - GEOSERVER_CSRF_WHITELIST={{ aWasdiGeoserverCsrfWhitelist | join(',') }}
-{% endif %}
-      - GEOSERVER_DATA_DIR={{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01
-      - GEOSERVER_HOME={{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}
-{% if sWasdiGeoserverEnvironmentJavaOpts | default('') != '' %}
-      - JAVA_OPTS={{ sWasdiGeoserverEnvironmentJavaOpts }}
+{% for aoWasdiGeoserverCurrentEnvironmentVariable in aoWasdiGeoserverEnvironmentVariable %}
+      - {{ aoWasdiGeoserverCurrentEnvironmentVariable['key'] }}={{ aoWasdiGeoserverCurrentEnvironmentVariable['value'] }}
+{% endfor %}
 {% endif %}
     image: "{{ sWasdiGeoserverServiceName }}:latest"
     labels:
@@ -158,26 +167,12 @@ services:
       - {{ sWasdiPostgresqlKeycloakServiceName }}
     entrypoint:
       - {{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/bin/kc.sh
+{% if ( aoWasdiKeycloakEnvironmentVariable | length ) > 0 %}
     environment:
-      - JGROUPS_DISCOVERY_EXTERNAL_IP={{ sWasdiKeycloakJgroupDiscoveryExternalIp | default('127.0.0.1') }}
-      - KC_CACHE_CONFIG_FILE=cache-ispn.xml
-      - KC_DB_PASSWORD=${sPostgresqlKeycloakDatabasePassword}
-      - KC_DB=postgres
-      - KC_DB_SCHEMA=public
-      - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_URL_HOST=wasdi-postgresql-keycloak
-      - KC_DB_URL_PORT=5432
-      - KC_DB_USERNAME=${sPostgresqlKeycloakDatabaseUsername}
-      - KC_HEALTH_ENABLED=false
-      - KC_HOSTNAME_STRICT=false
-      - KC_HOSTNAME_STRICT_HTTPS=false
-      - KC_HTTP_ENABLED=true
-      - KC_HTTP_RELATIVE_PATH=/{{ sWasdiKeycloakPathName.lstrip('/').rstrip('/') }}
-      - KC_LOG_LEVEL=debug
-      - KC_PROXY=edge
-      - KC_TRANSACTION_XA_ENABLED=true
-      - KEYCLOAK_ADMIN=${sWasdiAdministratorUserName}
-      - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorUserPassword}
+{% for aoWasdiKeycloakCurrentEnvironmentVariable in aoWasdiKeycloakEnvironmentVariable %}
+      - {{ aoWasdiKeycloakCurrentEnvironmentVariable['key'] }}={{ aoWasdiKeycloakCurrentEnvironmentVariable['value'] }}
+{% endfor %}
+{% endif %}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -215,7 +210,7 @@ services:
       - POSTGRES_USER1_NAME=${sPostgresqlKeycloakUser1Name}
       - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
 {% endif %}
-    image: "{{ sWasdiContainerPostgresqlKeycloakImageName }}:{{ sWasdiContainerPostgresqlKeycloakImageVersion }}"
+    image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakImageVersion }}"
     restart: "unless-stopped"
     ulimits:
       nofile:
