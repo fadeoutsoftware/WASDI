@@ -28,7 +28,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.utils.docker.DockerUtils;
 import wasdi.shared.utils.log.WasdiLog;
 
-public class PipOneShotProcessorEngine extends PipProcessorEngine {
+public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
 	
 	public PipOneShotProcessorEngine() {
 		super();
