@@ -176,8 +176,8 @@ services:
       - KC_LOG_LEVEL=debug
       - KC_PROXY=edge
       - KC_TRANSACTION_XA_ENABLED=true
-      - KEYCLOAK_ADMIN=${sWasdiAdministratorUsername}
-      - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorPassword}
+      - KEYCLOAK_ADMIN=${sWasdiAdministratorUserName}
+      - KEYCLOAK_ADMIN_PASSWORD=${sWasdiAdministratorUserPassword}
     image: "{{ sWasdiKeycloakServiceName }}:latest"
     labels:
       - "traefik.enable=true"
@@ -239,8 +239,8 @@ services:
 {% if bWasdiMongoInitialized == False %}
     environment:
       - MONGO_INITDB_DATABASE=${sWasdiMongoWasdiDatabaseName}
-      - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorPassword}
-      - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUsername}
+      - MONGO_INITDB_ROOT_PASSWORD=${sWasdiAdministratorUserPassword}
+      - MONGO_INITDB_ROOT_USERNAME=${sWasdiAdministratorUserName}
       - sWasdiMongoAdditionalUserBackupUserName=${sWasdiMongoAdditionalUserBackupUserName}
       - sWasdiMongoAdditionalUserBackupUserPassword=${sWasdiMongoAdditionalUserBackupUserPassword}
       - sWasdiMongoAdditionalUserMetrologyUserName=${sWasdiMongoAdditionalUserMetrologyUserName}

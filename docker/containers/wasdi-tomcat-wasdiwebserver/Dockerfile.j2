@@ -111,6 +111,8 @@ WORKDIR {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWe
 
 # Copy data
 COPY --chown={{ sWasdiTomcatWasdiWebServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiWebServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/{{ sWasdiTomcatWasdiWebServerBuildTargetFileName }}
+COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/server.xml
+COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/tomcat-users.xml
 
 
 # Start the container
