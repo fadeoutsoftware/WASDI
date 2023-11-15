@@ -50,29 +50,42 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# RUN specific to install Telegraf
+RUN mkdir /etc/telegraf && \
+    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} /etc/telegraf
+    chmod {{ sWasdiTelegrafRootDirectoryMode }} /etc/telegraf
+
+
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
 USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install Telegraf
-RUN mkdir {{ sWasdiTelegrafRootDirectoryPath }} && \
-    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} {{ sWasdiTelegrafRootDirectoryPath }} && \
-    chmod {{ sWasdiTelegrafRootDirectoryMode }} {{ sWasdiTelegrafRootDirectoryPath }} && \
+RUN mkdir --parents \
+        {{ sWasdiTelegrafRootDirectoryPath }} \
+        {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} && \
+    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} \
+        {{ sWasdiTelegrafRootDirectoryPath }} \
+        {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} && \
+    chmod {{ sWasdiTelegrafRootDirectoryMode }} \
+        {{ sWasdiTelegrafRootDirectoryPath }} \
+        {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} && \
     wget --directory-prefix=/tmp {{ sWasdiTelegrafSourceUrl }} && \
-    tar --directory {{ sWasdiTelegrafRootDirectoryPath }} --extract --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} --strip-components=2 --verbose && \
-    rm --force {{ sWasdiTelegrafRootDirectoryPath }}/etc/telegraf/telegraf.conf && \
-    echo "{{ sWasdiTelegrafVersion }}" > {{ sWasdiTelegrafRootDirectoryPath }}/version-{{ sWasdiTelegrafVersion }}.txt
+    tar --directory {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} --extract --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} --strip-components=2 --verbose && \
+    rm --recursive --force \
+        {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }}/etc \
+        /tmp/{{ sWasdiTelegrafSourceUrl | basename }}
 
 
 # Set the workdir
-WORKDIR {{ sWasdiTelegrafRootDirectoryPath }}
+WORKDIR {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }}
 
 
 # Start the container
 CMD [ \
-    "{{ sWasdiTelegrafRootDirectoryPath }}/usr/bin/telegraf", \
+    "{{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }}/usr/bin/telegraf", \
     "-config", \
-    "{{ sWasdiTelegrafRootDirectoryPath }}/etc/telegraf/telegraf.conf", \
+    "/etc/telegraf/telegraf.conf", \
     "-config-directory", \
-    "{{ sWasdiTelegrafRootDirectoryPath }}/etc/telegraf/telegraf.d" \
+    "/etc/telegraf/telegraf.d" \
 ]
