@@ -136,6 +136,7 @@ public class PipOneShotProcessorEngine extends DockerBuildOnceEngine {
             
             if (oProcessorTypeConfig == null) {
             	oProcessorTypeConfig = new ProcessorTypeConfig();
+            	oProcessorTypeConfig.processorType = oProcessor.getType();
             	WasdiConfig.Current.dockers.processorTypes.add(oProcessorTypeConfig);
             }
             
