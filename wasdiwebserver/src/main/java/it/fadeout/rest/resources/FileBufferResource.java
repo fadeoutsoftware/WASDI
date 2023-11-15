@@ -389,10 +389,8 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
-
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
-			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, sPath, oParameter, sParentProcessWorkspaceId);
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sProvider.toUpperCase(), sFileName, oParameter, sParentProcessWorkspaceId);
 			
 		} catch (IOException oEx) {
 			WasdiLog.errorLog("DownloadResource.imageImport: Error updating process list " + oEx);

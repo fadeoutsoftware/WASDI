@@ -253,9 +253,7 @@ public class ConsoleResource {
 				oProcessorParameter.setSessionID(sSessionId);
 				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-				String sPath = WasdiConfig.Current.paths.serializationPath;
-
-				PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), "jupyter-notebook", sPath, oProcessorParameter);
+				PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.LAUNCHJUPYTERNOTEBOOK.name(), "jupyter-notebook", oProcessorParameter);
 
 				if (oRes.getBoolValue()) {
 					oResult.setStringValue("PATIENCE IS THE VIRTUE OF THE STRONG");

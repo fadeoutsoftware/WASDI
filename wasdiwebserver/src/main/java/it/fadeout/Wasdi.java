@@ -41,6 +41,7 @@ import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.data.MetricsEntryRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
@@ -408,8 +409,8 @@ public class Wasdi extends ResourceConfig {
 	 * @return
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationType, sProductName, sSerializationPath, oParameter, null);
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, BaseParameter oParameter) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, sProductName, oParameter, null);
 	}
 	
 	/**
@@ -431,8 +432,8 @@ public class Wasdi extends ResourceConfig {
 	 * @return Primitive Result with the output status of the operation
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
-		return runProcess(sUserId, sSessionId, sOperationType, null, sProductName, sSerializationPath, oParameter, sParentId);
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sProductName, BaseParameter oParameter, String sParentId) throws IOException {
+		return runProcess(sUserId, sSessionId, sOperationType, null, sProductName, oParameter, sParentId);
 	}
 
 	/**
@@ -455,7 +456,7 @@ public class Wasdi extends ResourceConfig {
 	 * 			otherwise boolValue = false, intValue = httpErrorCode.
 	 * @throws IOException
 	 */
-	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sOperationSubId, String sProductName, String sSerializationPath, BaseParameter oParameter, String sParentId) throws IOException {
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationType, String sOperationSubId, String sProductName, BaseParameter oParameter, String sParentId) throws IOException {
 
 		if (!LauncherOperationsUtils.isValidLauncherOperation(sOperationType)) {
 			// Bad request
@@ -556,14 +557,7 @@ public class Wasdi extends ResourceConfig {
 		        }
 			}
 			else {
-				// The Workspace is here. Just add the ProcessWorkspace to the database 
-				
-				// Serialization Path
-				String sPath = sSerializationPath;
-
-				if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
-				sPath = sPath + sProcessObjId;
-				
+				// The Workspace is here. Just add the Parameter and the ProcessWorkspace to the database 
 				
 				//create a WASDI session here
 				
@@ -595,7 +589,9 @@ public class Wasdi extends ResourceConfig {
 					throw new IllegalArgumentException("could not insert session " + oSession.getSessionId() + " in DB, aborting");
 				}
 
-				SerializationUtils.serializeObjectToXML(sPath, oParameter);
+				// Insert the parameter in mongo
+				ParametersRepository oParametersRepository = new ParametersRepository();
+				oParametersRepository.insertParameter(oParameter);
 
 				// Create the process Workspace
 				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();

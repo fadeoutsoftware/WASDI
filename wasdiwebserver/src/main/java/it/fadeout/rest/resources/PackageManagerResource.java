@@ -300,8 +300,6 @@ public class PackageManagerResource {
 			// Schedule the process to run the operation in the environment
 			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
@@ -325,7 +323,7 @@ public class PackageManagerResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), sPath, oProcessorParameter);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.ENVIRONMENTUPDATE.name(), oProcessorToForceUpdate.getName(), oProcessorParameter);
 			
 			if (WasdiConfig.Current.isMainNode()) {
 				

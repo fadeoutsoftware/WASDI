@@ -12,6 +12,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.parameters.BaseParameter;
@@ -230,10 +231,10 @@ public class Killprocesstree extends Operation {
 	 */
 	private void killApplication(ProcessWorkspace oProcessToKill) {
 		try {
-			String sParameterPath = PathsConfig.getParameterPath(oProcessToKill.getProcessObjId());
 			
             // Deserialize the parameter
-			ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameterPath);
+			ParametersRepository oParametersRepository = new ParametersRepository();
+			ProcessorParameter oParameter = (ProcessorParameter) oParametersRepository.getParameterByProcessObjId(oProcessToKill.getProcessObjId());
 			
 	        WasdiProcessorEngine oEngine = WasdiProcessorEngine.getProcessorEngine(oParameter.getProcessorType());
 	        oEngine.setSendToRabbit(m_oSendToRabbit);

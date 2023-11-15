@@ -404,10 +404,8 @@ public class ProcessingResources {
                 return oResult;            	
             }            
             
-            String sPath = WasdiConfig.Current.paths.serializationPath;
-            
             // Make Wasdi handle this request: this should be in this node...
-            return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, sPath, oParameter, sParentProcessWorkspaceId);
+            return Wasdi.runProcess(oUser.getUserId(), sSessionId, sOperationType, sOperationSubType, sProductName, oParameter, sParentProcessWorkspaceId);
         } catch (Exception oE) {
             WasdiLog.errorLog("ProcessingResources.runProcess error: " + oE);
             oResult.setStringValue(oE.toString());

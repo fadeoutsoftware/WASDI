@@ -288,9 +288,7 @@ public class ProcessorsResource  {
 			oDeployProcessorParameter.setProcessorType(sType);
 			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, sPath, oDeployProcessorParameter);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, oDeployProcessorParameter);
 			
 			if (oRes.getBoolValue()) {
 				oResult.setIntValue(200);
@@ -1231,7 +1229,6 @@ public class ProcessorsResource  {
 			
 			// Schedule the process to delete the processor
 			String sProcessObjId = Utils.getRandomName();
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 						
 			// Trigger the processor delete operation on this specific node
 			WasdiLog.debugLog("ProcessorsResource.nodeDeleteProcessor: this is a computing node, just execute Delete here");
@@ -1258,7 +1255,7 @@ public class ProcessorsResource  {
 				oProcessorParameter.setVersion(sVersion);
 
 				
-				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), sProcessorName, sPath, oProcessorParameter);		
+				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), sProcessorName, oProcessorParameter);		
 			}
 			else {
 				WasdiLog.warnLog("ProcessorsResource.nodeDeleteProcessor: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
@@ -1338,7 +1335,6 @@ public class ProcessorsResource  {
 
 			// Schedule the process to delete the processor
 			String sProcessObjId = Utils.getRandomName();
-			String sPath = WasdiConfig.Current.paths.serializationPath;
 			
 			// Start a thread to update all the computing nodes
 			try {
@@ -1383,7 +1379,7 @@ public class ProcessorsResource  {
 				oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(oWorkspace.getWorkspaceId()));
 				oProcessorParameter.setVersion(oProcessorToDelete.getVersion());
 				
-				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), oProcessorToDelete.getName(), sPath, oProcessorParameter);		
+				Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DELETEPROCESSOR.name(), oProcessorToDelete.getName(), oProcessorParameter);		
 			}
 			else {
 				WasdiLog.warnLog("ProcessorsResource.deleteProcessor: IMPOSSIBLE TO FIND NODE SPECIFIC WORKSPACE!!!!");
@@ -1468,8 +1464,6 @@ public class ProcessorsResource  {
 			
 			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToReDeploy.getName());
 			oProcessorParameter.setProcessorID(oProcessorToReDeploy.getProcessorId());
@@ -1482,7 +1476,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(), sPath,oProcessorParameter);			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.REDEPLOYPROCESSOR.name(),oProcessorToReDeploy.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -1560,8 +1554,6 @@ public class ProcessorsResource  {
 			// Schedule the process to run the processor
 			String sProcessObjId = Utils.getRandomName();
 			
-			String sPath = WasdiConfig.Current.paths.serializationPath;
-			
 			// Get the dedicated special workpsace
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.getByNameAndNode(Wasdi.s_sLocalWorkspaceName, WasdiConfig.Current.nodeCode);
@@ -1580,7 +1572,7 @@ public class ProcessorsResource  {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(), sPath,oProcessorParameter);			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.LIBRARYUPDATE.name(),oProcessorToForceUpdate.getName(),oProcessorParameter);			
 			
 			if (oRes.getBoolValue()) {
 				return Response.ok().build();
@@ -1843,10 +1835,8 @@ public class ProcessorsResource  {
 					oProcessorParameter.setProcessorID(oProcessorToUpdate.getProcessorId());
 					oProcessorParameter.setProcessorType(oProcessorToUpdate.getType());
 					
-					String sPath = WasdiConfig.Current.paths.serializationPath;
-					
 					// Trigger the library update in this node
-					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), sPath, oProcessorParameter);
+					Wasdi.runProcess(oUser.getUserId(), sSessionId, LauncherOperations.LIBRARYUPDATE.name(), oProcessorToUpdate.getName(), oProcessorParameter);
 					
 					WasdiLog.debugLog("ProcessorsResource.updateProcessorFiles: LIBRARYUPDATE process scheduled");
 				}

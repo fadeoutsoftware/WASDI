@@ -54,6 +54,7 @@ import wasdi.shared.data.AppsCategoriesRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ParametersRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -70,6 +71,8 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.statistics.JobsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.OgcProcessesClient;
@@ -1450,21 +1453,16 @@ public class dbUtils {
                 }
 
                 Collections.sort(aoProcesses, new ProcessWorkspaceStartDateComparator());
+                ParametersRepository oParametersRepository = new ParametersRepository();
 
                 for (ProcessWorkspace oProcToRun : aoProcesses) {
 
                     System.out.println("Starting again " + oProcToRun.getProcessObjId());
 
-                    String sSerializationPath = WasdiConfig.Current.paths.serializationPath;
-
-                    if (!sSerializationPath.endsWith("" + File.separatorChar)) sSerializationPath += File.separatorChar;
-
-                    String sParameter = sSerializationPath + oProcToRun.getProcessObjId();
-
                     try {
 
                         // Create the base Parameter
-                        BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                        BaseParameter oBaseParameter = oParametersRepository.getParameterByProcessObjId(oProcToRun.getProcessObjId());
 
                         String sSessionId = oBaseParameter.getSessionID();
                         String sUser = oBaseParameter.getUserId();
