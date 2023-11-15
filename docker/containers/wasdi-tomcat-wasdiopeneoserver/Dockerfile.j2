@@ -111,8 +111,8 @@ WORKDIR {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasd
 
 # Copy data
 COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileName }}
-COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/server.xml
-COPY --chown={{ sWasdiTomcatOgcProcessesServerBuildTargetFileOwner }}:{{ sWasdiTomcatOgcProcessesServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/conf/tomcat-users.xml
+COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/conf_server.xml {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/conf/server.xml
+COPY --chown={{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileOwner }}:{{ sWasdiTomcatWasdiOpenEoServerBuildTargetFileGroup }} ./dataToCopy/conf_tomcat-users.xml {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/conf/tomcat-users.xml
 
 
 # Start the container
