@@ -94,13 +94,21 @@ USER {{ sWasdiSystemUserName }}
 RUN mkdir --parents \
         {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} \
         {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
-    chown {{ sWasdiTomcatOgcProcessesServerRootDirectoryOwner }}:{{ sWasdiTomcatOgcProcessesServerRootDirectoryGroup }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatOgcProcessesServerRootDirectoryOwner }}:{{ sWasdiTomcatOgcProcessesServerRootDirectoryGroup }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
-    chmod {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    chown {{ sWasdiTomcatOgcProcessesServerRootDirectoryOwner }}:{{ sWasdiTomcatOgcProcessesServerRootDirectoryGroup }} \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
+    chmod {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }} \
+        {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatOgcProcessesServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} --directory {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }}
+    tar --directory {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }} --extract --file /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} --strip-components=1 && \
+    rm --recursive --force \
+      /tmp/{{ sWasdiTomcatOgcProcessesServerSourceUrl | basename }} \
+      {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/ROOT \
+      {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/docs \
+      {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/examples && \
+    sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/manager/META-INF/context.xml
+
 
 ENV PATH="{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin:${PATH}"
 
