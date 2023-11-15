@@ -71,7 +71,7 @@ RUN mkdir --parents \
         {{ sWasdiTelegrafRootDirectoryPath }} \
         {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} && \
     wget --directory-prefix=/tmp {{ sWasdiTelegrafSourceUrl }} && \
-    tar --directory {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} --extract --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} --strip-components=2 --verbose && \
+    tar --directory {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} --extract --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} --strip-components=2 && \
     rm --recursive --force \
         {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }}/etc \
         /tmp/{{ sWasdiTelegrafSourceUrl | basename }}
