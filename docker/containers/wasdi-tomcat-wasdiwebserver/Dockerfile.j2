@@ -94,13 +94,20 @@ USER {{ sWasdiSystemUserName }}
 RUN mkdir --parents \
         {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} \
         {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
-    chown {{ sWasdiTomcatWasdiWebServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiWebServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatWasdiWebServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiWebServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
-    chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    chown {{ sWasdiTomcatWasdiWebServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiWebServerRootDirectoryGroup }} \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
+    chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatWasdiWebServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} --directory {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }}
+    tar --directory {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} --extract --file /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} --strip-components=1 && \
+    rm --recursive --force \
+      /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} \
+      {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/ROOT \
+      {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/docs \
+      {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/examples && \
+    sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/manager/META-INF/context.xml
 
 ENV PATH="{{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/bin:${PATH}"
 

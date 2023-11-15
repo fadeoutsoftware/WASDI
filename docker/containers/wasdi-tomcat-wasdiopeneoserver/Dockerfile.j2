@@ -94,13 +94,20 @@ USER {{ sWasdiSystemUserName }}
 RUN mkdir --parents \
         {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} \
         {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
-    chown {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} && \
-    chmod {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} && \
-    chown {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryGroup }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
-    chmod {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    chown {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryOwner }}:{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryGroup }} \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
+    chmod {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }} \
+        {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatWasdiOpenEoServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} --directory {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
-    rm --force /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }}
+    tar --directory {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} --extract --file /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} --strip-components=1 && \
+    rm --recursive --force \
+      /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} \
+      {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/ROOT \
+      {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/docs \
+      {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryMode }} {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/examples && \
+    sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/webapps/manager/META-INF/context.xml
 
 ENV PATH="{{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }}/bin:${PATH}"
 
