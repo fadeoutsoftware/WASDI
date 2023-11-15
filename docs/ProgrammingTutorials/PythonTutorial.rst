@@ -316,7 +316,7 @@ Next, modify the run method as follows:
    sDate = wasdi.getParameter("DATE")
    sMaxCloud = wasdi.getParameter("MAXCLOUD", "20")
    sSearchDays = wasdi.getParameter("SEARCHDAYS", "10")
-   sProvider = wasdi.getParameter("PROVIDER", "ONDA")
+   sProvider = wasdi.getParameter("PROVIDER", "AUTO")
    # L1
    sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI1C")
    # L2
@@ -702,7 +702,7 @@ Parameters are in this form:
    "MAXCLOUD": "50",
    "DATE": "2020-10-25",
    "SEARCHDAYS": "20",
-   "PROVIDER": "ONDA"
+   "PROVIDER": "AUTO"
    }
    
 
@@ -714,7 +714,7 @@ where:
    - MAXCLOUD is an integer representing the maximum cloud coverage (percent)
    - DATE is a date for the search
    - SEARCHDAYS is the maximum number of days to search in the past, so the search will be performed on the BBOX and in the period [DATE - SEARCHDAYS, DATE], and for images with at most MAXCLOUD% cloud coverage
-   - PROVIDER is the data provider, one in {"ONDA", "CREODIAS", "EODC"}
+   - PROVIDER is the data provider: use "AUTO"
 
 Check your file locally, you're going to use it in a moment. If you wish, you can download it from here: 
 `readme.md <https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorials/advancedPythonTutorial/readme.md>`_
@@ -845,9 +845,9 @@ This is what it should look like in the end (you can copy paste this, if you did
                    "param": "PROVIDER",
                    "type": "dropdown",
                    "label": "Data Provider:",
-                   "default": "ONDA",
+                   "default": "AUTO",
                    "values": [
-                       "ONDA",
+                       "AUTO",
                        "EODC",
                        "SOBLOO",
                        "CREODIAS"

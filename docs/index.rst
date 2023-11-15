@@ -2,6 +2,16 @@
 WASDI : Web Advanced Space Developer Interface
 ==================================================
 
+.. 
+   Available Videos, to be embedded
+   .. youtube:: 6LHIwdyh45U <-> Wasdi | Democratizing EO
+   .. youtube:: NJpZyRh5Hgw <-> Hazard Demo
+   .. youtube:: nA674SwSpxo <-> HASARD Teaser
+   .. youtube:: Ot92qAhJkXs <-> EoExpert Demo
+   .. youtube:: 0xNs9O_x9kE <-> EndUser Demo
+  
+
+   
 WASDI implements a unique, simple and intuitive interface to foster the exploitation of the asset concerning EO data and satellite products, for satisfying requirements of users’ communities and, in particular, experts/researchers in the field of Earth Sciences, managers of services and public administrations (i.e. civil protection decision makers), private companies (i.e. insurance, agricolture).
 
 WASDI allows researchers to gather satellite data, in particular the Sentinel ones, display them on-line, run algorithms, displaying and evaluating the results, and allows to share these projects among different users.
@@ -17,6 +27,8 @@ This :doc:`basic tutorial </WasdiTutorial>`  will help to acquire the main conce
 If you're acquired the basic concepts of WASDI and you're interested in how processors can be launched,  take a look at
 :doc:`this tutorial </SynchAsynch>`. This will highlights Synchronous and Asynchronous WASDI programming.
 
+.. youtube:: 6LHIwdyh45U
+
 
 .. toctree::
    :maxdepth: 2
@@ -26,6 +38,30 @@ If you're acquired the basic concepts of WASDI and you're interested in how proc
    GettingStarted/WasdiTutorial.rst
    GettingStarted/LibsConcepts.rst
 
+
+
+WASDI User Manual
+---------------------------
+WASDI has created a comprehensive user manual to explain and simplify all operations in WASDI. If you require explaination for any concepts in WASDI, please see the corresponding section in the manual. 
+A good starting point to search for and executing applications is the tutorial on the Space Marketplace 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Wasdi User Manual
+
+   UserManual/SigningUpAndSigningIn.rst
+   UserManual/UsingYourWorkspace.rst
+   UserManual/SearchingForProducts.rst
+   UserManual/SubscriptionsAndOrganizations.rst
+   UserManual/Other.rst
+
+   .. UserManual/AppStoreTutorial.rst 
+   .. UserManual/AddAppUIControl.rst
+   .. UserManual/Worksapces.rst
+
+  
+  
 
 WASDI Marketplace
 ---------------------------
@@ -110,4 +146,5 @@ Please, before start using WASDI, check our terms and condition.
    :caption: Legal
 
    Legal/EULA.rst
+   Legal/PrivacyPolicy.rst
 
