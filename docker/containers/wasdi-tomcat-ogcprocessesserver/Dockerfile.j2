@@ -107,7 +107,7 @@ RUN mkdir --parents \
       {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/ROOT \
       {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/docs \
       {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/examples && \
-    sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatOgcProcessesServerRootDirectoryMode }} {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/manager/META-INF/context.xml
+    sed --in-place 's/127\\.\\d+\\.\\d+\\.\\d+/127\\.\\d+\\.\\d+\\.\\d+|{{ sWasdiDockerNetworkRange.split('.')[0] }}\\.{{ sWasdiDockerNetworkRange.split('.')[1] }}\\.\\d+\\.\\d+/g' {{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/webapps/manager/META-INF/context.xml
 
 
 ENV PATH="{{ sWasdiTomcatOgcProcessesServerRootDirectoryPath }}/{{ sWasdiTomcatOgcProcessesServerVersion }}/bin:${PATH}"
