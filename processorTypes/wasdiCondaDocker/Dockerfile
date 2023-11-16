@@ -46,13 +46,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         git \
         gunicorn \
         nano \
-        python3 \
-        python3-flask \
-        python3-gdal \
-        python3-requests \
-        python3-pip \
-        python3-venv \
-        python3-wheel \
         wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
@@ -73,6 +66,9 @@ RUN wget --quiet --output-document=/tmp/miniconda.sh https://repo.anaconda.com/m
     bash /tmp/miniconda.sh -b -p {{ sWasdiSystemUserHome }}/venv && \
     rm --force /tmp/miniconda.sh && \
     conda update --yes --all && \
+    conda install --yes \
+        flask  \
+        gunicorn && \
     conda clean --all --force-pkgs-dirs --yes
 
 

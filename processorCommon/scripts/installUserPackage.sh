@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MAINTAINER: WASDI SARL
-# VERSION: 1.0
+# VERSION: 1.1
 
 
 #### FUNCTION ####
@@ -35,36 +35,36 @@ function showHelp() {
 }
 
 function getNumberOfLine() {
-    local fileToParse="${1}"
+    local sFileToParse="${1}"
     # sed 1: replace line that contains only space by an empty line
     # grep 1: remove empty line
-    echo "$(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | wc -l)"
+    echo "$(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | wc -l)"
     return 0
 }
 
 function getGreatestValue() {
-    local valueList=( "${@}" )
-    local currentValue
-    local valueToReturn=0
+    local aValues=( "${@}" )
+    local sCurrentValue
+    local sValueToReturn=0
 
-    for currentValue in "${valueList[@]}"
+    for sCurrentValue in "${aValues[@]}"
     do
-        if [[ "${currentValue}" -gt ${valueToReturn} ]]
+        if [[ "${sCurrentValue}" -gt ${sValueToReturn} ]]
         then
-            valueToReturn=${currentValue}
+            sValueToReturn=${sCurrentValue}
         fi
     done
 
-    return ${valueToReturn}
+    return ${sValueToReturn}
 }
 
 function installPackageApt() {
-    local fileToParse="${homeDirectory}/packages.txt"
-    local returnCode=0
+    local sFileToParse="${sHomeDirectory}/packages.txt"
+    local iReturnCode=0
 
-    echo "[INFO] Check if the file '${fileToParse}' exists..."
+    echo "[INFO] Check if the file '${sFileToParse}' exists..."
 
-    if [[ -f "${fileToParse}" ]]
+    if [[ -f "${sFileToParse}" ]]
     then
         echo -e "[INFO] The file exists: we continue"
     else
@@ -72,8 +72,8 @@ function installPackageApt() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${fileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${fileToParse}")
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    numberOfLine=$(getNumberOfLine "${sFileToParse}")
 
     if [[ ${numberOfLine} -gt 0 ]]
     then
@@ -84,26 +84,36 @@ function installPackageApt() {
     fi
 
     echo "[INFO] Install package..."
-    apt-get install --assume-yes --no-install-recommends $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
-    returnCode=${?}
+    apt-get install --assume-yes --no-install-recommends $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
+    iReturnCode=${?}
 
-    if [[ ${returnCode} -eq 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
         echo -e "[INFO] OK"
         return 0
     else
         echo -e "[ERROR] Please analyse the installation output"
-        return ${returnCode}
+        return ${iReturnCode}
     fi
+}
+
+function cleanCacheApt() {
+    if [[ -d "/var/lib/apt/lists/" ]]
+    then
+        rm --force --recursive /var/lib/apt/lists/*
+        return ${?}
+    fi
+
+    return 0
 }
 
 function installPackageConda() {
-    local fileToParse="${homeDirectory}/env.yml"
-    local returnCode=0
+    local sFileToParse="${sHomeDirectory}/env.yml"
+    local iReturnCode=0
 
-    echo "[INFO] Check if the file '${fileToParse}' exists..."
+    echo "[INFO] Check if the file '${sFileToParse}' exists..."
 
-    if [[ -f "${fileToParse}" ]]
+    if [[ -f "${sFileToParse}" ]]
     then
         echo -e "[INFO] The file exists: we continue"
     else
@@ -111,8 +121,8 @@ function installPackageConda() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${fileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${fileToParse}")
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    numberOfLine=$(getNumberOfLine "${sFileToParse}")
 
     if [[ ${numberOfLine} -gt 0 ]]
     then
@@ -123,26 +133,31 @@ function installPackageConda() {
     fi
 
     echo "[INFO] Install package..."
-    conda env update --quiet --file ${fileToParse}
-    returnCode=${?}
+    conda env update --quiet --file ${sFileToParse}
+    iReturnCode=${?}
 
-    if [[ ${returnCode} -eq 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
         echo -e "[INFO] OK"
         return 0
     else
         echo -e "[ERROR] Please analyse the installation output"
-        return ${returnCode}
+        return ${iReturnCode}
     fi
 }
 
+function cleanCacheConda() {
+    conda clean --all --force-pkgs-dirs --yes
+    return ${?}
+}
+
 function installPackagePip() {
-    local fileToParse="${homeDirectory}/pip.txt"
-    local returnCode=0
+    local sFileToParse="${sHomeDirectory}/pip.txt"
+    local iReturnCode=0
 
-    echo "[INFO] Check if the file '${fileToParse}' exists..."
+    echo "[INFO] Check if the file '${sFileToParse}' exists..."
 
-    if [[ -f "${fileToParse}" ]]
+    if [[ -f "${sFileToParse}" ]]
     then
         echo -e "[INFO] The file exists: we continue"
     else
@@ -150,8 +165,8 @@ function installPackagePip() {
         return 0
     fi
 
-    echo "[INFO] Check if the file '${fileToParse}' contains something..."
-    numberOfLine=$(getNumberOfLine "${fileToParse}")
+    echo "[INFO] Check if the file '${sFileToParse}' contains something..."
+    numberOfLine=$(getNumberOfLine "${sFileToParse}")
 
     if [[ ${numberOfLine} -gt 0 ]]
     then
@@ -162,17 +177,22 @@ function installPackagePip() {
     fi
 
     echo "[INFO] Install package..."
-    pip3 install --no-cache-dir --no-compile $(cat ${fileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
-    returnCode=${?}
+    pip3 install --no-cache-dir --no-compile $(cat ${sFileToParse} | sed 's/^[ \t]*$//' | grep -vE "^$" | tr "\n" " ")
+    iReturnCode=${?}
 
-    if [[ ${returnCode} -eq 0 ]]
+    if [[ ${iReturnCode} -eq 0 ]]
     then
         echo -e "[INFO] OK"
         return 0
     else
         echo -e "[ERROR] Please analyse the installation output"
-        return ${returnCode}
+        return ${iReturnCode}
     fi
+}
+
+function cleanCachePip() {
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
+    return ${?}
 }
 #### /FUNCTION ####
 
@@ -192,29 +212,29 @@ do
 
             if [[ -n "${1}" ]]
             then
-                homeDirectory="${1}"
+                sHomeDirectory="${1}"
             fi
 
             shift
         ;;
 
         --package-apt)
-            installUserPackageApt="true"
+            sInstallUserPackageApt="true"
             shift
         ;;
 
         --package-conda)
-            installUserPackageConda="true"
+            sInstallUserPackageConda="true"
             shift
         ;;
 
         --package-pip)
-            installUserPackagePip="true"
+            sInstallUserPackagePip="true"
             shift
         ;;
 
         --failure-is-ok)
-            failureIsOk="true"
+            sFailureIsOk="true"
             shift
         ;;
     esac
@@ -225,21 +245,21 @@ done
 
 
 #### CONTROL ####
-if [[ -z "${installUserPackageApt}" && -z "${installUserPackageConda}" && -z "${installUserPackagePip}" ]]
+if [[ -z "${sInstallUserPackageApt}" && -z "${sInstallUserPackageConda}" && -z "${sInstallUserPackagePip}" ]]
 then
     echo "[INFO] You didn't specificy which package to install so we stop now."
     exit 0
 fi
 
-if [[ -z "${homeDirectory}" ]]
+if [[ -z "${sHomeDirectory}" ]]
 then
     echo "[ERROR] Please specify the home directory in which user files are copied."
     errorDetected="true"
 fi
 
-if [[ -n "${homeDirectory}" && ! -d "${homeDirectory}" ]]
+if [[ -n "${sHomeDirectory}" && ! -d "${sHomeDirectory}" ]]
 then
-    echo "[INFO] The directory '${homeDirectory}' doesn't exists."
+    echo "[INFO] The directory '${sHomeDirectory}' doesn't exists."
     errorDetected="true"
 fi
 
@@ -253,54 +273,60 @@ fi
 
 
 #### SCRIPT ####
-if [[ "${installUserPackageApt,,}" == "true" ]]
+if [[ "${sInstallUserPackageApt,,}" == "true" ]]
 then
     echo "==== APT ===="
     installPackageApt
-    returnCodeApt=${?}
+    iReturnCodeInstallPackageApt=${?}
 
-    if [[ "${failureIsOk}" == "true" ]]
+    cleanCacheApt
+
+    if [[ "${sFailureIsOk}" == "true" ]]
     then
-        returnCodeApt=0
+        iReturnCodeInstallPackageApt=0
     fi
 
     echo "==== /APT ===="
 fi
 
-if [[ "${installUserPackageConda,,}" == "true" ]]
+if [[ "${sInstallUserPackageConda,,}" == "true" ]]
 then
     echo "==== CONDA ===="
     installPackageConda
-    returnCodeConda=${?}
+    iReturnCodeInstallPackageConda=${?}
 
-    if [[ "${failureIsOk}" == "true" ]]
+    cleanCacheConda
+
+    if [[ "${sFailureIsOk}" == "true" ]]
     then
-        returnCodeConda=0
+        iReturnCodeInstallPackageConda=0
     fi
 
     echo "==== /CONDA ===="
 fi
 
-if [[ "${installUserPackagePip,,}" == "true" ]]
+if [[ "${sInstallUserPackagePip,,}" == "true" ]]
 then
     echo "==== PIP ===="
     installPackagePip
-    returnCodePip=${?}
+    iReturnCodeInstallPackagePip=${?}
 
-    if [[ "${failureIsOk}" == "true" ]]
+    cleanCachePip
+
+    if [[ "${sFailureIsOk}" == "true" ]]
     then
-        returnCodePip=0
+        iReturnCodeInstallPackagePip=0
     fi
 
     echo "==== /PIP ===="
 fi
 
 
-returnCodeList=(
-    "${returnCodeApt}"
-    "${returnCodeConda}"
-    "${returnCodePip}"
+iReturnCodeList=(
+    "${iReturnCodeInstallPackageApt}"
+    "${iReturnCodeInstallPackageConda}"
+    "${iReturnCodeInstallPackagePip}"
 )
-getGreatestValue "${returnCodeList[@]}"
+getGreatestValue "${iReturnCodeList[@]}"
 exit ${?}
 #### /SCRIPT ####
