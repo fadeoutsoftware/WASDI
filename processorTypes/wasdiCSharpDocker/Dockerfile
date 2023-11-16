@@ -64,7 +64,9 @@ RUN wget --quiet --output-document=/tmp/microsoft-repository.deb https://package
     rm --force /tmp/microsoft-repository.deb && \
     apt-get update && \
     apt-get install \
-        aspnetcore-runtime-8.0
+        aspnetcore-runtime-8.0 && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
