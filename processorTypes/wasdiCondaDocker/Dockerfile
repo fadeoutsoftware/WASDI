@@ -44,7 +44,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         curl \
         gdal-bin \
         git \
-        gunicorn \
         nano \
         wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
