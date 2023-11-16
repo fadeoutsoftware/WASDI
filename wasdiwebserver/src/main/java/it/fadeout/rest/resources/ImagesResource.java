@@ -138,7 +138,7 @@ public class ImagesResource {
 			//if there is a saved logo with a different extension remove it 
 			if(!Utils.isNullOrEmpty(sExtensionOfSavedImage)) {
 				
-				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old logo");
+				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old image");
 				
 			    File oOldImage = new File(sPath.replace(Utils.GetFileNameExtension(sPath), sExtensionOfSavedImage));
 			    
@@ -184,7 +184,7 @@ public class ImagesResource {
 			double dMegabytes = (dKilobytes / 1024);
 			
 			if( dMegabytes > (double) ImageResourceUtils.s_iMAX_IMAGE_MB_SIZE){
-				WasdiLog.debugLog("ImagesResource.uploadImage: image too big, delete it");
+				WasdiLog.warnLog("ImagesResource.uploadImage: image too big, delete it");
 				oOutputImage.delete();
 		    	return Response.status(Status.BAD_REQUEST).build();
 			}
@@ -192,34 +192,44 @@ public class ImagesResource {
 				WasdiLog.debugLog("ImagesResource.uploadImage: Dimension is ok proceed");
 			}
 		    
-		    if (obResize!=null) {
-		    	if (obResize) {
-		    		
-		    		WasdiLog.debugLog("ImagesResource.uploadImage: start resizing");
-		    		
-		    	    boolean bIsResized = oOutputImage.resizeImage(ImageResourceUtils.s_iLOGO_SIZE, ImageResourceUtils.s_iLOGO_SIZE);
-		    	    
-		    	    if(bIsResized == false){
-		    	    	WasdiLog.debugLog("ImagesResource.uploadImage: error in resize");
-		    	    }	    		
-		    	}
-		    }
-		    
-		    WasdiLog.debugLog("ImagesResource.uploadImage: check if we need to create a thumb");
-		    
-		    if (obThumbnail!=null) {
-		    	if (obThumbnail) {
-		    		WasdiLog.debugLog("ImagesResource.uploadImage: create thumb");
-		    		ImageResourceUtils.createThumbOfImage(sPath);
-		    	}
-		    }
+//		    if (obResize!=null) {
+//		    	if (obResize) {
+//		    		
+//		    		WasdiLog.debugLog("ImagesResource.uploadImage: start resizing");
+//		    		
+//		    		try {
+//			    	    boolean bIsResized = oOutputImage.resizeImage(ImageResourceUtils.s_iLOGO_SIZE, ImageResourceUtils.s_iLOGO_SIZE);
+//			    	    
+//			    	    if(bIsResized == false){
+//			    	    	WasdiLog.debugLog("ImagesResource.uploadImage: error in resize");
+//			    	    }	    				    			
+//		    		}
+//		    		catch (Throwable oEx) {
+//		    			WasdiLog.warnLog("ImagesResource.uploadImage: exception in resize " + oEx.toString());
+//		    		}
+//		    	}
+//		    }
+//		    
+//		    WasdiLog.debugLog("ImagesResource.uploadImage: check if we need to create a thumb");
+//		    
+//		    if (obThumbnail!=null) {
+//		    	if (obThumbnail) {
+//		    		WasdiLog.debugLog("ImagesResource.uploadImage: create thumb");
+//		    		try {
+//		    			ImageResourceUtils.createThumbOfImage(sPath);
+//		    		}
+//		    		catch (Throwable oEx) {
+//		    			WasdiLog.warnLog("ImagesResource.uploadImage: exception in thumb " + oEx.toString());
+//		    		}
+//		    	}
+//		    }
 		    
 		    WasdiLog.debugLog("ImagesResource.uploadImage: ok, all done!");
 		    
 			return Response.status(Status.OK).build();
 		}
-		catch (Exception oEx) {
-			WasdiLog.errorLog("ImagesResource.uploadImage: exception ", oEx);
+		catch (Throwable oEx) {
+			WasdiLog.errorLog("ImagesResource.uploadImage: exception " + oEx.toString());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}	
