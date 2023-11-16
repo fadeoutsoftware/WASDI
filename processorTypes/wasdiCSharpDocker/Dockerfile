@@ -59,7 +59,10 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 
 # RUN specific to install the .NET runtime
-RUN apt-get update && \
+RUN wget --quiet --output-document=/tmp/microsoft-repository.deb https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
+    dpkg -i /tmp/microsoft-repository.deb && \
+    rm --force /tmp/microsoft-repository.deb && \
+    apt-get update && \
     apt-get install \
         aspnetcore-runtime-8.0
 
