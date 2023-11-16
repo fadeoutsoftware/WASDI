@@ -65,17 +65,17 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+RUN mkdir --parents \
         {{ sWasdiJre8RootDirectoryPath }} \
         {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
-    chmod {{ sWasdiJreRootDirectoryMode }} {{ sWasdiJreRootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }} && \
-    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
-    chmod {{ sWasdiJre8RootDirectoryMode }} {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chmod {{ sWasdiJre8RootDirectoryMode }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    tar --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --extract --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --strip-components=1 && \
     rm --force /tmp/{{ sWasdiJre8SourceUrl | basename }}
 
 ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"

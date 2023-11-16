@@ -55,17 +55,17 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install the JRE
-RUN mkdir --parents {{ sWasdiJreRootDirectoryPath }} \
+RUN mkdir --parents \
         {{ sWasdiJre17RootDirectoryPath }} \
         {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chown {{ sWasdiJreRootDirectoryOwner }}:{{ sWasdiJreRootDirectoryGroup }} {{ sWasdiJreRootDirectoryPath }} && \
-    chmod {{ sWasdiJreRootDirectoryMode }} {{ sWasdiJreRootDirectoryPath }} && \
-    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} {{ sWasdiJre17RootDirectoryPath }} && \
-    chmod {{ sWasdiJre17RootDirectoryMode }} {{ sWasdiJre17RootDirectoryPath }} && \
-    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chmod {{ sWasdiJre17RootDirectoryMode }} {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    chmod {{ sWasdiJre17RootDirectoryMode }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
     wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre17SourceUrl }} --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} && \
-    tar --extract --strip-components=1 --file /tmp/{{ sWasdiJre17SourceUrl | basename }} --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    tar --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} --extract --file /tmp/{{ sWasdiJre17SourceUrl | basename }} --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} --strip-components=1 && \
     rm --force /tmp/{{ sWasdiJre17SourceUrl | basename }}
 
 ENV JAVA_HOME="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}"

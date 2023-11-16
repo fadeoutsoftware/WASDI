@@ -80,8 +80,22 @@ RUN groupadd --gid {{ sWasdiBackupSystemGroupId }} --non-unique {{ sWasdiBackupS
 USER {{ sWasdiSystemUserName }}
 
 
-# Update the ${PATH} variable to be able to call the PostgreSQL binaries
-ENV PATH="${PATH}:/usr/lib/postgresql/14/bin"
+# RUN specific to install the JDK
+RUN mkdir --parents \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chown {{ sWasdiJdk17RootDirectoryOwner }}:{{ sWasdiJdk17RootDirectoryGroup }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    chmod {{ sWasdiJdk17RootDirectoryMode }} \
+        {{ sWasdiJdk17RootDirectoryPath }} \
+        {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJdk17SourceUrl }} --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} && \
+    tar --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} --extract --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} --strip-components=1 && \
+    rm --force /tmp/{{ sWasdiJdk17SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}"
+ENV PATH="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin:${PATH}"
 
 
 # RUN specific to install all elements related to the toolbox
