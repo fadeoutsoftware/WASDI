@@ -18,12 +18,14 @@ ENV PYTHONDONTWRITEBYTECODE="False"
 ENV PYTHONUNBUFFERED="True"
 
 # This variable is setted to use binaries from our virtual environment
-ENV PATH="{{ sWasdiSystemUserHome }}/venv/bin:${PATH}"
+ENV PATH="/home/wasdi/venv/bin:${PATH}"
 
 
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
-    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }}
+    useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
+    mkdir --parent /home/wasdi && \
+    chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} {{ sWasdiSystemGroupName }}
 
 
 # RUN generic to update the system and install common packages
@@ -65,31 +67,31 @@ USER {{ sWasdiSystemUserName }}
 # Create the virtual environment
 # Install the common PIP libraries
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/venv && \
-    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
+        /home/wasdi/venv && \
+    python3 -m venv --system-site-packages /home/wasdi/venv && \
     pip3 install --no-cache-dir --no-compile \
         numpy \
         wasdi
 
 
-# Set the workdir to {{ sWasdiSystemUserHome }}
-WORKDIR {{ sWasdiSystemUserHome }}
+# Set the workdir to /home/wasdi
+WORKDIR /home/wasdi
 
 
 # Copy the needed files
-COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/
+COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ /home/wasdi/
 
 
-# Install libraries only if {{ sWasdiSystemUserHome }}/pip.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }} --package-pip
+# Install libraries only if /home/wasdi/pip.txt exists
+RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-pip
 
 
 # From now, all commands executed are executed with the user 'root'
 USER root
 
 
-# Install packages only if {{ sWasdiSystemUserHome }}/packages.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }} --package-apt
+# Install packages only if /home/wasdi/packages.txt exists
+RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-apt
 
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
@@ -98,7 +100,7 @@ USER {{ sWasdiSystemUserName }}
 
 # Start the container
 CMD [ \
-    "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
+    "/home/wasdi/venv/bin/python3", \
     "/usr/bin/gunicorn", \
     "--workers", \
     "1", \
