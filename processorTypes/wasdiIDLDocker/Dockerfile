@@ -45,8 +45,6 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         gdal-bin \
         git \
         gunicorn \
-        libxpm4 \
-        libxmu6 \
         nano \
         python3 \
         python3-flask \
@@ -60,17 +58,24 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 
 # Specific for IDL:
+# - install additional packages
 # - create directories
 # - extract the archive in a temporary directory
 # - install the license server
 # - clean temporary files
-RUN mkdir --parents \
+RUN apt-get update && \
+    apt-get install \
+        libxpm4 \
+        libxmu6 && \
+mkdir --parents \
         /.idl \
         /tmp/install && \
     chown {{ sWasdiSystemUserName }}:{{ sWasdiSystemGroupName }} \
         /.idl && \
     chmod 750 \
-        /.idl
+        /.idl && \
+    rm --recursive --force /var/lib/apt/lists/* && \
+    find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 ADD envi552-linux.tar /tmp/install/
 
@@ -92,21 +97,25 @@ USER {{ sWasdiSystemUserName }}
 # Create the virtual environment
 RUN mkdir --parents \
         {{ sWasdiSystemUserHome }}/application \
-        {{ sWasdiSystemUserHome }}/venv && \
-    python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
-    pip3 install --no-cache-dir --no-compile wasdi
+        {{ sWasdiSystemUserHome }}/venv
 
 
 # Set the workdir to {{ sWasdiSystemUserHome }}/application
 WORKDIR {{ sWasdiSystemUserHome }}/application
 
 
-# Overwrite install script with the one which is close to the Dockerfile
+## FROM HERE, THERE IS NO MORE CACHE ##
+# Copy the needed files
 COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
 
 
+# Install the common PIP libraries
+RUN pip3 install --no-cache-dir --no-compile \
+    wasdi
+
+
 # Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
-#RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
+# RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
 
 
 # From now, all commands executed are executed with the user 'root'
@@ -122,4 +131,7 @@ USER {{ sWasdiSystemUserName }}
 
 
 # Start the container
-CMD ["/bin/bash", "{{ sWasdiSystemUserHome }}/application/docker-entrypoint.sh"]
+CMD [ \
+    "/bin/bash", \
+    "{{ sWasdiSystemUserHome }}/application/docker-entrypoint.sh" \
+]
