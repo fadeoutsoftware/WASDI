@@ -52,7 +52,8 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         python3-requests \
         python3-pip \
         python3-venv \
-        python3-wheel && \
+        python3-wheel \
+        wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -64,8 +65,7 @@ USER {{ sWasdiSystemUserName }}
 # Create the application directory
 # Create the virtual environment
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application \
-        {{ sWasdiSystemUserHome }}/venv
+        {{ sWasdiSystemUserHome }}/application
 
 
 # Install miniconda

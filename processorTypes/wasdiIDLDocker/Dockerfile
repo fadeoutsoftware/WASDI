@@ -52,7 +52,8 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         python3-requests \
         python3-pip \
         python3-venv \
-        python3-wheel && \
+        python3-wheel \
+        wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -96,8 +97,7 @@ USER {{ sWasdiSystemUserName }}
 # Create the application directory
 # Create the virtual environment
 RUN mkdir --parents \
-        {{ sWasdiSystemUserHome }}/application \
-        {{ sWasdiSystemUserHome }}/venv
+        {{ sWasdiSystemUserHome }}/application
 
 
 # Set the workdir to {{ sWasdiSystemUserHome }}/application
@@ -109,9 +109,11 @@ WORKDIR {{ sWasdiSystemUserHome }}/application
 COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
 
 
+# Create the virtual environment
 # Install the common PIP libraries
-RUN pip3 install --no-cache-dir --no-compile \
-    wasdi
+RUN python3 -m venv --system-site-packages {{ sWasdiSystemUserHome }}/venv && \
+    pip3 install --no-cache-dir --no-compile \
+        wasdi
 
 
 # Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists

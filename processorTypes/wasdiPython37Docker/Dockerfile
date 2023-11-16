@@ -54,7 +54,8 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
         python3-requests \
         python3-pip \
         python3-venv \
-        python3-wheel && \
+        python3-wheel \
+        wget && \
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
@@ -63,23 +64,21 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 USER {{ sWasdiSystemUserName }}
 
 
-# Create the application directory
-# Create the virtual environment
-# Install the common PIP libraries
-RUN mkdir --parents \
-        /home/wasdi/venv && \
-    python3 -m venv --system-site-packages /home/wasdi/venv && \
-    pip3 install --no-cache-dir --no-compile \
-        numpy \
-        wasdi
-
-
 # Set the workdir to /home/wasdi
 WORKDIR /home/wasdi
 
 
+## FROM HERE, THERE IS NO MORE CACHE ##
 # Copy the needed files
 COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ /home/wasdi/
+
+
+# Create the virtual environment
+# Install the common PIP libraries
+RUN python3 -m venv --system-site-packages /home/wasdi/venv && \
+    pip3 install --no-cache-dir --no-compile \
+        numpy \
+        wasdi
 
 
 # Install libraries only if /home/wasdi/pip.txt exists
