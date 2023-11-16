@@ -138,6 +138,8 @@ public class ImagesResource {
 			//if there is a saved logo with a different extension remove it 
 			if(!Utils.isNullOrEmpty(sExtensionOfSavedImage)) {
 				
+				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old logo");
+				
 			    File oOldImage = new File(sPath.replace(Utils.GetFileNameExtension(sPath), sExtensionOfSavedImage));
 			    
 			    if (oOldImage.exists()) {
@@ -148,23 +150,33 @@ public class ImagesResource {
 			    	WasdiLog.debugLog("ImagesResource.uploadImage: can't delete old image");
 			   	}
 			}
-		    	    
+			else {
+				WasdiLog.debugLog("ImagesResource.uploadImage: no old logo present");
+			}
+		    	   
 		    File oTouchFile = new File(sPath);
 		    
 		    try {
 				if (!oTouchFile.createNewFile()) {
 					WasdiLog.debugLog("ImagesResource.uploadImage: can't create new file");
 				}
+				else {
+					WasdiLog.debugLog("ImagesResource.uploadImage: created new empty file in path");
+				}
 			} catch (IOException e) {
 				WasdiLog.errorLog("ImagesResource.uploadImage: " + e.toString());
 			}	    
 		    
 		    ImageFile oOutputImage = new ImageFile(sPath);
+		    WasdiLog.debugLog("ImagesResource.uploadImage: created Image, saving");
 		    boolean bIsSaved =  oOutputImage.saveImage(oInputFileStream);
 		    
 		    if(bIsSaved == false){
 		    	WasdiLog.warnLog("ImagesResource.uploadImage:  not saved!");
 		    	return Response.status(Status.BAD_REQUEST).build();
+		    }
+		    else {
+		    	WasdiLog.debugLog("ImagesResource.uploadImage: Image saved");
 		    }
 		    
 			double dBytes = (double) oOutputImage.length();
@@ -176,9 +188,15 @@ public class ImagesResource {
 				oOutputImage.delete();
 		    	return Response.status(Status.BAD_REQUEST).build();
 			}
+			else {
+				WasdiLog.debugLog("ImagesResource.uploadImage: Dimension is ok proceed");
+			}
 		    
 		    if (obResize!=null) {
 		    	if (obResize) {
+		    		
+		    		WasdiLog.debugLog("ImagesResource.uploadImage: start resizing");
+		    		
 		    	    boolean bIsResized = oOutputImage.resizeImage(ImageResourceUtils.s_iLOGO_SIZE, ImageResourceUtils.s_iLOGO_SIZE);
 		    	    
 		    	    if(bIsResized == false){
@@ -187,16 +205,21 @@ public class ImagesResource {
 		    	}
 		    }
 		    
+		    WasdiLog.debugLog("ImagesResource.uploadImage: check if we need to create a thumb");
+		    
 		    if (obThumbnail!=null) {
 		    	if (obThumbnail) {
+		    		WasdiLog.debugLog("ImagesResource.uploadImage: create thumb");
 		    		ImageResourceUtils.createThumbOfImage(sPath);
 		    	}
 		    }
 		    
+		    WasdiLog.debugLog("ImagesResource.uploadImage: ok, all done!");
+		    
 			return Response.status(Status.OK).build();
 		}
 		catch (Exception oEx) {
-			WasdiLog.errorLog("ImagesResource.uploadImage: exception " + oEx.toString());
+			WasdiLog.errorLog("ImagesResource.uploadImage: exception ", oEx);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}	
