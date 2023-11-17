@@ -9,15 +9,12 @@ import urllib.parse
 import re
 import subprocess
 import traceback
-from distutils.dir_util import copy_tree
-from os.path import sys
 
 app = Flask(__name__)
 
-
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
-	print("[" + processId + "] wasdiProcessorServer Started - ProcId = " + processId)
+	print("[" + processId + "] wasdiProcessorServer Started v.2.1.2 - Started - ProcId = " + processId)
 
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -46,8 +43,6 @@ def run(processId):
 		return jsonify({'kill': '1'})
 
 	print("[" + processId + "] wasdiProcessorServer run request")
-
-	# This is not a help request but a run request.
 
 	# Copy request json in the parameters array
 	parameters = request.json

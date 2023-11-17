@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
-	print("wasdiProcessorServer Started v.2.1.1 - ProcId = " + processId, flush=True)
+	print("wasdiProcessorServer Started v.2.1.2 - ProcId = " + processId, flush=True)
 
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))
