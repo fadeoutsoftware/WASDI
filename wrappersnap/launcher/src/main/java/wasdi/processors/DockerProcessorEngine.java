@@ -984,11 +984,11 @@ public abstract class DockerProcessorEngine extends WasdiProcessorEngine {
 
 	        for (int i = 0; i < iNumberOfAttemptsToPingTheServer; i++) {
 	        	
-	        	Thread.sleep(iMillisBetweenAttmpts);
-	        	
 	        	if (isDockerServerUp(oParameter)) {
 	        		return;
 	        	}
+	        	
+	        	Thread.sleep(iMillisBetweenAttmpts);
 	        }
 	        
 	        WasdiLog.debugLog("DockerProcessorEngine.waitForApplicationToStart: attemps finished.. probably did not started!");
