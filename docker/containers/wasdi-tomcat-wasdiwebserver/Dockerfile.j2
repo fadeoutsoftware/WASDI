@@ -112,8 +112,17 @@ RUN mkdir --parents \
     chmod {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} \
         {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }} \
         {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiTomcatWasdiWebServerSourceUrl }} --output-document /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} && \
-    tar --directory {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} --extract --file /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} --strip-components=1 && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiTomcatWasdiWebServerSourceUrl }} && \
+    tar \
+        --directory {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }} \
+        --extract \
+        --file /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} \
+        --strip-components=1 && \
     rm --recursive --force \
       /tmp/{{ sWasdiTomcatWasdiWebServerSourceUrl | basename }} \
       {{ sWasdiTomcatWasdiWebServerRootDirectoryMode }} {{ sWasdiTomcatWasdiWebServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiWebServerVersion }}/webapps/ROOT \

@@ -114,14 +114,14 @@ RUN mkdir --parents \
         {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} && \
     wget \
         --no-verbose \
-        --output-document /tmp/{{ sWasdiTomcatOpenEoServerSourceUrl | basename }} \
+        --output-document /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} \
         --progress=bar:force:noscroll \
         --show-progress \
-        {{ sWasdiTomcatOpenEoServerSourceUrl }} && \
+        {{ sWasdiTomcatWasdiOpenEoServerSourceUrl }} && \
     tar \
-        --directory {{ sWasdiTomcatOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatOpenEoServerVersion }} \
+        --directory {{ sWasdiTomcatWasdiOpenEoServerRootDirectoryPath }}/{{ sWasdiTomcatWasdiOpenEoServerVersion }} \
         --extract \
-        --file /tmp/{{ sWasdiTomcatOpenEoServerSourceUrl | basename }} \
+        --file /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} \
         --strip-components=1 && \
     rm --recursive --force \
       /tmp/{{ sWasdiTomcatWasdiOpenEoServerSourceUrl | basename }} \
