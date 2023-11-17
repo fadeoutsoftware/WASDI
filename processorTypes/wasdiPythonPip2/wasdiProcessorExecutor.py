@@ -15,7 +15,7 @@ import traceback
 m_sProcId = ""
 
 def log(sLogString):
-	print("[" + m_sProcId + "] executeProcessor PIP2 Engine v.2.1.2 - " + sLogString)
+	print("[" + m_sProcId + "] wasdiProcessorExecutor PIP2 Engine v.2.1.3 - " + sLogString)
 
 def executeProcessor(parameters, processId):
     global m_sProcId
@@ -53,7 +53,7 @@ def executeProcessor(parameters, processId):
     #Try to get the workspace id
     try:
         sWorkspaceId = parameters['workspaceid']
-        wasdi.openWorkspaceById(sWorkspaceId)
+        wasdi.setActiveWorkspaceId(sWorkspaceId)
         log("Workspace Id available in params " + sWorkspaceId)
     except:
         log("Workspace Id not available in parameters.")
@@ -73,8 +73,10 @@ def executeProcessor(parameters, processId):
     wasdi.setDownloadActive(False)
     
     if not wasdi.init():
-        log("wasdi.executeProcessor: init FAILED")
-        
+        log("init FAILED")
+
+    wasdi.openWorkspaceById(sWorkspaceId)
+
     sForceStatus = 'ERROR'
     
     wasdi.setProcId(processId)
