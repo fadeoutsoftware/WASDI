@@ -21,9 +21,12 @@ ENV PYTHONUNBUFFERED="True"
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -51,9 +54,12 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
 
 
 # RUN specific to install Telegraf
-RUN mkdir /etc/telegraf && \
-    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} /etc/telegraf && \
-    chmod {{ sWasdiTelegrafRootDirectoryMode }} /etc/telegraf
+RUN mkdir \
+        /etc/telegraf && \
+    chown {{ sWasdiTelegrafRootDirectoryOwner }}:{{ sWasdiTelegrafRootDirectoryGroup }} \
+        /etc/telegraf && \
+    chmod {{ sWasdiTelegrafRootDirectoryMode }} \
+        /etc/telegraf
 
 
 # From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
@@ -70,8 +76,14 @@ RUN mkdir --parents \
     chmod {{ sWasdiTelegrafRootDirectoryMode }} \
         {{ sWasdiTelegrafRootDirectoryPath }} \
         {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} && \
-    wget --directory-prefix=/tmp {{ sWasdiTelegrafSourceUrl }} && \
-    tar --directory {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} --extract --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} --strip-components=2 && \
+    wget \
+        --directory-prefix=/tmp \
+        {{ sWasdiTelegrafSourceUrl }} && \
+    tar \
+        --directory {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }} \
+        --extract \
+        --file /tmp/{{ sWasdiTelegrafSourceUrl | basename }} \
+        --strip-components=2 && \
     rm --recursive --force \
         {{ sWasdiTelegrafRootDirectoryPath }}/{{ sWasdiTelegrafVersion }}/etc \
         /tmp/{{ sWasdiTelegrafSourceUrl | basename }}

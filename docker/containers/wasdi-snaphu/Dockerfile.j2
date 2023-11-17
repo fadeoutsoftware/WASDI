@@ -21,9 +21,12 @@ ENV PYTHONUNBUFFERED="True"
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -55,11 +58,21 @@ USER {{ sWasdiSystemUserName }}
 
 
 # RUN specific to install Snaphu
-RUN mkdir --parents {{ sWasdiSnaphuRootDirectoryPath }} && \
-    chown {{ sWasdiSnaphuRootDirectoryOwner }}:{{ sWasdiSnaphuRootDirectoryGroup }} {{ sWasdiSnaphuRootDirectoryPath }} && \
-    chmod {{ sWasdiSnaphuRootDirectoryMode }} {{ sWasdiSnaphuRootDirectoryPath }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiSnaphuSourceUrl }} --output-document=/tmp/{{ sWasdiSnaphuSourceUrl | basename }} && \
-    unzip /tmp/{{ sWasdiSnaphuSourceUrl | basename }} -d {{ sWasdiSnaphuRootDirectoryPath }}/ && \
+RUN mkdir --parents \
+    {{ sWasdiSnaphuRootDirectoryPath }} && \
+    chown {{ sWasdiSnaphuRootDirectoryOwner }}:{{ sWasdiSnaphuRootDirectoryGroup }} \
+        {{ sWasdiSnaphuRootDirectoryPath }} && \
+    chmod {{ sWasdiSnaphuRootDirectoryMode }} \
+        {{ sWasdiSnaphuRootDirectoryPath }} && \
+    wget \
+        --no-verbose \
+        --output-document=/tmp/{{ sWasdiSnaphuSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiSnaphuSourceUrl }} && \
+    unzip \
+        /tmp/{{ sWasdiSnaphuSourceUrl | basename }} \
+        -d {{ sWasdiSnaphuRootDirectoryPath }}/ && \
     mv {{ sWasdiSnaphuRootDirectoryPath }}/snaphu-v{{ sWasdiSnaphuVersion }}_linux {{ sWasdiSnaphuRootDirectoryPath }}/{{ sWasdiSnaphuVersion }} && \
     rm --force /tmp/{{ sWasdiSnaphuSourceUrl | basename }}
 

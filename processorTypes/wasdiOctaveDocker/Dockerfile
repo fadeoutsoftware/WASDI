@@ -58,11 +58,28 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
+# RUN specific to install the JRE
+RUN mkdir --parents \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chown {{ sWasdiJre8RootDirectoryOwner }}:{{ sWasdiJre8RootDirectoryGroup }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    chmod {{ sWasdiJre8RootDirectoryMode }} \
+        {{ sWasdiJre8RootDirectoryPath }} \
+        {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} && \
+    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre8SourceUrl }} --output-document /tmp/{{ sWasdiJre8SourceUrl | basename }} && \
+    tar --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --extract --file /tmp/{{ sWasdiJre8SourceUrl | basename }} --directory {{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }} --strip-components=1 && \
+    rm --force /tmp/{{ sWasdiJre8SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}"
+ENV PATH="{{ sWasdiJre8RootDirectoryPath }}/{{ sWasdiJre8Version }}/bin:${PATH}"
+
+
 # RUN specific to install Octave
 RUN apt-get update && \
     apt-get install \
-        octave-* \
-        openjdk-8-jre && \
+        octave-*
     rm --recursive --force /var/lib/apt/lists/* && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 

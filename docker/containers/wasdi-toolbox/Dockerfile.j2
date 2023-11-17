@@ -21,9 +21,12 @@ ENV PYTHONUNBUFFERED="True"
 # RUN generic to create user, group, directories, etc
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
-    mkdir --parents {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} {{ sWasdiSoftwareRootDirectoryPath }} && \
-    chmod {{ sWasdiSoftwareRootDirectoryMode }} {{ sWasdiSoftwareRootDirectoryPath }}
+    mkdir --parents \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -80,7 +83,7 @@ RUN groupadd --gid {{ sWasdiBackupSystemGroupId }} --non-unique {{ sWasdiBackupS
 USER {{ sWasdiSystemUserName }}
 
 
-# RUN specific to install the JDK
+# RUN specific to install JDK 17
 RUN mkdir --parents \
         {{ sWasdiJdk17RootDirectoryPath }} \
         {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
@@ -90,9 +93,19 @@ RUN mkdir --parents \
     chmod {{ sWasdiJdk17RootDirectoryMode }} \
         {{ sWasdiJdk17RootDirectoryPath }} \
         {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJdk17SourceUrl }} --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} && \
-    tar --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} --extract --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} --strip-components=1 && \
-    rm --force /tmp/{{ sWasdiJdk17SourceUrl | basename }}
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJdk17SourceUrl }} --output-document /tmp/{{ sWasdiJdk17SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJdk17SourceUrl | basename }} \
+        --strip-components=1 && \
+    rm --force \
+        /tmp/{{ sWasdiJdk17SourceUrl | basename }}
 
 ENV JAVA_HOME="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}"
 ENV PATH="{{ sWasdiJdk17RootDirectoryPath }}/{{ sWasdiJdk17Version }}/bin:${PATH}"

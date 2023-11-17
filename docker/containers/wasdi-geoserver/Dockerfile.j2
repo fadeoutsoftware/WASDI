@@ -22,14 +22,11 @@ ENV PYTHONUNBUFFERED="True"
 RUN groupadd --gid {{ sWasdiSystemGroupId }} --non-unique {{ sWasdiSystemGroupName }} && \
     useradd --create-home --home-dir {{ sWasdiSystemUserHome }} --uid {{ sWasdiSystemUserId }} --gid {{ sWasdiSystemGroupId }} --non-unique --shell /bin/bash {{ sWasdiSystemUserName }} && \
     mkdir --parents \
-      {{ sWasdiSoftwareRootDirectoryPath }} \
-      /data && \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
     chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
-      {{ sWasdiSoftwareRootDirectoryPath }} \
-      /data && \
+        {{ sWasdiSoftwareRootDirectoryPath }} && \
     chmod {{ sWasdiSoftwareRootDirectoryMode }} \
-      {{ sWasdiSoftwareRootDirectoryPath }} \
-      /data
+        {{ sWasdiSoftwareRootDirectoryPath }}
 
 
 # RUN generic to update the system and install common packages
@@ -56,34 +53,14 @@ RUN echo "APT::Install-Suggests \"0\";" > /etc/apt/apt.conf.d/99local && \
     find / -xdev -type d -name __pycache__ -exec rm --recursive --force {} +
 
 
-# From now, all commands executed are executed with the user '{{ sWasdiSystemUserName }}'
-USER {{ sWasdiSystemUserName }}
-
-
-# RUN specific to install the JRE
-RUN mkdir --parents \
-        {{ sWasdiJre17RootDirectoryPath }} \
-        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} \
-        {{ sWasdiJre17RootDirectoryPath }} \
-        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    chmod {{ sWasdiJre17RootDirectoryMode }} \
-        {{ sWasdiJre17RootDirectoryPath }} \
-        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiJre17SourceUrl }} --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} && \
-    tar --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} --extract --file /tmp/{{ sWasdiJre17SourceUrl | basename }} --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} --strip-components=1 && \
-    rm --force /tmp/{{ sWasdiJre17SourceUrl | basename }}
-
-ENV JAVA_HOME="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}"
-ENV PATH="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}/bin:${PATH}"
-
-
-# From now, all commands executed are executed with the user 'root'
-USER root
-
-
 # RUN specific to install Geoserver
-RUN apt-get update && \
+RUN mkdir --parents \
+      /data && \
+    chown {{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} \
+      /data && \
+    chmod {{ sWasdiSoftwareRootDirectoryMode }} \
+      /data && \
+    apt-get update && \
     apt-get install \
         fontconfig \
         libfreetype6 && \
@@ -95,25 +72,67 @@ RUN apt-get update && \
 USER {{ sWasdiSystemUserName }}
 
 
+# RUN specific to install JRE 17
+RUN mkdir --parents \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    chown {{ sWasdiJre17RootDirectoryOwner }}:{{ sWasdiJre17RootDirectoryGroup }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    chmod {{ sWasdiJre17RootDirectoryMode }} \
+        {{ sWasdiJre17RootDirectoryPath }} \
+        {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiJre17SourceUrl }} --output-document /tmp/{{ sWasdiJre17SourceUrl | basename }} && \
+    tar \
+        --directory {{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }} \
+        --extract \
+        --file /tmp/{{ sWasdiJre17SourceUrl | basename }} \
+        --strip-components=1 && \
+    rm --force \
+        /tmp/{{ sWasdiJre17SourceUrl | basename }}
+
+ENV JAVA_HOME="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}"
+ENV PATH="{{ sWasdiJre17RootDirectoryPath }}/{{ sWasdiJre17Version }}/bin:${PATH}"
+
+
 # RUN specific to install Geoserver
-RUN mkdir --parents {{ sWasdiGeoserverRootDirectoryPath }} \
+RUN mkdir --parents \
         {{ sWasdiGeoserverRootDirectoryPath }} \
         {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} \
         {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01 \
         /tmp/geoserverPlugin && \
-    chown {{ sWasdiGeoserverRootDirectoryOwner }}:{{ sWasdiGeoserverRootDirectoryGroup }} {{ sWasdiGeoserverRootDirectoryPath }} && \
-    chmod {{ sWasdiGeoserverRootDirectoryMode }} {{ sWasdiGeoserverRootDirectoryPath }} && \
-    chown {{ sWasdiGeoserverRootDirectoryOwner }}:{{ sWasdiGeoserverRootDirectoryGroup }} {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} && \
-    chmod {{ sWasdiGeoserverRootDirectoryMode }} {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiGeoserverSourceUrl }} --output-document /tmp/{{ sWasdiGeoserverSourceUrl | basename }} && \
-    unzip /tmp/{{ sWasdiGeoserverSourceUrl | basename }} -d {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} && \
-    rm --force /tmp/{{ sWasdiGeoserverSourceUrl | basename }} && \
-    wget --no-verbose --show-progress --progress=bar:force:noscroll {{ sWasdiGeoserverPluginImagePyramidSourceUrl }} --output-document /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
-    unzip /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} -d /tmp/geoserverPlugin && \
+    chmod {{ sWasdiGeoserverRootDirectoryMode }} \
+        {{ sWasdiGeoserverRootDirectoryPath }} \
+        {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiGeoserverSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiGeoserverSourceUrl }} && \
+    wget \
+        --no-verbose \
+        --output-document /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} \
+        --progress=bar:force:noscroll \
+        --show-progress \
+        {{ sWasdiGeoserverPluginImagePyramidSourceUrl }} && \
+    unzip \
+        /tmp/{{ sWasdiGeoserverSourceUrl | basename }} \
+        -d {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }} && \
+    unzip \
+        /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} \
+        -d /tmp/geoserverPlugin && \
     mv /tmp/geoserverPlugin/*.jar {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/. && \
-    rm --force {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/marlin-0.9.3.jar && \
-    rm --force /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} && \
-    rm --recursive --force /tmp/geoserverPlugin
+    rm --recursive --force \
+        {{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/webapps/geoserver/WEB-INF/lib/marlin-0.9.3.jar \
+        /tmp/{{ sWasdiGeoserverSourceUrl | basename }} \
+        /tmp/{{ sWasdiGeoserverPluginImagePyramidSourceUrl | basename }} \
+        /tmp/geoserverPlugin
 
 ENV PATH="{{ sWasdiGeoserverRootDirectoryPath }}/{{ sWasdiGeoserverVersion }}/bin:${PATH}"
 
