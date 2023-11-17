@@ -30,6 +30,10 @@ public class DockerRegistryConfig {
 	 * http address of the API of the register
 	 */
 	public String apiAddress;
+	/**
+	 * Name of the repository inside the Registry
+	 */
+	public String repositoryName="wasdi-docker";
 	
 	public int getPriority() {
 		return priority;

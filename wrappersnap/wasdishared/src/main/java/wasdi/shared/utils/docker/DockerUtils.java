@@ -1555,7 +1555,7 @@ public class DockerUtils {
     		String sUrl = oRegistry.apiAddress;
     		if (!sUrl.endsWith("/")) sUrl += "/";
     		
-    		sUrl += "repository/docker-wasdi-processor/v2/";
+    		sUrl += "repository/"  +  oRegistry.repositoryName + "/v2/";
     		sUrl += sImageName;
     		sUrl += "/manifests/" + sVersion;
     		
@@ -1583,7 +1583,7 @@ public class DockerUtils {
         		
         		if (!sUrl.endsWith("/")) sUrl += "/";
         		
-        		sUrl += "repository/docker-wasdi-processor/v2/";
+        		sUrl += "repository/"+  oRegistry.repositoryName +"/v2/";
         		sUrl += sImageName;
         		sUrl += "/manifests/" + sDigest;
         		
