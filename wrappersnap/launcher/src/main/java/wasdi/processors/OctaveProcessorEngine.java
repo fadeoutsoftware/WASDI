@@ -13,7 +13,7 @@ import wasdi.shared.packagemanagers.IPackageManager;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.log.WasdiLog;
 
-public class OctaveProcessorEngine extends DockerProcessorEngine {
+public class OctaveProcessorEngine extends DockerBuildOnceEngine {
 	
 	public OctaveProcessorEngine() {
 		super();

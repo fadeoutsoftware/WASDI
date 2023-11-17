@@ -23,7 +23,7 @@ import wasdi.shared.utils.log.WasdiLog;
  * @author p.campanella
  *
  */
-public class CondaProcessorEngine extends DockerProcessorEngine {
+public class CondaProcessorEngine extends DockerBuildOnceEngine {
 	
 	public CondaProcessorEngine() {
 		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
