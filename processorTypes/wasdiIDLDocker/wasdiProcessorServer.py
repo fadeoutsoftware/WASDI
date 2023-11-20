@@ -13,9 +13,18 @@ from os.path import sys
 
 app = Flask(__name__)
 
+
+m_sProcId = ""
+
+def log(sLogString):
+	print("[" + m_sProcId + "] wasdiProcessorServer IDL Engine v.2.1.2 - " + sLogString, flush=True)
+
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
-	print("wasdiProcessorServer Started v.2.1.2 - ProcId = " + processId, flush=True)
+	global m_sProcId
+	m_sProcId = processId
+
+	log("Started")
 
 	# First of all be sure to be in the right path
 	dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -30,20 +39,20 @@ def run(processId):
 			asKillParts = processId.split("_")
 
 			#TODO safety check
-			print("[" + processId+ "] Killing subprocess", flush=True)
+			log("Killing subprocess")
 			oProcess = subprocess.Popen(["kill", "-9", asKillParts[1]])
-			print("[" + processId+ "] Subprocess killed", flush=True)
+			log("Subprocess killed")
 		except Exception as oEx:
-			print("[" + processId+ "] wasdi.executeProcessor EXCEPTION", flush=True)
-			print("[" + processId+ "] " + repr(oEx), flush=True)
-			print("[" + processId+ "] " + traceback.format_exc(), flush=True)
+			log(" EXCEPTION")
+			log(" " + repr(oEx))
+			log(" " + traceback.format_exc())
 		except:
-			print("[" + processId+ "] wasdi.executeProcessor generic EXCEPTION", flush=True)
+			log("[" + processId+ "] generic EXCEPTION")
 
 		# Return the result of the update
 		return jsonify({'kill': '1'})
 
-	print("[" + processId+ "] wasdiProcessorServer run request", flush=True)
+	log("Run request")
 
 	# This is not a help request but a run request.
 	# Copy request json in the parameters array
@@ -53,52 +62,52 @@ def run(processId):
 	try:
 		sUser = request.args.get('user')
 		wasdi.setUser(sUser)
-		print("[" + processId+ "] wasdiProcessorServer User available in params. Got " + sUser, flush=True)
+		log("User available in params. Got " + sUser)
 	except:
-		print("[" + processId+ "] wasdiProcessorServer user not available in parameters.", flush=True)
+		log("User not available in parameters.")
 
 	#Try to get the session id
 	try:
 		sSessionId = request.args.get('sessionid')
 		wasdi.setSessionId(sSessionId)
-		print("[" + processId+ "] wasdiProcessorServer Session available in params " + sSessionId, flush=True)
+		log("Session available in params " + sSessionId)
 	except:
-		print("[" + processId+ "] wasdiProcessorServer Session not available in parameters.", flush=True)
+		log("Session not available in parameters.")
 
 	#Try to set the proc id
 	try:
 		wasdi.setProcId(processId)
-		print("[" + processId+ "] wasdiProcessorServer set Proc Id " + processId, flush=True)
+		log("set Proc Id " + processId)
 	except:
-		print("[" + processId+ "] wasdiProcessorServer Proc Id not available", flush=True)
+		log("Proc Id not available")
 
 	#Try to get the workspace id
 	sWorkspaceId = ""
 	try:
 		sWorkspaceId = request.args.get('workspaceid')
 		wasdi.setActiveWorkspaceId(sWorkspaceId)
-		print("[" + processId + "] wasdiProcessorServer got Workspace Id " + sWorkspaceId, flush=True)
+		log("got Workspace Id " + sWorkspaceId)
 	except:
-		print("[" + processId+ "] wasdiProcessorServer Workspace Id not available in parameters.", flush=True)
+		log("Workspace Id not available in parameters.")
 
 
 	#Init Wasdi
-	print("[" + processId+ "] wasdiProcessorServer: init waspy lib", flush=True)
+	log("init waspy lib")
 	wasdi.setIsOnServer(True)
 	wasdi.setDownloadActive(False)
 
 	if not wasdi.init():
-		print("[" + processId+ "] wasdiProcessorServer: init FAILED", flush=True)
+		log("init FAILED")
 		return jsonify({'processId': 'ERROR', 'processorEngineVersion':'2'})
 
-	print("[" + processId + "] wasdiProcessorServer: opening workspace", flush=True)
+	log("opening workspace")
 	wasdi.openWorkspaceById(sWorkspaceId)
 	#Run the processor
 	try:
 		sConfigFilePath = sLocalPath + '/' + processId + '.config'
 		sParamFilePath = sLocalPath +  '/' + processId + '.params'
 
-		print("[" + processId + "] wasdiProcessorServer: creating the config file " + sConfigFilePath, flush=True)
+		log("creating the config file " + sConfigFilePath)
 		# Write Config file:
 		oConfigFile = open(sConfigFilePath, 'w+')
 		oConfigFile.write('')
@@ -124,7 +133,7 @@ def run(processId):
 		oConfigFile.write('BASEURL=' + sBaseUrl + '\r\n')
 		oConfigFile.close()
 
-		print("[" + processId + "] wasdiProcessorServer: creating the paramas file "+ sParamFilePath, flush=True)
+		log("creating the paramas file "+ sParamFilePath)
 
 		#Write Params:
 		oParamsFile = open(sParamFilePath, 'w+')
