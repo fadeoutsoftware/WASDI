@@ -9,8 +9,6 @@ import urllib.parse
 import re
 import traceback
 import subprocess
-from distutils.dir_util import copy_tree
-from os.path import sys
 
 app = Flask(__name__)
 

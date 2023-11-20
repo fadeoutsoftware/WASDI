@@ -11,7 +11,6 @@ import urllib.parse
 import json
 import traceback
 
-
 m_sProcId = ""
 
 def log(sLogString):
@@ -49,7 +48,8 @@ def executeProcessor(parameters, processId):
         log("Proc Id " + processId)
     except:
         log("Proc Id not available")
-        
+
+    sWorkspaceId = ""
     #Try to get the workspace id
     try:
         sWorkspaceId = parameters['workspaceid']
