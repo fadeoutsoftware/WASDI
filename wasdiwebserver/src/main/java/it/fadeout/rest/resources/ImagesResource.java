@@ -138,6 +138,8 @@ public class ImagesResource {
 			//if there is a saved logo with a different extension remove it 
 			if(!Utils.isNullOrEmpty(sExtensionOfSavedImage)) {
 				
+				WasdiLog.debugLog("ImagesResource.uploadImage: cleaning old image");
+				
 			    File oOldImage = new File(sPath.replace(Utils.GetFileNameExtension(sPath), sExtensionOfSavedImage));
 			    
 			    if (oOldImage.exists()) {
@@ -148,23 +150,33 @@ public class ImagesResource {
 			    	WasdiLog.debugLog("ImagesResource.uploadImage: can't delete old image");
 			   	}
 			}
-		    	    
+			else {
+				WasdiLog.debugLog("ImagesResource.uploadImage: no old logo present");
+			}
+		    	   
 		    File oTouchFile = new File(sPath);
 		    
 		    try {
 				if (!oTouchFile.createNewFile()) {
 					WasdiLog.debugLog("ImagesResource.uploadImage: can't create new file");
 				}
+				else {
+					WasdiLog.debugLog("ImagesResource.uploadImage: created new empty file in path");
+				}
 			} catch (IOException e) {
 				WasdiLog.errorLog("ImagesResource.uploadImage: " + e.toString());
 			}	    
 		    
 		    ImageFile oOutputImage = new ImageFile(sPath);
+		    WasdiLog.debugLog("ImagesResource.uploadImage: created Image, saving");
 		    boolean bIsSaved =  oOutputImage.saveImage(oInputFileStream);
 		    
 		    if(bIsSaved == false){
 		    	WasdiLog.warnLog("ImagesResource.uploadImage:  not saved!");
 		    	return Response.status(Status.BAD_REQUEST).build();
+		    }
+		    else {
+		    	WasdiLog.debugLog("ImagesResource.uploadImage: Image saved");
 		    }
 		    
 			double dBytes = (double) oOutputImage.length();
@@ -172,30 +184,51 @@ public class ImagesResource {
 			double dMegabytes = (dKilobytes / 1024);
 			
 			if( dMegabytes > (double) ImageResourceUtils.s_iMAX_IMAGE_MB_SIZE){
-				WasdiLog.debugLog("ImagesResource.uploadImage: image too big, delete it");
+				WasdiLog.warnLog("ImagesResource.uploadImage: image too big, delete it");
 				oOutputImage.delete();
 		    	return Response.status(Status.BAD_REQUEST).build();
 			}
+			else {
+				WasdiLog.debugLog("ImagesResource.uploadImage: Dimension is ok proceed");
+			}
 		    
-		    if (obResize!=null) {
-		    	if (obResize) {
-		    	    boolean bIsResized = oOutputImage.resizeImage(ImageResourceUtils.s_iLOGO_SIZE, ImageResourceUtils.s_iLOGO_SIZE);
-		    	    
-		    	    if(bIsResized == false){
-		    	    	WasdiLog.debugLog("ImagesResource.uploadImage: error in resize");
-		    	    }	    		
-		    	}
-		    }
+//		    if (obResize!=null) {
+//		    	if (obResize) {
+//		    		
+//		    		WasdiLog.debugLog("ImagesResource.uploadImage: start resizing");
+//		    		
+//		    		try {
+//			    	    boolean bIsResized = oOutputImage.resizeImage(ImageResourceUtils.s_iLOGO_SIZE, ImageResourceUtils.s_iLOGO_SIZE);
+//			    	    
+//			    	    if(bIsResized == false){
+//			    	    	WasdiLog.debugLog("ImagesResource.uploadImage: error in resize");
+//			    	    }	    				    			
+//		    		}
+//		    		catch (Throwable oEx) {
+//		    			WasdiLog.warnLog("ImagesResource.uploadImage: exception in resize " + oEx.toString());
+//		    		}
+//		    	}
+//		    }
+//		    
+//		    WasdiLog.debugLog("ImagesResource.uploadImage: check if we need to create a thumb");
+//		    
+//		    if (obThumbnail!=null) {
+//		    	if (obThumbnail) {
+//		    		WasdiLog.debugLog("ImagesResource.uploadImage: create thumb");
+//		    		try {
+//		    			ImageResourceUtils.createThumbOfImage(sPath);
+//		    		}
+//		    		catch (Throwable oEx) {
+//		    			WasdiLog.warnLog("ImagesResource.uploadImage: exception in thumb " + oEx.toString());
+//		    		}
+//		    	}
+//		    }
 		    
-		    if (obThumbnail!=null) {
-		    	if (obThumbnail) {
-		    		ImageResourceUtils.createThumbOfImage(sPath);
-		    	}
-		    }
+		    WasdiLog.debugLog("ImagesResource.uploadImage: ok, all done!");
 		    
 			return Response.status(Status.OK).build();
 		}
-		catch (Exception oEx) {
+		catch (Throwable oEx) {
 			WasdiLog.errorLog("ImagesResource.uploadImage: exception " + oEx.toString());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
