@@ -93,7 +93,6 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-
 # From now, all commands executed are executed with the user 'root'
 USER root
 
-
 # Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
 RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-apt
 
@@ -101,6 +100,7 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
 USER {{ sWasdiSystemUserName }}
 
+RUN {{ sWasdiSystemUserHome }}/venv/bin/pip install wasdi
 
 # Start the container
 CMD [ \
