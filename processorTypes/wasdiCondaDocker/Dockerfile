@@ -105,7 +105,7 @@ USER {{ sWasdiSystemUserName }}
 # Start the container
 CMD [ \
     "{{ sWasdiSystemUserHome }}/venv/bin/python3", \
-    "/usr/bin/gunicorn", \
+    "{{ sWasdiSystemUserHome }}/venv/bin/gunicorn", \
     "--workers", \
     "1", \
     "--max-requests", \

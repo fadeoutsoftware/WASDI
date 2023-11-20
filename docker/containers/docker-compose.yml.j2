@@ -345,7 +345,6 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
 
-  # MongoDB
   {{ sWasdiMongoServiceName }}:
 {% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
     command:
@@ -561,7 +560,6 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
 
@@ -607,7 +605,6 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
 
@@ -653,7 +650,6 @@ services:
     volumes:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
-#      - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01/data:/mnt/data_{{ sWasdiGeoserverServiceName }}:rw
 {% endif %}
 
   {{ sWasdiTraefikServiceName }}:
