@@ -87,7 +87,7 @@ RUN pip3 install --no-cache-dir --no-compile \
 
 
 # Install libraries only if {{ sWasdiSystemUserHome }}/application/env.yml exists
-# RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-conda
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-conda
 
 
 # From now, all commands executed are executed with the user 'root'
