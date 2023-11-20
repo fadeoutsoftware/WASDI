@@ -27,7 +27,9 @@ services:
 {% if bWasdiClientEnabled == True %}
   {{ sWasdiClientServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -72,10 +74,11 @@ services:
     restart: "unless-stopped"
 {% endif %}
 {% if bWasdiClientV2Enabled == True %}
-
   {{ sWasdiClientV2ServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -118,8 +121,8 @@ services:
 {% endfor %}
 {% endif %}
     restart: "unless-stopped"
-
 {% endif %}
+{% if bWasdiGeoserverEnabled == True %}
   {{ sWasdiGeoserverServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
@@ -155,11 +158,13 @@ services:
         hard: {{ sWasdiGeoserverUlimitNofile }}
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiGeoserverServiceName }}/data01:rw
+{% endif %}
 {% if bWasdiGrafanaEnabled == True %}
-
   {{ sWasdiGrafanaServiceName }}:
+{% if bWasdiInfluxDbGrafanaEnabled == True %}
     depends_on:
       - {{ sWasdiInfluxDbGrafanaServiceName }}
+{% endif %}
 {% if ( aoWasdiGrafanaEnvironmentVariable | length ) > 0 %}
     environment:
 {% for aoWasdiGrafanaCurrentEnvironmentVariable in aoWasdiGrafanaEnvironmentVariable %}
@@ -167,6 +172,7 @@ services:
 {% endfor %}
 {% endif %}
     image: "{{ sWasdiGrafanaDockerImage }}"
+{% if bWasdiGrafanaCluster == False %}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.entrypoints={{ sWasdiContainerTraefikEntrypoint }}"
@@ -177,6 +183,7 @@ services:
       - "traefik.http.routers.r_{{ sWasdiGrafanaServiceName }}.tls=true"
 {% endif %}
       - "traefik.http.services.s_{{ sWasdiGrafanaServiceName }}.loadbalancer.server.port={{ sWasdiGrafanaInternalPort }}"
+{% endif %}
 {% if sWasdiGrafanaInternalPort | default("") != ""
     and sWasdiGrafanaExternalPort | default("") != ""
     and aWasdiGrafanaExternalIp | default([]) | length > 0 %}
@@ -196,7 +203,8 @@ services:
       - {{ aoWasdiGrafanaCurrentVolume }}
 {% endfor %}
 {% endif %}
-
+{% endif %}
+{% if bWasdiInfluxDbGrafanaEnabled == True %}
   {{ sWasdiInfluxDbGrafanaServiceName }}:
 {% if ( aoWasdiInfluxDbGrafanaEnvironmentVariable | length ) > 0 %}
     environment:
@@ -236,7 +244,6 @@ services:
 {% endif %}
 {% endif %}
 {% if bWasdiJenkinsEnabled == True %}
-
   {{ sWasdiJenkinsServiceName }}:
     command:
       - "--httpPort={{ sWasdiJenkinsInternalPort }}"
@@ -280,7 +287,6 @@ services:
 {% endif %}
 {% endif %}
 {% if bWasdiKeycloakEnabled == True %}
-
   {{ sWasdiKeycloakServiceName }}:
     command:
       - "start"
@@ -324,7 +330,6 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_data_import:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/data/import:ro
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiKeycloakServiceName }}/opt_wasdi_keycloak_providers:{{ sWasdiKeycloakRootDirectoryPath }}/{{ sWasdiKeycloakVersion }}/providers:ro
-
   {{ sWasdiPostgresqlKeycloakServiceName }}:
 {% if bWasdiPostgresqlKeycloakInitialized == False %}
     environment:
@@ -344,7 +349,7 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/data01:/var/lib/postgresql/data
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiPostgresqlKeycloakServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
 {% endif %}
-
+{% if bWasdiMongoEnabled == True %}
   {{ sWasdiMongoServiceName }}:
 {% if ( sWasdiMongoInternalPort | default('') ) not in ['', '27017'] %}
     command:
@@ -397,8 +402,8 @@ services:
     volumes:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/data01:/data/db:rw
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiMongoServiceName }}/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
-
   {{ sWasdiRabbitMqServiceName }}:
     depends_on:
       - {{ sWasdiTraefikServiceName }}
@@ -457,10 +462,11 @@ services:
       - {{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiRabbitMqServiceName }}/data01:/var/lib/rabbitmq:rw
 {% endif %}
 {% if bWasdiSchedulerEnabled == True %}
-
   {{ sWasdiSchedulerServiceName }}:
+{% if bWasdiMongoEnabled == True %}
     depends_on:
       - {{ sWasdiMongoServiceName }}
+{% endif %}
     image: "{{ sWasdiSchedulerServiceName }}:latest"
     restart: "unless-stopped"
     ulimits:
@@ -473,10 +479,11 @@ services:
       - "{{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro"
 {% endif %}
 {% if bWasdiTelegrafEnabled == True %}
-
   {{ sWasdiTelegrafServiceName }}:
     depends_on:
+{% if bWasdiMongoEnabled == True %}
       - {{ sWasdiMongoServiceName }}
+{% endif %}
 {% if bWasdiRabbitMqEnabled == True %}
       - {{ sWasdiRabbitMqServiceName }}
 {% endif %}
@@ -517,10 +524,11 @@ services:
 {% endif %}
 {% endif %}
 {% if bWasdiTomcatOgcProcessesServerEnabled == True %}
-
   {{ sWasdiTomcatOgcProcessesServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -562,10 +570,11 @@ services:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
 {% endif %}
 {% if bWasdiTomcatWasdiOpenEoServerEnabled == True %}
-
   {{ sWasdiTomcatWasdiOpenEoServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -607,10 +616,11 @@ services:
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
 {% endif %}
 {% if bWasdiTomcatWasdiWebServerEnabled == True %}
-
   {{ sWasdiTomcatWasdiWebServerServiceName }}:
     depends_on:
+{% if bWasdiGeoserverEnabled == True %}
       - {{ sWasdiGeoserverServiceName }}
+{% endif %}
 {% if bWasdiKeycloakEnabled == True %}
       - {{ sWasdiKeycloakServiceName }}
 {% endif %}
@@ -651,7 +661,6 @@ services:
       - {{ sWasdiDataRootDirectoryPath }}:{{ sWasdiDataRootDirectoryPath }}:rw
       - {{ sWasdiDataConfigurationRootDirectoryPath }}:{{ sWasdiDataConfigurationRootDirectoryPath }}:ro
 {% endif %}
-
   {{ sWasdiTraefikServiceName }}:
     command:
       - "--global.sendanonymoususage=false"
@@ -723,7 +732,6 @@ services:
 {% endif %}
       - "{{ sWasdiDataDockerVolumeRootDirectoryPath }}/{{ sWasdiTraefikServiceName }}/etc_traefik_conf.d:/etc/traefik/conf.d:ro"
 {% if bWasdiUpdateMetricEnabled == True %}
-
   {{ sWasdiUpdateMetricServiceName }}:
     depends_on:
 {% if bWasdiKeycloakEnabled == True %}

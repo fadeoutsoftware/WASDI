@@ -80,18 +80,9 @@ WORKDIR {{ sWasdiSystemUserHome }}/application
 COPY --chown={{ sWasdiSoftwareRootDirectoryOwner }}:{{ sWasdiSoftwareRootDirectoryGroup }} ./ {{ sWasdiSystemUserHome }}/application/
 
 
-# Install the common PIP libraries
-RUN pip3 install --no-cache-dir --no-compile \
-    numpy \
-    wasdi
-
-
-# Install libraries only if {{ sWasdiSystemUserHome }}/application/env.yml exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-conda
-
-
 # From now, all commands executed are executed with the user 'root'
 USER root
+
 
 # Install packages only if {{ sWasdiSystemUserHome }}/application/packages.txt exists
 RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-apt
@@ -100,7 +91,16 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
 USER {{ sWasdiSystemUserName }}
 
-RUN {{ sWasdiSystemUserHome }}/venv/bin/pip install wasdi
+
+# Install libraries only if {{ sWasdiSystemUserHome }}/application/env.yml exists
+RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-conda
+
+
+# Install the common PIP libraries
+RUN pip3 install --no-cache-dir --no-compile \
+    numpy \
+    wasdi
+
 
 # Start the container
 CMD [ \

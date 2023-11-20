@@ -81,10 +81,6 @@ RUN python3 -m venv --system-site-packages /home/wasdi/venv && \
         wasdi
 
 
-# Install libraries only if /home/wasdi/pip.txt exists
-RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-pip
-
-
 # From now, all commands executed are executed with the user 'root'
 USER root
 
@@ -95,6 +91,10 @@ RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /hom
 
 # From now, all commands executed are executed as {{ sWasdiSystemUserName }}
 USER {{ sWasdiSystemUserName }}
+
+
+# Install libraries only if /home/wasdi/pip.txt exists
+RUN bash /home/wasdi/installUserPackage.sh --failure-is-ok --home-directory /home/wasdi --package-pip
 
 
 # Start the container

@@ -1,0 +1,35 @@
+http:
+  routers:
+    r_{{ sWasdiGenericServiceName }}:
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      entrypoints: "websecure"
+{% else %}
+      entrypoints: "webs"
+{% endif %}
+      rule: "Host(`{{ sWasdiContainerTraefikRuleHost }}`) && PathPrefix(`{{ sWasdiGenericDefaultContextPath }}`)"
+      service: "s_{{ sWasdiGenericServiceName }}_lb"
+      middlewares: "mw_wasdi-secure-allowFrame@file"
+{% if bWasdiContainerTraefikSslEnabled == True and aoWasdiContainerTraefikSslCertificates | default([]) | length > 0 %}
+      tls: true
+{% endif %}
+  services:
+    s_{{ sWasdiGenericServiceName }}_lb:
+      failover:
+        service: "s_{{ sWasdiGenericServiceName }}_main"
+        fallback: "s_{{ sWasdiGenericServiceName }}_fallback"
+    s_{{ sWasdiGenericServiceName }}_main:
+      loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiGenericDefaultContextPath }}"
+          interval: "{{ sWasdiGenericClusterConfigurationInterval }}"
+          timeout: "{{ sWasdiGenericClusterConfigurationTimeout }}"
+        servers:
+          - url: "{{ sWasdiGenericClusterConfigurationUrlMain }}"
+    s_{{ sWasdiGenericServiceName }}_fallback:
+      loadBalancer:
+        healthCheck:
+          path: "{{ sWasdiGenericDefaultContextPath }}"
+          interval: "{{ sWasdiGenericClusterConfigurationInterval }}"
+          timeout: "{{ sWasdiGenericClusterConfigurationTimeout }}"
+        servers:
+          - url: "{{ sWasdiGenericClusterConfigurationUrlMain }}"
