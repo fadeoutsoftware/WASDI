@@ -2,10 +2,14 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.7.5
-; Last Update: 2023-03-15
+; IDL WASDI Lib Version 0.7.6
+; Last Update: 2023-11-20
 ;
 ; History
+;
+; 0.7.6 - 2023-11-20
+;	added catch in the POST operation
+;
 ; 0.7.5 - 2023-03-15
 ;	adapted api call to new Jersey version
 ;
@@ -406,6 +410,16 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody, sHostName
 			sSchemaToUse = wsurlschema
 		END		
 	END
+	
+	CATCH, iErrorStatus 
+
+	IF iErrorStatus NE 0 THEN BEGIN
+		IF (verbose EQ '1') THEN BEGIN
+			print, 'WasdiHttpPost ERROR STATUS=', STRTRIM(STRING(iErrorStatus),2), ' returning !NULL'
+		END
+		
+		RETURN, !NULL
+	ENDIF
 
 	sessioncookie = token
 
