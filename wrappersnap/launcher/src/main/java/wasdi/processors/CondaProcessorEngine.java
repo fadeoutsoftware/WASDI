@@ -92,7 +92,7 @@ public class CondaProcessorEngine extends DockerBuildOnceEngine {
 					}
 					else if (sRow.startsWith("prefix:")) {
 						WasdiLog.infoLog("CondaProcessorEngine.onAfterUnzipProcessor: changing prefix");
-						sRow = "prefix: /home/" + WasdiConfig.Current.systemUserName + "/miniconda/venv/bin";
+						sRow = "prefix: /home/" + WasdiConfig.Current.systemUserName + "/venv/bin";
 					}
 									
 					oEnvWriter.write(sRow);
