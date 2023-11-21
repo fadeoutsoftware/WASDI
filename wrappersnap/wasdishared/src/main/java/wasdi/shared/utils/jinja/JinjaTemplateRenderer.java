@@ -109,17 +109,4 @@ public class JinjaTemplateRenderer {
 
 		return oSB.toString();
 	}
-	
-//	public static void main(String[] args) {
-//		Jinjava oJinjava = new Jinjava();
-//		String sTemplate = WasdiFileUtils.fileToText("C:\\Codice\\Progetti\\WASDI\\Codice\\processorTypes\\eoepcaDocker\\appDeployBody.json.j2");
-//		Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects("{\"cwlLink\":\"http://www.nonce.piu\"}");
-//		String sRendered = oJinjava.render(sTemplate, aoVariables);
-//		System.out.println(sRendered);
-//		
-//		sTemplate = WasdiFileUtils.fileToText("C:\\Codice\\Progetti\\WASDI\\Codice\\processorTypes\\eoepcaDocker\\wasdi-processor.cwl.j2");
-//		aoVariables = JsonUtils.jsonToMapOfObjects(" {\"wasdiAppId\":\"super_eoepca_2\",\"wasdiProcessorImage\":\"test-docker-registry-main01.wasdi.net/wasdi/super_eoepca_2:2\",\"wasdiAppDescription\":\"\",\"wasdiAppParametersDeclaration\":[{\"type\":\"string\",\"key\":\"NAME\"}],\"wasdiOutputFolder\":\"/home/wasdi/output\"}");
-//		sRendered = oJinjava.render(sTemplate, aoVariables);
-//		System.out.println(sRendered);		
-//	}
 }

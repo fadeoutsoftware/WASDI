@@ -132,14 +132,20 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 			return false;
 		}
 		
-		String sBaseAddress = getEOEPCAAddress();		
+		String sBaseAddress = getEOEPCAAddress();
+		
+		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: try to log in EOEPCA " + sBaseAddress);
 		
 		OgcProcessesClient oOgcProcessesClient = new OgcProcessesClient(sBaseAddress);
 		
 		// Login
 		if (loginInEOEpca(oOgcProcessesClient)) {
 			// Call the deploy function: is a post of the App Deploy Body
+			WasdiLog.debugLog("EoepcaProcessorEngine.deploy: deploy in EOEPCA");
 			boolean bApiAnswer = oOgcProcessesClient.deployProcess(sDeployBody);
+			
+			WasdiLog.debugLog("EoepcaProcessorEngine.deploy: deploy result " + bApiAnswer);
+			
 	        return bApiAnswer;			
 		}
 		else {
@@ -156,7 +162,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 */
 	protected boolean loginInEOEpca(OgcProcessesClient oOgcProcessesClient) {
 		
-		if (oOgcProcessesClient==null) return true;
+		if (oOgcProcessesClient==null) return false;
 		
 		try {
 			// Is this istance under authentication?		
@@ -179,14 +185,17 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 				
 				// That we inject in all the call to ADES/OGC Processes API
 				oOgcProcessesClient.setHeaders(asHeaders);
-			}			
+				return true;
+			}
+			else {
+				WasdiLog.warnLog("EoepcaProcessorEngin.loginInEOEpca: EOEPCA user and password not found in the wasdi config");
+				return false;
+			}
 		}
 		catch (Exception oEx) {
 			WasdiLog.errorLog("EoepcaProcessorEngine.loginInEOEpca Exception ", oEx);
 			return false;
 		}
-		
-		return true;
 	}
 	
 	/**
@@ -196,7 +205,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 	 * @return true or false
 	 */
 	protected boolean renderCWLTemplates(Processor oProcessor, List<Map<String,Object>> aoProcessorParameters) {
-		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate csw file");
+		WasdiLog.debugLog("EoepcaProcessorEngine.renderCWLTemplates: generate csw file");
 		
 		String sProcessorName = oProcessor.getName();
 		
@@ -220,12 +229,12 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		boolean bTranslateCSW = oJinjaTemplateRenderer.translate(sCWLTemplateInput, sCWLTemplateOutput, aoCWLParameters);
 		
 		if (!bTranslateCSW) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: error translating CSW template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.renderCWLTemplates: error translating CSW template");
 			return false;		
 		}
 		
 		// Generate the body of the descriptor to deploy
-		WasdiLog.debugLog("EoepcaProcessorEngine.deploy: generate app body deploy json file");
+		WasdiLog.debugLog("EoepcaProcessorEngine.renderCWLTemplates: generate app body deploy json file");
 		
 		String sBodyTemplateInput = PathsConfig.getProcessorFolder(sProcessorName) + "appDeployBody.json.j2";
 		String sBodyTemplateOutput = PathsConfig.getProcessorFolder(sProcessorName) + "appDeployBody.json";
@@ -237,7 +246,7 @@ public class EoepcaProcessorEngine extends DockerProcessorEngine {
 		boolean bTranslateBody = oJinjaTemplateRenderer.translate(sBodyTemplateInput, sBodyTemplateOutput, aoBodyParameters);
 		
 		if (!bTranslateBody) {
-			WasdiLog.errorLog("EoepcaProcessorEngine.deploy: error translating Body json template");
+			WasdiLog.errorLog("EoepcaProcessorEngine.renderCWLTemplates: error translating Body json template");
 			return false;		
 		}
 		
