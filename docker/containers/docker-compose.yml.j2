@@ -324,7 +324,6 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
 {% endfor %}
 {% endif %}
-    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -343,6 +342,7 @@ services:
       - POSTGRES_USER1_PASSWORD=${sPostgresqlKeycloakUser1Password}
 {% endif %}
     image: "{{ sWasdiPostgresqlKeycloakImageName }}:{{ sWasdiPostgresqlKeycloakImageVersion }}"
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
