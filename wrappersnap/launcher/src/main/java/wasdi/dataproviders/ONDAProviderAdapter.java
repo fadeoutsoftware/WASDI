@@ -575,12 +575,15 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					JSONObject oJson = new JSONObject(sResponseBody);
 					String sFileName = oJson.optString("name");
 					
-					WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: file name retrieved from provider " + sFileName);
+					if (!Utils.isNullOrEmpty(sFileName)) {
+						WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: file name retrieved from provider " + sFileName);
+						return sFileName;
+					}
 					
-					return sFileName;
-					
+					WasdiLog.warnLog("ONDAProviderAdapter.GetFileName: could not find file name from product's details");
+										
 				} else {
-					WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: got error code from provider: " + oResponse.getResponseCode() );
+					WasdiLog.warnLog("ONDAProviderAdapter.GetFileName: got error code from provider: " + oResponse.getResponseCode() );
 				}
 				
 			}
