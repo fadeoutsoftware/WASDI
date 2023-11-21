@@ -15,7 +15,7 @@ app = Flask(__name__)
 m_sProcId = ""
 
 def log(sLogString):
-	print("[" + m_sProcId + "] wasdiProcessorExecutor CONDA Engine v.2.1.1 - " + sLogString)
+	print("[" + m_sProcId + "] wasdiProcessorExecutor .NET Core Engine v.2.1.1 - " + sLogString)
 
 @app.route('/run/<string:processId>', methods=['POST'])
 def run(processId):
@@ -116,7 +116,9 @@ def run(processId):
 		sLocalPath = "/home/appwasdi/application/"
 		sConfigFilePath = sLocalPath + "appsettings.json"
 		sParamFilePath = sLocalPath + "parameters.json"
-		
+
+		log("Writing Config " + sConfigFilePath)
+
 		# Write Config file:
 		oConfigFile = open(sConfigFilePath, "w+")
 		oConfigFile.write("{")
@@ -138,6 +140,9 @@ def run(processId):
 		json_string = json.dumps(aoParameters)
 				
 		#Write Params:
+
+		log("Writing Params " + sParamFilePath)
+
 		oParamsFile = open(sParamFilePath, "w+")
 		oParamsFile.write(json_string)
 		oParamsFile.close()

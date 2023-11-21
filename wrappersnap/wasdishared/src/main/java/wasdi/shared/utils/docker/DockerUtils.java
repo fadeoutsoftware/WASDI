@@ -411,6 +411,7 @@ public class DockerUtils {
     	sOutputString = sInputString.replace("{\"stream\":", "");
     	sOutputString = sOutputString.replace("\"\\n\"}", "\n");
     	sOutputString = sOutputString.replace("\\n\"}", "\n");
+    	sOutputString = sOutputString.replace("\"}", "");
     	sOutputString = sOutputString.replace("---\\u003e", "");
     	sOutputString = sOutputString.replace("\\u0026", "");
     	sOutputString = sOutputString.replace("\\u0026", "");
@@ -520,7 +521,7 @@ public class DockerUtils {
         		
         		// Since we are creating the Container, we need to set up our name
         		sContainerName = m_oProcessor.getName() + "_" + m_oProcessor.getVersion() + "_" + Utils.getRandomName();
-        		WasdiLog.debugLog("DockerUtils.start: ok is image pulled create the container named " + sContainerName);
+        		WasdiLog.debugLog("DockerUtils.start: image pulled, create the container named " + sContainerName);
         		
         		// Create the container
             	try {
@@ -542,15 +543,20 @@ public class DockerUtils {
             		// Set the network mode
             		oContainerCreateParams.HostConfig.NetworkMode = m_sDockerNetworkMode;
             		
-            		// Add the volume with the Processor Code
-            		MountVolumeParam oProcessorPath = new MountVolumeParam();
-            		oProcessorPath.Source = m_sProcessorFolder;
-            		oProcessorPath.Target = "/wasdi";
-            		oProcessorPath.ReadOnly = false;
-            		oProcessorPath.Type= MountTypes.BIND;
+            		// Mount the processor folder only if it exists
+            		File oProcessorFolder = new File(m_sProcessorFolder);
             		
-            		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);
-            		
+            		if (oProcessorFolder.exists() && oProcessorFolder.isDirectory()) {
+                		// Add the volume with the Processor Code
+                		MountVolumeParam oProcessorPath = new MountVolumeParam();
+                		oProcessorPath.Source = m_sProcessorFolder;
+                		oProcessorPath.Target = "/wasdi";
+                		oProcessorPath.ReadOnly = false;
+                		oProcessorPath.Type= MountTypes.BIND;
+                		
+                		oContainerCreateParams.HostConfig.Mounts.add(oProcessorPath);            			
+            		}
+            		            		
             		oContainerCreateParams.HostConfig.RestartPolicy.put("Name", "no");
             		oContainerCreateParams.HostConfig.RestartPolicy.put("MaximumRetryCount", 0);
             		
