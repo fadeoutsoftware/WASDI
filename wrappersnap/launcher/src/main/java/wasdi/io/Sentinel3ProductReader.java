@@ -129,6 +129,8 @@ public class Sentinel3ProductReader extends SnapProductReader {
 		asNames.add("enhanced_measurement.nc");
 		asNames.add("reduced_measurement.nc");
 		asNames.add("NRT_AOD.nc"); 				// file name specific for the product type: SL_2_AOD___ 
+		asNames.add("measurement_l1a.nc");		// file name specific for the product type: SR_1_SRA_A_
+		asNames.add("measurement_l1bs.nc");		// file name specific for the product type: SR_1_SRA_BS
 		
 		//try reading files until a good one is found
 		for (String sFileName : asNames) {

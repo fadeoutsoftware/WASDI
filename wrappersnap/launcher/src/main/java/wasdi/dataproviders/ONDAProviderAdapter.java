@@ -633,16 +633,4 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		return 0;
 	}
 
-	public static void main(String [] args) throws Exception {
-		HttpCallResponse oResponse = HttpUtils.httpGet("https://catalogue.onda-dias.eu/dias-catalogue/Products(28009b42-e7ae-4487-a1b2-7b268f1ecb47)");
-		String sBody = oResponse.getResponseBody();
-		System.out.println(sBody);
-		
-		JSONObject oJson = new JSONObject(sBody);
-		String sFileName = oJson.optString("name");
-		
-		System.out.println(sFileName);
-	
-	}
-
 }
