@@ -556,8 +556,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			}
 			
 			// sometimes the file name we try to read from the header is empty. If this is the case, we try to find it retrieving the information about the product
-			String sODataSuffix = ")/$value";
-			if (sFileURL.contains(ResponseTranslatorONDA.s_sAPI_URL + "(") && sFileURL.endsWith(sODataSuffix)) {
+			String sODataSuffix = "/$value";
+			if (sFileURL.contains(ResponseTranslatorONDA.s_sAPI_URL + "(") && sFileURL.endsWith(")" + sODataSuffix)) {
 				
 				WasdiLog.debugLog("ONDAProviderAdapter.GetFileName: couldn't retrieve name from header. Try from product's details");
 				
