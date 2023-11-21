@@ -409,10 +409,15 @@ public class DockerUtils {
     	String sOutputString = "";
     	
     	sOutputString = sInputString.replace("{\"stream\":", "");
-    	sOutputString = sOutputString.replace("\"\\n\"}", "");
+    	sOutputString = sOutputString.replace("\"\\n\"}", "\n");
+    	sOutputString = sOutputString.replace("\\n\"}", "\n");
     	sOutputString = sOutputString.replace("---\\u003e", "");
     	sOutputString = sOutputString.replace("\\u0026", "");
     	sOutputString = sOutputString.replace("\\u0026", "");
+    	sOutputString = sOutputString.replace("\\u001b", "");
+    	
+    	sOutputString = sOutputString.replace("\"", "");
+    	sOutputString = sOutputString.replace("\\n", "\n");
     	
     	
     	return sOutputString;
