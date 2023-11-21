@@ -108,8 +108,8 @@ RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-
 USER {{ sWasdiSystemUserName }}
 
 
-# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists
-RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
+# Install libraries only if {{ sWasdiSystemUserHome }}/application/pip.txt exists -> PIP Not used in .net
+#RUN bash {{ sWasdiSystemUserHome }}/application/installUserPackage.sh --failure-is-ok --home-directory {{ sWasdiSystemUserHome }}/application --package-pip
 
 
 # Start the container

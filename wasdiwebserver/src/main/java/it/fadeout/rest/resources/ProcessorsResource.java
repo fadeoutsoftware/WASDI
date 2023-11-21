@@ -2392,6 +2392,49 @@ public class ProcessorsResource  {
 		return Response.serverError().build();
 	}			
 	
+	@GET
+	@Path("/logs/build")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response getProcessorBuildLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId) {
+		try {
+			// Check User 
+			User oUser = Wasdi.getUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				WasdiLog.warnLog("ProcessorsResource.getProcessorBuildLogs: invalid session");
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			if (!PermissionsUtils.canUserAccessProcessor(oUser.getUserId(), sProcessorId)) {
+				WasdiLog.warnLog("ProcessorsResource.getProcessorBuildLogs: user cannot access the processor");
+				return Response.status(Status.FORBIDDEN).build();				
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.getProcessor(sProcessorId);
+			
+			if (oProcessor == null) {
+				WasdiLog.warnLog("ProcessorsResource.getProcessorBuildLogs: processor does not exists");
+				return Response.status(Status.BAD_REQUEST).build();				
+			}
+			
+			ArrayList<String> aoReturnLogs = new ArrayList<>();
+			
+			if (oProcessor.getBuildLogs() != null) {
+				for (int i=0; i<oProcessor.getBuildLogs().size(); i++) {
+					aoReturnLogs.add(oProcessor.getBuildLogs().get(i));
+				}
+			}
+			
+			return Response.ok(aoReturnLogs).build();
+		}
+		catch (Exception oEx) {
+			WasdiLog.errorLog("ProcessorResource.addLog error: " + oEx);
+			return Response.serverError().build();
+		}
+		
+	 }	
+	
 	/**
 	 * Detects if the Name of a processor is already in use or not
 	 * @param sProcessorName Name of the processor to check

@@ -416,7 +416,6 @@ public class DockerUtils {
     	sOutputString = sOutputString.replace("\\u0026", "");
     	sOutputString = sOutputString.replace("\\u001b", "");
     	
-    	sOutputString = sOutputString.replace("\"", "");
     	sOutputString = sOutputString.replace("\\n", "\n");
     	
     	
