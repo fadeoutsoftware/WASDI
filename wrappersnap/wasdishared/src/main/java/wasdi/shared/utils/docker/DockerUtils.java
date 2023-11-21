@@ -24,6 +24,7 @@ import wasdi.shared.config.EnvironmentVariableConfig;
 import wasdi.shared.config.PathsConfig;
 import wasdi.shared.config.ProcessorTypeConfig;
 import wasdi.shared.config.WasdiConfig;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.utils.HttpUtils;
 import wasdi.shared.utils.JsonUtils;
 import wasdi.shared.utils.StringUtils;
@@ -374,8 +375,16 @@ public class DockerUtils {
         	
         	WasdiLog.debugLog("DockerUtils.build: build done");
         	
+        	String sBuildOutput = oResponse.getResponseBody();
+        	sBuildOutput = cleanDockerLogsString(sBuildOutput);
+        	
+        	// Save the build output
+        	m_oProcessor.getBuildLogs().add(sBuildOutput);
+        	ProcessorRepository oProcessorRepository = new ProcessorRepository();
+        	oProcessorRepository.updateProcessor(m_oProcessor);
+        	
         	if (WasdiConfig.Current.dockers.logDockerAPICallsPayload) {
-        		WasdiLog.debugLog("DockerUtils.build: build output = " + oResponse.getResponseBody());
+        		WasdiLog.debugLog("DockerUtils.build: build output = " + sBuildOutput);
         	}
         	
         	// Delete the tar
@@ -394,6 +403,19 @@ public class DockerUtils {
         }
 
         return sImageName;
+    }
+    
+    protected String cleanDockerLogsString(String sInputString) {
+    	String sOutputString = "";
+    	
+    	sOutputString = sInputString.replace("{\"stream\":", "");
+    	sOutputString = sOutputString.replace("\"\\n\"}", "");
+    	sOutputString = sOutputString.replace("---\\u003e", "");
+    	sOutputString = sOutputString.replace("\\u0026", "");
+    	sOutputString = sOutputString.replace("\\u0026", "");
+    	
+    	
+    	return sOutputString;
     }
 
     /**
