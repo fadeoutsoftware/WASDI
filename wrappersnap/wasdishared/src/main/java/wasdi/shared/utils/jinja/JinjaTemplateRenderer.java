@@ -2,10 +2,12 @@ package wasdi.shared.utils.jinja;
 
 import java.util.Map;
 
+import com.hubspot.jinjava.Jinjava;
+
 import wasdi.shared.config.WasdiConfig;
 import wasdi.shared.utils.JsonUtils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.utils.log.WasdiLog;
-import wasdi.shared.utils.runtime.RunTimeUtils;
 
 /**
  * Utility class to translate a Jinja Template in a valorized file
@@ -52,21 +54,28 @@ public class JinjaTemplateRenderer {
 			
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: sTemplate = " + sTemplateFile);
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: JsonInput = " + sJsonInputs);
+//			
+//			// Create the command
+//			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
+//			// Utility to execute the script
+//			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
 			
-			// Create the command
-			String sRenderCommand = buildRenderCommand(sTemplateFile, sOutputFile, sJsonInputs, bStrict);
+			Jinjava oJinjava = new Jinjava();
+			String sTemplate = WasdiFileUtils.fileToText(sTemplateFile);
+			Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects(sJsonInputs);
+			String sRendered = oJinjava.render(sTemplate, aoVariables);
 			
-			// Utility to execute the script
-			boolean bRet = RunTimeUtils.runCommand(WasdiConfig.Current.paths.wasdiTempFolder, sRenderCommand);
+			WasdiFileUtils.writeFile(sRendered, sOutputFile);
+			
+			WasdiLog.debugLog("JinjaTemplateRenderer.translate: template rendered in = " + sOutputFile);
 			
 			// Bye bye
-			return bRet;			
+			return true;
 		}
 		catch (Exception oEx) {
 			WasdiLog.debugLog("JinjaTemplateRenderer.translate: exception " + oEx.toString());
+			return false;
 		}
-		
-		return false;
 	}
 	
 	/**
@@ -107,5 +116,10 @@ public class JinjaTemplateRenderer {
 //		Map<String, Object> aoVariables = JsonUtils.jsonToMapOfObjects("{\"cwlLink\":\"http://www.nonce.piu\"}");
 //		String sRendered = oJinjava.render(sTemplate, aoVariables);
 //		System.out.println(sRendered);
+//		
+//		sTemplate = WasdiFileUtils.fileToText("C:\\Codice\\Progetti\\WASDI\\Codice\\processorTypes\\eoepcaDocker\\wasdi-processor.cwl.j2");
+//		aoVariables = JsonUtils.jsonToMapOfObjects(" {\"wasdiAppId\":\"super_eoepca_2\",\"wasdiProcessorImage\":\"test-docker-registry-main01.wasdi.net/wasdi/super_eoepca_2:2\",\"wasdiAppDescription\":\"\",\"wasdiAppParametersDeclaration\":[{\"type\":\"string\",\"key\":\"NAME\"}],\"wasdiOutputFolder\":\"/home/wasdi/output\"}");
+//		sRendered = oJinjava.render(sTemplate, aoVariables);
+//		System.out.println(sRendered);		
 //	}
 }
