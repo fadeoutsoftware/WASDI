@@ -192,6 +192,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiGrafanaExternalPort }}:{{ sWasdiGrafanaInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -231,6 +232,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiInfluxDbGrafanaExternalPort }}:{{ sWasdiInfluxDbGrafanaInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -322,6 +324,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiKeycloakExternalPort }}:{{ sWasdiKeycloakInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
@@ -394,6 +397,7 @@ services:
       - "{{ sCurrentExternalIp }}:{{ sWasdiMongoExternalPort }}:{{ sWasdiMongoInternalPort }}"
 {% endfor %}
 {% endif %}
+    pull_policy: "always"
     restart: "unless-stopped"
     ulimits:
       nofile:
